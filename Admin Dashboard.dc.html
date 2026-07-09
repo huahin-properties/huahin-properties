@@ -10,6 +10,9 @@
 <helmet>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <title>Admin Dashboard — huahin.properties</title>
   <style>
     body { margin: 0; background: oklch(96% 0.015 75); font-family: 'Work Sans', sans-serif; }
@@ -81,7 +84,7 @@
     <div style="display:flex; flex-direction:column; gap:12px;">
       <sc-for list="{{ rows }}" as="r" hint-placeholder-count="9">
         <div style="background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:6px; padding:16px 18px; display:flex; gap:16px; flex-wrap:wrap; align-items:center;">
-          <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ r.coverPhotoId }}" shape="rounded" radius="4" placeholder="{{ t.gallery_photo }}" style="width:64px;height:48px;flex-shrink:0"></x-import>
+          <div style="width:64px;height:48px;flex-shrink:0;border-radius:4px;overflow:hidden;background:{{ r.coverPhotoBg }};"></div>
           <div style="flex:2; min-width:180px;">
             <div style="font-size:11px; color:oklch(50% 0.02 60); font-family:monospace;">{{ r.id }}</div>
             <div style="font-family:'Playfair Display',serif; font-size:16px; color:oklch(20% 0.02 60);">{{ r.title }}</div>
@@ -240,7 +243,10 @@
           <div style="display:flex; flex-direction:column; gap:8px;">
             <sc-for list="{{ form.photos }}" as="ph" hint-placeholder-count="4">
               <div style="display:flex; align-items:center; gap:8px; background:oklch(96% 0.015 75); border-radius:4px; padding:8px 10px;">
-                <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ ph.slotId }}" shape="rounded" radius="4" placeholder="{{ t.gallery_photo }}" style="width:48px;height:36px;flex-shrink:0"></x-import>
+                <label style="position:relative; width:48px; height:36px; flex-shrink:0; border-radius:4px; overflow:hidden; cursor:pointer; background:{{ ph.thumbBg }};">
+                  <input type="file" accept="image/*" onChange="{{ ph.onFile }}" style="position:absolute; inset:0; opacity:0; cursor:pointer;" />
+                  <sc-if value="{{ ph.uploading }}"><span style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:oklch(45% 0.02 60);">…</span></sc-if>
+                </label>
                 <input value="{{ ph.label }}" onChange="{{ ph.onChange }}" style="flex:1; min-width:0; border:1px solid oklch(88% 0.01 70); border-radius:4px; padding:6px 8px; font-size:13px; font-family:inherit;" />
                 <sc-if value="{{ ph.isCover }}"><span style="font-size:11px; color:oklch(50% 0.09 70); font-weight:600; white-space:nowrap;">{{ t.admin_set_cover }}</span></sc-if>
                 <sc-if value="{{ ph.notCover }}"><span onClick="{{ ph.onSetCover }}" style="font-size:11px; color:oklch(45% 0.08 230); cursor:pointer; white-space:nowrap;">{{ t.admin_set_cover }}</span></sc-if>
@@ -278,11 +284,15 @@
           <textarea value="{{ form.ownerNotes }}" onChange="{{ form.onOwnerNotes }}" placeholder="{{ t.admin_owner_notes_ph }}" rows="2" style="width:100%; box-sizing:border-box; margin-top:12px; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
           <div style="display:flex; gap:16px; margin-top:14px;">
             <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
-              <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ ownerPhoto1Id }}" shape="rounded" radius="8" placeholder="{{ t.admin_owner_photo1 }}" style="width:110px;height:110px"></x-import>
+              <label style="position:relative; width:110px; height:110px; border-radius:8px; overflow:hidden; cursor:pointer; background:{{ form.ownerPhoto1Bg }};">
+                <input type="file" accept="image/*" onChange="{{ form.onOwnerPhoto1File }}" style="position:absolute; inset:0; opacity:0; cursor:pointer;" />
+              </label>
               <span style="font-size:11px; color:oklch(50% 0.02 60);">{{ t.admin_owner_photo1 }}</span>
             </div>
             <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
-              <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ ownerPhoto2Id }}" shape="rounded" radius="8" placeholder="{{ t.admin_owner_photo2 }}" style="width:110px;height:110px"></x-import>
+              <label style="position:relative; width:110px; height:110px; border-radius:8px; overflow:hidden; cursor:pointer; background:{{ form.ownerPhoto2Bg }};">
+                <input type="file" accept="image/*" onChange="{{ form.onOwnerPhoto2File }}" style="position:absolute; inset:0; opacity:0; cursor:pointer;" />
+              </label>
               <span style="font-size:11px; color:oklch(50% 0.02 60);">{{ t.admin_owner_photo2 }}</span>
             </div>
           </div>
@@ -319,11 +329,15 @@
             <textarea value="{{ form.tenantNotes }}" onChange="{{ form.onTenantNotes }}" placeholder="{{ t.admin_tenant_notes_ph }}" rows="2" style="width:100%; box-sizing:border-box; margin-top:12px; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
             <div style="display:flex; gap:16px; margin-top:14px;">
               <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
-                <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ tenantPhoto1Id }}" shape="rounded" radius="8" placeholder="{{ t.admin_tenant_photo1 }}" style="width:110px;height:110px"></x-import>
+                <label style="position:relative; width:110px; height:110px; border-radius:8px; overflow:hidden; cursor:pointer; background:{{ form.tenantPhoto1Bg }};">
+                  <input type="file" accept="image/*" onChange="{{ form.onTenantPhoto1File }}" style="position:absolute; inset:0; opacity:0; cursor:pointer;" />
+                </label>
                 <span style="font-size:11px; color:oklch(50% 0.02 60);">{{ t.admin_tenant_photo1 }}</span>
               </div>
               <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
-                <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ tenantPhoto2Id }}" shape="rounded" radius="8" placeholder="{{ t.admin_tenant_photo2 }}" style="width:110px;height:110px"></x-import>
+                <label style="position:relative; width:110px; height:110px; border-radius:8px; overflow:hidden; cursor:pointer; background:{{ form.tenantPhoto2Bg }};">
+                  <input type="file" accept="image/*" onChange="{{ form.onTenantPhoto2File }}" style="position:absolute; inset:0; opacity:0; cursor:pointer;" />
+                </label>
                 <span style="font-size:11px; color:oklch(50% 0.02 60);">{{ t.admin_tenant_photo2 }}</span>
               </div>
             </div>
@@ -358,7 +372,7 @@ const BLANK_FORM = () => ({
   pool: false, furnished: "full", ownership: "Chanote",
   distanceBeach: 0, distanceTown: 0, mapLink: "",
   shortDesc: "", fullDesc: "", features: [],
-  photos: ["Exterior"],
+  photos: [{ label: "Exterior", url: "" }],
   ownerId: "__new__", ownerName: "", ownerPhone: "", ownerEmail: "", ownerLine: "", ownerNotes: "",
   leaseStart: "", leaseEnd: "",
   tenantId: "__new__", tenantName: "", tenantPhone: "", tenantEmail: "", tenantLine: "", tenantNotes: "",
@@ -377,41 +391,75 @@ class Component extends DCLogic {
 
   async componentDidMount() {
     const mod = await import("./data.js");
+    const fb = await import("./firebase-client.js");
     this._mod = mod;
-    const DATA_VERSION = "4";
-    let cacheValid = true;
-    try {
-      if (localStorage.getItem("hh_data_version") !== DATA_VERSION) {
-        localStorage.removeItem("hh_admin_properties");
-        localStorage.removeItem("hh_admin_owners");
-        localStorage.removeItem("hh_admin_tenants");
-        localStorage.setItem("hh_data_version", DATA_VERSION);
-        cacheValid = false;
-      }
-    } catch (e) {}
+    this._fb = fb;
 
-    let properties;
+    // One-time seed: if Firestore is empty (first run on this project),
+    // populate it from the built-in sample data so the site launches with
+    // its 21 listings already live for every visitor — not just this browser.
     try {
-      const stored = cacheValid ? localStorage.getItem("hh_admin_properties") : null;
-      properties = stored ? JSON.parse(stored) : mod.PROPERTIES.map((p) => ({ ...p, title: p.title.en, shortDesc: p.shortDesc.en, fullDesc: p.fullDesc.en }));
+      await fb.seedIfEmpty("properties", mod.PROPERTIES, "id");
+      await fb.seedIfEmpty("owners", mod.OWNERS, "id");
+      await fb.seedIfEmpty("tenants", mod.TENANTS, "id");
     } catch (e) {
-      properties = mod.PROPERTIES.map((p) => ({ ...p, title: p.title.en, shortDesc: p.shortDesc.en, fullDesc: p.fullDesc.en }));
+      console.warn("Firebase seed failed (offline / misconfigured):", e);
     }
-    let owners;
+
+    let properties, owners, tenants;
     try {
-      const storedOwners = cacheValid ? localStorage.getItem("hh_admin_owners") : null;
-      owners = storedOwners ? JSON.parse(storedOwners) : mod.OWNERS.map((o) => ({ ...o }));
+      [properties, owners, tenants] = await Promise.all([
+        fb.fetchCollection("properties"),
+        fb.fetchCollection("owners"),
+        fb.fetchCollection("tenants"),
+      ]);
     } catch (e) {
+      console.warn("Firebase fetch failed, falling back to built-in sample data:", e);
+      properties = mod.PROPERTIES.map((p) => ({ ...p }));
       owners = mod.OWNERS.map((o) => ({ ...o }));
-    }
-    let tenants;
-    try {
-      const storedTenants = cacheValid ? localStorage.getItem("hh_admin_tenants") : null;
-      tenants = storedTenants ? JSON.parse(storedTenants) : mod.TENANTS.map((x) => ({ ...x }));
-    } catch (e) {
       tenants = mod.TENANTS.map((x) => ({ ...x }));
     }
-    this.setState({ lang: mod.getLang(), data: mod, properties, owners, tenants });
+    // Uploaded photos live in their own Firestore docs (see firebase-client's
+    // propertyPhotos collection) so a property doc with many photos never
+    // risks Firestore's 1MB-per-document limit. Merge each photo's stored
+    // data: URL onto the matching {label} entry here for display.
+    let photosById = {};
+    try {
+      const allPhotos = await fb.fetchAllPhotos();
+      allPhotos.forEach((ph) => { photosById[ph.id] = ph.dataUrl; });
+    } catch (e) {
+      console.warn("Firebase photo fetch failed:", e);
+    }
+    let profilePhotosById = {};
+    try {
+      const allProfilePhotos = await fb.fetchAllProfilePhotos();
+      allProfilePhotos.forEach((ph) => { profilePhotosById[ph.id] = ph.dataUrl; });
+    } catch (e) {
+      console.warn("Firebase profile photo fetch failed:", e);
+    }
+    properties = properties.map((p) => ({
+      ...p,
+      photos: (p.photos || []).map((ph, i) => {
+        const label = typeof ph === "string" ? ph : ph.label;
+        const url = photosById[`${p.id}-${i}`] || (typeof ph === "object" && ph.url) || "";
+        return { label, url };
+      }),
+    }));
+    // Admin edits only the English copy of translatable fields (title /
+    // shortDesc / fullDesc) — flatten to English strings for the form/list
+    // here, and re-merge back into the full {en,th,ru,zh} object on save so
+    // the other languages' translations are preserved untouched.
+    properties = properties.map((p) => ({
+      ...p,
+      title: p.title && typeof p.title === "object" ? p.title.en : p.title,
+      shortDesc: p.shortDesc && typeof p.shortDesc === "object" ? p.shortDesc.en : p.shortDesc,
+      fullDesc: p.fullDesc && typeof p.fullDesc === "object" ? p.fullDesc.en : p.fullDesc,
+      // Normalize photos to {label, url} — older/seed data is plain label
+      // strings with no uploaded image yet (url stays "" -> placeholder tile).
+      photos: (p.photos || []).map((ph) => (typeof ph === "string" ? { label: ph, url: "" } : ph)),
+      _raw: p,
+    }));
+    this.setState({ lang: mod.getLang(), data: mod, properties, owners, tenants, profilePhotosById });
     this._onResize = () => this.setState({ isMobile: window.innerWidth < 760 });
     this._onResize();
     window.addEventListener("resize", this._onResize);
@@ -429,23 +477,65 @@ class Component extends DCLogic {
   }
 
   persist(properties) {
-    try { localStorage.setItem("hh_admin_properties", JSON.stringify(properties)); } catch (e) {}
     this.setState({ properties });
   }
 
+  async persistOne(property) {
+    try {
+      await this._fb.setDoc("properties", property.id, property._raw || property);
+    } catch (e) {
+      console.warn("Firebase save failed (offline?) — change is local-only until reconnected:", e);
+    }
+  }
+
+  async uploadProfilePhoto(slotId, file) {
+    if (!file) return;
+    try {
+      const dataUrl = await this._fb.fileToDataUrl(file, 500);
+      await this._fb.saveProfilePhoto(slotId, dataUrl);
+      this.setState((s) => ({ profilePhotosById: { ...s.profilePhotosById, [slotId]: dataUrl } }));
+    } catch (e) {
+      console.warn("Profile photo upload failed:", e);
+    }
+  }
+
+  async uploadPropertyPhoto(idx, file) {
+    if (!file) return;
+    const f = this.state.form;
+    const propId = f.id || "new";
+    this.setState({ uploadingPhotoIdx: idx });
+    try {
+      const dataUrl = await this._fb.fileToDataUrl(file, 1400);
+      await this._fb.savePhoto(propId, idx, dataUrl);
+      const photos = [...this.state.form.photos];
+      photos[idx] = { ...photos[idx], url: dataUrl };
+      this.setForm({ photos });
+    } catch (e) {
+      console.warn("Photo upload failed:", e);
+    } finally {
+      this.setState({ uploadingPhotoIdx: null });
+    }
+  }
+
   persistOwners(owners) {
-    try { localStorage.setItem("hh_admin_owners", JSON.stringify(owners)); } catch (e) {}
     this.setState({ owners });
+    owners.forEach((o) => {
+      this._fb.setDoc("owners", o.id, o).catch((e) => console.warn("Firebase owner save failed:", e));
+    });
   }
 
   persistTenants(tenants) {
-    try { localStorage.setItem("hh_admin_tenants", JSON.stringify(tenants)); } catch (e) {}
     this.setState({ tenants });
+    tenants.forEach((x) => {
+      this._fb.setDoc("tenants", x.id, x).catch((e) => console.warn("Firebase tenant save failed:", e));
+    });
   }
 
   updateStatus(id, status) {
-    const properties = this.state.properties.map((p) => (p.id === id ? { ...p, status } : p));
+    const properties = this.state.properties.map((p) => (p.id === id ? { ...p, status, _raw: { ...(p._raw || p), status } } : p));
     this.persist(properties);
+    const changed = properties.find((p) => p.id === id);
+    this.persistOne(changed);
   }
 
   openAdd() {
@@ -465,7 +555,7 @@ class Component extends DCLogic {
         pool: !!p.pool, furnished: p.furnished || "full", ownership: p.ownership || "",
         distanceBeach: p.distanceBeach || 0, distanceTown: p.distanceTown || 0, mapLink: p.mapLink || "",
         shortDesc: p.shortDesc, fullDesc: p.fullDesc, features: [...(p.features || [])],
-        photos: [...(p.photos || ["Exterior"])],
+        photos: (p.photos && p.photos.length ? p.photos : [{ label: "Exterior", url: "" }]).map((ph) => (typeof ph === "string" ? { label: ph, url: "" } : { ...ph })),
         ownerId: p.ownerId || "__new__",
         ownerName: (owner && owner.name) || "", ownerPhone: (owner && owner.phone) || "",
         ownerEmail: (owner && owner.email) || "", ownerLine: (owner && owner.line) || "",
@@ -541,6 +631,9 @@ class Component extends DCLogic {
       this.persistTenants(tenants);
     }
 
+    const editingRaw = this.state.editingId
+      ? (this.state.properties.find((p) => p.id === this.state.editingId) || {})._raw
+      : null;
     const built = {
       id: f.id, area: f.area, zone: f.zone, type: f.type, status: f.status,
       price: Number(f.price) || 0, currency: "THB",
@@ -548,20 +641,35 @@ class Component extends DCLogic {
       bedrooms: Number(f.bedrooms) || 0, bathrooms: Number(f.bathrooms) || 0, parking: Number(f.parking) || 0,
       pool: f.pool, furnished: f.furnished, ownership: f.ownership,
       distanceBeach: Number(f.distanceBeach) || 0, distanceTown: Number(f.distanceTown) || 0, mapLink: f.mapLink,
-      features: f.features, title: f.title, shortDesc: f.shortDesc, fullDesc: f.fullDesc,
-      seo: { title: f.title, desc: f.shortDesc, keywords: "" },
+      features: f.features,
+      // Only the English copy is admin-editable here — merge it into the
+      // existing {en,th,ru,zh} object so th/ru/zh translations survive.
+      title: editingRaw && typeof editingRaw.title === "object" ? { ...editingRaw.title, en: f.title } : f.title,
+      shortDesc: editingRaw && typeof editingRaw.shortDesc === "object" ? { ...editingRaw.shortDesc, en: f.shortDesc } : f.shortDesc,
+      fullDesc: editingRaw && typeof editingRaw.fullDesc === "object" ? { ...editingRaw.fullDesc, en: f.fullDesc } : f.fullDesc,
+      seo: { title: f.title, desc: f.shortDesc, keywords: (editingRaw && editingRaw.seo && editingRaw.seo.keywords) || "" },
       ownerId,
       ...(f.status === "rented" ? { tenantId, leaseInfo: { leaseStart: f.leaseStart, leaseEnd: f.leaseEnd } } : {}),
       adminNotes: f.adminNotes,
-      photos: f.photos,
+      // Uploaded photo bytes live in their own Firestore docs (propertyPhotos
+      // collection) — only the caption/label is stored on the property doc
+      // itself, keeping it comfortably under Firestore's 1MB document limit.
+      photos: f.photos.map((ph) => ({ label: ph.label })),
+    };
+    const builtForState = {
+      ...built,
+      title: f.title, shortDesc: f.shortDesc, fullDesc: f.fullDesc,
+      photos: f.photos, // keep url in local state for immediate display (Firestore doc itself omits it)
+      _raw: built,
     };
     let properties;
     if (this.state.editingId) {
-      properties = this.state.properties.map((p) => (p.id === this.state.editingId ? built : p));
+      properties = this.state.properties.map((p) => (p.id === this.state.editingId ? builtForState : p));
     } else {
-      properties = [built, ...this.state.properties];
+      properties = [builtForState, ...this.state.properties];
     }
     this.persist(properties);
+    this.persistOne(builtForState);
 
     // Any photo dropped into an <image-slot> just before this click is
     // still mid-encode/write in its own async pipeline (a few hundred ms) —
@@ -583,6 +691,7 @@ class Component extends DCLogic {
   confirmDelete(id) {
     this.persist(this.state.properties.filter((p) => p.id !== id));
     this.setState({ confirmingDeleteId: null });
+    this._fb.deleteDocById("properties", id).catch((e) => console.warn("Firebase delete failed:", e));
   }
 
   renderVals() {
@@ -623,7 +732,7 @@ class Component extends DCLogic {
           areaLabel: areaLabelOf(p.area), typeLabel: typeLabelOf(p.type),
           priceLabel: mod.formatPrice(p.price, p.currency, lang) + t.per_month,
           status: p.status, statusColor: statusColorOf(p.status),
-          coverPhotoId: "photo-" + p.id + "-0",
+          coverPhotoBg: (p.photos && p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(92% 0.015 75) 2px, oklch(92% 0.015 75) 22px)",
           onStatusChange: (e) => this.updateStatus(p.id, e.target.value),
           onEdit: () => this.openEdit(p),
           confirmingDelete: this.state.confirmingDeleteId === p.id,
@@ -651,7 +760,7 @@ class Component extends DCLogic {
         areaLabel: areaLabelOf(p.area), typeLabel: typeLabelOf(p.type),
         priceLabel: mod.formatPrice(p.price, p.currency, lang) + (p.status === "rent" ? t.per_month : ""),
         status: p.status, statusColor: statusColorOf(p.status),
-        coverPhotoId: "photo-" + p.id + "-0",
+        coverPhotoBg: (p.photos && p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(92% 0.015 75) 2px, oklch(92% 0.015 75) 22px)",
         onStatusChange: (e) => this.updateStatus(p.id, e.target.value),
         onEdit: () => this.openEdit(p),
         confirmingDelete: this.state.confirmingDeleteId === p.id,
@@ -682,22 +791,23 @@ class Component extends DCLogic {
       if (f.tenantId && f.tenantId !== "__new__") {
         tenantPhoto1Id = "tenant-photo-" + f.tenantId + "-1";
         tenantPhoto2Id = "tenant-photo-" + f.tenantId + "-2";
-      }
-      const featureOptions = Object.keys(mod.FEATURES).map((k) => ({
+      }      const featureOptions = Object.keys(mod.FEATURES).map((k) => ({
         id: k, label: mod.FEATURES[k][lang], checked: f.features.includes(k),
         onToggle: () => {
           const has = f.features.includes(k);
           this.setForm({ features: has ? f.features.filter((x) => x !== k) : [...f.features, k] });
         },
       }));
-      const photos = f.photos.map((label, i) => ({
-        label, isCover: i === 0, notCover: i !== 0,
-        slotId: "photo-" + (f.id || "new") + "-" + i,
-        onChange: (e) => { const photos = [...f.photos]; photos[i] = e.target.value; this.setForm({ photos }); },
+      const photos = f.photos.map((ph, i) => ({
+        label: ph.label, url: ph.url || "", isCover: i === 0, notCover: i !== 0,
+        uploading: this.state.uploadingPhotoIdx === i,
+        thumbBg: ph.url ? `url('${ph.url}') center/cover` : "oklch(90% 0.01 70)",
+        onChange: (e) => { const photos = [...f.photos]; photos[i] = { ...photos[i], label: e.target.value }; this.setForm({ photos }); },
+        onFile: (e) => this.uploadPropertyPhoto(i, e.target.files && e.target.files[0]),
         onSetCover: () => { const photos = [...f.photos]; const [x] = photos.splice(i, 1); photos.unshift(x); this.setForm({ photos }); },
         onUp: () => { if (i === 0) return; const photos = [...f.photos]; [photos[i - 1], photos[i]] = [photos[i], photos[i - 1]]; this.setForm({ photos }); },
         onDown: () => { if (i === f.photos.length - 1) return; const photos = [...f.photos]; [photos[i + 1], photos[i]] = [photos[i], photos[i + 1]]; this.setForm({ photos }); },
-        onRemove: () => { const photos = f.photos.filter((_, idx) => idx !== i); this.setForm({ photos: photos.length ? photos : ["Exterior"] }); },
+        onRemove: () => { const photos = f.photos.filter((_, idx) => idx !== i); this.setForm({ photos: photos.length ? photos : [{ label: "Exterior", url: "" }] }); },
       }));
       form = {
         title: f.title, onTitle: (e) => this.setForm({ title: e.target.value }),
@@ -720,13 +830,21 @@ class Component extends DCLogic {
         shortDesc: f.shortDesc, onShortDesc: (e) => this.setForm({ shortDesc: e.target.value }),
         fullDesc: f.fullDesc, onFullDesc: (e) => this.setForm({ fullDesc: e.target.value }),
         featureOptions, photos,
-        onAddPhoto: () => this.setForm({ photos: [...f.photos, "New photo"] }),
+        onAddPhoto: () => this.setForm({ photos: [...f.photos, { label: "New photo", url: "" }] }),
         ownerId: f.ownerId, onOwnerSelect: (e) => this.onOwnerSelect(e.target.value),
         ownerName: f.ownerName, onOwnerName: (e) => this.setForm({ ownerName: e.target.value }),
         ownerPhone: f.ownerPhone, onOwnerPhone: (e) => this.setForm({ ownerPhone: e.target.value }),
         ownerEmail: f.ownerEmail, onOwnerEmail: (e) => this.setForm({ ownerEmail: e.target.value }),
         ownerLine: f.ownerLine, onOwnerLine: (e) => this.setForm({ ownerLine: e.target.value }),
         ownerNotes: f.ownerNotes, onOwnerNotes: (e) => this.setForm({ ownerNotes: e.target.value }),
+        ownerPhoto1Bg: this.state.profilePhotosById && this.state.profilePhotosById[ownerPhoto1Id] ? `url('${this.state.profilePhotosById[ownerPhoto1Id]}') center/cover` : "oklch(90% 0.01 70)",
+        ownerPhoto2Bg: this.state.profilePhotosById && this.state.profilePhotosById[ownerPhoto2Id] ? `url('${this.state.profilePhotosById[ownerPhoto2Id]}') center/cover` : "oklch(90% 0.01 70)",
+        onOwnerPhoto1File: (e) => this.uploadProfilePhoto(ownerPhoto1Id, e.target.files && e.target.files[0]),
+        onOwnerPhoto2File: (e) => this.uploadProfilePhoto(ownerPhoto2Id, e.target.files && e.target.files[0]),
+        tenantPhoto1Bg: this.state.profilePhotosById && this.state.profilePhotosById[tenantPhoto1Id] ? `url('${this.state.profilePhotosById[tenantPhoto1Id]}') center/cover` : "oklch(90% 0.01 70)",
+        tenantPhoto2Bg: this.state.profilePhotosById && this.state.profilePhotosById[tenantPhoto2Id] ? `url('${this.state.profilePhotosById[tenantPhoto2Id]}') center/cover` : "oklch(90% 0.01 70)",
+        onTenantPhoto1File: (e) => this.uploadProfilePhoto(tenantPhoto1Id, e.target.files && e.target.files[0]),
+        onTenantPhoto2File: (e) => this.uploadProfilePhoto(tenantPhoto2Id, e.target.files && e.target.files[0]),
         isRented: f.status === "rented",
         leaseStart: f.leaseStart, onLeaseStart: (e) => this.setForm({ leaseStart: e.target.value }),
         leaseEnd: f.leaseEnd, onLeaseEnd: (e) => this.setForm({ leaseEnd: e.target.value }),

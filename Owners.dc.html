@@ -10,6 +10,9 @@
 <helmet>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <title>Contact Directory — huahin.properties Admin</title>
   <style>
     body { margin: 0; background: oklch(96% 0.015 75); font-family: 'Work Sans', sans-serif; }
@@ -51,8 +54,8 @@
         <div style="background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:8px; overflow:hidden;">
           <div onClick="{{ o.toggle }}" style="display:flex; align-items:center; gap:16px; padding:16px 18px; cursor:pointer; flex-wrap:wrap;">
             <div style="display:flex; gap:8px;">
-              <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ o.photo1Id }}" shape="rounded" radius="8" placeholder="{{ t.admin_owner_photo1 }}" style="width:52px;height:52px"></x-import>
-              <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ o.photo2Id }}" shape="rounded" radius="8" placeholder="{{ t.admin_owner_photo2 }}" style="width:52px;height:52px"></x-import>
+              <div style="width:52px;height:52px;border-radius:8px;overflow:hidden;background:{{ o.photo1Bg }};flex-shrink:0;"></div>
+              <div style="width:52px;height:52px;border-radius:8px;overflow:hidden;background:{{ o.photo2Bg }};flex-shrink:0;"></div>
             </div>
             <div style="flex:1; min-width:180px;">
               <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60);">{{ o.name }}</div>
@@ -72,7 +75,7 @@
               </sc-if>
               <sc-for list="{{ o.properties }}" as="pr" hint-placeholder-count="2">
                 <div style="display:flex; align-items:center; gap:14px; background:oklch(96% 0.015 75); border-radius:6px; padding:12px 14px; flex-wrap:wrap;">
-                  <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ pr.coverPhotoId }}" shape="rounded" radius="4" placeholder="{{ t.gallery_photo }}" style="width:64px;height:48px;flex-shrink:0"></x-import>
+                  <div style="width:64px;height:48px;flex-shrink:0;border-radius:4px;overflow:hidden;background:{{ pr.coverPhotoBg }};"></div>
                   <div style="font-family:monospace; font-size:12px; color:oklch(45% 0.02 60); white-space:nowrap;">{{ pr.id }}</div>
                   <div style="flex:1; min-width:160px;">
                     <div style="font-size:14px; color:oklch(25% 0.02 60);">{{ pr.title }}</div>
@@ -109,41 +112,48 @@ class Component extends DCLogic {
 
   async componentDidMount() {
     const mod = await import("./data.js");
+    const fb = await import("./firebase-client.js");
     this._mod = mod;
-    const DATA_VERSION = "4";
-    let cacheValid = true;
-    try {
-      if (localStorage.getItem("hh_data_version") !== DATA_VERSION) {
-        localStorage.removeItem("hh_admin_properties");
-        localStorage.removeItem("hh_admin_owners");
-        localStorage.removeItem("hh_admin_tenants");
-        localStorage.setItem("hh_data_version", DATA_VERSION);
-        cacheValid = false;
-      }
-    } catch (e) {}
 
-    let properties;
+    let properties, owners, tenants;
     try {
-      const stored = cacheValid ? localStorage.getItem("hh_admin_properties") : null;
-      properties = stored ? JSON.parse(stored) : mod.PROPERTIES.map((p) => ({ ...p, title: p.title.en, shortDesc: p.shortDesc.en, fullDesc: p.fullDesc.en }));
+      [properties, owners, tenants] = await Promise.all([
+        fb.fetchCollection("properties"),
+        fb.fetchCollection("owners"),
+        fb.fetchCollection("tenants"),
+      ]);
     } catch (e) {
-      properties = mod.PROPERTIES.map((p) => ({ ...p, title: p.title.en, shortDesc: p.shortDesc.en, fullDesc: p.fullDesc.en }));
-    }
-    let owners;
-    try {
-      const storedOwners = cacheValid ? localStorage.getItem("hh_admin_owners") : null;
-      owners = storedOwners ? JSON.parse(storedOwners) : mod.OWNERS.map((o) => ({ ...o }));
-    } catch (e) {
+      console.warn("Firebase fetch failed, falling back to built-in sample data:", e);
+      properties = mod.PROPERTIES.map((p) => ({ ...p }));
       owners = mod.OWNERS.map((o) => ({ ...o }));
-    }
-    let tenants;
-    try {
-      const storedTenants = cacheValid ? localStorage.getItem("hh_admin_tenants") : null;
-      tenants = storedTenants ? JSON.parse(storedTenants) : mod.TENANTS.map((x) => ({ ...x }));
-    } catch (e) {
       tenants = mod.TENANTS.map((x) => ({ ...x }));
     }
-    this.setState({ lang: mod.getLang(), data: mod, properties, owners, tenants });
+    let photosById = {};
+    try {
+      const allPhotos = await fb.fetchAllPhotos();
+      allPhotos.forEach((ph) => { photosById[ph.id] = ph.dataUrl; });
+    } catch (e) {
+      console.warn("Firebase photo fetch failed:", e);
+    }
+    let profilePhotosById = {};
+    try {
+      const allProfilePhotos = await fb.fetchAllProfilePhotos();
+      allProfilePhotos.forEach((ph) => { profilePhotosById[ph.id] = ph.dataUrl; });
+    } catch (e) {
+      console.warn("Firebase profile photo fetch failed:", e);
+    }
+    properties = properties.map((p) => ({
+      ...p,
+      title: p.title && typeof p.title === "object" ? p.title.en : p.title,
+      shortDesc: p.shortDesc && typeof p.shortDesc === "object" ? p.shortDesc.en : p.shortDesc,
+      fullDesc: p.fullDesc && typeof p.fullDesc === "object" ? p.fullDesc.en : p.fullDesc,
+      photos: (p.photos || []).map((ph, i) => {
+        const label = typeof ph === "string" ? ph : ph.label;
+        const url = photosById[`${p.id}-${i}`] || (typeof ph === "object" && ph.url) || "";
+        return { label, url };
+      }),
+    }));
+    this.setState({ lang: mod.getLang(), data: mod, properties, owners, tenants, profilePhotosById });
   }
 
   toggle(id) {
@@ -196,14 +206,14 @@ class Component extends DCLogic {
         toggle: () => this.toggle(o.id),
         hasNotes: !!o.notes,
         notes: o.notes,
-        photo1Id: photoPrefix + o.id + "-1",
-        photo2Id: photoPrefix + o.id + "-2",
+        photo1Bg: this.state.profilePhotosById && this.state.profilePhotosById[photoPrefix + o.id + "-1"] ? `url('${this.state.profilePhotosById[photoPrefix + o.id + "-1"]}') center/cover` : "oklch(90% 0.01 70)",
+        photo2Bg: this.state.profilePhotosById && this.state.profilePhotosById[photoPrefix + o.id + "-2"] ? `url('${this.state.profilePhotosById[photoPrefix + o.id + "-2"]}') center/cover` : "oklch(90% 0.01 70)",
         hasNearestLeaseEnd: !isOwnersTab && !!nearestLeaseEnd,
         nearestLeaseEndLabel: formatDate(nearestLeaseEnd),
         _sortKey: nearestLeaseEnd || "9999-99-99",
         properties: linkedProps.map((p) => ({
           id: p.id,
-          coverPhotoId: "photo-" + p.id + "-0",
+          coverPhotoBg: (p.photos && p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
           title: p.title,
           zone: p.zone,
           areaLabel: areaLabelOf(p.area),

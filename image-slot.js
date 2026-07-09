@@ -263,7 +263,9 @@
       const canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(bitmap, 0, 0, w, h);
-      return canvas.toDataURL('image/webp', 0.85);
+      const dataUrl = canvas.toDataURL('image/webp', 0.85);
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', 0.85));
+      return { dataUrl, blob };
     } finally {
       bitmap.close && bitmap.close();
     }
@@ -809,12 +811,12 @@
         // low-res image that looks sharp here but blurry/pixelated wherever
         // it's shown bigger. Always capture close to MAX_DIM instead.
         const w = Math.max(this.clientWidth || this.offsetWidth || 0, 900);
-        const url = await toDataUrl(file, w);
+        const { dataUrl } = await toDataUrl(file, w);
         if (gen !== this._gen) return;
         // Only exit reframe once the new image is in hand — a rejected type
         // or decode failure leaves the in-progress crop untouched.
         this._exitReframe(false);
-        const val = { u: url, s: 1, x: 0, y: 0 };
+        const val = { u: dataUrl, s: 1, x: 0, y: 0 };
         setSlot(this.id || '', val);
         // Keep a session-local copy for id-less slots so the drop still
         // shows, even though it cannot persist.

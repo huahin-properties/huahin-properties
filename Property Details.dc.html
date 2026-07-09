@@ -10,6 +10,9 @@
 <helmet>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <title>{{ seoTitle }}</title>
   <meta name="description" content="{{ seoDesc }}">
   <style>
@@ -78,18 +81,18 @@
 
     <!-- ============ GALLERY ============ -->
     <div style="padding:14px clamp(20px,4vw,56px) 0;">
-      <div style="position:relative; aspect-ratio:16/9; max-height:560px; border-radius:6px; overflow:hidden; background-image:repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(93% 0.015 75) 2px, oklch(93% 0.015 75) 22px);">
-        <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ activePhotoId }}" shape="rect" placeholder="{{ activePhotoLabel }}" hint-size="100%,100%" style="position:absolute;inset:0"></x-import>
+      <div style="position:relative; aspect-ratio:16/9; max-height:560px; border-radius:6px; overflow:hidden; background:{{ activePhotoBg }};">
         <div style="position:absolute; top:14px; left:14px; background:{{ p.statusColor }}; color:oklch(99% 0.005 80); font-size:12px; font-weight:600; padding:5px 14px; border-radius:100px; pointer-events:none;">{{ p.statusLabel }}</div>
-        <div style="position:absolute; bottom:14px; left:14px; font-family:monospace; font-size:12px; color:oklch(20% 0.02 60 / 0.8); background:rgba(255,255,255,0.7); padding:5px 10px; border-radius:4px; pointer-events:none;">[{{ activePhotoLabel }}]</div>
+        <sc-if value="{{ activePhotoNoPhoto }}">
+          <div style="position:absolute; bottom:14px; left:14px; font-family:monospace; font-size:12px; color:oklch(20% 0.02 60 / 0.8); background:rgba(255,255,255,0.7); padding:5px 10px; border-radius:4px; pointer-events:none;">[{{ activePhotoLabel }}]</div>
+        </sc-if>
         <div onClick="{{ prevPhoto }}" style="position:absolute; top:50%; left:14px; transform:translateY(-50%); width:38px; height:38px; border-radius:100px; background:rgba(255,255,255,0.8); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; color:oklch(25% 0.02 60); z-index:2;">‹</div>
         <div onClick="{{ nextPhoto }}" style="position:absolute; top:50%; right:14px; transform:translateY(-50%); width:38px; height:38px; border-radius:100px; background:rgba(255,255,255,0.8); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; color:oklch(25% 0.02 60); z-index:2;">›</div>
         <div style="position:absolute; bottom:14px; right:14px; font-size:12px; color:oklch(20% 0.02 60); background:rgba(255,255,255,0.7); padding:5px 10px; border-radius:4px; pointer-events:none;">{{ activePhotoNum }} / {{ photoCount }}</div>
       </div>
       <div style="display:flex; gap:10px; margin-top:10px; overflow-x:auto; padding-bottom:4px;">
         <sc-for list="{{ photos }}" as="ph" hint-placeholder-count="6">
-          <div onClick="{{ ph.select }}" style="flex-shrink:0; width:100px; height:72px; border-radius:4px; overflow:hidden; cursor:pointer; box-shadow:{{ ph.ring }}; background-image:repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(93% 0.015 75) 2px, oklch(93% 0.015 75) 22px); position:relative;">
-            <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ ph.photoId }}" shape="rect" placeholder="{{ ph.label }}" hint-size="100%,100%" style="position:absolute;inset:0;pointer-events:none"></x-import>
+          <div onClick="{{ ph.select }}" style="flex-shrink:0; width:100px; height:72px; border-radius:4px; overflow:hidden; cursor:pointer; box-shadow:{{ ph.ring }}; background:{{ ph.thumbBg }}; position:relative;">
             <div style="position:absolute; inset:0; opacity:{{ ph.dim }}; background:oklch(20% 0.02 60); pointer-events:none;"></div>
           </div>
         </sc-for>
@@ -173,7 +176,7 @@
       <div style="font-family:'Playfair Display',serif; font-size:clamp(22px,2.8vw,28px); color:oklch(20% 0.02 60); margin-bottom:24px;">{{ t.similar_properties }}</div>
       <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:22px;">
         <sc-for list="{{ similar }}" as="sp" hint-placeholder-count="3">
-          <dc-import name="PropertyCard" href="{{ sp.href }}" status-color="{{ sp.statusColor }}" status-label="{{ sp.statusLabel }}" cover-photo-label="{{ sp.coverPhotoLabel }}" cover-photo-id="{{ sp.coverPhotoId }}" zone="{{ sp.zone }}" area-label="{{ sp.areaLabel }}" title="{{ sp.title }}" type-label="{{ sp.typeLabel }}" has-bedrooms="{{ sp.hasBedrooms }}" bedrooms="{{ sp.bedrooms }}" has-bathrooms="{{ sp.hasBathrooms }}" bathrooms="{{ sp.bathrooms }}" has-living-area="{{ sp.hasLivingArea }}" living-area="{{ sp.livingArea }}" sqm-label="{{ sp.sqmLabel }}" price-label="{{ sp.priceLabel }}" view-details-label="{{ sp.viewDetailsLabel }}" hint-size="100%,380px"></dc-import>
+          <dc-import name="PropertyCard" href="{{ sp.href }}" status-color="{{ sp.statusColor }}" status-label="{{ sp.statusLabel }}" cover-photo-label="{{ sp.coverPhotoLabel }}" cover-photo-bg="{{ sp.coverPhotoBg }}" no-photo="{{ sp.noPhoto }}" zone="{{ sp.zone }}" area-label="{{ sp.areaLabel }}" title="{{ sp.title }}" type-label="{{ sp.typeLabel }}" has-bedrooms="{{ sp.hasBedrooms }}" bedrooms="{{ sp.bedrooms }}" has-bathrooms="{{ sp.hasBathrooms }}" bathrooms="{{ sp.bathrooms }}" has-living-area="{{ sp.hasLivingArea }}" living-area="{{ sp.livingArea }}" sqm-label="{{ sp.sqmLabel }}" price-label="{{ sp.priceLabel }}" view-details-label="{{ sp.viewDetailsLabel }}" hint-size="100%,380px"></dc-import>
         </sc-for>
       </div>
     </div>
@@ -206,41 +209,12 @@ class Component extends DCLogic {
     this._mod = mod;
     const params = new URLSearchParams(window.location.search);
     this._id = params.get("id") || mod.PROPERTIES[0].id;
-    this.setState({ lang: mod.getLang(), data: mod, effProps: mod.getEffectivePropertiesSync(mod) });
+    this.setState({ lang: mod.getLang(), data: mod });
+    const effProps = await mod.getEffectiveProperties(mod);
+    this.setState({ effProps });
     this._onResize = () => this.setState({ isMobile: window.innerWidth < 900 });
     this._onResize();
     window.addEventListener("resize", this._onResize);
-
-    // The gallery should only show photo slots that actually have an uploaded
-    // image — an empty slot an admin added to make room for a future upload
-    // shouldn't appear as a blank tile on the public site. Rather than reading
-    // image-slot's storage sidecar directly (unreliable outside its own
-    // component lifecycle), watch the real <image-slot> elements already
-    // mounted for this gallery: the component itself sets a `data-filled`
-    // attribute the instant it resolves whether it has an image, so observing
-    // that is exactly as reliable as the image actually rendering on screen.
-    this._recomputeFilled = () => {
-      const els = document.querySelectorAll("image-slot[id^='photo-']");
-      const filled = new Set();
-      els.forEach((el) => { if (el.hasAttribute("data-filled")) filled.add(el.id); });
-      this.setState({ filledPhotoIds: filled });
-    };
-    this._observer = new MutationObserver(this._recomputeFilled);
-    // Give the image-slot elements a moment to mount and hydrate from their
-    // shared storage, then start observing + do a first pass. After a short
-    // grace window we start trusting the observed set for filtering, so a
-    // brand-new gallery with zero uploads yet doesn't flash-hide everything
-    // before the first check has even run.
-    setTimeout(() => {
-      this._observer.observe(document.body, { attributes: true, attributeFilter: ["data-filled"], subtree: true });
-      this._recomputeFilled();
-    }, 50);
-    setTimeout(() => { this._recomputeFilled(); this.setState({ filterReady: true }); }, 900);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener("resize", this._onResize);
-    if (this._observer) this._observer.disconnect();
   }
 
   componentWillUnmount() {
@@ -277,8 +251,9 @@ class Component extends DCLogic {
       href: `Property Details.dc.html?id=${pr.id}`,
       statusColor: statusColorOf(pr.status),
       statusLabel: mod.STATUS[pr.status][lang],
-      coverPhotoLabel: pr.photos[0],
-      coverPhotoId: "photo-" + pr.id + "-0",
+      coverPhotoLabel: (pr.photos[0] && pr.photos[0].label) || pr.photos[0] || "photo",
+      coverPhotoBg: (pr.photos[0] && pr.photos[0].url) ? `url('${pr.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
+      noPhoto: !(pr.photos[0] && pr.photos[0].url),
       zone: pr.zone,
       areaLabel: areaLabelOf(pr.area),
       title: pr.title[lang],
@@ -312,25 +287,23 @@ class Component extends DCLogic {
       { label: "Ownership", value: raw.ownership },
     ].filter(Boolean);
 
-    const photoIdOf = (i) => "photo-" + raw.id + "-" + i;
-    const filledIds = this.state.filledPhotoIds;
-    let effectiveIndices;
-    if (!this.state.filterReady) {
-      // Still observing — render every slot so the MutationObserver has
-      // elements to check; nothing is hidden yet during this brief window.
-      effectiveIndices = raw.photos.map((_, i) => i);
-    } else {
-      const filtered = raw.photos.map((_, i) => i).filter((i) => filledIds && filledIds.has(photoIdOf(i)));
-      effectiveIndices = filtered.length > 0 ? filtered : raw.photos.map((_, i) => i);
-    }
+    // Only show gallery slots that actually have an uploaded photo — an
+    // empty slot an admin added to make room for a future upload shouldn't
+    // appear as a blank tile on the public site.
+    const filledIndices = raw.photos.map((_, i) => i).filter((i) => raw.photos[i] && raw.photos[i].url);
+    const effectiveIndices = filledIndices.length > 0 ? filledIndices : raw.photos.map((_, i) => i);
     const activePos = Math.max(0, effectiveIndices.indexOf(this.state.activePhoto));
     const activeIndex = effectiveIndices[activePos] ?? effectiveIndices[0];
 
+    const bgOf = (i) => (raw.photos[i] && raw.photos[i].url) ? `url('${raw.photos[i].url}') center/cover` : "repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(92% 0.015 75) 2px, oklch(92% 0.015 75) 22px)";
+
     const photos = effectiveIndices.map((i, pos) => ({
-      label: raw.photos[i], select: () => this.setState({ activePhoto: i }),
+      label: (raw.photos[i] && raw.photos[i].label) || raw.photos[i] || "photo",
+      thumbBg: bgOf(i),
+      noPhoto: !(raw.photos[i] && raw.photos[i].url),
+      select: () => this.setState({ activePhoto: i }),
       ring: i === activeIndex ? "0 0 0 2px oklch(50% 0.09 70)" : "none",
       dim: i === activeIndex ? 0 : 0.15,
-      photoId: "photo-" + raw.id + "-" + i,
     }));
 
     const similar = propsList.filter((pr) => pr.area === raw.area && pr.id !== raw.id && pr.status !== "rented" && pr.status !== "sold" && pr.status !== "reserved").slice(0, 3).map(cardProps);
@@ -348,8 +321,9 @@ class Component extends DCLogic {
       p, specs, photos,
       photoCount: effectiveIndices.length,
       activePhotoNum: activePos + 1,
-      activePhotoLabel: raw.photos[activeIndex],
-      activePhotoId: "photo-" + raw.id + "-" + activeIndex,
+      activePhotoBg: bgOf(activeIndex),
+      activePhotoLabel: (raw.photos[activeIndex] && raw.photos[activeIndex].label) || raw.photos[activeIndex] || "",
+      activePhotoNoPhoto: !(raw.photos[activeIndex] && raw.photos[activeIndex].url),
       prevPhoto: () => this.setState(() => ({ activePhoto: effectiveIndices[(activePos - 1 + effectiveIndices.length) % effectiveIndices.length] })),
       nextPhoto: () => this.setState(() => ({ activePhoto: effectiveIndices[(activePos + 1) % effectiveIndices.length] })),
       gridCols: this.state.isMobile ? "1fr" : "2fr 1fr",

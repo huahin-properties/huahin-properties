@@ -1005,47 +1005,38 @@ export function formatPrice(price, currency, lang) {
 export const ADMIN_DATA_VERSION = "4";
 
 export function getEffectivePropertiesSync(mod) {
-  let overrides = null;
+  return mod.PROPERTIES;
+}
+
+// Real, shared version: fetches the current property list from Firebase
+// (so every visitor sees the same admin-edited data + uploaded photos),
+// falling back to the static bundled sample data if Firebase is
+// unreachable. This replaces the old localStorage-based merge above, which
+// only ever reflected edits made in that one browser.
+export async function getEffectiveProperties(mod) {
   try {
-    if (localStorage.getItem("hh_data_version") === ADMIN_DATA_VERSION) {
-      const stored = localStorage.getItem("hh_admin_properties");
-      overrides = stored ? JSON.parse(stored) : null;
-    }
+    const fb = await import("./firebase-client.js");
+    const [properties, allPhotos] = await Promise.all([
+      fb.fetchCollection("properties"),
+      fb.fetchAllPhotos(),
+    ]);
+    if (!properties || !properties.length) return mod.PROPERTIES;
+    const photosById = {};
+    allPhotos.forEach((ph) => { photosById[ph.id] = ph.dataUrl; });
+    return properties.map((p) => {
+      const photos = (p.photos || []).map((ph, i) => {
+        const label = typeof ph === "string" ? ph : ph.label;
+        const url = photosById[`${p.id}-${i}`] || (typeof ph === "object" && ph.url) || "";
+        return { label, url };
+      });
+      // Brand-new properties added via Admin only have a single-language
+      // string for title/shortDesc/fullDesc — wrap them so the rest of the
+      // site (which expects { en, th, ru, zh }) still works.
+      const wrap = (v) => (v && typeof v === "object" ? v : { en: v, th: v, ru: v, zh: v });
+      return { ...p, photos, title: wrap(p.title), shortDesc: wrap(p.shortDesc), fullDesc: wrap(p.fullDesc) };
+    });
   } catch (e) {
-    overrides = null;
+    console.warn("getEffectiveProperties: Firebase fetch failed, using bundled sample data:", e);
+    return mod.PROPERTIES;
   }
-  if (!overrides) return mod.PROPERTIES;
-
-  const byId = new Map(overrides.map((o) => [o.id, o]));
-  const merged = mod.PROPERTIES.map((p) => {
-    const o = byId.get(p.id);
-    if (!o) return p;
-    return {
-      ...p,
-      area: o.area, zone: o.zone, type: o.type, status: o.status,
-      price: o.price, currency: o.currency || p.currency,
-      landSize: o.landSize, livingArea: o.livingArea,
-      bedrooms: o.bedrooms, bathrooms: o.bathrooms, parking: o.parking,
-      pool: o.pool, furnished: o.furnished, ownership: o.ownership,
-      distanceBeach: o.distanceBeach, distanceTown: o.distanceTown, mapLink: o.mapLink,
-      features: o.features && o.features.length ? o.features : p.features,
-      photos: o.photos && o.photos.length ? o.photos : p.photos,
-      ownerId: o.ownerId, tenantId: o.tenantId, leaseInfo: o.leaseInfo,
-      adminNotes: o.adminNotes,
-    };
-  });
-
-  // Any brand-new properties added via Admin (ids not present in the static set)
-  // only have a single-language string for title/shortDesc/fullDesc — wrap them so
-  // the rest of the site (which expects { en, th, ru, zh }) still works.
-  const newOnes = overrides
-    .filter((o) => !mod.PROPERTIES.some((p) => p.id === o.id))
-    .map((o) => ({
-      ...o,
-      title: { en: o.title, th: o.title, ru: o.title, zh: o.title },
-      shortDesc: { en: o.shortDesc, th: o.shortDesc, ru: o.shortDesc, zh: o.shortDesc },
-      fullDesc: { en: o.fullDesc, th: o.fullDesc, ru: o.fullDesc, zh: o.fullDesc },
-    }));
-
-  return merged.concat(newOnes);
 }

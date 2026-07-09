@@ -10,6 +10,9 @@
 <helmet>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <title>Property Map — huahin.properties Admin</title>
   <style>
     html, body { margin: 0; height: 100%; background: oklch(96% 0.015 75); font-family: 'Work Sans', sans-serif; }
@@ -177,25 +180,19 @@ class Component extends DCLogic {
 
   async componentDidMount() {
     const mod = await import("./data.js");
+    const fb = await import("./firebase-client.js");
     this._mod = mod;
-    const DATA_VERSION = "4";
-    let cacheValid = true;
-    try {
-      if (localStorage.getItem("hh_data_version") !== DATA_VERSION) {
-        localStorage.removeItem("hh_admin_properties");
-        localStorage.removeItem("hh_admin_owners");
-        localStorage.removeItem("hh_admin_tenants");
-        localStorage.setItem("hh_data_version", DATA_VERSION);
-        cacheValid = false;
-      }
-    } catch (e) {}
     let properties;
     try {
-      const stored = cacheValid ? localStorage.getItem("hh_admin_properties") : null;
-      properties = stored ? JSON.parse(stored) : mod.PROPERTIES.map((p) => ({ ...p, title: p.title.en }));
+      properties = await fb.fetchCollection("properties");
     } catch (e) {
-      properties = mod.PROPERTIES.map((p) => ({ ...p, title: p.title.en }));
+      console.warn("Firebase fetch failed, falling back to built-in sample data:", e);
+      properties = mod.PROPERTIES.map((p) => ({ ...p }));
     }
+    properties = properties.map((p) => ({
+      ...p,
+      title: p.title && typeof p.title === "object" ? p.title.en : p.title,
+    }));
     this.setState({ lang: mod.getLang(), data: mod, properties });
 
     await waitForGoogleMaps();
