@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <title>Property Map — huahin.properties Admin</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: oklch(96% 0.015 75); font-family: 'Work Sans', sans-serif; }
+    a { color: oklch(48% 0.07 55); }
+    a:hover { color: oklch(38% 0.08 55); }
+    .hh-pin-tooltip { font-family: 'Work Sans', sans-serif !important; font-size: 12px !important; }
+    .gm-style .gm-style-iw-c { font-family: 'Work Sans', sans-serif !important; padding: 12px !important; }
+    .gm-style-iw-d { overflow: hidden !important; }
+  </style>
+</helmet>
+
+<div style="display:flex; flex-direction:column; height:100vh; background:oklch(96% 0.015 75);">
+
+  <!-- ============ TOP BAR ============ -->
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px clamp(16px,3vw,40px); background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); flex-wrap:wrap; flex-shrink:0;">
+    <div style="display:flex; align-items:center; gap:14px;">
+      <a href="Home.dc.html" style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(97% 0.01 80); text-decoration:none;">huahin<span style="color:oklch(70% 0.1 70);">.</span>properties</a>
+      <span style="font-size:12px; color:oklch(75% 0.01 70); border-left:1px solid oklch(45% 0.01 60); padding-left:14px;">{{ t.admin_map_title }}</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:16px; font-size:13px; color:oklch(80% 0.01 70);">
+      <a href="Admin Dashboard.dc.html" style="color:oklch(90% 0.02 70); text-decoration:none;">{{ t.admin_back_to_dashboard }}</a>
+      <a href="Owners.dc.html" style="color:oklch(90% 0.02 70); text-decoration:none;">{{ t.admin_owners_nav }}</a>
+      <a href="Admin Login.dc.html" style="color:oklch(85% 0.06 70); text-decoration:none;">{{ t.admin_logout }}</a>
+    </div>
+  </div>
+
+  <!-- ============ FILTER BAR ============ -->
+  <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; padding:12px clamp(16px,3vw,40px); background:oklch(99% 0.005 80); border-bottom:1px solid oklch(90% 0.01 70); flex-shrink:0;">
+    <select value="{{ areaFilter }}" onChange="{{ onAreaFilter }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 12px; font-size:13px; font-family:inherit; background:oklch(99% 0.005 80);">
+      <option value="">{{ t.all_zones }}</option>
+      <sc-for list="{{ areaOptions }}" as="a" hint-placeholder-count="3">
+        <option value="{{ a.id }}">{{ a.label }}</option>
+      </sc-for>
+    </select>
+    <select value="{{ statusFilter }}" onChange="{{ onStatusFilter }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 12px; font-size:13px; font-family:inherit; background:oklch(99% 0.005 80);">
+      <option value="">{{ t.status_label }}: {{ t.any }}</option>
+      <option value="sale">{{ t.admin_for_sale }}</option>
+      <option value="rent">{{ t.admin_for_rent }}</option>
+      <option value="rented">{{ t.admin_rented }}</option>
+      <option value="sold">{{ t.admin_sold }}</option>
+      <option value="reserved">{{ t.admin_reserved }}</option>
+    </select>
+    <select value="{{ typeFilter }}" onChange="{{ onTypeFilter }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 12px; font-size:13px; font-family:inherit; background:oklch(99% 0.005 80);">
+      <option value="">{{ t.type_label }}: {{ t.any_type }}</option>
+      <sc-for list="{{ typeOptions }}" as="ty" hint-placeholder-count="5">
+        <option value="{{ ty.id }}">{{ ty.label }}</option>
+      </sc-for>
+    </select>
+    <div style="display:flex; gap:14px; flex-wrap:wrap; margin-left:8px;">
+      <sc-for list="{{ legend }}" as="lg" hint-placeholder-count="5">
+        <div style="display:flex; align-items:center; gap:6px; font-size:12px; color:oklch(35% 0.02 60);">
+          <span style="width:10px; height:10px; border-radius:100px; background:{{ lg.color }}; display:inline-block;"></span>{{ lg.label }}
+        </div>
+      </sc-for>
+    </div>
+    <div style="font-size:13px; color:oklch(50% 0.02 60); margin-left:auto;">{{ visibleCount }} / {{ totalCount }} {{ t.listings_count }}</div>
+  </div>
+
+  <!-- ============ FULL-SCREEN INTERACTIVE MAP ============ -->
+  <div ref="{{ mapRef }}" style="flex:1; min-height:0;"></div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const TYPE_COLOR = {
+  villa: "#8A6D3B",
+  house: "#2E6F9E",
+  condo: "#B25CC0",
+  land: "#3F9142",
+  commercial: "#C1440E",
+};
+
+const ZONE_COORDS = {
+  "Khao Tao": { lat: 12.4805, lng: 99.9713 },
+  "Hin Lek Fai": { lat: 12.5935, lng: 99.9430 },
+  "Khao Takiab": { lat: 12.5095, lng: 99.9805 },
+  "Thap Tai": { lat: 12.6010, lng: 99.9605 },
+  "Soi 88": { lat: 12.5760, lng: 99.9605 },
+  "Hua Hin Town": { lat: 12.5684, lng: 99.9578 },
+  "Dolphin Bay": { lat: 12.2495, lng: 99.9705 },
+  "Pak Nam Pran": { lat: 12.3300, lng: 99.9595 },
+  "Wang Phong": { lat: 12.4205, lng: 99.9295 },
+  "Pranburi Forest": { lat: 12.3605, lng: 99.9095 },
+  "Sam Roi Yot": { lat: 12.2010, lng: 99.9605 },
+  "Nong Chumsaeng": { lat: 12.4005, lng: 99.8895 },
+  "Pranburi Beach": { lat: 12.3905, lng: 99.9655 },
+  "Cha-am Beach": { lat: 12.8050, lng: 99.9700 },
+  "Nong Kae": { lat: 12.7300, lng: 99.9605 },
+  "Cha-am Hillside": { lat: 12.7900, lng: 99.9400 },
+  "Cha-am Town": { lat: 12.8000, lng: 99.9650 },
+};
+const AREA_COORDS = {
+  "hua-hin": { lat: 12.5684, lng: 99.9578 },
+  "pranburi": { lat: 12.3833, lng: 99.9500 },
+  "cha-am": { lat: 12.8000, lng: 99.9650 },
+};
+
+function coordFor(p) {
+  const base = ZONE_COORDS[p.zone] || AREA_COORDS[p.area] || { lat: 12.5, lng: 99.96 };
+  let h = 0;
+  for (let i = 0; i < p.id.length; i++) h = (h * 31 + p.id.charCodeAt(i)) >>> 0;
+  h = h ^ (h >>> 16);
+  const dLat = (((h % 200) - 100) / 100) * 0.006;
+  const dLng = ((((h >>> 8) % 200) - 100) / 100) * 0.006;
+  return [base.lat + dLat, base.lng + dLng];
+}
+
+const GOOGLE_MAPS_KEY = "AIzaSyAEkTsWJ83cot_Hwfe0dsx1Nqg0bIw2YP4";
+
+function loadGoogleMaps() {
+  if (window.google && window.google.maps) return Promise.resolve();
+  if (window.__hhGoogleMapsLoading) return window.__hhGoogleMapsLoading;
+  window.__hhGoogleMapsLoading = new Promise((resolve, reject) => {
+    const existing = document.querySelector('script[data-hh-gmaps="1"]');
+    if (existing) {
+      existing.addEventListener("load", () => resolve());
+      existing.addEventListener("error", reject);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://maps.googleapis.com/maps/api/js?key=" + GOOGLE_MAPS_KEY + "&libraries=marker";
+    script.async = true;
+    script.defer = true;
+    script.setAttribute("data-hh-gmaps", "1");
+    script.onload = () => resolve();
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+  return window.__hhGoogleMapsLoading;
+}
+
+function waitForGoogleMaps() {
+  return loadGoogleMaps().then(() => {
+    return new Promise((resolve) => {
+      if (window.google && window.google.maps) { resolve(); return; }
+      const check = setInterval(() => {
+        if (window.google && window.google.maps) { clearInterval(check); resolve(); }
+      }, 50);
+    });
+  });
+}
+
+// Classic map-pin silhouette (teardrop), same shape for every type — only the fill color changes per property type.
+const PIN_PATH = "M12 0C6.48 0 2 4.48 2 10c0 7.5 10 22 10 22s10-14.5 10-22c0-5.52-4.48-10-10-10z";
+
+function pinIcon(color) {
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="30" height="42" viewBox="0 0 24 32">' +
+    '<path d="' + PIN_PATH + '" fill="' + color + '" stroke="#ffffff" stroke-width="1.5"/>' +
+    '<circle cx="12" cy="10" r="4" fill="#ffffff"/></svg>';
+  return {
+    url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg),
+    scaledSize: new google.maps.Size(30, 42),
+    anchor: new google.maps.Point(15, 40),
+  };
+}
+
+class Component extends DCLogic {
+  state = {
+    lang: "en", data: null, properties: null,
+    areaFilter: "", statusFilter: "", typeFilter: "",
+  };
+
+  _map = null;
+  _markers = [];
+
+  async componentDidMount() {
+    const mod = await import("./data.js");
+    this._mod = mod;
+    const DATA_VERSION = "4";
+    let cacheValid = true;
+    try {
+      if (localStorage.getItem("hh_data_version") !== DATA_VERSION) {
+        localStorage.removeItem("hh_admin_properties");
+        localStorage.removeItem("hh_admin_owners");
+        localStorage.removeItem("hh_admin_tenants");
+        localStorage.setItem("hh_data_version", DATA_VERSION);
+        cacheValid = false;
+      }
+    } catch (e) {}
+    let properties;
+    try {
+      const stored = cacheValid ? localStorage.getItem("hh_admin_properties") : null;
+      properties = stored ? JSON.parse(stored) : mod.PROPERTIES.map((p) => ({ ...p, title: p.title.en }));
+    } catch (e) {
+      properties = mod.PROPERTIES.map((p) => ({ ...p, title: p.title.en }));
+    }
+    this.setState({ lang: mod.getLang(), data: mod, properties });
+
+    await waitForGoogleMaps();
+    if (!this._mapContainer) return;
+    this._map = new google.maps.Map(this._mapContainer, {
+      center: { lat: 12.55, lng: 99.96 },
+      zoom: 11,
+      fullscreenControl: true,
+      streetViewControl: true,
+      zoomControl: true,
+    });
+    this._infoWindow = new google.maps.InfoWindow();
+    this.refreshMarkers();
+  }
+
+  setMapRef(el) {
+    this._mapContainer = el;
+  }
+
+  getFilteredProperties() {
+    const all = this.state.properties || [];
+    return all.filter((p) => {
+      if (this.state.areaFilter && p.area !== this.state.areaFilter) return false;
+      if (this.state.statusFilter && p.status !== this.state.statusFilter) return false;
+      if (this.state.typeFilter && p.type !== this.state.typeFilter) return false;
+      return true;
+    });
+  }
+
+  refreshMarkers() {
+    if (!this._map || !window.google) return;
+    const mod = this._mod;
+    const lang = this.state.lang;
+    const t = mod.I18N[lang];
+    const typeLabelOf = (id) => { const ty = mod.TYPES.find((x) => x.id === id); return ty ? ty.label[lang] : id; };
+
+    this._markers.forEach((m) => m.setMap(null));
+    this._markers = [];
+
+    const list = this.getFilteredProperties();
+    list.forEach((p) => {
+      const [lat, lng] = coordFor(p);
+      const color = TYPE_COLOR[p.type] || "#666";
+      const marker = new google.maps.Marker({
+        position: { lat: lat, lng: lng },
+        map: this._map,
+        icon: pinIcon(color),
+        title: p.id + " — " + p.title,
+      });
+
+      const priceLabel = mod.formatPrice(p.price, p.currency, lang) + (p.status === "rent" || p.status === "rented" ? t.per_month : "");
+      const content = '<div class="hh-pin-tooltip" style="min-width:180px;"><b>' + p.id + '</b> · ' + p.title + '<br>' + typeLabelOf(p.type) + ' · ' + mod.STATUS[p.status][lang] + '<br>' + priceLabel + '</div>';
+
+      marker.addListener("mouseover", () => {
+        this._infoWindow.setContent(content);
+        this._infoWindow.open({ anchor: marker, map: this._map });
+      });
+      marker.addListener("mouseout", () => {
+        this._infoWindow.close();
+      });
+      marker.addListener("click", () => {
+        window.location.href = "Admin Dashboard.dc.html?edit=" + p.id;
+      });
+      this._markers.push(marker);
+    });
+  }
+
+  setFilter(patch) {
+    this.setState(patch, () => this.refreshMarkers());
+  }
+
+  renderVals() {
+    const mod = this.state.data;
+    if (!mod || !this.state.properties) {
+      return { t: {}, legend: [], typeOptions: [], areaOptions: [], mapRef: (el) => this.setMapRef(el) };
+    }
+    const lang = this.state.lang;
+    const t = mod.I18N[lang];
+    const filtered = this.getFilteredProperties();
+
+    const legend = Object.keys(TYPE_COLOR).map((typeId) => {
+      const ty = mod.TYPES.find((x) => x.id === typeId);
+      return { color: TYPE_COLOR[typeId], label: ty ? ty.label[lang] : typeId };
+    });
+
+    return {
+      t, lang,
+      areaFilter: this.state.areaFilter, onAreaFilter: (e) => this.setFilter({ areaFilter: e.target.value }),
+      statusFilter: this.state.statusFilter, onStatusFilter: (e) => this.setFilter({ statusFilter: e.target.value }),
+      typeFilter: this.state.typeFilter, onTypeFilter: (e) => this.setFilter({ typeFilter: e.target.value }),
+      areaOptions: mod.AREAS.map((a) => ({ id: a.id, label: a.label[lang] })),
+      typeOptions: mod.TYPES.map((ty) => ({ id: ty.id, label: ty.label[lang] })),
+      legend,
+      visibleCount: filtered.length, totalCount: this.state.properties.length,
+      mapRef: (el) => this.setMapRef(el),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

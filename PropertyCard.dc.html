@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<a href="{{ href }}" style="display:flex; flex-direction:column; text-decoration:none; background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:6px; overflow:hidden; transition:box-shadow 0.2s;" style-hover="box-shadow:0 18px 40px -14px rgba(30,20,10,0.28);">
+  <div style="position:relative; aspect-ratio:4/3; background-image:repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(93% 0.015 75) 2px, oklch(93% 0.015 75) 22px);">
+    <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ coverPhotoId }}" shape="rect" placeholder="{{ coverPhotoLabel }}" hint-size="100%,100%" style="position:absolute;inset:0"></x-import>
+    <div style="position:absolute; top:12px; left:12px; background:{{ statusColor }}; color:oklch(99% 0.005 80); font-size:12px; font-weight:600; letter-spacing:0.03em; padding:5px 12px; border-radius:100px; pointer-events:none;">{{ statusLabel }}</div>
+    <div style="position:absolute; bottom:10px; left:10px; right:10px; display:inline-block; width:fit-content; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:monospace; font-size:11px; color:oklch(20% 0.02 60 / 0.75); background:rgba(255,255,255,0.65); padding:4px 8px; border-radius:4px; pointer-events:none;">[{{ coverPhotoLabel }}]</div>
+  </div>
+  <div style="padding:18px 20px 20px; display:flex; flex-direction:column; gap:8px; flex:1;">
+    <div style="font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:oklch(48% 0.07 55);">{{ zone }} · {{ areaLabel }}</div>
+    <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); line-height:1.3;">{{ title }}</div>
+    <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ typeLabel }}</div>
+    <div style="display:flex; gap:14px; font-size:13px; color:oklch(40% 0.02 60); margin-top:2px; flex-wrap:wrap;">
+      <sc-if value="{{ hasBedrooms }}"><span style="white-space:nowrap;">{{ bedrooms }} bd</span></sc-if>
+      <sc-if value="{{ hasBathrooms }}"><span style="white-space:nowrap;">{{ bathrooms }} ba</span></sc-if>
+      <sc-if value="{{ hasLivingArea }}"><span style="white-space:nowrap;">{{ livingArea }} {{ sqmLabel }}</span></sc-if>
+    </div>
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-top:10px; padding-top:12px; border-top:1px solid oklch(92% 0.01 70);">
+      <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60);">{{ priceLabel }}</div>
+      <div style="font-size:13px; color:oklch(48% 0.07 55); font-weight:600;">{{ viewDetailsLabel }} →</div>
+    </div>
+  </div>
+</a>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 340, &quot;height&quot;: 380}, &quot;href&quot;: {&quot;editor&quot;: null, &quot;default&quot;: &quot;#&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;statusColor&quot;: {&quot;editor&quot;: null, &quot;default&quot;: &quot;#8A6D3B&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;statusLabel&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;For Sale&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;coverPhotoLabel&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;photo: villa exterior&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;coverPhotoId&quot;: {&quot;editor&quot;: null, &quot;default&quot;: &quot;photo-HH-101-0&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;zone&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;Khao Tao&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;areaLabel&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;Hua Hin&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;title&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;Sunset Cliff Pool Villa&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;typeLabel&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;Pool Villa&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;hasBedrooms&quot;: {&quot;editor&quot;: null, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;}, &quot;bedrooms&quot;: {&quot;editor&quot;: &quot;int&quot;, &quot;default&quot;: 4, &quot;tsType&quot;: &quot;number&quot;}, &quot;hasBathrooms&quot;: {&quot;editor&quot;: null, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;}, &quot;bathrooms&quot;: {&quot;editor&quot;: &quot;int&quot;, &quot;default&quot;: 4, &quot;tsType&quot;: &quot;number&quot;}, &quot;hasLivingArea&quot;: {&quot;editor&quot;: null, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;}, &quot;livingArea&quot;: {&quot;editor&quot;: &quot;int&quot;, &quot;default&quot;: 320, &quot;tsType&quot;: &quot;number&quot;}, &quot;sqmLabel&quot;: {&quot;editor&quot;: null, &quot;default&quot;: &quot;sqm&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;priceLabel&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;฿18,500,000&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;viewDetailsLabel&quot;: {&quot;editor&quot;: null, &quot;default&quot;: &quot;View Details&quot;, &quot;tsType&quot;: &quot;string&quot;}}"></script>
+</body>
+</html>

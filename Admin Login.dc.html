@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <title>Admin Login — huahin.properties</title>
+  <style>
+    body { margin: 0; background: oklch(96% 0.015 75); font-family: 'Work Sans', sans-serif; }
+    a { color: oklch(48% 0.07 55); }
+    a:hover { color: oklch(38% 0.08 55); }
+  </style>
+</helmet>
+
+<div style="min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px;">
+  <a href="Home.dc.html" style="font-family:'Playfair Display',serif; font-size:26px; letter-spacing:0.02em; color:oklch(22% 0.02 60); text-decoration:none; margin-bottom:32px;">huahin<span style="color:oklch(50% 0.09 70);">.</span>properties</a>
+
+  <div style="width:100%; max-width:400px; background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:36px 32px; box-shadow:0 24px 50px -20px rgba(30,20,10,0.2);">
+    <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:6px; text-align:center;">{{ t.admin_login_title }}</div>
+    <div style="font-size:13px; color:oklch(50% 0.02 60); text-align:center; margin-bottom:26px;">Property management &amp; internal tools</div>
+
+    <div style="display:flex; flex-direction:column; gap:14px;">
+      <div>
+        <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">{{ t.admin_username }}</div>
+        <input value="{{ username }}" onChange="{{ onUsername }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit;" />
+      </div>
+      <div>
+        <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">{{ t.admin_password }}</div>
+        <input type="password" value="{{ password }}" onChange="{{ onPassword }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit;" />
+      </div>
+      <div onClick="{{ onSubmit }}" style="margin-top:8px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); text-align:center; padding:13px; border-radius:4px; font-size:15px; font-weight:500; cursor:pointer;">{{ t.admin_login_cta }}</div>
+      <div style="font-size:12px; color:oklch(55% 0.02 60); text-align:center; margin-top:6px;">Demo prototype — any username / password signs in.</div>
+    </div>
+  </div>
+
+  <a href="Home.dc.html" style="font-size:13px; color:oklch(50% 0.02 60); margin-top:24px; text-decoration:none;">← Back to site</a>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { lang: "en", data: null, username: "", password: "" };
+
+  async componentDidMount() {
+    const mod = await import("./data.js");
+    this._mod = mod;
+    this.setState({ lang: mod.getLang(), data: mod });
+  }
+
+  renderVals() {
+    const mod = this.state.data;
+    const t = mod ? mod.I18N[this.state.lang] : {};
+    return {
+      t,
+      username: this.state.username,
+      onUsername: (e) => this.setState({ username: e.target.value }),
+      password: this.state.password,
+      onPassword: (e) => this.setState({ password: e.target.value }),
+      onSubmit: () => { window.location.href = "Admin Dashboard.dc.html"; },
+    };
+  }
+}
+
+</script>
+</body>
+</html>

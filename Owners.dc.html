@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <title>Contact Directory — huahin.properties Admin</title>
+  <style>
+    body { margin: 0; background: oklch(96% 0.015 75); font-family: 'Work Sans', sans-serif; }
+    a { color: oklch(48% 0.07 55); }
+    a:hover { color: oklch(38% 0.08 55); }
+  </style>
+</helmet>
+
+<div style="min-height:100vh; background:oklch(96% 0.015 75);">
+
+  <!-- ============ TOP BAR ============ -->
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px clamp(16px,3vw,40px); background:oklch(22% 0.02 60); color:oklch(97% 0.01 80);">
+    <div style="display:flex; align-items:center; gap:14px;">
+      <a href="Home.dc.html" style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(97% 0.01 80); text-decoration:none;">huahin<span style="color:oklch(70% 0.1 70);">.</span>properties</a>
+      <span style="font-size:12px; color:oklch(75% 0.01 70); border-left:1px solid oklch(45% 0.01 60); padding-left:14px;">{{ t.contacts_title }}</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:16px; font-size:13px; color:oklch(80% 0.01 70);">
+      <a href="Admin Dashboard.dc.html" style="color:oklch(90% 0.02 70); text-decoration:none;">{{ t.admin_back_to_dashboard }}</a>
+      <a href="Property Map.dc.html" style="color:oklch(90% 0.02 70); text-decoration:none;">🗺️ {{ t.admin_map_nav }}</a>
+      <a href="Admin Login.dc.html" style="color:oklch(85% 0.06 70); text-decoration:none;">{{ t.admin_logout }}</a>
+    </div>
+  </div>
+
+  <div style="padding:clamp(20px,3vw,40px) clamp(16px,3vw,40px) 80px; max-width:1100px; margin:0 auto;">
+    <div style="margin-bottom:20px;">
+      <div style="font-family:'Playfair Display',serif; font-size:26px; color:oklch(20% 0.02 60); margin-bottom:6px;">{{ t.contacts_title }}</div>
+      <div style="font-size:14px; color:oklch(50% 0.02 60);">{{ t.contacts_sub }}</div>
+    </div>
+
+    <div style="display:flex; gap:8px; margin-bottom:20px; border:1px solid oklch(88% 0.01 70); border-radius:6px; overflow:hidden; width:fit-content;">
+      <div onClick="{{ selectOwnersTab }}" style="padding:10px 20px; font-size:14px; cursor:pointer; background:{{ ownersTabBg }}; color:{{ ownersTabColor }};">{{ t.contacts_tab_owners }}</div>
+      <div onClick="{{ selectTenantsTab }}" style="padding:10px 20px; font-size:14px; cursor:pointer; background:{{ tenantsTabBg }}; color:{{ tenantsTabColor }};">{{ t.contacts_tab_tenants }}</div>
+    </div>
+
+    <input value="{{ searchQuery }}" onChange="{{ onSearch }}" placeholder="{{ t.admin_search }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 14px; font-size:14px; font-family:inherit; margin-bottom:20px;" />
+
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <sc-for list="{{ owners }}" as="o" hint-placeholder-count="8">
+        <div style="background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:8px; overflow:hidden;">
+          <div onClick="{{ o.toggle }}" style="display:flex; align-items:center; gap:16px; padding:16px 18px; cursor:pointer; flex-wrap:wrap;">
+            <div style="display:flex; gap:8px;">
+              <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ o.photo1Id }}" shape="rounded" radius="8" placeholder="{{ t.admin_owner_photo1 }}" style="width:52px;height:52px"></x-import>
+              <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ o.photo2Id }}" shape="rounded" radius="8" placeholder="{{ t.admin_owner_photo2 }}" style="width:52px;height:52px"></x-import>
+            </div>
+            <div style="flex:1; min-width:180px;">
+              <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60);">{{ o.name }}</div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60);"><a href="tel:{{ o.phoneHref }}" style="color:oklch(45% 0.08 230); text-decoration:none;">📞 {{ o.phone }}</a> · {{ o.email }}</div>
+            </div>
+            <sc-if value="{{ o.hasNearestLeaseEnd }}">
+              <div style="background:oklch(90% 0.03 155); color:oklch(30% 0.08 155); font-size:12px; font-weight:600; padding:5px 12px; border-radius:100px; white-space:nowrap;">📅 {{ t.admin_lease_ends_col }}: {{ o.nearestLeaseEndLabel }}</div>
+            </sc-if>
+            <div style="background:oklch(93% 0.02 70); color:oklch(35% 0.06 60); font-size:12px; font-weight:600; padding:5px 12px; border-radius:100px; white-space:nowrap;">{{ o.propertyCount }} {{ t.admin_owner_properties }}</div>
+            <div style="font-size:16px; color:oklch(50% 0.02 60); transform:{{ o.chevronRotate }}; transition:transform 0.15s;">▾</div>
+          </div>
+
+          <sc-if value="{{ o.expanded }}">
+            <div style="border-top:1px solid oklch(92% 0.01 70); padding:14px 18px 18px; display:flex; flex-direction:column; gap:10px;">
+              <sc-if value="{{ o.hasNotes }}">
+                <div style="font-size:12px; color:oklch(50% 0.02 60); font-style:italic;">"{{ o.notes }}"</div>
+              </sc-if>
+              <sc-for list="{{ o.properties }}" as="pr" hint-placeholder-count="2">
+                <div style="display:flex; align-items:center; gap:14px; background:oklch(96% 0.015 75); border-radius:6px; padding:12px 14px; flex-wrap:wrap;">
+                  <x-import component-from-global-scope="image-slot" from="./image-slot.js" id="{{ pr.coverPhotoId }}" shape="rounded" radius="4" placeholder="{{ t.gallery_photo }}" style="width:64px;height:48px;flex-shrink:0"></x-import>
+                  <div style="font-family:monospace; font-size:12px; color:oklch(45% 0.02 60); white-space:nowrap;">{{ pr.id }}</div>
+                  <div style="flex:1; min-width:160px;">
+                    <div style="font-size:14px; color:oklch(25% 0.02 60);">{{ pr.title }}</div>
+                    <div style="font-size:12px; color:oklch(50% 0.02 60);">{{ pr.zone }} · {{ pr.areaLabel }}</div>
+                  </div>
+                  <div style="background:{{ pr.statusColor }}; color:oklch(99% 0.005 80); font-size:11px; font-weight:600; padding:4px 10px; border-radius:100px; white-space:nowrap;">{{ pr.statusLabel }}</div>
+                  <sc-if value="{{ pr.hasMapLink }}">
+                    <a href="{{ pr.mapLink }}" target="_blank" style="font-size:12px; color:oklch(45% 0.08 230); text-decoration:none; white-space:nowrap;">📍 {{ t.admin_view_on_map }}</a>
+                  </sc-if>
+                  <sc-if value="{{ pr.hasLeaseEnd }}">
+                    <div style="font-size:12px; color:oklch(45% 0.02 60); white-space:nowrap;">{{ t.admin_lease_ends_col }}: {{ pr.leaseEnd }}</div>
+                  </sc-if>
+                  <a href="{{ pr.editHref }}" style="font-size:12px; color:oklch(48% 0.07 55); text-decoration:none; white-space:nowrap;">{{ t.admin_view_edit_property }} →</a>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+      <sc-if value="{{ noOwners }}">
+        <div style="padding:60px 20px; text-align:center; color:oklch(50% 0.02 60); font-size:14px;">{{ t.no_results }}</div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    lang: "en", data: null, properties: null, owners: null, tenants: null,
+    searchQuery: "", expandedIds: [], activeTab: "owners",
+  };
+
+  async componentDidMount() {
+    const mod = await import("./data.js");
+    this._mod = mod;
+    const DATA_VERSION = "4";
+    let cacheValid = true;
+    try {
+      if (localStorage.getItem("hh_data_version") !== DATA_VERSION) {
+        localStorage.removeItem("hh_admin_properties");
+        localStorage.removeItem("hh_admin_owners");
+        localStorage.removeItem("hh_admin_tenants");
+        localStorage.setItem("hh_data_version", DATA_VERSION);
+        cacheValid = false;
+      }
+    } catch (e) {}
+
+    let properties;
+    try {
+      const stored = cacheValid ? localStorage.getItem("hh_admin_properties") : null;
+      properties = stored ? JSON.parse(stored) : mod.PROPERTIES.map((p) => ({ ...p, title: p.title.en, shortDesc: p.shortDesc.en, fullDesc: p.fullDesc.en }));
+    } catch (e) {
+      properties = mod.PROPERTIES.map((p) => ({ ...p, title: p.title.en, shortDesc: p.shortDesc.en, fullDesc: p.fullDesc.en }));
+    }
+    let owners;
+    try {
+      const storedOwners = cacheValid ? localStorage.getItem("hh_admin_owners") : null;
+      owners = storedOwners ? JSON.parse(storedOwners) : mod.OWNERS.map((o) => ({ ...o }));
+    } catch (e) {
+      owners = mod.OWNERS.map((o) => ({ ...o }));
+    }
+    let tenants;
+    try {
+      const storedTenants = cacheValid ? localStorage.getItem("hh_admin_tenants") : null;
+      tenants = storedTenants ? JSON.parse(storedTenants) : mod.TENANTS.map((x) => ({ ...x }));
+    } catch (e) {
+      tenants = mod.TENANTS.map((x) => ({ ...x }));
+    }
+    this.setState({ lang: mod.getLang(), data: mod, properties, owners, tenants });
+  }
+
+  toggle(id) {
+    this.setState((s) => {
+      const has = s.expandedIds.includes(id);
+      return { expandedIds: has ? s.expandedIds.filter((x) => x !== id) : [...s.expandedIds, id] };
+    });
+  }
+
+  renderVals() {
+    const mod = this.state.data;
+    if (!mod || !this.state.properties || !this.state.owners) return { t: {}, owners: [], noOwners: false };
+
+    const lang = this.state.lang;
+    const t = mod.I18N[lang];
+    const areaLabelOf = (id) => { const a = mod.AREAS.find((x) => x.id === id); return a ? a.label[lang] : id; };
+    const statusColorOf = (s) => ({ sale: "oklch(50% 0.09 70)", rent: "oklch(45% 0.09 230)", rented: "oklch(48% 0.11 155)", sold: "oklch(45% 0.02 60)", reserved: "oklch(62% 0.16 85)" }[s]);
+    const localeOf = { en: "en-US", th: "th-TH-u-ca-gregory", ru: "ru-RU", zh: "zh-CN" }[lang] || "en-US";
+    const formatDate = (dateStr) => {
+      if (!dateStr) return "";
+      const d = new Date(dateStr + "T00:00:00");
+      return d.toLocaleDateString("en-US", { day: "2-digit", month: "2-digit", year: "numeric" });
+    };
+
+    const isOwnersTab = this.state.activeTab === "owners";
+    const contactList = isOwnersTab ? this.state.owners : (this.state.tenants || []);
+    const linkKey = isOwnersTab ? "ownerId" : "tenantId";
+    const photoPrefix = isOwnersTab ? "owner-photo-" : "tenant-photo-";
+
+    const q = this.state.searchQuery.toLowerCase();
+    const filteredContacts = contactList.filter((o) => {
+      if (!q) return true;
+      if ((o.name || "").toLowerCase().includes(q) || (o.phone || "").includes(q) || (o.email || "").toLowerCase().includes(q)) return true;
+      // Also match by any property id/title linked to this contact — e.g.
+      // typing "HH-101" or "101" or a property's name finds its owner/tenant.
+      const linkedProps = this.state.properties.filter((p) => p[linkKey] === o.id);
+      return linkedProps.some((p) => p.id.toLowerCase().includes(q) || (p.title || "").toLowerCase().includes(q));
+    });
+
+    let owners = filteredContacts.map((o) => {
+      const linkedProps = this.state.properties.filter((p) => p[linkKey] === o.id);
+      const expanded = q ? true : this.state.expandedIds.includes(o.id);
+      const leaseEnds = linkedProps.filter((p) => p.leaseInfo && p.leaseInfo.leaseEnd).map((p) => p.leaseInfo.leaseEnd).sort();
+      const nearestLeaseEnd = leaseEnds[0] || null;
+      return {
+        id: o.id, name: o.name, phone: o.phone, phoneHref: (o.phone || "").replace(/[^0-9+]/g, ""), email: o.email,
+        propertyCount: linkedProps.length,
+        expanded,
+        chevronRotate: expanded ? "rotate(180deg)" : "rotate(0deg)",
+        toggle: () => this.toggle(o.id),
+        hasNotes: !!o.notes,
+        notes: o.notes,
+        photo1Id: photoPrefix + o.id + "-1",
+        photo2Id: photoPrefix + o.id + "-2",
+        hasNearestLeaseEnd: !isOwnersTab && !!nearestLeaseEnd,
+        nearestLeaseEndLabel: formatDate(nearestLeaseEnd),
+        _sortKey: nearestLeaseEnd || "9999-99-99",
+        properties: linkedProps.map((p) => ({
+          id: p.id,
+          coverPhotoId: "photo-" + p.id + "-0",
+          title: p.title,
+          zone: p.zone,
+          areaLabel: areaLabelOf(p.area),
+          statusLabel: mod.STATUS[p.status][lang],
+          statusColor: statusColorOf(p.status),
+          hasMapLink: !!p.mapLink,
+          mapLink: p.mapLink,
+          hasLeaseEnd: !!(p.leaseInfo && p.leaseInfo.leaseEnd),
+          leaseEnd: p.leaseInfo ? formatDate(p.leaseInfo.leaseEnd) : "",
+          editHref: `Admin Dashboard.dc.html?edit=${p.id}`,
+        })),
+      };
+    });
+
+    if (!isOwnersTab) {
+      owners = [...owners].sort((a, b) => (a._sortKey < b._sortKey ? -1 : a._sortKey > b._sortKey ? 1 : 0));
+    }
+
+    return {
+      t, lang,
+      searchQuery: this.state.searchQuery,
+      onSearch: (e) => this.setState({ searchQuery: e.target.value }),
+      owners,
+      noOwners: owners.length === 0,
+      selectOwnersTab: () => this.setState({ activeTab: "owners", expandedIds: [] }),
+      selectTenantsTab: () => this.setState({ activeTab: "tenants", expandedIds: [] }),
+      ownersTabBg: isOwnersTab ? "oklch(22% 0.02 60)" : "transparent",
+      ownersTabColor: isOwnersTab ? "oklch(97% 0.01 80)" : "oklch(30% 0.02 60)",
+      tenantsTabBg: !isOwnersTab ? "oklch(22% 0.02 60)" : "transparent",
+      tenantsTabColor: !isOwnersTab ? "oklch(97% 0.01 80)" : "oklch(30% 0.02 60)",
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <title>About Us — huahin.properties</title>
+  <meta name="description" content="huahin.properties is a boutique real estate agency serving Hua Hin, Pranburi and Cha-am, Thailand.">
+  <style>
+    body { margin: 0; background: oklch(98% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    a { color: oklch(48% 0.07 55); }
+    a:hover { color: oklch(38% 0.08 55); }
+  </style>
+</helmet>
+
+<div style="max-width:1600px; margin:0 auto; background:oklch(98% 0.01 80); min-height:100vh;">
+
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:24px; padding:22px clamp(20px,4vw,56px); border-bottom:1px solid oklch(90% 0.01 70);">
+    <a href="Home.dc.html" style="white-space:nowrap; font-family:'Playfair Display',serif; font-size:clamp(19px,2.4vw,24px); letter-spacing:0.02em; color:oklch(22% 0.02 60); text-decoration:none;">huahin<span style="color:oklch(50% 0.09 70);">.</span>properties</a>
+    <sc-if value="{{ isDesktopNav }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; gap:32px; align-items:center; font-size:15px; color:oklch(30% 0.02 60); white-space:nowrap;">
+        <a href="Search Results.dc.html?status=sale" style="text-decoration:none; color:inherit;">{{ t.nav_buy }}</a>
+        <a href="Search Results.dc.html?status=rent" style="text-decoration:none; color:inherit;">{{ t.nav_rent }}</a>
+        <a href="Sell.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_sell }}</a>
+        <a href="About.dc.html" style="text-decoration:none; color:oklch(48% 0.07 55);">{{ t.nav_about }}</a>
+        <a href="Contact.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_contact }}</a>
+      </div>
+      <div style="display:flex; gap:12px; align-items:flex-end; white-space:nowrap;">
+        <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" hint-size="150,54"></dc-import>
+        <div style="width:1px; height:20px; background:oklch(80% 0.02 70); margin:0 4px 8px;"></div>
+        <a href="Admin Login.dc.html" style="font-size:13px; color:oklch(40% 0.02 60); text-decoration:none; padding-bottom:8px;">{{ t.nav_admin }}</a>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isMobileNav }}">
+      <div onClick="{{ toggleMenu }}" style="display:flex; flex-direction:column; gap:5px; padding:8px; cursor:pointer;">
+        <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
+        <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
+        <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
+      </div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{ mobileMenuOpen }}">
+    <div style="position:fixed; inset:0; background:oklch(98% 0.01 80); z-index:60; padding:22px clamp(20px,6vw,56px); display:flex; flex-direction:column; gap:28px; overflow-y:auto;">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(50% 0.09 70);">.</span>properties</div>
+        <div onClick="{{ toggleMenu }}" style="font-size:26px; line-height:1; color:oklch(30% 0.02 60); cursor:pointer; padding:6px;">&times;</div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:22px; font-size:20px; font-family:'Playfair Display',serif; color:oklch(22% 0.02 60);">
+        <a href="Search Results.dc.html?status=sale" style="text-decoration:none; color:inherit;">{{ t.nav_buy }}</a>
+        <a href="Search Results.dc.html?status=rent" style="text-decoration:none; color:inherit;">{{ t.nav_rent }}</a>
+        <a href="Sell.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_sell }}</a>
+        <a href="About.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_about }}</a>
+        <a href="Contact.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_contact }}</a>
+        <a href="Admin Login.dc.html" style="text-decoration:none; color:oklch(50% 0.02 60); font-size:15px; font-family:'Work Sans',sans-serif;">{{ t.nav_admin }}</a>
+      </div>
+      <div style="margin-top:auto; padding-top:20px; border-top:1px solid oklch(90% 0.01 70);">
+        <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" full-width="{{ true }}" hint-size="100%,60"></dc-import>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- HERO -->
+  <div style="position:relative; height:clamp(280px,40vh,420px); background-image:repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(92% 0.015 75) 2px, oklch(92% 0.015 75) 22px); display:flex; align-items:flex-end;">
+    <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(30,20,10,0.05) 0%, rgba(30,20,10,0.6) 100%);"></div>
+    <div style="position:absolute; top:14px; right:14px; font-family:monospace; font-size:11px; color:oklch(95% 0.01 80 / 0.85); background:rgba(0,0,0,0.32); padding:4px 8px; border-radius:4px;">[photo: Hua Hin railway station, historic teak architecture]</div>
+    <div style="position:relative; z-index:2; padding:0 clamp(20px,4vw,56px) clamp(32px,5vw,48px); color:oklch(98% 0.01 80);">
+      <div style="font-family:'Playfair Display',serif; font-weight:500; font-size:clamp(28px,4.5vw,46px);">{{ t.about_title }}</div>
+    </div>
+  </div>
+
+  <div style="max-width:820px; margin:0 auto; padding:clamp(40px,6vw,64px) clamp(20px,4vw,32px);">
+    <div style="font-size:16px; line-height:1.85; color:oklch(35% 0.02 60); margin-bottom:48px;">{{ t.about_body }}</div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:24px; margin-bottom:56px; text-align:center;">
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:32px; color:oklch(20% 0.02 60);">120+</div>
+        <div style="font-size:13px; color:oklch(50% 0.02 60); margin-top:4px;">Active listings</div>
+      </div>
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:32px; color:oklch(20% 0.02 60);">3</div>
+        <div style="font-size:13px; color:oklch(50% 0.02 60); margin-top:4px;">Coastal areas served</div>
+      </div>
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:32px; color:oklch(20% 0.02 60);">4</div>
+        <div style="font-size:13px; color:oklch(50% 0.02 60); margin-top:4px;">Languages supported</div>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:20px;">
+      <sc-for list="{{ areaCards }}" as="ac" hint-placeholder-count="3">
+        <a href="{{ ac.href }}" style="text-decoration:none; display:flex; flex-direction:column; border-radius:6px; overflow:hidden; background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70);">
+          <div style="aspect-ratio:16/10; position:relative; background-image:repeating-linear-gradient(135deg, oklch(86% 0.02 75) 0px, oklch(86% 0.02 75) 2px, oklch(91% 0.015 75) 2px, oklch(91% 0.015 75) 22px);">
+            <div style="position:absolute; bottom:10px; left:10px; font-family:monospace; font-size:11px; color:oklch(20% 0.02 60 / 0.75); background:rgba(255,255,255,0.65); padding:4px 8px; border-radius:4px;">[{{ ac.photoLabel }}]</div>
+          </div>
+          <div style="padding:18px;">
+            <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60); margin-bottom:6px;">{{ ac.label }}</div>
+            <div style="font-size:13px; line-height:1.6; color:oklch(45% 0.02 60);">{{ ac.desc }}</div>
+          </div>
+        </a>
+      </sc-for>
+    </div>
+
+    <div style="text-align:center; margin-top:56px;">
+      <a href="Contact.dc.html" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:14px 30px; border-radius:100px; font-size:14px; text-decoration:none;">{{ t.cta_contact }}</a>
+    </div>
+  </div>
+
+  <div style="border-top:1px solid oklch(90% 0.01 70); padding:32px clamp(20px,4vw,56px); display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between;">
+    <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(50% 0.09 70);">.</span>properties</div>
+    <div style="font-size:13px; color:oklch(50% 0.02 60);">© 2026 huahin.properties. {{ t.footer_rights }}</div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { lang: "en", isMobile: false, mobileMenuOpen: false, data: null };
+
+  async componentDidMount() {
+    const mod = await import("./data.js");
+    this._mod = mod;
+    this.setState({ lang: mod.getLang(), data: mod });
+    this._onResize = () => this.setState({ isMobile: window.innerWidth < 900 });
+    this._onResize();
+    window.addEventListener("resize", this._onResize);
+  }
+  componentWillUnmount() { window.removeEventListener("resize", this._onResize); }
+  selectLang(l) { this._mod.setLang(l); this.setState({ lang: l, mobileMenuOpen: false }); }
+
+  renderVals() {
+    const mod = this.state.data;
+    if (!mod) return { t: {}, isDesktopNav: true, isMobileNav: false, langOptions: [], areaCards: [] };
+    const lang = this.state.lang;
+    const t = mod.I18N[lang];
+    const langValue = lang;
+    const onLangChange = (code) => this.selectLang(code);
+    const langOptions = mod.LANGS.map((l) => ({ code: l, label: mod.LANG_LABELS[l] }));
+    const areaDescKey = { "hua-hin": "area_hua_hin_desc", pranburi: "area_pranburi_desc", "cha-am": "area_cha_am_desc" };
+    const areaPhoto = { "hua-hin": "photo: Hua Hin train station & beach", pranburi: "photo: Pranburi beachfront villa", "cha-am": "photo: Cha-am beach promenade" };
+    const areaCards = mod.AREAS.map((a) => ({ href: `Search Results.dc.html?area=${a.id}`, label: a.label[lang], desc: t[areaDescKey[a.id]], photoLabel: areaPhoto[a.id] }));
+    return {
+      t, lang,
+      isDesktopNav: !this.state.isMobile, isMobileNav: this.state.isMobile,
+      mobileMenuOpen: this.state.isMobile && this.state.mobileMenuOpen,
+      toggleMenu: () => this.setState((s) => ({ mobileMenuOpen: !s.mobileMenuOpen })),
+      langValue, onLangChange, langOptions, areaCards,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
