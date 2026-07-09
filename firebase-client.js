@@ -97,19 +97,21 @@ export async function fetchWhere(collectionName, field, value) {
   return snap.docs.map((d) => ({ ...d.data(), id: d.id }));
 }
 
-// Resizes an image File/Blob to a data: URL capped at ~1400px longest
-// side, WebP q=0.82 — small enough to store as a Firestore field.
+// Resizes an image File/Blob to a data: URL capped at ~1000px longest
+// side, WebP q=0.72 — keeps a real phone photo to roughly 60-120KB so a
+// page rendering many properties' cover photos at once (Home, Search,
+// Admin list) stays fast and well under Firestore's 1MB doc limit.
 export async function fileToDataUrl(file, maxDim) {
   const bitmap = await createImageBitmap(file);
   try {
-    const cap = maxDim || 1400;
+    const cap = maxDim || 1000;
     const scale = Math.min(1, cap / Math.max(bitmap.width, bitmap.height));
     const w = Math.max(1, Math.round(bitmap.width * scale));
     const h = Math.max(1, Math.round(bitmap.height * scale));
     const canvas = document.createElement("canvas");
     canvas.width = w; canvas.height = h;
     canvas.getContext("2d").drawImage(bitmap, 0, 0, w, h);
-    return canvas.toDataURL("image/webp", 0.82);
+    return canvas.toDataURL("image/webp", 0.72);
   } finally {
     bitmap.close && bitmap.close();
   }

@@ -491,7 +491,7 @@ class Component extends DCLogic {
   async uploadProfilePhoto(slotId, file) {
     if (!file) return;
     try {
-      const dataUrl = await this._fb.fileToDataUrl(file, 500);
+      const dataUrl = await this._fb.fileToDataUrl(file, 400);
       await this._fb.saveProfilePhoto(slotId, dataUrl);
       this.setState((s) => ({ profilePhotosById: { ...s.profilePhotosById, [slotId]: dataUrl } }));
     } catch (e) {
@@ -505,7 +505,7 @@ class Component extends DCLogic {
     const propId = f.id || "new";
     this.setState({ uploadingPhotoIdx: idx });
     try {
-      const dataUrl = await this._fb.fileToDataUrl(file, 1400);
+      const dataUrl = await this._fb.fileToDataUrl(file, 900);
       await this._fb.savePhoto(propId, idx, dataUrl);
       const photos = [...this.state.form.photos];
       photos[idx] = { ...photos[idx], url: dataUrl };
