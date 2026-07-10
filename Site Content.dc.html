@@ -96,6 +96,18 @@
       </sc-if>
     </div>
 
+    <!-- FACEBOOK POST FOOTER -->
+    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">📘 ข้อความท้ายโพสต์ Facebook (คงที่)</div>
+      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">ข้อความนี้จะต่อท้ายทุกโพสต์ Facebook ที่สร้างจากเครื่องมือ "เพิ่มทรัพย์ด่วนด้วย AI" โดยอัตโนมัติ แก้ไขที่นี่ครั้งเดียว มีผลกับโพสต์ครั้งต่อไปทั้งหมด</div>
+      <textarea value="{{ fbFooter }}" onChange="{{ onFbFooter }}" rows="14" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px; font-size:13px; font-family:inherit; resize:vertical; line-height:1.7;"></textarea>
+      <div style="font-size:12px; color:oklch(50% 0.02 60); margin-top:8px; margin-bottom:12px;">💡 แนะนำให้ใส่ 10 แฮชแท็กและข้อมูลติดต่อไว้ท้ายสุดของข้อความนี้</div>
+      <div onClick="{{ onSaveFbFooter }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">บันทึกข้อความ</div>
+      <sc-if value="{{ fbFooterMsg }}">
+        <span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ fbFooterMsg }}</span>
+      </sc-if>
+    </div>
+
   </div>
 </div>
 
@@ -109,6 +121,7 @@ class Component extends DCLogic {
     descDrafts: {},
     saveMsg: "",
     accUsername: "", accPassword: "", accEmail: "", accPhone: "", accMsg: "",
+    fbFooter: "", fbFooterMsg: "",
   };
 
   async componentDidMount() {
@@ -138,6 +151,25 @@ class Component extends DCLogic {
       accUsername: creds.username || "", accPassword: creds.password || "",
       accEmail: creds.recoveryEmail || "", accPhone: creds.recoveryPhone || "",
     });
+
+    let fbFooter = "";
+    try {
+      fbFooter = await fb.fetchFacebookFooter();
+    } catch (e) {
+      console.warn("Failed to load Facebook footer:", e);
+    }
+    this.setState({ fbFooter });
+  }
+
+  async saveFbFooter() {
+    try {
+      await this._fb.saveFacebookFooter(this.state.fbFooter);
+      this.setState({ fbFooterMsg: "บันทึกแล้ว" });
+      setTimeout(() => this.setState({ fbFooterMsg: "" }), 2500);
+    } catch (e) {
+      console.warn("Failed to save Facebook footer:", e);
+      this.setState({ fbFooterMsg: "บันทึกไม่สำเร็จ ลองใหม่" });
+    }
   }
 
   async saveAccount() {
@@ -240,6 +272,9 @@ class Component extends DCLogic {
       accPhone: this.state.accPhone, onAccPhone: (e) => this.setState({ accPhone: e.target.value }),
       accMsg: this.state.accMsg,
       onSaveAccount: () => this.saveAccount(),
+      fbFooter: this.state.fbFooter, onFbFooter: (e) => this.setState({ fbFooter: e.target.value }),
+      onSaveFbFooter: () => this.saveFbFooter(),
+      fbFooterMsg: this.state.fbFooterMsg,
     };
   }
 }

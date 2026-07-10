@@ -131,6 +131,42 @@ export async function fetchAllPhotos() {
   return fetchCollection("propertyPhotos");
 }
 
+// ── Facebook post footer (fixed block appended to every AI-generated
+// Facebook caption — hashtags + contact info) — editable from Site Content ──
+const DEFAULT_FB_FOOTER = `#HuaHin #HouseForSale #HouseForRent #RealEstate #BeachLiving #Property #HuaHinProperty #HuaHinTown #Convenience #BeachfrontLiving
+
+‼️ ช่องทางติดต่อเรา
+เพจขายบ้าน
+https://www.m.me/huahinpropertyhuahinrealestate/
+เพจบ้านเช่า
+https://www.m.me/HuaHinRentalVillasApartmentCondosVacati.../
+กลุ่มตลาดซื้อขายบ้านและที่ดินหัวหิน
+Hua Hin Property
+https://www.facebook.com/groups/179909282791693/?ref=share_group_link
+กลุ่มตลาดบ้านเช่าหัวหิน
+Hua Hin House for rent
+https://www.facebook.com/groups/999627083412222/?ref=share_group_link
+-📱โทรติดต่อ : 0851785480 (คุณปิ๋ม)
+-📱 เบอร์สำรอง : 0805820777 (คุณเจต)
+www.huahin.properties
+@huahinproperties
+https://lin.ee/rGhvAdJ
+อีเมลล์ : doothailand@gmail.com`;
+
+export async function fetchFacebookFooter() {
+  try {
+    const doc = await db().collection("settings").doc("facebook").get();
+    if (doc.exists && doc.data().footer) return doc.data().footer;
+  } catch (e) {
+    console.warn("fetchFacebookFooter failed, using default:", e);
+  }
+  return DEFAULT_FB_FOOTER;
+}
+
+export async function saveFacebookFooter(footer) {
+  await setDoc("settings", "facebook", { footer });
+}
+
 // ── Admin credentials (stored in Firestore so they can be changed from the
 // Admin panel without redeploying code) ──────────────────────────────────
 // NOTE: this is a lightweight gate to keep casual visitors out of the admin
