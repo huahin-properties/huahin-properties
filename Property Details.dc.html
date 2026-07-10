@@ -42,10 +42,13 @@
       </div>
     </sc-if>
     <sc-if value="{{ isMobileNav }}">
-      <div onClick="{{ toggleMenu }}" style="display:flex; flex-direction:column; gap:5px; padding:8px; cursor:pointer;">
-        <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
-        <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
-        <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" compact="{{ true }}" menu-align="right" hint-size="40,32"></dc-import>
+        <div onClick="{{ toggleMenu }}" style="display:flex; flex-direction:column; gap:5px; padding:8px; cursor:pointer;">
+          <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
+          <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
+          <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
+        </div>
       </div>
     </sc-if>
   </div>
