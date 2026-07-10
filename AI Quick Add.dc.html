@@ -254,7 +254,10 @@
       <div style="background:oklch(93% 0.04 230); border-radius:8px; padding:18px 20px; margin-bottom:20px;">
         <div style="font-weight:600; font-size:14px; color:oklch(30% 0.1 230); margin-bottom:6px;">🎙️ พูด/พิมพ์แก้ไขเพิ่มเติมให้ AI</div>
         <div style="font-size:12px; color:oklch(38% 0.08 230); margin-bottom:10px;">เห็นตรงไหนผิดหรืออยากเพิ่ม? กดไมค์แล้วพูด หรือพิมพ์คำสั่งแก้ไข เช่น "ราคาจริงๆคือ 9 ล้านไม่ใช่ 8 ล้าน" หรือ "เพิ่มว่าใกล้โรงเรียนนานาชาติด้วย" — ทำซ้ำได้เรื่อยๆ จนกว่าจะพอใจ</div>
-        <textarea value="{{ refineText }}" onChange="{{ onRefineText }}" rows="3" placeholder="พูดหรือพิมพ์สิ่งที่ต้องการแก้ไข/เพิ่มเติม..." style="width:100%; box-sizing:border-box; border:1px solid oklch(80% 0.05 230); border-radius:6px; padding:12px; font-size:14px; font-family:inherit; resize:vertical; margin-bottom:10px;"></textarea>
+        <div style="display:flex; gap:10px; align-items:flex-start; margin-bottom:10px;">
+          <textarea value="{{ refineText }}" onChange="{{ onRefineText }}" rows="3" placeholder="พูดหรือพิมพ์สิ่งที่ต้องการแก้ไข/เพิ่มเติม..." style="flex:1; min-width:0; box-sizing:border-box; border:1px solid oklch(80% 0.05 230); border-radius:6px; padding:12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
+          <div onClick="{{ onRefineMicToggle }}" style="{{ refineMicButtonStyle }}">🎙️</div>
+        </div>
         <sc-if value="{{ refineError }}">
           <div style="font-size:12px; color:oklch(50% 0.18 30); margin-bottom:10px;">{{ refineError }}</div>
         </sc-if>
@@ -353,7 +356,8 @@ class Component extends DCLogic {
           if (ev.results[i].isFinal) finalText += ev.results[i][0].transcript;
         }
         if (finalText.trim()) {
-          this.setState((s) => ({ transcript: (s.transcript ? s.transcript.trim() + " " : "") + finalText.trim() }));
+          const target = this._micTarget || "transcript";
+          this.setState((s) => ({ [target]: (s[target] ? s[target].trim() + " " : "") + finalText.trim() }));
         }
       };
       this._recognition.onend = () => {
@@ -374,7 +378,8 @@ class Component extends DCLogic {
     }
   }
 
-  startMic() {
+  startMic(target) {
+    this._micTarget = target || "transcript";
     if (!this._recognition || this.state.isRecording) return;
     try {
       this._recognition.start();
@@ -408,9 +413,9 @@ class Component extends DCLogic {
     } catch (e) {}
   }
 
-  toggleMic() {
+  toggleMic(target) {
     if (this.state.isRecording) this.stopMic();
-    else this.startMic();
+    else this.startMic(target);
   }
 
   async onPhotosFile(e) {
@@ -460,13 +465,17 @@ class Component extends DCLogic {
       text:
         "You are helping a Thai real-estate agent draft a property listing for huahin.properties " +
         "(Hua Hin, Pranburi, Cha-am, Thailand). Inputs may include: photos in upload order (first = cover), " +
-        "an optional project brochure/floor-plan document, and a Thai transcript describing the property.\n\n" +
+        "an optional project brochure/floor-plan document, and a spoken/typed transcript describing the " +
+        "property — the transcript may be in Thai, English, or a mix of both.\n\n" +
         "PRIVACY RULE: if the brochure reveals a project/developer name or developer contact info, NEVER put " +
         "it in title/shortDesc/fullDesc/photoCaptions (public-facing). Put it only in internalNotes, clearly " +
         "labeled. Distances/room sizes/amenities from the document are fine to use publicly.\n\n" +
-        "IMPORTANT: write title/shortDesc/fullDesc in THAI (natural, fluent Thai — this is the primary " +
-        "draft the Thai-speaking agent will review and confirm is correct BEFORE it gets translated into " +
-        "other languages as a separate later step).\n\n" +
+        "IMPORTANT — LANGUAGE: no matter what language the transcript is in (Thai, English, or mixed), " +
+        "you must UNDERSTAND it and then WRITE title/shortDesc/fullDesc entirely in natural, fluent Thai. " +
+        "Never leave any English sentence untranslated in the Thai fields, and never mix English words into " +
+        "the Thai output except real proper nouns that stay in Latin script (e.g. brand names). This Thai " +
+        "draft is what the agent reviews and confirms is correct BEFORE it gets translated into other " +
+        "languages as a separate later step.\n\n" +
         "Return ONLY a JSON object (no markdown) with this exact shape — use null/empty for anything not " +
         "mentioned or not confidently inferable, never invent price/size/room counts:\n" +
         '{"title":"short catchy Thai marketing title","zone":"","area":"hua-hin|pranburi|cha-am|\'\'",' +
@@ -478,13 +487,18 @@ class Component extends DCLogic {
         '"shortDesc":"1-2 sentence Thai marketing copy","fullDesc":"a full paragraph of Thai marketing copy",' +
         '"photoCaptions":["one per photo IN ORDER, see SEO rules below"],' +
         '"internalNotes":"project/developer info found in the document, or empty string"}\n\n' +
-        "SEO PHOTO CAPTION RULES (these double as SEO alt-text): each caption is Thai, formatted as " +
-        "'{keyword-rich Thai phrase describing this specific photo} {{CODE}}' — literally include the text " +
-        "'{{CODE}}' at the end (a template substitutes the real property code afterwards). Vary the phrase " +
-        "per photo, drawing on patterns like 'บ้านสวยหัวหิน', 'บ้านใกล้ทะเลหัวหิน', 'บ้านพร้อมอยู่หัวหิน', " +
-        "'ขายบ้านหัวหิน', 'หัวหิน พร็อพเพอร์ตี้', 'หัวหิน เรียลเอสเตท', 'พูลวิลล่าหัวหิน', 'บ้านเช่าหัวหิน', " +
-        "'คอนโดหัวหินวิวทะเล' — swap the area name for the real one (ปราณบุรี/ชะอำ) and swap in the real " +
-        "property type/status/features so each phrase stays true to this listing.\n"
+        "SEO PHOTO CAPTION RULES (these double as SEO alt-text): each caption is formatted as " +
+        "'{keyword-rich phrase describing this specific photo} {{CODE}}' — literally include the text " +
+        "'{{CODE}}' at the end (a template substitutes the real property code afterwards). RANDOMIZE the " +
+        "language per photo roughly 50/50 between Thai and English (e.g. alternate or mix unpredictably — " +
+        "do not just do Thai-then-English in strict order) so the listing attracts both Thai and " +
+        "international search traffic. For Thai captions draw on patterns like 'บ้านสวยหัวหิน', " +
+        "'บ้านใกล้ทะเลหัวหิน', 'บ้านพร้อมอยู่หัวหิน', 'ขายบ้านหัวหิน', 'หัวหิน พร็อพเพอร์ตี้', " +
+        "'หัวหิน เรียลเอสเตท', 'พูลวิลล่าหัวหิน', 'บ้านเช่าหัวหิน', 'คอนโดหัวหินวิวทะเล'. For English captions " +
+        "use equivalent SEO phrases like 'Hua Hin pool villa', 'Hua Hin sea view home', 'Hua Hin property " +
+        "for sale', 'Hua Hin real estate', 'move-in ready Hua Hin house', 'Hua Hin condo for rent'. In both " +
+        "languages swap the area name for the real one (Pranburi/ปราณบุรี, Cha-am/ชะอำ) and swap in the " +
+        "real property type/status/features so each phrase stays true to this listing.\n"
     });
     if (extraInstruction) {
       content[0].text += "\n\nThis is a REVISION request. Current draft JSON:\n" + JSON.stringify(this.state.draft && this.state.draft._raw) +
@@ -501,7 +515,7 @@ class Component extends DCLogic {
       }
     });
     if (this.state.transcript.trim()) {
-      content.push({ type: "text", text: "Agent's spoken/typed description (Thai):\n" + this.state.transcript });
+      content.push({ type: "text", text: "Agent's spoken/typed description (language may be Thai, English, or mixed — translate fully into Thai for the output fields):\n" + this.state.transcript });
     }
     return content;
   }
@@ -746,6 +760,15 @@ class Component extends DCLogic {
       draft, previewPhotos, hasInternalNotes,
       areaOptions: AREA_OPTIONS, typeOptions: TYPE_OPTIONS,
       refineText: this.state.refineText, onRefineText: (e) => this.setState({ refineText: e.target.value }),
+      onRefineMicToggle: () => this.toggleMic("refineText"),
+      refineMicButtonStyle: {
+        width: "44px", height: "44px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+        cursor: "pointer", userSelect: "none", flexShrink: 0,
+        background: this.state.isRecording ? "oklch(55% 0.18 30)" : "oklch(35% 0.1 230)",
+        boxShadow: this.state.isRecording ? "0 0 0 5px oklch(55% 0.18 30 / 0.25)" : "none",
+        transition: "box-shadow 0.15s",
+        color: "#fff", fontSize: "18px",
+      },
       refining: this.state.refining, notRefining: !this.state.refining,
       refineError: this.state.refineError,
       onRefine: () => this.refine(),
