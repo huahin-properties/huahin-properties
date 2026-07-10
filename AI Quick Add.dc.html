@@ -358,6 +358,9 @@ class Component extends DCLogic {
           this.setState((s) => ({ transcript: (s.transcript ? s.transcript.trim() + " " : "") + finalText.trim() }));
         }
       };
+      this._recognition.onend = () => {
+        this.setState({ isRecording: false });
+      };
       this._recognition.onerror = (ev) => {
         this.setState({ isRecording: false });
         if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
@@ -379,16 +382,32 @@ class Component extends DCLogic {
       this._recognition.start();
       this.setState({ isRecording: true, micError: "" });
     } catch (e) {
-      this.setState({ micError: "เริ่มไมค์ไม่สำเร็จ: " + (e && e.message ? e.message : String(e)) });
+      // "recognition has already started" happens if the browser's internal
+      // state hasn't caught up with our onend yet (rapid re-press). Force a
+      // clean stop then retry once, instead of surfacing it as an error.
+      if (e && /already started/i.test(e.message || "")) {
+        try {
+          this._recognition.abort();
+        } catch (e2) {}
+        setTimeout(() => {
+          try {
+            this._recognition.start();
+            this.setState({ isRecording: true, micError: "" });
+          } catch (e3) {
+            this.setState({ micError: "เริ่มไมค์ไม่สำเร็จ ลองกดใหม่อีกครั้ง" });
+          }
+        }, 250);
+      } else {
+        this.setState({ micError: "เริ่มไมค์ไม่สำเร็จ: " + (e && e.message ? e.message : String(e)) });
+      }
     }
   }
 
   stopMic() {
-    if (!this._recognition || !this.state.isRecording) return;
+    if (!this._recognition) return;
     try {
       this._recognition.stop();
     } catch (e) {}
-    this.setState({ isRecording: false });
   }
 
   async onPhotosFile(e) {
@@ -513,6 +532,10 @@ class Component extends DCLogic {
       this.setState({ genError: "กรุณาอัปโหลดรูปภาพหรือพูด/พิมพ์คำอธิบายอย่างน้อยหนึ่งอย่าง" });
       return;
     }
+    if (!window.claude || !window.claude.complete) {
+      this.setState({ genError: "ฟีเจอร์ AI นี้ใช้งานได้เฉพาะภายในระบบพรีวิวนี้เท่านั้น (window.claude ไม่พร้อมใช้งาน) — เมื่อนำเว็บนี้ไปรันบนโดเมนจริงนอกระบบนี้ จะต้องเชื่อมต่อ Claude API แยกต่างหากก่อนฟีเจอร์นี้จึงจะทำงานได้" });
+      return;
+    }
     this.setState({ generating: true, genError: "" });
     try {
       const content = this.buildMessageContent(null);
@@ -547,6 +570,10 @@ class Component extends DCLogic {
 
   async refine() {
     if (!this.state.refineText.trim()) return;
+    if (!window.claude || !window.claude.complete) {
+      this.setState({ refineError: "ฟีเจอร์ AI นี้ใช้งานได้เฉพาะภายในระบบพรีวิวนี้เท่านั้น" });
+      return;
+    }
     this.setState({ refining: true, refineError: "" });
     try {
       const content = this.buildMessageContent(this.state.refineText);
