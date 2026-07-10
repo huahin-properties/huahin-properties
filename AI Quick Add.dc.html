@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <title>เพิ่มทรัพย์ด่วนด้วย AI — huahin.properties Admin</title>
+  <style>
+    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+  </style>
+</helmet>
+
+<div style="max-width:900px; margin:0 auto; min-height:100vh;">
+
+  <!-- HEADER -->
+  <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 24px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80);">
+    <a href="Admin Dashboard.dc.html" style="text-decoration:none; color:inherit; font-family:'Playfair Display',serif; font-size:19px;">huahin<span style="color:oklch(70% 0.09 70);">.</span>properties <span style="font-size:12px; color:oklch(75% 0.01 70); border-left:1px solid oklch(45% 0.01 60); padding-left:14px;">🤖 เพิ่มทรัพย์ด่วนด้วย AI</span></a>
+    <a href="Admin Dashboard.dc.html" style="font-size:13px; color:oklch(85% 0.01 70); text-decoration:none;">← กลับแดชบอร์ด</a>
+  </div>
+
+  <div style="padding:28px 24px 100px;">
+
+    <!-- ============ STEP: FORM (photos, doc, transcript) ============ -->
+    <sc-if value="{{ showForm }}">
+      <div style="margin-bottom:24px;">
+        <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:6px;">เพิ่มทรัพย์ด่วนด้วย AI</div>
+        <div style="font-size:14px; color:oklch(50% 0.02 60);">อัปโหลดรูป + เอกสารโครงการ (ถ้ามี) แล้วพูด/พิมพ์อธิบายทรัพย์ — AI จะร่างประกาศให้ครบทุกภาษา พร้อมตั้งชื่อไฟล์รูปให้เป็นมิตรกับ SEO ก่อนเผยแพร่จริงคุณตรวจสอบและแก้ไขได้เสมอ</div>
+      </div>
+
+      <!-- PHOTOS -->
+      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-bottom:20px;">
+        <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:4px;">1. รูปภาพทรัพย์</div>
+        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">รูปแรกที่อัปโหลดจะเป็นภาพปกเสมอ เลือกได้หลายรูปพร้อมกัน — AI จะตั้งชื่อ/คำบรรยายแต่ละรูปให้เป็นมิตรกับ SEO อัตโนมัติ (เช่น "บ้านสวยหัวหิน HH-109", "บ้านใกล้ทะเลหัวหิน HH-109")</div>
+        <label style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; border:2px dashed oklch(85% 0.01 70); border-radius:8px; padding:28px; cursor:pointer; margin-bottom:14px;">
+          <input type="file" accept="image/*" multiple onChange="{{ onPhotosFile }}" style="display:none;" />
+          <div style="font-size:28px;">📷</div>
+          <div style="font-size:13px; color:oklch(45% 0.02 60);">คลิกเพื่อเลือกรูปภาพ (เลือกได้หลายรูป)</div>
+        </label>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <sc-for list="{{ photoPreviews }}" as="ph" hint-placeholder-count="4">
+            <div style="{{ ph.style }}">
+              <sc-if value="{{ ph.isCover }}">
+                <div style="position:absolute; top:2px; left:2px; background:oklch(50% 0.09 70); color:#fff; font-size:9px; padding:2px 5px; border-radius:3px;">ปก</div>
+              </sc-if>
+              <div onClick="{{ ph.onRemove }}" style="position:absolute; top:2px; right:2px; background:rgba(0,0,0,0.5); color:#fff; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; cursor:pointer;">✕</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- DOCUMENT -->
+      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-bottom:20px;">
+        <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:4px;">2. เอกสารโครงการ (ถ้ามี)</div>
+        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">แบบแปลน / โบรชัวร์ — เพิ่มได้หลายไฟล์ ทั้ง PDF และรูปภาพ AI จะดึงเฉพาะข้อมูลข้อเท็จจริง (ระยะทาง ขนาดห้อง สิ่งอำนวยความสะดวก) — ชื่อโครงการและข้อมูลติดต่อผู้พัฒนาจะไม่ถูกนำไปแสดงต่อสาธารณะ</div>
+
+        <sc-for list="{{ docPreviews }}" as="dc" hint-placeholder-count="2">
+          <div style="display:flex; align-items:center; gap:10px; background:oklch(96% 0.015 75); border-radius:6px; padding:10px 14px; margin-bottom:8px;">
+            <span style="font-size:18px;">{{ dc.icon }}</span>
+            <span style="font-size:13px; color:oklch(35% 0.02 60); flex:1; word-break:break-all;">{{ dc.name }}</span>
+            <div onClick="{{ dc.onRemove }}" style="cursor:pointer; color:oklch(50% 0.18 30); font-size:16px; padding:2px 6px;">✕</div>
+          </div>
+        </sc-for>
+
+        <label style="display:flex; align-items:center; gap:10px; border:1px dashed oklch(85% 0.01 70); border-radius:8px; padding:14px 18px; cursor:pointer;">
+          <input type="file" accept="application/pdf,image/*" multiple onChange="{{ onDocFile }}" style="display:none;" />
+          <span style="font-size:20px;">📄</span>
+          <span style="font-size:13px; color:oklch(45% 0.02 60);">+ เพิ่มเอกสาร (เลือกได้หลายไฟล์)</span>
+        </label>
+      </div>
+
+      <!-- TRANSCRIPT -->
+      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-bottom:20px;">
+        <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:4px;">3. พูดหรือพิมพ์อธิบายทรัพย์</div>
+        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">กดปุ่มไมค์บนคีย์บอร์ดมือถือแล้วพูดใส่ช่องด้านล่าง อ่านหัวข้อด้านล่างระหว่างพูด ไม่ต้องเรียงลำดับ ข้ามข้อไหนได้ก็ไม่เป็นไร ยิ่งพูดเยอะยิ่งดีต่อ SEO</div>
+
+        <div style="background:oklch(96% 0.015 75); border-radius:6px; padding:14px 16px; margin-bottom:14px; font-size:13px; color:oklch(35% 0.02 60); line-height:1.9;">
+          <b>ข้อมูลทั่วไป:</b> ชื่อ/จุดเด่นของทรัพย์ · ทำเล (หัวหิน/ปราณบุรี/ชะอำ) และโซนย่อย · ประเภท (พูลวิลล่า/บ้านเดี่ยว/คอนโด/ที่ดิน/เชิงพาณิชย์) · ขายหรือเช่า · ราคา<br/>
+          <b>ขนาด/โครงสร้าง:</b> ขนาดที่ดิน · พื้นที่ใช้สอย · จำนวนห้องนอน · จำนวนห้องน้ำ · ที่จอดรถ · มีสระว่ายน้ำไหม · เฟอร์นิเจอร์ (ครบ/บางส่วน/ไม่มี) · กรรมสิทธิ์ (โฉนด ฯลฯ)<br/>
+          <b>ระยะทาง:</b> ระยะห่างชายหาด · ระยะห่างตัวเมือง<br/>
+          <b>จุดเด่น:</b> วิวทะเล · วิวภูเขา · ติดชายหาด · ใกล้สนามกอล์ฟ · ติดริมแม่น้ำ · หมู่บ้านมีระบบรักษาความปลอดภัย · ซอยเงียบ · บ้านใหม่พร้อมเข้าอยู่ · เลี้ยงสัตว์ได้ · ผลตอบแทนค่าเช่าดี<br/>
+          <b>อื่นๆ:</b> รายละเอียดเพิ่มเติมที่อยากเล่า พูดอิสระได้เลย
+        </div>
+
+        <textarea value="{{ transcript }}" onChange="{{ onTranscript }}" rows="8" placeholder="กดปุ่มไมค์ค้างไว้แล้วพูด หรือพิมพ์ที่นี่..." style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:14px; font-size:15px; font-family:inherit; resize:vertical; margin-bottom:14px;"></textarea>
+
+        <sc-if value="{{ micSupported }}">
+          <div style="display:flex; align-items:center; justify-content:flex-end; gap:14px; flex-wrap:wrap; flex-direction:row-reverse;">
+            <div
+              onMouseDown="{{ onMicDown }}" onMouseUp="{{ onMicUp }}" onMouseLeave="{{ onMicUp }}"
+              onTouchStart="{{ onMicDown }}" onTouchEnd="{{ onMicUp }}"
+              style="{{ micButtonStyle }}">
+              <span style="font-size:22px;">🎤</span>
+            </div>
+            <div style="font-size:13px; color:oklch(45% 0.02 60);">
+              <sc-if value="{{ isRecording }}"><span style="color:oklch(50% 0.18 30); font-weight:600;">🔴 กำลังฟัง… ปล่อยนิ้วเมื่อพูดจบ</span></sc-if>
+              <sc-if value="{{ isNotRecording }}"><span>กดปุ่มไมค์ค้างไว้แล้วพูด ปล่อยเมื่อพูดจบ — พูดต่อได้เรื่อยๆ จะต่อท้ายข้อความเดิม</span></sc-if>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ micNotSupported }}">
+          <div style="font-size:12px; color:oklch(55% 0.02 60);">เบราว์เซอร์นี้ไม่รองรับปุ่มไมค์ในหน้าเว็บ — ใช้ปุ่มไมค์บนคีย์บอร์ดของเครื่องแทนได้ตามปกติ</div>
+        </sc-if>
+        <sc-if value="{{ micError }}">
+          <div style="margin-top:10px; font-size:13px; color:oklch(50% 0.18 30); background:oklch(95% 0.03 30); border-radius:6px; padding:10px 14px;">⚠️ {{ micError }}</div>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ genError }}">
+        <div style="background:oklch(95% 0.03 30); color:oklch(50% 0.18 30); border-radius:6px; padding:12px 16px; font-size:13px; margin-bottom:16px;">{{ genError }}</div>
+      </sc-if>
+
+      <div style="display:flex; justify-content:flex-end;">
+        <div onClick="{{ onGenerate }}" style="display:inline-flex; align-items:center; gap:8px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:14px 28px; border-radius:100px; font-size:15px; font-weight:500; cursor:pointer;">
+          <sc-if value="{{ generating }}"><span>⏳ AI กำลังร่างประกาศ… (อาจใช้เวลา 15-30 วินาที)</span></sc-if>
+          <sc-if value="{{ notGenerating }}"><span>✨ ให้ AI ร่างประกาศ</span></sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ STEP: PREVIEW / EDIT ============ -->
+    <sc-if value="{{ showPreview }}">
+      <div style="margin-bottom:20px;">
+        <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:6px;">ตรวจสอบก่อนเผยแพร่</div>
+        <div style="font-size:14px; color:oklch(50% 0.02 60);">AI ร่างให้แล้ว — ตรวจสอบและแก้ไขทุกช่องได้ก่อนกดเผยแพร่จริง</div>
+      </div>
+
+      <div style="display:flex; gap:14px; margin-bottom:20px; flex-wrap:wrap;">
+        <sc-for list="{{ previewPhotos }}" as="ph" hint-placeholder-count="4">
+          <div style="width:150px;">
+            <div style="{{ ph.style }}"></div>
+            <div style="font-size:10px; color:oklch(50% 0.02 60); line-height:1.3;">{{ ph.caption }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-bottom:20px;">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:16px;">
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">ชื่อทรัพย์</div>
+            <input value="{{ draft.title }}" onChange="{{ draft.onTitle }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">โซน</div>
+            <input value="{{ draft.zone }}" onChange="{{ draft.onZone }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">ทำเล</div>
+            <select value="{{ draft.area }}" onChange="{{ draft.onArea }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;">
+              <sc-for list="{{ areaOptions }}" as="a" hint-placeholder-count="3"><option value="{{ a.value }}">{{ a.label }}</option></sc-for>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">ประเภททรัพย์</div>
+            <select value="{{ draft.type }}" onChange="{{ draft.onType }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;">
+              <sc-for list="{{ typeOptions }}" as="ty" hint-placeholder-count="5"><option value="{{ ty.value }}">{{ ty.label }}</option></sc-for>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">สถานะ</div>
+            <select value="{{ draft.status }}" onChange="{{ draft.onStatus }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;">
+              <option value="sale">ประกาศขาย</option>
+              <option value="rent">ประกาศเช่า</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">ราคา (บาท)</div>
+            <input type="number" value="{{ draft.price }}" onChange="{{ draft.onPrice }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">ขนาดที่ดิน (ตร.ม.)</div>
+            <input type="number" value="{{ draft.landSize }}" onChange="{{ draft.onLandSize }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">พื้นที่ใช้สอย (ตร.ม.)</div>
+            <input type="number" value="{{ draft.livingArea }}" onChange="{{ draft.onLivingArea }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">ห้องนอน</div>
+            <input type="number" value="{{ draft.bedrooms }}" onChange="{{ draft.onBedrooms }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">ห้องน้ำ</div>
+            <input type="number" value="{{ draft.bathrooms }}" onChange="{{ draft.onBathrooms }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">ที่จอดรถ</div>
+            <input type="number" value="{{ draft.parking }}" onChange="{{ draft.onParking }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">กรรมสิทธิ์</div>
+            <input value="{{ draft.ownership }}" onChange="{{ draft.onOwnership }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">ระยะห่างชายหาด (กม.)</div>
+            <input type="number" value="{{ draft.distanceBeach }}" onChange="{{ draft.onDistanceBeach }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">ระยะห่างตัวเมือง (กม.)</div>
+            <input type="number" value="{{ draft.distanceTown }}" onChange="{{ draft.onDistanceTown }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">สระว่ายน้ำ / เฟอร์นิเจอร์</div>
+            <div style="display:flex; gap:10px; align-items:center; padding-top:6px;">
+              <label style="display:flex; align-items:center; gap:6px; font-size:13px;"><input type="checkbox" checked="{{ draft.pool }}" onChange="{{ draft.onPool }}" /> สระว่ายน้ำ</label>
+            </div>
+            <select value="{{ draft.furnished }}" onChange="{{ draft.onFurnished }}" style="width:100%; margin-top:6px; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 10px; font-size:13px; font-family:inherit;">
+              <option value="full">เฟอร์นิเจอร์ครบ</option>
+              <option value="partial">บางส่วน</option>
+              <option value="none">ไม่มี</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">จุดเด่น</div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:8px;">
+            <sc-for list="{{ draft.featureOptions }}" as="ft" hint-placeholder-count="6">
+              <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(30% 0.02 60);">
+                <input type="checkbox" checked="{{ ft.checked }}" onChange="{{ ft.onToggle }}" />
+                {{ ft.label }}
+              </label>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px;">
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">รายละเอียดโดยย่อ</div>
+          <textarea value="{{ draft.shortDesc }}" onChange="{{ draft.onShortDesc }}" rows="2" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
+        </div>
+        <div style="margin-bottom:6px;">
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">รายละเอียดเต็ม</div>
+          <textarea value="{{ draft.fullDesc }}" onChange="{{ draft.onFullDesc }}" rows="4" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
+        </div>
+
+        <sc-if value="{{ hasInternalNotes }}">
+          <div style="background:oklch(96% 0.015 75); border-radius:6px; padding:12px 16px; margin-top:14px;">
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">📝 บันทึกภายใน (จาก AI — ไม่แสดงต่อสาธารณะ เช่น ชื่อโครงการ/ข้อมูลติดต่อผู้พัฒนาที่พบในเอกสาร)</div>
+            <textarea value="{{ draft.internalNotes }}" onChange="{{ draft.onInternalNotes }}" rows="2" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical;"></textarea>
+          </div>
+        </sc-if>
+
+        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-top:14px;">✓ แปลแล้วครบ 6 ภาษา (TH · EN · RU · ZH · DE · NO) — จะบันทึกพร้อมกันตอนเผยแพร่</div>
+        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-top:6px;">ℹ️ ข้อมูลเจ้าของทรัพย์ (ชื่อ/เบอร์โทร/Line) ยังไม่ได้กรอก — เพิ่มได้ภายหลังจากหน้าแก้ไขทรัพย์ในแดชบอร์ด</div>
+      </div>
+
+      <!-- REFINE WITH AI -->
+      <div style="background:oklch(93% 0.04 230); border-radius:8px; padding:18px 20px; margin-bottom:20px;">
+        <div style="font-weight:600; font-size:14px; color:oklch(30% 0.1 230); margin-bottom:6px;">🎙️ พูด/พิมพ์แก้ไขเพิ่มเติมให้ AI</div>
+        <div style="font-size:12px; color:oklch(38% 0.08 230); margin-bottom:10px;">เห็นตรงไหนผิดหรืออยากเพิ่ม? กดไมค์แล้วพูด หรือพิมพ์คำสั่งแก้ไข เช่น "ราคาจริงๆคือ 9 ล้านไม่ใช่ 8 ล้าน" หรือ "เพิ่มว่าใกล้โรงเรียนนานาชาติด้วย" — ทำซ้ำได้เรื่อยๆ จนกว่าจะพอใจ</div>
+        <textarea value="{{ refineText }}" onChange="{{ onRefineText }}" rows="3" placeholder="พูดหรือพิมพ์สิ่งที่ต้องการแก้ไข/เพิ่มเติม..." style="width:100%; box-sizing:border-box; border:1px solid oklch(80% 0.05 230); border-radius:6px; padding:12px; font-size:14px; font-family:inherit; resize:vertical; margin-bottom:10px;"></textarea>
+        <sc-if value="{{ refineError }}">
+          <div style="font-size:12px; color:oklch(50% 0.18 30); margin-bottom:10px;">{{ refineError }}</div>
+        </sc-if>
+        <div onClick="{{ onRefine }}" style="display:inline-flex; align-items:center; gap:8px; background:oklch(35% 0.1 230); color:#fff; padding:11px 22px; border-radius:100px; font-size:14px; font-weight:500; cursor:pointer;">
+          <sc-if value="{{ refining }}"><span>⏳ กำลังปรับแก้…</span></sc-if>
+          <sc-if value="{{ notRefining }}"><span>ส่งคำสั่งแก้ไขให้ AI</span></sc-if>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:12px;">
+        <div onClick="{{ onBackToForm }}" style="border:1px solid oklch(75% 0.02 60); color:oklch(30% 0.02 60); padding:13px 24px; border-radius:4px; font-size:14px; cursor:pointer;">← แก้ไขข้อมูลต้นฉบับ</div>
+        <div onClick="{{ onPublish }}" style="background:oklch(50% 0.09 70); color:oklch(98% 0.01 80); padding:13px 24px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">
+          <sc-if value="{{ publishing }}"><span>⏳ กำลังเผยแพร่…</span></sc-if>
+          <sc-if value="{{ notPublishing }}"><span>✓ เผยแพร่จริง</span></sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ STEP: DONE ============ -->
+    <sc-if value="{{ showDone }}">
+      <div style="text-align:center; padding:60px 20px;">
+        <div style="font-size:48px; margin-bottom:16px;">✓</div>
+        <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:10px;">เผยแพร่สำเร็จ</div>
+        <div style="font-size:14px; color:oklch(50% 0.02 60); margin-bottom:24px;">รหัสทรัพย์: {{ newPropertyId }}</div>
+        <div style="display:flex; gap:12px; justify-content:center;">
+          <a href="Admin Dashboard.dc.html?edit={{ newPropertyId }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:12px 22px; border-radius:4px; font-size:14px; text-decoration:none;">ไปกรอกข้อมูลเจ้าของ</a>
+          <div onClick="{{ onAddAnother }}" style="border:1px solid oklch(75% 0.02 60); color:oklch(30% 0.02 60); padding:12px 22px; border-radius:4px; font-size:14px; cursor:pointer;">+ เพิ่มอีกรายการ</div>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const FEATURE_LIST = [
+  { id: "sea_view", label: "วิวทะเล" },
+  { id: "mountain_view", label: "วิวภูเขา" },
+  { id: "pool", label: "สระว่ายน้ำส่วนตัว" },
+  { id: "shared_pool", label: "สระว่ายน้ำส่วนกลาง" },
+  { id: "furnished", label: "เฟอร์นิเจอร์ครบ" },
+  { id: "new", label: "บ้านใหม่ พร้อมเข้าอยู่" },
+  { id: "beachfront", label: "ติดชายหาด" },
+  { id: "gated", label: "หมู่บ้านมีระบบรักษาความปลอดภัย" },
+  { id: "quiet", label: "ซอยเงียบสงบ" },
+  { id: "golf", label: "ใกล้สนามกอล์ฟ" },
+  { id: "riverside", label: "ติดริมแม่น้ำ" },
+  { id: "rental_yield", label: "ผลตอบแทนค่าเช่าดี" },
+  { id: "pet_friendly", label: "เลี้ยงสัตว์ได้" },
+];
+
+const AREA_OPTIONS = [
+  { value: "hua-hin", label: "หัวหิน" },
+  { value: "pranburi", label: "ปราณบุรี" },
+  { value: "cha-am", label: "ชะอำ" },
+];
+const TYPE_OPTIONS = [
+  { value: "villa", label: "พูลวิลล่า" },
+  { value: "house", label: "บ้านเดี่ยว" },
+  { value: "condo", label: "คอนโด" },
+  { value: "land", label: "ที่ดิน" },
+  { value: "commercial", label: "เชิงพาณิชย์" },
+];
+
+class Component extends DCLogic {
+  state = {
+    step: "form",
+    photos: [],
+    docFiles: [],
+    transcript: "",
+    generating: false, genError: "",
+    draft: null,
+    refineText: "", refining: false, refineError: "",
+    publishing: false,
+    newPropertyId: "",
+    isRecording: false, micSupported: false, micError: "",
+  };
+
+  async componentDidMount() {
+    const mod = await import("./data.js");
+    const fb = await import("./firebase-client.js");
+    if (!fb.requireAdminAuth()) return;
+    this._mod = mod;
+    this._fb = fb;
+
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SR) {
+      this._recognition = new SR();
+      this._recognition.lang = "th-TH";
+      this._recognition.continuous = true;
+      this._recognition.interimResults = false;
+      this._recognition.onresult = (ev) => {
+        let finalText = "";
+        for (let i = ev.resultIndex; i < ev.results.length; i++) {
+          if (ev.results[i].isFinal) finalText += ev.results[i][0].transcript;
+        }
+        if (finalText.trim()) {
+          this.setState((s) => ({ transcript: (s.transcript ? s.transcript.trim() + " " : "") + finalText.trim() }));
+        }
+      };
+      this._recognition.onerror = (ev) => {
+        this.setState({ isRecording: false });
+        if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
+          this.setState({ micError: "ไมโครโฟนถูกปฏิเสธ — กดไอคอนกุญแจ/ไมค์ที่แถบที่อยู่เว็บ (ด้านซ้ายของ URL) แล้วอนุญาตไมโครโฟน จากนั้นลองกดปุ่มไมค์อีกครั้ง" });
+        } else if (ev.error === "no-speech") {
+          this.setState({ micError: "ไม่ได้ยินเสียงพูด ลองกดค้างแล้วพูดใหม่อีกครั้ง" });
+        } else {
+          this.setState({ micError: "ไมโครโฟนมีปัญหา (" + ev.error + ") ลองใหม่อีกครั้ง" });
+        }
+        setTimeout(() => this.setState({ micError: "" }), 6000);
+      };
+      this.setState({ micSupported: true });
+    }
+  }
+
+  startMic() {
+    if (!this._recognition || this.state.isRecording) return;
+    try {
+      this._recognition.start();
+      this.setState({ isRecording: true, micError: "" });
+    } catch (e) {
+      this.setState({ micError: "เริ่มไมค์ไม่สำเร็จ: " + (e && e.message ? e.message : String(e)) });
+    }
+  }
+
+  stopMic() {
+    if (!this._recognition || !this.state.isRecording) return;
+    try {
+      this._recognition.stop();
+    } catch (e) {}
+    this.setState({ isRecording: false });
+  }
+
+  async onPhotosFile(e) {
+    const files = [...(e.target.files || [])];
+    if (!files.length) return;
+    const newPhotos = [];
+    for (const file of files) {
+      const dataUrl = await this._fb.fileToDataUrl(file, 1000);
+      newPhotos.push({ dataUrl });
+    }
+    this.setState((s) => ({ photos: [...s.photos, ...newPhotos] }));
+  }
+
+  removePhoto(idx) {
+    this.setState((s) => ({ photos: s.photos.filter((_, i) => i !== idx) }));
+  }
+
+  async onDocFile(e) {
+    const files = [...(e.target.files || [])];
+    if (!files.length) return;
+    const newDocs = [];
+    for (const file of files) {
+      const isPdf = file.type === "application/pdf";
+      if (isPdf) {
+        const b64 = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result.split(",")[1]);
+          reader.readAsDataURL(file);
+        });
+        newDocs.push({ kind: "pdf", data: b64, name: file.name });
+      } else {
+        const dataUrl = await this._fb.fileToDataUrl(file, 1400);
+        newDocs.push({ kind: "image", data: dataUrl.split(",")[1], name: file.name });
+      }
+    }
+    this.setState((s) => ({ docFiles: [...s.docFiles, ...newDocs] }));
+  }
+
+  removeDoc(idx) {
+    this.setState((s) => ({ docFiles: s.docFiles.filter((_, i) => i !== idx) }));
+  }
+
+  buildMessageContent(extraInstruction) {
+    const content = [];
+    content.push({
+      type: "text",
+      text:
+        "You are helping a Thai real-estate agent draft a property listing for huahin.properties " +
+        "(Hua Hin, Pranburi, Cha-am, Thailand). Inputs may include: photos in upload order (first = cover), " +
+        "an optional project brochure/floor-plan document, and a Thai transcript describing the property.\n\n" +
+        "PRIVACY RULE: if the brochure reveals a project/developer name or developer contact info, NEVER put " +
+        "it in title/shortDesc/fullDesc/photoCaptions (public-facing). Put it only in internalNotes, clearly " +
+        "labeled. Distances/room sizes/amenities from the document are fine to use publicly.\n\n" +
+        "IMPORTANT: write title/shortDesc/fullDesc in THAI (natural, fluent Thai — this is the primary " +
+        "draft the Thai-speaking agent will review and confirm is correct BEFORE it gets translated into " +
+        "other languages as a separate later step).\n\n" +
+        "Return ONLY a JSON object (no markdown) with this exact shape — use null/empty for anything not " +
+        "mentioned or not confidently inferable, never invent price/size/room counts:\n" +
+        '{"title":"short catchy Thai marketing title","zone":"","area":"hua-hin|pranburi|cha-am|\'\'",' +
+        '"type":"villa|house|condo|land|commercial","status":"sale|rent","price":number|null,' +
+        '"landSize":number|null,"livingArea":number|null,"bedrooms":number|null,"bathrooms":number|null,' +
+        '"parking":number|null,"pool":true|false,"furnished":"full|partial|none","ownership":"",' +
+        '"distanceBeach":number|null,"distanceTown":number|null,' +
+        '"features":["from: sea_view,mountain_view,pool,shared_pool,furnished,new,beachfront,gated,quiet,golf,riverside,rental_yield,pet_friendly"],' +
+        '"shortDesc":"1-2 sentence Thai marketing copy","fullDesc":"a full paragraph of Thai marketing copy",' +
+        '"photoCaptions":["one per photo IN ORDER, see SEO rules below"],' +
+        '"internalNotes":"project/developer info found in the document, or empty string"}\n\n' +
+        "SEO PHOTO CAPTION RULES (these double as SEO alt-text): each caption is Thai, formatted as " +
+        "'{keyword-rich Thai phrase describing this specific photo} {{CODE}}' — literally include the text " +
+        "'{{CODE}}' at the end (a template substitutes the real property code afterwards). Vary the phrase " +
+        "per photo, drawing on patterns like 'บ้านสวยหัวหิน', 'บ้านใกล้ทะเลหัวหิน', 'บ้านพร้อมอยู่หัวหิน', " +
+        "'ขายบ้านหัวหิน', 'หัวหิน พร็อพเพอร์ตี้', 'หัวหิน เรียลเอสเตท', 'พูลวิลล่าหัวหิน', 'บ้านเช่าหัวหิน', " +
+        "'คอนโดหัวหินวิวทะเล' — swap the area name for the real one (ปราณบุรี/ชะอำ) and swap in the real " +
+        "property type/status/features so each phrase stays true to this listing.\n"
+    });
+    if (extraInstruction) {
+      content[0].text += "\n\nThis is a REVISION request. Current draft JSON:\n" + JSON.stringify(this.state.draft && this.state.draft._raw) +
+        "\n\nApply this correction/addition from the agent, then return the FULL updated JSON (same schema): " + extraInstruction;
+    }
+    this.state.photos.forEach((p) => {
+      content.push({ type: "image", source: { type: "base64", media_type: "image/webp", data: p.dataUrl.split(",")[1] } });
+    });
+    this.state.docFiles.forEach((doc) => {
+      if (doc.kind === "pdf") {
+        content.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: doc.data } });
+      } else {
+        content.push({ type: "image", source: { type: "base64", media_type: "image/webp", data: doc.data } });
+      }
+    });
+    if (this.state.transcript.trim()) {
+      content.push({ type: "text", text: "Agent's spoken/typed description (Thai):\n" + this.state.transcript });
+    }
+    return content;
+  }
+
+  parseJsonResponse(raw) {
+    const jsonStart = raw.indexOf("{");
+    const jsonEnd = raw.lastIndexOf("}");
+    return JSON.parse(raw.slice(jsonStart, jsonEnd + 1));
+  }
+
+  async translateDraft(parsed) {
+    const prompt =
+      "Translate this Thai real-estate listing copy into 5 languages: English (en), Russian (ru), " +
+      "Simplified Chinese (zh), German (de), and Norwegian Bokmal (no).\n\nSTRICT RULES:\n" +
+      "- Each translation must be written ENTIRELY in its own script/language — never mix characters from " +
+      "one language into another's output.\n" +
+      "- Place names stay in Latin script in every language.\n" +
+      "- Marketing titles should be fully translated into natural real-estate phrasing, not left in Thai.\n" +
+      "- Keep numbers and property codes as-is.\n\n" +
+      "Respond with ONLY a JSON object, no markdown:\n" +
+      '{"en":{"title":"...","shortDesc":"...","fullDesc":"..."},"ru":{...},"zh":{...},"de":{...},"no":{...}}\n\n' +
+      "Source title (Thai): " + (parsed.title || "") + "\n" +
+      "Source short description (Thai): " + (parsed.shortDesc || "") + "\n" +
+      "Source full description (Thai): " + (parsed.fullDesc || "");
+    const raw = await window.claude.complete(prompt);
+    return this.parseJsonResponse(raw);
+  }
+
+  async generate() {
+    if (!this.state.photos.length && !this.state.transcript.trim() && !this.state.docFiles.length) {
+      this.setState({ genError: "กรุณาอัปโหลดรูปภาพหรือพูด/พิมพ์คำอธิบายอย่างน้อยหนึ่งอย่าง" });
+      return;
+    }
+    this.setState({ generating: true, genError: "" });
+    try {
+      const content = this.buildMessageContent(null);
+      const raw = await window.claude.complete({ messages: [{ role: "user", content }], max_tokens: 2000 });
+      const text = typeof raw === "string" ? raw : (raw && raw.content) || "";
+      const parsed = this.parseJsonResponse(text);
+      const translations = await this.translateDraft(parsed);
+      this.setDraftFromAI(parsed, translations);
+      this.setState({ generating: false, step: "preview" });
+    } catch (e) {
+      console.warn("AI generate failed:", e, e && e.message, e && e.stack);
+      this.setState({ generating: false, genError: "AI ประมวลผลไม่สำเร็จ: " + (e && e.message ? e.message : String(e)) });
+    }
+  }
+
+  setDraftFromAI(parsed, translations) {
+    this.setState({
+      draft: {
+        title: parsed.title || "", zone: parsed.zone || "",
+        area: parsed.area || "hua-hin", type: parsed.type || "villa", status: parsed.status || "sale",
+        price: parsed.price || 0, landSize: parsed.landSize || 0, livingArea: parsed.livingArea || 0,
+        bedrooms: parsed.bedrooms || 0, bathrooms: parsed.bathrooms || 0, parking: parsed.parking || 0,
+        pool: !!parsed.pool, furnished: parsed.furnished || "full", ownership: parsed.ownership || "",
+        distanceBeach: parsed.distanceBeach || 0, distanceTown: parsed.distanceTown || 0,
+        features: parsed.features || [], shortDesc: parsed.shortDesc || "", fullDesc: parsed.fullDesc || "",
+        photoCaptions: parsed.photoCaptions || [], internalNotes: parsed.internalNotes || "",
+        translations,
+        _raw: parsed,
+      },
+    });
+  }
+
+  async refine() {
+    if (!this.state.refineText.trim()) return;
+    this.setState({ refining: true, refineError: "" });
+    try {
+      const content = this.buildMessageContent(this.state.refineText);
+      const raw = await window.claude.complete({ messages: [{ role: "user", content }], max_tokens: 2000 });
+      const text = typeof raw === "string" ? raw : (raw && raw.content) || "";
+      const parsed = this.parseJsonResponse(text);
+      const translations = await this.translateDraft(parsed);
+      this.setDraftFromAI(parsed, translations);
+      this.setState({ refining: false, refineText: "" });
+    } catch (e) {
+      console.warn("AI refine failed:", e);
+      this.setState({ refining: false, refineError: "แก้ไขไม่สำเร็จ: " + (e && e.message ? e.message : String(e)) });
+    }
+  }
+
+  setDraft(patch) {
+    this.setState((s) => ({ draft: { ...s.draft, ...patch } }));
+  }
+
+  toggleFeature(id) {
+    this.setState((s) => {
+      const has = s.draft.features.includes(id);
+      const features = has ? s.draft.features.filter((f) => f !== id) : [...s.draft.features, id];
+      return { draft: { ...s.draft, features } };
+    });
+  }
+
+  async nextPropertyId(area) {
+    const prefix = { "hua-hin": "HH", pranburi: "PB", "cha-am": "CA" }[area] || "NEW";
+    const existing = await this._fb.fetchCollection("properties");
+    const nums = existing
+      .filter((p) => p.id && p.id.startsWith(prefix + "-"))
+      .map((p) => parseInt(p.id.split("-")[1], 10))
+      .filter((n) => !isNaN(n));
+    const next = (nums.length ? Math.max(...nums) : 100) + 1;
+    return prefix + "-" + next;
+  }
+
+  async publish() {
+    this.setState({ publishing: true });
+    try {
+      const d = this.state.draft;
+      const id = await this.nextPropertyId(d.area);
+      const t = d.translations || {};
+      const built = {
+        id, area: d.area, zone: d.zone, type: d.type, status: d.status,
+        price: Number(d.price) || 0, currency: "THB",
+        landSize: Number(d.landSize) || null, livingArea: Number(d.livingArea) || null,
+        bedrooms: Number(d.bedrooms) || 0, bathrooms: Number(d.bathrooms) || 0, parking: Number(d.parking) || 0,
+        pool: d.pool, furnished: d.furnished, ownership: d.ownership,
+        distanceBeach: Number(d.distanceBeach) || 0, distanceTown: Number(d.distanceTown) || 0, mapLink: "",
+        features: d.features,
+        title: { th: d.title, en: (t.en && t.en.title) || d.title, ru: (t.ru && t.ru.title) || d.title, zh: (t.zh && t.zh.title) || d.title, de: (t.de && t.de.title) || d.title, no: (t.no && t.no.title) || d.title },
+        shortDesc: { th: d.shortDesc, en: (t.en && t.en.shortDesc) || d.shortDesc, ru: (t.ru && t.ru.shortDesc) || d.shortDesc, zh: (t.zh && t.zh.shortDesc) || d.shortDesc, de: (t.de && t.de.shortDesc) || d.shortDesc, no: (t.no && t.no.shortDesc) || d.shortDesc },
+        fullDesc: { th: d.fullDesc, en: (t.en && t.en.fullDesc) || d.fullDesc, ru: (t.ru && t.ru.fullDesc) || d.fullDesc, zh: (t.zh && t.zh.fullDesc) || d.fullDesc, de: (t.de && t.de.fullDesc) || d.fullDesc, no: (t.no && t.no.fullDesc) || d.fullDesc },
+        seo: { title: d.title, desc: d.shortDesc, keywords: "" },
+        ownerId: null,
+        adminNotes: d.internalNotes || "",
+        photos: this.state.photos.map((p, i) => ({
+          label: ((d.photoCaptions && d.photoCaptions[i]) || "Photo " + (i + 1)).replace(/\{\{CODE\}\}/g, id),
+        })),
+      };
+      await this._fb.setDoc("properties", id, built);
+      await Promise.all(this.state.photos.map((p, i) => this._fb.savePhoto(id, i, p.dataUrl)));
+      this.setState({ publishing: false, step: "done", newPropertyId: id });
+    } catch (e) {
+      console.warn("Publish failed:", e);
+      this.setState({ publishing: false });
+    }
+  }
+
+  resetAll() {
+    this.setState({
+      step: "form", photos: [], docFiles: [],
+      transcript: "", generating: false, genError: "", draft: null,
+      refineText: "", refining: false, refineError: "", publishing: false, newPropertyId: "",
+    });
+  }
+
+  renderVals() {
+    const photoPreviews = this.state.photos.map((p, i) => ({
+      style: { position: "relative", width: "88px", height: "66px", borderRadius: "6px", overflow: "hidden", background: `url('${p.dataUrl}') center/cover` },
+      isCover: i === 0,
+      onRemove: () => this.removePhoto(i),
+    }));
+
+    let draft = null;
+    let previewPhotos = [];
+    let hasInternalNotes = false;
+    if (this.state.draft) {
+      const d = this.state.draft;
+      draft = {
+        title: d.title, onTitle: (e) => this.setDraft({ title: e.target.value }),
+        zone: d.zone, onZone: (e) => this.setDraft({ zone: e.target.value }),
+        area: d.area, onArea: (e) => this.setDraft({ area: e.target.value }),
+        type: d.type, onType: (e) => this.setDraft({ type: e.target.value }),
+        status: d.status, onStatus: (e) => this.setDraft({ status: e.target.value }),
+        price: d.price, onPrice: (e) => this.setDraft({ price: e.target.value }),
+        landSize: d.landSize, onLandSize: (e) => this.setDraft({ landSize: e.target.value }),
+        livingArea: d.livingArea, onLivingArea: (e) => this.setDraft({ livingArea: e.target.value }),
+        bedrooms: d.bedrooms, onBedrooms: (e) => this.setDraft({ bedrooms: e.target.value }),
+        bathrooms: d.bathrooms, onBathrooms: (e) => this.setDraft({ bathrooms: e.target.value }),
+        parking: d.parking, onParking: (e) => this.setDraft({ parking: e.target.value }),
+        ownership: d.ownership, onOwnership: (e) => this.setDraft({ ownership: e.target.value }),
+        distanceBeach: d.distanceBeach, onDistanceBeach: (e) => this.setDraft({ distanceBeach: e.target.value }),
+        distanceTown: d.distanceTown, onDistanceTown: (e) => this.setDraft({ distanceTown: e.target.value }),
+        pool: d.pool, onPool: (e) => this.setDraft({ pool: e.target.checked }),
+        furnished: d.furnished, onFurnished: (e) => this.setDraft({ furnished: e.target.value }),
+        shortDesc: d.shortDesc, onShortDesc: (e) => this.setDraft({ shortDesc: e.target.value }),
+        fullDesc: d.fullDesc, onFullDesc: (e) => this.setDraft({ fullDesc: e.target.value }),
+        internalNotes: d.internalNotes, onInternalNotes: (e) => this.setDraft({ internalNotes: e.target.value }),
+        featureOptions: FEATURE_LIST.map((f) => ({
+          id: f.id, label: f.label, checked: d.features.includes(f.id),
+          onToggle: () => this.toggleFeature(f.id),
+        })),
+      };
+      hasInternalNotes = !!d.internalNotes;
+      previewPhotos = this.state.photos.map((p, i) => ({
+        style: { width: "150px", height: "105px", borderRadius: "6px", overflow: "hidden", background: `url('${p.dataUrl}') center/cover`, marginBottom: "4px" },
+        caption: ((d.photoCaptions && d.photoCaptions[i]) || "").replace(/\{\{CODE\}\}/g, "(รหัสจะกำหนดตอนเผยแพร่)"),
+      }));
+    }
+
+    return {
+      showForm: this.state.step === "form",
+      showPreview: this.state.step === "preview",
+      showDone: this.state.step === "done",
+      photoPreviews,
+      onPhotosFile: (e) => this.onPhotosFile(e),
+      docPreviews: this.state.docFiles.map((d, i) => ({
+        icon: d.kind === "pdf" ? "📕" : "🖼️",
+        name: d.name,
+        onRemove: () => this.removeDoc(i),
+      })),
+      onDocFile: (e) => this.onDocFile(e),
+      transcript: this.state.transcript,
+      onTranscript: (e) => this.setState({ transcript: e.target.value }),
+      micSupported: this.state.micSupported, micNotSupported: !this.state.micSupported,
+      micError: this.state.micError,
+      isRecording: this.state.isRecording, isNotRecording: !this.state.isRecording,
+      onMicDown: (e) => { e.preventDefault(); this.startMic(); },
+      onMicUp: (e) => { e.preventDefault(); this.stopMic(); },
+      micButtonStyle: {
+        width: "56px", height: "56px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+        cursor: "pointer", userSelect: "none", flexShrink: 0,
+        background: this.state.isRecording ? "oklch(55% 0.18 30)" : "oklch(50% 0.09 70)",
+        boxShadow: this.state.isRecording ? "0 0 0 6px oklch(55% 0.18 30 / 0.25)" : "none",
+        transition: "box-shadow 0.15s",
+      },
+      generating: this.state.generating, notGenerating: !this.state.generating,
+      genError: this.state.genError,
+      onGenerate: () => this.generate(),
+      draft, previewPhotos, hasInternalNotes,
+      areaOptions: AREA_OPTIONS, typeOptions: TYPE_OPTIONS,
+      refineText: this.state.refineText, onRefineText: (e) => this.setState({ refineText: e.target.value }),
+      refining: this.state.refining, notRefining: !this.state.refining,
+      refineError: this.state.refineError,
+      onRefine: () => this.refine(),
+      onBackToForm: () => this.setState({ step: "form" }),
+      publishing: this.state.publishing, notPublishing: !this.state.publishing,
+      onPublish: () => this.publish(),
+      newPropertyId: this.state.newPropertyId,
+      onAddAnother: () => this.resetAll(),
+    };
+  }
+}
+</script>
+</body>
+</html>

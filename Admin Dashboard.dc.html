@@ -50,6 +50,17 @@
       </sc-for>
     </div>
 
+    <!-- ============ AI TOOLS ============ -->
+    <div style="margin-bottom:32px;">
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:12px;">🤖 เครื่องมือ AI</div>
+      <div style="display:flex; gap:14px; flex-wrap:wrap;">
+        <a href="AI Quick Add.dc.html" style="display:flex; flex-direction:column; align-items:center; gap:8px; width:120px; text-decoration:none; background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:16px 10px;">
+          <div style="font-size:28px;">📸</div>
+          <div style="font-size:12px; color:oklch(30% 0.02 60); text-align:center; line-height:1.3;">เพิ่มทรัพย์ด่วนด้วย AI</div>
+        </a>
+      </div>
+    </div>
+
     <!-- ============ TOOLBAR ============ -->
     <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:20px;">
       <div style="font-family:'Playfair Display',serif; font-size:22px; color:oklch(20% 0.02 60);">{{ t.admin_listings }}</div>
@@ -226,6 +237,19 @@
           <textarea value="{{ form.fullDesc }}" onChange="{{ form.onFullDesc }}" rows="4" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
         </div>
 
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <div onClick="{{ form.onAutoTranslate }}" style="display:inline-flex; align-items:center; gap:6px; background:oklch(93% 0.04 230); color:oklch(35% 0.1 230); padding:9px 18px; border-radius:100px; font-size:13px; cursor:pointer; white-space:nowrap;">
+            <sc-if value="{{ form.translating }}"><span>⏳ กำลังแปล…</span></sc-if>
+            <sc-if value="{{ form.notTranslating }}"><span>🌐 แปลอัตโนมัติ (AI) เป็นอีก 5 ภาษา</span></sc-if>
+          </div>
+          <sc-if value="{{ form.hasTranslations }}">
+            <span style="font-size:12px; color:oklch(40% 0.12 145);">✓ แปลแล้ว — TH · RU · ZH · DE · NO (จะบันทึกพร้อมกันตอนกด Save)</span>
+          </sc-if>
+          <sc-if value="{{ form.translateError }}">
+            <span style="font-size:12px; color:oklch(50% 0.18 30);">{{ form.translateError }}</span>
+          </sc-if>
+        </div>
+
         <div>
           <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">{{ t.features_label }}</div>
           <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:8px;">
@@ -381,6 +405,7 @@ const BLANK_FORM = () => ({
   leaseStart: "", leaseEnd: "",
   tenantId: "__new__", tenantName: "", tenantPhone: "", tenantEmail: "", tenantLine: "", tenantNotes: "",
   adminNotes: "",
+  translating: false, translations: null, translateError: "",
 });
 
 class Component extends DCLogic {
@@ -613,6 +638,62 @@ class Component extends DCLogic {
     this.setState((s) => ({ form: { ...s.form, ...patch } }));
   }
 
+  // Builds the final {en,th,ru,zh,de,no} value for one field. If the admin
+  // ran auto-translate this session, use those results for the non-English
+  // languages; otherwise fall back to whatever that field already held
+  // (preserving existing translations untouched on ordinary edits).
+  buildTranslated(translations, key, enValue, editingRaw, rawKey) {
+    const prior = editingRaw && typeof editingRaw[rawKey] === "object" ? editingRaw[rawKey] : null;
+    if (translations) {
+      return {
+        en: enValue,
+        th: translations.th ? translations.th[key] : (prior ? prior.th : enValue),
+        ru: translations.ru ? translations.ru[key] : (prior ? prior.ru : enValue),
+        zh: translations.zh ? translations.zh[key] : (prior ? prior.zh : enValue),
+        de: translations.de ? translations.de[key] : (prior ? prior.de : enValue),
+        no: translations.no ? translations.no[key] : (prior ? prior.no : enValue),
+      };
+    }
+    return prior ? { ...prior, en: enValue } : enValue;
+  }
+
+  async autoTranslate() {
+    const f = this.state.form;
+    if (!f.title && !f.shortDesc && !f.fullDesc) {
+      this.setForm({ translateError: "กรอกชื่อทรัพย์หรือคำบรรยายก่อนจึงจะแปลได้" });
+      return;
+    }
+    this.setForm({ translating: true, translateError: "" });
+    try {
+      const prompt =
+        "Translate this real-estate listing copy into 5 languages: Thai (th), Russian (ru), " +
+        "Simplified Chinese (zh), German (de), and Norwegian Bokmal (no).\n\n" +
+        "STRICT RULES:\n" +
+        "- Each translation must be written ENTIRELY in its own script/language — never mix characters " +
+        "from one language into another language's output (e.g. no Chinese characters inside the Thai " +
+        "text, no Thai inside German, etc). Each output string must pass a native speaker's read as pure, " +
+        "natural, fluent text in that one language only.\n" +
+        "- Place/street/village names (e.g. Khao Tao, Pak Nam Pran, Chanote) stay in Latin script in every " +
+        "language, transliterated only if that language has a very standard existing spelling.\n" +
+        "- A marketing-style property title (like 'Sunset Cliff Pool Villa') should be fully translated into " +
+        "natural real-estate phrasing in the target language, not left half-English/half-translated.\n" +
+        "- Keep numbers and property codes as-is.\n\n" +
+        "Respond with ONLY a JSON object, no markdown, no commentary, in this exact shape:\n" +
+        '{"th":{"title":"...","shortDesc":"...","fullDesc":"..."},"ru":{...},"zh":{...},"de":{...},"no":{...}}\n\n' +
+        "Source title: " + (f.title || "") + "\n" +
+        "Source short description: " + (f.shortDesc || "") + "\n" +
+        "Source full description: " + (f.fullDesc || "");
+      const raw = await window.claude.complete(prompt);
+      const jsonStart = raw.indexOf("{");
+      const jsonEnd = raw.lastIndexOf("}");
+      const parsed = JSON.parse(raw.slice(jsonStart, jsonEnd + 1));
+      this.setForm({ translating: false, translations: parsed, translateError: "" });
+    } catch (e) {
+      console.warn("Auto-translate failed:", e);
+      this.setForm({ translating: false, translateError: "แปลไม่สำเร็จ ลองใหม่อีกครั้ง" });
+    }
+  }
+
   saveForm() {
     const f = this.state.form;
 
@@ -656,9 +737,9 @@ class Component extends DCLogic {
       features: f.features,
       // Only the English copy is admin-editable here — merge it into the
       // existing {en,th,ru,zh} object so th/ru/zh translations survive.
-      title: editingRaw && typeof editingRaw.title === "object" ? { ...editingRaw.title, en: f.title } : f.title,
-      shortDesc: editingRaw && typeof editingRaw.shortDesc === "object" ? { ...editingRaw.shortDesc, en: f.shortDesc } : f.shortDesc,
-      fullDesc: editingRaw && typeof editingRaw.fullDesc === "object" ? { ...editingRaw.fullDesc, en: f.fullDesc } : f.fullDesc,
+      title: this.buildTranslated(f.translations, "title", f.title, editingRaw, "title"),
+      shortDesc: this.buildTranslated(f.translations, "shortDesc", f.shortDesc, editingRaw, "shortDesc"),
+      fullDesc: this.buildTranslated(f.translations, "fullDesc", f.fullDesc, editingRaw, "fullDesc"),
       seo: { title: f.title, desc: f.shortDesc, keywords: (editingRaw && editingRaw.seo && editingRaw.seo.keywords) || "" },
       ownerId,
       ...(f.status === "rented" ? { tenantId, leaseInfo: { leaseStart: f.leaseStart, leaseEnd: f.leaseEnd } } : {}),
@@ -841,6 +922,9 @@ class Component extends DCLogic {
         furnished: f.furnished, onFurnished: (e) => this.setForm({ furnished: e.target.value }),
         shortDesc: f.shortDesc, onShortDesc: (e) => this.setForm({ shortDesc: e.target.value }),
         fullDesc: f.fullDesc, onFullDesc: (e) => this.setForm({ fullDesc: e.target.value }),
+        translating: !!f.translating, notTranslating: !f.translating,
+        hasTranslations: !!f.translations, translateError: f.translateError || "",
+        onAutoTranslate: () => this.autoTranslate(),
         featureOptions, photos,
         onAddPhoto: () => this.setForm({ photos: [...f.photos, { label: "New photo", url: "" }] }),
         ownerId: f.ownerId, onOwnerSelect: (e) => this.onOwnerSelect(e.target.value),
