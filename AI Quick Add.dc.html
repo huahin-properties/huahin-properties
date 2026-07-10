@@ -263,8 +263,51 @@
       <div style="display:flex; gap:12px;">
         <div onClick="{{ onBackToForm }}" style="border:1px solid oklch(75% 0.02 60); color:oklch(30% 0.02 60); padding:13px 24px; border-radius:4px; font-size:14px; cursor:pointer;">← แก้ไขข้อมูลต้นฉบับ</div>
         <div onClick="{{ onPublish }}" style="background:oklch(50% 0.09 70); color:oklch(98% 0.01 80); padding:13px 24px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">
-          <sc-if value="{{ publishing }}"><span>⏳ กำลังเผยแพร่…</span></sc-if>
-          <sc-if value="{{ notPublishing }}"><span>✓ เผยแพร่จริง</span></sc-if>
+          <span>ถัดไป: กรอกข้อมูลเจ้าของ →</span>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- ============ STEP: OWNER INFO ============ -->
+    <sc-if value="{{ showOwner }}">
+      <div style="max-width:560px; margin:0 auto;">
+        <div style="margin-bottom:20px;">
+          <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:6px;">ข้อมูลเจ้าของทรัพย์</div>
+          <div style="font-size:14px; color:oklch(50% 0.02 60);">ข้อมูลนี้เก็บไว้ให้แอดมินดูเท่านั้น ไม่แสดงต่อสาธารณะ — กรอกให้ครบก่อนเผยแพร่จริง</div>
+        </div>
+        <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-bottom:20px;">
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px;">
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">ชื่อเจ้าของ *</div>
+              <input value="{{ ownerName }}" onChange="{{ onOwnerName }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+            </div>
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">เบอร์โทร *</div>
+              <input value="{{ ownerPhone }}" onChange="{{ onOwnerPhone }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+            </div>
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">อีเมล</div>
+              <input value="{{ ownerEmail }}" onChange="{{ onOwnerEmail }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+            </div>
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">Line ID</div>
+              <input value="{{ ownerLine }}" onChange="{{ onOwnerLine }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+            </div>
+          </div>
+          <div style="margin-top:12px;">
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">หมายเหตุ (ถ้ามี)</div>
+            <textarea value="{{ ownerNotes }}" onChange="{{ onOwnerNotes }}" rows="2" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
+          </div>
+        </div>
+        <sc-if value="{{ ownerError }}">
+          <div style="background:oklch(95% 0.03 30); color:oklch(50% 0.18 30); border-radius:6px; padding:12px 16px; font-size:13px; margin-bottom:16px;">{{ ownerError }}</div>
+        </sc-if>
+        <div style="display:flex; gap:12px;">
+          <div onClick="{{ onBackToPreview }}" style="border:1px solid oklch(75% 0.02 60); color:oklch(30% 0.02 60); padding:13px 24px; border-radius:4px; font-size:14px; cursor:pointer;">← กลับไปตรวจสอบร่าง</div>
+          <div onClick="{{ onPublish }}" style="background:oklch(50% 0.09 70); color:oklch(98% 0.01 80); padding:13px 24px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">
+            <sc-if value="{{ publishing }}"><span>⏳ กำลังเผยแพร่…</span></sc-if>
+            <sc-if value="{{ notPublishing }}"><span>✓ บันทึกและเผยแพร่จริง</span></sc-if>
+          </div>
         </div>
       </div>
     </sc-if>
@@ -276,7 +319,6 @@
         <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:10px;">เผยแพร่สำเร็จ</div>
         <div style="font-size:14px; color:oklch(50% 0.02 60); margin-bottom:24px;">รหัสทรัพย์: {{ newPropertyId }}</div>
         <div style="display:flex; gap:12px; justify-content:center;">
-          <a href="Admin Dashboard.dc.html?edit={{ newPropertyId }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:12px 22px; border-radius:4px; font-size:14px; text-decoration:none;">ไปกรอกข้อมูลเจ้าของ</a>
           <div onClick="{{ onAddAnother }}" style="border:1px solid oklch(75% 0.02 60); color:oklch(30% 0.02 60); padding:12px 22px; border-radius:4px; font-size:14px; cursor:pointer;">+ เพิ่มอีกรายการ</div>
         </div>
       </div>
@@ -371,6 +413,7 @@ class Component extends DCLogic {
     micError: "",
     fbCaption: "", fbCaptionLoading: false, fbCaptionError: "", fbCaptionCopied: false,
     fbFooterPanelOpen: false, fbFooterDraft: "", fbFooterSavedMsg: "",
+    ownerName: "", ownerPhone: "", ownerEmail: "", ownerLine: "", ownerNotes: "", ownerError: "",
   };
 
   async componentDidMount() {
@@ -633,12 +676,29 @@ class Component extends DCLogic {
     return prefix + "-" + next;
   }
 
+  goToOwnerStep() {
+    this.setState({ step: "owner" });
+  }
+
   async publish() {
-    this.setState({ publishing: true });
+    if (!this.state.ownerName.trim() || !this.state.ownerPhone.trim()) {
+      this.setState({ ownerError: "กรุณากรอกชื่อและเบอร์โทรเจ้าของทรัพย์อย่างน้อย" });
+      return;
+    }
+    this.setState({ publishing: true, ownerError: "" });
     try {
       const d = this.state.draft;
       const id = await this.nextPropertyId(d.area);
       const t = d.translations || {};
+
+      const owners = await this._fb.fetchCollection("owners");
+      const ownerId = "OWN-" + String(owners.length + 1).padStart(3, "0");
+      await this._fb.setDoc("owners", ownerId, {
+        id: ownerId, name: this.state.ownerName, phone: this.state.ownerPhone,
+        email: this.state.ownerEmail, line: this.state.ownerLine, notes: this.state.ownerNotes,
+        photo1: "", photo2: "",
+      });
+
       const built = {
         id, area: d.area, zone: d.zone, type: d.type, status: d.status,
         price: Number(d.price) || 0, currency: "THB",
@@ -651,7 +711,7 @@ class Component extends DCLogic {
         shortDesc: { th: d.shortDesc, en: (t.en && t.en.shortDesc) || d.shortDesc, ru: (t.ru && t.ru.shortDesc) || d.shortDesc, zh: (t.zh && t.zh.shortDesc) || d.shortDesc, de: (t.de && t.de.shortDesc) || d.shortDesc, no: (t.no && t.no.shortDesc) || d.shortDesc },
         fullDesc: { th: d.fullDesc, en: (t.en && t.en.fullDesc) || d.fullDesc, ru: (t.ru && t.ru.fullDesc) || d.fullDesc, zh: (t.zh && t.zh.fullDesc) || d.fullDesc, de: (t.de && t.de.fullDesc) || d.fullDesc, no: (t.no && t.no.fullDesc) || d.fullDesc },
         seo: { title: d.title, desc: d.shortDesc, keywords: d.seoKeywords || "" },
-        ownerId: null,
+        ownerId,
         adminNotes: d.internalNotes || "",
         photos: this.state.photos.map((p, i) => ({
           label: ((d.photoCaptions && d.photoCaptions[i]) || "Photo " + (i + 1)).replace(/\{\{CODE\}\}/g, id),
@@ -710,9 +770,14 @@ class Component extends DCLogic {
         "- Features: " + (built.features || []).join(", ") + "\n" +
         "- Description (Thai): " + built.shortDesc.th + " " + built.fullDesc.th + "\n\n" +
         "Output format, in this EXACT order:\n" +
-        "1. The ENGLISH caption block first.\n" +
-        "2. Then on its own line, exactly: (ภาษาไทยด้านล่าง)\n" +
-        "3. Then the THAI caption block (a natural translation/adaptation, not a literal one, matching the same punchy emoji style).\n" +
+        "1. First line, exactly: 🇹🇭 (ภาษาไทยด้านล่าง)\n" +
+        "2. Then the ENGLISH caption block: a keyword-optimized headline line, then a genuine descriptive " +
+        "marketing paragraph/bullet-list covering the property's key selling points, layout, rooms, and " +
+        "features (not just bare facts — write it like real marketing copy a buyer would enjoy reading, " +
+        "similar in spirit to the Thai description provided above but adapted naturally to English).\n" +
+        "3. Then a blank line, then the THAI caption block: a keyword-optimized headline line, then a " +
+        "genuine descriptive marketing paragraph/bullet-list in Thai (again real descriptive copy, not just " +
+        "a bare fact list) — a natural adaptation, not a literal translation of the English block.\n" +
         "4. Then a blank line, then exactly 10 relevant hashtags for this specific listing (mix of location, property type, and feature hashtags, e.g. #HuaHinVilla #PoolVillaForSale — tailor them to this listing, don't reuse a generic fixed set).\n\n" +
         "Return ONLY that content — no JSON, no extra commentary, no contact info (contact info is added separately after your output).";
       const caption = await this.callAI([{ type: "text", text: prompt }]);
@@ -737,6 +802,7 @@ class Component extends DCLogic {
   resetAll() {
     this.setState({
       step: "form", photos: [], docFiles: [],
+      ownerName: "", ownerPhone: "", ownerEmail: "", ownerLine: "", ownerNotes: "", ownerError: "",
       transcript: "", generating: false, genError: "", draft: null,
       refineText: "", refining: false, refineError: "", publishing: false, newPropertyId: "",
       fbCaption: "", fbCaptionLoading: false, fbCaptionError: "", fbCaptionCopied: false,
@@ -790,6 +856,7 @@ class Component extends DCLogic {
     return {
       showForm: this.state.step === "form",
       showPreview: this.state.step === "preview",
+      showOwner: this.state.step === "owner",
       showDone: this.state.step === "done",
       fbFooterPanelOpen: this.state.fbFooterPanelOpen,
       fbFooterToggleLabel: this.state.fbFooterPanelOpen ? "▲ ปิด" : "▼ ดู/แก้ไข",
@@ -820,8 +887,15 @@ class Component extends DCLogic {
       refineError: this.state.refineError,
       onRefine: () => this.refine(),
       onBackToForm: () => this.setState({ step: "form" }),
+      onBackToPreview: () => this.setState({ step: "preview" }),
       publishing: this.state.publishing, notPublishing: !this.state.publishing,
-      onPublish: () => this.publish(),
+      onPublish: () => (this.state.step === "preview" ? this.goToOwnerStep() : this.publish()),
+      ownerName: this.state.ownerName, onOwnerName: (e) => this.setState({ ownerName: e.target.value }),
+      ownerPhone: this.state.ownerPhone, onOwnerPhone: (e) => this.setState({ ownerPhone: e.target.value }),
+      ownerEmail: this.state.ownerEmail, onOwnerEmail: (e) => this.setState({ ownerEmail: e.target.value }),
+      ownerLine: this.state.ownerLine, onOwnerLine: (e) => this.setState({ ownerLine: e.target.value }),
+      ownerNotes: this.state.ownerNotes, onOwnerNotes: (e) => this.setState({ ownerNotes: e.target.value }),
+      ownerError: this.state.ownerError,
       newPropertyId: this.state.newPropertyId,
       onAddAnother: () => this.resetAll(),
       fbCaptionLoading: this.state.fbCaptionLoading,
