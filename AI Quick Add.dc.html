@@ -539,7 +539,7 @@ class Component extends DCLogic {
       const raw = await window.claude.complete({ messages: [{ role: "user", content }], max_tokens: 2000 });
       return typeof raw === "string" ? raw : (raw && raw.content) || "";
     }
-    const CLOUD_FUNCTION_URL = "https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/claudeComplete";
+    const CLOUD_FUNCTION_URL = "https://claudecomplete-3j4ldf4pja-as.a.run.app";
     const res = await fetch(CLOUD_FUNCTION_URL, {
       method: "POST",
       headers: { "content-type": "application/json" },
