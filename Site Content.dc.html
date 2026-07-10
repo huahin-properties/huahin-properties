@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <title>Site Content — huahin.properties Admin</title>
+  <style>
+    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+  </style>
+</helmet>
+
+<div style="max-width:900px; margin:0 auto; min-height:100vh;">
+
+  <!-- HEADER -->
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; padding:18px 24px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80);">
+    <a href="Admin Dashboard.dc.html" style="text-decoration:none; color:inherit; font-family:'Playfair Display',serif; font-size:19px; white-space:nowrap;">huahin<span style="color:oklch(70% 0.09 70);">.</span>properties <span style="font-size:12px; color:oklch(75% 0.01 70); border-left:1px solid oklch(45% 0.01 60); padding-left:14px;">Site Content</span></a>
+    <a href="Admin Dashboard.dc.html" style="font-size:13px; color:oklch(85% 0.01 70); text-decoration:none; white-space:nowrap;">{{ t.admin_back_to_dashboard }}</a>
+  </div>
+
+  <div style="padding:28px 24px 64px;">
+    <div style="margin-bottom:24px;">
+      <div style="font-family:'Playfair Display',serif; font-size:26px; color:oklch(20% 0.02 60); margin-bottom:6px;">Site Content</div>
+      <div style="font-size:14px; color:oklch(50% 0.02 60);">Edit the homepage hero photo and each area card's photo and description — no code required.</div>
+    </div>
+
+    <sc-if value="{{ saveMsg }}">
+      <div style="background:oklch(94% 0.06 145); color:oklch(35% 0.1 145); border-radius:6px; padding:10px 16px; font-size:14px; margin-bottom:20px;">{{ saveMsg }}</div>
+    </sc-if>
+
+    <!-- HERO -->
+    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-bottom:20px;">
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:14px;">Homepage Hero Photo</div>
+      <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
+        <label style="{{ heroStyle }}">
+          <input type="file" accept="image/*" onChange="{{ onHeroFile }}" style="position:absolute; inset:0; opacity:0; cursor:pointer;" />
+          <sc-if value="{{ heroUploading }}"><span style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:12px; color:oklch(45% 0.02 60);">Uploading…</span></sc-if>
+        </label>
+        <div style="font-size:13px; color:oklch(50% 0.02 60); flex:1; min-width:200px;">Click the image to upload a new hero photo for the homepage. Saves instantly.</div>
+      </div>
+    </div>
+
+    <!-- AREA CARDS -->
+    <sc-for list="{{ areas }}" as="a" hint-placeholder-count="3">
+      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-bottom:20px;">
+        <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:14px;">{{ a.label }}</div>
+        <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:16px;">
+          <label style="{{ a.photoStyle }}">
+            <input type="file" accept="image/*" onChange="{{ a.onFile }}" style="position:absolute; inset:0; opacity:0; cursor:pointer;" />
+            <sc-if value="{{ a.uploading }}"><span style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; color:oklch(45% 0.02 60);">Uploading…</span></sc-if>
+          </label>
+          <div style="font-size:13px; color:oklch(50% 0.02 60); flex:1; min-width:200px;">Click the image to upload a new photo for this area card.</div>
+        </div>
+        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">Description (shown on homepage — English text used across all languages)</div>
+        <textarea value="{{ a.desc }}" onChange="{{ a.onDescChange }}" rows="2" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit; resize:vertical; margin-bottom:10px;"></textarea>
+        <div onClick="{{ a.onSaveDesc }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">Save Description</div>
+      </div>
+    </sc-for>
+
+    <!-- ADMIN ACCOUNT -->
+    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px;">
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">Admin Login Details</div>
+      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:16px;">Change the username and password used to sign in to the Admin panel. Recovery contact is shown here in case you're locked out — it isn't used to send anything automatically.</div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:12px;">
+        <div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">Username</div>
+          <input value="{{ accUsername }}" onChange="{{ onAccUsername }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+        </div>
+        <div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">New Password</div>
+          <input type="text" value="{{ accPassword }}" onChange="{{ onAccPassword }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:16px;">
+        <div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">Recovery Email</div>
+          <input value="{{ accEmail }}" onChange="{{ onAccEmail }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+        </div>
+        <div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">Recovery Phone</div>
+          <input value="{{ accPhone }}" onChange="{{ onAccPhone }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+        </div>
+      </div>
+      <div onClick="{{ onSaveAccount }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">Save Login Details</div>
+      <sc-if value="{{ accMsg }}">
+        <span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ accMsg }}</span>
+      </sc-if>
+    </div>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    lang: "en", data: null,
+    heroUrl: "", heroUploading: false,
+    areaContent: {}, uploadingAreaId: null,
+    descDrafts: {},
+    saveMsg: "",
+    accUsername: "", accPassword: "", accEmail: "", accPhone: "", accMsg: "",
+  };
+
+  async componentDidMount() {
+    const mod = await import("./data.js");
+    const fb = await import("./firebase-client.js");
+    if (!fb.requireAdminAuth()) return;
+    this._mod = mod;
+    this._fb = fb;
+    let siteContent = {};
+    try {
+      siteContent = await fb.fetchSiteContent();
+    } catch (e) {
+      console.warn("Failed to load site content:", e);
+    }
+    const descDrafts = {};
+    mod.AREAS.forEach((a) => {
+      descDrafts[a.id] = (siteContent["area-" + a.id] && siteContent["area-" + a.id].desc) || mod.I18N.en[{ "hua-hin": "area_hua_hin_desc", pranburi: "area_pranburi_desc", "cha-am": "area_cha_am_desc" }[a.id]];
+    });
+    let creds = {};
+    try {
+      creds = await fb.fetchAdminCredentials();
+    } catch (e) {
+      console.warn("Failed to load admin credentials:", e);
+    }
+    this.setState({
+      lang: mod.getLang(), data: mod, areaContent: siteContent, descDrafts,
+      accUsername: creds.username || "", accPassword: creds.password || "",
+      accEmail: creds.recoveryEmail || "", accPhone: creds.recoveryPhone || "",
+    });
+  }
+
+  async saveAccount() {
+    try {
+      await this._fb.saveAdminCredentials({
+        username: this.state.accUsername,
+        password: this.state.accPassword,
+        recoveryEmail: this.state.accEmail,
+        recoveryPhone: this.state.accPhone,
+      });
+      this.setState({ accMsg: "Saved." });
+      setTimeout(() => this.setState({ accMsg: "" }), 2500);
+    } catch (e) {
+      console.warn("Failed to save admin credentials:", e);
+      this.setState({ accMsg: "Save failed — try again." });
+    }
+  }
+
+  flashSaved(msg) {
+    this.setState({ saveMsg: msg });
+    setTimeout(() => this.setState({ saveMsg: "" }), 2500);
+  }
+
+  async uploadHero(file) {
+    if (!file) return;
+    this.setState({ heroUploading: true });
+    try {
+      const dataUrl = await this._fb.fileToDataUrl(file, 1400);
+      await this._fb.saveSiteContentPhoto("hero", dataUrl);
+      this.setState((s) => ({ areaContent: { ...s.areaContent, hero: { ...(s.areaContent.hero || {}), photoUrl: dataUrl } } }));
+      this.flashSaved("Hero photo saved.");
+    } catch (e) {
+      console.warn("Hero upload failed:", e);
+    } finally {
+      this.setState({ heroUploading: false });
+    }
+  }
+
+  async uploadAreaPhoto(areaId, file) {
+    if (!file) return;
+    this.setState({ uploadingAreaId: areaId });
+    try {
+      const dataUrl = await this._fb.fileToDataUrl(file, 1200);
+      await this._fb.saveSiteContentPhoto("area-" + areaId, dataUrl);
+      this.setState((s) => ({ areaContent: { ...s.areaContent, ["area-" + areaId]: { ...(s.areaContent["area-" + areaId] || {}), photoUrl: dataUrl } } }));
+      this.flashSaved("Area photo saved.");
+    } catch (e) {
+      console.warn("Area photo upload failed:", e);
+    } finally {
+      this.setState({ uploadingAreaId: null });
+    }
+  }
+
+  async saveAreaDesc(areaId) {
+    const desc = this.state.descDrafts[areaId];
+    try {
+      await this._fb.saveSiteContentText("area-" + areaId, desc);
+      this.flashSaved("Description saved.");
+    } catch (e) {
+      console.warn("Description save failed:", e);
+    }
+  }
+
+  renderVals() {
+    const mod = this.state.data;
+    if (!mod) return { t: {}, areas: [] };
+    const t = mod.I18N[this.state.lang];
+    const heroUrl = (this.state.areaContent.hero && this.state.areaContent.hero.photoUrl) || "";
+
+    const areas = mod.AREAS.map((a) => {
+      const content = this.state.areaContent["area-" + a.id] || {};
+      return {
+        id: a.id,
+        label: a.label.en,
+        photoStyle: {
+          position: "relative", width: "160px", height: "100px", borderRadius: "6px", overflow: "hidden", cursor: "pointer", flexShrink: 0,
+          background: content.photoUrl ? `url('${content.photoUrl}') center/cover` : "oklch(90% 0.01 70)",
+        },
+        uploading: this.state.uploadingAreaId === a.id,
+        onFile: (e) => this.uploadAreaPhoto(a.id, e.target.files && e.target.files[0]),
+        desc: this.state.descDrafts[a.id] || "",
+        onDescChange: (e) => this.setState((s) => ({ descDrafts: { ...s.descDrafts, [a.id]: e.target.value } })),
+        onSaveDesc: () => this.saveAreaDesc(a.id),
+      };
+    });
+
+    return {
+      t,
+      saveMsg: this.state.saveMsg,
+      heroStyle: {
+        position: "relative", width: "220px", height: "130px", borderRadius: "6px", overflow: "hidden", cursor: "pointer", flexShrink: 0,
+        background: heroUrl ? `url('${heroUrl}') center/cover` : "oklch(90% 0.01 70)",
+      },
+      heroUploading: this.state.heroUploading,
+      onHeroFile: (e) => this.uploadHero(e.target.files && e.target.files[0]),
+      areas,
+      accUsername: this.state.accUsername, onAccUsername: (e) => this.setState({ accUsername: e.target.value }),
+      accPassword: this.state.accPassword, onAccPassword: (e) => this.setState({ accPassword: e.target.value }),
+      accEmail: this.state.accEmail, onAccEmail: (e) => this.setState({ accEmail: e.target.value }),
+      accPhone: this.state.accPhone, onAccPhone: (e) => this.setState({ accPhone: e.target.value }),
+      accMsg: this.state.accMsg,
+      onSaveAccount: () => this.saveAccount(),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -131,6 +131,78 @@ export async function fetchAllPhotos() {
   return fetchCollection("propertyPhotos");
 }
 
+// ── Admin credentials (stored in Firestore so they can be changed from the
+// Admin panel without redeploying code) ──────────────────────────────────
+// NOTE: this is a lightweight gate to keep casual visitors out of the admin
+// tools, not real security — anyone who opens devtools can read Firestore
+// rules/data. Before handling real customer/owner data in production,
+// replace this with proper Firebase Authentication (email+password or SSO).
+const DEFAULT_ADMIN_CREDENTIALS = {
+  username: "132435",
+  password: "qewret",
+  recoveryEmail: "doothailand@gmail.com",
+  recoveryPhone: "0805820777",
+};
+
+export async function fetchAdminCredentials() {
+  try {
+    const doc = await db().collection("settings").doc("admin").get();
+    if (doc.exists) return { ...DEFAULT_ADMIN_CREDENTIALS, ...doc.data() };
+  } catch (e) {
+    console.warn("fetchAdminCredentials failed, using defaults:", e);
+  }
+  return DEFAULT_ADMIN_CREDENTIALS;
+}
+
+export async function saveAdminCredentials(fields) {
+  const existing = await fetchAdminCredentials();
+  await setDoc("settings", "admin", { ...existing, ...fields });
+}
+
+const ADMIN_SESSION_KEY = "hh_admin_authed";
+export function setAdminAuthed() {
+  try { sessionStorage.setItem(ADMIN_SESSION_KEY, "1"); } catch (e) {}
+}
+export function isAdminAuthed() {
+  try { return sessionStorage.getItem(ADMIN_SESSION_KEY) === "1"; } catch (e) { return false; }
+}
+export function logoutAdmin() {
+  try { sessionStorage.removeItem(ADMIN_SESSION_KEY); } catch (e) {}
+}
+// Call at the top of componentDidMount in every admin-only page; redirects
+// immediately (before any private data loads) if not signed in.
+export function requireAdminAuth() {
+  if (!isAdminAuthed()) {
+    window.location.href = "Admin Login.dc.html";
+    return false;
+  }
+  return true;
+}
+
+// ── Site content (homepage hero + area cards) ───────────────────────────
+// Lets Admin replace the homepage hero photo and each area card's photo +
+// description without touching code. Stored as its own small collection so
+// it's independent of property data. Photos reuse the same resized data:
+// URL approach as property photos (no paid Storage plan required).
+export async function fetchSiteContent() {
+  const docs = await fetchCollection("siteContent");
+  const byId = {};
+  docs.forEach((d) => { byId[d.id] = d; });
+  return byId;
+}
+
+export async function saveSiteContentText(id, desc) {
+  const existing = await db().collection("siteContent").doc(id).get();
+  const prior = existing.exists ? existing.data() : {};
+  await setDoc("siteContent", id, { ...prior, desc });
+}
+
+export async function saveSiteContentPhoto(id, dataUrl) {
+  const existing = await db().collection("siteContent").doc(id).get();
+  const prior = existing.exists ? existing.data() : {};
+  await setDoc("siteContent", id, { ...prior, photoUrl: dataUrl });
+}
+
 // Generic reference-photo storage for owner/tenant contact cards (2 photos
 // each, no captions needed) — same Firestore-doc-per-photo approach as
 // property photos, in its own "profilePhotos" collection keyed by an

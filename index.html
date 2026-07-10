@@ -76,9 +76,11 @@
   </sc-if>
 
   <!-- ============ HERO ============ -->
-  <div style="position:relative; height:clamp(480px,70vh,680px); display:flex; align-items:flex-end; background-image:repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(92% 0.015 75) 2px, oklch(92% 0.015 75) 22px);">
+  <div style="{{ heroStyle }}">
     <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(30,20,10,0.08) 0%, rgba(30,20,10,0.68) 100%);"></div>
-    <div style="position:absolute; top:14px; right:14px; font-family:monospace; font-size:11px; color:oklch(95% 0.01 80 / 0.85); background:rgba(0,0,0,0.32); padding:4px 8px; border-radius:4px;">[photo: Hua Hin pool villa at dusk, sea horizon]</div>
+    <sc-if value="{{ heroNoPhoto }}">
+      <div style="position:absolute; top:14px; right:14px; font-family:monospace; font-size:11px; color:oklch(95% 0.01 80 / 0.85); background:rgba(0,0,0,0.32); padding:4px 8px; border-radius:4px;">[photo: Hua Hin pool villa at dusk, sea horizon]</div>
+    </sc-if>
 
     <div style="position:relative; z-index:2; padding:0 clamp(20px,4vw,56px) clamp(40px,7vw,64px); color:oklch(98% 0.01 80); max-width:760px;">
       <div style="font-size:13px; letter-spacing:0.2em; text-transform:uppercase; opacity:0.88; margin-bottom:16px;">{{ t.hero_kicker }}</div>
@@ -169,8 +171,10 @@
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px;">
       <sc-for list="{{ areaCards }}" as="ac" hint-placeholder-count="3">
         <a href="{{ ac.href }}" style="text-decoration:none; display:flex; flex-direction:column; border-radius:6px; overflow:hidden; background:oklch(99% 0.005 80);">
-          <div style="aspect-ratio:16/10; position:relative; background-image:repeating-linear-gradient(135deg, oklch(86% 0.02 75) 0px, oklch(86% 0.02 75) 2px, oklch(91% 0.015 75) 2px, oklch(91% 0.015 75) 22px);">
-            <div style="position:absolute; bottom:10px; left:10px; font-family:monospace; font-size:11px; color:oklch(20% 0.02 60 / 0.75); background:rgba(255,255,255,0.65); padding:4px 8px; border-radius:4px;">[{{ ac.photoLabel }}]</div>
+          <div style="{{ ac.photoStyle }}">
+            <sc-if value="{{ ac.noPhoto }}">
+              <div style="position:absolute; bottom:10px; left:10px; font-family:monospace; font-size:11px; color:oklch(20% 0.02 60 / 0.75); background:rgba(255,255,255,0.65); padding:4px 8px; border-radius:4px;">[{{ ac.photoLabel }}]</div>
+            </sc-if>
           </div>
           <div style="padding:20px;">
             <div style="font-family:'Playfair Display',serif; font-size:21px; color:oklch(20% 0.02 60); margin-bottom:8px;">{{ ac.label }}</div>
@@ -207,6 +211,7 @@ class Component extends DCLogic {
     areaValue: "",
     typeValue: "",
     priceValue: "",
+    siteContent: {},
     data: null,
   };
 
@@ -216,6 +221,13 @@ class Component extends DCLogic {
     this.setState({ lang: mod.getLang(), data: mod });
     const effProps = await mod.getEffectiveProperties(mod);
     this.setState({ effProps });
+    try {
+      const fb = await import("./firebase-client.js");
+      const siteContent = await fb.fetchSiteContent();
+      this.setState({ siteContent });
+    } catch (e) {
+      console.warn("Failed to load site content:", e);
+    }
     this._onResize = () => this.setState({ isMobile: window.innerWidth < 900 });
     this._onResize();
     window.addEventListener("resize", this._onResize);
@@ -272,12 +284,21 @@ class Component extends DCLogic {
 
     const areaDescKey = { "hua-hin": "area_hua_hin_desc", pranburi: "area_pranburi_desc", "cha-am": "area_cha_am_desc" };
     const areaPhoto = { "hua-hin": "photo: Hua Hin train station & beach", pranburi: "photo: Pranburi beachfront villa", "cha-am": "photo: Cha-am beach promenade" };
-    const areaCards = mod.AREAS.map((a) => ({
-      href: `Search Results.dc.html?area=${a.id}`,
-      label: a.label[lang],
-      desc: t[areaDescKey[a.id]],
-      photoLabel: areaPhoto[a.id],
-    }));
+    const sc = this.state.siteContent || {};
+    const areaCards = mod.AREAS.map((a) => {
+      const content = sc["area-" + a.id] || {};
+      return {
+        href: `Search Results.dc.html?area=${a.id}`,
+        label: a.label[lang],
+        desc: content.desc || t[areaDescKey[a.id]],
+        photoLabel: areaPhoto[a.id],
+        noPhoto: !content.photoUrl,
+        photoStyle: {
+          aspectRatio: "16/10", position: "relative",
+          background: content.photoUrl ? `url('${content.photoUrl}') center/cover` : "repeating-linear-gradient(135deg, oklch(86% 0.02 75) 0px, oklch(86% 0.02 75) 2px, oklch(91% 0.015 75) 2px, oklch(91% 0.015 75) 22px)",
+        },
+      };
+    });
 
     return {
       t,
@@ -309,6 +330,11 @@ class Component extends DCLogic {
       rentHref: "Search Results.dc.html?status=rent",
       featured,
       areaCards,
+      heroStyle: {
+        position: "relative", height: "clamp(480px,70vh,680px)", display: "flex", alignItems: "flex-end",
+        background: (sc.hero && sc.hero.photoUrl) ? `url('${sc.hero.photoUrl}') center/cover` : "repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(92% 0.015 75) 2px, oklch(92% 0.015 75) 22px)",
+      },
+      heroNoPhoto: !(sc.hero && sc.hero.photoUrl),
     };
   }
 }

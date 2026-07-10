@@ -32,8 +32,9 @@
     <div style="display:flex; align-items:center; gap:16px; font-size:13px; color:oklch(80% 0.01 70);">
       <a href="Property Map.dc.html" style="color:oklch(90% 0.02 70); text-decoration:none;">🗺️ {{ t.admin_map_nav }}</a>
       <a href="Owners.dc.html" style="color:oklch(90% 0.02 70); text-decoration:none;">👤 {{ t.admin_owners_nav }}</a>
+      <a href="Site Content.dc.html" style="color:oklch(90% 0.02 70); text-decoration:none;">🖼️ Site Content</a>
       <span>{{ t.admin_signed_in_as }}</span>
-      <a href="Admin Login.dc.html" style="color:oklch(85% 0.06 70); text-decoration:none;">{{ t.admin_logout }}</a>
+      <a href="#" onClick="{{ onLogout }}" style="color:oklch(85% 0.06 70); text-decoration:none;">{{ t.admin_logout }}</a>
     </div>
   </div>
 
@@ -395,6 +396,7 @@ class Component extends DCLogic {
   async componentDidMount() {
     const mod = await import("./data.js");
     const fb = await import("./firebase-client.js");
+    if (!fb.requireAdminAuth()) return;
     this._mod = mod;
     this._fb = fb;
 
@@ -870,6 +872,7 @@ class Component extends DCLogic {
 
     return {
       t, lang, stats, rows, noRows: rows.length === 0,
+      onLogout: (e) => { e.preventDefault(); this._fb.logoutAdmin(); window.location.href = "Admin Login.dc.html"; },
       leaseView: isLeaseFilter,
       onClearLeaseView: () => this.setState({ statusFilter: "" }),
       searchQuery: this.state.searchQuery, onSearch: (e) => this.setState({ searchQuery: e.target.value }),

@@ -35,7 +35,7 @@
     <div style="display:flex; align-items:center; gap:16px; font-size:13px; color:oklch(80% 0.01 70);">
       <a href="Admin Dashboard.dc.html" style="color:oklch(90% 0.02 70); text-decoration:none;">{{ t.admin_back_to_dashboard }}</a>
       <a href="Owners.dc.html" style="color:oklch(90% 0.02 70); text-decoration:none;">{{ t.admin_owners_nav }}</a>
-      <a href="Admin Login.dc.html" style="color:oklch(85% 0.06 70); text-decoration:none;">{{ t.admin_logout }}</a>
+      <a href="#" onClick="{{ onLogout }}" style="color:oklch(85% 0.06 70); text-decoration:none;">{{ t.admin_logout }}</a>
     </div>
   </div>
 
@@ -181,6 +181,8 @@ class Component extends DCLogic {
   async componentDidMount() {
     const mod = await import("./data.js");
     const fb = await import("./firebase-client.js");
+    if (!fb.requireAdminAuth()) return;
+    this._fb = fb;
     this._mod = mod;
     let properties;
     try {
@@ -280,6 +282,7 @@ class Component extends DCLogic {
 
     return {
       t, lang,
+      onLogout: (e) => { e.preventDefault(); this._fb.logoutAdmin(); window.location.href = "Admin Login.dc.html"; },
       areaFilter: this.state.areaFilter, onAreaFilter: (e) => this.setFilter({ areaFilter: e.target.value }),
       statusFilter: this.state.statusFilter, onStatusFilter: (e) => this.setFilter({ statusFilter: e.target.value }),
       typeFilter: this.state.typeFilter, onTypeFilter: (e) => this.setFilter({ typeFilter: e.target.value }),
