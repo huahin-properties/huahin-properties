@@ -94,15 +94,13 @@
 
         <sc-if value="{{ micSupported }}">
           <div style="display:flex; align-items:center; justify-content:flex-end; gap:14px; flex-wrap:wrap; flex-direction:row-reverse;">
-            <div
-              onMouseDown="{{ onMicDown }}" onMouseUp="{{ onMicUp }}" onMouseLeave="{{ onMicUp }}"
-              onTouchStart="{{ onMicDown }}" onTouchEnd="{{ onMicUp }}"
-              style="{{ micButtonStyle }}">
-              <span style="font-size:22px;">🎤</span>
+            <div onClick="{{ onMicToggle }}" style="{{ micButtonStyle }}">
+              <sc-if value="{{ isRecording }}"><span style="font-size:20px;">⏸</span></sc-if>
+              <sc-if value="{{ isNotRecording }}"><span style="font-size:22px;">🎤</span></sc-if>
             </div>
             <div style="font-size:13px; color:oklch(45% 0.02 60);">
-              <sc-if value="{{ isRecording }}"><span style="color:oklch(50% 0.18 30); font-weight:600;">🔴 กำลังฟัง… ปล่อยนิ้วเมื่อพูดจบ</span></sc-if>
-              <sc-if value="{{ isNotRecording }}"><span>กดปุ่มไมค์ค้างไว้แล้วพูด ปล่อยเมื่อพูดจบ — พูดต่อได้เรื่อยๆ จะต่อท้ายข้อความเดิม</span></sc-if>
+              <sc-if value="{{ isRecording }}"><span style="color:oklch(50% 0.18 30); font-weight:600;">🔴 กำลังฟัง… กดอีกครั้งเพื่อหยุด</span></sc-if>
+              <sc-if value="{{ isNotRecording }}"><span>กดปุ่มไมค์เพื่อเริ่มพูด กดอีกครั้งเพื่อหยุด — พูดต่อได้เรื่อยๆ จะต่อท้ายข้อความเดิม</span></sc-if>
             </div>
           </div>
         </sc-if>
@@ -410,6 +408,11 @@ class Component extends DCLogic {
     } catch (e) {}
   }
 
+  toggleMic() {
+    if (this.state.isRecording) this.stopMic();
+    else this.startMic();
+  }
+
   async onPhotosFile(e) {
     const files = [...(e.target.files || [])];
     if (!files.length) return;
@@ -523,8 +526,31 @@ class Component extends DCLogic {
       "Source title (Thai): " + (parsed.title || "") + "\n" +
       "Source short description (Thai): " + (parsed.shortDesc || "") + "\n" +
       "Source full description (Thai): " + (parsed.fullDesc || "");
-    const raw = await window.claude.complete(prompt);
+    const raw = await this.callAI([{ type: "text", text: prompt }]);
     return this.parseJsonResponse(raw);
+  }
+
+  // Calls Claude either via the in-preview window.claude.complete (while
+  // working inside claude.ai) or, on the real deployed site, via our
+  // Firebase Cloud Function proxy — which holds the real Anthropic API key
+  // server-side so it's never exposed in the browser.
+  async callAI(content) {
+    if (window.claude && window.claude.complete) {
+      const raw = await window.claude.complete({ messages: [{ role: "user", content }], max_tokens: 2000 });
+      return typeof raw === "string" ? raw : (raw && raw.content) || "";
+    }
+    const CLOUD_FUNCTION_URL = "https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/claudeComplete";
+    const res = await fetch(CLOUD_FUNCTION_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ content }),
+    });
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}));
+      throw new Error(errBody.error || ("AI request failed: " + res.status));
+    }
+    const data = await res.json();
+    return data.completion || "";
   }
 
   async generate() {
@@ -532,15 +558,11 @@ class Component extends DCLogic {
       this.setState({ genError: "กรุณาอัปโหลดรูปภาพหรือพูด/พิมพ์คำอธิบายอย่างน้อยหนึ่งอย่าง" });
       return;
     }
-    if (!window.claude || !window.claude.complete) {
-      this.setState({ genError: "ฟีเจอร์ AI นี้ใช้งานได้เฉพาะภายในระบบพรีวิวนี้เท่านั้น (window.claude ไม่พร้อมใช้งาน) — เมื่อนำเว็บนี้ไปรันบนโดเมนจริงนอกระบบนี้ จะต้องเชื่อมต่อ Claude API แยกต่างหากก่อนฟีเจอร์นี้จึงจะทำงานได้" });
-      return;
-    }
+
     this.setState({ generating: true, genError: "" });
     try {
       const content = this.buildMessageContent(null);
-      const raw = await window.claude.complete({ messages: [{ role: "user", content }], max_tokens: 2000 });
-      const text = typeof raw === "string" ? raw : (raw && raw.content) || "";
+      const text = await this.callAI(content);
       const parsed = this.parseJsonResponse(text);
       const translations = await this.translateDraft(parsed);
       this.setDraftFromAI(parsed, translations);
@@ -570,15 +592,11 @@ class Component extends DCLogic {
 
   async refine() {
     if (!this.state.refineText.trim()) return;
-    if (!window.claude || !window.claude.complete) {
-      this.setState({ refineError: "ฟีเจอร์ AI นี้ใช้งานได้เฉพาะภายในระบบพรีวิวนี้เท่านั้น" });
-      return;
-    }
+
     this.setState({ refining: true, refineError: "" });
     try {
       const content = this.buildMessageContent(this.state.refineText);
-      const raw = await window.claude.complete({ messages: [{ role: "user", content }], max_tokens: 2000 });
-      const text = typeof raw === "string" ? raw : (raw && raw.content) || "";
+      const text = await this.callAI(content);
       const parsed = this.parseJsonResponse(text);
       const translations = await this.translateDraft(parsed);
       this.setDraftFromAI(parsed, translations);
@@ -714,8 +732,7 @@ class Component extends DCLogic {
       micSupported: this.state.micSupported, micNotSupported: !this.state.micSupported,
       micError: this.state.micError,
       isRecording: this.state.isRecording, isNotRecording: !this.state.isRecording,
-      onMicDown: (e) => { e.preventDefault(); this.startMic(); },
-      onMicUp: (e) => { e.preventDefault(); this.stopMic(); },
+      onMicToggle: () => this.toggleMic(),
       micButtonStyle: {
         width: "56px", height: "56px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
         cursor: "pointer", userSelect: "none", flexShrink: 0,
