@@ -81,7 +81,7 @@
 
     <!-- ============ GALLERY ============ -->
     <div style="padding:14px clamp(20px,4vw,56px) 0;">
-      <div style="position:relative; aspect-ratio:16/9; max-height:560px; border-radius:6px; overflow:hidden; background:{{ activePhotoBg }};">
+      <div style="{{ heroPhotoStyle }}">
         <div style="position:absolute; top:14px; left:14px; background:{{ p.statusColor }}; color:oklch(99% 0.005 80); font-size:12px; font-weight:600; padding:5px 14px; border-radius:100px; pointer-events:none;">{{ p.statusLabel }}</div>
         <sc-if value="{{ activePhotoNoPhoto }}">
           <div style="position:absolute; bottom:14px; left:14px; font-family:monospace; font-size:12px; color:oklch(20% 0.02 60 / 0.8); background:rgba(255,255,255,0.7); padding:5px 10px; border-radius:4px; pointer-events:none;">[{{ activePhotoLabel }}]</div>
@@ -92,7 +92,7 @@
       </div>
       <div style="display:flex; gap:10px; margin-top:10px; overflow-x:auto; padding-bottom:4px;">
         <sc-for list="{{ photos }}" as="ph" hint-placeholder-count="6">
-          <div onClick="{{ ph.select }}" style="flex-shrink:0; width:100px; height:72px; border-radius:4px; overflow:hidden; cursor:pointer; box-shadow:{{ ph.ring }}; background:{{ ph.thumbBg }}; position:relative;">
+          <div onClick="{{ ph.select }}" style="{{ ph.thumbStyle }}">
             <div style="position:absolute; inset:0; opacity:{{ ph.dim }}; background:oklch(20% 0.02 60); pointer-events:none;"></div>
           </div>
         </sc-for>
@@ -299,7 +299,7 @@ class Component extends DCLogic {
 
     const photos = effectiveIndices.map((i, pos) => ({
       label: (raw.photos[i] && raw.photos[i].label) || raw.photos[i] || "photo",
-      thumbBg: bgOf(i),
+      thumbStyle: { flexShrink: 0, width: "100px", height: "72px", borderRadius: "4px", overflow: "hidden", cursor: "pointer", boxShadow: (i === activeIndex ? "0 0 0 2px oklch(50% 0.09 70)" : "none"), background: bgOf(i), position: "relative" },
       noPhoto: !(raw.photos[i] && raw.photos[i].url),
       select: () => this.setState({ activePhoto: i }),
       ring: i === activeIndex ? "0 0 0 2px oklch(50% 0.09 70)" : "none",
@@ -322,6 +322,7 @@ class Component extends DCLogic {
       photoCount: effectiveIndices.length,
       activePhotoNum: activePos + 1,
       activePhotoBg: bgOf(activeIndex),
+      heroPhotoStyle: { position: "relative", aspectRatio: "16/9", maxHeight: "560px", borderRadius: "6px", overflow: "hidden", background: bgOf(activeIndex) },
       activePhotoLabel: (raw.photos[activeIndex] && raw.photos[activeIndex].label) || raw.photos[activeIndex] || "",
       activePhotoNoPhoto: !(raw.photos[activeIndex] && raw.photos[activeIndex].url),
       prevPhoto: () => this.setState(() => ({ activePhoto: effectiveIndices[(activePos - 1 + effectiveIndices.length) % effectiveIndices.length] })),

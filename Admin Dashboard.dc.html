@@ -84,7 +84,7 @@
     <div style="display:flex; flex-direction:column; gap:12px;">
       <sc-for list="{{ rows }}" as="r" hint-placeholder-count="9">
         <div style="background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:6px; padding:16px 18px; display:flex; gap:16px; flex-wrap:wrap; align-items:center;">
-          <div style="width:64px;height:48px;flex-shrink:0;border-radius:4px;overflow:hidden;background:{{ r.coverPhotoBg }};"></div>
+          <div style="{{ r.coverPhotoStyle }}"></div>
           <div style="flex:2; min-width:180px;">
             <div style="font-size:11px; color:oklch(50% 0.02 60); font-family:monospace;">{{ r.id }}</div>
             <div style="font-family:'Playfair Display',serif; font-size:16px; color:oklch(20% 0.02 60);">{{ r.title }}</div>
@@ -246,7 +246,7 @@
           <div style="display:flex; flex-direction:column; gap:8px;">
             <sc-for list="{{ form.photos }}" as="ph" hint-placeholder-count="4">
               <div style="display:flex; align-items:center; gap:8px; background:oklch(96% 0.015 75); border-radius:4px; padding:8px 10px;">
-                <label style="position:relative; width:48px; height:36px; flex-shrink:0; border-radius:4px; overflow:hidden; cursor:pointer; background:{{ ph.thumbBg }};">
+                <label style="{{ ph.thumbStyle }}">
                   <input type="file" accept="image/*" onChange="{{ ph.onFile }}" style="position:absolute; inset:0; opacity:0; cursor:pointer;" />
                   <sc-if value="{{ ph.uploading }}"><span style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:oklch(45% 0.02 60);">…</span></sc-if>
                 </label>
@@ -287,13 +287,13 @@
           <textarea value="{{ form.ownerNotes }}" onChange="{{ form.onOwnerNotes }}" placeholder="{{ t.admin_owner_notes_ph }}" rows="2" style="width:100%; box-sizing:border-box; margin-top:12px; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
           <div style="display:flex; gap:16px; margin-top:14px;">
             <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
-              <label style="position:relative; width:110px; height:110px; border-radius:8px; overflow:hidden; cursor:pointer; background:{{ form.ownerPhoto1Bg }};">
+              <label style="{{ form.ownerPhoto1Style }}">
                 <input type="file" accept="image/*" onChange="{{ form.onOwnerPhoto1File }}" style="position:absolute; inset:0; opacity:0; cursor:pointer;" />
               </label>
               <span style="font-size:11px; color:oklch(50% 0.02 60);">{{ t.admin_owner_photo1 }}</span>
             </div>
             <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
-              <label style="position:relative; width:110px; height:110px; border-radius:8px; overflow:hidden; cursor:pointer; background:{{ form.ownerPhoto2Bg }};">
+              <label style="{{ form.ownerPhoto2Style }}">
                 <input type="file" accept="image/*" onChange="{{ form.onOwnerPhoto2File }}" style="position:absolute; inset:0; opacity:0; cursor:pointer;" />
               </label>
               <span style="font-size:11px; color:oklch(50% 0.02 60);">{{ t.admin_owner_photo2 }}</span>
@@ -332,13 +332,13 @@
             <textarea value="{{ form.tenantNotes }}" onChange="{{ form.onTenantNotes }}" placeholder="{{ t.admin_tenant_notes_ph }}" rows="2" style="width:100%; box-sizing:border-box; margin-top:12px; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
             <div style="display:flex; gap:16px; margin-top:14px;">
               <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
-                <label style="position:relative; width:110px; height:110px; border-radius:8px; overflow:hidden; cursor:pointer; background:{{ form.tenantPhoto1Bg }};">
+                <label style="{{ form.tenantPhoto1Style }}">
                   <input type="file" accept="image/*" onChange="{{ form.onTenantPhoto1File }}" style="position:absolute; inset:0; opacity:0; cursor:pointer;" />
                 </label>
                 <span style="font-size:11px; color:oklch(50% 0.02 60);">{{ t.admin_tenant_photo1 }}</span>
               </div>
               <div style="display:flex; flex-direction:column; gap:6px; align-items:center;">
-                <label style="position:relative; width:110px; height:110px; border-radius:8px; overflow:hidden; cursor:pointer; background:{{ form.tenantPhoto2Bg }};">
+                <label style="{{ form.tenantPhoto2Style }}">
                   <input type="file" accept="image/*" onChange="{{ form.onTenantPhoto2File }}" style="position:absolute; inset:0; opacity:0; cursor:pointer;" />
                 </label>
                 <span style="font-size:11px; color:oklch(50% 0.02 60);">{{ t.admin_tenant_photo2 }}</span>
@@ -742,7 +742,7 @@ class Component extends DCLogic {
           areaLabel: areaLabelOf(p.area), typeLabel: typeLabelOf(p.type),
           priceLabel: mod.formatPrice(p.price, p.currency, lang) + t.per_month,
           status: p.status, statusColor: statusColorOf(p.status),
-          coverPhotoBg: (p.photos && p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(92% 0.015 75) 2px, oklch(92% 0.015 75) 22px)",
+          coverPhotoStyle: { width: "64px", height: "48px", flexShrink: 0, borderRadius: "4px", overflow: "hidden", background: (p.photos && p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(92% 0.015 75) 2px, oklch(92% 0.015 75) 22px)" },
           onStatusChange: (e) => this.updateStatus(p.id, e.target.value),
           onEdit: () => this.openEdit(p),
           confirmingDelete: this.state.confirmingDeleteId === p.id,
@@ -770,7 +770,7 @@ class Component extends DCLogic {
         areaLabel: areaLabelOf(p.area), typeLabel: typeLabelOf(p.type),
         priceLabel: mod.formatPrice(p.price, p.currency, lang) + (p.status === "rent" ? t.per_month : ""),
         status: p.status, statusColor: statusColorOf(p.status),
-        coverPhotoBg: (p.photos && p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(92% 0.015 75) 2px, oklch(92% 0.015 75) 22px)",
+        coverPhotoStyle: { width: "64px", height: "48px", flexShrink: 0, borderRadius: "4px", overflow: "hidden", background: (p.photos && p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(92% 0.015 75) 2px, oklch(92% 0.015 75) 22px)" },
         onStatusChange: (e) => this.updateStatus(p.id, e.target.value),
         onEdit: () => this.openEdit(p),
         confirmingDelete: this.state.confirmingDeleteId === p.id,
@@ -811,7 +811,7 @@ class Component extends DCLogic {
       const photos = f.photos.map((ph, i) => ({
         label: ph.label, url: ph.url || "", isCover: i === 0, notCover: i !== 0,
         uploading: this.state.uploadingPhotoIdx === i,
-        thumbBg: ph.url ? `url('${ph.url}') center/cover` : "oklch(90% 0.01 70)",
+        thumbStyle: { position: "relative", width: "48px", height: "36px", flexShrink: 0, borderRadius: "4px", overflow: "hidden", cursor: "pointer", background: ph.url ? `url('${ph.url}') center/cover` : "oklch(90% 0.01 70)" },
         onChange: (e) => { const photos = [...f.photos]; photos[i] = { ...photos[i], label: e.target.value }; this.setForm({ photos }); },
         onFile: (e) => this.uploadPropertyPhoto(i, e.target.files && e.target.files[0]),
         onSetCover: () => { const photos = [...f.photos]; const [x] = photos.splice(i, 1); photos.unshift(x); this.setForm({ photos }); },
@@ -847,12 +847,12 @@ class Component extends DCLogic {
         ownerEmail: f.ownerEmail, onOwnerEmail: (e) => this.setForm({ ownerEmail: e.target.value }),
         ownerLine: f.ownerLine, onOwnerLine: (e) => this.setForm({ ownerLine: e.target.value }),
         ownerNotes: f.ownerNotes, onOwnerNotes: (e) => this.setForm({ ownerNotes: e.target.value }),
-        ownerPhoto1Bg: this.state.profilePhotosById && this.state.profilePhotosById[ownerPhoto1Id] ? `url('${this.state.profilePhotosById[ownerPhoto1Id]}') center/cover` : "oklch(90% 0.01 70)",
-        ownerPhoto2Bg: this.state.profilePhotosById && this.state.profilePhotosById[ownerPhoto2Id] ? `url('${this.state.profilePhotosById[ownerPhoto2Id]}') center/cover` : "oklch(90% 0.01 70)",
+        ownerPhoto1Style: { position: "relative", width: "110px", height: "110px", borderRadius: "8px", overflow: "hidden", cursor: "pointer", background: this.state.profilePhotosById && this.state.profilePhotosById[ownerPhoto1Id] ? `url('${this.state.profilePhotosById[ownerPhoto1Id]}') center/cover` : "oklch(90% 0.01 70)" },
+        ownerPhoto2Style: { position: "relative", width: "110px", height: "110px", borderRadius: "8px", overflow: "hidden", cursor: "pointer", background: this.state.profilePhotosById && this.state.profilePhotosById[ownerPhoto2Id] ? `url('${this.state.profilePhotosById[ownerPhoto2Id]}') center/cover` : "oklch(90% 0.01 70)" },
         onOwnerPhoto1File: (e) => this.uploadProfilePhoto(ownerPhoto1Id, e.target.files && e.target.files[0]),
         onOwnerPhoto2File: (e) => this.uploadProfilePhoto(ownerPhoto2Id, e.target.files && e.target.files[0]),
-        tenantPhoto1Bg: this.state.profilePhotosById && this.state.profilePhotosById[tenantPhoto1Id] ? `url('${this.state.profilePhotosById[tenantPhoto1Id]}') center/cover` : "oklch(90% 0.01 70)",
-        tenantPhoto2Bg: this.state.profilePhotosById && this.state.profilePhotosById[tenantPhoto2Id] ? `url('${this.state.profilePhotosById[tenantPhoto2Id]}') center/cover` : "oklch(90% 0.01 70)",
+        tenantPhoto1Style: { position: "relative", width: "110px", height: "110px", borderRadius: "8px", overflow: "hidden", cursor: "pointer", background: this.state.profilePhotosById && this.state.profilePhotosById[tenantPhoto1Id] ? `url('${this.state.profilePhotosById[tenantPhoto1Id]}') center/cover` : "oklch(90% 0.01 70)" },
+        tenantPhoto2Style: { position: "relative", width: "110px", height: "110px", borderRadius: "8px", overflow: "hidden", cursor: "pointer", background: this.state.profilePhotosById && this.state.profilePhotosById[tenantPhoto2Id] ? `url('${this.state.profilePhotosById[tenantPhoto2Id]}') center/cover` : "oklch(90% 0.01 70)" },
         onTenantPhoto1File: (e) => this.uploadProfilePhoto(tenantPhoto1Id, e.target.files && e.target.files[0]),
         onTenantPhoto2File: (e) => this.uploadProfilePhoto(tenantPhoto2Id, e.target.files && e.target.files[0]),
         isRented: f.status === "rented",

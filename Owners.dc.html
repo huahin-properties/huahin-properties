@@ -54,8 +54,8 @@
         <div style="background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:8px; overflow:hidden;">
           <div onClick="{{ o.toggle }}" style="display:flex; align-items:center; gap:16px; padding:16px 18px; cursor:pointer; flex-wrap:wrap;">
             <div style="display:flex; gap:8px;">
-              <div style="width:52px;height:52px;border-radius:8px;overflow:hidden;background:{{ o.photo1Bg }};flex-shrink:0;"></div>
-              <div style="width:52px;height:52px;border-radius:8px;overflow:hidden;background:{{ o.photo2Bg }};flex-shrink:0;"></div>
+              <div style="{{ o.photo1Style }}"></div>
+              <div style="{{ o.photo2Style }}"></div>
             </div>
             <div style="flex:1; min-width:180px;">
               <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60);">{{ o.name }}</div>
@@ -75,7 +75,7 @@
               </sc-if>
               <sc-for list="{{ o.properties }}" as="pr" hint-placeholder-count="2">
                 <div style="display:flex; align-items:center; gap:14px; background:oklch(96% 0.015 75); border-radius:6px; padding:12px 14px; flex-wrap:wrap;">
-                  <div style="width:64px;height:48px;flex-shrink:0;border-radius:4px;overflow:hidden;background:{{ pr.coverPhotoBg }};"></div>
+                  <div style="{{ pr.coverPhotoStyle }}"></div>
                   <div style="font-family:monospace; font-size:12px; color:oklch(45% 0.02 60); white-space:nowrap;">{{ pr.id }}</div>
                   <div style="flex:1; min-width:160px;">
                     <div style="font-size:14px; color:oklch(25% 0.02 60);">{{ pr.title }}</div>
@@ -206,14 +206,14 @@ class Component extends DCLogic {
         toggle: () => this.toggle(o.id),
         hasNotes: !!o.notes,
         notes: o.notes,
-        photo1Bg: this.state.profilePhotosById && this.state.profilePhotosById[photoPrefix + o.id + "-1"] ? `url('${this.state.profilePhotosById[photoPrefix + o.id + "-1"]}') center/cover` : "oklch(90% 0.01 70)",
-        photo2Bg: this.state.profilePhotosById && this.state.profilePhotosById[photoPrefix + o.id + "-2"] ? `url('${this.state.profilePhotosById[photoPrefix + o.id + "-2"]}') center/cover` : "oklch(90% 0.01 70)",
+        photo1Style: { width: "52px", height: "52px", borderRadius: "8px", overflow: "hidden", flexShrink: 0, background: this.state.profilePhotosById && this.state.profilePhotosById[photoPrefix + o.id + "-1"] ? `url('${this.state.profilePhotosById[photoPrefix + o.id + "-1"]}') center/cover` : "oklch(90% 0.01 70)" },
+        photo2Style: { width: "52px", height: "52px", borderRadius: "8px", overflow: "hidden", flexShrink: 0, background: this.state.profilePhotosById && this.state.profilePhotosById[photoPrefix + o.id + "-2"] ? `url('${this.state.profilePhotosById[photoPrefix + o.id + "-2"]}') center/cover` : "oklch(90% 0.01 70)" },
         hasNearestLeaseEnd: !isOwnersTab && !!nearestLeaseEnd,
         nearestLeaseEndLabel: formatDate(nearestLeaseEnd),
         _sortKey: nearestLeaseEnd || "9999-99-99",
         properties: linkedProps.map((p) => ({
           id: p.id,
-          coverPhotoBg: (p.photos && p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
+          coverPhotoStyle: { width: "64px", height: "48px", flexShrink: 0, borderRadius: "4px", overflow: "hidden", background: (p.photos && p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)" },
           title: p.title,
           zone: p.zone,
           areaLabel: areaLabelOf(p.area),
