@@ -767,6 +767,25 @@ class Component extends DCLogic {
     return data.completion || "";
   }
 
+  // Calls the AI and parses its JSON reply, automatically retrying (fresh
+  // AI call, not just re-parsing) up to 2 extra times if the reply comes
+  // back malformed — occasional AI formatting slips are usually gone on
+  // the next attempt, so this avoids surfacing a scary error for a
+  // one-off fluke.
+  async callAIAndParse(content) {
+    let lastErr;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const text = await this.callAI(content);
+        return this.parseJsonResponse(text);
+      } catch (e) {
+        lastErr = e;
+        console.warn("AI response parse failed (attempt " + (attempt + 1) + "/3):", e);
+      }
+    }
+    throw lastErr;
+  }
+
   async generate() {
     if (!this.state.photos.length && !this.state.transcript.trim() && !this.state.docFiles.length) {
       this.setState({ genError: "กรุณาอัปโหลดรูปภาพหรือพูด/พิมพ์คำอธิบายอย่างน้อยหนึ่งอย่าง" });
@@ -790,8 +809,7 @@ class Component extends DCLogic {
         this.setState({ landmarksError: "ไม่พบพิกัดในลิงก์นี้ — เปิดลิงก์นี้ในเบราว์เซอร์ก่อน แล้ววางลิงก์เต็มจาก address bar (ต้องมีตัวเลขพิกัดอยู่ในลิงก์)" });
       }
       const content = this.buildMessageContent(null, landmarks);
-      const text = await this.callAI(content);
-      const parsed = this.parseJsonResponse(text);
+      const parsed = await this.callAIAndParse(content);
       this.appendLandmarksToDraft(parsed, landmarks);
       const translations = await this.translateDraft(parsed);
       this.setDraftFromAI(parsed, translations);
@@ -834,8 +852,7 @@ class Component extends DCLogic {
     this.setState({ refining: true, refineError: "" });
     try {
       const content = this.buildMessageContent(this.state.refineText, this.state.landmarks);
-      const text = await this.callAI(content);
-      const parsed = this.parseJsonResponse(text);
+      const parsed = await this.callAIAndParse(content);
       this.appendLandmarksToDraft(parsed, this.state.landmarks);
       const translations = await this.translateDraft(parsed);
       this.setDraftFromAI(parsed, translations);
