@@ -85,9 +85,25 @@
         </label>
       </div>
 
+      <!-- MAP LINK -->
+      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-bottom:20px;">
+        <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:4px;">3. ลิงก์ Google Maps (ถ้ามี)</div>
+        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">วางลิงก์พิกัดบ้าน — AI จะค้นหาสถานที่ใกล้เคียงที่มีคนค้นหาบ่อย พร้อมระยะทาง/เวลาขับรถอัตโนมัติ ใช้ลิงก์แบบเต็มที่มีพิกัด (เปิดลิงก์แชร์สั้นในเบราว์เซอร์ก่อน แล้วคัดลอก URL จาก address bar)</div>
+        <input value="{{ mapsLink }}" onChange="{{ onMapsLink }}" placeholder="https://www.google.com/maps/@12.xxxx,99.xxxx,17z" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+        <sc-if value="{{ landmarksLoading }}">
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-top:8px;">⏳ กำลังค้นหาสถานที่ใกล้เคียง…</div>
+        </sc-if>
+        <sc-if value="{{ landmarksError }}">
+          <div style="font-size:12px; color:oklch(50% 0.18 30); margin-top:8px;">{{ landmarksError }}</div>
+        </sc-if>
+        <sc-if value="{{ hasLandmarks }}">
+          <div style="font-size:12px; color:oklch(40% 0.12 145); margin-top:8px;">✓ พบสถานที่ใกล้เคียง {{ landmarksCount }} แห่ง จะนำไปใช้ในคำบรรยายอัตโนมัติ</div>
+        </sc-if>
+      </div>
+
       <!-- TRANSCRIPT -->
       <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-bottom:20px;">
-        <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:4px;">3. พูดหรือพิมพ์อธิบายทรัพย์</div>
+        <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:4px;">4. พูดหรือพิมพ์อธิบายทรัพย์</div>
         <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">กดปุ่มไมค์บนคีย์บอร์ดมือถือแล้วพูดใส่ช่องด้านล่าง อ่านหัวข้อด้านล่างระหว่างพูด ไม่ต้องเรียงลำดับ ข้ามข้อไหนได้ก็ไม่เป็นไร ยิ่งพูดเยอะยิ่งดีต่อ SEO</div>
 
         <div style="background:oklch(96% 0.015 75); border-radius:6px; padding:14px 16px; margin-bottom:14px; font-size:13px; color:oklch(35% 0.02 60); line-height:1.9;">
@@ -298,6 +314,17 @@
             <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">หมายเหตุ (ถ้ามี)</div>
             <textarea value="{{ ownerNotes }}" onChange="{{ onOwnerNotes }}" rows="2" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
           </div>
+          <div style="margin-top:16px; padding-top:16px; border-top:1px solid oklch(92% 0.01 70);">
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">รูปเจ้าของ/ข้อมูลติดต่อ (ถ้ามี — เก็บให้แอดมินดูเท่านั้น)</div>
+            <div style="display:flex; gap:16px;">
+              <label style="{{ ownerPhoto1Style }}">
+                <input type="file" accept="image/*" onChange="{{ onOwnerPhoto1File }}" style="position:absolute; inset:0; opacity:0; cursor:pointer;" />
+              </label>
+              <label style="{{ ownerPhoto2Style }}">
+                <input type="file" accept="image/*" onChange="{{ onOwnerPhoto2File }}" style="position:absolute; inset:0; opacity:0; cursor:pointer;" />
+              </label>
+            </div>
+          </div>
         </div>
         <sc-if value="{{ ownerError }}">
           <div style="background:oklch(95% 0.03 30); color:oklch(50% 0.18 30); border-radius:6px; padding:12px 16px; font-size:13px; margin-bottom:16px;">{{ ownerError }}</div>
@@ -399,6 +426,86 @@ const TYPE_OPTIONS = [
   { value: "commercial", label: "เชิงพาณิชย์" },
 ];
 
+const GOOGLE_MAPS_KEY = "AIzaSyAEkTsWJ83cot_Hwfe0dsx1Nqg0bIw2YP4";
+let _gmapsLoadPromise = null;
+function loadGoogleMapsWithPlaces() {
+  if (window.google && window.google.maps && window.google.maps.places) return Promise.resolve();
+  if (_gmapsLoadPromise) return _gmapsLoadPromise;
+  _gmapsLoadPromise = new Promise((resolve, reject) => {
+    const cbName = "__gmapsQuickAddCb" + Date.now();
+    window[cbName] = () => { resolve(); delete window[cbName]; };
+    const script = document.createElement("script");
+    script.src = "https://maps.googleapis.com/maps/api/js?key=" + GOOGLE_MAPS_KEY + "&libraries=places&callback=" + cbName;
+    script.async = true;
+    script.onerror = () => reject(new Error("Google Maps script failed to load"));
+    document.head.appendChild(script);
+  });
+  return _gmapsLoadPromise;
+}
+
+// Extracts a {lat,lng} from common Google Maps link formats, or from a bare
+// "lat,lng" string. Short share links (maps.app.goo.gl/...) can't be
+// resolved client-side (cross-origin redirect), so those return null —
+// the UI asks the agent to open the link once and paste the full URL.
+function parseLatLngFromMapsLink(input) {
+  const s = (input || "").trim();
+  if (!s) return null;
+  let m = s.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+  m = s.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+  m = s.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+  m = s.match(/^(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)$/);
+  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+  return null;
+}
+
+// Finds well-known nearby points of interest around a coordinate and their
+// driving distance/time, using the Places + Distance Matrix JS services
+// (client-side, via the existing HTTP-referrer-restricted Maps key).
+async function fetchNearbyLandmarks(latLng) {
+  await loadGoogleMapsWithPlaces();
+  const g = window.google.maps;
+  const center = new g.LatLng(latLng.lat, latLng.lng);
+  const placesDiv = document.createElement("div");
+  const service = new g.places.PlacesService(placesDiv);
+
+  const searchOnce = (type) => new Promise((resolve) => {
+    service.nearbySearch({ location: center, radius: 15000, type }, (results, status) => {
+      resolve(status === g.places.PlacesServiceStatus.OK ? results || [] : []);
+    });
+  });
+
+  const types = ["tourist_attraction", "shopping_mall", "hospital", "airport", "train_station", "school", "point_of_interest"];
+  const batches = await Promise.all(types.map(searchOnce));
+  const byId = new Map();
+  batches.flat().forEach((p) => {
+    if (p.place_id && p.geometry && p.geometry.location && !byId.has(p.place_id)) byId.set(p.place_id, p);
+  });
+  const candidates = [...byId.values()]
+    .sort((a, b) => (b.user_ratings_total || 0) - (a.user_ratings_total || 0))
+    .slice(0, 15);
+  if (!candidates.length) return [];
+
+  const distService = new g.DistanceMatrixService();
+  const matrix = await new Promise((resolve, reject) => {
+    distService.getDistanceMatrix(
+      { origins: [center], destinations: candidates.map((c) => c.geometry.location), travelMode: g.TravelMode.DRIVING },
+      (response, status) => (status === "OK" ? resolve(response) : reject(new Error(status)))
+    );
+  });
+  const row = matrix.rows[0].elements;
+  const landmarks = candidates.map((c, i) => ({
+    name: c.name,
+    distanceText: row[i].status === "OK" ? row[i].distance.text : null,
+    durationText: row[i].status === "OK" ? row[i].duration.text : null,
+  })).filter((l) => l.distanceText);
+  // Sort nearest-first and cap at 10, per the requested "at least ~10 key nearby landmarks".
+  landmarks.sort((a, b) => parseFloat(a.distanceText) - parseFloat(b.distanceText));
+  return landmarks.slice(0, 10);
+}
+
 class Component extends DCLogic {
   state = {
     step: "form",
@@ -414,6 +521,8 @@ class Component extends DCLogic {
     fbCaption: "", fbCaptionLoading: false, fbCaptionError: "", fbCaptionCopied: false,
     fbFooterPanelOpen: false, fbFooterDraft: "", fbFooterSavedMsg: "",
     ownerName: "", ownerPhone: "", ownerEmail: "", ownerLine: "", ownerNotes: "", ownerError: "",
+    ownerPhoto1: null, ownerPhoto2: null,
+    mapsLink: "", landmarksLoading: false, landmarksError: "", landmarks: null,
   };
 
   async componentDidMount() {
@@ -481,7 +590,7 @@ class Component extends DCLogic {
     this.setState((s) => ({ docFiles: s.docFiles.filter((_, i) => i !== idx) }));
   }
 
-  buildMessageContent(extraInstruction) {
+  buildMessageContent(extraInstruction, landmarks) {
     const content = [];
     content.push({
       type: "text",
@@ -534,6 +643,13 @@ class Component extends DCLogic {
     if (extraInstruction) {
       content[0].text += "\n\nThis is a REVISION request. Current draft JSON:\n" + JSON.stringify(this.state.draft && this.state.draft._raw) +
         "\n\nApply this correction/addition from the agent, then return the FULL updated JSON (same schema): " + extraInstruction;
+    }
+    if (landmarks && landmarks.length) {
+      content[0].text += "\n\nNEARBY LANDMARKS (real, computed by driving distance from the property's " +
+        "map pin — use these naturally in shortDesc/fullDesc, e.g. '...ห่างจาก {name} ขับรถเพียง " +
+        "{durationText}...'. Don't list all of them mechanically; weave in the 2-4 most compelling/well-known " +
+        "ones as natural selling points):\n" +
+        landmarks.map((l) => "- " + l.name + ": " + l.distanceText + ", ประมาณ " + l.durationText + " (ขับรถ)").join("\n");
     }
     this.state.photos.forEach((p) => {
       content.push({ type: "image", source: { type: "base64", media_type: "image/webp", data: p.dataUrl.split(",")[1] } });
@@ -606,7 +722,21 @@ class Component extends DCLogic {
 
     this.setState({ generating: true, genError: "" });
     try {
-      const content = this.buildMessageContent(null);
+      let landmarks = this.state.landmarks;
+      const coords = parseLatLngFromMapsLink(this.state.mapsLink);
+      if (coords && !landmarks) {
+        this.setState({ landmarksLoading: true, landmarksError: "" });
+        try {
+          landmarks = await fetchNearbyLandmarks(coords);
+          this.setState({ landmarks, landmarksLoading: false });
+        } catch (e) {
+          console.warn("Landmark lookup failed:", e);
+          this.setState({ landmarksLoading: false, landmarksError: "ค้นหาสถานที่ใกล้เคียงไม่สำเร็จ — จะร่างประกาศต่อโดยไม่มีข้อมูลนี้" });
+        }
+      } else if (this.state.mapsLink.trim() && !coords) {
+        this.setState({ landmarksError: "ไม่พบพิกัดในลิงก์นี้ — เปิดลิงก์นี้ในเบราว์เซอร์ก่อน แล้ววางลิงก์เต็มจาก address bar (ต้องมีตัวเลขพิกัดอยู่ในลิงก์)" });
+      }
+      const content = this.buildMessageContent(null, landmarks);
       const text = await this.callAI(content);
       const parsed = this.parseJsonResponse(text);
       const translations = await this.translateDraft(parsed);
@@ -641,7 +771,7 @@ class Component extends DCLogic {
 
     this.setState({ refining: true, refineError: "" });
     try {
-      const content = this.buildMessageContent(this.state.refineText);
+      const content = this.buildMessageContent(this.state.refineText, this.state.landmarks);
       const text = await this.callAI(content);
       const parsed = this.parseJsonResponse(text);
       const translations = await this.translateDraft(parsed);
@@ -680,6 +810,12 @@ class Component extends DCLogic {
     this.setState({ step: "owner" });
   }
 
+  async uploadOwnerPhoto(slot, file) {
+    if (!file) return;
+    const dataUrl = await this._fb.fileToDataUrl(file, 400);
+    this.setState({ [slot]: dataUrl });
+  }
+
   async publish() {
     if (!this.state.ownerName.trim() || !this.state.ownerPhone.trim()) {
       this.setState({ ownerError: "กรุณากรอกชื่อและเบอร์โทรเจ้าของทรัพย์อย่างน้อย" });
@@ -698,6 +834,8 @@ class Component extends DCLogic {
         email: this.state.ownerEmail, line: this.state.ownerLine, notes: this.state.ownerNotes,
         photo1: "", photo2: "",
       });
+      if (this.state.ownerPhoto1) await this._fb.saveProfilePhoto("owner-photo-" + ownerId + "-1", this.state.ownerPhoto1);
+      if (this.state.ownerPhoto2) await this._fb.saveProfilePhoto("owner-photo-" + ownerId + "-2", this.state.ownerPhoto2);
 
       const built = {
         id, area: d.area, zone: d.zone, type: d.type, status: d.status,
@@ -705,7 +843,7 @@ class Component extends DCLogic {
         landSize: Number(d.landSize) || null, livingArea: Number(d.livingArea) || null,
         bedrooms: Number(d.bedrooms) || 0, bathrooms: Number(d.bathrooms) || 0, parking: Number(d.parking) || 0,
         pool: d.pool, furnished: d.furnished, ownership: d.ownership,
-        distanceBeach: Number(d.distanceBeach) || 0, distanceTown: Number(d.distanceTown) || 0, mapLink: "",
+        distanceBeach: Number(d.distanceBeach) || 0, distanceTown: Number(d.distanceTown) || 0, mapLink: this.state.mapsLink || "",
         features: d.features,
         title: { th: d.title, en: (t.en && t.en.title) || d.title, ru: (t.ru && t.ru.title) || d.title, zh: (t.zh && t.zh.title) || d.title, de: (t.de && t.de.title) || d.title, no: (t.no && t.no.title) || d.title },
         shortDesc: { th: d.shortDesc, en: (t.en && t.en.shortDesc) || d.shortDesc, ru: (t.ru && t.ru.shortDesc) || d.shortDesc, zh: (t.zh && t.zh.shortDesc) || d.shortDesc, de: (t.de && t.de.shortDesc) || d.shortDesc, no: (t.no && t.no.shortDesc) || d.shortDesc },
@@ -769,19 +907,28 @@ class Component extends DCLogic {
         "- Pool: " + (built.pool ? "yes" : "no") + ", Furnished: " + built.furnished + "\n" +
         "- Features: " + (built.features || []).join(", ") + "\n" +
         "- Description (Thai): " + built.shortDesc.th + " " + built.fullDesc.th + "\n\n" +
-        "Output format, in this EXACT order:\n" +
-        "1. First line, exactly: 🇹🇭 (ภาษาไทยด้านล่าง)\n" +
-        "2. Then the ENGLISH caption block: a keyword-optimized headline line, then a genuine descriptive " +
-        "marketing paragraph/bullet-list covering the property's key selling points, layout, rooms, and " +
-        "features (not just bare facts — write it like real marketing copy a buyer would enjoy reading, " +
-        "similar in spirit to the Thai description provided above but adapted naturally to English).\n" +
-        "3. Then a blank line, then the THAI caption block: a keyword-optimized headline line, then a " +
-        "genuine descriptive marketing paragraph/bullet-list in Thai (again real descriptive copy, not just " +
-        "a bare fact list) — a natural adaptation, not a literal translation of the English block.\n" +
-        "4. Then a blank line, then exactly 10 relevant hashtags for this specific listing (mix of location, property type, and feature hashtags, e.g. #HuaHinVilla #PoolVillaForSale — tailor them to this listing, don't reuse a generic fixed set).\n\n" +
+        "Output format, in this EXACT order — use the literal delimiter lines shown (===THAI=== and ===HASHTAGS===) so the caption can be reassembled programmatically:\n" +
+        "1. The ENGLISH caption block: FIRST a keyword-optimized headline line (this must be the very " +
+        "first line — nothing before it), then on the line immediately after the headline put exactly: " +
+        "🇹🇭 (ภาษาไทยด้านล่าง), then a blank line, then a genuine descriptive marketing paragraph/bullet-list " +
+        "covering the property's key selling points, layout, rooms, and features (not just bare facts — " +
+        "write it like real marketing copy a buyer would enjoy reading, similar in spirit to the Thai " +
+        "description provided above but adapted naturally to English).\n" +
+        "2. Then on its own line, exactly: ===THAI===\n" +
+        "3. Then the THAI caption block: a keyword-optimized headline line, then a genuine descriptive " +
+        "marketing paragraph/bullet-list in Thai (again real descriptive copy, not just a bare fact list) " +
+        "— a natural adaptation, not a literal translation of the English block.\n" +
+        "4. Then on its own line, exactly: ===HASHTAGS===\n" +
+        "5. Then exactly 10 relevant hashtags for this specific listing (mix of location, property type, and feature hashtags, e.g. #HuaHinVilla #PoolVillaForSale — tailor them to this listing, don't reuse a generic fixed set).\n\n" +
         "Return ONLY that content — no JSON, no extra commentary, no contact info (contact info is added separately after your output).";
-      const caption = await this.callAI([{ type: "text", text: prompt }]);
-      const full = caption.trim() + "\n\n" + footer;
+      const raw = await this.callAI([{ type: "text", text: prompt }]);
+      // Reassemble in the exact order requested: EN+TH body first, then the
+      // fixed contact-info footer, then the hashtags at the very bottom —
+      // so hashtags don't crowd the top of the post above the fold.
+      const hashSplit = raw.split("===HASHTAGS===");
+      const bodyPart = (hashSplit[0] || raw).replace("===THAI===", "").trim();
+      const hashtagsPart = (hashSplit[1] || "").trim();
+      const full = bodyPart + "\n\n" + footer + (hashtagsPart ? "\n\n" + hashtagsPart : "");
       this.setState({ fbCaptionLoading: false, fbCaption: full });
     } catch (e) {
       console.warn("Facebook caption generation failed:", e);
@@ -803,9 +950,11 @@ class Component extends DCLogic {
     this.setState({
       step: "form", photos: [], docFiles: [],
       ownerName: "", ownerPhone: "", ownerEmail: "", ownerLine: "", ownerNotes: "", ownerError: "",
+      ownerPhoto1: null, ownerPhoto2: null,
       transcript: "", generating: false, genError: "", draft: null,
       refineText: "", refining: false, refineError: "", publishing: false, newPropertyId: "",
       fbCaption: "", fbCaptionLoading: false, fbCaptionError: "", fbCaptionCopied: false,
+      mapsLink: "", landmarksLoading: false, landmarksError: "", landmarks: null,
     });
   }
 
@@ -874,6 +1023,12 @@ class Component extends DCLogic {
         onRemove: () => this.removeDoc(i),
       })),
       onDocFile: (e) => this.onDocFile(e),
+      mapsLink: this.state.mapsLink,
+      onMapsLink: (e) => this.setState({ mapsLink: e.target.value, landmarks: null, landmarksError: "" }),
+      landmarksLoading: this.state.landmarksLoading,
+      landmarksError: this.state.landmarksError,
+      hasLandmarks: !!(this.state.landmarks && this.state.landmarks.length),
+      landmarksCount: this.state.landmarks ? this.state.landmarks.length : 0,
       transcript: this.state.transcript,
       onTranscript: (e) => this.setState({ transcript: e.target.value }),
       micError: this.state.micError,
@@ -896,6 +1051,10 @@ class Component extends DCLogic {
       ownerLine: this.state.ownerLine, onOwnerLine: (e) => this.setState({ ownerLine: e.target.value }),
       ownerNotes: this.state.ownerNotes, onOwnerNotes: (e) => this.setState({ ownerNotes: e.target.value }),
       ownerError: this.state.ownerError,
+      ownerPhoto1Style: { position: "relative", width: "110px", height: "110px", borderRadius: "8px", overflow: "hidden", cursor: "pointer", background: this.state.ownerPhoto1 ? `url('${this.state.ownerPhoto1}') center/cover` : "oklch(90% 0.01 70)" },
+      ownerPhoto2Style: { position: "relative", width: "110px", height: "110px", borderRadius: "8px", overflow: "hidden", cursor: "pointer", background: this.state.ownerPhoto2 ? `url('${this.state.ownerPhoto2}') center/cover` : "oklch(90% 0.01 70)" },
+      onOwnerPhoto1File: (e) => this.uploadOwnerPhoto("ownerPhoto1", e.target.files && e.target.files[0]),
+      onOwnerPhoto2File: (e) => this.uploadOwnerPhoto("ownerPhoto2", e.target.files && e.target.files[0]),
       newPropertyId: this.state.newPropertyId,
       onAddAnother: () => this.resetAll(),
       fbCaptionLoading: this.state.fbCaptionLoading,
