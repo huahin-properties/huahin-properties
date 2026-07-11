@@ -517,6 +517,15 @@ function landmarksBlockEnglish(landmarks) {
     landmarks.map((l) => "- " + l.name + ", about " + l.distanceText + ", approximately " + l.durationText + " by car").join("\n\n");
 }
 
+// Thai counterpart, built deterministically (not by the AI) so the Facebook
+// caption always lists all landmarks with consistent formatting, matching
+// the "สถานที่ใกล้เคียง:" block already shown on the website.
+function landmarksBlockThai(landmarks) {
+  if (!landmarks || !landmarks.length) return "";
+  return "\n\nสถานที่ใกล้เคียง:\n\n" +
+    landmarks.map((l) => "- " + l.name + " ห่างประมาณ " + l.distanceText + " ใช้เวลาเดินทางโดยรถยนต์ประมาณ " + l.durationText).join("\n\n");
+}
+
 const DRAFT_TOOL = {
   name: "submit_property_draft",
   description: "Submit the structured property listing draft, in English.",
@@ -880,6 +889,7 @@ class Component extends DCLogic {
   appendLandmarksToDraft(parsed, landmarks) {
     if (!landmarks || !landmarks.length) return;
     parsed.fullDesc = (parsed.fullDesc || "") + landmarksBlockEnglish(landmarks);
+    this._lastLandmarks = landmarks;
   }
 
   setDraftFromAI(parsed, translations) {
@@ -896,7 +906,7 @@ class Component extends DCLogic {
         fullDesc: (translations.th && translations.th.fullDesc) || parsed.fullDesc || "",
         seoKeywords: parsed.seoKeywords || "",
         photoCaptions: parsed.photoCaptions || [], internalNotes: parsed.internalNotes || "",
-        masterEn: { title: parsed.title || "", shortDesc: parsed.shortDesc || "", fullDesc: parsed.fullDesc || "" },
+        masterEn: { title: parsed.title || "", shortDesc: parsed.shortDesc || "", fullDesc: parsed.fullDesc || "", ownership: parsed.ownership || "" },
         translations,
         _raw: parsed,
       },
@@ -1063,8 +1073,19 @@ class Component extends DCLogic {
       // fixed contact-info footer, then the hashtags at the very bottom —
       // so hashtags don't crowd the top of the post above the fold.
       const hashSplit = raw.split("===HASHTAGS===");
-      const bodyPart = (hashSplit[0] || raw).replace("===THAI===", "").trim();
+      let bodyPart = (hashSplit[0] || raw).replace("===THAI===", "\n\n===THAI===\n\n").trim();
       const hashtagsPart = (hashSplit[1] || "").trim();
+      // The AI tends to summarize/drop most of the nearby-landmarks list when
+      // writing free-text marketing copy. Since the deterministic list is
+      // already known (same data used on the website), append it verbatim
+      // here instead of trusting the AI to reproduce all entries — this
+      // guarantees every landmark appears in both languages every time.
+      const landmarksForCaption = this._lastLandmarks || this.state.landmarks;
+      if (landmarksForCaption && landmarksForCaption.length) {
+        const [enBody, thBody] = bodyPart.split("===THAI===").map((s) => s.trim());
+        bodyPart = enBody + landmarksBlockEnglish(landmarksForCaption) +
+          "\n\n===THAI===\n\n" + thBody + landmarksBlockThai(landmarksForCaption);
+      }
       const full = bodyPart + "\n\n" + footer + (hashtagsPart ? "\n\n" + hashtagsPart : "");
       this.setState({ fbCaptionLoading: false, fbCaption: full });
     } catch (e) {
