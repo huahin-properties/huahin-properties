@@ -44,9 +44,25 @@
         </div>
       </div>
 
+      <!-- MAP LINK -->
+      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-bottom:20px;">
+        <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:4px;">1. พิกัดแผนที่ (ถ้ามี)</div>
+        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">วางพิกัดบ้านแบบตัวเลข เช่น <b>12.558940,99.909039</b> (ตัวอย่างนี้ — ใช้รูปแบบนี้เสมอ) AI จะค้นหาสถานที่ใกล้เคียงที่มีคนค้นหาบ่อย พร้อมระยะทาง/เวลาขับรถอัตโนมัติ</div>
+        <input value="{{ mapsLink }}" onChange="{{ onMapsLink }}" placeholder="12.558940,99.909039" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+        <sc-if value="{{ landmarksLoading }}">
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-top:8px;">⏳ กำลังค้นหาสถานที่ใกล้เคียง…</div>
+        </sc-if>
+        <sc-if value="{{ landmarksError }}">
+          <div style="font-size:12px; color:oklch(50% 0.18 30); margin-top:8px;">{{ landmarksError }}</div>
+        </sc-if>
+        <sc-if value="{{ hasLandmarks }}">
+          <div style="font-size:12px; color:oklch(40% 0.12 145); margin-top:8px;">✓ พบสถานที่ใกล้เคียง {{ landmarksCount }} แห่ง จะนำไปใช้ในคำบรรยายอัตโนมัติ</div>
+        </sc-if>
+      </div>
+
       <!-- PHOTOS -->
       <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-bottom:20px;">
-        <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:4px;">1. รูปภาพทรัพย์</div>
+        <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:4px;">2. รูปภาพทรัพย์</div>
         <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">รูปแรกที่อัปโหลดจะเป็นภาพปกเสมอ เลือกได้หลายรูปพร้อมกัน — AI จะตั้งชื่อ/คำบรรยายแต่ละรูปให้เป็นมิตรกับ SEO อัตโนมัติ (เช่น "บ้านสวยหัวหิน HH-109", "บ้านใกล้ทะเลหัวหิน HH-109")</div>
         <label style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; border:2px dashed oklch(85% 0.01 70); border-radius:8px; padding:28px; cursor:pointer; margin-bottom:14px;">
           <input type="file" accept="image/*" multiple="multiple" onChange="{{ onPhotosFile }}" style="display:none;" />
@@ -67,7 +83,7 @@
 
       <!-- DOCUMENT -->
       <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-bottom:20px;">
-        <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:4px;">2. เอกสารโครงการ (ถ้ามี)</div>
+        <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:4px;">3. เอกสารโครงการ (ถ้ามี)</div>
         <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">แบบแปลน / โบรชัวร์ — เพิ่มได้หลายไฟล์ ทั้ง PDF และรูปภาพ AI จะดึงเฉพาะข้อมูลข้อเท็จจริง (ระยะทาง ขนาดห้อง สิ่งอำนวยความสะดวก) — ชื่อโครงการและข้อมูลติดต่อผู้พัฒนาจะไม่ถูกนำไปแสดงต่อสาธารณะ</div>
 
         <sc-for list="{{ docPreviews }}" as="dc" hint-placeholder-count="2">
@@ -83,22 +99,6 @@
           <span style="font-size:20px;">📄</span>
           <span style="font-size:13px; color:oklch(45% 0.02 60);">+ เพิ่มเอกสาร (เลือกได้หลายไฟล์)</span>
         </label>
-      </div>
-
-      <!-- MAP LINK -->
-      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-bottom:20px;">
-        <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:4px;">3. ลิงก์ Google Maps (ถ้ามี)</div>
-        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">วางลิงก์พิกัดบ้าน — AI จะค้นหาสถานที่ใกล้เคียงที่มีคนค้นหาบ่อย พร้อมระยะทาง/เวลาขับรถอัตโนมัติ ใช้ลิงก์แบบเต็มที่มีพิกัด (เปิดลิงก์แชร์สั้นในเบราว์เซอร์ก่อน แล้วคัดลอก URL จาก address bar)</div>
-        <input value="{{ mapsLink }}" onChange="{{ onMapsLink }}" placeholder="https://www.google.com/maps/@12.xxxx,99.xxxx,17z" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
-        <sc-if value="{{ landmarksLoading }}">
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-top:8px;">⏳ กำลังค้นหาสถานที่ใกล้เคียง…</div>
-        </sc-if>
-        <sc-if value="{{ landmarksError }}">
-          <div style="font-size:12px; color:oklch(50% 0.18 30); margin-top:8px;">{{ landmarksError }}</div>
-        </sc-if>
-        <sc-if value="{{ hasLandmarks }}">
-          <div style="font-size:12px; color:oklch(40% 0.12 145); margin-top:8px;">✓ พบสถานที่ใกล้เคียง {{ landmarksCount }} แห่ง จะนำไปใช้ในคำบรรยายอัตโนมัติ</div>
-        </sc-if>
       </div>
 
       <!-- TRANSCRIPT -->
@@ -506,6 +506,22 @@ async function fetchNearbyLandmarks(latLng) {
   return landmarks.slice(0, 10);
 }
 
+// Builds a deterministic, guaranteed-complete bullet list of nearby
+// landmarks (rather than relying on the AI to mention some of them) — one
+// place per line, blank line between each, exactly as requested: "- Name
+// distance, ~duration by car". Appended after AI-generated copy so the
+// count and formatting are always consistent in both languages.
+function landmarksBlockThai(landmarks) {
+  if (!landmarks || !landmarks.length) return "";
+  return "\n\nสถานที่ใกล้เคียง:\n\n" +
+    landmarks.map((l) => "- " + l.name + " ห่างประมาณ " + l.distanceText + " ใช้เวลาขับรถประมาณ " + l.durationText).join("\n\n");
+}
+function landmarksBlockEnglish(landmarks) {
+  if (!landmarks || !landmarks.length) return "";
+  return "\n\nNearby places:\n\n" +
+    landmarks.map((l) => "- " + l.name + ", about " + l.distanceText + ", approximately " + l.durationText + " by car").join("\n\n");
+}
+
 class Component extends DCLogic {
   state = {
     step: "form",
@@ -645,11 +661,11 @@ class Component extends DCLogic {
         "\n\nApply this correction/addition from the agent, then return the FULL updated JSON (same schema): " + extraInstruction;
     }
     if (landmarks && landmarks.length) {
-      content[0].text += "\n\nNEARBY LANDMARKS (real, computed by driving distance from the property's " +
-        "map pin — use these naturally in shortDesc/fullDesc, e.g. '...ห่างจาก {name} ขับรถเพียง " +
-        "{durationText}...'. Don't list all of them mechanically; weave in the 2-4 most compelling/well-known " +
-        "ones as natural selling points):\n" +
-        landmarks.map((l) => "- " + l.name + ": " + l.distanceText + ", ประมาณ " + l.durationText + " (ขับรถ)").join("\n");
+      content[0].text += "\n\nNEARBY LANDMARKS: real nearby places have already been looked up separately " +
+        "and will be appended to the description automatically as a formatted list AFTER your output — " +
+        "do NOT mention specific nearby place names or distances/drive-times yourself in shortDesc/fullDesc " +
+        "(that would duplicate them). You may still reference generic proximity in your own words if natural " +
+        "(e.g. 'located close to town amenities'), just don't name specific places or give specific distances.";
     }
     this.state.photos.forEach((p) => {
       content.push({ type: "image", source: { type: "base64", media_type: "image/webp", data: p.dataUrl.split(",")[1] } });
@@ -740,12 +756,22 @@ class Component extends DCLogic {
       const text = await this.callAI(content);
       const parsed = this.parseJsonResponse(text);
       const translations = await this.translateDraft(parsed);
+      this.appendLandmarksToDraft(parsed, translations, landmarks);
       this.setDraftFromAI(parsed, translations);
       this.setState({ generating: false, step: "preview" });
     } catch (e) {
       console.warn("AI generate failed:", e, e && e.message, e && e.stack);
       this.setState({ generating: false, genError: "AI ประมวลผลไม่สำเร็จ: " + (e && e.message ? e.message : String(e)) });
     }
+  }
+
+  appendLandmarksToDraft(parsed, translations, landmarks) {
+    if (!landmarks || !landmarks.length) return;
+    parsed.fullDesc = (parsed.fullDesc || "") + landmarksBlockThai(landmarks);
+    const enBlock = landmarksBlockEnglish(landmarks);
+    ["en", "ru", "zh", "de", "no"].forEach((lang) => {
+      if (translations[lang]) translations[lang].fullDesc = (translations[lang].fullDesc || "") + enBlock;
+    });
   }
 
   setDraftFromAI(parsed, translations) {
@@ -775,6 +801,7 @@ class Component extends DCLogic {
       const text = await this.callAI(content);
       const parsed = this.parseJsonResponse(text);
       const translations = await this.translateDraft(parsed);
+      this.appendLandmarksToDraft(parsed, translations, this.state.landmarks);
       this.setDraftFromAI(parsed, translations);
       this.setState({ refining: false, refineText: "" });
     } catch (e) {
