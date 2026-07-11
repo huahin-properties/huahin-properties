@@ -517,6 +517,58 @@ function landmarksBlockEnglish(landmarks) {
     landmarks.map((l) => "- " + l.name + ", about " + l.distanceText + ", approximately " + l.durationText + " by car").join("\n\n");
 }
 
+const DRAFT_TOOL = {
+  name: "submit_property_draft",
+  description: "Submit the structured property listing draft, in English.",
+  input_schema: {
+    type: "object",
+    properties: {
+      title: { type: "string", description: "Short catchy English marketing title, also an SEO headline" },
+      zone: { type: "string" },
+      area: { type: "string", enum: ["hua-hin", "pranburi", "cha-am", ""] },
+      type: { type: "string", enum: ["villa", "house", "condo", "land", "commercial"] },
+      status: { type: "string", enum: ["sale", "rent"] },
+      price: { type: ["number", "null"] },
+      landSize: { type: ["number", "null"] },
+      livingArea: { type: ["number", "null"] },
+      bedrooms: { type: ["number", "null"] },
+      bathrooms: { type: ["number", "null"] },
+      parking: { type: ["number", "null"] },
+      pool: { type: "boolean" },
+      furnished: { type: "string", enum: ["full", "partial", "none"] },
+      ownership: { type: "string" },
+      distanceBeach: { type: ["number", "null"] },
+      distanceTown: { type: ["number", "null"] },
+      features: {
+        type: "array",
+        items: { type: "string", enum: ["sea_view", "mountain_view", "pool", "shared_pool", "furnished", "new", "beachfront", "gated", "quiet", "golf", "riverside", "rental_yield", "pet_friendly"] },
+      },
+      shortDesc: { type: "string", description: "1-2 sentence English marketing copy" },
+      fullDesc: { type: "string", description: "Full paragraph of English marketing copy" },
+      seoKeywords: { type: "string", description: "Comma-separated Thai+English search keywords" },
+      photoCaptions: { type: "array", items: { type: "string" } },
+      internalNotes: { type: "string" },
+    },
+    required: ["title", "shortDesc", "fullDesc", "type", "status"],
+  },
+};
+
+const TRANSLATE_TOOL = {
+  name: "submit_translations",
+  description: "Submit the translated listing copy for all 5 target languages.",
+  input_schema: {
+    type: "object",
+    properties: {
+      th: { type: "object", properties: { title: { type: "string" }, shortDesc: { type: "string" }, fullDesc: { type: "string" } }, required: ["title", "shortDesc", "fullDesc"] },
+      ru: { type: "object", properties: { title: { type: "string" }, shortDesc: { type: "string" }, fullDesc: { type: "string" } }, required: ["title", "shortDesc", "fullDesc"] },
+      zh: { type: "object", properties: { title: { type: "string" }, shortDesc: { type: "string" }, fullDesc: { type: "string" } }, required: ["title", "shortDesc", "fullDesc"] },
+      de: { type: "object", properties: { title: { type: "string" }, shortDesc: { type: "string" }, fullDesc: { type: "string" } }, required: ["title", "shortDesc", "fullDesc"] },
+      no: { type: "object", properties: { title: { type: "string" }, shortDesc: { type: "string" }, fullDesc: { type: "string" } }, required: ["title", "shortDesc", "fullDesc"] },
+    },
+    required: ["th", "ru", "zh", "de", "no"],
+  },
+};
+
 class Component extends DCLogic {
   state = {
     step: "form",
@@ -740,31 +792,36 @@ class Component extends DCLogic {
       "Source title (English): " + (parsed.title || "") + "\n" +
       "Source short description (English): " + (parsed.shortDesc || "") + "\n" +
       "Source full description (English): " + (parsed.fullDesc || "");
-    const raw = await this.callAI([{ type: "text", text: prompt }]);
-    return this.parseJsonResponse(raw);
+    return await this.callAIAndParse([{ type: "text", text: prompt }], TRANSLATE_TOOL);
   }
 
   // Calls Claude either via the in-preview window.claude.complete (while
   // working inside claude.ai) or, on the real deployed site, via our
   // Firebase Cloud Function proxy — which holds the real Anthropic API key
   // server-side so it's never exposed in the browser.
-  async callAI(content) {
+  // content: Anthropic content-block array. tool: optional {name, description,
+  // input_schema} — when supplied, the Cloud Function forces Claude to reply
+  // via that tool's structured input, which Anthropic validates server-side
+  // (guaranteed well-formed, unlike free-text JSON parsing). Returns the
+  // parsed object directly when `tool` is used, otherwise the raw text.
+  async callAI(content, tool) {
     if (window.claude && window.claude.complete) {
       const raw = await window.claude.complete({ messages: [{ role: "user", content }], max_tokens: 2000 });
-      return typeof raw === "string" ? raw : (raw && raw.content) || "";
+      const text = typeof raw === "string" ? raw : (raw && raw.content) || "";
+      return tool ? this.parseJsonResponse(text) : text;
     }
     const CLOUD_FUNCTION_URL = "https://claudecomplete-3j4ldf4pja-as.a.run.app";
     const res = await fetch(CLOUD_FUNCTION_URL, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ content }),
+      body: JSON.stringify(tool ? { content, tool } : { content }),
     });
     if (!res.ok) {
       const errBody = await res.json().catch(() => ({}));
       throw new Error(errBody.error || ("AI request failed: " + res.status));
     }
     const data = await res.json();
-    return data.completion || "";
+    return tool ? data.result : (data.completion || "");
   }
 
   // Calls the AI and parses its JSON reply, automatically retrying (fresh
@@ -772,12 +829,12 @@ class Component extends DCLogic {
   // back malformed — occasional AI formatting slips are usually gone on
   // the next attempt, so this avoids surfacing a scary error for a
   // one-off fluke.
-  async callAIAndParse(content) {
+  async callAIAndParse(content, tool) {
     let lastErr;
     for (let attempt = 0; attempt < 3; attempt++) {
       try {
-        const text = await this.callAI(content);
-        return this.parseJsonResponse(text);
+        const result = await this.callAI(content, tool);
+        return tool ? result : this.parseJsonResponse(result);
       } catch (e) {
         lastErr = e;
         console.warn("AI response parse failed (attempt " + (attempt + 1) + "/3):", e);
@@ -809,7 +866,7 @@ class Component extends DCLogic {
         this.setState({ landmarksError: "ไม่พบพิกัดในลิงก์นี้ — เปิดลิงก์นี้ในเบราว์เซอร์ก่อน แล้ววางลิงก์เต็มจาก address bar (ต้องมีตัวเลขพิกัดอยู่ในลิงก์)" });
       }
       const content = this.buildMessageContent(null, landmarks);
-      const parsed = await this.callAIAndParse(content);
+      const parsed = await this.callAIAndParse(content, DRAFT_TOOL);
       this.appendLandmarksToDraft(parsed, landmarks);
       const translations = await this.translateDraft(parsed);
       this.setDraftFromAI(parsed, translations);
@@ -852,7 +909,7 @@ class Component extends DCLogic {
     this.setState({ refining: true, refineError: "" });
     try {
       const content = this.buildMessageContent(this.state.refineText, this.state.landmarks);
-      const parsed = await this.callAIAndParse(content);
+      const parsed = await this.callAIAndParse(content, DRAFT_TOOL);
       this.appendLandmarksToDraft(parsed, this.state.landmarks);
       const translations = await this.translateDraft(parsed);
       this.setDraftFromAI(parsed, translations);
