@@ -681,7 +681,45 @@ class Component extends DCLogic {
   parseJsonResponse(raw) {
     const jsonStart = raw.indexOf("{");
     const jsonEnd = raw.lastIndexOf("}");
-    return JSON.parse(raw.slice(jsonStart, jsonEnd + 1));
+    const slice = raw.slice(jsonStart, jsonEnd + 1);
+    try {
+      return JSON.parse(slice);
+    } catch (e) {
+      // Claude sometimes emits a literal newline/tab inside a JSON string
+      // value instead of an escaped \n — invalid JSON, but easy to repair:
+      // walk the text tracking string/escape state and escape any raw
+      // control character found while inside a string.
+      let fixed = "";
+      let inString = false;
+      let escaped = false;
+      for (let i = 0; i < slice.length; i++) {
+        const ch = slice[i];
+        if (inString) {
+          if (escaped) {
+            fixed += ch;
+            escaped = false;
+          } else if (ch === "\\") {
+            fixed += ch;
+            escaped = true;
+          } else if (ch === '"') {
+            fixed += ch;
+            inString = false;
+          } else if (ch === "\n") {
+            fixed += "\\n";
+          } else if (ch === "\r") {
+            fixed += "\\r";
+          } else if (ch === "\t") {
+            fixed += "\\t";
+          } else {
+            fixed += ch;
+          }
+        } else {
+          fixed += ch;
+          if (ch === '"') inString = true;
+        }
+      }
+      return JSON.parse(fixed);
+    }
   }
 
   async translateDraft(parsed) {
