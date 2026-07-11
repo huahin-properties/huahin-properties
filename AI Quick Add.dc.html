@@ -435,7 +435,7 @@ function loadGoogleMapsWithPlaces() {
     const cbName = "__gmapsQuickAddCb" + Date.now();
     window[cbName] = () => { resolve(); delete window[cbName]; };
     const script = document.createElement("script");
-    script.src = "https://maps.googleapis.com/maps/api/js?key=" + GOOGLE_MAPS_KEY + "&libraries=places&callback=" + cbName;
+    script.src = "https://maps.googleapis.com/maps/api/js?key=" + GOOGLE_MAPS_KEY + "&libraries=places&language=en&callback=" + cbName;
     script.async = true;
     script.onerror = () => reject(new Error("Google Maps script failed to load"));
     document.head.appendChild(script);
@@ -511,11 +511,6 @@ async function fetchNearbyLandmarks(latLng) {
 // place per line, blank line between each, exactly as requested: "- Name
 // distance, ~duration by car". Appended after AI-generated copy so the
 // count and formatting are always consistent in both languages.
-function landmarksBlockThai(landmarks) {
-  if (!landmarks || !landmarks.length) return "";
-  return "\n\nสถานที่ใกล้เคียง:\n\n" +
-    landmarks.map((l) => "- " + l.name + " ห่างประมาณ " + l.distanceText + " ใช้เวลาขับรถประมาณ " + l.durationText).join("\n\n");
-}
 function landmarksBlockEnglish(landmarks) {
   if (!landmarks || !landmarks.length) return "";
   return "\n\nNearby places:\n\n" +
@@ -619,20 +614,20 @@ class Component extends DCLogic {
         "it in title/shortDesc/fullDesc/photoCaptions (public-facing). Put it only in internalNotes, clearly " +
         "labeled. Distances/room sizes/amenities from the document are fine to use publicly.\n\n" +
         "IMPORTANT — LANGUAGE: no matter what language the transcript is in (Thai, English, or mixed), " +
-        "you must UNDERSTAND it and then WRITE title/shortDesc/fullDesc entirely in natural, fluent Thai. " +
-        "Never leave any English sentence untranslated in the Thai fields, and never mix English words into " +
-        "the Thai output except real proper nouns that stay in Latin script (e.g. brand names). This Thai " +
-        "draft is what the agent reviews and confirms is correct BEFORE it gets translated into other " +
-        "languages as a separate later step.\n\n" +
+        "you must UNDERSTAND it and then WRITE title/shortDesc/fullDesc entirely in natural, fluent English. " +
+        "Never leave any Thai sentence untranslated in the English fields, and never mix Thai words into " +
+        "the English output except real proper nouns that stay as-is. This English draft is the master " +
+        "copy — it gets translated into Thai (which the agent reviews) and other languages as a separate " +
+        "later step, so it must be complete and accurate on its own.\n\n" +
         "Return ONLY a JSON object (no markdown) with this exact shape — use null/empty for anything not " +
         "mentioned or not confidently inferable, never invent price/size/room counts:\n" +
-        '{"title":"short catchy Thai marketing title, written to double as an SEO headline (see SEO rules below)","zone":"","area":"hua-hin|pranburi|cha-am|\'\'",' +
+        '{"title":"short catchy English marketing title, written to double as an SEO headline (see SEO rules below)","zone":"","area":"hua-hin|pranburi|cha-am|\'\'",' +
         '"type":"villa|house|condo|land|commercial","status":"sale|rent","price":number|null,' +
         '"landSize":number|null,"livingArea":number|null,"bedrooms":number|null,"bathrooms":number|null,' +
         '"parking":number|null,"pool":true|false,"furnished":"full|partial|none","ownership":"",' +
         '"distanceBeach":number|null,"distanceTown":number|null,' +
         '"features":["from: sea_view,mountain_view,pool,shared_pool,furnished,new,beachfront,gated,quiet,golf,riverside,rental_yield,pet_friendly"],' +
-        '"shortDesc":"1-2 sentence Thai marketing copy, naturally including 1-2 target search keywords","fullDesc":"a full paragraph of Thai marketing copy, naturally weaving in 3-5 target search keywords without keyword-stuffing",' +
+        '"shortDesc":"1-2 sentence English marketing copy, naturally including 1-2 target search keywords","fullDesc":"a full paragraph of English marketing copy, naturally weaving in 3-5 target search keywords without keyword-stuffing",' +
         '"seoKeywords":"comma-separated list of 10-14 Thai+English search keywords this specific listing should rank for. CRITICAL: match keywords to the actual status field — if status is \\"rent\\" use เช่า/ให้เช่า/For Rent/Rent phrasing only (never ขาย/For Sale/Buy); if status is \\"sale\\" use ขาย/For Sale/Buy phrasing only (never เช่า/For Rent). Rotate in Thai phrases that fit from: บ้านหัวหิน, ขายบ้านหัวหิน, บ้านเช่าหัวหิน, ให้เช่าบ้านหัวหิน, บ้านพูลวิลล่าหัวหิน, ขายบ้านพร้อมอยู่, บ้านพร้อมเข้าอยู่, ขายบ้านใกล้ทะเล, บ้านติดทะเลหัวหิน, คอนโดหัวหินวิวทะเล, ที่ดินหัวหิน, บ้านหัวหินราคาถูก, บ้านเดี่ยวหัวหิน, พูลวิลล่าปราณบุรี, บ้านชะอำ (swap in the real area). Rotate in English phrases that fit from: Hua Hin Real Estate, Hua Hin Property, Hua Hin Property For Sale, Hua Hin Property For Rent, Hua Hin Pool Villa, Hua Hin Villa For Sale, Hua Hin House For Rent, Move-in Ready Hua Hin House, Beachfront Property Thailand, Hua Hin Sea View Condo, Buy House Hua Hin, Rent House Hua Hin, Thailand Property Investment. Pick only what genuinely fits this listing\'s real area/type/status — never force an irrelevant one.",' +
         '"photoCaptions":["one per photo IN ORDER, see SEO rules below"],' +
         '"internalNotes":"project/developer info found in the document, or empty string"}\n\n' +
@@ -691,18 +686,22 @@ class Component extends DCLogic {
 
   async translateDraft(parsed) {
     const prompt =
-      "Translate this Thai real-estate listing copy into 5 languages: English (en), Russian (ru), " +
+      "Translate this English real-estate listing copy into 5 languages: Thai (th), Russian (ru), " +
       "Simplified Chinese (zh), German (de), and Norwegian Bokmal (no).\n\nSTRICT RULES:\n" +
       "- Each translation must be written ENTIRELY in its own script/language — never mix characters from " +
-      "one language into another's output.\n" +
-      "- Place names stay in Latin script in every language.\n" +
-      "- Marketing titles should be fully translated into natural real-estate phrasing, not left in Thai.\n" +
+      "one language into another's output (this applies to EVERY sentence, including any 'nearby places' " +
+      "distance/duration list at the end of fullDesc — translate 'about X km, approximately Y mins by car' " +
+      "into natural phrasing in each target language too, not left in English).\n" +
+      "- Place/landmark proper names stay in Latin script (or their well-known local-script form) in every " +
+      "language, but all surrounding words (units, connecting phrases) must be in that language.\n" +
+      "- Marketing titles should be fully translated into natural real-estate phrasing for that language, " +
+      "written to work as a local SEO headline too — not a literal word-for-word translation.\n" +
       "- Keep numbers and property codes as-is.\n\n" +
       "Respond with ONLY a JSON object, no markdown:\n" +
-      '{"en":{"title":"...","shortDesc":"...","fullDesc":"..."},"ru":{...},"zh":{...},"de":{...},"no":{...}}\n\n' +
-      "Source title (Thai): " + (parsed.title || "") + "\n" +
-      "Source short description (Thai): " + (parsed.shortDesc || "") + "\n" +
-      "Source full description (Thai): " + (parsed.fullDesc || "");
+      '{"th":{"title":"...","shortDesc":"...","fullDesc":"..."},"ru":{...},"zh":{...},"de":{...},"no":{...}}\n\n' +
+      "Source title (English): " + (parsed.title || "") + "\n" +
+      "Source short description (English): " + (parsed.shortDesc || "") + "\n" +
+      "Source full description (English): " + (parsed.fullDesc || "");
     const raw = await this.callAI([{ type: "text", text: prompt }]);
     return this.parseJsonResponse(raw);
   }
@@ -755,8 +754,8 @@ class Component extends DCLogic {
       const content = this.buildMessageContent(null, landmarks);
       const text = await this.callAI(content);
       const parsed = this.parseJsonResponse(text);
+      this.appendLandmarksToDraft(parsed, landmarks);
       const translations = await this.translateDraft(parsed);
-      this.appendLandmarksToDraft(parsed, translations, landmarks);
       this.setDraftFromAI(parsed, translations);
       this.setState({ generating: false, step: "preview" });
     } catch (e) {
@@ -765,27 +764,26 @@ class Component extends DCLogic {
     }
   }
 
-  appendLandmarksToDraft(parsed, translations, landmarks) {
+  appendLandmarksToDraft(parsed, landmarks) {
     if (!landmarks || !landmarks.length) return;
-    parsed.fullDesc = (parsed.fullDesc || "") + landmarksBlockThai(landmarks);
-    const enBlock = landmarksBlockEnglish(landmarks);
-    ["en", "ru", "zh", "de", "no"].forEach((lang) => {
-      if (translations[lang]) translations[lang].fullDesc = (translations[lang].fullDesc || "") + enBlock;
-    });
+    parsed.fullDesc = (parsed.fullDesc || "") + landmarksBlockEnglish(landmarks);
   }
 
   setDraftFromAI(parsed, translations) {
     this.setState({
       draft: {
-        title: parsed.title || "", zone: parsed.zone || "",
+        title: (translations.th && translations.th.title) || parsed.title || "", zone: parsed.zone || "",
         area: parsed.area || "hua-hin", type: parsed.type || "villa", status: parsed.status || "sale",
         price: parsed.price || 0, landSize: parsed.landSize || 0, livingArea: parsed.livingArea || 0,
         bedrooms: parsed.bedrooms || 0, bathrooms: parsed.bathrooms || 0, parking: parsed.parking || 0,
         pool: !!parsed.pool, furnished: parsed.furnished || "full", ownership: parsed.ownership || "",
         distanceBeach: parsed.distanceBeach || 0, distanceTown: parsed.distanceTown || 0,
-        features: parsed.features || [], shortDesc: parsed.shortDesc || "", fullDesc: parsed.fullDesc || "",
+        features: parsed.features || [],
+        shortDesc: (translations.th && translations.th.shortDesc) || parsed.shortDesc || "",
+        fullDesc: (translations.th && translations.th.fullDesc) || parsed.fullDesc || "",
         seoKeywords: parsed.seoKeywords || "",
         photoCaptions: parsed.photoCaptions || [], internalNotes: parsed.internalNotes || "",
+        masterEn: { title: parsed.title || "", shortDesc: parsed.shortDesc || "", fullDesc: parsed.fullDesc || "" },
         translations,
         _raw: parsed,
       },
@@ -800,8 +798,8 @@ class Component extends DCLogic {
       const content = this.buildMessageContent(this.state.refineText, this.state.landmarks);
       const text = await this.callAI(content);
       const parsed = this.parseJsonResponse(text);
+      this.appendLandmarksToDraft(parsed, this.state.landmarks);
       const translations = await this.translateDraft(parsed);
-      this.appendLandmarksToDraft(parsed, translations, this.state.landmarks);
       this.setDraftFromAI(parsed, translations);
       this.setState({ refining: false, refineText: "" });
     } catch (e) {
@@ -872,10 +870,10 @@ class Component extends DCLogic {
         pool: d.pool, furnished: d.furnished, ownership: d.ownership,
         distanceBeach: Number(d.distanceBeach) || 0, distanceTown: Number(d.distanceTown) || 0, mapLink: this.state.mapsLink || "",
         features: d.features,
-        title: { th: d.title, en: (t.en && t.en.title) || d.title, ru: (t.ru && t.ru.title) || d.title, zh: (t.zh && t.zh.title) || d.title, de: (t.de && t.de.title) || d.title, no: (t.no && t.no.title) || d.title },
-        shortDesc: { th: d.shortDesc, en: (t.en && t.en.shortDesc) || d.shortDesc, ru: (t.ru && t.ru.shortDesc) || d.shortDesc, zh: (t.zh && t.zh.shortDesc) || d.shortDesc, de: (t.de && t.de.shortDesc) || d.shortDesc, no: (t.no && t.no.shortDesc) || d.shortDesc },
-        fullDesc: { th: d.fullDesc, en: (t.en && t.en.fullDesc) || d.fullDesc, ru: (t.ru && t.ru.fullDesc) || d.fullDesc, zh: (t.zh && t.zh.fullDesc) || d.fullDesc, de: (t.de && t.de.fullDesc) || d.fullDesc, no: (t.no && t.no.fullDesc) || d.fullDesc },
-        seo: { title: d.title, desc: d.shortDesc, keywords: d.seoKeywords || "" },
+        title: { th: d.title, en: d.masterEn.title, ru: (t.ru && t.ru.title) || d.masterEn.title, zh: (t.zh && t.zh.title) || d.masterEn.title, de: (t.de && t.de.title) || d.masterEn.title, no: (t.no && t.no.title) || d.masterEn.title },
+        shortDesc: { th: d.shortDesc, en: d.masterEn.shortDesc, ru: (t.ru && t.ru.shortDesc) || d.masterEn.shortDesc, zh: (t.zh && t.zh.shortDesc) || d.masterEn.shortDesc, de: (t.de && t.de.shortDesc) || d.masterEn.shortDesc, no: (t.no && t.no.shortDesc) || d.masterEn.shortDesc },
+        fullDesc: { th: d.fullDesc, en: d.masterEn.fullDesc, ru: (t.ru && t.ru.fullDesc) || d.masterEn.fullDesc, zh: (t.zh && t.zh.fullDesc) || d.masterEn.fullDesc, de: (t.de && t.de.fullDesc) || d.masterEn.fullDesc, no: (t.no && t.no.fullDesc) || d.masterEn.fullDesc },
+        seo: { title: d.masterEn.title, desc: d.masterEn.shortDesc, keywords: d.seoKeywords || "" },
         ownerId,
         adminNotes: d.internalNotes || "",
         photos: this.state.photos.map((p, i) => ({
@@ -933,7 +931,7 @@ class Component extends DCLogic {
         "- Bedrooms: " + built.bedrooms + ", Bathrooms: " + built.bathrooms + ", Parking: " + built.parking + "\n" +
         "- Pool: " + (built.pool ? "yes" : "no") + ", Furnished: " + built.furnished + "\n" +
         "- Features: " + (built.features || []).join(", ") + "\n" +
-        "- Description (Thai): " + built.shortDesc.th + " " + built.fullDesc.th + "\n\n" +
+        "- Description (English): " + built.shortDesc.en + " " + built.fullDesc.en + "\n\n" +
         "Output format, in this EXACT order — use the literal delimiter lines shown (===THAI=== and ===HASHTAGS===) so the caption can be reassembled programmatically:\n" +
         "1. The ENGLISH caption block: FIRST a keyword-optimized headline line (this must be the very " +
         "first line — nothing before it), then on the line immediately after the headline put exactly: " +
