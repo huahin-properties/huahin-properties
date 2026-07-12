@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:fixed; top:0; left:0; width:0; height:0; z-index:9999;">
+  <!-- ============ COLLAPSIBLE SIDE RAIL ============ -->
+  <!-- Toggle arrow stays pinned at the edge always (never slides away) so a
+       collapsed rail can still be reopened. Only the 3 tabs below it slide. -->
+  <div style="position:fixed; top:50%; right:0; transform:translateY(-160px); z-index:61;">
+    <div onClick="{{ onToggle }}" style="width:26px; height:44px; background:oklch(22% 0.02 60); border-radius:6px 0 0 6px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:-2px 2px 8px oklch(0% 0 0 / 0.15);">
+      <div style="color:oklch(97% 0.01 80); font-size:14px; transform:{{ arrowRotate }};">→</div>
+    </div>
+  </div>
+  <div style="position:fixed; top:50%; right:0; transform:translateY(-104px) {{ railTransform }}; transition:transform .28s ease; z-index:60; display:flex; flex-direction:column; align-items:flex-end;">
+    <!-- CONTACT US vertical tab -> opens form -->
+    <div onClick="{{ onOpenForm }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:16px 8px; border-radius:6px 0 0 6px; writing-mode:vertical-rl; text-orientation:mixed; font-size:12px; letter-spacing:0.12em; cursor:pointer; box-shadow:-2px 2px 8px oklch(0% 0 0 / 0.12);">{{ t.rail_contact_us }}</div>
+    <!-- LINE bubble -->
+    <a href="{{ lineUrl }}" target="_blank" rel="noopener" style="margin-top:10px; width:48px; height:48px; border-radius:50% 0 0 50%; background:#06C755; display:flex; align-items:center; justify-content:center; text-decoration:none; box-shadow:-2px 2px 8px oklch(0% 0 0 / 0.15);">
+      <span style="color:#fff; font-size:11px; font-weight:700; font-family:'Work Sans',sans-serif;">LINE</span>
+    </a>
+    <!-- WhatsApp pill -->
+    <a href="{{ whatsappUrl }}" target="_blank" rel="noopener" style="margin-top:10px; background:#25D366; color:#fff; padding:14px 16px; border-radius:6px 0 0 6px; text-decoration:none; font-size:13px; font-family:'Work Sans',sans-serif; font-weight:600; display:flex; align-items:center; gap:8px; box-shadow:-2px 2px 8px oklch(0% 0 0 / 0.15);">
+      WhatsApp
+    </a>
+  </div>
+
+  <!-- ============ PERSISTENT CHAT BUBBLE (always visible) ============ -->
+  <div style="position:fixed; right:20px; bottom:20px; z-index:70; display:flex; align-items:center; gap:10px;">
+    <sc-if value="{{ chatHintVisible }}">
+      <div onClick="{{ onOpenForm }}" style="background:#fff; color:oklch(25% 0.02 60); padding:10px 16px; border-radius:100px; font-size:14px; font-family:'Work Sans',sans-serif; box-shadow:0 4px 16px oklch(0% 0 0 / 0.15); cursor:pointer; white-space:nowrap;">{{ t.rail_chat_hint }} 👋</div>
+    </sc-if>
+    <div onClick="{{ onOpenForm }}" style="width:52px; height:52px; border-radius:50%; background:oklch(22% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 16px oklch(0% 0 0 / 0.2); font-size:22px;">
+      <span style="color:oklch(97% 0.01 80);">💬</span>
+    </div>
+  </div>
+
+  <!-- ============ CONTACT FORM MODAL ============ -->
+  <sc-if value="{{ formOpen }}">
+    <div onClick="{{ onCloseForm }}" style="position:fixed; inset:0; background:oklch(15% 0.01 60 / 0.5); z-index:80; display:flex; align-items:center; justify-content:center; padding:20px;">
+      <div onClick="{{ stopProp }}" style="background:oklch(99% 0.005 80); border-radius:8px; padding:28px; width:100%; max-width:420px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px oklch(0% 0 0 / 0.3);">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
+          <div style="font-family:'Playfair Display',serif; font-size:22px; color:oklch(20% 0.02 60);">{{ t.rail_form_title }}</div>
+          <div onClick="{{ onCloseForm }}" style="font-size:24px; line-height:1; color:oklch(50% 0.02 60); cursor:pointer; padding:4px;">&times;</div>
+        </div>
+        <sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center; padding:30px 10px; color:oklch(35% 0.02 60); font-size:15px; line-height:1.6;">{{ t.rail_form_success }}</div>
+        </sc-if>
+        <sc-if value="{{ notSubmitted }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <input value="{{ name }}" onChange="{{ onName }}" placeholder="{{ t.name_label }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit; box-sizing:border-box;" />
+            <input value="{{ phone }}" onChange="{{ onPhone }}" placeholder="{{ t.phone_label }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit; box-sizing:border-box;" />
+            <input value="{{ email }}" onChange="{{ onEmail }}" placeholder="{{ t.email_label }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit; box-sizing:border-box;" />
+            <textarea value="{{ message }}" onChange="{{ onMessage }}" placeholder="{{ t.message_label }}" rows="4" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit; box-sizing:border-box; resize:vertical;"></textarea>
+            <div onClick="{{ onSubmit }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); text-align:center; padding:13px; border-radius:4px; font-size:14px; font-weight:600; cursor:pointer; margin-top:4px;">{{ t.send }}</div>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+              <a href="{{ telUrl }}" style="flex:1; text-align:center; border:1px solid oklch(80% 0.01 70); color:oklch(30% 0.02 60); padding:11px; border-radius:4px; font-size:13px; text-decoration:none;">{{ t.call }}</a>
+              <a href="{{ whatsappUrl }}" target="_blank" rel="noopener" style="flex:1; text-align:center; background:#25D366; color:#fff; padding:11px; border-radius:4px; font-size:13px; text-decoration:none;">{{ t.whatsapp }}</a>
+              <a href="{{ lineUrl }}" target="_blank" rel="noopener" style="flex:1; text-align:center; background:#06C755; color:#fff; padding:11px; border-radius:4px; font-size:13px; text-decoration:none;">{{ t.line_app }}</a>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 120, &quot;height&quot;: 400}, &quot;phone&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;+6632000000&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;lineUrl&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;https://line.me/ti/p/huahinproperties&quot;, &quot;tsType&quot;: &quot;string&quot;}}">
+const I18N_RAIL = {
+  en: { rail_contact_us: "CONTACT US", rail_chat_hint: "Chat with us", rail_form_title: "Send us a message", rail_form_success: "Thank you — we'll be in touch within 24 hours." },
+  th: { rail_contact_us: "ติดต่อเรา", rail_chat_hint: "แชทกับเรา", rail_form_title: "ส่งข้อความถึงเรา", rail_form_success: "ขอบคุณครับ — เราจะติดต่อกลับภายใน 24 ชั่วโมง" },
+  ru: { rail_contact_us: "СВЯЗЬ С НАМИ", rail_chat_hint: "Написать нам", rail_form_title: "Отправить сообщение", rail_form_success: "Спасибо — мы свяжемся с вами в течение 24 часов." },
+  zh: { rail_contact_us: "联系我们", rail_chat_hint: "在线咨询", rail_form_title: "给我们发消息", rail_form_success: "谢谢 — 我们将在24小时内与您联系。" },
+  de: { rail_contact_us: "KONTAKT", rail_chat_hint: "Chatten Sie mit uns", rail_form_title: "Senden Sie uns eine Nachricht", rail_form_success: "Danke — wir melden uns innerhalb von 24 Stunden." },
+  no: { rail_contact_us: "KONTAKT OSS", rail_chat_hint: "Chat med oss", rail_form_title: "Send oss en melding", rail_form_success: "Takk — vi tar kontakt innen 24 timer." },
+  fr: { rail_contact_us: "CONTACTEZ-NOUS", rail_chat_hint: "Discutez avec nous", rail_form_title: "Envoyez-nous un message", rail_form_success: "Merci — nous vous répondrons sous 24 heures." },
+  it: { rail_contact_us: "CONTATTACI", rail_chat_hint: "Chatta con noi", rail_form_title: "Inviaci un messaggio", rail_form_success: "Grazie — ti risponderemo entro 24 ore." },
+};
+
+class Component extends DCLogic {
+  state = {
+    railOpen: true, formOpen: false, submitted: false,
+    name: "", phone: "", email: "", message: "",
+    lang: "th",
+  };
+
+  componentDidMount() {
+    try {
+      const collapsed = localStorage.getItem("contactRailCollapsed") === "1";
+      this.setState({ railOpen: !collapsed });
+    } catch (e) {}
+    const syncLang = () => {
+      import("./data.js").then((mod) => {
+        this._mod = mod;
+        this.setState({ lang: mod.getLang() });
+      }).catch(() => {});
+    };
+    syncLang();
+    this._onStorage = syncLang;
+    window.addEventListener("storage", this._onStorage);
+    window.addEventListener("langchange", this._onStorage);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("storage", this._onStorage);
+    window.removeEventListener("langchange", this._onStorage);
+  }
+
+  toggle() {
+    const next = !this.state.railOpen;
+    this.setState({ railOpen: next });
+    try { localStorage.setItem("contactRailCollapsed", next ? "0" : "1"); } catch (e) {}
+  }
+
+  submit() {
+    if (!this.state.name.trim() || !this.state.phone.trim()) return;
+    this.setState({ submitted: true });
+    setTimeout(() => this.setState({ formOpen: false, submitted: false, name: "", phone: "", email: "", message: "" }), 2200);
+  }
+
+  renderVals() {
+    const phone = this.props.phone || "+6632000000";
+    const whatsappNumber = phone.replace(/[^\d]/g, "");
+    const lineUrl = this.props.lineUrl || "https://line.me/ti/p/huahinproperties";
+    const t = I18N_RAIL[this.state.lang] || I18N_RAIL.en;
+    // Reuse the site's own full I18N dictionary for the shared field/button
+    // labels (name/phone/email/message/send/call/whatsapp/line) so all 8
+    // languages are covered consistently instead of duplicating them here.
+    const fullDict = (this._mod && this._mod.I18N && this._mod.I18N[this.state.lang]) || {};
+    const shared = {
+      name_label: fullDict.name_label || "Name", phone_label: fullDict.phone_label || "Phone",
+      email_label: fullDict.email_label || "Email", message_label: fullDict.message_label || "Message",
+      send: fullDict.send || "Send message", call: fullDict.call || "Call",
+      whatsapp: fullDict.whatsapp || "WhatsApp", line_app: fullDict.line_app || "Line",
+    };
+
+    return {
+      t: { ...t, ...shared },
+      railTransform: this.state.railOpen ? "translateX(0)" : "translateX(100%)",
+      arrowRotate: this.state.railOpen ? "rotate(0deg)" : "rotate(180deg)",
+      onToggle: () => this.toggle(),
+      lineUrl,
+      whatsappUrl: "https://wa.me/" + whatsappNumber,
+      telUrl: "tel:" + phone,
+      chatHintVisible: this.state.railOpen,
+      formOpen: this.state.formOpen,
+      onOpenForm: () => this.setState({ formOpen: true, submitted: false }),
+      onCloseForm: () => this.setState({ formOpen: false }),
+      stopProp: (e) => e.stopPropagation(),
+      submitted: this.state.submitted,
+      notSubmitted: !this.state.submitted,
+      name: this.state.name, onName: (e) => this.setState({ name: e.target.value }),
+      phone: this.state.phone, onPhone: (e) => this.setState({ phone: e.target.value }),
+      email: this.state.email, onEmail: (e) => this.setState({ email: e.target.value }),
+      message: this.state.message, onMessage: (e) => this.setState({ message: e.target.value }),
+      onSubmit: () => this.submit(),
+    };
+  }
+}
+</script>
+</body>
+</html>
