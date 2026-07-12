@@ -91,7 +91,9 @@
 
   <!-- ============ SEARCH BOX ============ -->
   <div style="position:relative; z-index:6; margin:0 clamp(16px,4vw,56px); transform:translateY(clamp(-24px,-3vw,-46px));">
-    <div style="background:oklch(99% 0.005 80); border-radius:6px; box-shadow:0 24px 50px -12px rgba(30,20,10,0.3); padding:10px; display:flex; flex-wrap:wrap; gap:8px;">
+    <div style="background:oklch(99% 0.005 80); border-radius:6px; box-shadow:0 24px 50px -12px rgba(30,20,10,0.3); padding:10px; display:flex; flex-direction:column; gap:8px;">
+      <input value="{{ keyword }}" onChange="{{ onKeywordChange }}" placeholder="{{ t.keyword_placeholder }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(88% 0.01 70); border-radius:4px; padding:12px 16px; font-size:14px; font-family:inherit; color:oklch(25% 0.02 60);" />
+      <div style="display:flex; flex-wrap:wrap; gap:8px;">
       <div style="display:flex; flex-wrap:wrap; flex:1; min-width:260px;">
         <div style="position:relative; flex:1; min-width:130px; padding:14px 34px 14px 18px; border-right:1px solid oklch(90% 0.01 70); cursor:pointer;" style-hover="background:oklch(97% 0.01 75);">
           <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:oklch(50% 0.02 60); margin-bottom:4px;">{{ t.want_label }}</div>
@@ -139,6 +141,7 @@
         </div>
       </div>
       <a href="{{ searchHref }}" style="background:oklch(50% 0.09 70); color:oklch(98% 0.01 80); padding:0 30px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:500; letter-spacing:0.02em; white-space:nowrap; text-decoration:none; min-height:48px; flex:1; min-width:180px;">{{ t.search_cta }}</a>
+      </div>
     </div>
   </div>
 
@@ -158,7 +161,7 @@
     </div>
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px;">
       <sc-for list="{{ featured }}" as="p" hint-placeholder-count="6">
-        <dc-import name="PropertyCard" href="{{ p.href }}" status-color="{{ p.statusColor }}" status-label="{{ p.statusLabel }}" cover-photo-label="{{ p.coverPhotoLabel }}" cover-photo-bg="{{ p.coverPhotoBg }}" no-photo="{{ p.noPhoto }}" zone="{{ p.zone }}" area-label="{{ p.areaLabel }}" title="{{ p.title }}" type-label="{{ p.typeLabel }}" has-bedrooms="{{ p.hasBedrooms }}" bedrooms="{{ p.bedrooms }}" has-bathrooms="{{ p.hasBathrooms }}" bathrooms="{{ p.bathrooms }}" has-living-area="{{ p.hasLivingArea }}" living-area="{{ p.livingArea }}" sqm-label="{{ p.sqmLabel }}" price-label="{{ p.priceLabel }}" view-details-label="{{ p.viewDetailsLabel }}" hint-size="100%,380px"></dc-import>
+        <dc-import name="PropertyCard" href="{{ p.href }}" status-color="{{ p.statusColor }}" status-label="{{ p.statusLabel }}" cover-photo-label="{{ p.coverPhotoLabel }}" cover-photo-bg="{{ p.coverPhotoBg }}" no-photo="{{ p.noPhoto }}" property-id="{{ p.propertyId }}" zone="{{ p.zone }}" area-label="{{ p.areaLabel }}" title="{{ p.title }}" type-label="{{ p.typeLabel }}" has-bedrooms="{{ p.hasBedrooms }}" bedrooms="{{ p.bedrooms }}" has-bathrooms="{{ p.hasBathrooms }}" bathrooms="{{ p.bathrooms }}" has-living-area="{{ p.hasLivingArea }}" living-area="{{ p.livingArea }}" sqm-label="{{ p.sqmLabel }}" price-label="{{ p.priceLabel }}" view-details-label="{{ p.viewDetailsLabel }}" hint-size="100%,380px"></dc-import>
       </sc-for>
     </div>
   </div>
@@ -208,6 +211,7 @@ class Component extends DCLogic {
     isMobile: false,
     mobileMenuOpen: false,
     wantValue: "sale",
+    keyword: "",
     areaValue: "",
     typeValue: "",
     priceValue: "",
@@ -264,6 +268,7 @@ class Component extends DCLogic {
       coverPhotoBg: (p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
       noPhoto: !(p.photos[0] && p.photos[0].url),
       zone: p.zone,
+      propertyId: p.id,
       areaLabel: areaLabelOf(p.area),
       title: p.title[lang],
       typeLabel: typeLabelOf(p.type),
@@ -325,7 +330,9 @@ class Component extends DCLogic {
         const opts = { "5000000": "฿5,000,000", "10000000": "฿10,000,000", "20000000": "฿20,000,000", "50000000": "฿50,000,000", "100000": "฿100,000 (rent)" };
         return this.state.priceValue ? opts[this.state.priceValue] : t.any_price;
       })(),
-      searchHref: `Search Results.dc.html?status=${this.state.wantValue}${this.state.areaValue ? "&area=" + this.state.areaValue : ""}${this.state.typeValue ? "&type=" + this.state.typeValue : ""}${this.state.priceValue ? "&priceMax=" + this.state.priceValue : ""}`,
+      keyword: this.state.keyword,
+      onKeywordChange: (e) => this.setState({ keyword: e.target.value }),
+      searchHref: `Search Results.dc.html?status=${this.state.wantValue}${this.state.areaValue ? "&area=" + this.state.areaValue : ""}${this.state.typeValue ? "&type=" + this.state.typeValue : ""}${this.state.priceValue ? "&priceMax=" + this.state.priceValue : ""}${this.state.keyword.trim() ? "&q=" + encodeURIComponent(this.state.keyword.trim()) : ""}`,
       buyHref: "Search Results.dc.html?status=sale",
       rentHref: "Search Results.dc.html?status=rent",
       featured,

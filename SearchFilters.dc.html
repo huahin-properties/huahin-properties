@@ -14,6 +14,11 @@
   </div>
 
   <div>
+    <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">{{ f.t.keyword_label }}</div>
+    <input value="{{ f.keyword }}" onChange="{{ f.onKeyword }}" placeholder="{{ f.t.keyword_placeholder }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; color:oklch(25% 0.02 60); background:oklch(99% 0.005 80); font-family:inherit;" />
+  </div>
+
+  <div>
     <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">{{ f.t.status_label }}</div>
     <select value="{{ f.status }}" onChange="{{ f.onStatus }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; color:oklch(25% 0.02 60); background:oklch(99% 0.005 80); font-family:inherit;">
       <option value="">{{ f.t.any }}</option>

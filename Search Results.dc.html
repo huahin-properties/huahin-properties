@@ -131,7 +131,7 @@
         <sc-if value="{{ isGrid }}" hint-placeholder-val="{{ true }}">
           <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:22px;">
             <sc-for list="{{ results }}" as="p" hint-placeholder-count="6">
-              <dc-import name="PropertyCard" href="{{ p.href }}" status-color="{{ p.statusColor }}" status-label="{{ p.statusLabel }}" cover-photo-label="{{ p.coverPhotoLabel }}" cover-photo-bg="{{ p.coverPhotoBg }}" no-photo="{{ p.noPhoto }}" zone="{{ p.zone }}" area-label="{{ p.areaLabel }}" title="{{ p.title }}" type-label="{{ p.typeLabel }}" has-bedrooms="{{ p.hasBedrooms }}" bedrooms="{{ p.bedrooms }}" has-bathrooms="{{ p.hasBathrooms }}" bathrooms="{{ p.bathrooms }}" has-living-area="{{ p.hasLivingArea }}" living-area="{{ p.livingArea }}" sqm-label="{{ p.sqmLabel }}" price-label="{{ p.priceLabel }}" view-details-label="{{ p.viewDetailsLabel }}" hint-size="100%,380px"></dc-import>
+              <dc-import name="PropertyCard" href="{{ p.href }}" status-color="{{ p.statusColor }}" status-label="{{ p.statusLabel }}" cover-photo-label="{{ p.coverPhotoLabel }}" cover-photo-bg="{{ p.coverPhotoBg }}" no-photo="{{ p.noPhoto }}" property-id="{{ p.propertyId }}" zone="{{ p.zone }}" area-label="{{ p.areaLabel }}" title="{{ p.title }}" type-label="{{ p.typeLabel }}" has-bedrooms="{{ p.hasBedrooms }}" bedrooms="{{ p.bedrooms }}" has-bathrooms="{{ p.hasBathrooms }}" bathrooms="{{ p.bathrooms }}" has-living-area="{{ p.hasLivingArea }}" living-area="{{ p.livingArea }}" sqm-label="{{ p.sqmLabel }}" price-label="{{ p.priceLabel }}" view-details-label="{{ p.viewDetailsLabel }}" hint-size="100%,380px"></dc-import>
             </sc-for>
           </div>
         </sc-if>
@@ -183,7 +183,7 @@ class Component extends DCLogic {
     view: "grid",
     sort: "newest",
     data: null,
-    filters: { area: "", type: "", status: "", bedroomsMin: "", bathroomsMin: "", priceMax: "", features: [] },
+    filters: { area: "", type: "", status: "", bedroomsMin: "", bathroomsMin: "", priceMax: "", features: [], keyword: "" },
   };
 
   async componentDidMount() {
@@ -195,6 +195,7 @@ class Component extends DCLogic {
     if (params.get("type")) filters.type = params.get("type");
     if (params.get("status")) filters.status = params.get("status");
     if (params.get("priceMax")) filters.priceMax = params.get("priceMax");
+    if (params.get("q")) filters.keyword = params.get("q");
     this.setState({ lang: mod.getLang(), data: mod, filters });
     const effProps = await mod.getEffectiveProperties(mod);
     this.setState({ effProps });
@@ -225,7 +226,7 @@ class Component extends DCLogic {
   }
 
   clearFilters() {
-    this.setState({ filters: { area: "", type: "", status: "", bedroomsMin: "", bathroomsMin: "", priceMax: "", features: [] } });
+    this.setState({ filters: { area: "", type: "", status: "", bedroomsMin: "", bathroomsMin: "", priceMax: "", features: [], keyword: "" } });
   }
 
   renderVals() {
@@ -253,6 +254,11 @@ class Component extends DCLogic {
       if (f.bedroomsMin && p.bedrooms < Number(f.bedroomsMin)) return false;
       if (f.bathroomsMin && p.bathrooms < Number(f.bathroomsMin)) return false;
       if (f.priceMax && p.price > Number(f.priceMax)) return false;
+      if (f.keyword && f.keyword.trim()) {
+        const kw = f.keyword.trim().toLowerCase();
+        const haystack = [p.id, p.zone, p.title && p.title[lang], p.shortDesc && p.shortDesc[lang]].filter(Boolean).join(" ").toLowerCase();
+        if (!haystack.includes(kw)) return false;
+      }
       if (f.features.length && !f.features.every((feat) => p.features.includes(feat))) return false;
       return true;
     });
@@ -268,6 +274,7 @@ class Component extends DCLogic {
       coverPhotoBg: (p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
       noPhoto: !(p.photos[0] && p.photos[0].url),
       zone: p.zone,
+      propertyId: p.id,
       areaLabel: areaLabelOf(p.area),
       title: p.title[lang],
       typeLabel: typeLabelOf(p.type),
@@ -293,6 +300,8 @@ class Component extends DCLogic {
       types: mod.TYPES.map((ty) => ({ id: ty.id, label: ty.label[lang] })),
       features: Object.keys(mod.FEATURES).map((k) => ({ id: k, label: mod.FEATURES[k][lang] })),
       area: f.area, type: f.type, status: f.status, bedroomsMin: f.bedroomsMin, bathroomsMin: f.bathroomsMin, priceMax: f.priceMax, selectedFeatures: f.features,
+      keyword: f.keyword || "",
+      onKeyword: (e) => this.setFilter("keyword", e.target.value),
       onArea: (e) => this.setFilter("area", e.target.value),
       onType: (e) => this.setFilter("type", e.target.value),
       onStatus: (e) => this.setFilter("status", e.target.value),

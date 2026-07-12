@@ -86,6 +86,7 @@
     <div style="padding:14px clamp(20px,4vw,56px) 0;">
       <div style="{{ heroPhotoStyle }}">
         <div style="position:absolute; top:14px; left:14px; background:{{ p.statusColor }}; color:oklch(99% 0.005 80); font-size:12px; font-weight:600; padding:5px 14px; border-radius:100px; pointer-events:none;">{{ p.statusLabel }}</div>
+        <div style="position:absolute; top:14px; right:14px; font-family:monospace; font-size:13px; font-weight:600; letter-spacing:0.02em; color:oklch(20% 0.02 60); background:rgba(255,255,255,0.8); padding:5px 12px; border-radius:100px; pointer-events:none;">{{ p.propertyId }}</div>
         <sc-if value="{{ activePhotoNoPhoto }}">
           <div style="position:absolute; bottom:14px; left:14px; font-family:monospace; font-size:12px; color:oklch(20% 0.02 60 / 0.8); background:rgba(255,255,255,0.7); padding:5px 10px; border-radius:4px; pointer-events:none;">[{{ activePhotoLabel }}]</div>
         </sc-if>
@@ -179,7 +180,7 @@
       <div style="font-family:'Playfair Display',serif; font-size:clamp(22px,2.8vw,28px); color:oklch(20% 0.02 60); margin-bottom:24px;">{{ t.similar_properties }}</div>
       <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:22px;">
         <sc-for list="{{ similar }}" as="sp" hint-placeholder-count="3">
-          <dc-import name="PropertyCard" href="{{ sp.href }}" status-color="{{ sp.statusColor }}" status-label="{{ sp.statusLabel }}" cover-photo-label="{{ sp.coverPhotoLabel }}" cover-photo-bg="{{ sp.coverPhotoBg }}" no-photo="{{ sp.noPhoto }}" zone="{{ sp.zone }}" area-label="{{ sp.areaLabel }}" title="{{ sp.title }}" type-label="{{ sp.typeLabel }}" has-bedrooms="{{ sp.hasBedrooms }}" bedrooms="{{ sp.bedrooms }}" has-bathrooms="{{ sp.hasBathrooms }}" bathrooms="{{ sp.bathrooms }}" has-living-area="{{ sp.hasLivingArea }}" living-area="{{ sp.livingArea }}" sqm-label="{{ sp.sqmLabel }}" price-label="{{ sp.priceLabel }}" view-details-label="{{ sp.viewDetailsLabel }}" hint-size="100%,380px"></dc-import>
+          <dc-import name="PropertyCard" href="{{ sp.href }}" status-color="{{ sp.statusColor }}" status-label="{{ sp.statusLabel }}" cover-photo-label="{{ sp.coverPhotoLabel }}" cover-photo-bg="{{ sp.coverPhotoBg }}" no-photo="{{ sp.noPhoto }}" property-id="{{ sp.propertyId }}" zone="{{ sp.zone }}" area-label="{{ sp.areaLabel }}" title="{{ sp.title }}" type-label="{{ sp.typeLabel }}" has-bedrooms="{{ sp.hasBedrooms }}" bedrooms="{{ sp.bedrooms }}" has-bathrooms="{{ sp.hasBathrooms }}" bathrooms="{{ sp.bathrooms }}" has-living-area="{{ sp.hasLivingArea }}" living-area="{{ sp.livingArea }}" sqm-label="{{ sp.sqmLabel }}" price-label="{{ sp.priceLabel }}" view-details-label="{{ sp.viewDetailsLabel }}" hint-size="100%,380px"></dc-import>
         </sc-for>
       </div>
     </div>
@@ -258,6 +259,7 @@ class Component extends DCLogic {
       coverPhotoBg: (pr.photos[0] && pr.photos[0].url) ? `url('${pr.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
       noPhoto: !(pr.photos[0] && pr.photos[0].url),
       zone: pr.zone,
+      propertyId: pr.id,
       areaLabel: areaLabelOf(pr.area),
       title: pr.title[lang],
       typeLabel: typeLabelOf(pr.type),
