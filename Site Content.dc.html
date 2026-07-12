@@ -118,6 +118,38 @@
       <div onClick="{{ onAddNote }}" style="display:inline-block; border:1px dashed oklch(60% 0.02 60); color:oklch(40% 0.02 60); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">+ เพิ่มบันทึกใหม่</div>
     </div>
 
+    <!-- AI PERSONA -->
+    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">🎭 ตัวตนของ AI แชท</div>
+      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">ตั้งชื่อและบทบาทของผู้ช่วย AI ที่คุยกับลูกค้า เช่น ชื่อ "แอนนา" บทบาท "ผู้ช่วย AI" หรือจะเปลี่ยนเป็นชื่ออื่นและบทบาทอื่น เช่น "ตัวแทนอสังหาริมทรัพย์อาวุโส" ก็ได้ มีผลกับแชททันที</div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:12px;">
+        <div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">ชื่อ</div>
+          <input value="{{ aiPersonaName }}" onChange="{{ onAiPersonaName }}" placeholder="เช่น แอนนา" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+        </div>
+        <div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">บทบาท / สถานะ</div>
+          <input value="{{ aiPersonaRole }}" onChange="{{ onAiPersonaRole }}" placeholder="เช่น ผู้ช่วย AI ของ huahin.properties" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+        </div>
+      </div>
+      <div onClick="{{ onSaveAiPersona }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">บันทึกตัวตน</div>
+      <sc-if value="{{ aiPersonaMsg }}">
+        <span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ aiPersonaMsg }}</span>
+      </sc-if>
+    </div>
+
+    <!-- AI RESTRICTED TOPICS -->
+    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">🚫 คำสั่งห้าม AI เปิดเผย/ตอบ</div>
+      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">พิมพ์สิ่งที่ไม่ต้องการให้ AI เปิดเผยกับลูกค้า เช่น "ห้ามบอกจำนวนทรัพย์ทั้งหมดในเว็บ", "ห้ามบอกค่าคอมมิชชั่น", "ห้ามเปิดเผยชื่อเจ้าของบ้าน" — พิมพ์ทีละบรรทัด AI จะปฏิเสธอย่างสุภาพและแนะนำให้ติดต่อทีมแทนเมื่อลูกค้าถามเรื่องเหล่านี้</div>
+      <textarea value="{{ aiRestrictions }}" onChange="{{ onAiRestrictions }}" rows="8" placeholder="เช่น&#10;ห้ามบอกจำนวนทรัพย์ทั้งหมดที่มีในเว็บ&#10;ห้ามบอกราคาต้นทุนหรือค่าคอมมิชชั่น&#10;ห้ามเปิดเผยชื่อ-เบอร์เจ้าของบ้าน" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px; font-size:13px; font-family:inherit; resize:vertical; line-height:1.7;"></textarea>
+      <div style="font-size:12px; color:oklch(50% 0.02 60); margin-top:8px; margin-bottom:12px;">💡 มีผลกับแชท AI ทันทีในการคุยครั้งถัดไป ไม่ต้องรอ deploy</div>
+      <div onClick="{{ onSaveAiRestrictions }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">บันทึกคำสั่งห้าม</div>
+      <sc-if value="{{ aiRestrictionsMsg }}">
+        <span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ aiRestrictionsMsg }}</span>
+      </sc-if>
+    </div>
+
     <!-- FACEBOOK POST FOOTER -->
     <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
       <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">📘 ข้อความท้ายโพสต์ Facebook (คงที่)</div>
@@ -145,6 +177,8 @@ class Component extends DCLogic {
     accUsername: "", accPassword: "", accEmail: "", accPhone: "", accMsg: "",
     fbFooter: "", fbFooterMsg: "",
     aiNotes: [], noteDrafts: {}, noteMsgs: {},
+    aiRestrictions: "", aiRestrictionsMsg: "",
+    aiPersonaName: "", aiPersonaRole: "", aiPersonaMsg: "",
   };
 
   async componentDidMount() {
@@ -190,6 +224,42 @@ class Component extends DCLogic {
       this.setState({ aiNotes, noteDrafts });
     } catch (e) {
       console.warn("Failed to load AI notes:", e);
+    }
+
+    try {
+      const aiRestrictions = await fb.fetchAiRestrictions();
+      this.setState({ aiRestrictions });
+    } catch (e) {
+      console.warn("Failed to load AI restrictions:", e);
+    }
+
+    try {
+      const persona = await fb.fetchAiPersona();
+      this.setState({ aiPersonaName: persona.name, aiPersonaRole: persona.role });
+    } catch (e) {
+      console.warn("Failed to load AI persona:", e);
+    }
+  }
+
+  async saveAiPersona() {
+    try {
+      await this._fb.saveAiPersona(this.state.aiPersonaName, this.state.aiPersonaRole);
+      this.setState({ aiPersonaMsg: "บันทึกแล้ว" });
+      setTimeout(() => this.setState({ aiPersonaMsg: "" }), 2500);
+    } catch (e) {
+      console.warn("Failed to save AI persona:", e);
+      this.setState({ aiPersonaMsg: "บันทึกไม่สำเร็จ ลองใหม่" });
+    }
+  }
+
+  async saveAiRestrictions() {
+    try {
+      await this._fb.saveAiRestrictions(this.state.aiRestrictions);
+      this.setState({ aiRestrictionsMsg: "บันทึกแล้ว" });
+      setTimeout(() => this.setState({ aiRestrictionsMsg: "" }), 2500);
+    } catch (e) {
+      console.warn("Failed to save AI restrictions:", e);
+      this.setState({ aiRestrictionsMsg: "บันทึกไม่สำเร็จ ลองใหม่" });
     }
   }
 
@@ -344,6 +414,16 @@ class Component extends DCLogic {
       onSaveFbFooter: () => this.saveFbFooter(),
       fbFooterMsg: this.state.fbFooterMsg,
       onAddNote: () => this.addNote(),
+      aiPersonaName: this.state.aiPersonaName,
+      onAiPersonaName: (e) => this.setState({ aiPersonaName: e.target.value }),
+      aiPersonaRole: this.state.aiPersonaRole,
+      onAiPersonaRole: (e) => this.setState({ aiPersonaRole: e.target.value }),
+      onSaveAiPersona: () => this.saveAiPersona(),
+      aiPersonaMsg: this.state.aiPersonaMsg,
+      aiRestrictions: this.state.aiRestrictions,
+      onAiRestrictions: (e) => this.setState({ aiRestrictions: e.target.value }),
+      onSaveAiRestrictions: () => this.saveAiRestrictions(),
+      aiRestrictionsMsg: this.state.aiRestrictionsMsg,
       aiNotes: this.state.aiNotes.map((n) => {
         const draft = this.state.noteDrafts[n.id] || { title: "", body: "" };
         return {

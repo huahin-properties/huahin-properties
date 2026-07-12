@@ -272,3 +272,31 @@ export async function saveAiNote(id, title, body) {
 export async function deleteAiNote(id) {
   await deleteDocById("aiNotes", id);
 }
+
+// ── AI restricted topics ────────────────────────────────────────────────
+// Free-text instructions Admin writes describing things the AI chat must
+// NOT reveal or discuss (e.g. total number of listings, commission rates,
+// owner identities). Stored as a single doc, injected into every chat
+// system prompt as a hard restriction list.
+export async function fetchAiRestrictions() {
+  const doc = await db().collection("siteContent").doc("aiRestrictions").get();
+  return doc.exists ? doc.data().text || "" : "";
+}
+
+export async function saveAiRestrictions(text) {
+  await setDoc("siteContent", "aiRestrictions", { text });
+}
+
+// ── AI persona ───────────────────────────────────────────────────────────
+// Lets Admin name/re-cast the chat assistant (e.g. swap "Anna" for another
+// name, or change her role from "AI assistant" to "Senior Agent") without
+// touching code. Both fields are plugged straight into the chat's system
+// prompt.
+export async function fetchAiPersona() {
+  const doc = await db().collection("siteContent").doc("aiPersona").get();
+  return doc.exists ? { name: doc.data().name || "", role: doc.data().role || "" } : { name: "", role: "" };
+}
+
+export async function saveAiPersona(name, role) {
+  await setDoc("siteContent", "aiPersona", { name, role });
+}
