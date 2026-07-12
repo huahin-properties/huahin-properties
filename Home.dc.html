@@ -22,6 +22,19 @@
   </style>
 </helmet>
 
+<sc-if value="{{ showGate }}">
+  <div style="position:fixed; inset:0; background:oklch(96% 0.015 75); z-index:300; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
+    <img src="logo.png" alt="huahin.properties logo" style="height:56px; width:56px; object-fit:contain; border-radius:50%; margin-bottom:20px;" />
+    <div style="font-family:'Playfair Display',serif; font-size:26px; color:oklch(20% 0.02 60); margin-bottom:10px;">กำลังปรับปรุงเว็บไซต์</div>
+    <div style="font-size:14px; color:oklch(50% 0.02 60); max-width:360px; margin-bottom:26px; line-height:1.6;">เรากำลังปรับปรุงเว็บไซต์อยู่ ขออภัยในความไม่สะดวก จะกลับมาเปิดให้บริการเร็วๆ นี้</div>
+    <div style="width:100%; max-width:300px; display:flex; flex-direction:column; gap:10px;">
+      <input type="text" value="{{ gatePassword }}" onChange="{{ onGatePassword }}" placeholder="รหัสผ่านแอดมิน" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit; text-align:center;" />
+      <div onClick="{{ onGateSubmit }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:12px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">เข้าดูตัวอย่าง</div>
+      <sc-if value="{{ gateError }}"><div style="font-size:13px; color:oklch(50% 0.18 30);">{{ gateError }}</div></sc-if>
+    </div>
+  </div>
+</sc-if>
+
 <div style="max-width:1600px; margin:0 auto; background:oklch(98% 0.01 80);">
 
   <!-- ============ HEADER ============ -->
@@ -212,6 +225,7 @@ class Component extends DCLogic {
     lang: "en",
     isMobile: (typeof window !== "undefined" && window.innerWidth < 900),
     mobileMenuOpen: false,
+    showGate: false, gatePassword: "", gateError: "",
     wantValue: "sale",
     keyword: "",
     areaValue: "",
@@ -222,6 +236,14 @@ class Component extends DCLogic {
   };
 
   async componentDidMount() {
+    const fb0 = await import("./firebase-client.js");
+    this._fb = fb0;
+    if (!fb0.hasSiteBypass() && !fb0.isAdminAuthed()) {
+      try {
+        const on = await fb0.fetchMaintenanceMode();
+        if (on) this.setState({ showGate: true });
+      } catch (e) { console.warn("Failed to check maintenance mode:", e); }
+    }
     const mod = await import("./data.js");
     this._mod = mod;
     this.setState({ lang: mod.getLang(), data: mod });
@@ -248,9 +270,30 @@ class Component extends DCLogic {
     this.setState({ lang: l, mobileMenuOpen: false });
   }
 
+  async submitGate() {
+    try {
+      const creds = await this._fb.fetchAdminCredentials();
+      if (this.state.gatePassword === creds.password) {
+        this._fb.setSiteBypass();
+        this.setState({ showGate: false, gateError: "" });
+      } else {
+        this.setState({ gateError: "รหัสผ่านไม่ถูกต้อง" });
+      }
+    } catch (e) {
+      this.setState({ gateError: "ตรวจสอบไม่สำเร็จ ลองใหม่" });
+    }
+  }
+
   renderVals() {
+    const gateVals = {
+      showGate: this.state.showGate,
+      gatePassword: this.state.gatePassword,
+      onGatePassword: (e) => this.setState({ gatePassword: e.target.value, gateError: "" }),
+      onGateSubmit: () => this.submitGate(),
+      gateError: this.state.gateError,
+    };
     const mod = this.state.data;
-    if (!mod) return { t: {}, featured: [], areas: [], areaCards: [], langOptions: [], isDesktopNav: true, isMobileNav: false };
+    if (!mod) return { t: {}, featured: [], areas: [], areaCards: [], langOptions: [], isDesktopNav: true, isMobileNav: false, ...gateVals };
 
     const lang = this.state.lang;
     const t = mod.I18N[lang];
@@ -344,6 +387,7 @@ class Component extends DCLogic {
         background: (sc.hero && sc.hero.photoUrl) ? `url('${sc.hero.photoUrl}') center/cover` : "repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(92% 0.015 75) 2px, oklch(92% 0.015 75) 22px)",
       },
       heroNoPhoto: !(sc.hero && sc.hero.photoUrl),
+      ...gateVals,
     };
   }
 }

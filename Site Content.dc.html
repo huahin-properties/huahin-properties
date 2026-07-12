@@ -37,6 +37,16 @@
       <div style="background:oklch(94% 0.06 145); color:oklch(35% 0.1 145); border-radius:6px; padding:10px 16px; font-size:14px; margin-bottom:20px;">{{ saveMsg }}</div>
     </sc-if>
 
+    <!-- MAINTENANCE MODE -->
+    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-bottom:20px;">
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">🚧 โหมดปิดปรับปรุงเว็บไซต์</div>
+      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:16px;">เปิดโหมดนี้ตอนกำลังแก้ไข/พัฒนาเว็บ — คนทั่วไปที่เข้าเว็บจะเห็นหน้า "กำลังปรับปรุง" แทนเนื้อหาจริง ส่วนคุณเข้าดูเว็บจริงได้ตามปกติ (ใช้รหัสผ่านแอดมินเดิมปลดล็อกครั้งเดียว เบราว์เซอร์จะจำไว้ให้)</div>
+      <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+        <div onClick="{{ onToggleMaintenance }}" style="{{ maintenanceToggleStyle }}">{{ maintenanceToggleLabel }}</div>
+        <div style="font-size:15px; font-weight:700; color:{{ maintenanceStatusColor }};">{{ maintenanceStatusLabel }}</div>
+      </div>
+    </div>
+
     <!-- HERO -->
     <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-bottom:20px;">
       <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:14px;">Homepage Hero Photo</div>
@@ -179,6 +189,7 @@ class Component extends DCLogic {
     aiNotes: [], noteDrafts: {}, noteMsgs: {},
     aiRestrictions: "", aiRestrictionsMsg: "",
     aiPersonaName: "", aiPersonaRole: "", aiPersonaMsg: "",
+    maintenanceOn: false,
   };
 
   async componentDidMount() {
@@ -238,6 +249,23 @@ class Component extends DCLogic {
       this.setState({ aiPersonaName: persona.name, aiPersonaRole: persona.role });
     } catch (e) {
       console.warn("Failed to load AI persona:", e);
+    }
+
+    try {
+      const maintenanceOn = await fb.fetchMaintenanceMode();
+      this.setState({ maintenanceOn });
+    } catch (e) {
+      console.warn("Failed to load maintenance mode:", e);
+    }
+  }
+
+  async toggleMaintenance() {
+    const next = !this.state.maintenanceOn;
+    this.setState({ maintenanceOn: next });
+    try {
+      await this._fb.saveMaintenanceMode(next);
+    } catch (e) {
+      console.warn("Failed to save maintenance mode:", e);
     }
   }
 
@@ -397,6 +425,16 @@ class Component extends DCLogic {
     return {
       t,
       saveMsg: this.state.saveMsg,
+      maintenanceOn: this.state.maintenanceOn,
+      onToggleMaintenance: () => this.toggleMaintenance(),
+      maintenanceToggleLabel: this.state.maintenanceOn ? "ปิดโหมดนี้ — เปิดให้ทุกคนดูเว็บได้" : "เปิดโหมดนี้ — ซ่อนเว็บจากทุกคน",
+      maintenanceToggleStyle: {
+        display: "inline-block", padding: "11px 22px", borderRadius: "100px", fontSize: "14px", fontWeight: 500, cursor: "pointer",
+        background: this.state.maintenanceOn ? "oklch(45% 0.18 30)" : "oklch(22% 0.02 60)",
+        color: "oklch(97% 0.01 80)",
+      },
+      maintenanceStatusColor: this.state.maintenanceOn ? "oklch(50% 0.19 25)" : "oklch(45% 0.15 145)",
+      maintenanceStatusLabel: this.state.maintenanceOn ? "🔴 ปิดกั้นอยู่ — เห็นเฉพาะคุณเท่านั้น" : "🟢 เปิดให้ทุกคนดูได้แล้ว",
       heroStyle: {
         position: "relative", width: "220px", height: "130px", borderRadius: "6px", overflow: "hidden", cursor: "pointer", flexShrink: 0,
         background: heroUrl ? `url('${heroUrl}') center/cover` : "oklch(90% 0.01 70)",

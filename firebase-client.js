@@ -215,6 +215,38 @@ export function requireAdminAuth() {
   return true;
 }
 
+// ── Maintenance / "coming soon" mode ─────────────────────────────────────
+// Lets Admin hide the public site behind a simple splash screen while still
+// building/fixing it, toggled with one button on Site Content — no
+// redeploy needed. This is a casual-visitor deterrent (a client-side check
+// on each public page), not real server-side security — good enough to
+// keep ordinary visitors from seeing work-in-progress, not to stop a
+// determined technical person.
+export async function fetchMaintenanceMode() {
+  try {
+    const doc = await db().collection("siteContent").doc("maintenance").get();
+    return doc.exists ? !!doc.data().on : false;
+  } catch (e) {
+    console.warn("fetchMaintenanceMode failed, defaulting to off:", e);
+    return false;
+  }
+}
+
+export async function saveMaintenanceMode(on) {
+  await setDoc("siteContent", "maintenance", { on });
+}
+
+// Unlocking the splash with the admin password remembers the visitor's
+// browser indefinitely (localStorage, not sessionStorage) so Admin can
+// browse the live public pages smoothly without re-entering it every visit.
+const SITE_BYPASS_KEY = "hh_site_bypass";
+export function setSiteBypass() {
+  try { localStorage.setItem(SITE_BYPASS_KEY, "1"); } catch (e) {}
+}
+export function hasSiteBypass() {
+  try { return localStorage.getItem(SITE_BYPASS_KEY) === "1"; } catch (e) { return false; }
+}
+
 // ── Site content (homepage hero + area cards) ───────────────────────────
 // Lets Admin replace the homepage hero photo and each area card's photo +
 // description without touching code. Stored as its own small collection so
