@@ -32,12 +32,42 @@
   <!-- ============ PERSISTENT CHAT BUBBLE (always visible) ============ -->
   <div style="position:fixed; right:20px; bottom:20px; z-index:70; display:flex; align-items:center; gap:10px;">
     <sc-if value="{{ chatHintVisible }}">
-      <div onClick="{{ onOpenForm }}" style="background:#fff; color:oklch(25% 0.02 60); padding:10px 16px; border-radius:100px; font-size:14px; font-family:'Work Sans',sans-serif; box-shadow:0 4px 16px oklch(0% 0 0 / 0.15); cursor:pointer; white-space:nowrap;">{{ t.rail_chat_hint }} 👋</div>
+      <div onClick="{{ onOpenChat }}" style="background:#fff; color:oklch(25% 0.02 60); padding:10px 16px; border-radius:100px; font-size:14px; font-family:'Work Sans',sans-serif; box-shadow:0 4px 16px oklch(0% 0 0 / 0.15); cursor:pointer; white-space:nowrap;">{{ t.rail_chat_hint }} 👋</div>
     </sc-if>
-    <div onClick="{{ onOpenForm }}" style="width:52px; height:52px; border-radius:50%; background:oklch(22% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 16px oklch(0% 0 0 / 0.2); font-size:22px;">
+    <div onClick="{{ onOpenChat }}" style="width:52px; height:52px; border-radius:50%; background:oklch(22% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 16px oklch(0% 0 0 / 0.2); font-size:22px;">
       <span style="color:oklch(97% 0.01 80);">💬</span>
     </div>
   </div>
+
+  <!-- ============ AI CHAT MODAL ============ -->
+  <sc-if value="{{ chatOpen }}">
+    <div onClick="{{ onCloseChat }}" style="position:fixed; inset:0; background:oklch(15% 0.01 60 / 0.5); z-index:85; display:flex; align-items:flex-end; justify-content:flex-end; padding:20px;">
+      <div onClick="{{ stopProp }}" style="background:oklch(99% 0.005 80); border-radius:10px; width:100%; max-width:380px; height:min(560px, 80vh); display:flex; flex-direction:column; box-shadow:0 20px 60px oklch(0% 0 0 / 0.35); overflow:hidden;">
+        <div style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:16px 18px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
+          <div>
+            <div style="font-family:'Playfair Display',serif; font-size:17px;">{{ t.chat_title }}</div>
+            <div style="font-size:11px; color:oklch(80% 0.01 70); margin-top:2px;">{{ t.chat_subtitle }}</div>
+          </div>
+          <div onClick="{{ onCloseChat }}" style="font-size:22px; line-height:1; cursor:pointer; padding:4px;">&times;</div>
+        </div>
+        <div ref="{{ chatScrollRef }}" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px;">
+          <sc-for list="{{ chatMessages }}" as="m" hint-placeholder-count="1">
+            <div style="{{ m.bubbleWrapStyle }}">
+              <div style="{{ m.bubbleStyle }}">{{ m.text }}</div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ chatLoading }}">
+            <div style="align-self:flex-start; background:oklch(93% 0.01 75); color:oklch(45% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px;">{{ t.chat_thinking }}</div>
+          </sc-if>
+        </div>
+        <div style="flex-shrink:0; border-top:1px solid oklch(90% 0.01 70); padding:12px; display:flex; gap:8px;">
+          <input value="{{ chatInput }}" onChange="{{ onChatInput }}" onKeyDown="{{ onChatKeyDown }}" placeholder="{{ t.chat_placeholder }}" style="flex:1; border:1px solid oklch(85% 0.01 70); border-radius:100px; padding:10px 16px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0;" />
+          <div onClick="{{ onChatSend }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; font-size:16px;">➤</div>
+        </div>
+        <div onClick="{{ onOpenFormFromChat }}" style="flex-shrink:0; text-align:center; padding:9px; font-size:12px; color:oklch(45% 0.02 60); border-top:1px solid oklch(93% 0.01 70); cursor:pointer;">{{ t.chat_talk_to_human }}</div>
+      </div>
+    </div>
+  </sc-if>
 
   <!-- ============ CONTACT FORM MODAL ============ -->
   <sc-if value="{{ formOpen }}">
@@ -82,12 +112,26 @@ const I18N_RAIL = {
   it: { rail_contact_us: "CONTATTACI", rail_chat_hint: "Chatta con noi", rail_form_title: "Inviaci un messaggio", rail_form_success: "Grazie — ti risponderemo entro 24 ore." },
 };
 
+const CHAT_I18N = {
+  en: { chat_title: "Ask about our properties", chat_subtitle: "AI assistant · huahin.properties listings only", chat_placeholder: "e.g. Any 4-bedroom pool villas?", chat_thinking: "Typing…", chat_talk_to_human: "Prefer a human? Leave your contact →", chat_greeting: "Hi! Ask me anything about our listings — bedrooms, price, area, property codes, availability." },
+  th: { chat_title: "ถามเกี่ยวกับทรัพย์ของเรา", chat_subtitle: "ผู้ช่วย AI · ข้อมูลจากประกาศใน huahin.properties เท่านั้น", chat_placeholder: "เช่น มีพูลวิลล่า 4 ห้องนอนไหม", chat_thinking: "กำลังพิมพ์…", chat_talk_to_human: "อยากคุยกับเจ้าหน้าที่? ฝากข้อมูลติดต่อ →", chat_greeting: "สวัสดีค่ะ ถามอะไรก็ได้เกี่ยวกับทรัพย์ของเรา เช่น จำนวนห้องนอน ราคา โซน รหัสทรัพย์ หรือสถานะว่าง/เช่าแล้ว" },
+  ru: { chat_title: "Спросите о наших объектах", chat_subtitle: "ИИ-ассистент · только объекты huahin.properties", chat_placeholder: "напр. Есть виллы с 4 спальнями?", chat_thinking: "Печатает…", chat_talk_to_human: "Хотите поговорить с человеком? Оставьте контакт →", chat_greeting: "Здравствуйте! Спрашивайте о наших объектах — спальни, цена, район, код объекта, наличие." },
+  zh: { chat_title: "咨询我们的房源", chat_subtitle: "AI 助手 · 仅限 huahin.properties 房源信息", chat_placeholder: "例如：有4卧室泳池别墅吗？", chat_thinking: "输入中…", chat_talk_to_human: "想联系真人客服？留下联系方式 →", chat_greeting: "您好！可以问我关于房源的任何问题 — 卧室数、价格、区域、房源编号或是否可租。" },
+  de: { chat_title: "Fragen zu unseren Immobilien", chat_subtitle: "KI-Assistent · nur huahin.properties Angebote", chat_placeholder: "z.B. Poolvillen mit 4 Schlafzimmern?", chat_thinking: "Tippt…", chat_talk_to_human: "Lieber mit einem Menschen sprechen? Kontakt hinterlassen →", chat_greeting: "Hallo! Fragen Sie mich alles zu unseren Angeboten — Schlafzimmer, Preis, Gebiet, Objektcode oder Verfügbarkeit." },
+  no: { chat_title: "Spør om eiendommene våre", chat_subtitle: "AI-assistent · kun huahin.properties oppføringer", chat_placeholder: "f.eks. Bassengvillaer med 4 soverom?", chat_thinking: "Skriver…", chat_talk_to_human: "Vil du snakke med et menneske? Legg igjen kontaktinfo →", chat_greeting: "Hei! Spør meg om oppføringene våre — soverom, pris, område, eiendomskode eller tilgjengelighet." },
+  fr: { chat_title: "Posez une question sur nos biens", chat_subtitle: "Assistant IA · uniquement les annonces huahin.properties", chat_placeholder: "ex. Villas avec piscine 4 chambres ?", chat_thinking: "En train d'écrire…", chat_talk_to_human: "Préférez parler à un humain ? Laissez vos coordonnées →", chat_greeting: "Bonjour ! Posez-moi vos questions sur nos annonces — chambres, prix, secteur, code du bien ou disponibilité." },
+  it: { chat_title: "Chiedi sui nostri immobili", chat_subtitle: "Assistente IA · solo annunci huahin.properties", chat_placeholder: "es. Ville con piscina 4 camere?", chat_thinking: "Sta scrivendo…", chat_talk_to_human: "Preferisci parlare con una persona? Lascia i tuoi contatti →", chat_greeting: "Ciao! Chiedimi qualsiasi cosa sui nostri annunci — camere, prezzo, zona, codice immobile o disponibilità." },
+};
+
 class Component extends DCLogic {
   state = {
     railOpen: true, formOpen: false, submitted: false,
     name: "", phone: "", email: "", message: "",
     lang: "th",
+    chatOpen: false, chatMessages: [], chatInput: "", chatLoading: false,
   };
+
+  chatScrollRef = React.createRef();
 
   componentDidMount() {
     try {
@@ -104,6 +148,68 @@ class Component extends DCLogic {
     this._onStorage = syncLang;
     window.addEventListener("storage", this._onStorage);
     window.addEventListener("langchange", this._onStorage);
+    this._loadProperties();
+  }
+
+  async _loadProperties() {
+    try {
+      const mod = this._mod || (await import("./data.js"));
+      this._mod = mod;
+      this._properties = await mod.getEffectiveProperties(mod);
+    } catch (e) {
+      console.warn("Chat: failed to load properties", e);
+    }
+  }
+
+  _buildContext(lang) {
+    const props = this._properties || (this._mod ? this._mod.PROPERTIES : []) || [];
+    const lines = props.map((p) => {
+      const title = (p.title && (p.title[lang] || p.title.en)) || p.id;
+      return `${p.id} | ${title} | area:${p.area} zone:${p.zone} type:${p.type} status:${p.status} price:${p.price}${p.currency} beds:${p.bedrooms} baths:${p.bathrooms} land:${p.landSize || "-"}sqm living:${p.livingArea || "-"}sqm pool:${p.pool ? "yes" : "no"}`;
+    });
+    return lines.join("\n");
+  }
+
+  async sendChat() {
+    const text = this.state.chatInput.trim();
+    if (!text || this.state.chatLoading) return;
+    const lang = this.state.lang;
+    const userMsg = { role: "user", text, bubbleWrapStyle: "align-self:flex-end; max-width:85%;", bubbleStyle: "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:10px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
+    const history = [...this.state.chatMessages, userMsg];
+    this.setState({ chatMessages: history, chatInput: "", chatLoading: true });
+    this._scrollChat();
+    try {
+      const context = this._buildContext(lang);
+      const langNames = { en: "English", th: "Thai", ru: "Russian", zh: "Chinese", de: "German", no: "Norwegian", fr: "French", it: "Italian" };
+      const system = `You are the on-site assistant for huahin.properties, a real-estate agency in Hua Hin, Pranburi and Cha-am, Thailand. Answer ONLY using the property listing data below — never invent properties, prices or availability that aren't in this list. If asked about something not covered by the data, say you don't have that information and suggest contacting the team. Keep answers short (2-5 sentences), friendly, concrete (cite property codes when relevant). Reply in ${langNames[lang] || "English"}.\n\nCURRENT LISTINGS (code | title | area | zone | type | status | price | beds | baths | land | living | pool):\n${context}`;
+      const messages = history.map((m) => ({ role: m.role, content: m.text }));
+      const reply = await window.claude.complete({ system, messages, model: "claude-haiku-4-5", max_tokens: 500 });
+      const aiMsg = { role: "assistant", text: reply, bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
+      this.setState({ chatMessages: [...history, aiMsg], chatLoading: false });
+    } catch (e) {
+      console.warn("Chat error", e);
+      const t = CHAT_I18N[lang] || CHAT_I18N.en;
+      const errMsg = { role: "assistant", text: "Sorry, something went wrong. Please try again or contact us directly.", bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" };
+      this.setState({ chatMessages: [...history, errMsg], chatLoading: false });
+    }
+    this._scrollChat();
+  }
+
+  _scrollChat() {
+    setTimeout(() => {
+      if (this.chatScrollRef.current) {
+        this.chatScrollRef.current.scrollTop = this.chatScrollRef.current.scrollHeight;
+      }
+    }, 60);
+  }
+
+  openChat() {
+    const alreadyGreeted = this.state.chatMessages.length > 0;
+    const lang = this.state.lang;
+    const t = CHAT_I18N[lang] || CHAT_I18N.en;
+    const next = alreadyGreeted ? this.state.chatMessages : [{ role: "assistant", text: t.chat_greeting, bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" }];
+    this.setState({ chatOpen: true, formOpen: false, chatMessages: next });
+    this._scrollChat();
   }
 
   componentWillUnmount() {
@@ -139,8 +245,10 @@ class Component extends DCLogic {
       whatsapp: fullDict.whatsapp || "WhatsApp", line_app: fullDict.line_app || "Line",
     };
 
+    const chatT = CHAT_I18N[this.state.lang] || CHAT_I18N.en;
+
     return {
-      t: { ...t, ...shared },
+      t: { ...t, ...shared, ...chatT },
       railTransform: this.state.railOpen ? "translateX(0)" : "translateX(100%)",
       arrowRotate: this.state.railOpen ? "rotate(0deg)" : "rotate(180deg)",
       onToggle: () => this.toggle(),
@@ -149,7 +257,7 @@ class Component extends DCLogic {
       telUrl: "tel:" + phone,
       chatHintVisible: true,
       formOpen: this.state.formOpen,
-      onOpenForm: () => this.setState({ formOpen: true, submitted: false }),
+      onOpenForm: () => this.setState({ formOpen: true, chatOpen: false, submitted: false }),
       onCloseForm: () => this.setState({ formOpen: false }),
       stopProp: (e) => e.stopPropagation(),
       submitted: this.state.submitted,
@@ -159,6 +267,18 @@ class Component extends DCLogic {
       email: this.state.email, onEmail: (e) => this.setState({ email: e.target.value }),
       message: this.state.message, onMessage: (e) => this.setState({ message: e.target.value }),
       onSubmit: () => this.submit(),
+
+      chatOpen: this.state.chatOpen,
+      chatMessages: this.state.chatMessages,
+      chatLoading: this.state.chatLoading,
+      chatInput: this.state.chatInput,
+      chatScrollRef: this.chatScrollRef,
+      onOpenChat: () => this.openChat(),
+      onCloseChat: () => this.setState({ chatOpen: false }),
+      onChatInput: (e) => this.setState({ chatInput: e.target.value }),
+      onChatSend: () => this.sendChat(),
+      onChatKeyDown: (e) => { if (e.key === "Enter") { e.preventDefault(); this.sendChat(); } },
+      onOpenFormFromChat: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }),
     };
   }
 }

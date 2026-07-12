@@ -14,22 +14,22 @@
   <meta name="description" content="Contact huahin.properties for buying, renting or listing property in Hua Hin, Pranburi and Cha-am.">
   <style>
     body { margin: 0; background: oklch(98% 0.01 80); font-family: 'Work Sans', sans-serif; }
-    a { color: oklch(48% 0.07 55); }
-    a:hover { color: oklch(38% 0.08 55); }
+    a { color: oklch(42% 0.12 25); }
+    a:hover { color: oklch(32% 0.13 25); }
   </style>
 </helmet>
 
 <div style="max-width:1600px; margin:0 auto; background:oklch(98% 0.01 80); min-height:100vh;">
 
   <div style="display:flex; align-items:center; justify-content:space-between; gap:24px; padding:22px clamp(20px,4vw,56px); border-bottom:1px solid oklch(90% 0.01 70);">
-    <a href="Home.dc.html" style="white-space:nowrap; font-family:'Playfair Display',serif; font-size:clamp(19px,2.4vw,24px); letter-spacing:0.02em; color:oklch(22% 0.02 60); text-decoration:none;">huahin<span style="color:oklch(50% 0.09 70);">.</span>properties</a>
+    <a href="Home.dc.html" style="white-space:nowrap; display:flex; align-items:center; gap:9px; font-family:'Playfair Display',serif; font-size:clamp(19px,2.4vw,24px); letter-spacing:0.02em; color:oklch(22% 0.02 60); text-decoration:none;"><img src="logo.png" alt="huahin.properties logo" style="height:36px; width:36px; object-fit:contain; border-radius:50%; flex-shrink:0;" />huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</a>
     <sc-if value="{{ isDesktopNav }}" hint-placeholder-val="{{ true }}">
       <div style="display:flex; gap:32px; align-items:center; font-size:15px; color:oklch(30% 0.02 60); white-space:nowrap;">
         <a href="Search Results.dc.html?status=sale" style="text-decoration:none; color:inherit;">{{ t.nav_buy }}</a>
         <a href="Search Results.dc.html?status=rent" style="text-decoration:none; color:inherit;">{{ t.nav_rent }}</a>
         <a href="Sell.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_sell }}</a>
         <a href="About.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_about }}</a>
-        <a href="Contact.dc.html" style="text-decoration:none; color:oklch(48% 0.07 55);">{{ t.nav_contact }}</a>
+        <a href="Contact.dc.html" style="text-decoration:none; color:oklch(42% 0.12 25);">{{ t.nav_contact }}</a>
       </div>
       <div style="display:flex; gap:12px; align-items:flex-end; white-space:nowrap;">
         <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" hint-size="150,54"></dc-import>
@@ -52,7 +52,7 @@
   <sc-if value="{{ mobileMenuOpen }}">
     <div style="position:fixed; inset:0; background:oklch(98% 0.01 80); z-index:60; padding:22px clamp(20px,6vw,56px); display:flex; flex-direction:column; gap:28px; overflow-y:auto;">
       <div style="display:flex; align-items:center; justify-content:space-between;">
-        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(50% 0.09 70);">.</span>properties</div>
+        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
         <div onClick="{{ toggleMenu }}" style="font-size:26px; line-height:1; color:oklch(30% 0.02 60); cursor:pointer; padding:6px;">&times;</div>
       </div>
       <div style="display:flex; flex-direction:column; gap:22px; font-size:20px; font-family:'Playfair Display',serif; color:oklch(22% 0.02 60);">
@@ -95,14 +95,14 @@
           <input placeholder="{{ t.email_label }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
           <input placeholder="{{ t.phone_label }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
           <textarea placeholder="{{ t.message_label }}" rows="4" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
-          <div onClick="{{ onSubmit }}" style="background:oklch(50% 0.09 70); color:oklch(98% 0.01 80); text-align:center; padding:13px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">{{ t.send }}</div>
+          <div onClick="{{ onSubmit }}" style="background:oklch(40% 0.13 25); color:oklch(98% 0.01 80); text-align:center; padding:13px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">{{ t.send }}</div>
         </sc-if>
       </div>
     </div>
   </div>
 
   <div style="border-top:1px solid oklch(90% 0.01 70); padding:32px clamp(20px,4vw,56px); display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between;">
-    <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(50% 0.09 70);">.</span>properties</div>
+    <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
     <div style="font-size:13px; color:oklch(50% 0.02 60);">© 2026 huahin.properties. {{ t.footer_rights }}</div>
   </div>
 </div>

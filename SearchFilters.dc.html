@@ -10,7 +10,7 @@
 <div style="display:flex; flex-direction:column; gap:20px; font-family:'Work Sans',sans-serif;">
   <div style="display:flex; align-items:center; justify-content:space-between;">
     <div style="font-size:15px; font-weight:600; color:oklch(20% 0.02 60);">{{ f.t.filters }}</div>
-    <div onClick="{{ f.onClear }}" style="font-size:13px; color:oklch(48% 0.07 55); cursor:pointer;">{{ f.t.clear_filters }}</div>
+    <div onClick="{{ f.onClear }}" style="font-size:13px; color:oklch(42% 0.12 25); cursor:pointer;">{{ f.t.clear_filters }}</div>
   </div>
 
   <div>
@@ -88,7 +88,7 @@
     <div style="display:flex; flex-direction:column; gap:10px;">
       <sc-for list="{{ f.features }}" as="ft" hint-placeholder-count="6">
         <label style="display:flex; align-items:center; gap:10px; font-size:14px; color:oklch(30% 0.02 60); cursor:pointer;">
-          <input type="checkbox" checked="{{ ft.checked }}" onChange="{{ ft.onToggle }}" style="width:16px; height:16px; accent-color:oklch(50% 0.09 70);" />
+          <input type="checkbox" checked="{{ ft.checked }}" onChange="{{ ft.onToggle }}" style="width:16px; height:16px; accent-color:oklch(40% 0.13 25);" />
           {{ ft.label }}
         </label>
       </sc-for>

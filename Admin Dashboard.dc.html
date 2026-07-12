@@ -16,8 +16,8 @@
   <title>Admin Dashboard — huahin.properties</title>
   <style>
     body { margin: 0; background: oklch(96% 0.015 75); font-family: 'Work Sans', sans-serif; }
-    a { color: oklch(48% 0.07 55); }
-    a:hover { color: oklch(38% 0.08 55); }
+    a { color: oklch(42% 0.12 25); }
+    a:hover { color: oklch(32% 0.13 25); }
   </style>
 </helmet>
 
@@ -26,7 +26,7 @@
   <!-- ============ TOP BAR ============ -->
   <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px clamp(16px,3vw,40px); background:oklch(22% 0.02 60); color:oklch(97% 0.01 80);">
     <div style="display:flex; align-items:center; gap:14px;">
-      <a href="Home.dc.html" style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(97% 0.01 80); text-decoration:none;">huahin<span style="color:oklch(70% 0.1 70);">.</span>properties</a>
+      <a href="Home.dc.html" style="display:flex; align-items:center; gap:8px; font-family:'Playfair Display',serif; font-size:19px; color:oklch(97% 0.01 80); text-decoration:none;"><img src="logo.png" alt="huahin.properties logo" style="height:30px; width:30px; object-fit:contain; border-radius:50%; flex-shrink:0;" />huahin<span style="color:oklch(75% 0.13 85);">.</span>properties</a>
       <span style="font-size:12px; color:oklch(75% 0.01 70); border-left:1px solid oklch(45% 0.01 60); padding-left:14px;">{{ t.admin_dashboard }}</span>
     </div>
     <div style="display:flex; align-items:center; gap:16px; font-size:13px; color:oklch(80% 0.01 70);">
@@ -64,7 +64,7 @@
     <!-- ============ TOOLBAR ============ -->
     <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:20px;">
       <div style="font-family:'Playfair Display',serif; font-size:22px; color:oklch(20% 0.02 60);">{{ t.admin_listings }}</div>
-      <div onClick="{{ openAdd }}" style="background:oklch(50% 0.09 70); color:oklch(98% 0.01 80); padding:11px 20px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">+ {{ t.admin_add_property }}</div>
+      <div onClick="{{ openAdd }}" style="background:oklch(40% 0.13 25); color:oklch(98% 0.01 80); padding:11px 20px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">+ {{ t.admin_add_property }}</div>
     </div>
 
     <sc-if value="{{ leaseView }}">
@@ -215,7 +215,7 @@
             <input type="number" value="{{ form.distanceTown }}" onChange="{{ form.onDistanceTown }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
           </div>
           <label style="display:flex; align-items:center; gap:8px; font-size:14px; color:oklch(30% 0.02 60);">
-            <input type="checkbox" checked="{{ form.pool }}" onChange="{{ form.onPool }}" style="width:16px; height:16px; accent-color:oklch(50% 0.09 70);" />
+            <input type="checkbox" checked="{{ form.pool }}" onChange="{{ form.onPool }}" style="width:16px; height:16px; accent-color:oklch(40% 0.13 25);" />
             {{ t.admin_field_pool }}
           </label>
           <div>
@@ -255,7 +255,7 @@
           <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:8px;">
             <sc-for list="{{ form.featureOptions }}" as="ft" hint-placeholder-count="6">
               <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(30% 0.02 60);">
-                <input type="checkbox" checked="{{ ft.checked }}" onChange="{{ ft.onToggle }}" style="width:15px; height:15px; accent-color:oklch(50% 0.09 70);" />
+                <input type="checkbox" checked="{{ ft.checked }}" onChange="{{ ft.onToggle }}" style="width:15px; height:15px; accent-color:oklch(40% 0.13 25);" />
                 {{ ft.label }}
               </label>
             </sc-for>
@@ -276,14 +276,14 @@
                   <sc-if value="{{ ph.uploading }}"><span style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:10px; color:oklch(45% 0.02 60);">…</span></sc-if>
                 </label>
                 <input value="{{ ph.label }}" onChange="{{ ph.onChange }}" style="flex:1; min-width:0; border:1px solid oklch(88% 0.01 70); border-radius:4px; padding:6px 8px; font-size:13px; font-family:inherit;" />
-                <sc-if value="{{ ph.isCover }}"><span style="font-size:11px; color:oklch(50% 0.09 70); font-weight:600; white-space:nowrap;">{{ t.admin_set_cover }}</span></sc-if>
+                <sc-if value="{{ ph.isCover }}"><span style="font-size:11px; color:oklch(40% 0.13 25); font-weight:600; white-space:nowrap;">{{ t.admin_set_cover }}</span></sc-if>
                 <sc-if value="{{ ph.notCover }}"><span onClick="{{ ph.onSetCover }}" style="font-size:11px; color:oklch(45% 0.08 230); cursor:pointer; white-space:nowrap;">{{ t.admin_set_cover }}</span></sc-if>
                 <span onClick="{{ ph.onUp }}" style="cursor:pointer; padding:2px 6px; color:oklch(40% 0.02 60);">↑</span>
                 <span onClick="{{ ph.onDown }}" style="cursor:pointer; padding:2px 6px; color:oklch(40% 0.02 60);">↓</span>
                 <span onClick="{{ ph.onRemove }}" style="cursor:pointer; padding:2px 6px; color:oklch(50% 0.18 30);">✕</span>
               </div>
             </sc-for>
-            <div onClick="{{ form.onAddPhoto }}" style="font-size:13px; color:oklch(48% 0.07 55); cursor:pointer; padding:6px 0;">{{ t.admin_add_photo }}</div>
+            <div onClick="{{ form.onAddPhoto }}" style="font-size:13px; color:oklch(42% 0.12 25); cursor:pointer; padding:6px 0;">{{ t.admin_add_photo }}</div>
           </div>
         </div>
 
@@ -379,7 +379,7 @@
 
         <div style="display:flex; gap:12px; justify-content:flex-end; padding-top:8px;">
           <div onClick="{{ closeModal }}" style="border:1px solid oklch(75% 0.02 60); color:oklch(30% 0.02 60); padding:12px 22px; border-radius:4px; font-size:14px; cursor:pointer;">{{ t.admin_cancel }}</div>
-          <div onClick="{{ saveForm }}" style="background:oklch(50% 0.09 70); color:oklch(98% 0.01 80); padding:12px 22px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">{{ savingLabel }}</div>
+          <div onClick="{{ saveForm }}" style="background:oklch(40% 0.13 25); color:oklch(98% 0.01 80); padding:12px 22px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">{{ savingLabel }}</div>
         </div>
       </div>
     </div>
@@ -795,7 +795,7 @@ class Component extends DCLogic {
     const t = mod.I18N[lang];
     const areaLabelOf = (id) => { const a = mod.AREAS.find((x) => x.id === id); return a ? a.label[lang] : id; };
     const typeLabelOf = (id) => { const ty = mod.TYPES.find((x) => x.id === id); return ty ? ty.label[lang] : id; };
-    const statusColorOf = (s) => ({ sale: "oklch(50% 0.09 70)", rent: "oklch(45% 0.09 230)", rented: "oklch(48% 0.11 155)", sold: "oklch(45% 0.02 60)", reserved: "oklch(62% 0.16 85)" }[s]);
+    const statusColorOf = (s) => ({ sale: "oklch(40% 0.13 25)", rent: "oklch(45% 0.09 230)", rented: "oklch(48% 0.11 155)", sold: "oklch(45% 0.02 60)", reserved: "oklch(62% 0.16 85)" }[s]);
 
     const all = this.state.properties;
     const rentedProps = all.filter((p) => p.status === "rented" && p.leaseInfo && p.leaseInfo.leaseEnd);

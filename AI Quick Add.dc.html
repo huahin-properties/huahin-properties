@@ -23,7 +23,7 @@
 
   <!-- HEADER -->
   <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 24px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80);">
-    <a href="Admin Dashboard.dc.html" style="text-decoration:none; color:inherit; font-family:'Playfair Display',serif; font-size:19px;">huahin<span style="color:oklch(70% 0.09 70);">.</span>properties <span style="font-size:12px; color:oklch(75% 0.01 70); border-left:1px solid oklch(45% 0.01 60); padding-left:14px;">🤖 เพิ่มทรัพย์ด่วนด้วย AI</span></a>
+    <a href="Admin Dashboard.dc.html" style="text-decoration:none; color:inherit; font-family:'Playfair Display',serif; font-size:19px;">huahin<span style="color:oklch(75% 0.13 85);">.</span>properties <span style="font-size:12px; color:oklch(75% 0.01 70); border-left:1px solid oklch(45% 0.01 60); padding-left:14px;">🤖 เพิ่มทรัพย์ด่วนด้วย AI</span></a>
     <a href="Admin Dashboard.dc.html" style="font-size:13px; color:oklch(85% 0.01 70); text-decoration:none;">← กลับแดชบอร์ด</a>
   </div>
 
@@ -73,7 +73,7 @@
           <sc-for list="{{ photoPreviews }}" as="ph" hint-placeholder-count="4">
             <div style="{{ ph.style }}">
               <sc-if value="{{ ph.isCover }}">
-                <div style="position:absolute; top:2px; left:2px; background:oklch(50% 0.09 70); color:#fff; font-size:9px; padding:2px 5px; border-radius:3px;">ปก</div>
+                <div style="position:absolute; top:2px; left:2px; background:oklch(40% 0.13 25); color:#fff; font-size:9px; padding:2px 5px; border-radius:3px;">ปก</div>
               </sc-if>
               <div onClick="{{ ph.onRemove }}" style="position:absolute; top:2px; right:2px; background:rgba(0,0,0,0.5); color:#fff; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; cursor:pointer;">✕</div>
             </div>
@@ -278,7 +278,7 @@
 
       <div style="display:flex; gap:12px;">
         <div onClick="{{ onBackToForm }}" style="border:1px solid oklch(75% 0.02 60); color:oklch(30% 0.02 60); padding:13px 24px; border-radius:4px; font-size:14px; cursor:pointer;">← แก้ไขข้อมูลต้นฉบับ</div>
-        <div onClick="{{ onPublish }}" style="background:oklch(50% 0.09 70); color:oklch(98% 0.01 80); padding:13px 24px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">
+        <div onClick="{{ onPublish }}" style="background:oklch(40% 0.13 25); color:oklch(98% 0.01 80); padding:13px 24px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">
           <span>ถัดไป: กรอกข้อมูลเจ้าของ →</span>
         </div>
       </div>
@@ -331,7 +331,7 @@
         </sc-if>
         <div style="display:flex; gap:12px;">
           <div onClick="{{ onBackToPreview }}" style="border:1px solid oklch(75% 0.02 60); color:oklch(30% 0.02 60); padding:13px 24px; border-radius:4px; font-size:14px; cursor:pointer;">← กลับไปตรวจสอบร่าง</div>
-          <div onClick="{{ onPublish }}" style="background:oklch(50% 0.09 70); color:oklch(98% 0.01 80); padding:13px 24px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">
+          <div onClick="{{ onPublish }}" style="background:oklch(40% 0.13 25); color:oklch(98% 0.01 80); padding:13px 24px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">
             <sc-if value="{{ publishing }}"><span>⏳ กำลังเผยแพร่…</span></sc-if>
             <sc-if value="{{ notPublishing }}"><span>✓ บันทึกและเผยแพร่จริง</span></sc-if>
           </div>

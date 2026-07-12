@@ -1333,6 +1333,18 @@ export function formatPrice(price, currency, lang) {
 // photo gallery — is reflected on the public site immediately.
 export const ADMIN_DATA_VERSION = "4";
 
+export const OWNERSHIP_LABELS = {
+  "Chanote": { en: "Chanote (freehold title)", th: "โฉนดที่ดิน (กรรมสิทธิ์เต็ม)", ru: "Чанот (право собственности)", zh: "查诺特地契（完全产权）", de: "Chanote (Eigentumsurkunde)", no: "Chanote (eiendomsrett)", fr: "Chanote (pleine propriété)", it: "Chanote (piena proprietà)" },
+  "Foreign Freehold Quota": { en: "Foreign Freehold Quota", th: "โควตากรรมสิทธิ์ต่างชาติ", ru: "Иностранная квота на право собственности", zh: "外国人产权配额", de: "Ausländer-Eigentumsquote", no: "Utenlandsk eierkvote", fr: "Quota de pleine propriété étrangère", it: "Quota di proprietà per stranieri" },
+  "N/A (Rental)": { en: "N/A (Rental)", th: "ไม่เกี่ยวข้อง (บ้านเช่า)", ru: "Не применимо (аренда)", zh: "不适用（出租）", de: "N/V (Miete)", no: "Ikke aktuelt (leie)", fr: "N/A (Location)", it: "N/D (Affitto)" },
+};
+
+export function ownershipLabel(raw, lang) {
+  if (!raw) return raw;
+  const entry = OWNERSHIP_LABELS[raw];
+  return entry ? (entry[lang] || entry.en) : raw;
+}
+
 export function getEffectivePropertiesSync(mod) {
   return mod.PROPERTIES;
 }

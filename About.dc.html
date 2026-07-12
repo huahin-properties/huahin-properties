@@ -14,21 +14,21 @@
   <meta name="description" content="huahin.properties is a boutique real estate agency serving Hua Hin, Pranburi and Cha-am, Thailand.">
   <style>
     body { margin: 0; background: oklch(98% 0.01 80); font-family: 'Work Sans', sans-serif; }
-    a { color: oklch(48% 0.07 55); }
-    a:hover { color: oklch(38% 0.08 55); }
+    a { color: oklch(42% 0.12 25); }
+    a:hover { color: oklch(32% 0.13 25); }
   </style>
 </helmet>
 
 <div style="max-width:1600px; margin:0 auto; background:oklch(98% 0.01 80); min-height:100vh;">
 
   <div style="display:flex; align-items:center; justify-content:space-between; gap:24px; padding:22px clamp(20px,4vw,56px); border-bottom:1px solid oklch(90% 0.01 70);">
-    <a href="Home.dc.html" style="white-space:nowrap; font-family:'Playfair Display',serif; font-size:clamp(19px,2.4vw,24px); letter-spacing:0.02em; color:oklch(22% 0.02 60); text-decoration:none;">huahin<span style="color:oklch(50% 0.09 70);">.</span>properties</a>
+    <a href="Home.dc.html" style="white-space:nowrap; display:flex; align-items:center; gap:9px; font-family:'Playfair Display',serif; font-size:clamp(19px,2.4vw,24px); letter-spacing:0.02em; color:oklch(22% 0.02 60); text-decoration:none;"><img src="logo.png" alt="huahin.properties logo" style="height:36px; width:36px; object-fit:contain; border-radius:50%; flex-shrink:0;" />huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</a>
     <sc-if value="{{ isDesktopNav }}" hint-placeholder-val="{{ true }}">
       <div style="display:flex; gap:32px; align-items:center; font-size:15px; color:oklch(30% 0.02 60); white-space:nowrap;">
         <a href="Search Results.dc.html?status=sale" style="text-decoration:none; color:inherit;">{{ t.nav_buy }}</a>
         <a href="Search Results.dc.html?status=rent" style="text-decoration:none; color:inherit;">{{ t.nav_rent }}</a>
         <a href="Sell.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_sell }}</a>
-        <a href="About.dc.html" style="text-decoration:none; color:oklch(48% 0.07 55);">{{ t.nav_about }}</a>
+        <a href="About.dc.html" style="text-decoration:none; color:oklch(42% 0.12 25);">{{ t.nav_about }}</a>
         <a href="Contact.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_contact }}</a>
       </div>
       <div style="display:flex; gap:12px; align-items:flex-end; white-space:nowrap;">
@@ -52,7 +52,7 @@
   <sc-if value="{{ mobileMenuOpen }}">
     <div style="position:fixed; inset:0; background:oklch(98% 0.01 80); z-index:60; padding:22px clamp(20px,6vw,56px); display:flex; flex-direction:column; gap:28px; overflow-y:auto;">
       <div style="display:flex; align-items:center; justify-content:space-between;">
-        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(50% 0.09 70);">.</span>properties</div>
+        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
         <div onClick="{{ toggleMenu }}" style="font-size:26px; line-height:1; color:oklch(30% 0.02 60); cursor:pointer; padding:6px;">&times;</div>
       </div>
       <div style="display:flex; flex-direction:column; gap:22px; font-size:20px; font-family:'Playfair Display',serif; color:oklch(22% 0.02 60);">
@@ -99,8 +99,10 @@
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:20px;">
       <sc-for list="{{ areaCards }}" as="ac" hint-placeholder-count="3">
         <a href="{{ ac.href }}" style="text-decoration:none; display:flex; flex-direction:column; border-radius:6px; overflow:hidden; background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70);">
-          <div style="aspect-ratio:16/10; position:relative; background-image:repeating-linear-gradient(135deg, oklch(86% 0.02 75) 0px, oklch(86% 0.02 75) 2px, oklch(91% 0.015 75) 2px, oklch(91% 0.015 75) 22px);">
-            <div style="position:absolute; bottom:10px; left:10px; font-family:monospace; font-size:11px; color:oklch(20% 0.02 60 / 0.75); background:rgba(255,255,255,0.65); padding:4px 8px; border-radius:4px;">[{{ ac.photoLabel }}]</div>
+          <div style="{{ ac.photoStyle }}">
+            <sc-if value="{{ ac.noPhoto }}">
+              <div style="position:absolute; bottom:10px; left:10px; font-family:monospace; font-size:11px; color:oklch(20% 0.02 60 / 0.75); background:rgba(255,255,255,0.65); padding:4px 8px; border-radius:4px;">[{{ ac.photoLabel }}]</div>
+            </sc-if>
           </div>
           <div style="padding:18px;">
             <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60); margin-bottom:6px;">{{ ac.label }}</div>
@@ -116,7 +118,7 @@
   </div>
 
   <div style="border-top:1px solid oklch(90% 0.01 70); padding:32px clamp(20px,4vw,56px); display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between;">
-    <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(50% 0.09 70);">.</span>properties</div>
+    <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
     <div style="font-size:13px; color:oklch(50% 0.02 60);">© 2026 huahin.properties. {{ t.footer_rights }}</div>
   </div>
 </div>
@@ -126,12 +128,19 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { lang: "en", isMobile: (typeof window !== "undefined" && window.innerWidth < 900), mobileMenuOpen: false, data: null };
+  state = { lang: "en", isMobile: (typeof window !== "undefined" && window.innerWidth < 900), mobileMenuOpen: false, data: null, siteContent: {} };
 
   async componentDidMount() {
     const mod = await import("./data.js");
     this._mod = mod;
     this.setState({ lang: mod.getLang(), data: mod });
+    try {
+      const fb = await import("./firebase-client.js");
+      const siteContent = await fb.fetchSiteContent();
+      this.setState({ siteContent });
+    } catch (e) {
+      console.warn("Failed to load site content:", e);
+    }
     this._onResize = () => this.setState({ isMobile: window.innerWidth < 900 });
     this._onResize();
     window.addEventListener("resize", this._onResize);
@@ -149,7 +158,21 @@ class Component extends DCLogic {
     const langOptions = mod.LANGS.map((l) => ({ code: l, label: mod.LANG_LABELS[l] }));
     const areaDescKey = { "hua-hin": "area_hua_hin_desc", pranburi: "area_pranburi_desc", "cha-am": "area_cha_am_desc" };
     const areaPhoto = { "hua-hin": "photo: Hua Hin train station & beach", pranburi: "photo: Pranburi beachfront villa", "cha-am": "photo: Cha-am beach promenade" };
-    const areaCards = mod.AREAS.map((a) => ({ href: `Search Results.dc.html?area=${a.id}`, label: a.label[lang], desc: t[areaDescKey[a.id]], photoLabel: areaPhoto[a.id] }));
+    const sc = this.state.siteContent || {};
+    const areaCards = mod.AREAS.map((a) => {
+      const content = sc["area-" + a.id] || {};
+      return {
+        href: `Search Results.dc.html?area=${a.id}`,
+        label: a.label[lang],
+        desc: content.desc || t[areaDescKey[a.id]],
+        photoLabel: areaPhoto[a.id],
+        noPhoto: !content.photoUrl,
+        photoStyle: {
+          aspectRatio: "16/10", position: "relative",
+          background: content.photoUrl ? `url('${content.photoUrl}') center/cover` : "repeating-linear-gradient(135deg, oklch(86% 0.02 75) 0px, oklch(86% 0.02 75) 2px, oklch(91% 0.015 75) 2px, oklch(91% 0.015 75) 22px)",
+        },
+      };
+    });
     return {
       t, lang,
       isDesktopNav: !this.state.isMobile, isMobileNav: this.state.isMobile,

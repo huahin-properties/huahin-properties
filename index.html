@@ -17,8 +17,8 @@
   <meta name="description" content="Curated pool villas, beachfront homes and land for sale and rent across Hua Hin, Pranburi and Cha-am, Thailand.">
   <style>
     body { margin: 0; background: oklch(98% 0.01 80); font-family: 'Work Sans', sans-serif; }
-    a { color: oklch(48% 0.07 55); }
-    a:hover { color: oklch(38% 0.08 55); }
+    a { color: oklch(42% 0.12 25); }
+    a:hover { color: oklch(32% 0.13 25); }
   </style>
 </helmet>
 
@@ -26,7 +26,7 @@
 
   <!-- ============ HEADER ============ -->
   <div style="display:flex; align-items:center; justify-content:space-between; gap:24px; padding:22px clamp(20px,4vw,56px); border-bottom:1px solid oklch(90% 0.01 70); position:relative;">
-    <a href="Home.dc.html" style="white-space:nowrap; font-family:'Playfair Display',serif; font-size:clamp(19px,2.4vw,24px); letter-spacing:0.02em; color:oklch(22% 0.02 60); text-decoration:none;">huahin<span style="color:oklch(50% 0.09 70);">.</span>properties</a>
+    <a href="Home.dc.html" style="white-space:nowrap; display:flex; align-items:center; gap:9px; font-family:'Playfair Display',serif; font-size:clamp(19px,2.4vw,24px); letter-spacing:0.02em; color:oklch(22% 0.02 60); text-decoration:none;"><img src="logo.png" alt="huahin.properties logo" style="height:36px; width:36px; object-fit:contain; border-radius:50%; flex-shrink:0;" />huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</a>
 
     <sc-if value="{{ isDesktopNav }}" hint-placeholder-val="{{ true }}">
       <div style="display:flex; gap:32px; align-items:center; font-size:15px; color:oklch(30% 0.02 60); white-space:nowrap;">
@@ -58,7 +58,7 @@
   <sc-if value="{{ mobileMenuOpen }}">
     <div style="position:fixed; inset:0; background:oklch(98% 0.01 80); z-index:50; padding:22px clamp(20px,6vw,56px); display:flex; flex-direction:column; gap:28px; overflow-y:auto;">
       <div style="display:flex; align-items:center; justify-content:space-between;">
-        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(50% 0.09 70);">.</span>properties</div>
+        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
         <div onClick="{{ toggleMenu }}" style="font-size:26px; line-height:1; color:oklch(30% 0.02 60); cursor:pointer; padding:6px;">&times;</div>
       </div>
       <div style="display:flex; flex-direction:column; gap:22px; font-size:20px; font-family:'Playfair Display',serif; color:oklch(22% 0.02 60);">
@@ -140,7 +140,7 @@
           <div style="position:absolute; right:12px; top:50%; margin-top:-2px; width:8px; height:8px; border-right:2px solid oklch(45% 0.02 60); border-bottom:2px solid oklch(45% 0.02 60); transform:rotate(45deg); pointer-events:none;"></div>
         </div>
       </div>
-      <a href="{{ searchHref }}" style="background:oklch(50% 0.09 70); color:oklch(98% 0.01 80); padding:0 30px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:500; letter-spacing:0.02em; white-space:nowrap; text-decoration:none; min-height:48px; flex:1; min-width:180px;">{{ t.search_cta }}</a>
+      <a href="{{ searchHref }}" style="background:oklch(40% 0.13 25); color:oklch(98% 0.01 80); padding:0 30px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:500; letter-spacing:0.02em; white-space:nowrap; text-decoration:none; min-height:48px; flex:1; min-width:180px;">{{ t.search_cta }}</a>
       </div>
     </div>
   </div>
@@ -192,12 +192,12 @@
   <div style="padding:clamp(48px,7vw,88px) clamp(20px,4vw,56px); max-width:760px; margin:0 auto; text-align:center;">
     <div style="font-family:'Playfair Display',serif; font-size:clamp(24px,3vw,32px); color:oklch(20% 0.02 60); margin-bottom:18px;">{{ t.about_title }}</div>
     <div style="font-size:15px; line-height:1.75; color:oklch(38% 0.02 60); margin-bottom:24px;">{{ t.about_body }}</div>
-    <a href="About.dc.html" style="font-size:14px; font-weight:600; color:oklch(48% 0.07 55); text-decoration:none;">{{ t.nav_about }} →</a>
+    <a href="About.dc.html" style="font-size:14px; font-weight:600; color:oklch(42% 0.12 25); text-decoration:none;">{{ t.nav_about }} →</a>
   </div>
 
   <!-- ============ FOOTER ============ -->
   <div style="border-top:1px solid oklch(90% 0.01 70); padding:32px clamp(20px,4vw,56px); display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between;">
-    <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(50% 0.09 70);">.</span>properties</div>
+    <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
     <div style="font-size:13px; color:oklch(50% 0.02 60);">© 2026 huahin.properties. {{ t.footer_rights }}</div>
   </div>
 
@@ -260,7 +260,7 @@ class Component extends DCLogic {
 
     const areaLabelOf = (id) => mod.AREAS.find((a) => a.id === id).label[lang];
     const typeLabelOf = (id) => mod.TYPES.find((ty) => ty.id === id).label[lang];
-    const statusColorOf = (s) => ({ sale: "oklch(50% 0.09 70)", rent: "oklch(45% 0.09 230)", sold: "oklch(45% 0.02 60)", reserved: "oklch(62% 0.16 85)" }[s]);
+    const statusColorOf = (s) => ({ sale: "oklch(40% 0.13 25)", rent: "oklch(45% 0.09 230)", sold: "oklch(45% 0.02 60)", reserved: "oklch(62% 0.16 85)" }[s]);
 
     const cardProps = (p) => ({
       href: `Property Details.dc.html?id=${p.id}`,
