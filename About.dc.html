@@ -23,7 +23,7 @@
 </helmet>
 
 <sc-if value="{{ showGate }}">
-  <div style="position:fixed; inset:0; background:oklch(96% 0.015 75); z-index:300; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
+  <div style="position:fixed; inset:0; background:oklch(96% 0.015 75); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
     <img src="logo.png" alt="huahin.properties logo" style="height:56px; width:56px; object-fit:contain; border-radius:50%; margin-bottom:20px;" />
     <div style="font-family:'Playfair Display',serif; font-size:26px; color:oklch(20% 0.02 60); margin-bottom:10px;">กำลังปรับปรุงเว็บไซต์</div>
     <div style="font-size:14px; color:oklch(50% 0.02 60); max-width:360px; margin-bottom:26px; line-height:1.6;">เรากำลังปรับปรุงเว็บไซต์อยู่ ขออภัยในความไม่สะดวก จะกลับมาเปิดให้บริการเร็วๆ นี้</div>
@@ -139,7 +139,7 @@
   </div>
 </div>
 
-<dc-import name="ContactRail" hint-size="0,0"></dc-import>
+<sc-if value="{{ showChrome }}"><dc-import name="ContactRail" hint-size="0,0"></dc-import></sc-if>
 
 </x-dc>
 <script type="text/x-dc" data-dc-script>
@@ -187,6 +187,7 @@ class Component extends DCLogic {
   renderVals() {
     const gateVals = {
       showGate: this.state.showGate,
+      showChrome: !this.state.showGate,
       gatePassword: this.state.gatePassword,
       onGatePassword: (e) => this.setState({ gatePassword: e.target.value, gateError: "" }),
       onGateSubmit: () => this.submitGate(),
