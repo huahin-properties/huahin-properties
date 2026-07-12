@@ -159,6 +159,18 @@ class Component extends DCLogic {
     } catch (e) {
       console.warn("Chat: failed to load properties", e);
     }
+    try {
+      const fb = await import("./firebase-client.js");
+      this._aiNotes = await fb.fetchAiNotes();
+    } catch (e) {
+      console.warn("Chat: failed to load AI notes", e);
+    }
+  }
+
+  _buildNotesContext() {
+    const notes = this._aiNotes || [];
+    if (!notes.length) return "";
+    return notes.filter((n) => n.title || n.body).map((n) => `• ${n.title || "(untitled)"}: ${n.body || ""}`).join("\n");
   }
 
   _buildContext(lang) {
@@ -180,10 +192,36 @@ class Component extends DCLogic {
     this._scrollChat();
     try {
       const context = this._buildContext(lang);
-      const langNames = { en: "English", th: "Thai", ru: "Russian", zh: "Chinese", de: "German", no: "Norwegian", fr: "French", it: "Italian" };
-      const system = `You are the on-site assistant for huahin.properties, a real-estate agency in Hua Hin, Pranburi and Cha-am, Thailand. Answer ONLY using the property listing data below — never invent properties, prices or availability that aren't in this list. If asked about something not covered by the data, say you don't have that information and suggest contacting the team. Keep answers short (2-5 sentences), friendly, concrete (cite property codes when relevant). Reply in ${langNames[lang] || "English"}.\n\nCURRENT LISTINGS (code | title | area | zone | type | status | price | beds | baths | land | living | pool):\n${context}`;
+      const system = `You are "Anna", the friendly female AI assistant for huahin.properties, a real-estate agency covering Hua Hin, Pranburi and Cha-am, Thailand. Introduce yourself as the AI assistant from huahin.properties if asked who you are.
+
+TONE: For general conversation (greetings, small talk, understanding what the customer is looking for) — reply naturally and warmly, like a real person would. Give helpful preliminary advice about the areas, property types, or process.
+
+FACTS: For any concrete question about listings — price, bedrooms, bathrooms, size, property code, area/zone, availability (for sale/rent/sold/reserved) — you must answer using ONLY the CURRENT LISTINGS data below. Never invent, estimate, or guess a property, price or availability that isn't in this list. If the data doesn't cover what's asked, say so honestly and suggest contacting the team for the latest details.
+
+LANGUAGE: Always reply in the SAME language the customer just wrote in (detect it from their message), regardless of any other setting — if they write in English reply in English, if Thai reply in Thai, if Russian reply in Russian, etc.
+
+Keep replies short (2-5 sentences). When a customer shows genuine interest in a specific property or wants to view/book/negotiate, encourage them to use the "Contact us" option so a real team member can follow up.
+
+CURRENT LISTINGS (code | title | area | zone | type | status | price | beds | baths | land | living | pool):
+${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE AGENCY (promotions, updated contact info, announcements — treat as equally authoritative facts):\n${this._buildNotesContext()}` : ""}`;
       const messages = history.map((m) => ({ role: m.role, content: m.text }));
-      const reply = await window.claude.complete({ system, messages, model: "claude-haiku-4-5", max_tokens: 500 });
+      let reply;
+      if (window.claude && window.claude.complete) {
+        reply = await window.claude.complete({ system, messages, model: "claude-haiku-4-5", max_tokens: 500 });
+      } else {
+        const CLOUD_FUNCTION_URL = "https://claudecomplete-3j4ldf4pja-as.a.run.app";
+        const res = await fetch(CLOUD_FUNCTION_URL, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ system, messages }),
+        });
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          throw new Error(errBody.error || ("AI request failed: " + res.status));
+        }
+        const data = await res.json();
+        reply = data.completion || "";
+      }
       const aiMsg = { role: "assistant", text: reply, bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
       this.setState({ chatMessages: [...history, aiMsg], chatLoading: false });
     } catch (e) {

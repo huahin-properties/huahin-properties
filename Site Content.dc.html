@@ -96,6 +96,28 @@
       </sc-if>
     </div>
 
+    <!-- AI KNOWLEDGE NOTES -->
+    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">🧠 บันทึกข้อมูลสำหรับ AI แชท</div>
+      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:16px;">เพิ่มบันทึกอะไรก็ได้ (เบอร์ติดต่อล่าสุด, โปรโมชั่น, ประกาศพิเศษ ฯลฯ) — AI ที่ตอบลูกค้าในแชทจะใช้ข้อมูลนี้ประกอบการตอบ ลบบันทึกไหนออก AI ก็จะไม่รู้เรื่องนั้นอีกต่อไป</div>
+
+      <sc-for list="{{ aiNotes }}" as="note" hint-placeholder-count="1">
+        <div style="border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:14px; margin-bottom:12px;">
+          <div style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
+            <input value="{{ note.title }}" onChange="{{ note.onTitleChange }}" placeholder="หัวข้อ เช่น เบอร์ติดต่อล่าสุด" style="flex:1; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 10px; font-size:13px; font-weight:600; font-family:inherit;" />
+            <div onClick="{{ note.onDelete }}" style="cursor:pointer; color:oklch(50% 0.15 30); font-size:12px; padding:6px 10px; border:1px solid oklch(85% 0.1 30); border-radius:100px; white-space:nowrap;">ลบ</div>
+          </div>
+          <textarea value="{{ note.body }}" onChange="{{ note.onBodyChange }}" rows="3" placeholder="พิมพ์หรือวางเนื้อหาที่อยากให้ AI รู้..." style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical; margin-bottom:8px;"></textarea>
+          <div onClick="{{ note.onSave }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:7px 18px; border-radius:100px; font-size:12px; cursor:pointer;">บันทึก</div>
+          <sc-if value="{{ note.msg }}">
+            <span style="margin-left:10px; font-size:12px; color:oklch(40% 0.12 145);">{{ note.msg }}</span>
+          </sc-if>
+        </div>
+      </sc-for>
+
+      <div onClick="{{ onAddNote }}" style="display:inline-block; border:1px dashed oklch(60% 0.02 60); color:oklch(40% 0.02 60); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">+ เพิ่มบันทึกใหม่</div>
+    </div>
+
     <!-- FACEBOOK POST FOOTER -->
     <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
       <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">📘 ข้อความท้ายโพสต์ Facebook (คงที่)</div>
@@ -122,6 +144,7 @@ class Component extends DCLogic {
     saveMsg: "",
     accUsername: "", accPassword: "", accEmail: "", accPhone: "", accMsg: "",
     fbFooter: "", fbFooterMsg: "",
+    aiNotes: [], noteDrafts: {}, noteMsgs: {},
   };
 
   async componentDidMount() {
@@ -159,6 +182,51 @@ class Component extends DCLogic {
       console.warn("Failed to load Facebook footer:", e);
     }
     this.setState({ fbFooter });
+
+    try {
+      const aiNotes = await fb.fetchAiNotes();
+      const noteDrafts = {};
+      aiNotes.forEach((n) => { noteDrafts[n.id] = { title: n.title || "", body: n.body || "" }; });
+      this.setState({ aiNotes, noteDrafts });
+    } catch (e) {
+      console.warn("Failed to load AI notes:", e);
+    }
+  }
+
+  addNote() {
+    const id = "note-" + Date.now();
+    this.setState((s) => ({
+      aiNotes: [...s.aiNotes, { id, title: "", body: "" }],
+      noteDrafts: { ...s.noteDrafts, [id]: { title: "", body: "" } },
+    }));
+  }
+
+  updateNoteDraft(id, field, value) {
+    this.setState((s) => ({ noteDrafts: { ...s.noteDrafts, [id]: { ...s.noteDrafts[id], [field]: value } } }));
+  }
+
+  async saveNote(id) {
+    const draft = this.state.noteDrafts[id] || { title: "", body: "" };
+    try {
+      await this._fb.saveAiNote(id, draft.title, draft.body);
+      this.setState((s) => ({
+        aiNotes: s.aiNotes.map((n) => (n.id === id ? { ...n, title: draft.title, body: draft.body } : n)),
+        noteMsgs: { ...s.noteMsgs, [id]: "บันทึกแล้ว" },
+      }));
+      setTimeout(() => this.setState((s) => ({ noteMsgs: { ...s.noteMsgs, [id]: "" } })), 2500);
+    } catch (e) {
+      console.warn("Failed to save AI note:", e);
+      this.setState((s) => ({ noteMsgs: { ...s.noteMsgs, [id]: "บันทึกไม่สำเร็จ" } }));
+    }
+  }
+
+  async deleteNote(id) {
+    this.setState((s) => ({ aiNotes: s.aiNotes.filter((n) => n.id !== id) }));
+    try {
+      await this._fb.deleteAiNote(id);
+    } catch (e) {
+      console.warn("Failed to delete AI note:", e);
+    }
   }
 
   async saveFbFooter() {
@@ -275,6 +343,19 @@ class Component extends DCLogic {
       fbFooter: this.state.fbFooter, onFbFooter: (e) => this.setState({ fbFooter: e.target.value }),
       onSaveFbFooter: () => this.saveFbFooter(),
       fbFooterMsg: this.state.fbFooterMsg,
+      onAddNote: () => this.addNote(),
+      aiNotes: this.state.aiNotes.map((n) => {
+        const draft = this.state.noteDrafts[n.id] || { title: "", body: "" };
+        return {
+          title: draft.title,
+          body: draft.body,
+          msg: this.state.noteMsgs[n.id] || "",
+          onTitleChange: (e) => this.updateNoteDraft(n.id, "title", e.target.value),
+          onBodyChange: (e) => this.updateNoteDraft(n.id, "body", e.target.value),
+          onSave: () => this.saveNote(n.id),
+          onDelete: () => this.deleteNote(n.id),
+        };
+      }),
     };
   }
 }

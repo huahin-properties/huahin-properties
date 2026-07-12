@@ -250,3 +250,25 @@ export async function saveProfilePhoto(slotId, dataUrl) {
 export async function fetchAllProfilePhotos() {
   return fetchCollection("profilePhotos");
 }
+
+// ── AI knowledge notes ──────────────────────────────────────────────────
+// Free-text notes (title + body) Admin can add/edit/delete from Site
+// Content. The AI chat widget (ContactRail) pulls all of these in as extra
+// context alongside the property listings — e.g. "current promotion",
+// "updated contact number". Delete a note and the AI stops mentioning it.
+export async function fetchAiNotes() {
+  const docs = await fetchCollection("aiNotes");
+  return docs.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+}
+
+export async function saveAiNote(id, title, body) {
+  const noteId = id || ("note-" + Date.now());
+  const existing = await db().collection("aiNotes").doc(noteId).get();
+  const prior = existing.exists ? existing.data() : { createdAt: Date.now() };
+  await setDoc("aiNotes", noteId, { ...prior, title, body });
+  return noteId;
+}
+
+export async function deleteAiNote(id) {
+  await deleteDocById("aiNotes", id);
+}
