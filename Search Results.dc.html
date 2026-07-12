@@ -179,7 +179,7 @@
 class Component extends DCLogic {
   state = {
     lang: "en",
-    isMobile: false,
+    isMobile: (typeof window !== "undefined" && window.innerWidth < 900),
     mobileMenuOpen: false,
     filtersOpen: false,
     view: "grid",

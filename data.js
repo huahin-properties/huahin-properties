@@ -10,6 +10,7 @@ export function getLang() {
 }
 export function setLang(l) {
   try { localStorage.setItem("hh_lang", l); } catch (e) {}
+  try { window.dispatchEvent(new CustomEvent("langchange", { detail: l })); } catch (e) {}
 }
 export function t(dict, lang, key) {
   return (dict[lang] && dict[lang][key]) ?? (dict.en && dict.en[key]) ?? key;

@@ -410,7 +410,7 @@ const BLANK_FORM = () => ({
 
 class Component extends DCLogic {
   state = {
-    lang: "en", isMobile: false, data: null,
+    lang: "en", isMobile: (typeof window !== "undefined" && window.innerWidth < 900), data: null,
     properties: null, owners: null,
     searchQuery: "", statusFilter: "", areaFilter: "",
     confirmingDeleteId: null,

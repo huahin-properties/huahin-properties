@@ -112,7 +112,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { lang: "en", isMobile: false, mobileMenuOpen: false, data: null, submitted: false };
+  state = { lang: "en", isMobile: (typeof window !== "undefined" && window.innerWidth < 900), mobileMenuOpen: false, data: null, submitted: false };
 
   async componentDidMount() {
     const mod = await import("./data.js");
