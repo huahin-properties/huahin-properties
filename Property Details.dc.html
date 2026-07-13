@@ -15,6 +15,14 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <title>{{ seoTitle }}</title>
   <meta name="description" content="{{ seoDesc }}">
+  <link rel="canonical" href="{{ canonicalUrl }}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ seoTitle }}">
+  <meta property="og:description" content="{{ seoDesc }}">
+  <meta property="og:image" content="{{ ogImage }}">
+  <meta property="og:url" content="{{ canonicalUrl }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <script type="application/ld+json">{{ jsonLd }}</script>
   <style>
     body { margin: 0; background: oklch(98% 0.01 80); font-family: 'Work Sans', sans-serif; }
     a { color: oklch(42% 0.12 25); }
@@ -368,6 +376,24 @@ class Component extends DCLogic {
       langValue, onLangChange, langOptions,
       hasProperty: true,
       seoTitle: raw.seo.title, seoDesc: raw.seo.desc,
+      canonicalUrl: `${window.location.origin}${window.location.pathname}?id=${raw.id}`,
+      ogImage: (raw.photos[0] && raw.photos[0].url) || `${window.location.origin}/logo.png`,
+      jsonLd: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: raw.title[lang],
+        description: raw.seo.desc,
+        image: raw.photos.filter((ph) => ph && ph.url).map((ph) => ph.url),
+        sku: raw.id,
+        offers: {
+          "@type": "Offer",
+          priceCurrency: raw.currency || "THB",
+          price: raw.price,
+          availability: raw.status === "sold" || raw.status === "rented"
+            ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+          url: `${window.location.origin}${window.location.pathname}?id=${raw.id}`,
+        },
+      }),
       areaSearchHref: `Search Results.dc.html?area=${raw.area}`,
       p, specs, photos,
       photoCount: effectiveIndices.length,

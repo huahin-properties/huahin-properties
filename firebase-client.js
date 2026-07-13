@@ -75,10 +75,9 @@ export async function seedIfEmpty(collectionName, items, idKey) {
 // Uploads a File/Blob to Firebase Storage at `path` and returns its
 // public download URL (a real https CDN URL — safe to store in Firestore
 // and render directly in <img src>).
-// NOTE: Firebase Storage on new projects requires the paid Blaze plan to
-// provision a bucket. For a $0-cost setup, photos are instead stored
-// directly in Firestore (see savePhoto/fetchPhotosFor below) — this
-// function is kept for projects that DO have Storage enabled.
+// This project is on the Blaze plan, so Storage is enabled and every photo
+// upload (savePhoto/saveProfilePhoto/saveSiteContentPhoto below) goes
+// through here rather than being embedded as a Firestore data: URL.
 export async function uploadImage(file, path) {
   const ref = storageRef().ref().child(path);
   await ref.put(file);
@@ -117,9 +116,23 @@ export async function fileToDataUrl(file, maxDim) {
   }
 }
 
+// Converts a data: URL (from fileToDataUrl) into a Blob for uploading.
+async function dataUrlToBlob(dataUrl) {
+  const res = await fetch(dataUrl);
+  return await res.blob();
+}
+
+// Photos now upload the actual bytes to Firebase Storage (Blaze plan is
+// active on this project) and store only the short https download URL in
+// Firestore — keeps documents tiny and avoids the 1MB-per-doc ceiling that
+// bit when many/large photos were embedded as base64 data: URLs directly.
+// The Firestore field is still named "dataUrl" for backward compatibility
+// with every page that already reads it — its value is just a URL now.
 export async function savePhoto(propertyId, index, dataUrl) {
   const id = `${propertyId}-${index}`;
-  await setDoc("propertyPhotos", id, { propertyId, index, dataUrl });
+  const blob = await dataUrlToBlob(dataUrl);
+  const url = await uploadImage(blob, `propertyPhotos/${id}.webp`);
+  await setDoc("propertyPhotos", id, { propertyId, index, dataUrl: url });
   return id;
 }
 
@@ -129,6 +142,39 @@ export async function fetchPhotosFor(propertyId) {
 
 export async function fetchAllPhotos() {
   return fetchCollection("propertyPhotos");
+}
+
+// ── One-time migration: existing photos saved as huge base64 data: URLs
+// (from before Storage was enabled) get re-uploaded to Storage and their
+// Firestore doc updated to hold the short URL instead. Safe to run more
+// than once — already-migrated docs (dataUrl starting with "https:") are
+// skipped. Call once from Admin Dashboard's system-status panel.
+export async function migrateExistingPhotosToStorage(onProgress) {
+  let migrated = 0, skipped = 0, failed = 0;
+  const jobs = [
+    { collection: "propertyPhotos", pathPrefix: "propertyPhotos" },
+    { collection: "profilePhotos", pathPrefix: "profilePhotos" },
+    { collection: "siteContent", pathPrefix: "siteContent", field: "photoUrl" },
+  ];
+  for (const job of jobs) {
+    const docs = await fetchCollection(job.collection);
+    for (const d of docs) {
+      const field = job.field || "dataUrl";
+      const val = d[field];
+      if (!val || !val.startsWith("data:")) { skipped++; continue; }
+      try {
+        const blob = await dataUrlToBlob(val);
+        const url = await uploadImage(blob, `${job.pathPrefix}/${d.id}.webp`);
+        await setDoc(job.collection, d.id, { ...d, [field]: url });
+        migrated++;
+      } catch (e) {
+        console.warn(`Migration failed for ${job.collection}/${d.id}:`, e);
+        failed++;
+      }
+      if (onProgress) onProgress({ migrated, skipped, failed });
+    }
+  }
+  return { migrated, skipped, failed };
 }
 
 // ── Facebook post footer (fixed block appended to every AI-generated
@@ -266,9 +312,11 @@ export async function saveSiteContentText(id, desc) {
 }
 
 export async function saveSiteContentPhoto(id, dataUrl) {
+  const blob = await dataUrlToBlob(dataUrl);
+  const url = await uploadImage(blob, `siteContent/${id}.webp`);
   const existing = await db().collection("siteContent").doc(id).get();
   const prior = existing.exists ? existing.data() : {};
-  await setDoc("siteContent", id, { ...prior, photoUrl: dataUrl });
+  await setDoc("siteContent", id, { ...prior, photoUrl: url });
 }
 
 // Generic reference-photo storage for owner/tenant contact cards (2 photos
@@ -276,7 +324,9 @@ export async function saveSiteContentPhoto(id, dataUrl) {
 // property photos, in its own "profilePhotos" collection keyed by an
 // arbitrary slot id such as "owner-OWN-001-1".
 export async function saveProfilePhoto(slotId, dataUrl) {
-  await setDoc("profilePhotos", slotId, { dataUrl });
+  const blob = await dataUrlToBlob(dataUrl);
+  const url = await uploadImage(blob, `profilePhotos/${slotId}.webp`);
+  await setDoc("profilePhotos", slotId, { dataUrl: url });
 }
 
 export async function fetchAllProfilePhotos() {
