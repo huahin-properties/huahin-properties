@@ -17,17 +17,50 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     function isAdmin() {
-      return request.auth != null && request.auth.uid == "n7TZKSBscPXE1kRU8WzYpsqJh2g2";
+      return request.auth != null && (
+        request.auth.uid == "n7TZKSBscPXE1kRU8WzYpsqJh2g2" ||
+        exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid))
+      );
+    }
+
+    // Owner-only: financial/settings collections (Site Content, external
+    // service costs, team management) — Staff can use the rest of the admin
+    // tools but not these. The original hardcoded UID is always Owner.
+    function isOwner() {
+      return request.auth != null && (
+        request.auth.uid == "n7TZKSBscPXE1kRU8WzYpsqJh2g2" ||
+        (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.role == "owner")
+      );
     }
 
     // Public, read-only data the site renders for every visitor.
     match /properties/{id} { allow read: if true; allow write: if isAdmin(); }
     match /propertyPhotos/{id} { allow read: if true; allow write: if isAdmin(); }
-    match /siteContent/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /siteContent/{id} { allow read: if true; allow write: if isOwner(); }
     match /profilePhotos/{id} { allow read: if true; allow write: if isAdmin(); }
-    match /aiNotes/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /aiNotes/{id} { allow read: if true; allow write: if isOwner(); }
     match /banners/{id} { allow read: if true; allow write: if isAdmin(); }
-    match /externalServices/{id} { allow read, write: if isAdmin(); }
+    match /externalServices/{id} { allow read, write: if isOwner(); }
+
+    // Team management — Owner-only. Staff invites are keyed by lowercase
+    // email until the invited person signs up (then moved to adminUsers/{uid}).
+    match /adminUsers/{uid} {
+      allow read: if isAdmin();
+      allow write: if isOwner();
+      // Allow a newly-signed-up staff member to create ONLY their own doc,
+      // ONLY as role "staff", ONLY if an owner-issued invite for their email
+      // still exists — closes the loop of Staff Signup without needing an
+      // Owner to be online to click anything at that moment.
+      allow create: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.role == "staff"
+        && exists(/databases/$(database)/documents/staffInvites/$(request.auth.token.email));
+    }
+    match /staffInvites/{email} {
+      allow get: if true;
+      allow list: if isOwner();
+      allow write: if isOwner();
+    }
 
     // Leads captured from the public contact form / auto-bot engagement —
     // anyone can create one (that's the point of a lead form), but only the
@@ -35,6 +68,15 @@ service cloud.firestore {
     match /leads/{id} {
       allow create: if true;
       allow read, update, delete: if isAdmin();
+    }
+
+    // Payments ledger (BLUEPRINT.md §4) — written ONLY by the stripeWebhook
+    // Cloud Function via the Admin SDK, which bypasses these rules entirely.
+    // No client (not even the lister themselves) can create/edit a payment
+    // record directly — that would let someone fake a "paid" entry.
+    match /payments/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
     }
 
     // Self-serve accounts (Agent/owner) — Admin can see/approve, and the account

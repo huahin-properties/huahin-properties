@@ -392,6 +392,103 @@ export async function fetchAllProfilePhotos() {
   return fetchCollection("profilePhotos");
 }
 
+// ── Stripe (subscriptions for Agents/homeowners) ──────────────────────────
+// Same Cloud Functions project/region as the Claude proxy above — the URL
+// hash is fixed per-project, only the function name segment changes. After
+// `firebase deploy --only functions`, the terminal prints the REAL URLs;
+// if they don't match this guessed pattern, update these two constants.
+const CHECKOUT_URL = "https://createcheckoutsession-3j4ldf4pja-as.a.run.app";
+const PORTAL_URL = "https://createportalsession-3j4ldf4pja-as.a.run.app";
+
+export async function startCheckout(priceId, listerId, email) {
+  const res = await fetch(CHECKOUT_URL, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ priceId, listerId, email }),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.url) throw new Error(data.error || "ไม่สามารถเริ่มการชำระเงินได้");
+  window.location.href = data.url;
+}
+
+export async function openBillingPortal(customerId) {
+  const res = await fetch(PORTAL_URL, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ customerId }),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.url) throw new Error(data.error || "ไม่สามารถเปิดหน้าจัดการสมาชิกได้");
+  window.location.href = data.url;
+}
+
+export async function fetchMyListerDoc() {
+  const a = authApp();
+  const user = a && a.currentUser;
+  if (!user) return null;
+  const doc = await db().collection("listers").doc(user.uid).get();
+  return doc.exists ? { id: doc.id, ...doc.data() } : null;
+}
+
+// Stripe Price IDs per tier — kept admin-editable in Site Content (not
+// hardcoded) so pricing/plan changes never require a code redeploy.
+export async function fetchStripePrices() {
+  const doc = await db().collection("siteContent").doc("stripePrices").get();
+  return doc.exists ? doc.data() : { pro: "", agency: "" };
+}
+
+export async function saveStripePrices(prices) {
+  await setDoc("siteContent", "stripePrices", prices);
+}
+
+// Returns "owner" | "staff" | null (null = not a team member yet, e.g. the
+// account exists in Firebase Auth but was never added as Owner/Staff).
+export async function fetchMyRole() {
+  const a = authApp();
+  const user = a && a.currentUser;
+  if (!user) return null;
+  if (user.uid === "n7TZKSBscPXE1kRU8WzYpsqJh2g2") return "owner";
+  try {
+    const doc = await db().collection("adminUsers").doc(user.uid).get();
+    return doc.exists ? doc.data().role : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchTeam() {
+  const [members, invites] = await Promise.all([
+    fetchCollection("adminUsers"),
+    fetchCollection("staffInvites"),
+  ]);
+  return { members, invites };
+}
+
+export async function inviteStaff(email) {
+  const key = email.trim().toLowerCase();
+  await setDoc("staffInvites", key, { email: key, role: "staff", invitedAt: Date.now() });
+}
+
+export async function revokeInvite(email) {
+  await deleteDocById("staffInvites", email.trim().toLowerCase());
+}
+
+export async function removeTeamMember(uid) {
+  await deleteDocById("adminUsers", uid);
+}
+
+// Called by Staff Signup after createUserWithEmailAndPassword succeeds —
+// completes the loop by writing their own adminUsers/{uid} doc (allowed by
+// the Firestore rule only when a matching staffInvites/{email} exists).
+export async function completeStaffSignup(email) {
+  const a = authApp();
+  const user = a && a.currentUser;
+  if (!user) throw new Error("Not signed in.");
+  await setDoc("adminUsers", user.uid, { role: "staff", email: email.trim().toLowerCase(), joinedAt: Date.now() });
+  await deleteDocById("staffInvites", email.trim().toLowerCase()).catch(() => {});
+}
+
+
 // ── Listing lifecycle: auto-archive photos for closed/expired listings ───
 // A property becomes eligible for archival when its `archiveScheduledAt`
 // (epoch ms) timestamp has passed. We keep all Firestore text data forever

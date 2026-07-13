@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <title>สมาชิกของฉัน — huahin.properties</title>
+  <style>
+    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    a { color: oklch(42% 0.12 25); }
+  </style>
+</helmet>
+
+<div style="min-height:100vh;">
+  <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; gap:9px;">
+    <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
+    <span style="font-family:'Playfair Display',serif; font-size:19px; color:white;">huahin . properties</span>
+    <span style="color:oklch(70% 0.02 70); font-size:14px;">| สมาชิกของฉัน</span>
+  </div>
+
+  <div style="max-width:640px; margin:0 auto; padding:clamp(20px,4vw,40px);">
+
+    <sc-if value="{{ notSignedIn }}" hint-placeholder-val="{{ false }}">
+      <div style="background:white; border-radius:8px; padding:32px; text-align:center;">
+        <div style="font-size:15px; color:oklch(35% 0.02 60); margin-bottom:16px;">กรุณาเข้าสู่ระบบก่อน</div>
+        <a href="Agent Signup.dc.html" style="display:inline-block; background:oklch(22% 0.02 60); color:white; padding:10px 24px; border-radius:6px; text-decoration:none; font-size:14px;">ไปที่หน้าสมัคร/เข้าสู่ระบบ</a>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ loaded }}">
+      <div style="font-family:'Playfair Display',serif; font-size:22px; color:oklch(20% 0.02 60); margin-bottom:4px;">สถานะสมาชิกของฉัน</div>
+      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:24px;">{{ lister.email }}</div>
+
+      <div style="background:white; border-radius:8px; padding:22px; margin-bottom:20px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+          <div style="width:9px; height:9px; border-radius:50%; background:{{ statusDotColor }};"></div>
+          <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60);">{{ statusLabel }}</div>
+        </div>
+        <div style="font-size:13px; color:oklch(50% 0.02 60);">แพ็กเกจปัจจุบัน: {{ tierLabel }}</div>
+
+        <sc-if value="{{ hasCustomerId }}">
+          <div onClick="{{ onManageBilling }}" style="display:inline-block; margin-top:16px; background:oklch(22% 0.02 60); color:white; padding:10px 22px; border-radius:6px; font-size:13px; cursor:pointer;">จัดการการชำระเงิน / ยกเลิก</div>
+        </sc-if>
+      </div>
+
+      <div style="font-size:13px; font-weight:600; color:oklch(45% 0.02 60); margin-bottom:10px;">อัปเกรดแพ็กเกจ</div>
+      <div style="display:flex; gap:14px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:220px; background:white; border-radius:8px; padding:20px;">
+          <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60); margin-bottom:6px;">Pro</div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">โพสต์ได้ 5 หลัง + Featured 1 รายการ</div>
+          <div onClick="{{ onUpgradePro }}" style="{{ proButtonStyle }}">{{ proButtonLabel }}</div>
+        </div>
+        <div style="flex:1; min-width:220px; background:white; border-radius:8px; padding:20px;">
+          <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60); margin-bottom:6px;">Agency</div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">โพสต์ไม่จำกัด + Featured หลายรายการ + ป้าย Verified Agent</div>
+          <div onClick="{{ onUpgradeAgency }}" style="{{ agencyButtonStyle }}">{{ agencyButtonLabel }}</div>
+        </div>
+      </div>
+      <sc-if value="{{ error }}"><div style="font-size:13px; color:oklch(50% 0.18 30); margin-top:14px;">{{ error }}</div></sc-if>
+    </sc-if>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { lister: null, prices: { pro: "", agency: "" }, loaded: false, notSignedIn: false, error: "", busyTier: null };
+
+  async componentDidMount() {
+    const fb = await import("./firebase-client.js");
+    this._fb = fb;
+    await fb.onAdminAuthReady().catch(() => {});
+    if (!fb.isAdminAuthed()) {
+      this.setState({ notSignedIn: true, loaded: false });
+      return;
+    }
+    try {
+      const [lister, prices] = await Promise.all([fb.fetchMyListerDoc(), fb.fetchStripePrices()]);
+      this.setState({ lister, prices, loaded: true });
+    } catch (e) {
+      console.warn("Failed to load billing info:", e);
+      this.setState({ loaded: true, error: "โหลดข้อมูลไม่สำเร็จ" });
+    }
+  }
+
+  async upgrade(tier) {
+    const priceId = this.state.prices[tier];
+    if (!priceId) {
+      this.setState({ error: "แอดมินยังไม่ได้ตั้งราคาแพ็กเกจนี้ — ติดต่อแอดมิน" });
+      return;
+    }
+    this.setState({ busyTier: tier, error: "" });
+    try {
+      await this._fb.startCheckout(priceId, this.state.lister.id, this.state.lister.email);
+    } catch (e) {
+      this.setState({ busyTier: null, error: "เริ่มการชำระเงินไม่สำเร็จ ลองใหม่อีกครั้ง" });
+    }
+  }
+
+  async manageBilling() {
+    try {
+      await this._fb.openBillingPortal(this.state.lister.stripeCustomerId);
+    } catch (e) {
+      this.setState({ error: "เปิดหน้าจัดการไม่สำเร็จ ลองใหม่อีกครั้ง" });
+    }
+  }
+
+  renderVals() {
+    const lister = this.state.lister || {};
+    const status = lister.subscriptionStatus;
+    const isActive = status === "active";
+    const tierLabels = { basic: "Basic (ฟรี)", pro: "Pro", agency: "Agency" };
+    const btnBase = "display:inline-block; padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;";
+    const btnActive = btnBase + "background:oklch(22% 0.02 60); color:white;";
+    const btnBusy = btnBase + "background:oklch(85% 0.01 70); color:oklch(50% 0.02 60); cursor:default;";
+
+    return {
+      notSignedIn: this.state.notSignedIn,
+      loaded: this.state.loaded && !this.state.notSignedIn,
+      lister,
+      statusDotColor: isActive ? "oklch(50% 0.13 145)" : "oklch(70% 0.01 70)",
+      statusLabel: isActive ? "สมาชิกใช้งานอยู่" : "ยังไม่ได้อัปเกรด (ใช้แพ็กเกจฟรี)",
+      tierLabel: tierLabels[lister.tier] || "Basic (ฟรี)",
+      hasCustomerId: !!lister.stripeCustomerId,
+      onManageBilling: () => this.manageBilling(),
+      onUpgradePro: () => this.upgrade("pro"),
+      onUpgradeAgency: () => this.upgrade("agency"),
+      proButtonStyle: this.state.busyTier === "pro" ? btnBusy : btnActive,
+      proButtonLabel: this.state.busyTier === "pro" ? "กำลังเปิด…" : "อัปเกรดเป็น Pro",
+      agencyButtonStyle: this.state.busyTier === "agency" ? btnBusy : btnActive,
+      agencyButtonLabel: this.state.busyTier === "agency" ? "กำลังเปิด…" : "อัปเกรดเป็น Agency",
+      error: this.state.error,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

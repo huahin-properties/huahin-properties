@@ -212,6 +212,28 @@
       </sc-if>
     </div>
 
+    <!-- STRIPE PRICE IDS (Owner) -->
+    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">💳 ราคาสมาชิก Agent/เจ้าของบ้าน (Stripe)</div>
+      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">สร้าง Product + Price ใน Stripe Dashboard ก่อน แล้ววาง Price ID (ขึ้นต้นด้วย price_) ที่นี่ — เปลี่ยนราคาได้เองโดยไม่ต้องแก้โค้ด</div>
+      <div style="display:flex; flex-direction:column; gap:10px; max-width:420px;">
+        <div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">แพ็กเกจ Pro — Price ID</div>
+          <input value="{{ stripePro }}" onChange="{{ onStripePro }}" placeholder="price_xxxxxxxxxxxx" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
+        </div>
+        <div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">แพ็กเกจ Agency — Price ID</div>
+          <input value="{{ stripeAgency }}" onChange="{{ onStripeAgency }}" placeholder="price_xxxxxxxxxxxx" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <div onClick="{{ onSaveStripePrices }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">บันทึก</div>
+        <sc-if value="{{ stripeMsg }}">
+          <span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ stripeMsg }}</span>
+        </sc-if>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -226,6 +248,7 @@ class Component extends DCLogic {
     saveMsg: "",
     accUsername: "", accPassword: "", accEmail: "", accPhone: "", accMsg: "",
     fbFooter: "", fbFooterMsg: "",
+    stripePrices: { pro: "", agency: "" }, stripeMsg: "",
     aiNotes: [], noteDrafts: {}, noteMsgs: {},
     aiRestrictions: "", aiRestrictionsMsg: "",
     aiPersonaName: "", aiPersonaRole: "", aiPersonaMsg: "",
@@ -274,6 +297,13 @@ class Component extends DCLogic {
       console.warn("Failed to load Facebook footer:", e);
     }
     this.setState({ fbFooter });
+
+    try {
+      const stripePrices = await fb.fetchStripePrices();
+      this.setState({ stripePrices });
+    } catch (e) {
+      console.warn("Failed to load Stripe price IDs:", e);
+    }
 
     try {
       const aiNotes = await fb.fetchAiNotes();
@@ -437,6 +467,17 @@ class Component extends DCLogic {
     }
   }
 
+  async saveStripePrices() {
+    try {
+      await this._fb.saveStripePrices(this.state.stripePrices);
+      this.setState({ stripeMsg: "บันทึกแล้ว" });
+      setTimeout(() => this.setState({ stripeMsg: "" }), 2500);
+    } catch (e) {
+      console.warn("Failed to save Stripe prices:", e);
+      this.setState({ stripeMsg: "บันทึกไม่สำเร็จ ลองใหม่" });
+    }
+  }
+
   async saveAccount() {
     try {
       await this._fb.saveAdminCredentials({
@@ -550,6 +591,12 @@ class Component extends DCLogic {
       fbFooter: this.state.fbFooter, onFbFooter: (e) => this.setState({ fbFooter: e.target.value }),
       onSaveFbFooter: () => this.saveFbFooter(),
       fbFooterMsg: this.state.fbFooterMsg,
+      stripePro: this.state.stripePrices.pro || "",
+      onStripePro: (e) => this.setState((s) => ({ stripePrices: { ...s.stripePrices, pro: e.target.value } })),
+      stripeAgency: this.state.stripePrices.agency || "",
+      onStripeAgency: (e) => this.setState((s) => ({ stripePrices: { ...s.stripePrices, agency: e.target.value } })),
+      onSaveStripePrices: () => this.saveStripePrices(),
+      stripeMsg: this.state.stripeMsg,
       onAddNote: () => this.addNote(),
       aiPersonaName: this.state.aiPersonaName,
       onAiPersonaName: (e) => this.setState({ aiPersonaName: e.target.value }),

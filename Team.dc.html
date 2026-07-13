@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <title>Team — huahin.properties Admin</title>
+  <style>
+    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    a { color: oklch(42% 0.12 25); }
+  </style>
+</helmet>
+
+<div style="min-height:100vh;">
+  <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+    <a href="Admin Dashboard.dc.html" style="display:flex; align-items:center; gap:9px; text-decoration:none;">
+      <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
+      <span style="font-family:'Playfair Display',serif; font-size:19px; color:white;">huahin . properties</span>
+      <span style="color:oklch(70% 0.02 70); font-size:14px;">| Team</span>
+    </a>
+    <a href="Admin Dashboard.dc.html" style="color:oklch(85% 0.02 70); font-size:13px; text-decoration:none;">← กลับแดชบอร์ด</a>
+  </div>
+
+  <div style="max-width:800px; margin:0 auto; padding:clamp(20px,4vw,40px);">
+
+    <sc-if value="{{ notOwner }}" hint-placeholder-val="{{ false }}">
+      <div style="background:white; border-radius:8px; padding:32px; text-align:center; color:oklch(45% 0.02 60); font-size:14px;">
+        หน้านี้สำหรับ Owner เท่านั้น
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isOwner }}">
+      <div style="font-family:'Playfair Display',serif; font-size:22px; color:oklch(20% 0.02 60); margin-bottom:6px;">ทีมงาน (Owner / Staff)</div>
+      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:24px;">Owner เห็น/แก้ทุกอย่าง+การเงิน — Staff จัดการประกาศ/lead/แชทได้ แตะการเงิน-ตั้งค่าไซต์ไม่ได้</div>
+
+      <div style="background:white; border-radius:8px; padding:20px; margin-bottom:20px;">
+        <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60); margin-bottom:12px;">เชิญ Staff ใหม่</div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <input value="{{ inviteEmail }}" onChange="{{ onInviteEmail }}" placeholder="อีเมลของ Staff" style="flex:1; min-width:220px; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+          <div onClick="{{ onSendInvite }}" style="background:oklch(22% 0.02 60); color:white; padding:10px 20px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">ส่งคำเชิญ</div>
+        </div>
+        <div style="font-size:12px; color:oklch(55% 0.02 60); margin-top:10px;">หลังเชิญแล้ว ส่งลิงก์นี้ให้ Staff ไปสมัครเอง: <strong>Staff Signup.dc.html</strong> (ต้องใช้อีเมลเดียวกับที่เชิญไว้)</div>
+        <sc-if value="{{ inviteMsg }}"><div style="font-size:13px; color:oklch(40% 0.1 145); margin-top:8px;">{{ inviteMsg }}</div></sc-if>
+      </div>
+
+      <div style="font-size:13px; font-weight:600; color:oklch(45% 0.02 60); margin-bottom:8px;">คำเชิญที่รอ Staff สมัคร</div>
+      <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:24px;">
+        <sc-for list="{{ inviteRows }}" as="inv" hint-placeholder-count="1">
+          <div style="background:white; border-radius:6px; padding:12px 16px; display:flex; align-items:center; gap:12px;">
+            <div style="flex:1; font-size:14px;">{{ inv.email }}</div>
+            <div onClick="{{ inv.onRevoke }}" style="font-size:12px; color:oklch(50% 0.15 30); cursor:pointer;">ยกเลิกคำเชิญ</div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noInvites }}"><div style="font-size:13px; color:oklch(55% 0.02 60);">ไม่มีคำเชิญค้าง</div></sc-if>
+      </div>
+
+      <div style="font-size:13px; font-weight:600; color:oklch(45% 0.02 60); margin-bottom:8px;">สมาชิกทีม</div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <sc-for list="{{ memberRows }}" as="m" hint-placeholder-count="1">
+          <div style="background:white; border-radius:6px; padding:12px 16px; display:flex; align-items:center; gap:12px;">
+            <div style="width:8px; height:8px; border-radius:50%; background:{{ m.dotColor }};"></div>
+            <div style="flex:1;"><div style="font-size:14px;">{{ m.email }}</div><div style="font-size:12px; color:oklch(55% 0.02 60);">{{ m.roleLabel }}</div></div>
+            <sc-if value="{{ m.showRemove }}"><div onClick="{{ m.onRemove }}" style="font-size:12px; color:oklch(50% 0.15 30); cursor:pointer;">ลบออก</div></sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { role: null, team: { members: [], invites: [] }, inviteEmail: "", inviteMsg: "", loaded: false };
+
+  async componentDidMount() {
+    const fb = await import("./firebase-client.js");
+    this._fb = fb;
+    await fb.onAdminAuthReady();
+    if (!fb.isAdminAuthed()) { window.location.href = "Admin Login.dc.html"; return; }
+    const role = await fb.fetchMyRole();
+    this.setState({ role, loaded: true });
+    if (role === "owner") {
+      try {
+        const team = await fb.fetchTeam();
+        this.setState({ team });
+      } catch (e) { console.warn("fetchTeam failed:", e); }
+    }
+  }
+
+  async sendInvite() {
+    const email = this.state.inviteEmail.trim();
+    if (!email || !email.includes("@")) return;
+    await this._fb.inviteStaff(email);
+    const team = await this._fb.fetchTeam();
+    this.setState({ team, inviteEmail: "", inviteMsg: "ส่งคำเชิญแล้ว — ส่งลิงก์ Staff Signup.dc.html ให้ Staff ได้เลย" });
+    setTimeout(() => this.setState({ inviteMsg: "" }), 4000);
+  }
+
+  async revokeInvite(email) {
+    await this._fb.revokeInvite(email);
+    this.setState((s) => ({ team: { ...s.team, invites: s.team.invites.filter((i) => i.id !== email) } }));
+  }
+
+  async removeMember(uid) {
+    await this._fb.removeTeamMember(uid);
+    this.setState((s) => ({ team: { ...s.team, members: s.team.members.filter((m) => m.id !== uid) } }));
+  }
+
+  renderVals() {
+    const isOwner = this.state.role === "owner";
+    const inviteRows = (this.state.team.invites || []).map((inv) => ({
+      email: inv.email, onRevoke: () => this.revokeInvite(inv.id),
+    }));
+    const memberRows = (this.state.team.members || []).map((m) => ({
+      email: m.email, roleLabel: m.role === "owner" ? "Owner" : "Staff",
+      dotColor: m.role === "owner" ? "oklch(45% 0.15 25)" : "oklch(55% 0.1 220)",
+      showRemove: m.role !== "owner", onRemove: () => this.removeMember(m.id),
+    }));
+    return {
+      isOwner, notOwner: this.state.loaded && !isOwner,
+      inviteEmail: this.state.inviteEmail, onInviteEmail: (e) => this.setState({ inviteEmail: e.target.value }),
+      onSendInvite: () => this.sendInvite(), inviteMsg: this.state.inviteMsg,
+      inviteRows, noInvites: inviteRows.length === 0,
+      memberRows,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
