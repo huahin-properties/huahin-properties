@@ -392,6 +392,51 @@ export async function fetchAllProfilePhotos() {
   return fetchCollection("profilePhotos");
 }
 
+// ── Listing lifecycle: auto-archive photos for closed/expired listings ───
+// A property becomes eligible for archival when its `archiveScheduledAt`
+// (epoch ms) timestamp has passed. We keep all Firestore text data forever
+// (price, description, owner) — only the photo BINARY files in Storage get
+// deleted, since those are what actually consume space. This runs as a
+// client-side sweep triggered from the Admin Dashboard on load (there is no
+// server-side cron in this project) — so it only fires when an admin opens
+// the dashboard, not on a fixed schedule. Note this limitation if a listing
+// needs to be archived exactly on time regardless of admin activity.
+export async function scheduleArchival(propertyId, archiveAt) {
+  await setDoc("properties", propertyId, { archiveScheduledAt: archiveAt, archived: false });
+}
+
+export async function cancelArchival(propertyId) {
+  await setDoc("properties", propertyId, { archiveScheduledAt: null });
+}
+
+export async function runArchivalSweep(properties) {
+  const now = Date.now();
+  const due = (properties || []).filter(
+    (p) => p.archiveScheduledAt && p.archiveScheduledAt <= now && !p.archived
+  );
+  let archivedCount = 0;
+  for (const p of due) {
+    try {
+      const photos = await fetchPhotosFor(p.id);
+      for (const ph of photos) {
+        try {
+          if (ph.dataUrl && ph.dataUrl.startsWith("https://")) {
+            const path = decodeURIComponent(new URL(ph.dataUrl).pathname.split("/o/")[1].split("?")[0]);
+            await storageRef().ref(path).delete().catch(() => {});
+          }
+        } catch (e) {}
+        await deleteDocById("propertyPhotos", ph.id).catch(() => {});
+      }
+      await setDoc("properties", p.id, { archived: true, archivedAt: now, photosDeletedAt: now });
+      archivedCount += 1;
+    } catch (e) {
+      console.warn("Archival failed for", p.id, e);
+    }
+  }
+  return archivedCount;
+}
+
+
 // ── AI knowledge notes ──────────────────────────────────────────────────
 // Free-text notes (title + body) Admin can add/edit/delete from Site
 // Content. The AI chat widget (ContactRail) pulls all of these in as extra
