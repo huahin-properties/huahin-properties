@@ -37,8 +37,8 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
-    // Self-serve Agent/owner accounts — each signed-in user manages only
-    // their own lister doc (keyed by their Auth UID); admin sees/edits all.
+    // Self-serve accounts (Agent/owner) — Admin can see/approve, and the account
+    // owner (matched by Auth UID) can see/edit only their own status.
     match /listers/{uid} {
       allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == uid);
     }

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <title>Agent Approvals — huahin.properties Admin</title>
+  <style>
+    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    a { color: oklch(42% 0.12 25); }
+  </style>
+</helmet>
+
+<div style="min-height:100vh;">
+  <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+    <a href="Admin Dashboard.dc.html" style="display:flex; align-items:center; gap:9px; text-decoration:none;">
+      <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
+      <span style="font-family:'Playfair Display',serif; font-size:19px; color:white;">huahin . properties</span>
+      <span style="color:oklch(70% 0.02 70); font-size:14px;">| Agent Approvals</span>
+    </a>
+    <a href="Admin Dashboard.dc.html" style="color:oklch(85% 0.02 70); font-size:13px; text-decoration:none;">← กลับแดชบอร์ด</a>
+  </div>
+
+  <div style="max-width:1000px; margin:0 auto; padding:clamp(20px,4vw,40px);">
+    <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:6px;">รายชื่อผู้สมัคร Agent / เจ้าของบ้าน</div>
+    <div style="font-size:14px; color:oklch(50% 0.02 60); margin-bottom:24px;">อนุมัติแล้วเขาจะ login เข้าใช้งานได้ทันที — ปฏิเสธจะบล็อกไม่ให้เข้าระบบ</div>
+
+    <div style="display:flex; gap:10px; margin-bottom:20px;">
+      <div onClick="{{ onFilterAll }}" style="{{ tabAllStyle }}">ทั้งหมด ({{ countAll }})</div>
+      <div onClick="{{ onFilterPending }}" style="{{ tabPendingStyle }}">รออนุมัติ ({{ countPending }})</div>
+      <div onClick="{{ onFilterApproved }}" style="{{ tabApprovedStyle }}">อนุมัติแล้ว ({{ countApproved }})</div>
+      <div onClick="{{ onFilterRejected }}" style="{{ tabRejectedStyle }}">ปฏิเสธ ({{ countRejected }})</div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="2">
+        <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:18px 20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+          <div style="width:38px; height:38px; border-radius:50%; background:{{ r.avatarBg }}; color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px; flex-shrink:0;">{{ r.initial }}</div>
+          <div style="flex:1; min-width:200px;">
+            <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60);">{{ r.name }} <span style="font-weight:400; color:oklch(55% 0.02 60); font-size:13px;">({{ r.roleLabel }})</span></div>
+            <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ r.email }} · {{ r.phone }}</div>
+            <div style="font-size:12px; color:oklch(60% 0.02 60); margin-top:2px;">สมัครเมื่อ {{ r.dateLabel }}</div>
+          </div>
+          <div style="font-size:12px; font-weight:600; padding:5px 12px; border-radius:100px; background:{{ r.statusBg }}; color:{{ r.statusColor }}; white-space:nowrap;">{{ r.statusLabel }}</div>
+          <div style="display:flex; gap:8px;">
+            <sc-if value="{{ r.showApprove }}">
+              <div onClick="{{ r.onApprove }}" style="background:oklch(40% 0.13 150); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">✓ อนุมัติ</div>
+            </sc-if>
+            <sc-if value="{{ r.showReject }}">
+              <div onClick="{{ r.onReject }}" style="background:oklch(95% 0.02 30); color:oklch(45% 0.15 30); padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">✕ ปฏิเสธ</div>
+            </sc-if>
+            <sc-if value="{{ r.showReinstate }}">
+              <div onClick="{{ r.onReinstate }}" style="background:oklch(93% 0.02 60); color:oklch(35% 0.02 60); padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">↺ คืนสถานะ</div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+      <sc-if value="{{ noRows }}">
+        <div style="text-align:center; padding:40px; color:oklch(55% 0.02 60); font-size:14px;">ไม่มีรายการในหมวดนี้</div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { listers: [], filter: "pending", loaded: false };
+
+  async componentDidMount() {
+    const fb = await import("./firebase-client.js");
+    this._fb = fb;
+    await fb.onAdminAuthReady();
+    if (!fb.isAdminAuthed()) { window.location.href = "Admin Login.dc.html"; return; }
+    try {
+      const listers = await fb.fetchCollection("listers");
+      this.setState({ listers, loaded: true });
+    } catch (e) {
+      console.warn("fetch listers failed:", e);
+      this.setState({ loaded: true });
+    }
+  }
+
+  async setStatus(id, status) {
+    this.setState((s) => ({ listers: s.listers.map((l) => (l.id === id ? { ...l, status } : l)) }));
+    try { await this._fb.setDoc("listers", id, { status }); } catch (e) { console.warn("setStatus failed:", e); }
+  }
+
+  renderVals() {
+    const all = this.state.listers || [];
+    const countAll = all.length;
+    const countPending = all.filter((l) => l.status === "pending").length;
+    const countApproved = all.filter((l) => l.status === "approved").length;
+    const countRejected = all.filter((l) => l.status === "rejected").length;
+
+    const tabBase = "padding:8px 16px; border-radius:100px; font-size:13px; cursor:pointer;";
+    const tabActive = tabBase + "background:oklch(22% 0.02 60); color:white;";
+    const tabInactive = tabBase + "background:white; color:oklch(35% 0.02 60); border:1px solid oklch(88% 0.01 70);";
+
+    const filtered = this.state.filter === "all" ? all : all.filter((l) => l.status === this.state.filter);
+
+    const roleLabels = { agent: "Agent", owner: "เจ้าของบ้าน" };
+    const statusMap = {
+      pending: { label: "รออนุมัติ", bg: "oklch(95% 0.06 75)", color: "oklch(45% 0.13 75)" },
+      approved: { label: "อนุมัติแล้ว", bg: "oklch(95% 0.05 150)", color: "oklch(35% 0.12 150)" },
+      rejected: { label: "ปฏิเสธ", bg: "oklch(95% 0.03 30)", color: "oklch(45% 0.15 30)" },
+    };
+
+    const rows = filtered
+      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+      .map((l) => {
+        const st = statusMap[l.status] || statusMap.pending;
+        return {
+          initial: (l.name || "?").trim().charAt(0).toUpperCase(),
+          avatarBg: l.role === "agent" ? "oklch(45% 0.1 250)" : "oklch(45% 0.12 25)",
+          name: l.name || "(ไม่มีชื่อ)",
+          roleLabel: roleLabels[l.role] || l.role,
+          email: l.email || "-",
+          phone: l.phone || "-",
+          dateLabel: l.createdAt ? new Date(l.createdAt).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" }) : "-",
+          statusLabel: st.label, statusBg: st.bg, statusColor: st.color,
+          showApprove: l.status === "pending",
+          showReject: l.status === "pending",
+          showReinstate: l.status === "rejected",
+          onApprove: () => this.setStatus(l.id, "approved"),
+          onReject: () => this.setStatus(l.id, "rejected"),
+          onReinstate: () => this.setStatus(l.id, "pending"),
+        };
+      });
+
+    return {
+      countAll, countPending, countApproved, countRejected,
+      tabAllStyle: this.state.filter === "all" ? tabActive : tabInactive,
+      tabPendingStyle: this.state.filter === "pending" ? tabActive : tabInactive,
+      tabApprovedStyle: this.state.filter === "approved" ? tabActive : tabInactive,
+      tabRejectedStyle: this.state.filter === "rejected" ? tabActive : tabInactive,
+      onFilterAll: () => this.setState({ filter: "all" }),
+      onFilterPending: () => this.setState({ filter: "pending" }),
+      onFilterApproved: () => this.setState({ filter: "approved" }),
+      onFilterRejected: () => this.setState({ filter: "rejected" }),
+      rows,
+      noRows: this.state.loaded && rows.length === 0,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
