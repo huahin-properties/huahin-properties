@@ -129,6 +129,44 @@
       <div onClick="{{ onAddNote }}" style="display:inline-block; border:1px dashed oklch(60% 0.02 60); color:oklch(40% 0.02 60); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">+ เพิ่มบันทึกใหม่</div>
     </div>
 
+    <!-- BANNERS -->
+    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">🖼️ แบนเนอร์โฆษณา</div>
+      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:16px;">ใส่แบนเนอร์ของตัวเองก่อนได้เลย (กันหน้าเว็บว่าง) แล้วสลับเป็นของลูกค้าจริงทีหลัง — ถ้ามีมากกว่า 1 อันในหน้า/ตำแหน่งเดียวกัน ระบบจะสุ่มหมุนเวียนให้เอง</div>
+
+      <sc-for list="{{ bannerRows }}" as="bn" hint-placeholder-count="1">
+        <div style="border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:14px; margin-bottom:12px; display:flex; flex-direction:column; gap:8px;">
+          <input value="{{ bn.imageUrl }}" onChange="{{ bn.onImageUrl }}" placeholder="ลิงก์รูปแบนเนอร์ (URL)" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
+          <input value="{{ bn.link }}" onChange="{{ bn.onLink }}" placeholder="ลิงก์ปลายทางเมื่อคลิก (เช่น /promo/ชื่อธุรกิจ หรือ URL ภายนอก)" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
+          <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+            <select value="{{ bn.page }}" onChange="{{ bn.onPage }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 10px; font-size:13px; font-family:inherit;">
+              <option value="home">หน้า Home</option>
+              <option value="search">หน้า Search Results</option>
+              <option value="property">หน้า Property Details</option>
+              <option value="sell">หน้า Sell</option>
+              <option value="about">หน้า About</option>
+              <option value="contact">หน้า Contact</option>
+            </select>
+            <select value="{{ bn.position }}" onChange="{{ bn.onPosition }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 10px; font-size:13px; font-family:inherit;">
+              <option value="top">ตำแหน่งบนสุด (แพงสุด)</option>
+              <option value="mid">ตำแหน่งกลางหน้า</option>
+              <option value="side">แถบข้าง/footer (ถูกสุด)</option>
+            </select>
+            <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:oklch(35% 0.02 60);">
+              <input type="checkbox" checked="{{ bn.active }}" onChange="{{ bn.onActive }}" style="width:15px; height:15px; accent-color:oklch(40% 0.13 25);" /> ใช้งานอยู่
+            </label>
+          </div>
+          <div style="display:flex; align-items:center; gap:12px;">
+            <div onClick="{{ bn.onSave }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:8px 18px; border-radius:100px; font-size:13px; cursor:pointer;">บันทึก</div>
+            <div onClick="{{ bn.onDelete }}" style="font-size:13px; color:oklch(50% 0.18 30); cursor:pointer;">ลบ</div>
+            <sc-if value="{{ bn.msg }}"><div style="font-size:12px; color:oklch(40% 0.12 145);">{{ bn.msg }}</div></sc-if>
+          </div>
+        </div>
+      </sc-for>
+
+      <div onClick="{{ onAddBanner }}" style="display:inline-block; border:1px dashed oklch(60% 0.02 60); color:oklch(40% 0.02 60); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">+ เพิ่มแบนเนอร์ใหม่</div>
+    </div>
+
     <!-- AI PERSONA -->
     <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
       <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">🎭 ตัวตนของ AI แชท</div>
@@ -190,6 +228,7 @@ class Component extends DCLogic {
     aiNotes: [], noteDrafts: {}, noteMsgs: {},
     aiRestrictions: "", aiRestrictionsMsg: "",
     aiPersonaName: "", aiPersonaRole: "", aiPersonaMsg: "",
+    banners: [], bannerDrafts: {}, bannerMsgs: {},
     maintenanceOn: false,
   };
 
@@ -237,6 +276,15 @@ class Component extends DCLogic {
       this.setState({ aiNotes, noteDrafts });
     } catch (e) {
       console.warn("Failed to load AI notes:", e);
+    }
+
+    try {
+      const banners = await fb.fetchCollection("banners");
+      const bannerDrafts = {};
+      banners.forEach((b) => { bannerDrafts[b.id] = { imageUrl: b.imageUrl || "", link: b.link || "", page: b.page || "home", position: b.position || "top", active: b.active !== false, isOwnerContent: !!b.isOwnerContent }; });
+      this.setState({ banners, bannerDrafts });
+    } catch (e) {
+      console.warn("Failed to load banners:", e);
     }
 
     try {
@@ -327,6 +375,36 @@ class Component extends DCLogic {
     } catch (e) {
       console.warn("Failed to delete AI note:", e);
     }
+  }
+
+  addBanner() {
+    const id = "banner-" + Date.now();
+    const blank = { imageUrl: "", link: "", page: "home", position: "top", active: true, isOwnerContent: false };
+    this.setState((s) => ({
+      banners: [...s.banners, { id, ...blank }],
+      bannerDrafts: { ...s.bannerDrafts, [id]: blank },
+    }));
+  }
+
+  onBannerField(id, field, value) {
+    this.setState((s) => ({ bannerDrafts: { ...s.bannerDrafts, [id]: { ...s.bannerDrafts[id], [field]: value } } }));
+  }
+
+  async saveBanner(id) {
+    const draft = this.state.bannerDrafts[id];
+    try {
+      await this._fb.setDoc("banners", id, draft);
+      this.setState((s) => ({
+        banners: s.banners.map((b) => (b.id === id ? { ...b, ...draft } : b)),
+        bannerMsgs: { ...s.bannerMsgs, [id]: "บันทึกแล้ว" },
+      }));
+      setTimeout(() => this.setState((s) => ({ bannerMsgs: { ...s.bannerMsgs, [id]: "" } })), 2000);
+    } catch (e) { console.warn("saveBanner failed:", e); }
+  }
+
+  async deleteBanner(id) {
+    this.setState((s) => ({ banners: s.banners.filter((b) => b.id !== id) }));
+    try { await this._fb.deleteDocById("banners", id); } catch (e) { console.warn("deleteBanner failed:", e); }
   }
 
   async saveFbFooter() {
@@ -474,6 +552,20 @@ class Component extends DCLogic {
           onBodyChange: (e) => this.updateNoteDraft(n.id, "body", e.target.value),
           onSave: () => this.saveNote(n.id),
           onDelete: () => this.deleteNote(n.id),
+        };
+      }),
+      onAddBanner: () => this.addBanner(),
+      bannerRows: this.state.banners.map((b) => {
+        const draft = this.state.bannerDrafts[b.id] || {};
+        return {
+          imageUrl: draft.imageUrl, onImageUrl: (e) => this.onBannerField(b.id, "imageUrl", e.target.value),
+          link: draft.link, onLink: (e) => this.onBannerField(b.id, "link", e.target.value),
+          page: draft.page, onPage: (e) => this.onBannerField(b.id, "page", e.target.value),
+          position: draft.position, onPosition: (e) => this.onBannerField(b.id, "position", e.target.value),
+          active: draft.active, onActive: (e) => this.onBannerField(b.id, "active", e.target.checked),
+          msg: this.state.bannerMsgs[b.id] || "",
+          onSave: () => this.saveBanner(b.id),
+          onDelete: () => this.deleteBanner(b.id),
         };
       }),
     };

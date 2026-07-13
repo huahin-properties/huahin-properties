@@ -26,6 +26,7 @@ service cloud.firestore {
     match /siteContent/{id} { allow read: if true; allow write: if isAdmin(); }
     match /profilePhotos/{id} { allow read: if true; allow write: if isAdmin(); }
     match /aiNotes/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /banners/{id} { allow read: if true; allow write: if isAdmin(); }
     match /externalServices/{id} { allow read, write: if isAdmin(); }
 
     // Leads captured from the public contact form / auto-bot engagement —

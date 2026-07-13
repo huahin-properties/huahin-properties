@@ -88,6 +88,13 @@
     </div>
   </sc-if>
 
+  <!-- ============ BANNER SLOT (top) ============ -->
+  <sc-if value="{{ hasTopBanner }}">
+    <a href="{{ topBanner.link }}" style="display:block; width:100%;">
+      <img src="{{ topBanner.imageUrl }}" alt="banner" style="width:100%; display:block; object-fit:cover; max-height:180px;" />
+    </a>
+  </sc-if>
+
   <!-- ============ HERO ============ -->
   <div style="{{ heroStyle }}">
     <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(30,20,10,0.08) 0%, rgba(30,20,10,0.68) 100%);"></div>
@@ -233,6 +240,7 @@ class Component extends DCLogic {
     priceValue: "",
     siteContent: {},
     data: null,
+    banners: [],
   };
 
   async componentDidMount() {
@@ -249,6 +257,10 @@ class Component extends DCLogic {
     this.setState({ lang: mod.getLang(), data: mod });
     const effProps = await mod.getEffectiveProperties(mod);
     this.setState({ effProps });
+    try {
+      const allBanners = await fb0.fetchCollection("banners");
+      this.setState({ banners: allBanners });
+    } catch (e) { console.warn("banners fetch failed:", e); }
     try {
       const fb = await import("./firebase-client.js");
       const siteContent = await fb.fetchSiteContent();
@@ -388,6 +400,16 @@ class Component extends DCLogic {
         background: (sc.hero && sc.hero.photoUrl) ? `url('${sc.hero.photoUrl}') center/cover` : "repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(92% 0.015 75) 2px, oklch(92% 0.015 75) 22px)",
       },
       heroNoPhoto: !(sc.hero && sc.hero.photoUrl),
+      hasTopBanner: (() => {
+        const active = (this.state.banners || []).filter((b) => b.page === "home" && b.position === "top" && b.active !== false && b.imageUrl);
+        return active.length > 0;
+      })(),
+      topBanner: (() => {
+        const active = (this.state.banners || []).filter((b) => b.page === "home" && b.position === "top" && b.active !== false && b.imageUrl);
+        if (!active.length) return { imageUrl: "", link: "#" };
+        const pick = active[Math.floor(Math.random() * active.length)];
+        return { imageUrl: pick.imageUrl, link: pick.link || "#" };
+      })(),
       ...gateVals,
     };
   }
