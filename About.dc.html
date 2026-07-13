@@ -173,8 +173,7 @@ class Component extends DCLogic {
   selectLang(l) { this._mod.setLang(l); this.setState({ lang: l, mobileMenuOpen: false }); }
   async submitGate() {
     try {
-      const creds = await this._fb.fetchAdminCredentials();
-      await this._fb.adminSignIn(creds.username, this.state.gatePassword);
+      await this._fb.adminSignIn("doothailand@gmail.com", this.state.gatePassword);
       this._fb.setSiteBypass();
       this.setState({ showGate: false, gateError: "" });
     } catch (e) {
