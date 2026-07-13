@@ -115,7 +115,9 @@
 
     <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">8. การแจ้งเตือน &amp; กระบวนการอัปเดตเว็บอย่างปลอดภัย</h2>
     <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
-      <p><strong>8.1 LINE Official Account</strong> (ทำภายหลัง ไม่เร่งด่วน): แจ้งเฉพาะเรื่องพลาดไม่ได้ (ชำระเงิน, hot lead, ฟอร์มติดต่อ, Agent สมัครใหม่, สัญญาเช่าใกล้หมดอายุ, ปัญหาระบบ) กิจกรรมเบาๆ ดูในแดชบอร์ดพอ</p>
+      <p><strong>8.1 LINE Official Account</strong> (ทำภายหลัง ไม่เร่งด่วน): แจ้งเฉพาะเรื่องพลาดไม่ได้ (ชำระเงิน, hot lead, ฟอร์มติดต่อ, Agent สมัครใหม่, สัญญาเช่าใกล้หมดอายุ, ปัญหาระบบ) กิจกรรมเบาๆ ดูในแดชบอร์ดพอ — ใช้บัญชี LINE เดียวกันตัวเดียวทั้งแจ้งเตือนด่วนและสรุปประจำวัน ไม่ต้องแยกหลายบัญชี</p>
+      <p style="background:oklch(94% 0.05 250); border-left:3px solid oklch(55% 0.15 250); padding:10px 14px; border-radius:4px;"><strong>+ สรุปงานประจำวันตอนเช้า (คิวถัดไป)</strong>: Scheduled Function สรุป lead ใหม่/สัญญาใกล้หมดอายุ/สถานะจ่ายเงิน Agent ให้ Claude เรียบเรียงส่งเข้า LINE ทุกเช้า ต่อยอดเป็นผู้ช่วยส่วนตัวคุยปรึกษาผ่าน LINE ได้</p>
+      <p style="background:oklch(94% 0.05 250); border-left:3px solid oklch(55% 0.15 250); padding:10px 14px; border-radius:4px;"><strong>+ หน้า Monthly/Yearly Report Dashboard (คิวถัดไป)</strong>: เก็บสแนปช็อตสถิติทุกสิ้นเดือน (`monthlyStats`) — lead/hot lead, Agent สมัครใหม่, ยอดสมาชิกจ่ายเงิน, ประกาศใหม่/ขายแล้ว/หมดสัญญา, แบนเนอร์ active ดูย้อนหลังได้ทั้งรายเดือน (เทียบเดือนก่อนหน้าเป็น %) และรายปี (สรุปรวม 12 เดือน เทียบปีก่อนหน้า) พร้อมกราฟแนวโน้ม ใช้ประชุมวางแผนทิศทาง — ส่งสรุปเข้า LINE ทุกสิ้นเดือน/สิ้นปีด้วย</p>
       <p><strong>8.2 Staging ก่อนขึ้นจริง</strong>: จุด A (Production) นิ่งเสมอ, จุด B (Staging) ทดลองก่อน ผ่าน Firebase Hosting Preview Channels — ทดสอบลิงก์ทดลองก่อน แล้วค่อย "เลื่อนขึ้น" เป็นเว็บจริง เว็บจริงไม่มีวันพังกลางอากาศ</p>
       <p><strong>8.3 Integration Registry</strong>: Firebase (Firestore/Auth/Hosting/Functions/Storage), Anthropic Claude API, Stripe (ยังไม่ต่อ), LINE Official (ยังไม่ต่อ), Google Maps API, ผู้ให้บริการโดเมน, GitHub — อัปเดตทุกครั้งที่เพิ่มการเชื่อมต่อใหม่</p>
     </div>
