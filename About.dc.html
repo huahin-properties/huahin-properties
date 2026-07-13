@@ -15,6 +15,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <style>
     body { margin: 0; background: oklch(98% 0.01 80); font-family: 'Work Sans', sans-serif; }
     a { color: oklch(42% 0.12 25); }
@@ -173,14 +174,11 @@ class Component extends DCLogic {
   async submitGate() {
     try {
       const creds = await this._fb.fetchAdminCredentials();
-      if (this.state.gatePassword === creds.password) {
-        this._fb.setSiteBypass();
-        this.setState({ showGate: false, gateError: "" });
-      } else {
-        this.setState({ gateError: "รหัสผ่านไม่ถูกต้อง" });
-      }
+      await this._fb.adminSignIn(creds.username, this.state.gatePassword);
+      this._fb.setSiteBypass();
+      this.setState({ showGate: false, gateError: "" });
     } catch (e) {
-      this.setState({ gateError: "ตรวจสอบไม่สำเร็จ ลองใหม่" });
+      this.setState({ gateError: "รหัสผ่านไม่ถูกต้อง" });
     }
   }
 

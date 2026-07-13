@@ -13,6 +13,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <title>huahin.properties — Luxury Pool Villas &amp; Homes in Hua Hin, Pranburi, Cha-am</title>
   <meta name="description" content="Curated pool villas, beachfront homes and land for sale and rent across Hua Hin, Pranburi and Cha-am, Thailand.">
   <style>
@@ -284,15 +285,15 @@ class Component extends DCLogic {
 
   async submitGate() {
     try {
+      // Uses the SAME Firebase Authentication credential as Admin Login —
+      // the stored "username" field now holds the admin's login email, so
+      // typing the real Firebase password here works everywhere at once.
       const creds = await this._fb.fetchAdminCredentials();
-      if (this.state.gatePassword === creds.password) {
-        this._fb.setSiteBypass();
-        this.setState({ showGate: false, gateError: "" });
-      } else {
-        this.setState({ gateError: "รหัสผ่านไม่ถูกต้อง" });
-      }
+      await this._fb.adminSignIn(creds.username, this.state.gatePassword);
+      this._fb.setSiteBypass();
+      this.setState({ showGate: false, gateError: "" });
     } catch (e) {
-      this.setState({ gateError: "ตรวจสอบไม่สำเร็จ ลองใหม่" });
+      this.setState({ gateError: "รหัสผ่านไม่ถูกต้อง" });
     }
   }
 
