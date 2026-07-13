@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Blueprint — huahin.properties</title>
+  <style>
+    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    h2 { font-family: 'Playfair Display', serif; }
+  </style>
+</helmet>
+
+<div style="min-height:100vh; padding:clamp(20px,4vw,56px); box-sizing:border-box;">
+  <div style="max-width:900px; margin:0 auto; background:white; border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:clamp(24px,4vw,48px); box-shadow:0 20px 50px -30px rgba(30,20,10,0.25);">
+
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:4px;">
+      <div style="width:38px; height:38px; border-radius:10px; background:oklch(35% 0.09 25); display:flex; align-items:center; justify-content:center; color:white; font-size:19px;">🏠</div>
+      <div style="font-family:'Playfair Display',serif; font-size:23px; font-weight:700; color:oklch(20% 0.02 60);">huahin . properties — Blueprint</div>
+    </div>
+    <div style="font-size:13px; color:oklch(55% 0.02 60); margin:8px 0 6px;">แผนธุรกิจ + สถาปัตยกรรมระบบ — เอกสารมีชีวิต อัปเดตทุกครั้งที่ตัดสินใจ/เปลี่ยนแผนใหม่</div>
+    <div style="display:flex; gap:16px; font-size:12px; color:oklch(50% 0.02 60); margin-bottom:24px; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:5px;"><span style="width:9px; height:9px; border-radius:50%; background:oklch(45% 0.13 150); display:inline-block;"></span> เสร็จแล้ว</div>
+      <div style="display:flex; align-items:center; gap:5px;"><span style="width:9px; height:9px; border-radius:50%; background:oklch(55% 0.15 75); display:inline-block;"></span> ทำต่อจากนี้</div>
+      <div style="display:flex; align-items:center; gap:5px;"><span style="width:9px; height:9px; border-radius:50%; background:oklch(80% 0.01 70); display:inline-block;"></span> ยังไม่เริ่ม</div>
+    </div>
+
+    <div style="height:1px; background:oklch(90% 0.01 70); margin:20px 0;"></div>
+
+    <h2 style="font-size:19px; color:oklch(20% 0.02 60); margin:0 0 10px;">0. สถานะปัจจุบัน — สิ่งที่สร้างเสร็จแล้วก่อนเริ่ม Blueprint นี้</h2>
+    <div style="background:oklch(96% 0.04 150); border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:16px 18px; color:oklch(25% 0.06 150); font-size:14px; line-height:1.75;">
+      <p style="margin:0 0 10px;">เอกสารนี้ครอบคลุมตั้งแต่จุดเริ่มต้นโปรเจกต์จนถึงแผนอนาคตทั้งหมดในที่เดียว หมวดนี้คือ "สร้างเสร็จแล้ว" ส่วนหมวด 11 (ลำดับการสร้างจริง) คือสิ่งที่ยังไม่ได้ทำนับจากนี้เป็นต้นไป</p>
+      <p style="margin:0 0 10px;"><strong>หน้าเว็บที่สร้างเสร็จแล้ว:</strong> Home, Search Results, Property Details, Sell, About, Contact, Admin Login, Admin Dashboard, Owners, Property Map, AI Quick Add, Site Content — พร้อม shared components: PropertyCard, SearchFilters, LanguageSwitcher, ContactRail</p>
+      <p style="margin:0 0 6px;"><strong>ฟีเจอร์ที่ใช้งานได้แล้วจริง:</strong></p>
+      <ul style="margin:0 0 10px; padding-left:20px;">
+        <li>ระบบ 8 ภาษาเต็มรูปแบบ ทุกหน้า+ฟอร์ม+แชท+แอดมิน</li>
+        <li>แชทบอท AI (Claude API ผ่าน Cloud Function) ตอบลูกค้าอัตโนมัติ + สร้างปุ่มลิงก์อัตโนมัติ</li>
+        <li>AI Quick Add: ถ่ายรูปหลายรูป, พูดบอกข้อมูล, พิกัด Google Maps, ร่างประกาศ+คำนวณระยะทาง+โพสต์ Facebook อัตโนมัติ</li>
+        <li>Admin Dashboard: สถิติครบ + tracker สัญญาเช่าใกล้หมดอายุ</li>
+        <li>โหมดปิดปรับปรุงเว็บไซต์ (Maintenance Gate)</li>
+        <li>ระบบรหัสผ่านแอดมิน + <code>data.js</code> ตัวอย่าง 9+ รายการ</li>
+      </ul>
+      <p style="margin:0;"><strong>งานถัดจากนี้เริ่มที่หมวด 11 ข้อ 1 เป็นต้นไป</strong> — ทุกอย่างก่อนหน้านั้นถือว่าเสร็จแล้ว</p>
+    </div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">1. รูปแบบธุรกิจ &amp; ทีมงาน</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <ul style="margin:0; padding-left:20px;">
+        <li><strong>นิติบุคคล</strong>: ทำในนามบุคคลธรรมดา/อิสระได้ ไม่ต้องเปิดบริษัทตอนนี้ Stripe รับเงินให้บุคคลธรรมดาได้ปกติ พอรายได้/ทีมโตพอค่อยพิจารณาเปิดบริษัท</li>
+        <li><strong>ทีมงาน</strong>: ขยายจาก 1 คน → 2-3 คนสูงสุด สิทธิ์ 2 ระดับพอ: Owner (เห็น/แก้ทุกอย่าง+การเงิน) / Staff (จัดการประกาศ/lead/แชท แตะการเงิน-ตั้งค่าไซต์ไม่ได้)</li>
+        <li><strong>โมเดลการทำงาน — Remote core + Local hands</strong>: ระบบ cloud-native ทั้งหมด จัดการได้จากทุกที่ Owner ดูแลเว็บ/การเงินจากที่ไหนก็ได้ Staff พื้นที่ถ่ายรูป+ป้อนข้อมูลผ่าน AI Quick Add หน้างาน</li>
+      </ul>
+    </div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">2. รายได้ 3 ทาง</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <p><strong>2.0 ขอบเขตพื้นที่ให้บริการ</strong>: เฉพาะ 3 อำเภอ หัวหิน/ชะอำ/ปราณบุรี ตรวจสอบพิกัด Google Maps ก่อนอนุญาตโพสต์ทุกครั้ง — ปฏิเสธทันทีถ้าอยู่นอกเขต (รักษาความน่าเชื่อถือ + SEO เฉพาะทาง)</p>
+      <p><strong>ทาง 1 — ค่าคอมมิชชัน (ทำอยู่แล้ว)</strong>: กด favorite → intent score เงียบๆ → ถึง threshold → บอท AI เปิดบทสนทนาเจาะจง → เก็บ requirement → บันทึกเป็น lead แท็ก "hot"</p>
+      <p><strong>ทาง 2 — ค่าสมัครสมาชิกโพสต์เอง (Agent/เจ้าของบ้าน, Stripe)</strong>: จุดขาย AI ช่วยร่างประกาศ 8 ภาษา, ผู้ช่วย AI 24 ชม., ระบบ lead อัตโนมัติ แพ็กเกจ Basic/Pro/Agency + pay-per-listing, โปรไฟล์ Agent สาธารณะ, ระยะฟรี "Founding Agents" ช่วงเปิดตัว (ประกาศเงื่อนไขชัด, ตั้ง milestone เปลี่ยนผ่าน, จำกัดจำนวน)</p>
+      <p>Flow: สมัคร → เลือกแพ็กเกจ/ฟรี → Stripe Checkout → approve → โพสต์ผ่าน self-serve → จัดการผ่าน Stripe Customer Portal</p>
+      <p>Facebook post AI ร่าง + ลิงก์ backlink กลับหน้าประกาศเฉพาะ (traffic + SEO สองต่อ) — TikTok caption แยกดีไซน์ (ไม่รองรับลิงก์คลิกได้ ใช้รหัสประกาศ+bio link แทน) — ข้อมูลติดต่อเติมอัตโนมัติจากโปรไฟล์ (แก้รายประกาศได้) — ทุกประกาศมีลิงก์เฉพาะ+ปุ่ม Copy Link ให้ลูกค้ากระจายเอง</p>
+      <p><strong>ล็อกอิน Agent/เจ้าของบ้านแบบง่าย</strong>: Firebase Authentication เดียวกับแอดมิน รองรับ Google / Facebook / เบอร์โทร OTP / อีเมล+รหัสผ่าน ผูกบัญชีเดียวกันทุกช่องทาง</p>
+      <p><strong>ทาง 3 — โฆษณา/แบนเนอร์</strong>: เติมเนื้อหาเองช่วงแรกกันหน้าว่าง, slot จำนวนปรับได้ต่อตำแหน่ง, สุ่มหมุนเวียนถ้าคนจ่ายเกิน slot, คลิกเข้าหน้าโฆษณาในเว็บเอง (ไม่ออกนอกเว็บ), ราคาตามหน้า×ตำแหน่ง×ขนาด, Featured Listing boost ต่อยอด subscription เดียวกัน</p>
+      <p><strong>ทาง 4 — Agent VIP / Curated High-Commission Pool</strong> <em>(เฟสอนาคต หลังทาง 2 มั่นคง)</em>: รายได้ 2 ฝั่งเก็บแน่นอน 100% — ฝั่งเจ้าของบ้านจ่ายแพ็กเกจ VIP (เงิน/ทอง/เพชร) เพื่อเข้าพูล Agent VIP เห็น/ติดต่อมากขึ้น, ฝั่ง Agent จ่ายค่าสมาชิก VIP เพื่อเข้าถึงบ้านคุณภาพดี — ค่าคอมระหว่าง Agent กับเจ้าของบ้านไม่เกี่ยวกับแพลตฟอร์มเลย แพลตฟอร์มมีสิทธิ์ขายเอง/ใช้ Agent ในสังกัดแบ่งค่าคอมได้ด้วย ระดับ VIP ขยายได้ไม่จำกัด มี teaser ล่อใจ + ตัวเลขสต๊อกโชว์สองฝั่ง สัญญา 2 ฉบับเชื่อมกัน (แพลตฟอร์ม↔เจ้าของบ้าน, Agent↔เจ้าของบ้าน) กติกา Procuring Cause + Buyer Registration ป้องกันข้อพิพาท Agent Code ป้องกันสวมสิทธิ์ เบอร์ติดต่อเจ้าของบ้านแสดงปกติไม่ซ่อน</p>
+    </div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">3. การสร้างตัวตนแบรนด์ (AI-powered)</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <p>Landing Page สำหรับ Agent/เจ้าของบ้านแยกเฉพาะ, ทดลองคุยกับแชทบอทก่อนสมัคร, signature ท้าย Facebook post, ป้าย "Powered by AI" บนเว็บสาธารณะ</p>
+      <p><strong>3.1 เมนูตัวเลือกด่วนในแชทบอท</strong>: หลังทักทาย ส่งปุ่มเลือกทันที (ฝากขาย/ฝากเช่า/สมัคร Agent/หาบ้าน/คำถามอื่น) พาไปสู่ flow ที่ถูกต้องทันที ปรับได้จาก Site Content</p>
+    </div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">4. ระบบการเงิน — ให้ Stripe ทำงานหนักแทนเรา</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <p>Ledger จาก webhook ทุกครั้งที่ตัดเงินสำเร็จ, แจ้งเตือนก่อนหมดอายุผ่าน Stripe Billing, หยุดอัตโนมัติถ้าจ่ายไม่ผ่าน (ซ่อนประกาศ ไม่ลบข้อมูล) กลับมาโชว์ทันทีเมื่อจ่ายสำเร็จ — สร้างจริงแค่ 1 หน้า self-serve (Stripe Customer Portal) + 1 Cloud Function รับ webhook</p>
+    </div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">5. ความปลอดภัย &amp; ป้องกันสแปม/แฮก</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <ol style="margin:0; padding-left:20px;">
+        <li>Firestore Security Rules แบบ role-based</li>
+        <li>Firebase App Check — กันบอทยิง request ตรง (ฟรี)</li>
+        <li>Rate limiting ที่ Cloud Functions</li>
+        <li>reCAPTCHA v3 แบบเงียบ</li>
+        <li>Stripe webhook signature verification</li>
+        <li>สำรองข้อมูลอัตโนมัติ (Firestore scheduled export → Storage)</li>
+        <li>บัญชีแอดมิน — รหัสผ่านแข็งแรง + พิจารณา 2FA</li>
+      </ol>
+    </div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">6. SEO (ความสำคัญสูงสุด)</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <ol style="margin:0; padding-left:20px;">
+        <li>URL ถาวรต่อประกาศ</li>
+        <li>Meta title/description เฉพาะหน้า + Open Graph</li>
+        <li>Structured data (schema.org) เป็น JSON-LD ต่อประกาศ</li>
+        <li>Sitemap.xml อัตโนมัติ + Google Search Console</li>
+        <li>Prerendering/dynamic rendering สำหรับ crawler</li>
+        <li>ความเร็วโหลดหน้า (Core Web Vitals)</li>
+        <li>ชื่อไฟล์รูป/alt text SEO-friendly</li>
+        <li>Google Business Profile + Search Console ตั้งแต่ soft launch</li>
+      </ol>
+    </div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">7. แดชบอร์ด "สถานะระบบ &amp; สิ่งที่ต้องทำ"</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <p>การ์ดแจ้งเตือนสีตามความเร่งด่วน แบ่ง 3 หมวด: <strong>A.</strong> เช็คอัตโนมัติ (โควตา/subscription/สัญญาเช่า/lead ใหม่) <strong>B.</strong> ปฏิทินความปลอดภัย (Firestore rules หมดอายุ, checklist deploy, รีวิว API key) <strong>C.</strong> บริการภายนอกที่แอดมินกรอกเอง (โดเมน ฯลฯ เตือนล่วงหน้า 30/14/3/1 วัน)</p>
+    </div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">8. การแจ้งเตือน &amp; กระบวนการอัปเดตเว็บอย่างปลอดภัย</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <p><strong>8.1 LINE Official Account</strong> (ทำภายหลัง ไม่เร่งด่วน): แจ้งเฉพาะเรื่องพลาดไม่ได้ (ชำระเงิน, hot lead, ฟอร์มติดต่อ, Agent สมัครใหม่, สัญญาเช่าใกล้หมดอายุ, ปัญหาระบบ) กิจกรรมเบาๆ ดูในแดชบอร์ดพอ</p>
+      <p><strong>8.2 Staging ก่อนขึ้นจริง</strong>: จุด A (Production) นิ่งเสมอ, จุด B (Staging) ทดลองก่อน ผ่าน Firebase Hosting Preview Channels — ทดสอบลิงก์ทดลองก่อน แล้วค่อย "เลื่อนขึ้น" เป็นเว็บจริง เว็บจริงไม่มีวันพังกลางอากาศ</p>
+      <p><strong>8.3 Integration Registry</strong>: Firebase (Firestore/Auth/Hosting/Functions/Storage), Anthropic Claude API, Stripe (ยังไม่ต่อ), LINE Official (ยังไม่ต่อ), Google Maps API, ผู้ให้บริการโดเมน, GitHub — อัปเดตทุกครั้งที่เพิ่มการเชื่อมต่อใหม่</p>
+    </div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">9. วงจรชีวิตประกาศ &amp; การลบข้อมูล/รูปภาพอัตโนมัติ</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <p>นับถอยหลังอัตโนมัติจากวันที่มีอยู่แล้ว → แจ้งเตือนลูกค้าเป็นชั้น (30 วัน → 7 วัน → ถึงกำหนด) → ลูกค้ากดปุ่มเดียว "ขอเก็บไว้ต่อ" ได้ → ถึงกำหนดจริงลบเฉพาะรูปจาก Storage คงข้อมูลข้อความไว้ → แอดมินเห็นแค่สรุปในแดชบอร์ด ไม่ต้องลงมือทำเอง</p>
+    </div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">10. ระบบจัดการแบนเนอร์ (Admin Backend)</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <p>CRUD เต็มรูปแบบ ไม่ต้องแก้โค้ด — รูป/ลิงก์/ตำแหน่ง+หน้า/วันเริ่ม-หมดอายุ/สถานะ — เริ่มด้วยเนื้อหาของเจ้าของเว็บเองกันหน้าว่าง แล้วถอด/ลดสัดส่วนได้ทันทีเมื่อมีลูกค้าจริง</p>
+    </div>
+
+    <div style="height:1px; background:oklch(90% 0.01 70); margin:28px 0;"></div>
+
+    <h2 style="font-size:19px; color:oklch(20% 0.02 60); margin:0 0 6px;">11. ลำดับการสร้างจริง — สถานะปัจจุบัน</h2>
+    <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">แบ่งเป็น 2 ชุดตามที่ต้องพึ่งอะไรจากคุณหรือไม่ — สีบอกสถานะแต่ละข้อ</div>
+
+    <div style="font-size:13px; font-weight:600; color:oklch(35% 0.02 60); margin:16px 0 8px; text-transform:uppercase; letter-spacing:0.03em;">ชุด A — ไม่ต้องรอเตรียมอะไรเพิ่ม</div>
+    <div style="display:flex; flex-direction:column; gap:7px;">
+      <div style="display:flex; align-items:center; gap:10px; background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:oklch(45% 0.13 150); color:white; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;">✓</div>
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">1. SEO-ready property URLs + meta/structured data — <strong>เสร็จแล้ว</strong> (Open Graph + JSON-LD ที่ Property Details)</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:oklch(45% 0.13 150); color:white; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;">✓</div>
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">2. แดชบอร์ด "สถานะระบบ &amp; สิ่งที่ต้องทำ" — <strong>เสร็จแล้ว</strong> (อยู่ใน Admin Dashboard)</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; background:oklch(94% 0.06 75); border:1px solid oklch(78% 0.12 75); border-radius:7px; padding:11px 14px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:oklch(55% 0.15 75); color:white; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">▶</div>
+        <div style="font-size:13.5px; color:oklch(30% 0.06 75); font-weight:600;">3. Favorites + Intent Scoring + Auto-bot ติดตาม lead (ปิดทาง 1 ให้สมบูรณ์) — ทำต่อจากนี้</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">○</div>
+        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">4. ระบบจัดการแบนเนอร์ (Admin CRUD) + slot สุ่มหมุนเวียน + หน้าโฆษณาในเว็บ</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">○</div>
+        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">5. หน้าสมัครสมาชิก Agent/เจ้าของบ้าน + Landing Page + ระยะฟรี "Founding Agents"</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">○</div>
+        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">6. วงจรชีวิตประกาศ &amp; ลบข้อมูล/รูปภาพอัตโนมัติ</div>
+      </div>
+    </div>
+
+    <div style="font-size:13px; font-weight:600; color:oklch(35% 0.02 60); margin:22px 0 8px; text-transform:uppercase; letter-spacing:0.03em;">ชุด B — ต้องเตรียมบัญชี/ข้อมูลภายนอกก่อน</div>
+    <div style="display:flex; flex-direction:column; gap:7px;">
+      <div style="display:flex; align-items:center; gap:10px; background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:oklch(45% 0.13 150); color:white; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;">✓</div>
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">1. ล็อก Firestore + Storage Security Rules — <strong>เสร็จแล้ว</strong> (Firebase Auth จริง + deploy แล้ว)</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:oklch(45% 0.13 150); color:white; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;">✓</div>
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">2. ย้ายรูปภาพ Firestore → Firebase Storage — <strong>เสร็จแล้ว</strong></div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">○</div>
+        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">3. ระบบ role Owner/Staff — พร้อมเริ่มได้แล้ว (ไม่ต้องรอเพิ่ม)</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">○</div>
+        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">4. Stripe subscription + webhook + payments ledger (ต้องสมัคร Stripe ก่อน)</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">○</div>
+        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">5. Featured Listing boost</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">○</div>
+        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">6. เปิดขายแบนเนอร์ให้ลูกค้าภายนอกจริง</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">○</div>
+        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">7. ทาง 4 — แพ็กเกจ VIP ทั้งฝั่งเจ้าของบ้านและฝั่ง Agent</div>
+      </div>
+    </div>
+
+    <div style="font-size:13px; color:oklch(50% 0.02 60); margin-top:16px; line-height:1.7;">ประเมินเวลา: ชุด A ที่เหลือราว 2-3 สัปดาห์ปฏิทินถ้าทำต่อเนื่อง, ชุด B ที่เหลือราว 1-1.5 สัปดาห์เมื่อ Stripe พร้อมแล้ว (LINE Official แจ้งเตือน อยู่ในชุด B แต่ไม่เร่งด่วน ทำเมื่อไหร่ก็ได้)</div>
+
+    <div style="height:1px; background:oklch(90% 0.01 70); margin:28px 0;"></div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:0 0 10px;">12. แผนเปิดตัว (Go-to-Market)</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <p><strong>หลักการรวม</strong>: ทุกกลุ่ม (ผู้ซื้อทั่วไป/เจ้าของบ้าน/Agent) ใช้ฟรีก่อนเสมอ แล้วค่อยเปิดจ่ายทีละชั้นเมื่อเห็นผลจริง — ผู้ซื้อ/ผู้เช่าใช้ฟรีตลอดไป (แต่เก็บข้อมูลความสนใจอย่างเป็นระบบเสมอ), เจ้าของบ้าน(ขาย+เช่า)โพสต์ฟรีก่อนแล้วค่อยเสนอ VIP, Agent โพสต์ฟรีช่วง Founding แล้วค่อยเก็บค่าสมาชิก+เสนอ VIP</p>
+      <ol style="margin:0; padding-left:20px;">
+        <li>ปิดเงียบ (Soft launch) 2-4 สัปดาห์ — เติมประกาศ 50+ รายการ</li>
+        <li>เปิดวงในพื้นที่ + เปิดรับ "Founding Agents" ฟรี</li>
+        <li>SEO/Google Business คู่ขนาน</li>
+        <li>เปิดเก็บเงินทาง 2 เมื่อ traffic/lead สม่ำเสมอ</li>
+        <li>เปิดทาง 3 (โฆษณาลูกค้าภายนอก) เมื่อมีตัวเลข traffic</li>
+        <li>เปิดทาง 4 (แพ็กเกจ VIP ทั้งสองฝั่ง) เมื่อฐาน Agent/พูลมั่นคง</li>
+      </ol>
+    </div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">13. หมายเหตุค่าใช้จ่าย</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <p>Firebase อยู่ใน free tier ได้นานในสเกลนี้ ค่าใช้จ่ายเพิ่มตามการใช้งานจริงคือ Claude API (ต่อข้อความ) และ Stripe (~3-4% ต่อธุรกรรม) — ไม่มีค่า license ก้อนใหญ่ผูกพันรายเดือน</p>
+    </div>
+
+    <div style="margin-top:32px; font-size:12px; color:oklch(55% 0.02 60); text-align:center;">อ่านคู่กับ CLAUDE.md — หน้านี้คืออีกวิธีดู BLUEPRINT.md แบบมีสี อัปเดตพร้อมกันทุกครั้งที่มีการเปลี่ยนแผน</div>
+
+  </div>
+</div>
+
+</x-dc>
+</body>
+</html>
