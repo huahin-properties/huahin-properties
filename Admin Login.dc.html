@@ -13,6 +13,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <title>Admin Login — huahin.properties</title>
   <style>
     body { margin: 0; background: oklch(96% 0.015 75); font-family: 'Work Sans', sans-serif; }
@@ -30,12 +31,12 @@
 
     <div style="display:flex; flex-direction:column; gap:14px;">
       <div>
-        <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">{{ t.admin_username }}</div>
-        <input value="{{ username }}" onChange="{{ onUsername }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit;" />
+        <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">Email</div>
+        <input value="{{ username }}" onChange="{{ onUsername }}" type="email" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit;" />
       </div>
       <div>
         <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">{{ t.admin_password }}</div>
-        <input type="text" autoCapitalize="off" autoCorrect="off" spellCheck="{{ false }}" value="{{ password }}" onChange="{{ onPassword }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit;" />
+        <input type="password" autoCapitalize="off" autoCorrect="off" spellCheck="{{ false }}" value="{{ password }}" onChange="{{ onPassword }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit;" />
       </div>
       <div onClick="{{ onSubmit }}" style="margin-top:8px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); text-align:center; padding:13px; border-radius:4px; font-size:15px; font-weight:500; cursor:pointer;">{{ t.admin_login_cta }}</div>
       <sc-if value="{{ error }}">
@@ -59,13 +60,17 @@ class Component extends DCLogic {
   }
 
   async submit() {
+    if (!this.state.username || !this.state.password) {
+      this.setState({ error: "Enter your email and password." });
+      return;
+    }
+    this.setState({ error: "" });
     const fb = await import("./firebase-client.js");
-    const creds = await fb.fetchAdminCredentials();
-    if (this.state.username === creds.username && this.state.password === creds.password) {
-      fb.setAdminAuthed();
+    try {
+      await fb.adminSignIn(this.state.username, this.state.password);
       window.location.href = "Admin Dashboard.dc.html";
-    } else {
-      this.setState({ error: "Incorrect username or password." });
+    } catch (e) {
+      this.setState({ error: "Incorrect email or password." });
     }
   }
 

@@ -241,18 +241,46 @@ export async function saveAdminCredentials(fields) {
   await setDoc("settings", "admin", { ...existing, ...fields });
 }
 
-const ADMIN_SESSION_KEY = "hh_admin_authed";
-export function setAdminAuthed() {
-  try { sessionStorage.setItem(ADMIN_SESSION_KEY, "1"); } catch (e) {}
+// ── Admin auth (real Firebase Authentication — Email/Password) ───────────
+// Replaces the old sessionStorage-flag placeholder. Every admin-only page
+// must load firebase-auth-compat.js in <helmet> alongside the other
+// Firebase SDK scripts for these to work.
+function authApp() {
+  if (typeof window === "undefined" || !window.firebase || !window.firebase.auth) return null;
+  return getApp().auth();
 }
+
+export async function adminSignIn(email, password) {
+  const a = authApp();
+  if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
+  await a.signInWithEmailAndPassword(email, password);
+}
+
 export function isAdminAuthed() {
-  try { return sessionStorage.getItem(ADMIN_SESSION_KEY) === "1"; } catch (e) { return false; }
+  const a = authApp();
+  return !!(a && a.currentUser);
 }
+
 export function logoutAdmin() {
-  try { sessionStorage.removeItem(ADMIN_SESSION_KEY); } catch (e) {}
+  const a = authApp();
+  if (a) a.signOut().catch(() => {});
 }
-// Call at the top of componentDidMount in every admin-only page; redirects
-// immediately (before any private data loads) if not signed in.
+
+// Firebase Auth restores a signed-in session asynchronously (reads
+// IndexedDB) on every page load. Admin pages must await this ONCE at the
+// top of componentDidMount, BEFORE calling requireAdminAuth() — otherwise
+// a genuinely signed-in admin can get bounced back to the login page by a
+// false "not signed in yet" read.
+export function onAdminAuthReady() {
+  return new Promise((resolve) => {
+    const a = authApp();
+    if (!a) { resolve(null); return; }
+    const unsub = a.onAuthStateChanged((user) => { unsub(); resolve(user); });
+  });
+}
+
+// Call at the top of componentDidMount in every admin-only page (after
+// awaiting onAdminAuthReady()); redirects immediately if not signed in.
 export function requireAdminAuth() {
   if (!isAdminAuthed()) {
     window.location.href = "Admin Login.dc.html";

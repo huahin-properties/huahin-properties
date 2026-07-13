@@ -13,6 +13,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <title>Admin Dashboard — huahin.properties</title>
   <style>
     body { margin: 0; background: oklch(96% 0.015 75); font-family: 'Work Sans', sans-serif; }
@@ -497,6 +498,7 @@ class Component extends DCLogic {
   async componentDidMount() {
     const mod = await import("./data.js");
     const fb = await import("./firebase-client.js");
+    await fb.onAdminAuthReady();
     if (!fb.requireAdminAuth()) return;
     this._mod = mod;
     this._fb = fb;

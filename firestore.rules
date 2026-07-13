@@ -1,0 +1,47 @@
+rules_version = '2';
+
+// huahin.properties — Firestore Security Rules
+//
+// Replaces the temporary wide-open rules (which expire 2026-08-08). Locked
+// down now that real Firebase Authentication is in place for the admin
+// account. Public visitors can read the data the site needs to render but
+// cannot write anything directly — all writes go through the signed-in
+// admin, exactly like before.
+//
+// ADMIN_UID below is the single admin account's Firebase Auth User UID
+// (Firebase Console → Authentication → Users). If a second Staff account
+// is added later (see BLUEPRINT.md §1 Owner/Staff roles), extend the
+// isAdmin() function to check a list of UIDs or a Firestore-stored role
+// instead of one hardcoded value.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null && request.auth.uid == "n7TZKSBscPXE1kRU8WzYpsqJh2g2";
+    }
+
+    // Public, read-only data the site renders for every visitor.
+    match /properties/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /propertyPhotos/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /siteContent/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /profilePhotos/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /aiNotes/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /externalServices/{id} { allow read, write: if isAdmin(); }
+
+    // Owner/tenant contact records — not meant for public browsing, but the
+    // site currently reads them client-side (Owners directory, property
+    // owner lookups) without a public-facing display of sensitive fields.
+    // Kept admin-write / open-read for now; revisit if a public page ever
+    // needs to filter/display owner data directly.
+    match /owners/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /tenants/{id} { allow read: if true; allow write: if isAdmin(); }
+
+    // Admin credentials doc (legacy fallback login) and site settings —
+    // never publicly readable; the values include a legacy plaintext
+    // password fallback.
+    match /settings/{id} { allow read, write: if isAdmin(); }
+
+    // Default deny for anything not explicitly listed above.
+    match /{document=**} { allow read, write: if false; }
+  }
+}
