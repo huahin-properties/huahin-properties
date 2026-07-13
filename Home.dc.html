@@ -90,8 +90,8 @@
 
   <!-- ============ BANNER SLOT (top) ============ -->
   <sc-if value="{{ hasTopBanner }}">
-    <a href="{{ topBanner.link }}" style="display:block; width:100%;">
-      <img src="{{ topBanner.imageUrl }}" alt="banner" style="width:100%; display:block; object-fit:cover; max-height:180px;" />
+    <a href="{{ topBanner.link }}" style="display:block; width:100%; height:clamp(64px,10vw,140px); overflow:hidden;">
+      <img src="{{ topBanner.imageUrl }}" alt="banner" style="width:100%; height:100%; display:block; object-fit:cover;" />
     </a>
   </sc-if>
 
