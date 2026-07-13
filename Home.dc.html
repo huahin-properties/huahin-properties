@@ -293,7 +293,9 @@ class Component extends DCLogic {
       this.setState({ showGate: false, gateError: "" });
     } catch (e) {
       console.error("Gate login failed:", e);
-      this.setState({ gateError: "รหัสผ่านไม่ถูกต้อง (" + (e && (e.code || e.message) || "unknown") + ")" });
+      const detail = "รหัสผ่านไม่ถูกต้อง (" + (e && (e.code || e.message) || "unknown") + ")";
+      window.alert("DEBUG: " + detail);
+      this.setState({ gateError: detail });
     }
   }
 
