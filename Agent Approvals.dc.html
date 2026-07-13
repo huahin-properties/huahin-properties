@@ -34,7 +34,15 @@
     <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:6px;">รายชื่อผู้สมัคร Agent / เจ้าของบ้าน</div>
     <div style="font-size:14px; color:oklch(50% 0.02 60); margin-bottom:24px;">อนุมัติแล้วเขาจะ login เข้าใช้งานได้ทันที — ปฏิเสธจะบล็อกไม่ให้เข้าระบบ</div>
 
-    <div style="display:flex; gap:10px; margin-bottom:20px;">
+    <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.04em; color:oklch(50% 0.02 60); margin-bottom:8px;">ดูแยกตามประเภท</div>
+    <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+      <div onClick="{{ onRoleAll }}" style="{{ roleAllStyle }}">ดูรวม ({{ countRoleAll }})</div>
+      <div onClick="{{ onRoleOwner }}" style="{{ roleOwnerStyle }}">👤 เจ้าของบ้าน ({{ countOwner }})</div>
+      <div onClick="{{ onRoleAgent }}" style="{{ roleAgentStyle }}">🧑‍💼 Agent ({{ countAgent }})</div>
+    </div>
+
+    <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.04em; color:oklch(50% 0.02 60); margin-bottom:8px;">กรองตามสถานะ</div>
+    <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
       <div onClick="{{ onFilterAll }}" style="{{ tabAllStyle }}">ทั้งหมด ({{ countAll }})</div>
       <div onClick="{{ onFilterPending }}" style="{{ tabPendingStyle }}">รออนุมัติ ({{ countPending }})</div>
       <div onClick="{{ onFilterApproved }}" style="{{ tabApprovedStyle }}">อนุมัติแล้ว ({{ countApproved }})</div>
@@ -74,7 +82,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { listers: [], filter: "pending", loaded: false };
+  state = { listers: [], filter: "pending", roleFilter: "all", loaded: false };
 
   async componentDidMount() {
     const fb = await import("./firebase-client.js");
@@ -96,17 +104,23 @@ class Component extends DCLogic {
   }
 
   renderVals() {
-    const all = this.state.listers || [];
-    const countAll = all.length;
-    const countPending = all.filter((l) => l.status === "pending").length;
-    const countApproved = all.filter((l) => l.status === "approved").length;
-    const countRejected = all.filter((l) => l.status === "rejected").length;
+    const everyone = this.state.listers || [];
+    const countOwner = everyone.filter((l) => l.role === "owner").length;
+    const countAgent = everyone.filter((l) => l.role === "agent").length;
+    const countRoleAll = everyone.length;
+
+    const byRole = this.state.roleFilter === "all" ? everyone : everyone.filter((l) => l.role === this.state.roleFilter);
+
+    const countAll = byRole.length;
+    const countPending = byRole.filter((l) => l.status === "pending").length;
+    const countApproved = byRole.filter((l) => l.status === "approved").length;
+    const countRejected = byRole.filter((l) => l.status === "rejected").length;
 
     const tabBase = "padding:8px 16px; border-radius:100px; font-size:13px; cursor:pointer;";
     const tabActive = tabBase + "background:oklch(22% 0.02 60); color:white;";
     const tabInactive = tabBase + "background:white; color:oklch(35% 0.02 60); border:1px solid oklch(88% 0.01 70);";
 
-    const filtered = this.state.filter === "all" ? all : all.filter((l) => l.status === this.state.filter);
+    const filtered = this.state.filter === "all" ? byRole : byRole.filter((l) => l.status === this.state.filter);
 
     const roleLabels = { agent: "Agent", owner: "เจ้าของบ้าน" };
     const statusMap = {
@@ -138,6 +152,13 @@ class Component extends DCLogic {
       });
 
     return {
+      countRoleAll, countOwner, countAgent,
+      roleAllStyle: this.state.roleFilter === "all" ? tabActive : tabInactive,
+      roleOwnerStyle: this.state.roleFilter === "owner" ? tabActive : tabInactive,
+      roleAgentStyle: this.state.roleFilter === "agent" ? tabActive : tabInactive,
+      onRoleAll: () => this.setState({ roleFilter: "all" }),
+      onRoleOwner: () => this.setState({ roleFilter: "owner" }),
+      onRoleAgent: () => this.setState({ roleFilter: "agent" }),
       countAll, countPending, countApproved, countRejected,
       tabAllStyle: this.state.filter === "all" ? tabActive : tabInactive,
       tabPendingStyle: this.state.filter === "pending" ? tabActive : tabInactive,
