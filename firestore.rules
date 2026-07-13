@@ -37,6 +37,12 @@ service cloud.firestore {
       allow read, update, delete: if isAdmin();
     }
 
+    // Self-serve Agent/owner accounts — each signed-in user manages only
+    // their own lister doc (keyed by their Auth UID); admin sees/edits all.
+    match /listers/{uid} {
+      allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == uid);
+    }
+
     // Owner/tenant contact records — not meant for public browsing, but the
     // site currently reads them client-side (Owners directory, property
     // owner lookups) without a public-facing display of sensitive fields.

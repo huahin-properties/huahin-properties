@@ -148,6 +148,18 @@ export async function fetchAllPhotos() {
 // Captures each inquiry with the favorited properties + intent score at
 // the moment of submission, so Admin can see which leads are "hot" (score
 // crossed the auto-bot threshold) vs a routine inquiry.
+// ── Self-serve accounts (Agent / homeowner signup) ────────────────────────
+// Creates a Firebase Auth account for a new Agent/owner self-signup, then
+// the caller writes their "listers" doc (status: pending) keyed by this
+// UID. Kept separate from admin auth (adminSignIn) — this is a brand-new
+// account, not a sign-in.
+export async function createListerAccount(email, password) {
+  const a = authApp();
+  if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
+  const cred = await a.createUserWithEmailAndPassword(email, password);
+  return cred.user.uid;
+}
+
 export async function saveLead(lead) {
   const id = "lead-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
   await setDoc("leads", id, { ...lead, createdAt: Date.now(), contacted: false });
