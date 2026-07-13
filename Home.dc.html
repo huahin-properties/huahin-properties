@@ -292,7 +292,8 @@ class Component extends DCLogic {
       this._fb.setSiteBypass();
       this.setState({ showGate: false, gateError: "" });
     } catch (e) {
-      this.setState({ gateError: "รหัสผ่านไม่ถูกต้อง" });
+      console.error("Gate login failed:", e);
+      this.setState({ gateError: "รหัสผ่านไม่ถูกต้อง (" + (e && (e.code || e.message) || "unknown") + ")" });
     }
   }
 
