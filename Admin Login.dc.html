@@ -36,7 +36,7 @@
       </div>
       <div>
         <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">{{ t.admin_password }}</div>
-        <input type="password" autoCapitalize="off" autoCorrect="off" spellCheck="{{ false }}" value="{{ password }}" onChange="{{ onPassword }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit;" />
+        <input type="text" autoCapitalize="off" autoCorrect="off" spellCheck="{{ false }}" value="{{ password }}" onChange="{{ onPassword }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit;" />
       </div>
       <div onClick="{{ onSubmit }}" style="margin-top:8px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); text-align:center; padding:13px; border-radius:4px; font-size:15px; font-weight:500; cursor:pointer;">{{ t.admin_login_cta }}</div>
       <sc-if value="{{ error }}">

@@ -136,8 +136,9 @@
 
       <sc-for list="{{ bannerRows }}" as="bn" hint-placeholder-count="1">
         <div style="border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:14px; margin-bottom:12px; display:flex; flex-direction:column; gap:8px;">
-          <input value="{{ bn.imageUrl }}" onChange="{{ bn.onImageUrl }}" placeholder="ลิงก์รูปแบนเนอร์ (URL)" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
-          <input value="{{ bn.link }}" onChange="{{ bn.onLink }}" placeholder="ลิงก์ปลายทางเมื่อคลิก (เช่น /promo/ชื่อธุรกิจ หรือ URL ภายนอก)" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
+          <input value="{{ bn.propertyCode }}" onChange="{{ bn.onPropertyCode }}" placeholder="รหัสทรัพย์ (เช่น CA-301) — ระบบดึงรูปปก+ลิงก์ให้อัตโนมัติ" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
+          <sc-if value="{{ bn.resolvedLabel }}"><div style="font-size:12px; color:oklch(40% 0.12 145);">{{ bn.resolvedLabel }}</div></sc-if>
+          <sc-if value="{{ bn.resolveError }}"><div style="font-size:12px; color:oklch(50% 0.18 30);">{{ bn.resolveError }}</div></sc-if>
           <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
             <select value="{{ bn.page }}" onChange="{{ bn.onPage }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 10px; font-size:13px; font-family:inherit;">
               <option value="home">หน้า Home</option>
@@ -239,6 +240,11 @@ class Component extends DCLogic {
     if (!fb.requireAdminAuth()) return;
     this._mod = mod;
     this._fb = fb;
+    try {
+      this._properties = await mod.getEffectiveProperties(mod);
+    } catch (e) {
+      this._properties = mod.PROPERTIES || [];
+    }
     let siteContent = {};
     try {
       siteContent = await fb.fetchSiteContent();
@@ -281,7 +287,7 @@ class Component extends DCLogic {
     try {
       const banners = await fb.fetchCollection("banners");
       const bannerDrafts = {};
-      banners.forEach((b) => { bannerDrafts[b.id] = { imageUrl: b.imageUrl || "", link: b.link || "", page: b.page || "home", position: b.position || "top", active: b.active !== false, isOwnerContent: !!b.isOwnerContent }; });
+      banners.forEach((b) => { bannerDrafts[b.id] = { propertyCode: b.propertyCode || "", propertyTitle: b.propertyTitle || "", imageUrl: b.imageUrl || "", link: b.link || "", page: b.page || "home", position: b.position || "top", active: b.active !== false, isOwnerContent: !!b.isOwnerContent, resolveError: "" }; });
       this.setState({ banners, bannerDrafts });
     } catch (e) {
       console.warn("Failed to load banners:", e);
@@ -379,7 +385,7 @@ class Component extends DCLogic {
 
   addBanner() {
     const id = "banner-" + Date.now();
-    const blank = { imageUrl: "", link: "", page: "home", position: "top", active: true, isOwnerContent: false };
+    const blank = { propertyCode: "", imageUrl: "", link: "", page: "home", position: "top", active: true, isOwnerContent: false, resolveError: "" };
     this.setState((s) => ({
       banners: [...s.banners, { id, ...blank }],
       bannerDrafts: { ...s.bannerDrafts, [id]: blank },
@@ -392,6 +398,19 @@ class Component extends DCLogic {
 
   async saveBanner(id) {
     const draft = this.state.bannerDrafts[id];
+    const code = (draft.propertyCode || "").trim().toUpperCase();
+    const prop = (this._properties || []).find((p) => p.id === code);
+    if (!prop) {
+      this.setState((s) => ({ bannerDrafts: { ...s.bannerDrafts, [id]: { ...draft, resolveError: "ไม่พบรหัสทรัพย์นี้ในระบบ" } } }));
+      return;
+    }
+    const lang = this.state.lang || "th";
+    const cover = (prop.photos && prop.photos[0] && (prop.photos[0].url || prop.photos[0])) || "";
+    draft.propertyCode = code;
+    draft.imageUrl = typeof cover === "string" ? cover : "";
+    draft.link = `Property Details.dc.html?id=${code}`;
+    draft.resolveError = "";
+    draft.propertyTitle = (prop.title && (prop.title[lang] || prop.title.en)) || code;
     try {
       await this._fb.setDoc("banners", id, draft);
       this.setState((s) => ({
@@ -558,8 +577,9 @@ class Component extends DCLogic {
       bannerRows: this.state.banners.map((b) => {
         const draft = this.state.bannerDrafts[b.id] || {};
         return {
-          imageUrl: draft.imageUrl, onImageUrl: (e) => this.onBannerField(b.id, "imageUrl", e.target.value),
-          link: draft.link, onLink: (e) => this.onBannerField(b.id, "link", e.target.value),
+          propertyCode: draft.propertyCode, onPropertyCode: (e) => this.onBannerField(b.id, "propertyCode", e.target.value),
+          resolveError: draft.resolveError || "",
+          resolvedLabel: draft.propertyTitle ? ("✓ ผูกกับ: " + draft.propertyTitle) : "",
           page: draft.page, onPage: (e) => this.onBannerField(b.id, "page", e.target.value),
           position: draft.position, onPosition: (e) => this.onBannerField(b.id, "position", e.target.value),
           active: draft.active, onActive: (e) => this.onBannerField(b.id, "active", e.target.checked),
