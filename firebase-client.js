@@ -144,6 +144,25 @@ export async function fetchAllPhotos() {
   return fetchCollection("propertyPhotos");
 }
 
+// ── Leads (from ContactRail contact form + auto-bot engagement) ──────────
+// Captures each inquiry with the favorited properties + intent score at
+// the moment of submission, so Admin can see which leads are "hot" (score
+// crossed the auto-bot threshold) vs a routine inquiry.
+export async function saveLead(lead) {
+  const id = "lead-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+  await setDoc("leads", id, { ...lead, createdAt: Date.now(), contacted: false });
+  return id;
+}
+
+export async function fetchLeads() {
+  const leads = await fetchCollection("leads");
+  return leads.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+}
+
+export async function markLeadContacted(id, contacted) {
+  await setDoc("leads", id, { contacted });
+}
+
 // ── One-time migration: existing photos saved as huge base64 data: URLs
 // (from before Storage was enabled) get re-uploaded to Storage and their
 // Firestore doc updated to hold the short URL instead. Safe to run more

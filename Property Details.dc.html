@@ -251,10 +251,16 @@ class Component extends DCLogic {
     this._onResize = () => this.setState({ isMobile: window.innerWidth < 900 });
     this._onResize();
     window.addEventListener("resize", this._onResize);
+    try {
+      const favs = await import("./favorites.js");
+      favs.recordPropertyView(this._id);
+      this._longViewTimer = setTimeout(() => favs.recordLongView(this._id), 60000);
+    } catch (e) {}
   }
 
   componentWillUnmount() {
     window.removeEventListener("resize", this._onResize);
+    clearTimeout(this._longViewTimer);
   }
 
   selectLang(l) {

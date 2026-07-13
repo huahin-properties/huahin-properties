@@ -74,6 +74,24 @@
         <div style="font-size:13px; color:oklch(35% 0.06 60); margin-bottom:20px;">{{ migrationResultText }}</div>
       </sc-if>
 
+      <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.04em; color:oklch(50% 0.02 60); margin-bottom:8px;">🔥 Lead ที่สนใจจริง (ระบบ Favorites + Intent Scoring)</div>
+      <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:22px;">
+        <sc-for list="{{ leadRows }}" as="ld" hint-placeholder-count="1">
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 14px; border-radius:6px; background:{{ ld.bg }};">
+            <div style="font-size:16px;">{{ ld.hotIcon }}</div>
+            <div style="flex:1; min-width:160px;">
+              <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60);">{{ ld.name }} · {{ ld.phone }}</div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60);">{{ ld.propsLabel }}</div>
+            </div>
+            <div style="font-size:11px; color:oklch(50% 0.02 60);">{{ ld.dateLabel }}</div>
+            <div onClick="{{ ld.onToggleContacted }}" style="font-size:12px; color:{{ ld.contactedColor }}; cursor:pointer; white-space:nowrap;">{{ ld.contactedLabel }}</div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noLeadRows }}">
+          <div style="font-size:13px; color:oklch(55% 0.02 60); padding:8px 14px;">ยังไม่มี lead เข้ามา</div>
+        </sc-if>
+      </div>
+
       <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.04em; color:oklch(50% 0.02 60); margin-bottom:8px;">ปฏิทินความปลอดภัย</div>
       <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:22px;">
         <sc-for list="{{ securityCalendar }}" as="sc" hint-placeholder-count="1">
@@ -492,7 +510,7 @@ class Component extends DCLogic {
     modalOpen: false, editingId: null, form: null,
     tenants: null,
     externalServices: null, svcForm: { name: "", expiry: "", cost: "", link: "" },
-    editingSvcId: null, confirmingDeleteSvcId: null,
+    editingSvcId: null, confirmingDeleteSvcId: null, leads: null,
   };
 
   async componentDidMount() {
@@ -532,6 +550,12 @@ class Component extends DCLogic {
     } catch (e) {
       console.warn("Firebase externalServices fetch failed:", e);
       externalServices = [];
+    }
+    let leads = [];
+    try {
+      leads = await fb.fetchLeads();
+    } catch (e) {
+      console.warn("Firebase leads fetch failed:", e);
     }
     // Uploaded photos live in their own Firestore docs (see firebase-client's
     // propertyPhotos collection) so a property doc with many photos never
@@ -573,7 +597,7 @@ class Component extends DCLogic {
       photos: (p.photos || []).map((ph) => (typeof ph === "string" ? { label: ph, url: "" } : ph)),
       _raw: p,
     }));
-    this.setState({ lang: mod.getLang(), data: mod, properties, owners, tenants, profilePhotosById, externalServices });
+    this.setState({ lang: mod.getLang(), data: mod, properties, owners, tenants, profilePhotosById, externalServices, leads });
     this._onResize = () => this.setState({ isMobile: window.innerWidth < 760 });
     this._onResize();
     window.addEventListener("resize", this._onResize);
@@ -617,6 +641,12 @@ class Component extends DCLogic {
 
   cancelSvcEdit() {
     this.setState({ editingSvcId: null, svcForm: { name: "", expiry: "", cost: "", link: "" } });
+  }
+
+  toggleLeadContacted(ld) {
+    const next = (this.state.leads || []).map((l) => (l.id === ld.id ? { ...l, contacted: !l.contacted } : l));
+    this.setState({ leads: next });
+    this._fb.markLeadContacted(ld.id, !ld.contacted).catch((e) => console.warn("markLeadContacted failed:", e));
   }
 
   requestDeleteSvc(id) { this.setState({ confirmingDeleteSvcId: id }); }
@@ -1099,6 +1129,21 @@ class Component extends DCLogic {
       };
     });
 
+    const leadList = this.state.leads || [];
+    const leadRows = leadList.map((ld) => ({
+      id: ld.id,
+      name: ld.name || "-", phone: ld.phone || "-",
+      hotIcon: ld.hot ? "🔥" : "💬",
+      bg: ld.hot ? "oklch(96% 0.05 40)" : "oklch(97% 0.01 70)",
+      propsLabel: (ld.favoritedPropertyIds && ld.favoritedPropertyIds.length)
+        ? "สนใจ: " + ld.favoritedPropertyIds.slice(0, 4).join(", ")
+        : (ld.message ? ld.message.slice(0, 60) : "—"),
+      dateLabel: ld.createdAt ? new Date(ld.createdAt).toLocaleDateString("th-TH", { day: "numeric", month: "short" }) : "",
+      contactedLabel: ld.contacted ? "✓ ติดต่อแล้ว" : "ยังไม่ติดต่อ",
+      contactedColor: ld.contacted ? "oklch(45% 0.1 145)" : "oklch(50% 0.15 40)",
+      onToggleContacted: () => this.toggleLeadContacted(ld),
+    }));
+
     const svcList = this.state.externalServices || [];
     const svcRows = [...svcList].sort((a, b) => new Date(a.expiry) - new Date(b.expiry)).map((s) => {
       const days = daysUntilDate(s.expiry);
@@ -1119,6 +1164,7 @@ class Component extends DCLogic {
     return {
       t, lang, stats, rows, noRows: rows.length === 0,
       onLogout: (e) => { e.preventDefault(); this._fb.logoutAdmin(); window.location.href = "Admin Login.dc.html"; },
+      leadRows, noLeadRows: leadRows.length === 0,
       securityCalendar, svcRows, hasSvcRows: svcRows.length > 0, noSvcRows: svcRows.length === 0,
       svcForm: this.state.svcForm,
       onSvcName: (e) => this.onSvcField("name", e.target.value),
