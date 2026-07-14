@@ -31,9 +31,9 @@
 
   <!-- ============ MY FAVORITES (persistent, cart-style) ============ -->
   <sc-if value="{{ showFavButton }}">
-    <div onClick="{{ onOpenFavorites }}" style="position:fixed; left:20px; bottom:20px; z-index:70; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); border-radius:100px; padding:12px 18px; display:flex; align-items:center; gap:8px; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.18); font-family:'Work Sans',sans-serif;">
+    <div onClick="{{ onOpenFavorites }}" style="position:fixed; left:16px; bottom:16px; z-index:70; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); border-radius:100px; padding:{{ favButtonPadding }}; display:flex; align-items:center; gap:8px; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.18); font-family:'Work Sans',sans-serif;">
       <span style="font-size:16px;">⭐</span>
-      <span style="font-size:13px;">{{ favButtonLabel }}</span>
+      <sc-if value="{{ showFavLabel }}"><span style="font-size:13px; white-space:nowrap;">{{ favButtonLabel }}</span></sc-if>
       <sc-if value="{{ hasFavCount }}"><span style="background:oklch(97% 0.01 80); color:oklch(22% 0.02 60); border-radius:100px; min-width:20px; height:20px; padding:0 5px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;">{{ favCount }}</span></sc-if>
     </div>
   </sc-if>
@@ -63,11 +63,11 @@
   </sc-if>
 
   <!-- ============ PERSISTENT CHAT BUBBLE (always visible) ============ -->
-  <div style="position:fixed; right:20px; bottom:20px; z-index:70; display:flex; align-items:center; gap:10px;">
+  <div style="position:fixed; right:16px; bottom:16px; z-index:70; display:flex; align-items:center; gap:10px;">
     <sc-if value="{{ chatHintVisible }}">
       <div onClick="{{ onOpenChat }}" style="background:#fff; color:oklch(25% 0.02 60); padding:10px 16px; border-radius:100px; font-size:14px; font-family:'Work Sans',sans-serif; box-shadow:0 4px 16px oklch(0% 0 0 / 0.15); cursor:pointer; white-space:nowrap;">{{ t.rail_chat_hint }} 👋</div>
     </sc-if>
-    <div onClick="{{ onOpenChat }}" style="width:52px; height:52px; border-radius:50%; background:oklch(22% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 16px oklch(0% 0 0 / 0.2); font-size:22px;">
+    <div onClick="{{ onOpenChat }}" style="width:48px; height:48px; border-radius:50%; background:oklch(22% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 16px oklch(0% 0 0 / 0.2); font-size:20px; flex-shrink:0;">
       <span style="color:oklch(97% 0.01 80);">💬</span>
     </div>
   </div>
@@ -193,6 +193,7 @@ const FAV_EMPTY_LABELS = { en: "No saved favorites yet — tap the star on any l
 
 class Component extends DCLogic {
   state = {
+    isMobile: (typeof window !== "undefined" && window.innerWidth < 640),
     railOpen: true, formOpen: false, submitted: false, favoritesOpen: false, favIds: [],
     name: "", phone: "", email: "", message: "",
     lang: "th",
@@ -211,6 +212,8 @@ class Component extends DCLogic {
       setTimeout(() => this.toggleMic(), 350);
     };
     window.addEventListener("hh-open-voice-chat", this._onOpenVoiceChat);
+    this._onResize = () => this.setState({ isMobile: window.innerWidth < 640 });
+    window.addEventListener("resize", this._onResize);
     const syncLang = () => {
       import("./data.js").then((mod) => {
         this._mod = mod;
@@ -487,6 +490,7 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
     window.removeEventListener("storage", this._onStorage);
     window.removeEventListener("langchange", this._onStorage);
     window.removeEventListener("hh-open-voice-chat", this._onOpenVoiceChat);
+    window.removeEventListener("resize", this._onResize);
     if (this._onFavChange) {
       window.removeEventListener("hh_favorites_changed", this._onFavChange);
       window.removeEventListener("storage", this._onFavChange);
@@ -545,7 +549,7 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       lineUrl,
       whatsappUrl: "https://wa.me/" + whatsappNumber,
       telUrl: "tel:" + phone,
-      chatHintVisible: true,
+      chatHintVisible: !this.state.isMobile,
       formOpen: this.state.formOpen,
       onOpenForm: () => this.setState({ formOpen: true, chatOpen: false, submitted: false }),
       onCloseForm: () => this.setState({ formOpen: false }),
@@ -571,6 +575,8 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       onOpenChat: () => this.openChat(),
       onCloseChat: () => this.setState({ chatOpen: false, chatMinimized: false }),
       showFavButton: true,
+      showFavLabel: !this.state.isMobile,
+      favButtonPadding: this.state.isMobile ? "12px" : "12px 18px",
       favButtonLabel: FAV_PANEL_LABELS[this.state.lang] || FAV_PANEL_LABELS.en,
       favCount: this.state.favIds.length,
       hasFavCount: this.state.favIds.length > 0,
