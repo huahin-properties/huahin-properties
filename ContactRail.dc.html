@@ -39,16 +39,27 @@
     </div>
   </div>
 
+  <!-- ============ AI CHAT — MINIMIZED BAR ============ -->
+  <sc-if value="{{ chatBarOpen }}">
+    <div onClick="{{ onExpandChat }}" style="position:fixed; bottom:20px; right:20px; z-index:85; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); border-radius:100px; padding:12px 20px; display:flex; align-items:center; gap:10px; cursor:pointer; box-shadow:0 12px 32px oklch(0% 0 0 / 0.25);">
+      <span style="font-size:15px;">💬</span>
+      <span style="font-family:'Playfair Display',serif; font-size:14px;">{{ t.chat_title }}</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;"><path d="M6 15L12 9L18 15" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+  </sc-if>
+
   <!-- ============ AI CHAT MODAL ============ -->
-  <sc-if value="{{ chatOpen }}">
-    <div onClick="{{ onCloseChat }}" style="position:fixed; inset:0; background:oklch(15% 0.01 60 / 0.5); z-index:85; display:flex; align-items:flex-end; justify-content:flex-end; padding:20px;">
+  <sc-if value="{{ chatPanelOpen }}">
+    <div onClick="{{ onMinimizeChat }}" style="position:fixed; inset:0; background:oklch(15% 0.01 60 / 0.5); z-index:85; display:flex; align-items:flex-end; justify-content:flex-end; padding:20px;">
       <div onClick="{{ stopProp }}" style="background:oklch(99% 0.005 80); border-radius:10px; width:100%; max-width:380px; height:min(560px, 80vh); display:flex; flex-direction:column; box-shadow:0 20px 60px oklch(0% 0 0 / 0.35); overflow:hidden;">
         <div style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:16px 18px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
           <div>
             <div style="font-family:'Playfair Display',serif; font-size:17px;">{{ t.chat_title }}</div>
             <div style="font-size:11px; color:oklch(80% 0.01 70); margin-top:2px;">{{ t.chat_subtitle }}</div>
           </div>
-          <div onClick="{{ onCloseChat }}" style="font-size:22px; line-height:1; cursor:pointer; padding:4px;">&times;</div>
+          <div onClick="{{ onMinimizeChat }}" title="ย่อหน้าต่างแชท" style="cursor:pointer; padding:8px; border-radius:8px; display:flex; align-items:center; justify-content:center;" style-hover="background:oklch(30% 0.02 60);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
         </div>
         <div ref="{{ chatScrollRef }}" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px;">
           <sc-for list="{{ chatMessages }}" as="m" hint-placeholder-count="1">
@@ -131,7 +142,7 @@ class Component extends DCLogic {
     railOpen: true, formOpen: false, submitted: false,
     name: "", phone: "", email: "", message: "",
     lang: "th",
-    chatOpen: false, chatMessages: [], chatInput: "", chatLoading: false,
+    chatOpen: false, chatMinimized: false, chatMessages: [], chatInput: "", chatLoading: false,
   };
 
   chatScrollRef = React.createRef();
@@ -182,7 +193,7 @@ class Component extends DCLogic {
     try {
       const saved = JSON.parse(localStorage.getItem("hh_chat_history") || "null");
       if (saved && saved.length) {
-        this.setState({ chatMessages: saved.map((m) => this._buildBubble(m.role, m.text)), chatOpen: true });
+        this.setState({ chatMessages: saved.map((m) => this._buildBubble(m.role, m.text)), chatOpen: true, chatMinimized: false });
         return true;
       }
     } catch (e) {}
@@ -210,7 +221,7 @@ class Component extends DCLogic {
       favs.markAutoTriggered();
       setTimeout(() => {
         const msgs = [{ role: "assistant", text: tailored, links: [], bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" }];
-        this.setState({ chatOpen: true, chatMessages: msgs });
+        this.setState({ chatOpen: true, chatMinimized: false, chatMessages: msgs });
         this._persistHistory(msgs);
       }, 1500);
     } catch (e) { console.warn("Auto-trigger check failed:", e); }
@@ -345,6 +356,7 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
   }
 
   openChat() {
+    if (this.state.chatOpen && this.state.chatMinimized) { this.setState({ chatMinimized: false }); return; }
     const alreadyGreeted = this.state.chatMessages.length > 0;
     const lang = this.state.lang;
     const t = CHAT_I18N[lang] || CHAT_I18N.en;
@@ -420,12 +432,16 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       onSubmit: () => this.submit(),
 
       chatOpen: this.state.chatOpen,
+      chatPanelOpen: this.state.chatOpen && !this.state.chatMinimized,
+      chatBarOpen: this.state.chatOpen && this.state.chatMinimized,
+      onMinimizeChat: () => this.setState({ chatMinimized: true }),
+      onExpandChat: () => this.setState({ chatMinimized: false }),
       chatMessages: this.state.chatMessages,
       chatLoading: this.state.chatLoading,
       chatInput: this.state.chatInput,
       chatScrollRef: this.chatScrollRef,
       onOpenChat: () => this.openChat(),
-      onCloseChat: () => this.setState({ chatOpen: false }),
+      onCloseChat: () => this.setState({ chatOpen: false, chatMinimized: false }),
       onChatInput: (e) => this.setState({ chatInput: e.target.value }),
       onChatSend: () => this.sendChat(),
       onChatKeyDown: (e) => { if (e.key === "Enter") { e.preventDefault(); this.sendChat(); } },
