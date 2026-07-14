@@ -91,9 +91,12 @@
 
   <!-- ============ BANNER SLOT (top) ============ -->
   <sc-if value="{{ hasTopBanner }}">
-    <a href="{{ topBanner.link }}" style="display:block; width:100%; height:clamp(64px,10vw,140px); overflow:hidden;">
-      <img src="{{ topBanner.imageUrl }}" alt="banner" style="width:100%; height:100%; display:block; object-fit:cover;" />
-    </a>
+    <div style="background:oklch(93% 0.02 75); padding:6px 0 0; border-bottom:2px solid oklch(40% 0.13 25);">
+      <div style="text-align:center; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:oklch(50% 0.02 60); margin-bottom:4px;">Sponsored</div>
+      <a href="{{ topBanner.link }}" style="display:block; width:100%; height:clamp(64px,10vw,140px); overflow:hidden;">
+        <img src="{{ topBanner.imageUrl }}" alt="banner" style="width:100%; height:100%; display:block; object-fit:cover;" />
+      </a>
+    </div>
   </sc-if>
 
   <!-- ============ HERO ============ -->
