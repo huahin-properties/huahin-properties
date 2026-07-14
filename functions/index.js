@@ -191,6 +191,44 @@ exports.createPortalSession = onRequest(
   }
 );
 
+// createFeaturedCheckoutSession — one-time payment to boost a listing to the
+// top of Home/Search for N days ("Featured Listing boost" in BLUEPRINT.md
+// §11 item 5). Uses Stripe's dynamic price_data instead of a pre-created
+// Product/Price — admin sets THB amount per duration in Site Content.
+exports.createFeaturedCheckoutSession = onRequest(
+  { secrets: [STRIPE_SECRET_KEY], cors: true, region: "asia-southeast1" },
+  async (req, res) => {
+    if (req.method === "OPTIONS") { res.set(CORS_HEADERS).status(204).send(""); return; }
+    if (req.method !== "POST") { res.status(405).send("Use POST"); return; }
+    try {
+      const { propertyId, days, amountThb, successUrl, cancelUrl } = req.body || {};
+      if (!propertyId || !days || !amountThb) {
+        res.status(400).json({ error: "propertyId, days and amountThb are required" });
+        return;
+      }
+      const stripe = new Stripe(STRIPE_SECRET_KEY.value());
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        line_items: [{
+          price_data: {
+            currency: "thb",
+            unit_amount: Math.round(Number(amountThb) * 100),
+            product_data: { name: `Featured Listing — ${propertyId} — ${days} days` },
+          },
+          quantity: 1,
+        }],
+        metadata: { type: "featured", propertyId: String(propertyId), days: String(days) },
+        success_url: successUrl || "https://huahin.properties/Admin%20Dashboard.dc.html?featured=success",
+        cancel_url: cancelUrl || "https://huahin.properties/Admin%20Dashboard.dc.html?featured=cancelled",
+      });
+      res.json({ url: session.url });
+    } catch (e) {
+      console.error("createFeaturedCheckoutSession failed:", e);
+      res.status(500).json({ error: String(e && e.message || e) });
+    }
+  }
+);
+
 // createBannerCheckoutSession — one-time payment for a self-serve external
 // banner ad ("เปิดขายแบนเนอร์ให้ลูกค้าภายนอกจริง" in BLUEPRINT.md §11 item 6).
 // Same dynamic price_data pattern as Featured — no Stripe Product needed,
