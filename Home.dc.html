@@ -182,7 +182,7 @@
     </div>
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px;">
       <sc-for list="{{ featured }}" as="p" hint-placeholder-count="6">
-        <dc-import name="PropertyCard" href="{{ p.href }}" status-color="{{ p.statusColor }}" status-label="{{ p.statusLabel }}" cover-photo-label="{{ p.coverPhotoLabel }}" cover-photo-bg="{{ p.coverPhotoBg }}" no-photo="{{ p.noPhoto }}" property-id="{{ p.propertyId }}" zone="{{ p.zone }}" area-label="{{ p.areaLabel }}" title="{{ p.title }}" type-label="{{ p.typeLabel }}" has-bedrooms="{{ p.hasBedrooms }}" bedrooms="{{ p.bedrooms }}" has-bathrooms="{{ p.hasBathrooms }}" bathrooms="{{ p.bathrooms }}" has-living-area="{{ p.hasLivingArea }}" living-area="{{ p.livingArea }}" sqm-label="{{ p.sqmLabel }}" price-label="{{ p.priceLabel }}" view-details-label="{{ p.viewDetailsLabel }}" hint-size="100%,380px"></dc-import>
+        <dc-import name="PropertyCard" href="{{ p.href }}" status-color="{{ p.statusColor }}" status-label="{{ p.statusLabel }}" is-featured="{{ p.isFeatured }}" cover-photo-label="{{ p.coverPhotoLabel }}" cover-photo-bg="{{ p.coverPhotoBg }}" no-photo="{{ p.noPhoto }}" property-id="{{ p.propertyId }}" zone="{{ p.zone }}" area-label="{{ p.areaLabel }}" title="{{ p.title }}" type-label="{{ p.typeLabel }}" has-bedrooms="{{ p.hasBedrooms }}" bedrooms="{{ p.bedrooms }}" has-bathrooms="{{ p.hasBathrooms }}" bathrooms="{{ p.bathrooms }}" has-living-area="{{ p.hasLivingArea }}" living-area="{{ p.livingArea }}" sqm-label="{{ p.sqmLabel }}" price-label="{{ p.priceLabel }}" view-details-label="{{ p.viewDetailsLabel }}" hint-size="100%,380px"></dc-import>
       </sc-for>
     </div>
   </div>
@@ -322,6 +322,7 @@ class Component extends DCLogic {
       href: `Property Details.dc.html?id=${p.id}`,
       statusColor: statusColorOf(p.status),
       statusLabel: mod.STATUS[p.status][lang],
+      isFeatured: !!(p.featuredUntil && p.featuredUntil > Date.now()),
       coverPhotoLabel: (p.photos[0] && p.photos[0].label) || p.photos[0] || "photo",
       coverPhotoBg: (p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
       noPhoto: !(p.photos[0] && p.photos[0].url),

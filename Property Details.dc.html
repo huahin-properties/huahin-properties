@@ -91,6 +91,13 @@
 
   <sc-if value="{{ hasProperty }}" hint-placeholder-val="{{ true }}">
 
+    <!-- ============ BANNER SLOT (top) ============ -->
+    <sc-if value="{{ hasTopBanner }}">
+      <a href="{{ topBanner.link }}" style="display:block; width:100%; height:clamp(64px,10vw,140px); overflow:hidden;">
+        <img src="{{ topBanner.imageUrl }}" alt="banner" style="width:100%; height:100%; display:block; object-fit:cover;" />
+      </a>
+    </sc-if>
+
     <!-- ============ BREADCRUMB ============ -->
     <div style="padding:18px clamp(20px,4vw,56px) 0; font-size:13px; color:oklch(50% 0.02 60); display:flex; gap:8px; flex-wrap:wrap;">
       <a href="Home.dc.html" style="text-decoration:none;">{{ t.site_name }}</a><span>/</span>
@@ -217,6 +224,7 @@
 class Component extends DCLogic {
   state = {
     lang: "en",
+    banners: [],
     isMobile: (typeof window !== "undefined" && window.innerWidth < 900),
     mobileMenuOpen: false,
     data: null,
@@ -243,6 +251,10 @@ class Component extends DCLogic {
     this.setState({ lang: mod.getLang(), data: mod });
     const effProps = await mod.getEffectiveProperties(mod);
     this.setState({ effProps });
+    try {
+      const allBanners = await fb0.fetchCollection("banners");
+      this.setState({ banners: allBanners });
+    } catch (e) { console.warn("banners fetch failed:", e); }
     this._updateSeoTags(effProps, mod, this.state.lang);
     this._onResize = () => this.setState({ isMobile: window.innerWidth < 900 });
     this._onResize();
@@ -318,6 +330,18 @@ class Component extends DCLogic {
     const gateVals = {
       showGate: this.state.showGate,
       showChrome: !this.state.showGate,
+      hasTopBanner: (() => {
+        const now = Date.now();
+        const active = (this.state.banners || []).filter((b) => b.page === "property" && b.position === "top" && b.active !== false && b.imageUrl && (!b.expiresAt || b.expiresAt > now));
+        return active.length > 0;
+      })(),
+      topBanner: (() => {
+        const now = Date.now();
+        const active = (this.state.banners || []).filter((b) => b.page === "property" && b.position === "top" && b.active !== false && b.imageUrl && (!b.expiresAt || b.expiresAt > now));
+        if (!active.length) return { imageUrl: "", link: "#" };
+        const pick = active[Math.floor(Math.random() * active.length)];
+        return { imageUrl: pick.imageUrl, link: pick.link || "#" };
+      })(),
       gatePassword: this.state.gatePassword,
       onGatePassword: (e) => this.setState({ gatePassword: e.target.value, gateError: "" }),
       onGateSubmit: () => this.submitGate(),

@@ -87,6 +87,13 @@
     </div>
   </sc-if>
 
+  <!-- ============ BANNER SLOT (top) ============ -->
+  <sc-if value="{{ hasTopBanner }}">
+    <a href="{{ topBanner.link }}" style="display:block; width:100%; height:clamp(64px,10vw,140px); overflow:hidden;">
+      <img src="{{ topBanner.imageUrl }}" alt="banner" style="width:100%; height:100%; display:block; object-fit:cover;" />
+    </a>
+  </sc-if>
+
   <!-- ============ PAGE HEADING ============ -->
   <div style="padding:clamp(24px,4vw,40px) clamp(20px,4vw,56px) 0;">
     <div style="font-family:'Playfair Display',serif; font-size:clamp(24px,3vw,32px); color:oklch(20% 0.02 60); margin-bottom:6px;">{{ heading }}</div>
@@ -145,7 +152,7 @@
         <sc-if value="{{ isGrid }}" hint-placeholder-val="{{ true }}">
           <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:22px;">
             <sc-for list="{{ results }}" as="p" hint-placeholder-count="6">
-              <dc-import name="PropertyCard" href="{{ p.href }}" status-color="{{ p.statusColor }}" status-label="{{ p.statusLabel }}" cover-photo-label="{{ p.coverPhotoLabel }}" cover-photo-bg="{{ p.coverPhotoBg }}" no-photo="{{ p.noPhoto }}" property-id="{{ p.propertyId }}" zone="{{ p.zone }}" area-label="{{ p.areaLabel }}" title="{{ p.title }}" type-label="{{ p.typeLabel }}" has-bedrooms="{{ p.hasBedrooms }}" bedrooms="{{ p.bedrooms }}" has-bathrooms="{{ p.hasBathrooms }}" bathrooms="{{ p.bathrooms }}" has-living-area="{{ p.hasLivingArea }}" living-area="{{ p.livingArea }}" sqm-label="{{ p.sqmLabel }}" price-label="{{ p.priceLabel }}" view-details-label="{{ p.viewDetailsLabel }}" hint-size="100%,380px"></dc-import>
+              <dc-import name="PropertyCard" href="{{ p.href }}" status-color="{{ p.statusColor }}" status-label="{{ p.statusLabel }}" is-featured="{{ p.isFeatured }}" cover-photo-label="{{ p.coverPhotoLabel }}" cover-photo-bg="{{ p.coverPhotoBg }}" no-photo="{{ p.noPhoto }}" property-id="{{ p.propertyId }}" zone="{{ p.zone }}" area-label="{{ p.areaLabel }}" title="{{ p.title }}" type-label="{{ p.typeLabel }}" has-bedrooms="{{ p.hasBedrooms }}" bedrooms="{{ p.bedrooms }}" has-bathrooms="{{ p.hasBathrooms }}" bathrooms="{{ p.bathrooms }}" has-living-area="{{ p.hasLivingArea }}" living-area="{{ p.livingArea }}" sqm-label="{{ p.sqmLabel }}" price-label="{{ p.priceLabel }}" view-details-label="{{ p.viewDetailsLabel }}" hint-size="100%,380px"></dc-import>
             </sc-for>
           </div>
         </sc-if>
@@ -201,6 +208,7 @@ class Component extends DCLogic {
     data: null,
     showGate: false, gatePassword: "", gateError: "",
     filters: { area: "", type: "", status: "", bedroomsMin: "", bathroomsMin: "", priceMax: "", features: [], keyword: "" },
+    banners: [],
   };
 
   async componentDidMount() {
@@ -224,6 +232,10 @@ class Component extends DCLogic {
     this.setState({ lang: mod.getLang(), data: mod, filters });
     const effProps = await mod.getEffectiveProperties(mod);
     this.setState({ effProps });
+    try {
+      const allBanners = await fb0.fetchCollection("banners");
+      this.setState({ banners: allBanners });
+    } catch (e) { console.warn("banners fetch failed:", e); }
     this._onResize = () => this.setState({ isMobile: window.innerWidth < 900 });
     this._onResize();
     window.addEventListener("resize", this._onResize);
@@ -309,10 +321,20 @@ class Component extends DCLogic {
     if (this.state.sort === "price_asc") list = [...list].sort((a, b) => a.price - b.price);
     else if (this.state.sort === "price_desc") list = [...list].sort((a, b) => b.price - a.price);
 
+    // Featured boosts (paid via Stripe, see BLUEPRINT §11 item 5) always float
+    // to the top regardless of the chosen sort, most-recently-boosted first.
+    const now0 = Date.now();
+    list = [...list].sort((a, b) => {
+      const af = a.featuredUntil && a.featuredUntil > now0 ? a.featuredUntil : 0;
+      const bf = b.featuredUntil && b.featuredUntil > now0 ? b.featuredUntil : 0;
+      return bf - af;
+    });
+
     const results = list.map((p) => ({
       href: `Property Details.dc.html?id=${p.id}`,
       statusColor: statusColorOf(p.status),
       statusLabel: mod.STATUS[p.status][lang],
+      isFeatured: !!(p.featuredUntil && p.featuredUntil > now0),
       coverPhotoLabel: (p.photos[0] && p.photos[0].label) || p.photos[0] || "photo",
       coverPhotoBg: (p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
       noPhoto: !(p.photos[0] && p.photos[0].url),
@@ -364,6 +386,18 @@ class Component extends DCLogic {
       filtersOpen: this.state.isMobile && this.state.filtersOpen,
       toggleFilters: () => this.setState((s) => ({ filtersOpen: !s.filtersOpen })),
       langValue, onLangChange, langOptions,
+      hasTopBanner: (() => {
+        const now = Date.now();
+        const active = (this.state.banners || []).filter((b) => b.page === "search" && b.position === "top" && b.active !== false && b.imageUrl && (!b.expiresAt || b.expiresAt > now));
+        return active.length > 0;
+      })(),
+      topBanner: (() => {
+        const now = Date.now();
+        const active = (this.state.banners || []).filter((b) => b.page === "search" && b.position === "top" && b.active !== false && b.imageUrl && (!b.expiresAt || b.expiresAt > now));
+        if (!active.length) return { imageUrl: "", link: "#" };
+        const pick = active[Math.floor(Math.random() * active.length)];
+        return { imageUrl: pick.imageUrl, link: pick.link || "#" };
+      })(),
       heading,
       resultCount: results.length,
       sort: this.state.sort,
