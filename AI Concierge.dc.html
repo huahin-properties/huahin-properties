@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <title>huahin.properties — คุยกับผู้ช่วย AI</title>
+  <style>
+    body { margin: 0; font-family: 'Work Sans', sans-serif; }
+    @keyframes dotPulse { 0%,80%,100%{opacity:.25} 40%{opacity:1} }
+  </style>
+</helmet>
+
+<div style="min-height:100vh; background:oklch(96% 0.015 75); display:flex; flex-direction:column;">
+
+  <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px; flex-wrap:wrap; gap:10px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <img src="logo.png" style="height:34px; width:34px; border-radius:50%; object-fit:contain;" />
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(25% 0.03 40);">huahin . properties</div>
+    </div>
+    <a href="Home.dc.html" style="font-size:13px; color:oklch(45% 0.02 60); text-decoration:none; border:1px solid oklch(80% 0.02 60); padding:8px 16px; border-radius:100px;">ดูเว็บไซต์แบบเต็ม →</a>
+  </div>
+
+  <sc-if value="{{ showQuickIcons }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex; justify-content:center; gap:10px; padding:0 20px 14px; flex-wrap:wrap;">
+      <sc-for list="{{ quickChips }}" as="qc" hint-placeholder-count="3">
+        <div onClick="{{ qc.onClick }}" style="display:flex; align-items:center; gap:6px; background:white; border:1px solid oklch(88% 0.01 70); border-radius:100px; padding:8px 16px; font-size:13px; color:oklch(30% 0.02 60); cursor:pointer;">
+          <span>{{ qc.icon }}</span><span>{{ qc.label }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 16px 16px;">
+    <div style="width:100%; max-width:560px; display:flex; flex-direction:column; height:min(560px, 62vh);">
+
+      <div ref="{{ scrollRef }}" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding:6px 4px 14px;">
+        <sc-if value="{{ showIntro }}" hint-placeholder-val="{{ true }}">
+          <div style="text-align:center; padding:28px 10px 10px;">
+            <div style="font-size:34px; margin-bottom:10px;">💬</div>
+            <div style="font-family:'Playfair Display',serif; font-size:21px; color:oklch(25% 0.03 40); margin-bottom:6px;">คุยกับผู้ช่วย AI ของเราได้เลย</div>
+            <div style="font-size:14px; color:oklch(50% 0.02 60);">หาบ้าน หาที่เช่า หรือฝากขาย — พิมพ์หรือพูดได้ทันที ทุกภาษา ตลอด 24 ชม.</div>
+          </div>
+        </sc-if>
+        <sc-for list="{{ chatMessages }}" as="m" hint-placeholder-count="0">
+          <div style="{{ m.bubbleWrapStyle }}">
+            <div style="{{ m.bubbleStyle }}">{{ m.text }}</div>
+            <sc-if value="{{ m.hasLinks }}">
+              <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+                <sc-for list="{{ m.links }}" as="lk" hint-placeholder-count="0">
+                  <div onClick="{{ lk.onClick }}" style="background:oklch(35% 0.09 25); color:white; font-size:12px; padding:7px 14px; border-radius:100px; cursor:pointer; white-space:nowrap;">{{ lk.label }}</div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+        <sc-if value="{{ chatLoading }}">
+          <div style="align-self:flex-start; background:oklch(93% 0.01 75); padding:10px 16px; border-radius:14px 14px 14px 2px; display:flex; gap:4px;">
+            <span style="width:6px; height:6px; border-radius:50%; background:oklch(50% 0.02 60); animation:dotPulse 1.2s infinite;"></span>
+            <span style="width:6px; height:6px; border-radius:50%; background:oklch(50% 0.02 60); animation:dotPulse 1.2s infinite .2s;"></span>
+            <span style="width:6px; height:6px; border-radius:50%; background:oklch(50% 0.02 60); animation:dotPulse 1.2s infinite .4s;"></span>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="display:flex; gap:8px; background:white; border:1px solid oklch(88% 0.01 70); border-radius:100px; padding:6px 6px 6px 18px; box-shadow:0 8px 24px -14px rgba(0,0,0,0.15);">
+        <input value="{{ chatInput }}" onChange="{{ onChatInput }}" onKeyDown="{{ onChatKeyDown }}" placeholder="{{ placeholder }}" style="flex:1; border:none; outline:none; font-size:15px; font-family:inherit; background:transparent;" />
+        <div onClick="{{ onSend }}" style="width:40px; height:40px; border-radius:50%; background:oklch(35% 0.09 25); color:white; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;">➤</div>
+      </div>
+      <div style="text-align:center; margin-top:10px;">
+        <a href="Home.dc.html" style="font-size:12px; color:oklch(55% 0.02 60);">หรือดูประกาศทั้งหมดด้วยตัวเอง →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const QUICK_PROMPTS = {
+  buy: "ฉันกำลังหาซื้อบ้านหรือคอนโดอยู่ ช่วยแนะนำหน่อยได้ไหม",
+  rent: "ฉันกำลังหาบ้านเช่าอยู่ ช่วยแนะนำหน่อยได้ไหม",
+  sell: "ฉันมีบ้าน/ที่ดินอยากฝากขายหรือฝากเช่า ต้องทำยังไงบ้าง",
+};
+
+class Component extends DCLogic {
+  scrollRef = React.createRef();
+  state = { chatMessages: [], chatInput: "", chatLoading: false, lang: "th" };
+
+  async componentDidMount() {
+    try {
+      const mod = await import("./data.js");
+      this._mod = mod;
+      this._properties = await mod.getEffectiveProperties(mod);
+      this.setState({ lang: mod.getLang() });
+    } catch (e) { console.warn("AI Concierge: data load failed", e); }
+    try {
+      const fb = await import("./firebase-client.js");
+      this._aiNotes = await fb.fetchAiNotes();
+      this._aiRestrictions = await fb.fetchAiRestrictions();
+      this._aiPersona = await fb.fetchAiPersona();
+    } catch (e) { console.warn("AI Concierge: firebase load failed", e); }
+  }
+
+  _navigate(href) { window.location.href = href; }
+
+  _extractLinks(text) {
+    if (!text) return [];
+    const props = this._properties || [];
+    const codes = [...new Set((text.match(/\b[A-Z]{2,4}-\d{2,4}\b/g) || []))];
+    const links = [];
+    codes.forEach((code) => {
+      const p = props.find((pr) => pr.id === code);
+      if (p) links.push({ label: "ดูรายละเอียด " + code, onClick: () => this._navigate("Property Details.dc.html?id=" + encodeURIComponent(code)) });
+    });
+    if (/contact us|ติดต่อเรา/i.test(text)) {
+      links.push({ label: "ดูประกาศทั้งหมด", onClick: () => this._navigate("Search Results.dc.html") });
+    }
+    return links;
+  }
+
+  _buildContext() {
+    const lang = this.state.lang;
+    return (this._properties || []).map((p) => {
+      const title = (p.title && (p.title[lang] || p.title.en)) || p.id;
+      return `${p.id} | ${title} | area:${p.area} zone:${p.zone} type:${p.type} status:${p.status} price:${p.price}${p.currency} beds:${p.bedrooms} baths:${p.bathrooms}`;
+    }).join("\n");
+  }
+
+  quickSend(text) {
+    this.setState({ chatInput: text }, () => this.sendChat());
+  }
+
+  async sendChat() {
+    const text = this.state.chatInput.trim();
+    if (!text || this.state.chatLoading) return;
+    const userMsg = { role: "user", text, links: [], hasLinks: false, bubbleWrapStyle: "align-self:flex-end; max-width:85%;", bubbleStyle: "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:10px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
+    const history = [...this.state.chatMessages, userMsg];
+    this.setState({ chatMessages: history, chatInput: "", chatLoading: true });
+    try {
+      const personaName = (this._aiPersona && this._aiPersona.name && this._aiPersona.name.trim()) || "Anna";
+      const personaRole = (this._aiPersona && this._aiPersona.role && this._aiPersona.role.trim()) || "the friendly AI assistant for huahin.properties";
+      const notesTxt = (this._aiNotes || []).filter((n) => n.title || n.body).map((n) => `• ${n.title || ""}: ${n.body || ""}`).join("\n");
+      const system = `You are "${personaName}", ${personaRole}, for huahin.properties, a real-estate agency covering Hua Hin, Pranburi and Cha-am, Thailand. This is a first-touch landing conversation — be warm, brief, and quickly figure out if they want to buy, rent, or list a property, then guide them helpfully.
+
+FACTS: For concrete questions (price, beds, baths, code, availability) use ONLY this listings data — never invent:
+${this._buildContext()}${notesTxt ? `\n\nAGENCY NOTES:\n${notesTxt}` : ""}${this._aiRestrictions ? `\n\nRESTRICTIONS — never discuss, redirect politely instead:\n${this._aiRestrictions}` : ""}
+
+LANGUAGE: reply in the same language the customer just used. Keep replies short (2-4 sentences). Always write property codes plainly (e.g. HH-109) when relevant — never a fake link. When the customer wants to browse everything themselves, naturally say "contact us" is not needed and mention they can view all listings — the interface adds a button automatically.`;
+      const messages = history.map((m) => ({ role: m.role, content: m.text }));
+      let reply;
+      if (window.claude && window.claude.complete) {
+        reply = await window.claude.complete({ system, messages, model: "claude-haiku-4-5", max_tokens: 400 });
+      } else {
+        const res = await fetch("https://claudecomplete-3j4ldf4pja-as.a.run.app", {
+          method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ system, messages }),
+        });
+        const data = await res.json();
+        reply = data.completion || "ขออภัยค่ะ ระบบขัดข้องชั่วคราว ลองใหม่อีกครั้งได้เลยค่ะ";
+      }
+      const links = this._extractLinks(reply);
+      const aiMsg = { role: "assistant", text: reply, links, hasLinks: links.length > 0, bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:white; color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap; box-shadow:0 2px 8px rgba(0,0,0,0.04);" };
+      this.setState({ chatMessages: [...history, aiMsg], chatLoading: false });
+    } catch (e) {
+      const errMsg = { role: "assistant", text: "ขออภัยค่ะ ระบบขัดข้องชั่วคราว ลองใหม่อีกครั้งหรือดูประกาศทั้งหมดด้วยตัวเองก่อนได้ค่ะ", links: [{ label: "ดูประกาศทั้งหมด", onClick: () => this._navigate("Search Results.dc.html") }], hasLinks: true, bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:white; padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px;" };
+      this.setState({ chatMessages: [...history, errMsg], chatLoading: false });
+    }
+    setTimeout(() => { if (this.scrollRef.current) this.scrollRef.current.scrollTop = this.scrollRef.current.scrollHeight; }, 60);
+  }
+
+  renderVals() {
+    return {
+      scrollRef: this.scrollRef,
+      showIntro: this.state.chatMessages.length === 0,
+      showQuickIcons: this.state.chatMessages.length === 0,
+      quickChips: [
+        { icon: "🏠", label: "ซื้อบ้าน/คอนโด", onClick: () => this.quickSend(QUICK_PROMPTS.buy) },
+        { icon: "🔑", label: "หาเช่า", onClick: () => this.quickSend(QUICK_PROMPTS.rent) },
+        { icon: "📋", label: "ฝากขาย/ฝากเช่า", onClick: () => this.quickSend(QUICK_PROMPTS.sell) },
+      ],
+      chatMessages: this.state.chatMessages,
+      chatLoading: this.state.chatLoading,
+      chatInput: this.state.chatInput,
+      onChatInput: (e) => this.setState({ chatInput: e.target.value }),
+      onChatKeyDown: (e) => { if (e.key === "Enter") this.sendChat(); },
+      onSend: () => this.sendChat(),
+      placeholder: "พิมพ์คำถามของคุณที่นี่…",
+    };
+  }
+}
+
+</script>
+</body>
+</html>
