@@ -191,6 +191,45 @@ exports.createPortalSession = onRequest(
   }
 );
 
+// createBannerCheckoutSession — one-time payment for a self-serve external
+// banner ad ("เปิดขายแบนเนอร์ให้ลูกค้าภายนอกจริง" in BLUEPRINT.md §11 item 6).
+// Same dynamic price_data pattern as Featured — no Stripe Product needed,
+// admin sets THB price per position in Site Content.
+exports.createBannerCheckoutSession = onRequest(
+  { secrets: [STRIPE_SECRET_KEY], cors: true, region: "asia-southeast1" },
+  async (req, res) => {
+    if (req.method === "OPTIONS") { res.set(CORS_HEADERS).status(204).send(""); return; }
+    if (req.method !== "POST") { res.status(405).send("Use POST"); return; }
+    try {
+      const { bannerId, position, amountThb, email, successUrl, cancelUrl } = req.body || {};
+      if (!bannerId || !amountThb) {
+        res.status(400).json({ error: "bannerId and amountThb are required" });
+        return;
+      }
+      const stripe = new Stripe(STRIPE_SECRET_KEY.value());
+      const session = await stripe.checkout.sessions.create({
+        mode: "payment",
+        line_items: [{
+          price_data: {
+            currency: "thb",
+            unit_amount: Math.round(Number(amountThb) * 100),
+            product_data: { name: `Banner Ad — ${position || "slot"} — 30 days` },
+          },
+          quantity: 1,
+        }],
+        customer_email: email || undefined,
+        metadata: { type: "banner", bannerId: String(bannerId) },
+        success_url: successUrl || "https://huahin.properties/Advertise.dc.html?checkout=success",
+        cancel_url: cancelUrl || "https://huahin.properties/Advertise.dc.html?checkout=cancelled",
+      });
+      res.json({ url: session.url });
+    } catch (e) {
+      console.error("createBannerCheckoutSession failed:", e);
+      res.status(500).json({ error: String(e && e.message || e) });
+    }
+  }
+);
+
 exports.stripeWebhook = onRequest(
   { secrets: [STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET], region: "asia-southeast1" },
   async (req, res) => {
@@ -210,6 +249,26 @@ exports.stripeWebhook = onRequest(
       switch (event.type) {
         case "checkout.session.completed": {
           const session = event.data.object;
+          if (session.metadata && session.metadata.type === "featured") {
+            const { propertyId, days } = session.metadata;
+            const featuredUntil = Date.now() + Number(days) * 24 * 60 * 60 * 1000;
+            await db.collection("properties").doc(propertyId).set({ featuredUntil }, { merge: true });
+            await db.collection("payments").add({
+              propertyId, type: "featured", days: Number(days),
+              amount: session.amount_total, currency: session.currency, createdAt: Date.now(),
+            });
+            break;
+          }
+          if (session.metadata && session.metadata.type === "banner") {
+            const { bannerId } = session.metadata;
+            const expiresAt = Date.now() + 30 * 24 * 60 * 60 * 1000;
+            await db.collection("banners").doc(bannerId).set({ active: true, expiresAt, pendingPayment: false }, { merge: true });
+            await db.collection("payments").add({
+              bannerId, type: "banner",
+              amount: session.amount_total, currency: session.currency, createdAt: Date.now(),
+            });
+            break;
+          }
           const listerId = session.client_reference_id;
           if (listerId) {
             await db.collection("listers").doc(listerId).set(
