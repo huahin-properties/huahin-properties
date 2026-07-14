@@ -500,9 +500,13 @@ class Component extends DCLogic {
       return;
     }
     const lang = this.state.lang || "th";
-    const cover = (prop.photos && prop.photos[0] && (prop.photos[0].url || prop.photos[0])) || "";
+    const cover = (prop.photos && prop.photos[0] && (prop.photos[0].url || prop.photos[0].imageUrl)) || "";
+    if (!cover) {
+      this.setState((s) => ({ bannerDrafts: { ...s.bannerDrafts, [id]: { ...draft, resolveError: "ทรัพย์นี้ยังไม่มีรูปจริงอัปโหลด (มีแต่รูปตัวอย่าง) กรุณาเลือกทรัพย์ที่มีรูปถ่ายจริงแล้ว" } } }));
+      return;
+    }
     draft.propertyCode = code;
-    draft.imageUrl = typeof cover === "string" ? cover : "";
+    draft.imageUrl = cover;
     draft.link = `Property Details.dc.html?id=${code}`;
     draft.resolveError = "";
     draft.propertyTitle = (prop.title && (prop.title[lang] || prop.title.en)) || code;
