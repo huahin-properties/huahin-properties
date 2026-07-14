@@ -397,8 +397,8 @@ export async function fetchAllProfilePhotos() {
 // hash is fixed per-project, only the function name segment changes. After
 // `firebase deploy --only functions`, the terminal prints the REAL URLs;
 // if they don't match this guessed pattern, update these two constants.
-const CHECKOUT_URL = "https://createcheckoutsession-3j4ldf4pja-as.a.run.app";
-const PORTAL_URL = "https://createportalsession-3j4ldf4pja-as.a.run.app";
+const CHECKOUT_URL = "https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/createCheckoutSession";
+const PORTAL_URL = "https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/createPortalSession";
 
 export async function startCheckout(priceId, listerId, email) {
   const res = await fetch(CHECKOUT_URL, {
