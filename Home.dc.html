@@ -89,13 +89,17 @@
     </div>
   </sc-if>
 
-  <!-- ============ BANNER SLOT (top) ============ -->
+  <!-- ============ BANNER SLOT (top) — grid of small tiles, not one big strip ============ -->
   <sc-if value="{{ hasTopBanner }}">
-    <div style="background:oklch(93% 0.02 75); padding:6px 0 0; border-bottom:2px solid oklch(40% 0.13 25);">
-      <div style="text-align:center; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:oklch(50% 0.02 60); margin-bottom:4px;">Sponsored</div>
-      <a href="{{ topBanner.link }}" style="display:block; width:100%; height:clamp(64px,10vw,140px); overflow:hidden;">
-        <img src="{{ topBanner.imageUrl }}" alt="banner" style="width:100%; height:100%; display:block; object-fit:cover;" />
-      </a>
+    <div style="background:oklch(93% 0.02 75); padding:10px clamp(20px,4vw,56px) 12px; border-bottom:2px solid oklch(40% 0.13 25);">
+      <div style="text-align:center; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:oklch(50% 0.02 60); margin-bottom:8px;">Sponsored</div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; max-width:1200px; margin:0 auto;">
+        <sc-for list="{{ topBanners }}" as="tb" hint-placeholder-count="4">
+          <a href="{{ tb.link }}" style="display:block; width:100%; height:80px; overflow:hidden; border-radius:6px;">
+            <img src="{{ tb.imageUrl }}" alt="banner" style="width:100%; height:100%; display:block; object-fit:cover;" />
+          </a>
+        </sc-for>
+      </div>
     </div>
   </sc-if>
 
@@ -414,12 +418,14 @@ class Component extends DCLogic {
         const active = (this.state.banners || []).filter((b) => b.page === "home" && b.position === "top" && b.active !== false && b.imageUrl && (!b.expiresAt || b.expiresAt > now));
         return active.length > 0;
       })(),
-      topBanner: (() => {
+      // Shows every active banner in this slot as a small tile in a
+      // responsive grid (4-5 across on desktop, 2 on narrow phones via
+      // auto-fit) instead of picking one at random to show full-width —
+      // makes a paid banner look like a premium placement, not a lone ad.
+      topBanners: (() => {
         const now = Date.now();
         const active = (this.state.banners || []).filter((b) => b.page === "home" && b.position === "top" && b.active !== false && b.imageUrl && (!b.expiresAt || b.expiresAt > now));
-        if (!active.length) return { imageUrl: "", link: "#" };
-        const pick = active[Math.floor(Math.random() * active.length)];
-        return { imageUrl: pick.imageUrl, link: pick.link || "#" };
+        return active.map((b) => ({ imageUrl: b.imageUrl, link: b.link || "#" }));
       })(),
       ...gateVals,
     };
