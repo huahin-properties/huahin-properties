@@ -80,6 +80,7 @@ export function toggleFavorite(propertyId) {
     delete favs[propertyId];
     writeJSON(FAV_KEY, favs);
   }
+  try { window.dispatchEvent(new CustomEvent("hh_favorites_changed")); } catch (e) {}
   return nowFav;
 }
 

@@ -29,6 +29,39 @@
     </a>
   </div>
 
+  <!-- ============ MY FAVORITES (persistent, cart-style) ============ -->
+  <sc-if value="{{ showFavButton }}">
+    <div onClick="{{ onOpenFavorites }}" style="position:fixed; left:20px; bottom:20px; z-index:70; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); border-radius:100px; padding:12px 18px; display:flex; align-items:center; gap:8px; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.18); font-family:'Work Sans',sans-serif;">
+      <span style="font-size:16px;">⭐</span>
+      <span style="font-size:13px;">{{ favButtonLabel }}</span>
+      <sc-if value="{{ hasFavCount }}"><span style="background:oklch(97% 0.01 80); color:oklch(22% 0.02 60); border-radius:100px; min-width:20px; height:20px; padding:0 5px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;">{{ favCount }}</span></sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ favoritesOpen }}">
+    <div onClick="{{ onCloseFavorites }}" style="position:fixed; inset:0; background:oklch(15% 0.01 60 / 0.5); z-index:86; display:flex; align-items:flex-end; justify-content:flex-start; padding:20px;">
+      <div onClick="{{ stopProp }}" style="background:oklch(99% 0.005 80); border-radius:10px; width:100%; max-width:360px; max-height:70vh; display:flex; flex-direction:column; box-shadow:0 20px 60px oklch(0% 0 0 / 0.35); overflow:hidden;">
+        <div style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:16px 18px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
+          <div style="font-family:'Playfair Display',serif; font-size:16px;">⭐ {{ favButtonLabel }}</div>
+          <div onClick="{{ onCloseFavorites }}" style="cursor:pointer; padding:6px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+        </div>
+        <div style="flex:1; overflow-y:auto; padding:12px;">
+          <sc-for list="{{ favoriteRows }}" as="fr" hint-placeholder-count="1">
+            <a href="{{ fr.href }}" style="display:flex; gap:10px; align-items:center; padding:10px; border-radius:8px; text-decoration:none; margin-bottom:6px;" style-hover="background:oklch(96% 0.01 75);">
+              <div style="{{ fr.thumbStyle }}"></div>
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:13px; color:oklch(25% 0.02 60); font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ fr.title }}</div>
+                <div style="font-size:12px; color:oklch(50% 0.02 60);">{{ fr.priceLabel }}</div>
+              </div>
+              <div onClick="{{ fr.onRemove }}" style="font-size:11px; color:oklch(50% 0.15 30); cursor:pointer; padding:6px; flex-shrink:0;">✕</div>
+            </a>
+          </sc-for>
+          <sc-if value="{{ noFavorites }}"><div style="text-align:center; padding:30px 10px; font-size:13px; color:oklch(55% 0.02 60);">{{ noFavoritesLabel }}</div></sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
   <!-- ============ PERSISTENT CHAT BUBBLE (always visible) ============ -->
   <div style="position:fixed; right:20px; bottom:20px; z-index:70; display:flex; align-items:center; gap:10px;">
     <sc-if value="{{ chatHintVisible }}">
@@ -57,8 +90,13 @@
             <div style="font-family:'Playfair Display',serif; font-size:17px;">{{ t.chat_title }}</div>
             <div style="font-size:11px; color:oklch(80% 0.01 70); margin-top:2px;">{{ t.chat_subtitle }}</div>
           </div>
-          <div onClick="{{ onMinimizeChat }}" title="ย่อหน้าต่างแชท" style="cursor:pointer; padding:8px; border-radius:8px; display:flex; align-items:center; justify-content:center;" style-hover="background:oklch(30% 0.02 60);">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div style="display:flex; align-items:center; gap:2px;">
+            <div onClick="{{ onClearChat }}" title="ล้างประวัติแชท เริ่มใหม่" style="cursor:pointer; padding:8px; border-radius:8px; display:flex; align-items:center; justify-content:center;" style-hover="background:oklch(30% 0.02 60);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7H20M9 7V4.5C9 4 9.4 3.5 10 3.5H14C14.6 3.5 15 4 15 4.5V7M18 7L17.3 19C17.25 19.8 16.6 20.5 15.8 20.5H8.2C7.4 20.5 6.75 19.8 6.7 19L6 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div onClick="{{ onMinimizeChat }}" title="ย่อหน้าต่างแชท" style="cursor:pointer; padding:8px; border-radius:8px; display:flex; align-items:center; justify-content:center;" style-hover="background:oklch(30% 0.02 60);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
           </div>
         </div>
         <div ref="{{ chatScrollRef }}" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px;">
@@ -66,7 +104,14 @@
             <div style="{{ m.bubbleWrapStyle }}">
               <div style="{{ m.bubbleStyle }}">{{ m.text }}</div>
               <sc-for list="{{ m.links }}" as="lnk" hint-placeholder-count="0">
-                <div onClick="{{ lnk.onClick }}" style="display:inline-block; margin-top:6px; margin-right:6px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:7px 14px; border-radius:100px; font-size:12px; cursor:pointer;">{{ lnk.label }} →</div>
+                <div onClick="{{ lnk.onClick }}" style="display:flex; align-items:center; gap:10px; margin-top:6px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:8px; border-radius:12px; cursor:pointer; max-width:260px;">
+                  <div style="width:44px; height:44px; border-radius:8px; background:{{ lnk.thumbBg }}; flex-shrink:0;"></div>
+                  <div style="min-width:0;">
+                    <div style="font-size:12.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ lnk.label }}</div>
+                    <sc-if value="{{ lnk.priceLabel }}"><div style="font-size:12px; color:oklch(85% 0.02 70);">{{ lnk.priceLabel }}</div></sc-if>
+                    <sc-if value="{{ lnk.specsLabel }}"><div style="font-size:11px; color:oklch(70% 0.02 70);">{{ lnk.specsLabel }}</div></sc-if>
+                  </div>
+                </div>
               </sc-for>
             </div>
           </sc-for>
@@ -137,9 +182,12 @@ const CHAT_I18N = {
   it: { chat_title: "Chiedi sui nostri immobili", chat_subtitle: "Assistente IA · solo annunci huahin.properties", chat_placeholder: "es. Ville con piscina 4 camere?", chat_thinking: "Sta scrivendo…", chat_talk_to_human: "Preferisci parlare con una persona? Lascia i tuoi contatti →", chat_greeting: "Ciao! Chiedimi qualsiasi cosa sui nostri annunci — camere, prezzo, zona, codice immobile o disponibilità.", chat_view_property: "Vedi immobile", chat_contact_us: "Contattaci", chat_autobot_intro: "Ciao! Ho notato che ti interessano", chat_autobot_help: "Posso aiutarti con qualcosa di specifico?" },
 };
 
+const FAV_PANEL_LABELS = { en: "My Favorites", th: "รายการโปรดของฉัน", ru: "Избранное", zh: "我的收藏", de: "Meine Favoriten", no: "Mine favoritter", fr: "Mes favoris", it: "I miei preferiti" };
+const FAV_EMPTY_LABELS = { en: "No saved favorites yet — tap the star on any listing.", th: "ยังไม่มีรายการโปรด — กดดาวที่ประกาศที่สนใจได้เลย", ru: "Пока нет избранного — нажмите звезду на объекте.", zh: "暂无收藏 — 点击房源上的星标即可收藏", de: "Noch keine Favoriten — tippen Sie auf den Stern bei einem Angebot.", no: "Ingen favoritter ennå — trykk på stjernen på en oppføring.", fr: "Aucun favori pour l'instant — appuyez sur l'étoile d'une annonce.", it: "Nessun preferito ancora — tocca la stella su un annuncio." };
+
 class Component extends DCLogic {
   state = {
-    railOpen: true, formOpen: false, submitted: false,
+    railOpen: true, formOpen: false, submitted: false, favoritesOpen: false, favIds: [],
     name: "", phone: "", email: "", message: "",
     lang: "th",
     chatOpen: false, chatMinimized: false, chatMessages: [], chatInput: "", chatLoading: false,
@@ -165,6 +213,18 @@ class Component extends DCLogic {
     await this._loadProperties();
     const restored = this._restoreHistory();
     if (!restored) this._maybeAutoTrigger();
+    this._refreshFavIds();
+    this._onFavChange = () => this._refreshFavIds();
+    window.addEventListener("hh_favorites_changed", this._onFavChange);
+    window.addEventListener("storage", this._onFavChange);
+  }
+
+  async _refreshFavIds() {
+    try {
+      const favs = this._favs || (await import("./favorites.js"));
+      this._favs = favs;
+      this.setState({ favIds: favs.getFavoritedIds() });
+    } catch (e) {}
   }
 
   // Shared chat continuity across pages (AI Concierge landing page ↔ this
@@ -194,10 +254,16 @@ class Component extends DCLogic {
       const saved = JSON.parse(localStorage.getItem("hh_chat_history") || "null");
       if (saved && saved.length) {
         this.setState({ chatMessages: saved.map((m) => this._buildBubble(m.role, m.text)), chatOpen: true, chatMinimized: false });
+        this._scrollChat();
         return true;
       }
     } catch (e) {}
     return false;
+  }
+
+  clearChatHistory() {
+    try { localStorage.removeItem("hh_chat_history"); } catch (e) {}
+    this.setState({ chatMessages: [] });
   }
 
   async _maybeAutoTrigger() {
@@ -267,7 +333,15 @@ class Component extends DCLogic {
       const p = props.find((pr) => pr.id === code);
       if (p) {
         const href = "Property Details.dc.html?id=" + encodeURIComponent(code);
-        links.push({ label: (t.chat_view_property || "View") + " " + code, onClick: () => this._navigate(href) });
+        const photoUrl = p.photos && p.photos[0] && p.photos[0].url;
+        // Demo/seed listings often only have a text label for each photo (no
+        // uploaded image yet) — always render a cover box either way, using
+        // the same placeholder pattern as the property cards elsewhere on
+        // the site, so the chat card never silently falls back to plain text.
+        const thumbBg = photoUrl ? `url(${photoUrl}) center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 10px)";
+        const priceLabel = `${(p.price || 0).toLocaleString()} ${p.currency || "THB"}`;
+        const specsLabel = `${p.bedrooms || 0} bed · ${p.zone || p.area || ""}`;
+        links.push({ label: (t.chat_view_property || "View") + " " + code, thumbBg, priceLabel, specsLabel, onClick: () => this._navigate(href) });
       }
     });
     if (/contact us|ติดต่อเรา|связ|联系|kontakt|contattaci|contactez/i.test(text)) {
@@ -378,6 +452,15 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
   componentWillUnmount() {
     window.removeEventListener("storage", this._onStorage);
     window.removeEventListener("langchange", this._onStorage);
+    if (this._onFavChange) {
+      window.removeEventListener("hh_favorites_changed", this._onFavChange);
+      window.removeEventListener("storage", this._onFavChange);
+    }
+  }
+
+  removeFavorite(id) {
+    if (this._favs) this._favs.toggleFavorite(id);
+    this._refreshFavIds();
   }
 
   toggle() {
@@ -444,6 +527,7 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       chatPanelOpen: this.state.chatOpen && !this.state.chatMinimized,
       chatBarOpen: this.state.chatOpen && this.state.chatMinimized,
       onMinimizeChat: () => this.setState({ chatMinimized: true }),
+      onClearChat: () => this.clearChatHistory(),
       onExpandChat: () => this.setState({ chatMinimized: false }),
       chatMessages: this.state.chatMessages,
       chatLoading: this.state.chatLoading,
@@ -451,6 +535,28 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       chatScrollRef: this.chatScrollRef,
       onOpenChat: () => this.openChat(),
       onCloseChat: () => this.setState({ chatOpen: false, chatMinimized: false }),
+      showFavButton: true,
+      favButtonLabel: FAV_PANEL_LABELS[this.state.lang] || FAV_PANEL_LABELS.en,
+      favCount: this.state.favIds.length,
+      hasFavCount: this.state.favIds.length > 0,
+      onOpenFavorites: () => this.setState({ favoritesOpen: true }),
+      onCloseFavorites: () => this.setState({ favoritesOpen: false }),
+      favoritesOpen: this.state.favoritesOpen,
+      noFavoritesLabel: FAV_EMPTY_LABELS[this.state.lang] || FAV_EMPTY_LABELS.en,
+      noFavorites: this.state.favIds.length === 0,
+      favoriteRows: this.state.favIds.map((id) => {
+        const props = this._properties || (this._mod ? this._mod.PROPERTIES : []) || [];
+        const p = props.find((pr) => pr.id === id);
+        const title = p ? ((p.title && (p.title[this.state.lang] || p.title.en)) || p.id) : id;
+        const cover = p && p.photos && p.photos[0] && p.photos[0].url;
+        return {
+          href: `Property Details.dc.html?id=${encodeURIComponent(id)}`,
+          title,
+          priceLabel: p ? `${(p.price || 0).toLocaleString()} ${p.currency || "THB"}` : "",
+          thumbStyle: `width:48px; height:48px; border-radius:6px; flex-shrink:0; background:${cover ? `url(${cover}) center/cover` : "oklch(90% 0.01 70)"};`,
+          onRemove: (e) => { e.preventDefault(); e.stopPropagation(); this.removeFavorite(id); },
+        };
+      }),
       onChatInput: (e) => this.setState({ chatInput: e.target.value }),
       onChatSend: () => this.sendChat(),
       onChatKeyDown: (e) => { if (e.key === "Enter") { e.preventDefault(); this.sendChat(); } },
