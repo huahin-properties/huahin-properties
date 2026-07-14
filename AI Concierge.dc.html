@@ -107,6 +107,37 @@ class Component extends DCLogic {
       this._aiRestrictions = await fb.fetchAiRestrictions();
       this._aiPersona = await fb.fetchAiPersona();
     } catch (e) { console.warn("AI Concierge: firebase load failed", e); }
+    this._restoreHistory();
+  }
+
+  // Shared with ContactRail's chat panel — same localStorage key, so a
+  // conversation started here continues seamlessly after navigating into a
+  // property page (and vice versa), surviving back/forward navigation.
+  _persistHistory(messages) {
+    try {
+      localStorage.setItem("hh_chat_history", JSON.stringify(messages.map((m) => ({ role: m.role, text: m.text }))));
+    } catch (e) {}
+  }
+
+  _buildBubble(role, text) {
+    const isUser = role === "user";
+    const links = isUser ? [] : this._extractLinks(text);
+    return {
+      role, text, links, hasLinks: links.length > 0,
+      bubbleWrapStyle: isUser ? "align-self:flex-end; max-width:85%;" : "align-self:flex-start; max-width:85%;",
+      bubbleStyle: isUser
+        ? "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:10px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5; white-space:pre-wrap;"
+        : "background:white; color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap; box-shadow:0 2px 8px rgba(0,0,0,0.04);",
+    };
+  }
+
+  _restoreHistory() {
+    try {
+      const saved = JSON.parse(localStorage.getItem("hh_chat_history") || "null");
+      if (saved && saved.length) {
+        this.setState({ chatMessages: saved.map((m) => this._buildBubble(m.role, m.text)) });
+      }
+    } catch (e) {}
   }
 
   _navigate(href) { window.location.href = href; }
@@ -144,6 +175,7 @@ class Component extends DCLogic {
     const userMsg = { role: "user", text, links: [], hasLinks: false, bubbleWrapStyle: "align-self:flex-end; max-width:85%;", bubbleStyle: "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:10px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
     const history = [...this.state.chatMessages, userMsg];
     this.setState({ chatMessages: history, chatInput: "", chatLoading: true });
+    this._persistHistory(history);
     try {
       const personaName = (this._aiPersona && this._aiPersona.name && this._aiPersona.name.trim()) || "Anna";
       const personaRole = (this._aiPersona && this._aiPersona.role && this._aiPersona.role.trim()) || "the friendly AI assistant for huahin.properties";
@@ -168,9 +200,11 @@ LANGUAGE: reply in the same language the customer just used. Keep replies short 
       const links = this._extractLinks(reply);
       const aiMsg = { role: "assistant", text: reply, links, hasLinks: links.length > 0, bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:white; color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap; box-shadow:0 2px 8px rgba(0,0,0,0.04);" };
       this.setState({ chatMessages: [...history, aiMsg], chatLoading: false });
+      this._persistHistory([...history, aiMsg]);
     } catch (e) {
       const errMsg = { role: "assistant", text: "ขออภัยค่ะ ระบบขัดข้องชั่วคราว ลองใหม่อีกครั้งหรือดูประกาศทั้งหมดด้วยตัวเองก่อนได้ค่ะ", links: [{ label: "ดูประกาศทั้งหมด", onClick: () => this._navigate("Search Results.dc.html") }], hasLinks: true, bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:white; padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px;" };
       this.setState({ chatMessages: [...history, errMsg], chatLoading: false });
+      this._persistHistory([...history, errMsg]);
     }
     setTimeout(() => { if (this.scrollRef.current) this.scrollRef.current.scrollTop = this.scrollRef.current.scrollHeight; }, 60);
   }

@@ -152,7 +152,41 @@ class Component extends DCLogic {
     window.addEventListener("storage", this._onStorage);
     window.addEventListener("langchange", this._onStorage);
     await this._loadProperties();
-    this._maybeAutoTrigger();
+    const restored = this._restoreHistory();
+    if (!restored) this._maybeAutoTrigger();
+  }
+
+  // Shared chat continuity across pages (AI Concierge landing page ↔ this
+  // rail's chat panel): both write/read the same localStorage key so a
+  // conversation started on one page picks up exactly where it left off on
+  // the next, surviving navigation and back/forward.
+  _persistHistory(messages) {
+    try {
+      localStorage.setItem("hh_chat_history", JSON.stringify(messages.map((m) => ({ role: m.role, text: m.text }))));
+    } catch (e) {}
+  }
+
+  _buildBubble(role, text) {
+    const isUser = role === "user";
+    return {
+      role, text,
+      links: isUser ? [] : this._extractLinks(text, this.state.lang),
+      bubbleWrapStyle: isUser ? "align-self:flex-end; max-width:85%;" : "align-self:flex-start; max-width:85%;",
+      bubbleStyle: isUser
+        ? "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:10px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5; white-space:pre-wrap;"
+        : "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap;",
+    };
+  }
+
+  _restoreHistory() {
+    try {
+      const saved = JSON.parse(localStorage.getItem("hh_chat_history") || "null");
+      if (saved && saved.length) {
+        this.setState({ chatMessages: saved.map((m) => this._buildBubble(m.role, m.text)), chatOpen: true });
+        return true;
+      }
+    } catch (e) {}
+    return false;
   }
 
   async _maybeAutoTrigger() {
@@ -175,10 +209,9 @@ class Component extends DCLogic {
         : t.chat_greeting;
       favs.markAutoTriggered();
       setTimeout(() => {
-        this.setState({
-          chatOpen: true,
-          chatMessages: [{ role: "assistant", text: tailored, links: [], bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" }],
-        });
+        const msgs = [{ role: "assistant", text: tailored, links: [], bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" }];
+        this.setState({ chatOpen: true, chatMessages: msgs });
+        this._persistHistory(msgs);
       }, 1500);
     } catch (e) { console.warn("Auto-trigger check failed:", e); }
   }
@@ -254,6 +287,7 @@ class Component extends DCLogic {
     const userMsg = { role: "user", text, links: [], bubbleWrapStyle: "align-self:flex-end; max-width:85%;", bubbleStyle: "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:10px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
     const history = [...this.state.chatMessages, userMsg];
     this.setState({ chatMessages: history, chatInput: "", chatLoading: true });
+    this._persistHistory(history);
     this._scrollChat();
     try {
       const context = this._buildContext(lang);
@@ -291,11 +325,13 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       }
       const aiMsg = { role: "assistant", text: reply, links: this._extractLinks(reply, lang), bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
       this.setState({ chatMessages: [...history, aiMsg], chatLoading: false });
+      this._persistHistory([...history, aiMsg]);
     } catch (e) {
       console.warn("Chat error", e);
       const t = CHAT_I18N[lang] || CHAT_I18N.en;
       const errMsg = { role: "assistant", text: "Sorry, something went wrong. Please try again or contact us directly.", links: [{ label: t.chat_contact_us || "Contact us", onClick: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }) }], bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" };
       this.setState({ chatMessages: [...history, errMsg], chatLoading: false });
+      this._persistHistory([...history, errMsg]);
     }
     this._scrollChat();
   }
@@ -314,6 +350,7 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
     const t = CHAT_I18N[lang] || CHAT_I18N.en;
     const next = alreadyGreeted ? this.state.chatMessages : [{ role: "assistant", text: t.chat_greeting, links: [], bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" }];
     this.setState({ chatOpen: true, formOpen: false, chatMessages: next });
+    this._persistHistory(next);
     this._scrollChat();
   }
 
