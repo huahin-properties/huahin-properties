@@ -256,6 +256,33 @@
       </div>
     </div>
 
+    <!-- SELF-SERVE BANNER PRICING -->
+    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">📢 ราคาแบนเนอร์ (ขายเองให้ลูกค้าภายนอก)</div>
+      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">ราคาต่อตำแหน่ง/30 วัน ที่ลูกค้าภายนอกจ่ายเองผ่านหน้า Advertise.dc.html — ตัดบัตรทันที ไม่ต้องสร้าง Stripe Product</div>
+      <div style="display:flex; gap:14px; flex-wrap:wrap; max-width:520px;">
+        <div style="flex:1; min-width:140px;">
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">บนสุด (แพงสุด)</div>
+          <input type="number" value="{{ bannerTopPrice }}" onChange="{{ onBannerTopPrice }}" placeholder="3990" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
+        </div>
+        <div style="flex:1; min-width:140px;">
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">กลางหน้า</div>
+          <input type="number" value="{{ bannerMidPrice }}" onChange="{{ onBannerMidPrice }}" placeholder="1990" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
+        </div>
+        <div style="flex:1; min-width:140px;">
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">แถบข้าง/footer (ถูกสุด)</div>
+          <input type="number" value="{{ bannerSidePrice }}" onChange="{{ onBannerSidePrice }}" placeholder="990" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <div onClick="{{ onSaveBannerPrices }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">บันทึก</div>
+        <sc-if value="{{ bannerPriceMsg }}">
+          <span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ bannerPriceMsg }}</span>
+        </sc-if>
+      </div>
+      <div style="margin-top:10px; font-size:12px; color:oklch(55% 0.02 60);">ลิงก์สำหรับลูกค้าภายนอก: <strong>huahin.properties/Advertise.dc.html</strong></div>
+    </div>
+
   </div>
 </div>
 
@@ -272,6 +299,7 @@ class Component extends DCLogic {
     fbFooter: "", fbFooterMsg: "",
     stripePrices: { pro: "", agency: "" }, stripeMsg: "",
     featuredPrices: { p7: "", p30: "" }, featuredPriceMsg: "",
+    bannerPrices: { top: "", mid: "", side: "" }, bannerPriceMsg: "",
     aiNotes: [], noteDrafts: {}, noteMsgs: {},
     aiRestrictions: "", aiRestrictionsMsg: "",
     aiPersonaName: "", aiPersonaRole: "", aiPersonaMsg: "",
@@ -333,6 +361,13 @@ class Component extends DCLogic {
       this.setState({ featuredPrices });
     } catch (e) {
       console.warn("Failed to load Featured prices:", e);
+    }
+
+    try {
+      const bannerPrices = await fb.fetchBannerPrices();
+      this.setState({ bannerPrices });
+    } catch (e) {
+      console.warn("Failed to load banner prices:", e);
     }
 
     try {
@@ -505,6 +540,14 @@ class Component extends DCLogic {
     } catch (e) { console.warn("saveFeaturedPrices failed:", e); }
   }
 
+  async saveBannerPrices() {
+    try {
+      await this._fb.saveBannerPrices(this.state.bannerPrices);
+      this.setState({ bannerPriceMsg: "บันทึกแล้ว" });
+      setTimeout(() => this.setState({ bannerPriceMsg: "" }), 2500);
+    } catch (e) { console.warn("saveBannerPrices failed:", e); }
+  }
+
   async saveStripePrices() {
     try {
       await this._fb.saveStripePrices(this.state.stripePrices);
@@ -641,6 +684,14 @@ class Component extends DCLogic {
       onFeatured30Price: (e) => this.setState((s) => ({ featuredPrices: { ...s.featuredPrices, p30: e.target.value } })),
       onSaveFeaturedPrices: () => this.saveFeaturedPrices(),
       featuredPriceMsg: this.state.featuredPriceMsg,
+      bannerTopPrice: this.state.bannerPrices.top || "",
+      onBannerTopPrice: (e) => this.setState((s) => ({ bannerPrices: { ...s.bannerPrices, top: e.target.value } })),
+      bannerMidPrice: this.state.bannerPrices.mid || "",
+      onBannerMidPrice: (e) => this.setState((s) => ({ bannerPrices: { ...s.bannerPrices, mid: e.target.value } })),
+      bannerSidePrice: this.state.bannerPrices.side || "",
+      onBannerSidePrice: (e) => this.setState((s) => ({ bannerPrices: { ...s.bannerPrices, side: e.target.value } })),
+      onSaveBannerPrices: () => this.saveBannerPrices(),
+      bannerPriceMsg: this.state.bannerPriceMsg,
       onAddNote: () => this.addNote(),
       aiPersonaName: this.state.aiPersonaName,
       onAiPersonaName: (e) => this.setState({ aiPersonaName: e.target.value }),

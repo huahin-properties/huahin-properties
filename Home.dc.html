@@ -406,11 +406,13 @@ class Component extends DCLogic {
       },
       heroNoPhoto: !(sc.hero && sc.hero.photoUrl),
       hasTopBanner: (() => {
-        const active = (this.state.banners || []).filter((b) => b.page === "home" && b.position === "top" && b.active !== false && b.imageUrl);
+        const now = Date.now();
+        const active = (this.state.banners || []).filter((b) => b.page === "home" && b.position === "top" && b.active !== false && b.imageUrl && (!b.expiresAt || b.expiresAt > now));
         return active.length > 0;
       })(),
       topBanner: (() => {
-        const active = (this.state.banners || []).filter((b) => b.page === "home" && b.position === "top" && b.active !== false && b.imageUrl);
+        const now = Date.now();
+        const active = (this.state.banners || []).filter((b) => b.page === "home" && b.position === "top" && b.active !== false && b.imageUrl && (!b.expiresAt || b.expiresAt > now));
         if (!active.length) return { imageUrl: "", link: "#" };
         const pick = active[Math.floor(Math.random() * active.length)];
         return { imageUrl: pick.imageUrl, link: pick.link || "#" };

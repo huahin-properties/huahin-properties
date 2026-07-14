@@ -40,7 +40,15 @@ service cloud.firestore {
     match /siteContent/{id} { allow read: if true; allow write: if isOwner(); }
     match /profilePhotos/{id} { allow read: if true; allow write: if isAdmin(); }
     match /aiNotes/{id} { allow read: if true; allow write: if isOwner(); }
-    match /banners/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /banners/{id} {
+      allow read: if true;
+      // Public self-serve (Advertise.dc.html): anyone can create their OWN
+      // pending banner doc (unpaid, active:false) — the Stripe webhook is
+      // the only thing that ever flips it to active:true. Editing/deleting
+      // any banner (including someone else's pending one) stays admin-only.
+      allow create: if request.resource.data.active == false;
+      allow update, delete: if isAdmin();
+    }
     match /externalServices/{id} { allow read, write: if isOwner(); }
 
     // Team management — Owner-only. Staff invites are keyed by lowercase

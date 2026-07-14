@@ -412,6 +412,29 @@ export async function startFeaturedCheckout(propertyId, days, amountThb) {
   window.location.href = data.url;
 }
 
+const BANNER_CHECKOUT_URL = "https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/createBannerCheckoutSession";
+
+export async function startBannerCheckout(bannerId, position, amountThb, email) {
+  const res = await fetch(BANNER_CHECKOUT_URL, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ bannerId, position, amountThb, email }),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.url) throw new Error(data.error || "ไม่สามารถเริ่มการชำระเงินได้");
+  window.location.href = data.url;
+}
+
+// Banner slot pricing per position (THB / 30 days) — admin-editable.
+export async function fetchBannerPrices() {
+  const doc = await db().collection("siteContent").doc("bannerPrices").get();
+  return doc.exists ? doc.data() : { top: "", mid: "", side: "" };
+}
+
+export async function saveBannerPrices(prices) {
+  await setDoc("siteContent", "bannerPrices", prices);
+}
+
 export async function startCheckout(priceId, listerId, email) {
   const res = await fetch(CHECKOUT_URL, {
     method: "POST",
