@@ -341,8 +341,10 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       console.warn("Chat error", e);
       const t = CHAT_I18N[lang] || CHAT_I18N.en;
       const errMsg = { role: "assistant", text: "Sorry, something went wrong. Please try again or contact us directly.", links: [{ label: t.chat_contact_us || "Contact us", onClick: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }) }], bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" };
+      // Don't persist the error bubble — transient local notice only, not a
+      // real reply. Persisting it would leave stale error text sitting in
+      // the shared cross-page history forever, replayed as fake context.
       this.setState({ chatMessages: [...history, errMsg], chatLoading: false });
-      this._persistHistory([...history, errMsg]);
     }
     this._scrollChat();
   }

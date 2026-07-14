@@ -203,8 +203,11 @@ LANGUAGE: reply in the same language the customer just used. Keep replies short 
       this._persistHistory([...history, aiMsg]);
     } catch (e) {
       const errMsg = { role: "assistant", text: "ขออภัยค่ะ ระบบขัดข้องชั่วคราว ลองใหม่อีกครั้งหรือดูประกาศทั้งหมดด้วยตัวเองก่อนได้ค่ะ", links: [{ label: "ดูประกาศทั้งหมด", onClick: () => this._navigate("Search Results.dc.html") }], hasLinks: true, bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:white; padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px;" };
+      // Don't persist the error bubble itself — it's a transient local
+      // notice, not a real assistant reply. Persisting it would leave stale
+      // "Sorry, something went wrong" text sitting in the shared cross-page
+      // history forever, replayed as fake context on every future visit.
       this.setState({ chatMessages: [...history, errMsg], chatLoading: false });
-      this._persistHistory([...history, errMsg]);
     }
     setTimeout(() => { if (this.scrollRef.current) this.scrollRef.current.scrollTop = this.scrollRef.current.scrollHeight; }, 60);
   }
