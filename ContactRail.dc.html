@@ -90,12 +90,13 @@
             <div style="font-family:'Playfair Display',serif; font-size:17px;">{{ t.chat_title }}</div>
             <div style="font-size:11px; color:oklch(80% 0.01 70); margin-top:2px;">{{ t.chat_subtitle }}</div>
           </div>
-          <div style="display:flex; align-items:center; gap:2px;">
-            <div onClick="{{ onClearChat }}" title="ล้างประวัติแชท เริ่มใหม่" style="cursor:pointer; padding:8px; border-radius:8px; display:flex; align-items:center; justify-content:center;" style-hover="background:oklch(30% 0.02 60);">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7H20M9 7V4.5C9 4 9.4 3.5 10 3.5H14C14.6 3.5 15 4 15 4.5V7M18 7L17.3 19C17.25 19.8 16.6 20.5 15.8 20.5H8.2C7.4 20.5 6.75 19.8 6.7 19L6 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
+          <div style="display:flex; align-items:center; gap:4px;">
             <div onClick="{{ onMinimizeChat }}" title="ย่อหน้าต่างแชท" style="cursor:pointer; padding:8px; border-radius:8px; display:flex; align-items:center; justify-content:center;" style-hover="background:oklch(30% 0.02 60);">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div onClick="{{ onClearChat }}" title="ล้างประวัติแชท เริ่มใหม่" style="cursor:pointer; padding:6px 10px 6px 6px; border-radius:8px; display:flex; align-items:center; gap:5px;" style-hover="background:oklch(30% 0.02 60);">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 7H20M9 7V4.5C9 4 9.4 3.5 10 3.5H14C14.6 3.5 15 4 15 4.5V7M18 7L17.3 19C17.25 19.8 16.6 20.5 15.8 20.5H8.2C7.4 20.5 6.75 19.8 6.7 19L6 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span style="font-size:11px;">ล้าง</span>
             </div>
           </div>
         </div>
@@ -104,9 +105,9 @@
             <div style="{{ m.bubbleWrapStyle }}">
               <div style="{{ m.bubbleStyle }}">{{ m.text }}</div>
               <sc-for list="{{ m.links }}" as="lnk" hint-placeholder-count="0">
-                <div onClick="{{ lnk.onClick }}" style="display:flex; align-items:center; gap:10px; margin-top:6px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:8px; border-radius:12px; cursor:pointer; max-width:260px;">
-                  <div style="width:44px; height:44px; border-radius:8px; background:{{ lnk.thumbBg }}; flex-shrink:0;"></div>
-                  <div style="min-width:0;">
+                <div onClick="{{ lnk.onClick }}" style="display:flex; align-items:stretch; gap:10px; margin-top:6px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); border-radius:12px; cursor:pointer; max-width:260px; overflow:hidden;">
+                  <div style="width:64px; aspect-ratio:1/1; background:{{ lnk.thumbBg }}; flex-shrink:0;"></div>
+                  <div style="min-width:0; padding:8px 10px 8px 0;">
                     <div style="font-size:12.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ lnk.label }}</div>
                     <sc-if value="{{ lnk.priceLabel }}"><div style="font-size:12px; color:oklch(85% 0.02 70);">{{ lnk.priceLabel }}</div></sc-if>
                     <sc-if value="{{ lnk.specsLabel }}"><div style="font-size:11px; color:oklch(70% 0.02 70);">{{ lnk.specsLabel }}</div></sc-if>
