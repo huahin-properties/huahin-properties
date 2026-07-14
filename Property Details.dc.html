@@ -109,7 +109,8 @@
     <div style="padding:14px clamp(20px,4vw,56px) 0;">
       <div style="{{ heroPhotoStyle }}">
         <div style="position:absolute; top:14px; left:14px; background:{{ p.statusColor }}; color:oklch(99% 0.005 80); font-size:12px; font-weight:600; padding:5px 14px; border-radius:100px; pointer-events:none;">{{ p.statusLabel }}</div>
-        <div style="position:absolute; top:14px; right:14px; font-family:monospace; font-size:13px; font-weight:600; letter-spacing:0.02em; color:oklch(20% 0.02 60); background:rgba(255,255,255,0.8); padding:5px 12px; border-radius:100px; pointer-events:none;">{{ p.propertyId }}</div>
+        <div onClick="{{ onToggleFav }}" title="{{ favTitle }}" style="position:absolute; top:14px; right:14px; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; font-size:19px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15); z-index:2;">{{ favIcon }}</div>
+        <div style="position:absolute; bottom:14px; right:14px; font-family:monospace; font-size:11px; font-weight:600; letter-spacing:0.02em; color:oklch(20% 0.02 60); background:rgba(255,255,255,0.8); padding:4px 10px; border-radius:100px; pointer-events:none;">{{ p.propertyId }}</div>
         <sc-if value="{{ activePhotoNoPhoto }}">
           <div style="position:absolute; bottom:14px; left:14px; font-family:monospace; font-size:12px; color:oklch(20% 0.02 60 / 0.8); background:rgba(255,255,255,0.7); padding:5px 10px; border-radius:4px; pointer-events:none;">[{{ activePhotoLabel }}]</div>
         </sc-if>
@@ -179,7 +180,7 @@
           <a href="tel:+6632000000" style="display:flex; align-items:center; justify-content:center; gap:8px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:12px; border-radius:4px; font-size:14px; text-decoration:none;">📞 {{ t.call }}</a>
           <a href="https://wa.me/6632000000" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background:oklch(52% 0.13 150); color:oklch(98% 0.01 80); padding:12px; border-radius:4px; font-size:14px; text-decoration:none;">💬 {{ t.whatsapp }}</a>
           <a href="https://line.me/ti/p/huahinproperties" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background:oklch(58% 0.16 145); color:oklch(98% 0.01 80); padding:12px; border-radius:4px; font-size:14px; text-decoration:none;">✆ {{ t.line_app }}</a>
-          <a href="mailto:hello@huahin.properties" style="display:flex; align-items:center; justify-content:center; gap:8px; border:1px solid oklch(75% 0.02 60); color:oklch(25% 0.02 60); padding:12px; border-radius:4px; font-size:14px; text-decoration:none;">✉ {{ t.email_cta }}</a>
+          <a href="/cdn-cgi/l/email-protection#e28a878e8e8da28a97838a8b8ccc92908d928790968b8791" style="display:flex; align-items:center; justify-content:center; gap:8px; border:1px solid oklch(75% 0.02 60); color:oklch(25% 0.02 60); padding:12px; border-radius:4px; font-size:14px; text-decoration:none;">✉ {{ t.email_cta }}</a>
         </div>
 
         <div style="background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:6px; padding:22px; display:flex; flex-direction:column; gap:12px;">
@@ -220,10 +221,11 @@
 <sc-if value="{{ showChrome }}"><dc-import name="ContactRail" current-property-id="{{ currentPropertyId }}" hint-size="0,0"></dc-import></sc-if>
 
 </x-dc>
-<script type="text/x-dc" data-dc-script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = {
     lang: "en",
+    isFav: false,
     banners: [],
     isMobile: (typeof window !== "undefined" && window.innerWidth < 900),
     mobileMenuOpen: false,
@@ -261,6 +263,8 @@ class Component extends DCLogic {
     window.addEventListener("resize", this._onResize);
     try {
       const favs = await import("./favorites.js");
+      this._favs = favs;
+      this.setState({ isFav: favs.isFavorited(this._id) });
       favs.recordPropertyView(this._id);
       this._longViewTimer = setTimeout(() => favs.recordLongView(this._id), 60000);
     } catch (e) {}
@@ -439,6 +443,13 @@ class Component extends DCLogic {
       langValue, onLangChange, langOptions,
       hasProperty: true,
       currentPropertyId: raw.id,
+      favIcon: this.state.isFav ? "⭐" : "☆",
+      favTitle: this.state.isFav ? "นำออกจากรายการโปรด" : "บันทึกไว้ในรายการโปรด",
+      onToggleFav: () => {
+        if (!this._favs) return;
+        const nowFav = this._favs.toggleFavorite(this._id);
+        this.setState({ isFav: nowFav });
+      },
       areaSearchHref: `Search Results.dc.html?area=${raw.area}`,
       p, specs, photos,
       photoCount: effectiveIndices.length,
