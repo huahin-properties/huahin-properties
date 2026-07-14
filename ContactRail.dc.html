@@ -105,14 +105,19 @@
             <div style="{{ m.bubbleWrapStyle }}">
               <div style="{{ m.bubbleStyle }}">{{ m.text }}</div>
               <sc-for list="{{ m.links }}" as="lnk" hint-placeholder-count="0">
-                <div onClick="{{ lnk.onClick }}" style="display:flex; align-items:stretch; gap:10px; margin-top:6px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); border-radius:12px; cursor:pointer; max-width:260px; overflow:hidden;">
-                  <div style="width:64px; aspect-ratio:1/1; background:{{ lnk.thumbBg }}; flex-shrink:0;"></div>
-                  <div style="min-width:0; padding:8px 10px 8px 0;">
-                    <div style="font-size:12.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ lnk.label }}</div>
-                    <sc-if value="{{ lnk.priceLabel }}"><div style="font-size:12px; color:oklch(85% 0.02 70);">{{ lnk.priceLabel }}</div></sc-if>
-                    <sc-if value="{{ lnk.specsLabel }}"><div style="font-size:11px; color:oklch(70% 0.02 70);">{{ lnk.specsLabel }}</div></sc-if>
+                <sc-if value="{{ lnk.thumbBg }}">
+                  <div onClick="{{ lnk.onClick }}" style="display:flex; align-items:stretch; gap:0; margin-top:6px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); border-radius:12px; cursor:pointer; width:220px; overflow:hidden;">
+                    <div style="aspect-ratio:1/1; background:{{ lnk.thumbBg }}; flex-shrink:0;"></div>
+                    <div style="min-width:0; flex:1; padding:8px 10px;">
+                      <div style="font-size:11.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ lnk.label }}</div>
+                      <sc-if value="{{ lnk.priceLabel }}"><div style="font-size:11px; color:oklch(85% 0.02 70); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ lnk.priceLabel }}</div></sc-if>
+                      <sc-if value="{{ lnk.specsLabel }}"><div style="font-size:10px; color:oklch(70% 0.02 70); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ lnk.specsLabel }}</div></sc-if>
+                    </div>
                   </div>
-                </div>
+                </sc-if>
+                <sc-if value="{{ lnk.noThumb }}">
+                  <div onClick="{{ lnk.onClick }}" style="display:inline-block; margin-top:6px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:8px 16px; border-radius:100px; font-size:13px; cursor:pointer;">{{ lnk.label }}</div>
+                </sc-if>
               </sc-for>
             </div>
           </sc-for>
@@ -346,7 +351,7 @@ class Component extends DCLogic {
       }
     });
     if (/contact us|ติดต่อเรา|связ|联系|kontakt|contattaci|contactez/i.test(text)) {
-      links.push({ label: t.chat_contact_us || "Contact us", onClick: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }) });
+      links.push({ label: t.chat_contact_us || "Contact us", noThumb: true, onClick: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }) });
     }
     return links;
   }
@@ -422,7 +427,7 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
     } catch (e) {
       console.warn("Chat error", e);
       const t = CHAT_I18N[lang] || CHAT_I18N.en;
-      const errMsg = { role: "assistant", text: "Sorry, something went wrong. Please try again or contact us directly.", links: [{ label: t.chat_contact_us || "Contact us", onClick: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }) }], bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" };
+      const errMsg = { role: "assistant", text: "Sorry, something went wrong. Please try again or contact us directly.", links: [{ label: t.chat_contact_us || "Contact us", noThumb: true, onClick: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }) }], bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" };
       // Don't persist the error bubble — transient local notice only, not a
       // real reply. Persisting it would leave stale error text sitting in
       // the shared cross-page history forever, replayed as fake context.
