@@ -44,9 +44,10 @@ service cloud.firestore {
       allow read: if true;
       // Public self-serve (Advertise.dc.html): anyone can create their OWN
       // pending banner doc (unpaid, active:false) — the Stripe webhook is
-      // the only thing that ever flips it to active:true. Editing/deleting
-      // any banner (including someone else's pending one) stays admin-only.
-      allow create: if request.resource.data.active == false;
+      // the only thing that ever flips it to active:true. Admin can create
+      // (and activate) its own banners directly (e.g. house-inventory
+      // banners added in Site Content) regardless of the active value.
+      allow create: if isAdmin() || request.resource.data.active == false;
       allow update, delete: if isAdmin();
     }
     match /externalServices/{id} { allow read, write: if isOwner(); }
