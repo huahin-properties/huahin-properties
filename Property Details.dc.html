@@ -116,7 +116,7 @@
         </sc-if>
         <div onClick="{{ prevPhoto }}" style="position:absolute; top:50%; left:14px; transform:translateY(-50%); width:38px; height:38px; border-radius:100px; background:rgba(255,255,255,0.8); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; color:oklch(25% 0.02 60); z-index:2;">‹</div>
         <div onClick="{{ nextPhoto }}" style="position:absolute; top:50%; right:14px; transform:translateY(-50%); width:38px; height:38px; border-radius:100px; background:rgba(255,255,255,0.8); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; color:oklch(25% 0.02 60); z-index:2;">›</div>
-        <div style="position:absolute; bottom:14px; right:14px; font-size:12px; color:oklch(20% 0.02 60); background:rgba(255,255,255,0.7); padding:5px 10px; border-radius:4px; pointer-events:none;">{{ activePhotoNum }} / {{ photoCount }}</div>
+        <div style="position:absolute; bottom:14px; left:14px; font-size:12px; color:oklch(20% 0.02 60); background:rgba(255,255,255,0.7); padding:5px 10px; border-radius:4px; pointer-events:none;">{{ activePhotoNum }} / {{ photoCount }}</div>
       </div>
       <div style="display:flex; gap:10px; margin-top:10px; overflow-x:auto; padding-bottom:4px;">
         <sc-for list="{{ photos }}" as="ph" hint-placeholder-count="6">
@@ -180,7 +180,7 @@
           <a href="tel:+6632000000" style="display:flex; align-items:center; justify-content:center; gap:8px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:12px; border-radius:4px; font-size:14px; text-decoration:none;">📞 {{ t.call }}</a>
           <a href="https://wa.me/6632000000" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background:oklch(52% 0.13 150); color:oklch(98% 0.01 80); padding:12px; border-radius:4px; font-size:14px; text-decoration:none;">💬 {{ t.whatsapp }}</a>
           <a href="https://line.me/ti/p/huahinproperties" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background:oklch(58% 0.16 145); color:oklch(98% 0.01 80); padding:12px; border-radius:4px; font-size:14px; text-decoration:none;">✆ {{ t.line_app }}</a>
-          <a href="/cdn-cgi/l/email-protection#e28a878e8e8da28a97838a8b8ccc92908d928790968b8791" style="display:flex; align-items:center; justify-content:center; gap:8px; border:1px solid oklch(75% 0.02 60); color:oklch(25% 0.02 60); padding:12px; border-radius:4px; font-size:14px; text-decoration:none;">✉ {{ t.email_cta }}</a>
+          <a href="/cdn-cgi/l/email-protection#ea828f868685aa829f8b828384c49a98859a8f989e838f99" style="display:flex; align-items:center; justify-content:center; gap:8px; border:1px solid oklch(75% 0.02 60); color:oklch(25% 0.02 60); padding:12px; border-radius:4px; font-size:14px; text-decoration:none;">✉ {{ t.email_cta }}</a>
         </div>
 
         <div style="background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:6px; padding:22px; display:flex; flex-direction:column; gap:12px;">
