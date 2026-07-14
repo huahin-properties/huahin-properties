@@ -234,6 +234,28 @@
       </div>
     </div>
 
+    <!-- FEATURED LISTING BOOST PRICING -->
+    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">🌟 ราคาดัน Featured Listing</div>
+      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">ราคาที่เจ้าของ/Agent จ่ายเพื่อดันประกาศขึ้นอันดับแรกชั่วคราว — ตัดบัตรทันทีผ่าน Stripe ไม่ต้องสร้าง Product ล่วงหน้า ปรับราคาได้ตรงนี้เลย</div>
+      <div style="display:flex; gap:16px; flex-wrap:wrap; max-width:420px;">
+        <div style="flex:1; min-width:160px;">
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">7 วัน — ราคา (บาท)</div>
+          <input type="number" value="{{ featured7Price }}" onChange="{{ onFeatured7Price }}" placeholder="990" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
+        </div>
+        <div style="flex:1; min-width:160px;">
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">30 วัน — ราคา (บาท)</div>
+          <input type="number" value="{{ featured30Price }}" onChange="{{ onFeatured30Price }}" placeholder="2990" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <div onClick="{{ onSaveFeaturedPrices }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">บันทึก</div>
+        <sc-if value="{{ featuredPriceMsg }}">
+          <span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ featuredPriceMsg }}</span>
+        </sc-if>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -249,6 +271,7 @@ class Component extends DCLogic {
     accUsername: "", accPassword: "", accEmail: "", accPhone: "", accMsg: "",
     fbFooter: "", fbFooterMsg: "",
     stripePrices: { pro: "", agency: "" }, stripeMsg: "",
+    featuredPrices: { p7: "", p30: "" }, featuredPriceMsg: "",
     aiNotes: [], noteDrafts: {}, noteMsgs: {},
     aiRestrictions: "", aiRestrictionsMsg: "",
     aiPersonaName: "", aiPersonaRole: "", aiPersonaMsg: "",
@@ -303,6 +326,13 @@ class Component extends DCLogic {
       this.setState({ stripePrices });
     } catch (e) {
       console.warn("Failed to load Stripe price IDs:", e);
+    }
+
+    try {
+      const featuredPrices = await fb.fetchFeaturedPrices();
+      this.setState({ featuredPrices });
+    } catch (e) {
+      console.warn("Failed to load Featured prices:", e);
     }
 
     try {
@@ -467,6 +497,14 @@ class Component extends DCLogic {
     }
   }
 
+  async saveFeaturedPrices() {
+    try {
+      await this._fb.saveFeaturedPrices(this.state.featuredPrices);
+      this.setState({ featuredPriceMsg: "บันทึกแล้ว" });
+      setTimeout(() => this.setState({ featuredPriceMsg: "" }), 2500);
+    } catch (e) { console.warn("saveFeaturedPrices failed:", e); }
+  }
+
   async saveStripePrices() {
     try {
       await this._fb.saveStripePrices(this.state.stripePrices);
@@ -597,6 +635,12 @@ class Component extends DCLogic {
       onStripeAgency: (e) => this.setState((s) => ({ stripePrices: { ...s.stripePrices, agency: e.target.value } })),
       onSaveStripePrices: () => this.saveStripePrices(),
       stripeMsg: this.state.stripeMsg,
+      featured7Price: this.state.featuredPrices.p7 || "",
+      onFeatured7Price: (e) => this.setState((s) => ({ featuredPrices: { ...s.featuredPrices, p7: e.target.value } })),
+      featured30Price: this.state.featuredPrices.p30 || "",
+      onFeatured30Price: (e) => this.setState((s) => ({ featuredPrices: { ...s.featuredPrices, p30: e.target.value } })),
+      onSaveFeaturedPrices: () => this.saveFeaturedPrices(),
+      featuredPriceMsg: this.state.featuredPriceMsg,
       onAddNote: () => this.addNote(),
       aiPersonaName: this.state.aiPersonaName,
       onAiPersonaName: (e) => this.setState({ aiPersonaName: e.target.value }),

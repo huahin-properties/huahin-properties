@@ -397,8 +397,20 @@ export async function fetchAllProfilePhotos() {
 // hash is fixed per-project, only the function name segment changes. After
 // `firebase deploy --only functions`, the terminal prints the REAL URLs;
 // if they don't match this guessed pattern, update these two constants.
-const CHECKOUT_URL = "https://createcheckoutsession-3j4ldf4pja-as.a.run.app";
-const PORTAL_URL = "https://createportalsession-3j4ldf4pja-as.a.run.app";
+const CHECKOUT_URL = "https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/createCheckoutSession";
+const PORTAL_URL = "https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/createPortalSession";
+const FEATURED_CHECKOUT_URL = "https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/createFeaturedCheckoutSession";
+
+export async function startFeaturedCheckout(propertyId, days, amountThb) {
+  const res = await fetch(FEATURED_CHECKOUT_URL, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ propertyId, days, amountThb }),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.url) throw new Error(data.error || "ไม่สามารถเริ่มการชำระเงินได้");
+  window.location.href = data.url;
+}
 
 export async function startCheckout(priceId, listerId, email) {
   const res = await fetch(CHECKOUT_URL, {
@@ -439,6 +451,17 @@ export async function fetchStripePrices() {
 
 export async function saveStripePrices(prices) {
   await setDoc("siteContent", "stripePrices", prices);
+}
+
+// Featured Listing boost pricing (THB per duration) — admin-editable, no
+// Stripe Product/Price needed since checkout uses dynamic price_data.
+export async function fetchFeaturedPrices() {
+  const doc = await db().collection("siteContent").doc("featuredPrices").get();
+  return doc.exists ? doc.data() : { p7: "", p30: "" };
+}
+
+export async function saveFeaturedPrices(prices) {
+  await setDoc("siteContent", "featuredPrices", prices);
 }
 
 // Returns "owner" | "staff" | null (null = not a team member yet, e.g. the

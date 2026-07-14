@@ -343,7 +343,12 @@ class Component extends DCLogic {
 
     const featuredIds = ["HH-101", "PB-201", "CA-301", "HH-104", "PB-202", "CA-304"];
     const propsList = this.state.effProps || mod.PROPERTIES;
-    const featured = featuredIds.map((id) => propsList.find((p) => p.id === id)).filter(Boolean).map(cardProps);
+    // Paid "Featured Listing boost" (BLUEPRINT.md §11 item 5) takes priority
+    // over the curated fallback list — boosted listings always show first.
+    const now = Date.now();
+    const boosted = propsList.filter((p) => p.featuredUntil && p.featuredUntil > now).sort((a, b) => b.featuredUntil - a.featuredUntil);
+    const fallback = featuredIds.map((id) => propsList.find((p) => p.id === id)).filter(Boolean).filter((p) => !boosted.some((b) => b.id === p.id));
+    const featured = [...boosted, ...fallback].slice(0, 6).map(cardProps);
 
     const areaDescKey = { "hua-hin": "area_hua_hin_desc", pranburi: "area_pranburi_desc", "cha-am": "area_cha_am_desc" };
     const areaPhoto = { "hua-hin": "photo: Hua Hin train station & beach", pranburi: "photo: Pranburi beachfront villa", "cha-am": "photo: Cha-am beach promenade" };
