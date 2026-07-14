@@ -184,13 +184,13 @@
         <div style="width:20px; height:20px; border-radius:50%; background:oklch(45% 0.13 150); color:white; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;">✓</div>
         <div style="font-size:13.5px; color:oklch(25% 0.05 150);">4. Stripe subscription + webhook + payments ledger — <strong>เสร็จสมบูรณ์ทั้งระบบ</strong></div>
       </div>
-      <div style="display:flex; align-items:center; gap:10px; background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px;">
-        <div style="width:20px; height:20px; border-radius:50%; background:oklch(45% 0.13 150); color:white; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;">✓</div>
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">5. Featured Listing boost — <strong>เสร็จแล้ว</strong> (7/30 วัน ผ่าน Stripe one-time, admin กดจากแดชบอร์ด)</div>
+      <div style="display:flex; align-items:center; gap:10px; background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">○</div>
+        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">5. Featured Listing boost</div>
       </div>
-      <div style="display:flex; align-items:center; gap:10px; background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px;">
-        <div style="width:20px; height:20px; border-radius:50%; background:oklch(45% 0.13 150); color:white; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;">✓</div>
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">6. เปิดขายแบนเนอร์ให้ลูกค้าภายนอกจริง — <strong>เสร็จแล้ว</strong> (Advertise.dc.html + Stripe)</div>
+      <div style="display:flex; align-items:center; gap:10px; background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">○</div>
+        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">6. เปิดขายแบนเนอร์ให้ลูกค้าภายนอกจริง</div>
       </div>
       <div style="display:flex; align-items:center; gap:10px; background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px;">
         <div style="width:20px; height:20px; border-radius:50%; background:oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">○</div>
@@ -213,23 +213,6 @@
         <li>เปิดทาง 3 (โฆษณาลูกค้าภายนอก) เมื่อมีตัวเลข traffic</li>
         <li>เปิดทาง 4 (แพ็กเกจ VIP ทั้งสองฝั่ง) เมื่อฐาน Agent/พูลมั่นคง</li>
       </ol>
-    </div>
-
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">14. หน้า AI Concierge (Conversational Landing Page) — ใหม่ล่าสุด</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
-      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:8px; padding:14px 18px;">
-        <p style="margin:0 0 8px;"><strong>แนวคิด</strong>: หน้าแยกจาก Home เปิดมาเจอแค่กล่องคุยกับ AI เต็มจอ + ไอคอนเล็ก 3 อัน (ซื้อ/เช่า/ฝากขาย) ไม่มีบ้านโชว์เลย ใช้ส่งให้ Agent ในกลุ่ม LINE ทดลอง/ทำการตลาดได้ทันที ไม่ต้องเปลี่ยนหน้าแรกจริง</p>
-        <p style="margin:0 0 8px;"><strong>สถานะ: ✅ สร้างเสร็จแล้ว</strong> — ไฟล์ <code>AI Concierge.dc.html</code> ใช้ persona/ข้อมูลบ้านชุดเดียวกับแชทบอทหลัก มีปุ่ม "ดูเว็บไซต์แบบเต็ม" ให้ข้ามเข้า Home ได้ — <strong>ยังไม่ได้อัปโหลดขึ้นเว็บจริง</strong> รอตัดสินใจ</p>
-        <p style="margin:0 0 8px;"><strong>บทสนทนาต่อเนื่องข้ามหน้า (เสร็จแล้ว)</strong>: ไม่ว่าเริ่มคุยจาก AI Concierge หรือปุ่ม "💬 แชทกับเรา" หน้าไหนก็ตาม บันทึกร่วมกันผ่าน localStorage คีย์เดียว — คลิกดูบ้าน/ย้อนกลับ/ไปหน้าอื่น กล่องแชทเปิดเองพร้อมประวัติเดิม ไม่ขาดช่วง</p>
-        <p style="margin:0;"><strong>ปุ่มย่อ/ขยายกล่องแชท (เสร็จแล้ว)</strong>: เปลี่ยน "×" ที่ทำให้เข้าใจผิดว่าปิดแชท เป็น "─" ย่อเหลือแถบเล็กมุมล่างขวา คลิกแถบนั้นอีกครั้งเพื่อขยายกลับมาคุยต่อ ไม่เสียประวัติ</p>
-      </div>
-      <p style="margin:0 0 8px;"><strong>ยังไม่ได้ทำ (ถ้าตัดสินใจใช้จริง)</strong>: ปุ่มแชร์ครบรูปแบบ (Web Share API + คัดลอกลิงก์), เก็บสถิติว่า Agent คนไหนแชร์ลิงก์แล้วมีคนกดเข้าเท่าไหร่ (ต้องมี ref code ต่อท้ายลิงก์)</p>
-      <p style="margin:0 0 8px;"><strong>แชทรู้บริบทหน้าที่กำลังดูอยู่ (เสร็จแล้ว)</strong>: ส่งรหัสทรัพย์ของหน้าปัจจุบันเข้าบริบท AI เสมอ — ถามกำกวมไม่ระบุรหัส (ราคา/ห้องนอน/ให้เช่าไหม) จะตอบอ้างอิงบ้านหลังที่กำลังดูอยู่ทันที เว้นแต่ถามถึงหลังอื่นชัดเจน</p>
-      <p style="margin:0 0 8px;"><strong>ปรับปรุงกล่องแชท (เสร็จแล้ว)</strong>: เลื่อนไปข้อความล่าสุดอัตโนมัติเมื่อเปิด/คืนค่าประวัติ + ไอคอนถังขยะล้างประวัติแชทเริ่มใหม่</p>
-      <p style="margin:0 0 8px;"><strong>ไอคอน Favorite เป็นดาว (เสร็จแล้ว)</strong>: เปลี่ยนจากหัวใจ (❤️/🤍) เป็นดาว (⭐/☆) + ข้อความเล็ก "Favorite" ต่อท้ายเมื่อบันทึกแล้ว ครบ 8 ภาษา</p>
-      <p style="margin:0 0 8px;"><strong>ปุ่ม "My Favorites" ลอยแบบตะกร้าสินค้า (เสร็จแล้ว)</strong>: มุมล่างซ้ายทุกหน้า แสดงจำนวนแบบเรียลไทม์ คลิกดูรายการ+ลิงก์เข้าดู+ลบออกได้</p>
-      <p style="margin:0 0 8px;"><strong>ลิงก์บ้านในแชทเป็นการ์ด (เสร็จแล้ว)</strong>: กล่องรูปปก 72×72px คงที่ (แก้บั๊ก aspect-ratio ไม่แสดงผล) + ราคา+ห้องนอน/ทำเล การ์ดกว้างเต็มบับเบิลแชท ไม่ตัดข้อความด้วย ellipsis แล้ว แก้ปัญหาตัวหนังสือแสดงผลไม่ครบบนมือถือ</p>
-      <p style="margin:0;"><strong>ปุ่มล้างประวัติแชทมีข้อความกำกับ (เสร็จแล้ว)</strong>: ทั้ง ContactRail และ AI Concierge — ไอคอนถังขยะ+คำว่า "ล้าง" ชัดเจน</p>
     </div>
 
     <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">13. หมายเหตุค่าใช้จ่าย</h2>
