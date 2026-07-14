@@ -125,8 +125,10 @@
             <div style="align-self:flex-start; background:oklch(93% 0.01 75); color:oklch(45% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px;">{{ t.chat_thinking }}</div>
           </sc-if>
         </div>
-        <div style="flex-shrink:0; border-top:1px solid oklch(90% 0.01 70); padding:12px; display:flex; gap:8px;">
+        <div style="flex-shrink:0; text-align:center; font-size:11px; color:oklch(55% 0.02 60); padding:6px 12px 0;">{{ t.chat_type_or_speak }}</div>
+        <div style="flex-shrink:0; padding:6px 12px 12px; display:flex; gap:8px;">
           <input value="{{ chatInput }}" onChange="{{ onChatInput }}" onKeyDown="{{ onChatKeyDown }}" placeholder="{{ t.chat_placeholder }}" style="flex:1; border:1px solid oklch(85% 0.01 70); border-radius:100px; padding:10px 16px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0;" />
+          <div onClick="{{ onMicClick }}" style="background:{{ micBg }}; color:{{ micColor }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; font-size:16px;">🎙️</div>
           <div onClick="{{ onChatSend }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; font-size:16px;">➤</div>
         </div>
         <div onClick="{{ onOpenFormFromChat }}" style="flex-shrink:0; text-align:center; padding:9px; font-size:12px; color:oklch(45% 0.02 60); border-top:1px solid oklch(93% 0.01 70); cursor:pointer;">{{ t.chat_talk_to_human }}</div>
@@ -178,8 +180,8 @@ const I18N_RAIL = {
 };
 
 const CHAT_I18N = {
-  en: { chat_title: "Ask about our properties", chat_subtitle: "AI assistant · huahin.properties listings only", chat_placeholder: "e.g. Any 4-bedroom pool villas?", chat_thinking: "Typing…", chat_talk_to_human: "Prefer a human? Leave your contact →", chat_greeting: "Hi! Ask me anything about our listings — bedrooms, price, area, property codes, availability.", chat_view_property: "View property", chat_contact_us: "Contact us", chat_autobot_intro: "Hi! I noticed you've been looking closely at", chat_autobot_help: "Want me to help with anything specific?" },
-  th: { chat_title: "ถามเกี่ยวกับทรัพย์ของเรา", chat_subtitle: "ผู้ช่วย AI · ข้อมูลจากประกาศใน huahin.properties เท่านั้น", chat_placeholder: "เช่น มีพูลวิลล่า 4 ห้องนอนไหม", chat_thinking: "กำลังพิมพ์…", chat_talk_to_human: "อยากคุยกับเจ้าหน้าที่? ฝากข้อมูลติดต่อ →", chat_greeting: "สวัสดีค่ะ ถามอะไรก็ได้เกี่ยวกับทรัพย์ของเรา เช่น จำนวนห้องนอน ราคา โซน รหัสทรัพย์ หรือสถานะว่าง/เช่าแล้ว", chat_view_property: "ดูรายละเอียด", chat_contact_us: "ติดต่อเรา", chat_autobot_intro: "สวัสดีค่ะ เห็นว่าคุณสนใจดู", chat_autobot_help: "อยากให้ช่วยอะไรเพิ่มเติมไหมคะ?" },
+  en: { chat_title: "Ask about our properties", chat_subtitle: "AI assistant · huahin.properties listings only", chat_placeholder: "e.g. Any 4-bedroom pool villas?", chat_type_or_speak: "Type or tap 🎙️ to speak", chat_thinking: "Typing…", chat_talk_to_human: "Prefer a human? Leave your contact →", chat_greeting: "Hi! Ask me anything about our listings — bedrooms, price, area, property codes, availability.", chat_view_property: "View property", chat_contact_us: "Contact us", chat_autobot_intro: "Hi! I noticed you've been looking closely at", chat_autobot_help: "Want me to help with anything specific?" },
+  th: { chat_type_or_speak: "พิมพ์หรือกด 🎙️ เพื่อพูดก็ได้", chat_title: "ถามเกี่ยวกับทรัพย์ของเรา", chat_subtitle: "ผู้ช่วย AI · ข้อมูลจากประกาศใน huahin.properties เท่านั้น", chat_placeholder: "เช่น มีพูลวิลล่า 4 ห้องนอนไหม", chat_thinking: "กำลังพิมพ์…", chat_talk_to_human: "อยากคุยกับเจ้าหน้าที่? ฝากข้อมูลติดต่อ →", chat_greeting: "สวัสดีค่ะ ถามอะไรก็ได้เกี่ยวกับทรัพย์ของเรา เช่น จำนวนห้องนอน ราคา โซน รหัสทรัพย์ หรือสถานะว่าง/เช่าแล้ว", chat_view_property: "ดูรายละเอียด", chat_contact_us: "ติดต่อเรา", chat_autobot_intro: "สวัสดีค่ะ เห็นว่าคุณสนใจดู", chat_autobot_help: "อยากให้ช่วยอะไรเพิ่มเติมไหมคะ?" },
   ru: { chat_title: "Спросите о наших объектах", chat_subtitle: "ИИ-ассистент · только объекты huahin.properties", chat_placeholder: "напр. Есть виллы с 4 спальнями?", chat_thinking: "Печатает…", chat_talk_to_human: "Хотите поговорить с человеком? Оставьте контакт →", chat_greeting: "Здравствуйте! Спрашивайте о наших объектах — спальни, цена, район, код объекта, наличие.", chat_view_property: "Смотреть объект", chat_contact_us: "Связаться с нами", chat_autobot_intro: "Здравствуйте! Я заметила, что вас заинтересовали", chat_autobot_help: "Могу чем-то помочь?" },
   zh: { chat_title: "咨询我们的房源", chat_subtitle: "AI 助手 · 仅限 huahin.properties 房源信息", chat_placeholder: "例如：有4卧室泳池别墅吗？", chat_thinking: "输入中…", chat_talk_to_human: "想联系真人客服？留下联系方式 →", chat_greeting: "您好！可以问我关于房源的任何问题 — 卧室数、价格、区域、房源编号或是否可租。", chat_view_property: "查看房源", chat_contact_us: "联系我们", chat_autobot_intro: "您好！我注意到您一直在关注", chat_autobot_help: "需要我帮您什么吗？" },
   de: { chat_title: "Fragen zu unseren Immobilien", chat_subtitle: "KI-Assistent · nur huahin.properties Angebote", chat_placeholder: "z.B. Poolvillen mit 4 Schlafzimmern?", chat_thinking: "Tippt…", chat_talk_to_human: "Lieber mit einem Menschen sprechen? Kontakt hinterlassen →", chat_greeting: "Hallo! Fragen Sie mich alles zu unseren Angeboten — Schlafzimmer, Preis, Gebiet, Objektcode oder Verfügbarkeit.", chat_view_property: "Immobilie ansehen", chat_contact_us: "Kontaktieren Sie uns", chat_autobot_intro: "Hallo! Mir ist aufgefallen, dass Sie sich für", chat_autobot_help: "interessieren. Kann ich Ihnen bei etwas Bestimmtem helfen?" },
@@ -378,6 +380,29 @@ class Component extends DCLogic {
     return text;
   }
 
+  toggleMic() {
+    if (this.state.listening) {
+      if (this._recognition) this._recognition.stop();
+      this.setState({ listening: false });
+      return;
+    }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { window.alert("เบราว์เซอร์นี้ยังไม่รองรับการพูด ลองใช้ Chrome"); return; }
+    const rec = new SR();
+    rec.lang = { th: "th-TH", en: "en-US", ru: "ru-RU", zh: "zh-CN", de: "de-DE", no: "nb-NO", fr: "fr-FR", it: "it-IT" }[this.state.lang] || "en-US";
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+    rec.onresult = (e) => {
+      const said = e.results[0][0].transcript;
+      this.setState((s) => ({ chatInput: (s.chatInput ? s.chatInput + " " : "") + said }));
+    };
+    rec.onend = () => this.setState({ listening: false });
+    rec.onerror = () => this.setState({ listening: false });
+    this._recognition = rec;
+    this.setState({ listening: true });
+    rec.start();
+  }
+
   async sendChat() {
     const text = this.state.chatInput.trim();
     if (!text || this.state.chatLoading) return;
@@ -566,6 +591,9 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       onChatInput: (e) => this.setState({ chatInput: e.target.value }),
       onChatSend: () => this.sendChat(),
       onChatKeyDown: (e) => { if (e.key === "Enter") { e.preventDefault(); this.sendChat(); } },
+      onMicClick: () => this.toggleMic(),
+      micBg: this.state.listening ? "oklch(50% 0.18 25)" : "oklch(93% 0.01 75)",
+      micColor: this.state.listening ? "white" : "oklch(30% 0.02 60)",
       onOpenFormFromChat: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }),
     };
   }
