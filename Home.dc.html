@@ -89,16 +89,29 @@
     </div>
   </sc-if>
 
-  <!-- ============ BANNER SLOT (top) — grid of small tiles, not one big strip ============ -->
+  <!-- ============ BANNER SLOT (top) — small tiles, looping carousel on narrow screens ============ -->
   <sc-if value="{{ hasTopBanner }}">
     <div style="background:oklch(93% 0.02 75); padding:10px clamp(20px,4vw,56px) 12px; border-bottom:2px solid oklch(40% 0.13 25);">
       <div style="text-align:center; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:oklch(50% 0.02 60); margin-bottom:8px;">Sponsored</div>
-      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; max-width:1200px; margin:0 auto;">
-        <sc-for list="{{ topBanners }}" as="tb" hint-placeholder-count="4">
-          <a href="{{ tb.link }}" style="display:block; width:100%; height:80px; overflow:hidden; border-radius:6px;">
-            <img src="{{ tb.imageUrl }}" alt="banner" style="width:100%; height:100%; display:block; object-fit:cover;" />
-          </a>
-        </sc-for>
+      <div style="display:flex; align-items:center; gap:8px; max-width:1200px; margin:0 auto;">
+        <sc-if value="{{ showBannerArrows }}">
+          <div onClick="{{ onBannerPrev }}" style="flex:0 0 auto; width:28px; height:28px; border-radius:50%; background:white; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,0.15); font-size:13px;">‹</div>
+        </sc-if>
+        <div style="flex:1; display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; overflow:hidden;">
+          <sc-for list="{{ visibleBanners }}" as="tb" hint-placeholder-count="2">
+            <a href="{{ tb.link }}" style="position:relative; display:block; width:100%; height:120px; overflow:hidden; border-radius:6px;">
+              <img src="{{ tb.imageUrl }}" alt="banner" style="width:100%; height:100%; display:block; object-fit:cover;" />
+              <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.65) 100%);"></div>
+              <div style="position:absolute; bottom:6px; left:8px; right:8px; color:white;">
+                <div style="font-size:11px; font-weight:600; opacity:0.85;">{{ tb.code }}</div>
+                <div style="font-size:13px; font-weight:700;">{{ tb.priceLabel }}</div>
+              </div>
+            </a>
+          </sc-for>
+        </div>
+        <sc-if value="{{ showBannerArrows }}">
+          <div onClick="{{ onBannerNext }}" style="flex:0 0 auto; width:28px; height:28px; border-radius:50%; background:white; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,0.15); font-size:13px;">›</div>
+        </sc-if>
       </div>
     </div>
   </sc-if>
@@ -249,6 +262,7 @@ class Component extends DCLogic {
     siteContent: {},
     data: null,
     banners: [],
+    bannerPage: 0,
   };
 
   async componentDidMount() {
@@ -425,8 +439,36 @@ class Component extends DCLogic {
       topBanners: (() => {
         const now = Date.now();
         const active = (this.state.banners || []).filter((b) => b.page === "home" && b.position === "top" && b.active !== false && b.imageUrl && (!b.expiresAt || b.expiresAt > now));
-        return active.map((b) => ({ imageUrl: b.imageUrl, link: b.link || "#" }));
+        const propsList = this.state.effProps || (mod ? mod.PROPERTIES : []) || [];
+        const list = active.map((b) => {
+          const prop = propsList.find((p) => b.link && b.link.includes(`id=${p.id}`));
+          return {
+            imageUrl: b.imageUrl, link: b.link || "#",
+            code: prop ? prop.id : (b.propertyCode || ""),
+            priceLabel: prop ? `฿${prop.price.toLocaleString()}` : "",
+          };
+        });
+        this._topBannersCache = list;
+        return list;
       })(),
+      // Mobile shows 2 tiles at a time with arrows that loop back to the
+      // start; desktop's auto-fit grid naturally shows more (4-5) so the
+      // arrows are hidden there since everything already fits on one row.
+      showBannerArrows: this.state.isMobile && (this._topBannersCache || []).length > 2,
+      visibleBanners: (() => {
+        const all = this._topBannersCache || [];
+        if (!this.state.isMobile || all.length <= 2) return all;
+        const start = this.state.bannerPage % all.length;
+        return [all[start], all[(start + 1) % all.length]];
+      })(),
+      onBannerPrev: () => this.setState((s) => {
+        const len = (this._topBannersCache || []).length || 1;
+        return { bannerPage: (s.bannerPage - 1 + len) % len };
+      }),
+      onBannerNext: () => this.setState((s) => {
+        const len = (this._topBannersCache || []).length || 1;
+        return { bannerPage: (s.bannerPage + 1) % len };
+      }),
       ...gateVals,
     };
   }
