@@ -284,11 +284,18 @@ class Component extends DCLogic {
 
   _buildContext(lang) {
     const props = this._properties || (this._mod ? this._mod.PROPERTIES : []) || [];
+    const currentId = this.props.currentPropertyId;
+    const current = currentId && props.find((p) => p.id === currentId);
     const lines = props.map((p) => {
       const title = (p.title && (p.title[lang] || p.title.en)) || p.id;
       return `${p.id} | ${title} | area:${p.area} zone:${p.zone} type:${p.type} status:${p.status} price:${p.price}${p.currency} beds:${p.bedrooms} baths:${p.bathrooms} land:${p.landSize || "-"}sqm living:${p.livingArea || "-"}sqm pool:${p.pool ? "yes" : "no"}`;
     });
-    return lines.join("\n");
+    let text = lines.join("\n");
+    if (current) {
+      const title = (current.title && (current.title[lang] || current.title.en)) || current.id;
+      text += `\n\nIMPORTANT — the customer is CURRENTLY VIEWING this exact listing's page right now: ${current.id} (${title}). If they ask something ambiguous without naming a property (e.g. "how much is it", "how many bedrooms", "is this for rent", "this one") — assume they mean ${current.id} unless they clearly ask about something else or a different code.`;
+    }
+    return text;
   }
 
   async sendChat() {

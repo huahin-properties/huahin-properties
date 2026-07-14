@@ -210,7 +210,7 @@
 
 </div>
 
-<sc-if value="{{ showChrome }}"><dc-import name="ContactRail" hint-size="0,0"></dc-import></sc-if>
+<sc-if value="{{ showChrome }}"><dc-import name="ContactRail" current-property-id="{{ currentPropertyId }}" hint-size="0,0"></dc-import></sc-if>
 
 </x-dc>
 <script type="text/x-dc" data-dc-script>
@@ -324,7 +324,7 @@ class Component extends DCLogic {
       gateError: this.state.gateError,
     };
     const mod = this.state.data;
-    if (!mod) return { t: {}, isDesktopNav: true, isMobileNav: false, hasProperty: false, langOptions: [], ...gateVals };
+    if (!mod) return { t: {}, isDesktopNav: true, isMobileNav: false, hasProperty: false, langOptions: [], currentPropertyId: this._id, ...gateVals };
 
     const lang = this.state.lang;
     const t = mod.I18N[lang];
@@ -340,6 +340,7 @@ class Component extends DCLogic {
     const raw = propsList.find((x) => x.id === this._id);
     if (!raw) {
       return { t, lang, isDesktopNav: !this.state.isMobile, isMobileNav: this.state.isMobile, hasProperty: false, langValue, onLangChange, langOptions,
+        currentPropertyId: this._id,
         toggleMenu: () => this.setState((s) => ({ mobileMenuOpen: !s.mobileMenuOpen })), mobileMenuOpen: false };
     }
 
@@ -413,6 +414,7 @@ class Component extends DCLogic {
       toggleMenu: () => this.setState((s) => ({ mobileMenuOpen: !s.mobileMenuOpen })),
       langValue, onLangChange, langOptions,
       hasProperty: true,
+      currentPropertyId: raw.id,
       areaSearchHref: `Search Results.dc.html?area=${raw.area}`,
       p, specs, photos,
       photoCount: effectiveIndices.length,
