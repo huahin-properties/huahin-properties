@@ -74,9 +74,9 @@
 
   <!-- ============ AI CHAT — MINIMIZED BAR ============ -->
   <sc-if value="{{ chatBarOpen }}">
-    <div onClick="{{ onExpandChat }}" style="position:fixed; bottom:{{ chatBarBottom }}; right:{{ chatBarRight }}; left:{{ chatBarLeft }}; z-index:85; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); border-radius:100px; padding:12px 20px; display:flex; align-items:center; gap:10px; cursor:pointer; box-shadow:0 12px 32px oklch(0% 0 0 / 0.25);">
-      <span style="font-size:15px;">💬</span>
-      <span style="font-family:'Playfair Display',serif; font-size:14px; flex:1; text-align:center;">{{ t.chat_title }}</span>
+    <div onClick="{{ onExpandChat }}" style="position:fixed; bottom:{{ chatBarBottom }}; right:{{ chatBarRight }}; z-index:85; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); border-radius:100px; padding:12px 18px; display:flex; align-items:center; gap:8px; cursor:pointer; box-shadow:0 12px 32px oklch(0% 0 0 / 0.25); max-width:{{ chatBarMaxWidth }};">
+      <span style="font-size:15px; flex-shrink:0;">💬</span>
+      <sc-if value="{{ showFavLabel }}"><span style="font-family:'Playfair Display',serif; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.chat_title }}</span></sc-if>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;"><path d="M6 15L12 9L18 15" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
   </sc-if>
@@ -564,14 +564,15 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
 
       chatOpen: this.state.chatOpen,
       chatPanelOpen: this.state.chatOpen && !this.state.chatMinimized,
-      chatBarBottom: this.state.isMobile ? "78px" : "20px",
+      chatBarBottom: this.state.isMobile ? "16px" : "20px",
       chatBarRight: this.state.isMobile ? "16px" : "20px",
-      chatBarLeft: this.state.isMobile ? "16px" : "auto",
+      chatBarLeft: "auto",
       chatOverlayPadding: this.state.isMobile ? "0" : "20px",
       chatPanelRadius: this.state.isMobile ? "0" : "10px",
       chatPanelMaxWidth: this.state.isMobile ? "100%" : "380px",
-      chatPanelHeight: this.state.isMobile ? "100vh" : "min(560px, 80vh)",
+      chatPanelHeight: this.state.isMobile ? "100dvh" : "min(560px, 80vh)",
       chatBarOpen: this.state.chatOpen && this.state.chatMinimized,
+      chatBarMaxWidth: this.state.isMobile ? "52px" : "260px",
       onMinimizeChat: () => this.setState({ chatMinimized: true }),
       onClearChat: () => this.clearChatHistory(),
       onExpandChat: () => this.setState({ chatMinimized: false }),
