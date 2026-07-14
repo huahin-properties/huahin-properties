@@ -59,6 +59,7 @@
 
     <sc-if value="{{ isMobileNav }}">
       <div style="display:flex; align-items:center; gap:6px;">
+        <div onClick="{{ onVoiceChatOpen }}" style="width:38px; height:38px; border-radius:50%; background:oklch(40% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-size:17px; cursor:pointer; flex-shrink:0;">🎙️</div>
         <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" compact="{{ true }}" menu-align="right" hint-size="40,32"></dc-import>
         <div onClick="{{ toggleMenu }}" style="display:flex; flex-direction:column; gap:5px; padding:8px; cursor:pointer;">
           <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
@@ -399,6 +400,7 @@ class Component extends DCLogic {
       isMobileNav: this.state.isMobile,
       mobileMenuOpen: this.state.isMobile && this.state.mobileMenuOpen,
       toggleMenu: () => this.setState((s) => ({ mobileMenuOpen: !s.mobileMenuOpen })),
+      onVoiceChatOpen: () => window.dispatchEvent(new CustomEvent("hh-open-voice-chat")),
       langValue, onLangChange, langOptions,
       areas: mod.AREAS.map((a) => ({ id: a.id, label: a.label[lang] })),
       areaLabel: this.state.areaValue ? areaLabelOf(this.state.areaValue) : t.all_zones,

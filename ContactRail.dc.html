@@ -125,10 +125,8 @@
             <div style="align-self:flex-start; background:oklch(93% 0.01 75); color:oklch(45% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px;">{{ t.chat_thinking }}</div>
           </sc-if>
         </div>
-        <div style="flex-shrink:0; text-align:center; font-size:11px; color:oklch(55% 0.02 60); padding:6px 12px 0;">{{ t.chat_type_or_speak }}</div>
-        <div style="flex-shrink:0; padding:6px 12px 12px; display:flex; gap:8px;">
-          <input value="{{ chatInput }}" onChange="{{ onChatInput }}" onKeyDown="{{ onChatKeyDown }}" placeholder="{{ t.chat_placeholder }}" style="flex:1; border:1px solid oklch(85% 0.01 70); border-radius:100px; padding:10px 16px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0;" />
-          <div onClick="{{ onMicClick }}" style="background:{{ micBg }}; color:{{ micColor }}; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; font-size:16px;">🎙️</div>
+        <div style="flex-shrink:0; border-top:1px solid oklch(90% 0.01 70); padding:12px; display:flex; gap:8px;">
+          <input value="{{ chatInput }}" onChange="{{ onChatInput }}" onKeyDown="{{ onChatKeyDown }}" placeholder="{{ t.chat_type_or_speak }}" style="flex:1; border:1px solid oklch(85% 0.01 70); border-radius:100px; padding:10px 16px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0;" />
           <div onClick="{{ onChatSend }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; font-size:16px;">➤</div>
         </div>
         <div onClick="{{ onOpenFormFromChat }}" style="flex-shrink:0; text-align:center; padding:9px; font-size:12px; color:oklch(45% 0.02 60); border-top:1px solid oklch(93% 0.01 70); cursor:pointer;">{{ t.chat_talk_to_human }}</div>
@@ -208,6 +206,11 @@ class Component extends DCLogic {
       const collapsed = localStorage.getItem("contactRailCollapsed") === "1";
       this.setState({ railOpen: !collapsed });
     } catch (e) {}
+    this._onOpenVoiceChat = () => {
+      this.setState({ chatOpen: true });
+      setTimeout(() => this.toggleMic(), 350);
+    };
+    window.addEventListener("hh-open-voice-chat", this._onOpenVoiceChat);
     const syncLang = () => {
       import("./data.js").then((mod) => {
         this._mod = mod;
@@ -483,6 +486,7 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
   componentWillUnmount() {
     window.removeEventListener("storage", this._onStorage);
     window.removeEventListener("langchange", this._onStorage);
+    window.removeEventListener("hh-open-voice-chat", this._onOpenVoiceChat);
     if (this._onFavChange) {
       window.removeEventListener("hh_favorites_changed", this._onFavChange);
       window.removeEventListener("storage", this._onFavChange);
@@ -591,9 +595,7 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       onChatInput: (e) => this.setState({ chatInput: e.target.value }),
       onChatSend: () => this.sendChat(),
       onChatKeyDown: (e) => { if (e.key === "Enter") { e.preventDefault(); this.sendChat(); } },
-      onMicClick: () => this.toggleMic(),
-      micBg: this.state.listening ? "oklch(50% 0.18 25)" : "oklch(93% 0.01 75)",
-      micColor: this.state.listening ? "white" : "oklch(30% 0.02 60)",
+
       onOpenFormFromChat: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }),
     };
   }
