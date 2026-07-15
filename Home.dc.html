@@ -181,7 +181,8 @@
       </sc-for>
     </div>
     <sc-if value="{{ showFeaturedPagination }}">
-      <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-top:32px; flex-wrap:wrap;">
+      <div style="text-align:center; font-size:13px; color:oklch(50% 0.02 60); margin-top:28px;">{{ totalFeaturedCount }} รายการ</div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-top:10px; flex-wrap:wrap;">
         <div onClick="{{ onFeaturedPrevPage }}" style="width:36px; height:36px; border-radius:50%; border:1px solid oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; color:oklch(30% 0.02 60);">‹</div>
         <sc-for list="{{ featuredPageNumbers }}" as="pg" hint-placeholder-count="3">
           <div onClick="{{ pg.onClick }}" style="width:36px; height:36px; border-radius:50%; background:{{ pg.bg }}; color:{{ pg.color }}; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; border:1px solid oklch(85% 0.01 70);">{{ pg.num }}</div>
@@ -437,6 +438,7 @@ class Component extends DCLogic {
       buyHref: "Search Results.dc.html?status=sale",
       rentHref: "Search Results.dc.html?status=rent",
       featured,
+      totalFeaturedCount: allOrdered.length,
       showFeaturedPagination: totalFeaturedPages > 1,
       featuredPageNumbers: Array.from({ length: totalFeaturedPages }, (_, i) => {
         const num = i + 1;

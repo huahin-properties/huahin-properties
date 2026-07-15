@@ -184,7 +184,8 @@
       </sc-if>
 
       <sc-if value="{{ showPagination }}">
-        <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-top:32px; flex-wrap:wrap;">
+        <div style="text-align:center; font-size:13px; color:oklch(50% 0.02 60); margin-top:28px;">{{ totalResultsCount }} รายการ</div>
+        <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-top:10px; flex-wrap:wrap;">
           <div onClick="{{ onPrevPage }}" style="width:36px; height:36px; border-radius:50%; border:1px solid oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; color:oklch(30% 0.02 60);">‹</div>
           <sc-for list="{{ pageNumbers }}" as="pg" hint-placeholder-count="3">
             <div onClick="{{ pg.onClick }}" style="width:36px; height:36px; border-radius:50%; background:{{ pg.bg }}; color:{{ pg.color }}; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; border:1px solid oklch(85% 0.01 70);">{{ pg.num }}</div>
@@ -346,6 +347,8 @@ class Component extends DCLogic {
       return bf - af;
     });
 
+    const totalResultsCount = list.length;
+
     const results = list.map((p) => ({
       href: `Property Details.dc.html?id=${p.id}`,
       statusColor: statusColorOf(p.status),
@@ -427,23 +430,24 @@ class Component extends DCLogic {
       listActiveBg: this.state.view === "list" ? "oklch(22% 0.02 60)" : "transparent",
       listActiveColor: this.state.view === "list" ? "oklch(98% 0.01 80)" : "oklch(30% 0.02 60)",
       results: (() => {
-        const perPage = 8;
+        const perPage = 10;
         const totalPages = Math.max(1, Math.ceil(results.length / perPage));
         const page = Math.min(this.state.page, totalPages);
         return results.slice((page - 1) * perPage, page * perPage);
       })(),
       hasResults: results.length > 0,
       noResults: results.length === 0,
-      totalPages: Math.max(1, Math.ceil(results.length / 8)),
-      currentPage: Math.min(this.state.page, Math.max(1, Math.ceil(results.length / 8))),
-      showPagination: results.length > 8,
-      pageNumbers: Array.from({ length: Math.max(1, Math.ceil(results.length / 8)) }, (_, i) => {
+      totalResultsCount,
+      totalPages: Math.max(1, Math.ceil(results.length / 10)),
+      currentPage: Math.min(this.state.page, Math.max(1, Math.ceil(results.length / 10))),
+      showPagination: results.length > 10,
+      pageNumbers: Array.from({ length: Math.max(1, Math.ceil(results.length / 10)) }, (_, i) => {
         const num = i + 1;
-        const isActive = num === Math.min(this.state.page, Math.max(1, Math.ceil(results.length / 8)));
+        const isActive = num === Math.min(this.state.page, Math.max(1, Math.ceil(results.length / 10)));
         return { num, isActive, bg: isActive ? "oklch(22% 0.02 60)" : "transparent", color: isActive ? "oklch(98% 0.01 80)" : "oklch(30% 0.02 60)", onClick: () => this.goToPage(num) };
       }),
       onPrevPage: () => this.goToPage(Math.max(1, this.state.page - 1)),
-      onNextPage: () => this.goToPage(Math.min(Math.max(1, Math.ceil(results.length / 8)), this.state.page + 1)),
+      onNextPage: () => this.goToPage(Math.min(Math.max(1, Math.ceil(results.length / 10)), this.state.page + 1)),
       filterVals,
       ...gateVals,
     };
