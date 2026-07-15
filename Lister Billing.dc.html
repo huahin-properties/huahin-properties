@@ -27,7 +27,7 @@
     <span style="color:oklch(70% 0.02 70); font-size:14px;">| สมาชิกของฉัน</span>
   </div>
 
-  <div style="max-width:640px; margin:0 auto; padding:clamp(20px,4vw,40px);">
+  <div style="max-width:1080px; margin:0 auto; padding:clamp(20px,4vw,40px);">
 
     <sc-if value="{{ notSignedIn }}" hint-placeholder-val="{{ false }}">
       <div style="background:white; border-radius:8px; padding:20px 24px; text-align:center; margin-bottom:20px;">
@@ -62,7 +62,7 @@
       <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:16px;">{{ t.ladderSub }}</div>
       <div style="display:flex; gap:0; overflow-x:auto; border-radius:10px; box-shadow:0 1px 6px rgba(0,0,0,0.06);">
         <sc-for list="{{ tierCards }}" as="c" hint-placeholder-count="4">
-          <div style="flex:1; min-width:190px; background:{{ c.bg }}; padding:26px 20px; border-right:1px solid oklch(92% 0.01 70); position:relative;">
+          <div style="flex:1 1 0; min-width:150px; background:{{ c.bg }}; padding:26px 16px; border-right:1px solid oklch(92% 0.01 70); position:relative;">
             <sc-if value="{{ c.badge }}">
               <div style="position:absolute; top:-1px; left:0; right:0; text-align:center; background:oklch(40% 0.13 25); color:white; font-size:10px; font-weight:700; letter-spacing:0.04em; padding:4px; text-transform:uppercase;">{{ c.badge }}</div>
             </sc-if>
@@ -100,32 +100,32 @@ const BILLING_I18N = {
     tier2Desc: ["5 listings", "1 Featured slot", "Priority support"],
     tier3Desc: ["15 listings", "Multiple Featured slots", "Priority support"],
     contactDesc: ["Custom listing volume", "Dedicated support", "Custom terms"],
-    perMonth: "/month", billedMonthly: "Billed monthly", startFree: "Current plan", upgrade: "Upgrade", current: "Current plan", contactUs: "Contact us" },
+    perMonth: "/month", billedMonthly: "Billed monthly", currentlyFree: "You're using this for free", startFree: "Current plan", upgrade: "Upgrade", current: "Current plan", contactUs: "Contact us" },
   th: { ladderTitle: "บันไดสมาชิก", ladderSub: "ไต่ระดับขึ้นทีละขั้น — ระดับสูงกว่าได้ทุกสิทธิ์จากระดับล่างกว่าด้วย",
     free: "ฟรี", tier2: "ระดับ 2", tier3: "ระดับ 3", contact: "ติดต่อเรา",
     freeDesc: ["โพสต์ได้ 1 หลัง", "AI ร่างประกาศ 8 ภาษา", "ซัพพอร์ตพื้นฐาน"],
     tier2Desc: ["โพสต์ได้ 5 หลัง", "Featured 1 รายการ", "ซัพพอร์ตพิเศษ"],
     tier3Desc: ["โพสต์ได้ 15 หลัง", "Featured หลายรายการ", "ซัพพอร์ตพิเศษ"],
     contactDesc: ["ปริมาณโพสต์ตามตกลง", "ทีมซัพพอร์ตเฉพาะ", "เงื่อนไขพิเศษเฉพาะราย"],
-    perMonth: "/เดือน", billedMonthly: "เรียกเก็บรายเดือน", startFree: "แพ็กเกจปัจจุบัน", upgrade: "อัปเกรด", current: "สมาชิกอยู่แล้ว", contactUs: "ติดต่อเรา" },
+    perMonth: "/เดือน", billedMonthly: "เรียกเก็บรายเดือน", currentlyFree: "คุณกำลังใช้งานฟรีอยู่", startFree: "แพ็กเกจปัจจุบัน", upgrade: "อัปเกรด", current: "สมาชิกอยู่แล้ว", contactUs: "ติดต่อเรา" },
   ru: { ladderTitle: "Уровни членства", ladderSub: "Повышайте уровень в любое время", free: "Бесплатно", tier2: "Уровень 2", tier3: "Уровень 3", contact: "Свяжитесь с нами",
     freeDesc: ["1 объявление"], tier2Desc: ["5 объявлений"], tier3Desc: ["15 объявлений"], contactDesc: ["По договорённости"],
-    perMonth: "/мес", billedMonthly: "Ежемесячно", startFree: "Текущий план", upgrade: "Улучшить", current: "Уже активен", contactUs: "Связаться" },
+    perMonth: "/мес", billedMonthly: "Ежемесячно", currentlyFree: "Вы используете это бесплатно", startFree: "Текущий план", upgrade: "Улучшить", current: "Уже активен", contactUs: "Связаться" },
   zh: { ladderTitle: "会员等级", ladderSub: "随时升级 — 高等级保留所有低等级权益", free: "免费", tier2: "二级", tier3: "三级", contact: "联系我们",
     freeDesc: ["1个房源"], tier2Desc: ["5个房源"], tier3Desc: ["15个房源"], contactDesc: ["定制数量"],
-    perMonth: "/月", billedMonthly: "按月计费", startFree: "当前套餐", upgrade: "升级", current: "已是会员", contactUs: "联系我们" },
+    perMonth: "/月", billedMonthly: "按月计费", currentlyFree: "您正在免费使用", startFree: "当前套餐", upgrade: "升级", current: "已是会员", contactUs: "联系我们" },
   de: { ladderTitle: "Mitgliedschaftsstufen", ladderSub: "Jederzeit upgraden", free: "Kostenlos", tier2: "Stufe 2", tier3: "Stufe 3", contact: "Kontakt",
     freeDesc: ["1 Angebot"], tier2Desc: ["5 Angebote"], tier3Desc: ["15 Angebote"], contactDesc: ["Individuell"],
-    perMonth: "/Monat", billedMonthly: "Monatlich", startFree: "Aktueller Plan", upgrade: "Upgrade", current: "Bereits aktiv", contactUs: "Kontaktieren" },
+    perMonth: "/Monat", billedMonthly: "Monatlich", currentlyFree: "Sie nutzen dies kostenlos", startFree: "Aktueller Plan", upgrade: "Upgrade", current: "Bereits aktiv", contactUs: "Kontaktieren" },
   no: { ladderTitle: "Medlemsnivåer", ladderSub: "Oppgrader når som helst", free: "Gratis", tier2: "Nivå 2", tier3: "Nivå 3", contact: "Kontakt oss",
     freeDesc: ["1 oppføring"], tier2Desc: ["5 oppføringer"], tier3Desc: ["15 oppføringer"], contactDesc: ["Tilpasset"],
-    perMonth: "/mnd", billedMonthly: "Fakturert månedlig", startFree: "Nåværende plan", upgrade: "Oppgrader", current: "Allerede aktiv", contactUs: "Kontakt oss" },
+    perMonth: "/mnd", billedMonthly: "Fakturert månedlig", currentlyFree: "Du bruker dette gratis", startFree: "Nåværende plan", upgrade: "Oppgrader", current: "Allerede aktiv", contactUs: "Kontakt oss" },
   fr: { ladderTitle: "Niveaux d'adhésion", ladderSub: "Passez au niveau supérieur à tout moment", free: "Gratuit", tier2: "Niveau 2", tier3: "Niveau 3", contact: "Contactez-nous",
     freeDesc: ["1 annonce"], tier2Desc: ["5 annonces"], tier3Desc: ["15 annonces"], contactDesc: ["Sur mesure"],
-    perMonth: "/mois", billedMonthly: "Facturé mensuellement", startFree: "Plan actuel", upgrade: "Mettre à niveau", current: "Déjà membre", contactUs: "Contactez-nous" },
+    perMonth: "/mois", billedMonthly: "Facturé mensuellement", currentlyFree: "Vous l'utilisez gratuitement", startFree: "Plan actuel", upgrade: "Mettre à niveau", current: "Déjà membre", contactUs: "Contactez-nous" },
   it: { ladderTitle: "Livelli di iscrizione", ladderSub: "Aggiorna in qualsiasi momento", free: "Gratuito", tier2: "Livello 2", tier3: "Livello 3", contact: "Contattaci",
     freeDesc: ["1 annuncio"], tier2Desc: ["5 annunci"], tier3Desc: ["15 annunci"], contactDesc: ["Su misura"],
-    perMonth: "/mese", billedMonthly: "Fatturato mensilmente", startFree: "Piano attuale", upgrade: "Aggiorna", current: "Già membro", contactUs: "Contattaci" },
+    perMonth: "/mese", billedMonthly: "Fatturato mensilmente", currentlyFree: "Lo stai usando gratuitamente", startFree: "Piano attuale", upgrade: "Aggiorna", current: "Già membro", contactUs: "Contattaci" },
 };
 
 class Component extends DCLogic {
@@ -244,23 +244,21 @@ class Component extends DCLogic {
   buildTierCards(t, lister) {
     const cards = [
       { key: "basic", bg: "white", accentColor: "oklch(40% 0.13 25)", textColor: "oklch(25% 0.02 60)", subTextColor: "oklch(55% 0.02 60)",
-        name: t.free, price: "฿0", priceSub: t.billedMonthly, features: t.freeDesc,
+        name: t.free, price: "฿0", priceSub: t.currentlyFree, features: t.freeDesc,
         isFree: true, buttonLabel: t.startFree },
     ];
-    if (this.state.rolloutLevel >= 2) {
-      cards.push({ key: "pro", bg: "white", accentColor: "oklch(40% 0.13 25)", textColor: "oklch(25% 0.02 60)", subTextColor: "oklch(55% 0.02 60)",
-        name: t.tier2, price: "฿590", priceSub: t.perMonth + " · " + t.billedMonthly, features: t.tier2Desc,
-        isPaid: true, badge: this.state.rolloutLevel === 2 ? "Most popular" : "",
-        buttonLabel: this.state.busyTier === "pro" ? "…" : (lister.tier === "pro" || lister.tier === "agency" || lister.tier === "level3" ? t.current : t.upgrade),
-        onClick: () => this.upgrade("pro") });
-    }
-    if (this.state.rolloutLevel >= 3) {
-      cards.push({ key: "level3", bg: "white", accentColor: "oklch(40% 0.13 25)", textColor: "oklch(25% 0.02 60)", subTextColor: "oklch(55% 0.02 60)",
-        name: t.tier3, price: "฿1,190", priceSub: t.perMonth + " · " + t.billedMonthly, features: t.tier3Desc,
-        isPaid: true, badge: "Most popular",
-        buttonLabel: this.state.busyTier === "level3" ? "…" : (lister.tier === "level3" ? t.current : t.upgrade),
-        onClick: () => this.upgrade("level3") });
-    }
+    // Levels 1-3 (free/tier2/level3) are always shown — only the higher VIP
+    // tiers (4-5) are gated behind rolloutLevel. See BLUEPRINT.md §2 ทาง 2.
+    cards.push({ key: "pro", bg: "white", accentColor: "oklch(40% 0.13 25)", textColor: "oklch(25% 0.02 60)", subTextColor: "oklch(55% 0.02 60)",
+      name: t.tier2, price: "฿590", priceSub: t.perMonth + " · " + t.billedMonthly, features: t.tier2Desc,
+      isPaid: true, badge: "",
+      buttonLabel: this.state.busyTier === "pro" ? "…" : (lister.tier === "pro" || lister.tier === "agency" || lister.tier === "level3" ? t.current : t.upgrade),
+      onClick: () => this.upgrade("pro") });
+    cards.push({ key: "level3", bg: "white", accentColor: "oklch(40% 0.13 25)", textColor: "oklch(25% 0.02 60)", subTextColor: "oklch(55% 0.02 60)",
+      name: t.tier3, price: "฿1,190", priceSub: t.perMonth + " · " + t.billedMonthly, features: t.tier3Desc,
+      isPaid: true, badge: "Most popular",
+      buttonLabel: this.state.busyTier === "level3" ? "…" : (lister.tier === "level3" ? t.current : t.upgrade),
+      onClick: () => this.upgrade("level3") });
     cards.push({ key: "contact", bg: "oklch(20% 0.02 60)", accentColor: "oklch(75% 0.1 25)", textColor: "white", subTextColor: "oklch(75% 0.01 70)",
       name: t.contact, price: t.contactUs, priceSub: "", features: t.contactDesc,
       isContact: true, buttonLabel: t.contactUs });
