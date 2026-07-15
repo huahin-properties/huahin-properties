@@ -52,6 +52,29 @@
       </div>
     </div>
 
+    <div style="display:flex; gap:0; margin-bottom:20px; border-bottom:1px solid oklch(88% 0.01 70);">
+      <div onClick="{{ onTabSignup }}" style="padding:10px 20px; font-size:14px; font-weight:600; cursor:pointer; border-bottom:2px solid {{ signupTabColor }}; color:{{ signupTabColor }};">Sign up Free</div>
+      <div onClick="{{ onTabLogin }}" style="padding:10px 20px; font-size:14px; font-weight:600; cursor:pointer; border-bottom:2px solid {{ loginTabColor }}; color:{{ loginTabColor }};">Login</div>
+    </div>
+
+    <sc-if value="{{ showLoginForm }}">
+      <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:clamp(24px,4vw,36px); margin-bottom:20px;">
+        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); margin-bottom:14px;">เข้าสู่ระบบ</div>
+        <div style="display:grid; gap:12px; max-width:360px; margin-bottom:14px;">
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">อีเมล</div>
+            <input type="email" value="{{ loginEmail }}" onChange="{{ onLoginEmail }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รหัสผ่าน</div>
+            <input type="text" value="{{ loginPassword }}" onChange="{{ onLoginPassword }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;" />
+          </div>
+        </div>
+        <div onClick="{{ onLoginSubmit }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:600; cursor:pointer; max-width:360px;">{{ loginSubmitLabel }}</div>
+        <sc-if value="{{ loginError }}"><div style="font-size:13px; color:oklch(50% 0.18 30); margin-top:10px;">{{ loginError }}</div></sc-if>
+      </div>
+    </sc-if>
+
     <sc-if value="{{ submitted }}">
       <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:40px 24px; text-align:center;">
         <div style="font-size:34px; margin-bottom:12px;">✅</div>
@@ -61,7 +84,7 @@
       </div>
     </sc-if>
 
-    <sc-if value="{{ notSubmitted }}" hint-placeholder-val="{{ true }}">
+    <sc-if value="{{ showSignupForm }}" hint-placeholder-val="{{ true }}">
       <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:clamp(24px,4vw,36px);">
         <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); margin-bottom:6px;">สมัครใช้งานฟรี</div>
         <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:20px;">ทดลองใช้งานฟรี โพสต์ประกาศได้ทันที — AI ช่วยร่างประกาศ 8 ภาษาให้อัตโนมัติ</div>
@@ -102,7 +125,23 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { name: "", role: "agent", phone: "", email: "", password: "", submitted: false, submitting: false, error: "" };
+  state = { tab: "signup", name: "", role: "agent", phone: "", email: "", password: "", submitted: false, submitting: false, error: "", loginEmail: "", loginPassword: "", loginBusy: false, loginError: "" };
+
+  async loginSubmit() {
+    if (this.state.loginBusy) return;
+    if (!this.state.loginEmail.trim() || !this.state.loginPassword) {
+      this.setState({ loginError: "กรอกอีเมลและรหัสผ่าน" });
+      return;
+    }
+    this.setState({ loginBusy: true, loginError: "" });
+    try {
+      const fb = await import("./firebase-client.js");
+      await fb.adminSignIn(this.state.loginEmail.trim(), this.state.loginPassword);
+      window.location.href = "Lister Billing.dc.html";
+    } catch (e) {
+      this.setState({ loginBusy: false, loginError: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
+    }
+  }
 
   async submit() {
     if (this.state.submitting) return;
@@ -122,6 +161,7 @@ class Component extends DCLogic {
         status: "approved", tier: "basic", createdAt: Date.now(),
       });
       this.setState({ submitted: true, submitting: false });
+      setTimeout(() => { window.location.href = "Lister Billing.dc.html"; }, 2200);
     } catch (e) {
       const msg = (e && e.code === "auth/email-already-in-use")
         ? "อีเมลนี้เคยสมัครไว้แล้ว"
@@ -138,7 +178,17 @@ class Component extends DCLogic {
       email: this.state.email, onEmail: (e) => this.setState({ email: e.target.value }),
       password: this.state.password, onPassword: (e) => this.setState({ password: e.target.value }),
       submitted: this.state.submitted,
-      notSubmitted: !this.state.submitted,
+      showSignupForm: this.state.tab === "signup" && !this.state.submitted,
+      showLoginForm: this.state.tab === "login",
+      onTabSignup: () => this.setState({ tab: "signup" }),
+      onTabLogin: () => this.setState({ tab: "login" }),
+      signupTabColor: this.state.tab === "signup" ? "oklch(40% 0.13 25)" : "oklch(70% 0.01 70)",
+      loginTabColor: this.state.tab === "login" ? "oklch(40% 0.13 25)" : "oklch(70% 0.01 70)",
+      loginEmail: this.state.loginEmail, onLoginEmail: (e) => this.setState({ loginEmail: e.target.value }),
+      loginPassword: this.state.loginPassword, onLoginPassword: (e) => this.setState({ loginPassword: e.target.value }),
+      loginSubmitLabel: this.state.loginBusy ? "กำลังเข้าสู่ระบบ…" : "เข้าสู่ระบบ",
+      onLoginSubmit: () => this.loginSubmit(),
+      loginError: this.state.loginError,
       submitLabel: this.state.submitting ? "กำลังส่ง…" : "สมัครเลย",
       error: this.state.error,
       onSubmit: () => this.submit(),
