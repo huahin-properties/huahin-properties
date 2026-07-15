@@ -65,6 +65,29 @@
           <div onClick="{{ onUpgradeAgency }}" style="{{ agencyButtonStyle }}">{{ agencyButtonLabel }}</div>
         </div>
       </div>
+      <sc-if value="{{ showVip }}">
+        <div style="font-size:13px; font-weight:600; color:oklch(45% 0.02 60); margin:28px 0 10px;">💎 Agent VIP — เข้าถึงพูลบ้านคุณภาพดีที่ตัวแทนทั่วไปไม่เห็น</div>
+        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:12px;">สถานะปัจจุบัน: {{ vipTierLabel }}</div>
+        <div style="display:flex; gap:14px; flex-wrap:wrap;">
+          <div style="flex:1; min-width:200px; background:white; border-radius:8px; padding:20px;">
+            <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60); margin-bottom:6px;">🥈 VIP เงิน</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">เข้าถึงพูลบ้านค่าคอม 3%</div>
+            <div onClick="{{ onUpgradeVipSilver }}" style="{{ vipSilverStyle }}">{{ vipSilverLabel }}</div>
+          </div>
+          <div style="flex:1; min-width:200px; background:white; border-radius:8px; padding:20px;">
+            <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60); margin-bottom:6px;">🥇 VIP ทอง</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">เข้าถึงพูล 3% + 5%</div>
+            <div onClick="{{ onUpgradeVipGold }}" style="{{ vipGoldStyle }}">{{ vipGoldLabel }}</div>
+          </div>
+          <sc-if value="{{ showVipDiamond }}">
+            <div style="flex:1; min-width:200px; background:white; border-radius:8px; padding:20px;">
+              <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60); margin-bottom:6px;">💎 VIP เพชร</div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">เข้าถึงพูลระดับสูงสุด + สิทธิพิเศษ</div>
+              <div onClick="{{ onUpgradeVipDiamond }}" style="{{ vipDiamondStyle }}">{{ vipDiamondLabel }}</div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
       <sc-if value="{{ error }}"><div style="font-size:13px; color:oklch(50% 0.18 30); margin-top:14px;">{{ error }}</div></sc-if>
     </sc-if>
   </div>
@@ -73,7 +96,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { lister: null, prices: { pro: "", agency: "" }, loaded: false, notSignedIn: false, error: "", busyTier: null };
+  state = { lister: null, prices: { pro: "", agency: "" }, vipPrices: { silver: "", gold: "", diamond: "" }, rolloutLevel: 1, loaded: false, notSignedIn: false, error: "", busyTier: null };
 
   async componentDidMount() {
     const fb = await import("./firebase-client.js");
@@ -84,8 +107,10 @@ class Component extends DCLogic {
       return;
     }
     try {
-      const [lister, prices] = await Promise.all([fb.fetchMyListerDoc(), fb.fetchStripePrices()]);
-      this.setState({ lister, prices, loaded: true });
+      const [lister, prices, vipPrices, rolloutLevel] = await Promise.all([
+        fb.fetchMyListerDoc(), fb.fetchStripePrices(), fb.fetchAgentVipPrices(), fb.fetchRolloutLevel(),
+      ]);
+      this.setState({ lister, prices, vipPrices, rolloutLevel, loaded: true });
     } catch (e) {
       console.warn("Failed to load billing info:", e);
       this.setState({ loaded: true, error: "โหลดข้อมูลไม่สำเร็จ" });
@@ -100,7 +125,22 @@ class Component extends DCLogic {
     }
     this.setState({ busyTier: tier, error: "" });
     try {
-      await this._fb.startCheckout(priceId, this.state.lister.id, this.state.lister.email);
+      await this._fb.startCheckout(priceId, this.state.lister.id, this.state.lister.email, tier);
+    } catch (e) {
+      this.setState({ busyTier: null, error: "เริ่มการชำระเงินไม่สำเร็จ ลองใหม่อีกครั้ง" });
+    }
+  }
+
+  async upgradeVip(tier) {
+    const priceId = this.state.vipPrices[tier];
+    if (!priceId) {
+      this.setState({ error: "แอดมินยังไม่เปิดแพ็กเกจ VIP นี้ — ติดต่อแอดมิน" });
+      return;
+    }
+    const vipKey = "vip" + tier.charAt(0).toUpperCase() + tier.slice(1);
+    this.setState({ busyTier: vipKey, error: "" });
+    try {
+      await this._fb.startCheckout(priceId, this.state.lister.id, this.state.lister.email, vipKey);
     } catch (e) {
       this.setState({ busyTier: null, error: "เริ่มการชำระเงินไม่สำเร็จ ลองใหม่อีกครั้ง" });
     }
@@ -138,6 +178,18 @@ class Component extends DCLogic {
       proButtonLabel: this.state.busyTier === "pro" ? "กำลังเปิด…" : "อัปเกรดเป็น Pro",
       agencyButtonStyle: this.state.busyTier === "agency" ? btnBusy : btnActive,
       agencyButtonLabel: this.state.busyTier === "agency" ? "กำลังเปิด…" : "อัปเกรดเป็น Agency",
+      showVip: this.state.rolloutLevel >= 3,
+      vipTierLabel: { silver: "🥈 VIP เงิน", gold: "🥇 VIP ทอง", diamond: "💎 VIP เพชร" }[lister.vipTier] || "ยังไม่ได้เป็นสมาชิก VIP",
+      vipSilverStyle: this.state.busyTier === "vipSilver" ? btnBusy : btnActive,
+      vipSilverLabel: this.state.busyTier === "vipSilver" ? "กำลังเปิด…" : (lister.vipTier === "silver" ? "สมาชิกอยู่แล้ว" : "สมัคร VIP เงิน"),
+      vipGoldStyle: this.state.busyTier === "vipGold" ? btnBusy : btnActive,
+      vipGoldLabel: this.state.busyTier === "vipGold" ? "กำลังเปิด…" : (lister.vipTier === "gold" ? "สมาชิกอยู่แล้ว" : "สมัคร VIP ทอง"),
+      showVipDiamond: this.state.rolloutLevel >= 4,
+      vipDiamondStyle: this.state.busyTier === "vipDiamond" ? btnBusy : btnActive,
+      vipDiamondLabel: this.state.busyTier === "vipDiamond" ? "กำลังเปิด…" : (lister.vipTier === "diamond" ? "สมาชิกอยู่แล้ว" : "สมัคร VIP เพชร"),
+      onUpgradeVipSilver: () => this.upgradeVip("silver"),
+      onUpgradeVipGold: () => this.upgradeVip("gold"),
+      onUpgradeVipDiamond: () => this.upgradeVip("diamond"),
       error: this.state.error,
     };
   }

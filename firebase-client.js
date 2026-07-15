@@ -435,15 +435,64 @@ export async function saveBannerPrices(prices) {
   await setDoc("siteContent", "bannerPrices", prices);
 }
 
-export async function startCheckout(priceId, listerId, email) {
+export async function startCheckout(priceId, listerId, email, tier) {
   const res = await fetch(CHECKOUT_URL, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ priceId, listerId, email }),
+    body: JSON.stringify({ priceId, listerId, email, tier }),
   });
   const data = await res.json();
   if (!res.ok || !data.url) throw new Error(data.error || "ไม่สามารถเริ่มการชำระเงินได้");
   window.location.href = data.url;
+}
+
+const VIP_CHECKOUT_URL = "https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/createVipCheckoutSession";
+
+// Homeowner VIP pool boost (ทาง 4) — admin triggers on the owner's behalf,
+// same one-time dynamic-price pattern as Featured/Banner.
+export async function startVipCheckout(propertyId, tier, amountThb) {
+  const res = await fetch(VIP_CHECKOUT_URL, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ propertyId, tier, amountThb }),
+  });
+  const data = await res.json();
+  if (!res.ok || !data.url) throw new Error(data.error || "ไม่สามารถเริ่มการชำระเงินได้");
+  window.location.href = data.url;
+}
+
+// Homeowner VIP tier pricing (THB / 30 days per tier) — admin-editable.
+export async function fetchHomeownerVipPrices() {
+  const doc = await db().collection("siteContent").doc("homeownerVipPrices").get();
+  return doc.exists ? doc.data() : { silver: "", gold: "", diamond: "" };
+}
+
+export async function saveHomeownerVipPrices(prices) {
+  await setDoc("siteContent", "homeownerVipPrices", prices);
+}
+
+// Agent VIP subscription Stripe Price IDs per tier — admin-editable (real
+// Stripe Products/Prices needed since these are recurring subscriptions).
+export async function fetchAgentVipPrices() {
+  const doc = await db().collection("siteContent").doc("agentVipPrices").get();
+  return doc.exists ? doc.data() : { silver: "", gold: "", diamond: "" };
+}
+
+export async function saveAgentVipPrices(prices) {
+  await setDoc("siteContent", "agentVipPrices", prices);
+}
+
+// Rollout level (1-4) gating how much of the paid feature set is visible —
+// see BLUEPRINT.md §12 rollout plan. 1 = free-only, 2 = plan tiers visible,
+// 3-4 = Agent VIP visible. Single admin-controlled switch, no code changes
+// needed to advance a stage.
+export async function fetchRolloutLevel() {
+  const doc = await db().collection("siteContent").doc("rollout").get();
+  return doc.exists ? (doc.data().level || 1) : 1;
+}
+
+export async function saveRolloutLevel(level) {
+  await setDoc("siteContent", "rollout", { level });
 }
 
 export async function openBillingPortal(customerId) {

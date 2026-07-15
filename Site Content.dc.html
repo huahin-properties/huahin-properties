@@ -280,6 +280,65 @@
           <span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ bannerPriceMsg }}</span>
         </sc-if>
       </div>
+    </div>
+
+    <!-- ทาง 4: AGENT VIP PACKAGES -->
+    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">💎 แพ็กเกจ VIP (ทาง 4)</div>
+      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">ราคาฝั่งเจ้าของบ้าน (จ่ายครั้งเดียว/30 วัน เพื่อเข้าพูล VIP ให้ Agent เห็น) และฝั่ง Agent (สมัครสมาชิกรายเดือน เพื่อเข้าถึงพูล) — ดูรายละเอียดหมวด 2 ทาง 4 ใน BLUEPRINT.md</div>
+
+      <div style="font-size:12px; font-weight:600; color:oklch(40% 0.02 60); margin-bottom:8px;">ฝั่งเจ้าของบ้าน (บาท / 30 วัน)</div>
+      <div style="display:flex; gap:14px; flex-wrap:wrap; max-width:520px; margin-bottom:16px;">
+        <div style="flex:1; min-width:140px;">
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">🥈 แพ็กเกจเงิน</div>
+          <input type="number" value="{{ homeownerVipSilver }}" onChange="{{ onHomeownerVipSilver }}" placeholder="990" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
+        </div>
+        <div style="flex:1; min-width:140px;">
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">🥇 แพ็กเกจทอง</div>
+          <input type="number" value="{{ homeownerVipGold }}" onChange="{{ onHomeownerVipGold }}" placeholder="1990" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
+        </div>
+        <div style="flex:1; min-width:140px;">
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">💎 แพ็กเกจเพชร</div>
+          <input type="number" value="{{ homeownerVipDiamond }}" onChange="{{ onHomeownerVipDiamond }}" placeholder="3990" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
+        </div>
+      </div>
+      <div style="margin-bottom:16px;">
+        <div onClick="{{ onSaveHomeownerVip }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">บันทึก</div>
+        <sc-if value="{{ homeownerVipMsg }}"><span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ homeownerVipMsg }}</span></sc-if>
+      </div>
+
+      <div style="font-size:12px; font-weight:600; color:oklch(40% 0.02 60); margin-bottom:8px;">ฝั่ง Agent (Stripe Price ID — ต้องสร้าง Product/Price ใน Stripe ก่อน เพราะเป็นรายเดือน)</div>
+      <div style="display:flex; gap:14px; flex-wrap:wrap; max-width:640px; margin-bottom:12px;">
+        <div style="flex:1; min-width:180px;">
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">🥈 VIP เงิน — Price ID</div>
+          <input value="{{ agentVipSilver }}" onChange="{{ onAgentVipSilver }}" placeholder="price_..." style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
+        </div>
+        <div style="flex:1; min-width:180px;">
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">🥇 VIP ทอง — Price ID</div>
+          <input value="{{ agentVipGold }}" onChange="{{ onAgentVipGold }}" placeholder="price_..." style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
+        </div>
+        <div style="flex:1; min-width:180px;">
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">💎 VIP เพชร — Price ID</div>
+          <input value="{{ agentVipDiamond }}" onChange="{{ onAgentVipDiamond }}" placeholder="price_..." style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
+        </div>
+      </div>
+      <div>
+        <div onClick="{{ onSaveAgentVip }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">บันทึก</div>
+        <sc-if value="{{ agentVipMsg }}"><span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ agentVipMsg }}</span></sc-if>
+      </div>
+    </div>
+
+    <!-- ROLLOUT LEVEL SWITCH -->
+    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">🚀 ระดับการเปิดตัว (Rollout Level)</div>
+      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">สวิตช์เดียวคุมว่าเว็บเปิดเผยฟีเจอร์เก็บเงินระดับไหนแล้ว — ปลดทีละระดับตามที่พร้อม ไม่ต้องรอแก้โค้ดทุกครั้ง</div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <sc-for list="{{ rolloutOptions }}" as="r" hint-placeholder-count="4">
+          <div onClick="{{ r.onClick }}" style="padding:10px 16px; border-radius:6px; background:{{ r.bg }}; color:{{ r.color }}; font-size:13px; cursor:pointer; border:1px solid oklch(85% 0.01 70);">{{ r.label }}</div>
+        </sc-for>
+      </div>
+      <sc-if value="{{ rolloutMsg }}"><div style="margin-top:10px; font-size:13px; color:oklch(40% 0.12 145);">{{ rolloutMsg }}</div></sc-if>
+      </div>
       <div style="margin-top:10px; font-size:12px; color:oklch(55% 0.02 60);">ลิงก์สำหรับลูกค้าภายนอก: <strong>huahin.properties/Advertise.dc.html</strong></div>
     </div>
 
@@ -300,6 +359,9 @@ class Component extends DCLogic {
     stripePrices: { pro: "", agency: "" }, stripeMsg: "",
     featuredPrices: { p7: "", p30: "" }, featuredPriceMsg: "",
     bannerPrices: { top: "", mid: "", side: "" }, bannerPriceMsg: "",
+    homeownerVipPrices: { silver: "", gold: "", diamond: "" }, homeownerVipMsg: "",
+    agentVipPrices: { silver: "", gold: "", diamond: "" }, agentVipMsg: "",
+    rolloutLevel: 1, rolloutMsg: "",
     aiNotes: [], noteDrafts: {}, noteMsgs: {},
     aiRestrictions: "", aiRestrictionsMsg: "",
     aiPersonaName: "", aiPersonaRole: "", aiPersonaMsg: "",
@@ -368,6 +430,15 @@ class Component extends DCLogic {
       this.setState({ bannerPrices });
     } catch (e) {
       console.warn("Failed to load banner prices:", e);
+    }
+
+    try {
+      const [homeownerVipPrices, agentVipPrices, rolloutLevel] = await Promise.all([
+        fb.fetchHomeownerVipPrices(), fb.fetchAgentVipPrices(), fb.fetchRolloutLevel(),
+      ]);
+      this.setState({ homeownerVipPrices, agentVipPrices, rolloutLevel });
+    } catch (e) {
+      console.warn("Failed to load VIP config:", e);
     }
 
     try {
@@ -552,6 +623,31 @@ class Component extends DCLogic {
     } catch (e) { console.warn("saveBannerPrices failed:", e); }
   }
 
+  async saveHomeownerVipPrices() {
+    try {
+      await this._fb.saveHomeownerVipPrices(this.state.homeownerVipPrices);
+      this.setState({ homeownerVipMsg: "บันทึกแล้ว" });
+      setTimeout(() => this.setState({ homeownerVipMsg: "" }), 2500);
+    } catch (e) { console.warn("saveHomeownerVipPrices failed:", e); }
+  }
+
+  async saveAgentVipPrices() {
+    try {
+      await this._fb.saveAgentVipPrices(this.state.agentVipPrices);
+      this.setState({ agentVipMsg: "บันทึกแล้ว" });
+      setTimeout(() => this.setState({ agentVipMsg: "" }), 2500);
+    } catch (e) { console.warn("saveAgentVipPrices failed:", e); }
+  }
+
+  async saveRolloutLevel(level) {
+    this.setState({ rolloutLevel: level });
+    try {
+      await this._fb.saveRolloutLevel(level);
+      this.setState({ rolloutMsg: "บันทึกแล้ว" });
+      setTimeout(() => this.setState({ rolloutMsg: "" }), 2500);
+    } catch (e) { console.warn("saveRolloutLevel failed:", e); }
+  }
+
   async saveStripePrices() {
     try {
       await this._fb.saveStripePrices(this.state.stripePrices);
@@ -696,6 +792,32 @@ class Component extends DCLogic {
       onBannerSidePrice: (e) => this.setState((s) => ({ bannerPrices: { ...s.bannerPrices, side: e.target.value } })),
       onSaveBannerPrices: () => this.saveBannerPrices(),
       bannerPriceMsg: this.state.bannerPriceMsg,
+      homeownerVipSilver: this.state.homeownerVipPrices.silver || "",
+      onHomeownerVipSilver: (e) => this.setState((s) => ({ homeownerVipPrices: { ...s.homeownerVipPrices, silver: e.target.value } })),
+      homeownerVipGold: this.state.homeownerVipPrices.gold || "",
+      onHomeownerVipGold: (e) => this.setState((s) => ({ homeownerVipPrices: { ...s.homeownerVipPrices, gold: e.target.value } })),
+      homeownerVipDiamond: this.state.homeownerVipPrices.diamond || "",
+      onHomeownerVipDiamond: (e) => this.setState((s) => ({ homeownerVipPrices: { ...s.homeownerVipPrices, diamond: e.target.value } })),
+      onSaveHomeownerVip: () => this.saveHomeownerVipPrices(),
+      homeownerVipMsg: this.state.homeownerVipMsg,
+      agentVipSilver: this.state.agentVipPrices.silver || "",
+      onAgentVipSilver: (e) => this.setState((s) => ({ agentVipPrices: { ...s.agentVipPrices, silver: e.target.value } })),
+      agentVipGold: this.state.agentVipPrices.gold || "",
+      onAgentVipGold: (e) => this.setState((s) => ({ agentVipPrices: { ...s.agentVipPrices, gold: e.target.value } })),
+      agentVipDiamond: this.state.agentVipPrices.diamond || "",
+      onAgentVipDiamond: (e) => this.setState((s) => ({ agentVipPrices: { ...s.agentVipPrices, diamond: e.target.value } })),
+      onSaveAgentVip: () => this.saveAgentVipPrices(),
+      agentVipMsg: this.state.agentVipMsg,
+      rolloutLevel: this.state.rolloutLevel,
+      rolloutOptions: [1, 2, 3, 4].map((n) => ({
+        n,
+        label: { 1: "ระดับ 1 — โพสต์ฟรีเท่านั้น", 2: "ระดับ 2 — เปิดแพ็กเกจสมาชิก Pro/Agency", 3: "ระดับ 3 — เปิด Agent VIP (เงิน/ทอง)", 4: "ระดับ 4 — เปิด Agent VIP ครบ (รวมเพชร)" }[n],
+        active: this.state.rolloutLevel === n,
+        bg: this.state.rolloutLevel === n ? "oklch(22% 0.02 60)" : "transparent",
+        color: this.state.rolloutLevel === n ? "oklch(98% 0.01 80)" : "oklch(30% 0.02 60)",
+        onClick: () => this.saveRolloutLevel(n),
+      })),
+      rolloutMsg: this.state.rolloutMsg,
       onAddNote: () => this.addNote(),
       aiPersonaName: this.state.aiPersonaName,
       onAiPersonaName: (e) => this.setState({ aiPersonaName: e.target.value }),

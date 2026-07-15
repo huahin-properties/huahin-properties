@@ -223,6 +223,16 @@
           <sc-if value="{{ r.isFeatured }}">
             <div style="font-size:11px; color:oklch(45% 0.13 75); font-weight:600;">{{ r.featuredUntilLabel }}</div>
           </sc-if>
+          <sc-if value="{{ r.showVipButtons }}">
+            <div style="display:flex; gap:6px;">
+              <div onClick="{{ r.onVipSilver }}" title="ดัน VIP เงิน (30 วัน)" style="font-size:11px; color:oklch(40% 0.02 60); border:1px solid oklch(75% 0.02 60); padding:5px 9px; border-radius:100px; cursor:pointer;">🥈 VIP</div>
+              <div onClick="{{ r.onVipGold }}" title="ดัน VIP ทอง (30 วัน)" style="font-size:11px; color:oklch(40% 0.1 75); border:1px solid oklch(75% 0.1 75); padding:5px 9px; border-radius:100px; cursor:pointer;">🥇 VIP</div>
+              <sc-if value="{{ r.showVipDiamondButton }}">
+                <div onClick="{{ r.onVipDiamond }}" title="ดัน VIP เพชร (30 วัน)" style="font-size:11px; color:oklch(45% 0.15 250); border:1px solid oklch(75% 0.1 250); padding:5px 9px; border-radius:100px; cursor:pointer;">💎 VIP</div>
+              </sc-if>
+            </div>
+          </sc-if>
+          <sc-if value="{{ r.vipTierLabel }}"><div style="font-size:10px; color:oklch(45% 0.02 60);">{{ r.vipTierLabel }}</div></sc-if>
           <sc-if value="{{ r.showBoost }}">
             <div style="display:flex; gap:6px;">
               <div onClick="{{ r.onBoost7 }}" title="ดัน Featured 7 วัน" style="font-size:11px; color:oklch(40% 0.1 75); border:1px solid oklch(80% 0.06 75); padding:5px 9px; border-radius:100px; cursor:pointer; white-space:nowrap;">🌟 7 วัน</div>
@@ -568,6 +578,13 @@ class Component extends DCLogic {
     } catch (e) {
       console.warn("Firebase featuredPrices fetch failed:", e);
     }
+    let homeownerVipPrices = { silver: "", gold: "", diamond: "" };
+    let rolloutLevel = 1;
+    try {
+      [homeownerVipPrices, rolloutLevel] = await Promise.all([fb.fetchHomeownerVipPrices(), fb.fetchRolloutLevel()]);
+    } catch (e) {
+      console.warn("Firebase VIP config fetch failed:", e);
+    }
     try {
       externalServices = await fb.fetchCollection("externalServices");
     } catch (e) {
@@ -620,7 +637,7 @@ class Component extends DCLogic {
       photos: (p.photos || []).map((ph) => (typeof ph === "string" ? { label: ph, url: "" } : ph)),
       _raw: p,
     }));
-    this.setState({ lang: mod.getLang(), data: mod, properties, owners, tenants, profilePhotosById, externalServices, leads, featuredPrices });
+    this.setState({ lang: mod.getLang(), data: mod, properties, owners, tenants, profilePhotosById, externalServices, leads, featuredPrices, homeownerVipPrices, rolloutLevel });
     try {
       const archivedCount = await fb.runArchivalSweep(properties.map((p) => p._raw));
       if (archivedCount > 0) this.setState({ archivedThisSession: archivedCount });
@@ -974,6 +991,17 @@ class Component extends DCLogic {
     }, 700);
   }
 
+  async boostVip(propertyId, tier) {
+    try {
+      const amountThb = (this.state.homeownerVipPrices || {})[tier];
+      if (!amountThb) { alert("ยังไม่ได้ตั้งราคา VIP นี้ — ไปตั้งค่าที่หน้า Site Content ก่อน"); return; }
+      await this._fb.startVipCheckout(propertyId, tier, Number(amountThb));
+    } catch (e) {
+      console.warn("boostVip failed:", e);
+      alert("เริ่มการชำระเงินไม่สำเร็จ: " + (e && e.message));
+    }
+  }
+
   async boostFeatured(propertyId, days) {
     try {
       const prices = this.state.featuredPrices || {};
@@ -1075,6 +1103,12 @@ class Component extends DCLogic {
           ? "🌟 Featured ถึง " + new Date(p.featuredUntil).toLocaleDateString("th-TH") : "",
         onBoost7: () => this.boostFeatured(p.id, 7),
         onBoost30: () => this.boostFeatured(p.id, 30),
+        showVipButtons: this.state.rolloutLevel >= 3,
+        vipTierLabel: p.vipTier && p.vipUntil > Date.now() ? ({ silver: "🥈 VIP เงิน", gold: "🥇 VIP ทอง", diamond: "💎 VIP เพชร" }[p.vipTier] + " ถึง " + new Date(p.vipUntil).toLocaleDateString("th-TH")) : "",
+        onVipSilver: () => this.boostVip(p.id, "silver"),
+        onVipGold: () => this.boostVip(p.id, "gold"),
+        showVipDiamondButton: this.state.rolloutLevel >= 4,
+        onVipDiamond: () => this.boostVip(p.id, "diamond"),
       }));
     }
 
