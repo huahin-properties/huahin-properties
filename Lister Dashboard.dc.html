@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <title>หน้าทำงานของฉัน — huahin.properties</title>
+  <style>
+    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    a { color: oklch(42% 0.12 25); }
+    a:hover { color: oklch(32% 0.13 25); }
+  </style>
+</helmet>
+
+<div style="min-height:100vh;">
+  <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+    <div style="display:flex; align-items:center; gap:9px;">
+      <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
+      <span style="font-family:'Playfair Display',serif; font-size:19px; color:white;">huahin . properties</span>
+      <span style="color:oklch(70% 0.02 70); font-size:14px;">| หน้าทำงานของฉัน</span>
+    </div>
+    <div onClick="{{ onLogout }}" style="font-size:13px; color:oklch(75% 0.02 70); cursor:pointer;">ออกจากระบบ</div>
+  </div>
+
+  <div style="max-width:1080px; margin:0 auto; padding:clamp(20px,4vw,40px);">
+
+    <sc-if value="{{ notSignedIn }}">
+      <div style="background:white; border-radius:8px; padding:24px; text-align:center;">
+        <div style="font-size:14px; color:oklch(35% 0.02 60); margin-bottom:14px;">กรุณาเข้าสู่ระบบเพื่อดูหน้าทำงานของคุณ</div>
+        <a href="Agent Signup.dc.html" style="display:inline-block; background:oklch(22% 0.02 60); color:white; padding:10px 24px; border-radius:6px; text-decoration:none; font-size:14px;">ไปที่หน้าเข้าสู่ระบบ</a>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
+      <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:2px;">สวัสดีคุณ{{ listerName }}</div>
+      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:22px;">{{ listerEmail }}</div>
+
+      <div style="background:white; border-radius:8px; padding:20px 22px; margin-bottom:22px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+        <div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">แพ็กเกจปัจจุบันของคุณ</div>
+          <div style="font-size:16px; font-weight:600; color:oklch(25% 0.02 60);">{{ tierLabel }}</div>
+        </div>
+        <a href="Lister Billing.dc.html" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:11px 22px; border-radius:100px; font-size:13px; font-weight:600; text-decoration:none; white-space:nowrap;">📦 ดู/อัปเกรดแพ็กเกจ</a>
+      </div>
+
+      <sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+          <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60);">ทรัพย์ของฉัน ({{ propCount }})</div>
+          <div onClick="{{ onNewProperty }}" style="background:oklch(22% 0.02 60); color:white; padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">+ เพิ่มทรัพย์ใหม่</div>
+        </div>
+
+        <sc-if value="{{ hasNoProps }}">
+          <div style="background:white; border-radius:8px; padding:32px 20px; text-align:center; font-size:13px; color:oklch(50% 0.02 60);">ยังไม่มีทรัพย์ในระบบ — กด "เพิ่มทรัพย์ใหม่" เพื่อเริ่มลงประกาศ</div>
+        </sc-if>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px;">
+          <sc-for list="{{ properties }}" as="p" hint-placeholder-count="2">
+            <div onClick="{{ p.onEdit }}" style="background:white; border-radius:8px; padding:18px; cursor:pointer; border:1px solid oklch(92% 0.01 70);">
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                <div style="font-size:13px; font-weight:700; color:oklch(40% 0.13 25);">{{ p.code }}</div>
+                <div style="font-size:11px; padding:3px 9px; border-radius:100px; background:{{ p.statusBg }}; color:{{ p.statusColor }};">{{ p.statusLabel }}</div>
+              </div>
+              <div style="font-size:14px; color:oklch(25% 0.02 60); margin-bottom:4px;">{{ p.zone }}, {{ p.areaLabel }}</div>
+              <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:10px;">{{ p.typeLabel }} · {{ p.bedBath }}</div>
+              <div style="font-size:15px; font-weight:700; color:oklch(25% 0.02 60);">{{ p.priceLabel }}</div>
+              <sc-if value="{{ p.assistedSale }}">
+                <div style="font-size:11px; color:oklch(45% 0.13 145); margin-top:8px;">🤝 เปิดใช้ "ให้ทีมช่วยขาย"</div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showEdit }}">
+        <div style="background:white; border-radius:8px; padding:clamp(20px,4vw,30px);">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
+            <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60);">{{ editTitle }}</div>
+            <div onClick="{{ onBackToList }}" style="font-size:13px; color:oklch(50% 0.02 60); cursor:pointer;">← กลับไปหน้ารายการ</div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:16px;">
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ประเภททรัพย์</div>
+              <select value="{{ f_type }}" onChange="{{ onFType }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white;">
+                <sc-for list="{{ typeOptions }}" as="ty" hint-placeholder-count="5"><option value="{{ ty.id }}">{{ ty.label }}</option></sc-for>
+              </select>
+            </div>
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">โซน/พื้นที่</div>
+              <select value="{{ f_area }}" onChange="{{ onFArea }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white;">
+                <sc-for list="{{ areaOptions }}" as="a" hint-placeholder-count="3"><option value="{{ a.id }}">{{ a.label }}</option></sc-for>
+              </select>
+            </div>
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ชื่อทำเล/ซอย</div>
+              <input value="{{ f_zone }}" onChange="{{ onFZone }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+            </div>
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">สถานะ</div>
+              <select value="{{ f_status }}" onChange="{{ onFStatus }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white;">
+                <option value="sale">ประกาศขาย</option>
+                <option value="rent">ประกาศเช่า</option>
+              </select>
+            </div>
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ราคา (บาท)</div>
+              <input type="number" value="{{ f_price }}" onChange="{{ onFPrice }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+            </div>
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ห้องนอน</div>
+              <input type="number" value="{{ f_bedrooms }}" onChange="{{ onFBedrooms }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+            </div>
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ห้องน้ำ</div>
+              <input type="number" value="{{ f_bathrooms }}" onChange="{{ onFBathrooms }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+            </div>
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">พื้นที่ใช้สอย (ตร.ม.)</div>
+              <input type="number" value="{{ f_livingArea }}" onChange="{{ onFLivingArea }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+            </div>
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ขนาดที่ดิน (ตร.ว.)</div>
+              <input type="number" value="{{ f_landSize }}" onChange="{{ onFLandSize }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+            </div>
+          </div>
+
+          <div style="margin-bottom:16px;">
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รายละเอียดเพิ่มเติม</div>
+            <textarea rows="4" value="{{ f_description }}" onChange="{{ onFDescription }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
+          </div>
+
+          <div style="background:oklch(97% 0.01 80); border:1px dashed oklch(82% 0.02 60); border-radius:6px; padding:16px 18px; display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+            <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer;">
+              <input type="checkbox" checked="{{ f_assistedSale }}" onChange="{{ onFAssistedSale }}" style="margin-top:3px;" />
+              <span style="font-size:13.5px; color:oklch(30% 0.02 60); line-height:1.6;">นอกจากลงประกาศในเว็บเราแล้ว ต้องการให้ทีมงานช่วยขาย/ปล่อยเช่าผ่านช่องทางอื่นเพิ่มเติมด้วยหรือไม่? ข้อความนี้เป็นความลับระหว่างคุณกับทีมงานเท่านั้น</span>
+            </label>
+            <sc-if value="{{ f_assistedSale }}">
+              <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <span style="font-size:12px; color:oklch(50% 0.02 60);">ค่าคอมมิชชันที่ยินดีให้เรา:</span>
+                <select value="{{ f_commissionPct }}" onChange="{{ onFCommissionPct }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 10px; font-size:13px; font-family:inherit; background:white;">
+                  <option value="1">1%</option>
+                  <option value="2">2%</option>
+                  <option value="5">5%</option>
+                  <option value="10">10%</option>
+                  <option value="15">15%</option>
+                </select>
+              </div>
+            </sc-if>
+            <div style="font-size:11.5px; color:oklch(58% 0.02 60);">🔒 ส่วนตัว — เห็นเฉพาะทีมงานเราเท่านั้น ไม่แสดงต่อสาธารณะหรือผู้ลงประกาศรายอื่น</div>
+          </div>
+
+          <div onClick="{{ onSaveProperty }}" style="background:oklch(40% 0.13 25); color:white; text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:600; cursor:pointer;">{{ saveLabel }}</div>
+          <sc-if value="{{ saveError }}"><div style="font-size:13px; color:oklch(50% 0.18 30); text-align:center; margin-top:10px;">{{ saveError }}</div></sc-if>
+        </div>
+      </sc-if>
+    </sc-if>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    loaded: false, signedIn: false, lister: null, properties: [], view: "list",
+    editingId: null, f_type: "villa", f_area: "hua-hin", f_zone: "", f_status: "sale",
+    f_price: "", f_bedrooms: "", f_bathrooms: "", f_livingArea: "", f_landSize: "",
+    f_description: "", f_assistedSale: false, f_commissionPct: "5", saveError: "", saving: false,
+  };
+
+  async componentDidMount() {
+    const fb = await import("./firebase-client.js");
+    this._fb = fb;
+    const mod = await import("./data.js");
+    this._mod = mod;
+    await fb.onAdminAuthReady().catch(() => {});
+    const signedIn = fb.isAdminAuthed();
+    if (!signedIn) { this.setState({ loaded: true, signedIn: false }); return; }
+    try {
+      const lister = await fb.fetchMyListerDoc();
+      if (!lister) { this.setState({ loaded: true, signedIn: false }); return; }
+      const properties = await fb.fetchWhere("properties", "listerId", lister.id);
+      this.setState({ loaded: true, signedIn: true, lister, properties });
+    } catch (e) {
+      console.warn("Failed to load dashboard:", e);
+      this.setState({ loaded: true, signedIn: true, lister: null, properties: [] });
+    }
+  }
+
+  onLogout() { this._fb.logoutAdmin(); window.location.href = "Home.dc.html"; }
+
+  startNew() {
+    this.setState({
+      view: "edit", editingId: null, f_type: "villa", f_area: "hua-hin", f_zone: "",
+      f_status: "sale", f_price: "", f_bedrooms: "", f_bathrooms: "", f_livingArea: "",
+      f_landSize: "", f_description: "", f_assistedSale: false, f_commissionPct: "5", saveError: "",
+    });
+  }
+
+  startEdit(p) {
+    this.setState({
+      view: "edit", editingId: p.id, f_type: p.type || "villa", f_area: p.area || "hua-hin",
+      f_zone: p.zone || "", f_status: p.status === "rent" ? "rent" : "sale",
+      f_price: p.price != null ? String(p.price) : "", f_bedrooms: p.bedrooms != null ? String(p.bedrooms) : "",
+      f_bathrooms: p.bathrooms != null ? String(p.bathrooms) : "", f_livingArea: p.livingArea != null ? String(p.livingArea) : "",
+      f_landSize: p.landSize != null ? String(p.landSize) : "", f_description: p.description || "",
+      f_assistedSale: !!p.assistedSale, f_commissionPct: p.commissionPct || "5", saveError: "",
+    });
+  }
+
+  genCode(area) {
+    const prefix = { "hua-hin": "HH", "pranburi": "PB", "cha-am": "CA" }[area] || "LST";
+    return prefix + "-" + String(Date.now()).slice(-5);
+  }
+
+  async saveProperty() {
+    if (this.state.saving) return;
+    if (!this.state.f_zone.trim() || !this.state.f_price) {
+      this.setState({ saveError: "กรุณากรอกชื่อทำเลและราคาให้ครบ" });
+      return;
+    }
+    this.setState({ saving: true, saveError: "" });
+    const id = this.state.editingId || this.genCode(this.state.f_area);
+    const payload = {
+      listerId: this.state.lister.id,
+      type: this.state.f_type, area: this.state.f_area, zone: this.state.f_zone,
+      status: this.state.f_status, price: Number(this.state.f_price) || 0,
+      bedrooms: this.state.f_bedrooms ? Number(this.state.f_bedrooms) : null,
+      bathrooms: this.state.f_bathrooms ? Number(this.state.f_bathrooms) : null,
+      livingArea: this.state.f_livingArea ? Number(this.state.f_livingArea) : null,
+      landSize: this.state.f_landSize ? Number(this.state.f_landSize) : null,
+      description: this.state.f_description,
+      assistedSale: this.state.f_assistedSale,
+      commissionPct: this.state.f_assistedSale ? this.state.f_commissionPct : null,
+      currency: "THB", updatedAt: Date.now(),
+    };
+    try {
+      await this._fb.setDoc("properties", id, payload);
+      const properties = await this._fb.fetchWhere("properties", "listerId", this.state.lister.id);
+      this.setState({ saving: false, view: "list", properties });
+    } catch (e) {
+      console.warn("Failed to save property:", e);
+      this.setState({ saving: false, saveError: "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง" });
+    }
+  }
+
+  renderVals() {
+    const mod = this._mod;
+    const tierLabels = { basic: "① ฟรี", pro: "② Premium", agency: "② Premium", level3: "③ ระดับ 3", silver: "🥈 VIP เงิน", gold: "🥇 VIP ทอง", diamond: "💎 VIP เพชร" };
+    const lister = this.state.lister || {};
+    const areaLabels = { "hua-hin": "หัวหิน", "pranburi": "ปราณบุรี", "cha-am": "ชะอำ" };
+    const typeLabels = { villa: "พูลวิลล่า", house: "บ้านเดี่ยว", condo: "คอนโด", land: "ที่ดิน", commercial: "อาคารพาณิชย์" };
+    const statusMap = {
+      sale: { label: "ประกาศขาย", bg: "oklch(93% 0.03 145)", color: "oklch(35% 0.1 145)" },
+      rent: { label: "ประกาศเช่า", bg: "oklch(93% 0.03 250)", color: "oklch(40% 0.1 250)" },
+      sold: { label: "ขายแล้ว", bg: "oklch(90% 0.01 70)", color: "oklch(45% 0.02 60)" },
+      reserved: { label: "จอง", bg: "oklch(93% 0.05 80)", color: "oklch(45% 0.1 80)" },
+      rented: { label: "เช่าแล้ว", bg: "oklch(90% 0.01 70)", color: "oklch(45% 0.02 60)" },
+    };
+
+    const properties = (this.state.properties || []).map((p) => {
+      const st = statusMap[p.status] || statusMap.sale;
+      const bedBath = (p.bedrooms || p.bathrooms) ? `${p.bedrooms || 0} นอน / ${p.bathrooms || 0} น้ำ` : "-";
+      return {
+        id: p.id, code: p.id, zone: p.zone || "-", areaLabel: areaLabels[p.area] || p.area || "-",
+        typeLabel: typeLabels[p.type] || p.type || "-", bedBath,
+        priceLabel: "฿" + (Number(p.price) || 0).toLocaleString() + (p.status === "rent" ? "/เดือน" : ""),
+        statusLabel: st.label, statusBg: st.bg, statusColor: st.color,
+        assistedSale: !!p.assistedSale,
+        onEdit: () => this.startEdit(p),
+      };
+    });
+
+    return {
+      loaded: this.state.loaded, signedIn: this.state.signedIn, notSignedIn: this.state.loaded && !this.state.signedIn,
+      listerName: lister.name ? " " + lister.name : "", listerEmail: lister.email || "",
+      tierLabel: tierLabels[lister.tier] || tierLabels[lister.vipTier] || "① ฟรี",
+      onLogout: () => this.onLogout(),
+      showList: this.state.view === "list", showEdit: this.state.view === "edit",
+      propCount: properties.length, hasNoProps: properties.length === 0,
+      properties,
+      onNewProperty: () => this.startNew(),
+      onBackToList: () => this.setState({ view: "list" }),
+      editTitle: this.state.editingId ? `แก้ไขทรัพย์ ${this.state.editingId}` : "เพิ่มทรัพย์ใหม่",
+      typeOptions: mod ? mod.TYPES.map((ty) => ({ id: ty.id, label: ty.label.th })) : [],
+      areaOptions: mod ? mod.AREAS.map((a) => ({ id: a.id, label: a.label.th })) : [],
+      f_type: this.state.f_type, onFType: (e) => this.setState({ f_type: e.target.value }),
+      f_area: this.state.f_area, onFArea: (e) => this.setState({ f_area: e.target.value }),
+      f_zone: this.state.f_zone, onFZone: (e) => this.setState({ f_zone: e.target.value }),
+      f_status: this.state.f_status, onFStatus: (e) => this.setState({ f_status: e.target.value }),
+      f_price: this.state.f_price, onFPrice: (e) => this.setState({ f_price: e.target.value }),
+      f_bedrooms: this.state.f_bedrooms, onFBedrooms: (e) => this.setState({ f_bedrooms: e.target.value }),
+      f_bathrooms: this.state.f_bathrooms, onFBathrooms: (e) => this.setState({ f_bathrooms: e.target.value }),
+      f_livingArea: this.state.f_livingArea, onFLivingArea: (e) => this.setState({ f_livingArea: e.target.value }),
+      f_landSize: this.state.f_landSize, onFLandSize: (e) => this.setState({ f_landSize: e.target.value }),
+      f_description: this.state.f_description, onFDescription: (e) => this.setState({ f_description: e.target.value }),
+      f_assistedSale: this.state.f_assistedSale, onFAssistedSale: (e) => this.setState({ f_assistedSale: e.target.checked }),
+      f_commissionPct: this.state.f_commissionPct, onFCommissionPct: (e) => this.setState({ f_commissionPct: e.target.value }),
+      saveLabel: this.state.saving ? "กำลังบันทึก…" : "บันทึกทรัพย์นี้",
+      onSaveProperty: () => this.saveProperty(),
+      saveError: this.state.saveError,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
