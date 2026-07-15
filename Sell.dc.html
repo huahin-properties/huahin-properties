@@ -146,6 +146,26 @@
           <textarea rows="4" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
         </div>
 
+        <div style="background:oklch(97% 0.01 80); border:1px dashed oklch(82% 0.02 60); border-radius:6px; padding:16px 18px; display:flex; flex-direction:column; gap:10px;">
+          <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer;">
+            <input type="checkbox" checked="{{ assistedSale }}" onChange="{{ onAssistedSaleToggle }}" style="margin-top:3px;" />
+            <span style="font-size:13.5px; color:oklch(30% 0.02 60); line-height:1.6;">{{ assistedLabel }}</span>
+          </label>
+          <sc-if value="{{ assistedSale }}">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <span style="font-size:12px; color:oklch(50% 0.02 60);">{{ commissionLabel }}</span>
+              <select value="{{ commissionPct }}" onChange="{{ onCommissionPct }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 10px; font-size:13px; font-family:inherit; background:white;">
+                <option value="1">1%</option>
+                <option value="2">2%</option>
+                <option value="5">5%</option>
+                <option value="10">10%</option>
+                <option value="15">15%</option>
+              </select>
+            </div>
+          </sc-if>
+          <div style="font-size:11.5px; color:oklch(58% 0.02 60);">{{ privateNote }}</div>
+        </div>
+
         <div onClick="{{ onSubmit }}" style="background:oklch(40% 0.13 25); color:oklch(98% 0.01 80); text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:500; cursor:pointer; margin-top:8px;">{{ t.sell_submit }}</div>
       </div>
     </sc-if>
@@ -162,7 +182,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { lang: "en", isMobile: (typeof window !== "undefined" && window.innerWidth < 900), mobileMenuOpen: false, data: null, listingType: "sale", submitted: false, showGate: false, gatePassword: "", gateError: "" };
+  state = { lang: "en", isMobile: (typeof window !== "undefined" && window.innerWidth < 900), mobileMenuOpen: false, data: null, listingType: "sale", submitted: false, showGate: false, gatePassword: "", gateError: "", assistedSale: false, commissionPct: "5" };
 
   async componentDidMount() {
     const fb0 = await import("./firebase-client.js");
@@ -182,6 +202,17 @@ class Component extends DCLogic {
   }
   componentWillUnmount() { window.removeEventListener("resize", this._onResize); }
   selectLang(l) { this._mod.setLang(l); this.setState({ lang: l, mobileMenuOpen: false }); }
+  async submitForm() {
+    try {
+      await this._fb.saveLead({
+        source: "sell-form",
+        listingType: this.state.listingType,
+        assistedSale: this.state.assistedSale,
+        commissionPct: this.state.assistedSale ? this.state.commissionPct : null,
+      });
+    } catch (e) { console.warn("Failed to save sell inquiry:", e); }
+    this.setState({ submitted: true });
+  }
   async submitGate() {
     try {
       await this._fb.adminSignIn("doothailand@gmail.com", this.state.gatePassword);
@@ -214,6 +245,19 @@ class Component extends DCLogic {
       ru: ["Спасибо!", "Наша команда рассмотрит ваш объект и свяжется с вами в течение 24 часов."],
       zh: ["谢谢！", "我们的团队将审核您的房产信息，并在24小时内与您联系。"],
     };
+    const assistedText = {
+      en: {
+        label: "In addition to listing it on our site, would you like our team to also help sell/rent it out through other channels? This is a private note between you and us only.",
+        commission: "If yes, commission you're willing to offer us:",
+        note: "🔒 Private — only our team sees this. Never shown to the public or other listers.",
+      },
+      th: {
+        label: "นอกจากลงประกาศในเว็บเราแล้ว ต้องการให้ทีมงานช่วยขาย/ปล่อยเช่าผ่านช่องทางอื่นเพิ่มเติมด้วยหรือไม่? ข้อความนี้เป็นความลับระหว่างคุณกับทีมงานเท่านั้น",
+        commission: "ถ้าต้องการ ค่าคอมมิชชันที่ยินดีให้เรา:",
+        note: "🔒 ส่วนตัว — เห็นเฉพาะทีมงานเราเท่านั้น ไม่แสดงต่อสาธารณะหรือผู้ลงประกาศรายอื่น",
+      },
+    };
+    const at = assistedText[lang] || assistedText.en;
     return {
       t, lang,
       isDesktopNav: !this.state.isMobile, isMobileNav: this.state.isMobile,
@@ -230,7 +274,12 @@ class Component extends DCLogic {
       rentActiveColor: this.state.listingType === "rent" ? "oklch(98% 0.01 80)" : "oklch(30% 0.02 60)",
       submitted: this.state.submitted, notSubmitted: !this.state.submitted,
       thanksTitle: thanks[lang][0], thanksBody: thanks[lang][1],
-      onSubmit: () => this.setState({ submitted: true }),
+      assistedSale: this.state.assistedSale,
+      onAssistedSaleToggle: (e) => this.setState({ assistedSale: e.target.checked }),
+      commissionPct: this.state.commissionPct,
+      onCommissionPct: (e) => this.setState({ commissionPct: e.target.value }),
+      assistedLabel: at.label, commissionLabel: at.commission, privateNote: at.note,
+      onSubmit: () => this.submitForm(),
       ...gateVals,
     };
   }

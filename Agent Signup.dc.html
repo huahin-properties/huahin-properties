@@ -94,13 +94,6 @@
             <input value="{{ name }}" onChange="{{ onName }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;" />
           </div>
           <div>
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ประเภทผู้สมัคร</div>
-            <select value="{{ role }}" onChange="{{ onRole }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;">
-              <option value="agent">Agent / นายหน้า</option>
-              <option value="owner">เจ้าของบ้าน</option>
-            </select>
-          </div>
-          <div>
             <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">เบอร์โทร/LINE</div>
             <input value="{{ phone }}" onChange="{{ onPhone }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;" />
           </div>
@@ -112,15 +105,6 @@
             <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ตั้งรหัสผ่าน</div>
             <input type="text" value="{{ password }}" onChange="{{ onPassword }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;" />
           </div>
-        </div>
-        <div style="font-size:12px; color:oklch(50% 0.02 60); margin:18px 0 8px;">{{ pickPackageLabel }}</div>
-        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-bottom:16px;">
-          <sc-for list="{{ packageOptions }}" as="p" hint-placeholder-count="3">
-            <div onClick="{{ p.onClick }}" style="border:2px solid {{ p.borderColor }}; border-radius:6px; padding:14px; cursor:pointer; background:{{ p.bg }};">
-              <div style="font-size:14px; font-weight:600; color:oklch(22% 0.02 60);">{{ p.name }}</div>
-              <div style="font-size:13px; color:oklch(45% 0.02 60);">{{ p.price }}</div>
-            </div>
-          </sc-for>
         </div>
         <div onClick="{{ onSubmit }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:600; cursor:pointer;">{{ submitLabel }}</div>
         <sc-if value="{{ error }}"><div style="font-size:13px; color:oklch(50% 0.18 30); text-align:center; margin-top:10px;">{{ error }}</div></sc-if>
@@ -145,7 +129,7 @@ const SIGNUP_I18N = {
 };
 
 class Component extends DCLogic {
-  state = { tab: "signup", name: "", role: "agent", phone: "", email: "", password: "", submitted: false, submitting: false, error: "", loginEmail: "", loginPassword: "", loginBusy: false, loginError: "", packageChoice: null, lang: "th" };
+  state = { tab: "signup", name: "", phone: "", email: "", password: "", submitted: false, submitting: false, error: "", loginEmail: "", loginPassword: "", loginBusy: false, loginError: "", packageChoice: null, lang: "th" };
 
   async componentDidMount() {
     try {
@@ -172,14 +156,9 @@ class Component extends DCLogic {
 
   async submit() {
     if (this.state.submitting) return;
-    const { name, phone, email, password, packageChoice } = this.state;
+    const { name, phone, email, password } = this.state;
     if (!name.trim() || !phone.trim() || !email.trim() || password.length < 6) {
       this.setState({ error: "กรอกให้ครบทุกช่อง (รหัสผ่านอย่างน้อย 6 ตัวอักษร)" });
-      return;
-    }
-    if (!packageChoice) {
-      const t = SIGNUP_I18N[this.state.lang] || SIGNUP_I18N.en;
-      this.setState({ error: t.requirePkg });
       return;
     }
     this.setState({ submitting: true, error: "" });
@@ -187,22 +166,14 @@ class Component extends DCLogic {
       const fb = await import("./firebase-client.js");
       const uid = await fb.createListerAccount(email, password);
       await fb.setDoc("listers", uid, {
-        name, role: this.state.role, phone, email,
-        // Auto-approved immediately (no admin queue) — email verification
-        // link just sent is the rigor check instead. See BLUEPRINT.md §2.
+        name, role: "lister", phone, email,
+        // Auto-approved immediately (no admin queue), free tier by default —
+        // upgrading to a paid tier happens on Lister Billing right after,
+        // where all packages are shown side by side (BLUEPRINT.md §2).
         status: "approved", tier: "basic", createdAt: Date.now(),
       });
-      if (packageChoice === "free") {
-        this.setState({ submitted: true, submitting: false });
-        setTimeout(() => { window.location.href = "Lister Billing.dc.html"; }, 2200);
-      } else {
-        // User picked a paid tier themselves — send them straight to Stripe
-        // checkout to enter their own card, not decided/charged by us.
-        const prices = await fb.fetchStripePrices();
-        const priceId = prices[packageChoice];
-        if (!priceId) { window.location.href = "Lister Billing.dc.html"; return; }
-        await fb.startCheckout(priceId, uid, email, packageChoice);
-      }
+      this.setState({ submitted: true, submitting: false });
+      setTimeout(() => { window.location.href = "Lister Billing.dc.html"; }, 1400);
     } catch (e) {
       const msg = (e && e.code === "auth/email-already-in-use")
         ? "อีเมลนี้เคยสมัครไว้แล้ว"
@@ -214,7 +185,6 @@ class Component extends DCLogic {
   renderVals() {
     return {
       name: this.state.name, onName: (e) => this.setState({ name: e.target.value }),
-      role: this.state.role, onRole: (e) => this.setState({ role: e.target.value }),
       phone: this.state.phone, onPhone: (e) => this.setState({ phone: e.target.value }),
       email: this.state.email, onEmail: (e) => this.setState({ email: e.target.value }),
       password: this.state.password, onPassword: (e) => this.setState({ password: e.target.value }),
@@ -233,17 +203,6 @@ class Component extends DCLogic {
       submitLabel: this.state.submitting ? "กำลังส่ง…" : "สมัครเลย",
       error: this.state.error,
       onSubmit: () => this.submit(),
-      pickPackageLabel: (SIGNUP_I18N[this.state.lang] || SIGNUP_I18N.en).pickPackage,
-      packageOptions: [
-        { key: "free", name: (SIGNUP_I18N[this.state.lang] || SIGNUP_I18N.en).free, price: "฿0" },
-        { key: "pro", name: (SIGNUP_I18N[this.state.lang] || SIGNUP_I18N.en).tier2, price: "฿590" + (SIGNUP_I18N[this.state.lang] || SIGNUP_I18N.en).perMonth },
-        { key: "level3", name: (SIGNUP_I18N[this.state.lang] || SIGNUP_I18N.en).tier3, price: "฿1,190" + (SIGNUP_I18N[this.state.lang] || SIGNUP_I18N.en).perMonth },
-      ].map((p) => ({
-        ...p,
-        borderColor: this.state.packageChoice === p.key ? "oklch(40% 0.13 25)" : "oklch(88% 0.01 70)",
-        bg: this.state.packageChoice === p.key ? "oklch(97% 0.04 30)" : "white",
-        onClick: () => this.setState({ packageChoice: p.key }),
-      })),
     };
   }
 }
