@@ -113,6 +113,15 @@
             <input type="text" value="{{ password }}" onChange="{{ onPassword }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;" />
           </div>
         </div>
+        <div style="font-size:12px; color:oklch(50% 0.02 60); margin:18px 0 8px;">{{ pickPackageLabel }}</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-bottom:16px;">
+          <sc-for list="{{ packageOptions }}" as="p" hint-placeholder-count="3">
+            <div onClick="{{ p.onClick }}" style="border:2px solid {{ p.borderColor }}; border-radius:6px; padding:14px; cursor:pointer; background:{{ p.bg }};">
+              <div style="font-size:14px; font-weight:600; color:oklch(22% 0.02 60);">{{ p.name }}</div>
+              <div style="font-size:13px; color:oklch(45% 0.02 60);">{{ p.price }}</div>
+            </div>
+          </sc-for>
+        </div>
         <div onClick="{{ onSubmit }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:600; cursor:pointer;">{{ submitLabel }}</div>
         <sc-if value="{{ error }}"><div style="font-size:13px; color:oklch(50% 0.18 30); text-align:center; margin-top:10px;">{{ error }}</div></sc-if>
         <div style="font-size:12px; color:oklch(55% 0.02 60); text-align:center; margin-top:14px; line-height:1.6;">ช่วงนี้ฟรีชั่วคราวสำหรับผู้สมัครกลุ่มแรก — จะแจ้งล่วงหน้าก่อนเริ่มเก็บค่าบริการในอนาคต</div>
@@ -124,8 +133,26 @@
 
 </x-dc>
 <script type="text/x-dc" data-dc-script>
+const SIGNUP_I18N = {
+  en: { pickPackage: "Choose your package (required before signing up)", free: "① Free", tier2: "② Level 2", tier3: "③ Level 3", perMonth: "/month", requirePkg: "Please choose a package before signing up" },
+  th: { pickPackage: "เลือกแพ็กเกจ (จำเป็นต้องเลือกก่อนสมัคร)", free: "① ฟรี", tier2: "② ระดับ 2", tier3: "③ ระดับ 3", perMonth: "/เดือน", requirePkg: "กรุณาเลือกแพ็กเกจก่อนสมัคร" },
+  ru: { pickPackage: "Выберите пакет (обязательно перед регистрацией)", free: "① Бесплатно", tier2: "② Уровень 2", tier3: "③ Уровень 3", perMonth: "/мес", requirePkg: "Пожалуйста, выберите пакет" },
+  zh: { pickPackage: "选择套餐（注册前必选）", free: "① 免费", tier2: "② 二级", tier3: "③ 三级", perMonth: "/月", requirePkg: "请先选择套餐" },
+  de: { pickPackage: "Paket wählen (vor Anmeldung erforderlich)", free: "① Kostenlos", tier2: "② Stufe 2", tier3: "③ Stufe 3", perMonth: "/Monat", requirePkg: "Bitte wählen Sie ein Paket" },
+  no: { pickPackage: "Velg pakke (påkrevd før registrering)", free: "① Gratis", tier2: "② Nivå 2", tier3: "③ Nivå 3", perMonth: "/mnd", requirePkg: "Velg en pakke" },
+  fr: { pickPackage: "Choisissez votre forfait (requis avant l'inscription)", free: "① Gratuit", tier2: "② Niveau 2", tier3: "③ Niveau 3", perMonth: "/mois", requirePkg: "Veuillez choisir un forfait" },
+  it: { pickPackage: "Scegli il pacchetto (obbligatorio prima dell'iscrizione)", free: "① Gratuito", tier2: "② Livello 2", tier3: "③ Livello 3", perMonth: "/mese", requirePkg: "Seleziona un pacchetto" },
+};
+
 class Component extends DCLogic {
-  state = { tab: "signup", name: "", role: "agent", phone: "", email: "", password: "", submitted: false, submitting: false, error: "", loginEmail: "", loginPassword: "", loginBusy: false, loginError: "" };
+  state = { tab: "signup", name: "", role: "agent", phone: "", email: "", password: "", submitted: false, submitting: false, error: "", loginEmail: "", loginPassword: "", loginBusy: false, loginError: "", packageChoice: null, lang: "th" };
+
+  async componentDidMount() {
+    try {
+      const mod = await import("./data.js");
+      this.setState({ lang: mod.getLang() });
+    } catch (e) {}
+  }
 
   async loginSubmit() {
     if (this.state.loginBusy) return;
@@ -145,9 +172,14 @@ class Component extends DCLogic {
 
   async submit() {
     if (this.state.submitting) return;
-    const { name, phone, email, password } = this.state;
+    const { name, phone, email, password, packageChoice } = this.state;
     if (!name.trim() || !phone.trim() || !email.trim() || password.length < 6) {
       this.setState({ error: "กรอกให้ครบทุกช่อง (รหัสผ่านอย่างน้อย 6 ตัวอักษร)" });
+      return;
+    }
+    if (!packageChoice) {
+      const t = SIGNUP_I18N[this.state.lang] || SIGNUP_I18N.en;
+      this.setState({ error: t.requirePkg });
       return;
     }
     this.setState({ submitting: true, error: "" });
@@ -160,8 +192,17 @@ class Component extends DCLogic {
         // link just sent is the rigor check instead. See BLUEPRINT.md §2.
         status: "approved", tier: "basic", createdAt: Date.now(),
       });
-      this.setState({ submitted: true, submitting: false });
-      setTimeout(() => { window.location.href = "Lister Billing.dc.html"; }, 2200);
+      if (packageChoice === "free") {
+        this.setState({ submitted: true, submitting: false });
+        setTimeout(() => { window.location.href = "Lister Billing.dc.html"; }, 2200);
+      } else {
+        // User picked a paid tier themselves — send them straight to Stripe
+        // checkout to enter their own card, not decided/charged by us.
+        const prices = await fb.fetchStripePrices();
+        const priceId = prices[packageChoice];
+        if (!priceId) { window.location.href = "Lister Billing.dc.html"; return; }
+        await fb.startCheckout(priceId, uid, email, packageChoice);
+      }
     } catch (e) {
       const msg = (e && e.code === "auth/email-already-in-use")
         ? "อีเมลนี้เคยสมัครไว้แล้ว"
@@ -192,6 +233,17 @@ class Component extends DCLogic {
       submitLabel: this.state.submitting ? "กำลังส่ง…" : "สมัครเลย",
       error: this.state.error,
       onSubmit: () => this.submit(),
+      pickPackageLabel: (SIGNUP_I18N[this.state.lang] || SIGNUP_I18N.en).pickPackage,
+      packageOptions: [
+        { key: "free", name: (SIGNUP_I18N[this.state.lang] || SIGNUP_I18N.en).free, price: "฿0" },
+        { key: "pro", name: (SIGNUP_I18N[this.state.lang] || SIGNUP_I18N.en).tier2, price: "฿590" + (SIGNUP_I18N[this.state.lang] || SIGNUP_I18N.en).perMonth },
+        { key: "level3", name: (SIGNUP_I18N[this.state.lang] || SIGNUP_I18N.en).tier3, price: "฿1,190" + (SIGNUP_I18N[this.state.lang] || SIGNUP_I18N.en).perMonth },
+      ].map((p) => ({
+        ...p,
+        borderColor: this.state.packageChoice === p.key ? "oklch(40% 0.13 25)" : "oklch(88% 0.01 70)",
+        bg: this.state.packageChoice === p.key ? "oklch(97% 0.04 30)" : "white",
+        onClick: () => this.setState({ packageChoice: p.key }),
+      })),
     };
   }
 }
