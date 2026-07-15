@@ -836,7 +836,7 @@ export const I18N = {
     listings_count: "รายการ",
     sort_label: "เรียงตาม", sort_newest: "ใหม่ล่าสุด", sort_price_asc: "ราคา: ต่ำไปสูง", sort_price_desc: "ราคา: สูงไปต่ำ",
     view_grid: "ตาราง", view_list: "รายการ",
-    filters: "ตัวกรอง", apply_filters: "ใช้ตัวกรอง", clear_filters: "ล้างค่า",
+    filters: "ตัวกรองรายละเอียดเพิ่มเติม", apply_filters: "ใช้ตัวกรอง", clear_filters: "ล้างค่า",
     keyword_label: "คำค้นหาหรือรหัสทรัพย์", keyword_placeholder: "เช่น HH-101 หรือ พูลวิลล่า",
     bedrooms_label: "ห้องนอน", bathrooms_label: "ห้องน้ำ", land_size_label: "ขนาดที่ดิน", living_area_label: "พื้นที่ใช้สอย", any: "ทั้งหมด",
     status_label: "สถานะ", features_label: "คุณสมบัติ",
