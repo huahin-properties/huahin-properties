@@ -157,6 +157,9 @@ export async function createListerAccount(email, password) {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
   const cred = await a.createUserWithEmailAndPassword(email, password);
+  // Free signups are auto-approved immediately (no admin queue) — email
+  // verification is the rigor check instead, per BLUEPRINT.md §2 ทาง 2.
+  try { await cred.user.sendEmailVerification(); } catch (e) { console.warn("sendEmailVerification failed:", e); }
   return cred.user.uid;
 }
 
