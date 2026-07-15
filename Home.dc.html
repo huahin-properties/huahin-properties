@@ -105,35 +105,6 @@
     </div>
   </div>
 
-  <!-- ============ BANNER SLOT (below hero) — small tiles, looping carousel on narrow screens ============ -->
-  <sc-if value="{{ hasTopBanner }}">
-    <div style="background:oklch(93% 0.02 75); padding:10px clamp(20px,4vw,56px) 12px; border-bottom:2px solid oklch(40% 0.13 25);">
-      <div style="text-align:center; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:oklch(50% 0.02 60); margin-bottom:8px;">Sponsored</div>
-      <div style="display:flex; align-items:center; gap:8px; max-width:1200px; margin:0 auto;">
-        <sc-if value="{{ showBannerArrows }}">
-          <div onClick="{{ onBannerPrev }}" style="flex:0 0 auto; width:28px; height:28px; border-radius:50%; background:white; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,0.15); font-size:13px;">‹</div>
-        </sc-if>
-        <div style="flex:1; display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; overflow:hidden;">
-          <sc-for list="{{ visibleBanners }}" as="tb" hint-placeholder-count="2">
-            <a href="{{ tb.link }}" style="position:relative; display:block; width:100%; height:120px; overflow:hidden; border-radius:6px;">
-              <img src="{{ tb.imageUrl }}" alt="banner" style="width:100%; height:100%; display:block; object-fit:cover;" />
-              <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.65) 100%);"></div>
-              <div style="position:absolute; top:6px; left:8px; background:oklch(40% 0.13 25); color:white; font-size:9px; font-weight:700; letter-spacing:0.03em; padding:2px 7px; border-radius:100px;">{{ tb.statusLabel }}</div>
-              <div style="position:absolute; bottom:6px; left:8px; right:8px; color:white;">
-                <div style="font-size:11px; font-weight:600; line-height:1.2; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ tb.title }}</div>
-                <div style="font-size:9px; opacity:0.8;">{{ tb.code }}</div>
-                <div style="font-size:13px; font-weight:700;">{{ tb.priceLabel }}</div>
-              </div>
-            </a>
-          </sc-for>
-        </div>
-        <sc-if value="{{ showBannerArrows }}">
-          <div onClick="{{ onBannerNext }}" style="flex:0 0 auto; width:28px; height:28px; border-radius:50%; background:white; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,0.15); font-size:13px;">›</div>
-        </sc-if>
-      </div>
-    </div>
-  </sc-if>
-
   <!-- ============ SEARCH BOX ============ -->
   <div style="position:relative; z-index:6; margin:0 clamp(16px,4vw,56px); transform:translateY(clamp(-24px,-3vw,-46px));">
     <div style="background:oklch(99% 0.005 80); border-radius:6px; box-shadow:0 24px 50px -12px rgba(30,20,10,0.3); padding:10px; display:flex; flex-direction:column; gap:8px;">
@@ -205,10 +176,19 @@
       <div style="font-size:15px; color:oklch(48% 0.02 60);">{{ t.featured_sub }}</div>
     </div>
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px;">
-      <sc-for list="{{ featured }}" as="p" hint-placeholder-count="6">
+      <sc-for list="{{ featured }}" as="p" hint-placeholder-count="8">
         <dc-import name="PropertyCard" href="{{ p.href }}" status-color="{{ p.statusColor }}" status-label="{{ p.statusLabel }}" is-featured="{{ p.isFeatured }}" cover-photo-label="{{ p.coverPhotoLabel }}" cover-photo-bg="{{ p.coverPhotoBg }}" no-photo="{{ p.noPhoto }}" property-id="{{ p.propertyId }}" zone="{{ p.zone }}" area-label="{{ p.areaLabel }}" title="{{ p.title }}" type-label="{{ p.typeLabel }}" has-bedrooms="{{ p.hasBedrooms }}" bedrooms="{{ p.bedrooms }}" has-bathrooms="{{ p.hasBathrooms }}" bathrooms="{{ p.bathrooms }}" has-living-area="{{ p.hasLivingArea }}" living-area="{{ p.livingArea }}" sqm-label="{{ p.sqmLabel }}" price-label="{{ p.priceLabel }}" view-details-label="{{ p.viewDetailsLabel }}" hint-size="100%,380px"></dc-import>
       </sc-for>
     </div>
+    <sc-if value="{{ showFeaturedPagination }}">
+      <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-top:32px; flex-wrap:wrap;">
+        <div onClick="{{ onFeaturedPrevPage }}" style="width:36px; height:36px; border-radius:50%; border:1px solid oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; color:oklch(30% 0.02 60);">‹</div>
+        <sc-for list="{{ featuredPageNumbers }}" as="pg" hint-placeholder-count="3">
+          <div onClick="{{ pg.onClick }}" style="width:36px; height:36px; border-radius:50%; background:{{ pg.bg }}; color:{{ pg.color }}; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; border:1px solid oklch(85% 0.01 70);">{{ pg.num }}</div>
+        </sc-for>
+        <div onClick="{{ onFeaturedNextPage }}" style="width:36px; height:36px; border-radius:50%; border:1px solid oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; color:oklch(30% 0.02 60);">›</div>
+      </div>
+    </sc-if>
   </div>
 
   <!-- ============ AREAS ============ -->
@@ -253,8 +233,14 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
+  goToPage(p) {
+    this.setState({ page: p });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   state = {
     lang: "en",
+    page: 1,
     isMobile: (typeof window !== "undefined" && window.innerWidth < 900),
     mobileMenuOpen: false,
     showGate: false, gatePassword: "", gateError: "",
@@ -369,12 +355,32 @@ class Component extends DCLogic {
 
     const featuredIds = ["HH-101", "PB-201", "CA-301", "HH-104", "PB-202", "CA-304"];
     const propsList = this.state.effProps || mod.PROPERTIES;
+    const now = Date.now();
+
+    // Banner properties (bought via Site Content's banner CRUD, BLUEPRINT §11
+    // item 4) always occupy the first slots of this same grid — rendered as
+    // ordinary PropertyCards (no "Sponsored" badge) so a paid placement looks
+    // identical to any other listing. They only take the front seats once;
+    // everything else fills in after them and pagination continues normally
+    // (e.g. 3 banners + 5 regular = page 1, page 2 starts at the 9th listing).
+    const homeBanners = (this.state.banners || []).filter((b) => b.page === "home" && b.position === "top" && b.active !== false && (!b.expiresAt || b.expiresAt > now));
+    const bannerPropIds = homeBanners.map((b) => {
+      const m = (b.link || "").match(/id=([^&]+)/);
+      return m ? decodeURIComponent(m[1]) : (b.propertyCode || "");
+    }).filter(Boolean);
+    const bannerProps = bannerPropIds.map((id) => propsList.find((p) => p.id === id)).filter(Boolean);
+
+    const remaining = propsList.filter((p) => !bannerPropIds.includes(p.id));
     // Paid "Featured Listing boost" (BLUEPRINT.md §11 item 5) takes priority
     // over the curated fallback list — boosted listings always show first.
-    const now = Date.now();
-    const boosted = propsList.filter((p) => p.featuredUntil && p.featuredUntil > now).sort((a, b) => b.featuredUntil - a.featuredUntil);
-    const fallback = featuredIds.map((id) => propsList.find((p) => p.id === id)).filter(Boolean).filter((p) => !boosted.some((b) => b.id === p.id));
-    const featured = [...boosted, ...fallback].slice(0, 6).map(cardProps);
+    const boosted = remaining.filter((p) => p.featuredUntil && p.featuredUntil > now).sort((a, b) => b.featuredUntil - a.featuredUntil);
+    const fallback = featuredIds.map((id) => remaining.find((p) => p.id === id)).filter(Boolean).filter((p) => !boosted.some((b) => b.id === p.id));
+    const rest = remaining.filter((p) => !boosted.some((b) => b.id === p.id) && !fallback.some((f) => f.id === p.id));
+    const allOrdered = [...bannerProps, ...boosted, ...fallback, ...rest];
+    const perPage = 8;
+    const totalFeaturedPages = Math.max(1, Math.ceil(allOrdered.length / perPage));
+    const featuredPage = Math.min(this.state.page, totalFeaturedPages);
+    const featured = allOrdered.slice((featuredPage - 1) * perPage, featuredPage * perPage).map(cardProps);
 
     const areaDescKey = { "hua-hin": "area_hua_hin_desc", pranburi: "area_pranburi_desc", "cha-am": "area_cha_am_desc" };
     const areaPhoto = { "hua-hin": "photo: Hua Hin train station & beach", pranburi: "photo: Pranburi beachfront villa", "cha-am": "photo: Cha-am beach promenade" };
@@ -431,6 +437,14 @@ class Component extends DCLogic {
       buyHref: "Search Results.dc.html?status=sale",
       rentHref: "Search Results.dc.html?status=rent",
       featured,
+      showFeaturedPagination: totalFeaturedPages > 1,
+      featuredPageNumbers: Array.from({ length: totalFeaturedPages }, (_, i) => {
+        const num = i + 1;
+        const isActive = num === featuredPage;
+        return { num, isActive, bg: isActive ? "oklch(22% 0.02 60)" : "transparent", color: isActive ? "oklch(98% 0.01 80)" : "oklch(30% 0.02 60)", onClick: () => this.goToPage(num) };
+      }),
+      onFeaturedPrevPage: () => this.goToPage(Math.max(1, featuredPage - 1)),
+      onFeaturedNextPage: () => this.goToPage(Math.min(totalFeaturedPages, featuredPage + 1)),
       areaCards,
       heroStyle: {
         position: "relative", height: "clamp(480px,70vh,680px)", display: "flex", alignItems: "flex-end",
