@@ -105,6 +105,14 @@
     </div>
   </div>
 
+  <!-- ============ CTA ROW ============ -->
+  <div style="display:flex; gap:8px; justify-content:center; padding:12px clamp(12px,4vw,56px) 4px; overflow-x:auto; -webkit-overflow-scrolling:touch;">
+    <a href="{{ buyHref }}" style="flex:0 0 auto; border:1px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:9px 14px; border-radius:100px; font-size:12.5px; text-decoration:none; white-space:nowrap;">{{ t.cta_find }}</a>
+    <a href="{{ rentHref }}" style="flex:0 0 auto; border:1px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:9px 14px; border-radius:100px; font-size:12.5px; text-decoration:none; white-space:nowrap;">{{ t.cta_rent }}</a>
+    <a href="Sell.dc.html" style="flex:0 0 auto; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 14px; border-radius:100px; font-size:12.5px; text-decoration:none; white-space:nowrap;">{{ t.cta_list }}</a>
+    <a href="Contact.dc.html" style="flex:0 0 auto; border:1px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:9px 14px; border-radius:100px; font-size:12.5px; text-decoration:none; white-space:nowrap;">{{ t.cta_contact }}</a>
+  </div>
+
   <!-- ============ SEARCH BOX ============ -->
   <div style="position:relative; z-index:6; margin:0 clamp(16px,4vw,56px); transform:translateY(clamp(-24px,-3vw,-46px));">
     <div style="background:oklch(99% 0.005 80); border-radius:6px; box-shadow:0 24px 50px -12px rgba(30,20,10,0.3); padding:10px; display:flex; flex-direction:column; gap:8px;">
@@ -159,14 +167,6 @@
       <a href="{{ searchHref }}" style="background:oklch(40% 0.13 25); color:oklch(98% 0.01 80); padding:0 30px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:500; letter-spacing:0.02em; white-space:nowrap; text-decoration:none; min-height:48px; flex:1; min-width:180px;">{{ t.search_cta }}</a>
       </div>
     </div>
-  </div>
-
-  <!-- ============ CTA ROW ============ -->
-  <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; padding:8px clamp(16px,4vw,56px) clamp(40px,6vw,64px);">
-    <a href="{{ buyHref }}" style="border:1px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:11px 22px; border-radius:100px; font-size:14px; text-decoration:none;">{{ t.cta_find }}</a>
-    <a href="{{ rentHref }}" style="border:1px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:11px 22px; border-radius:100px; font-size:14px; text-decoration:none;">{{ t.cta_rent }}</a>
-    <a href="Sell.dc.html" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:11px 22px; border-radius:100px; font-size:14px; text-decoration:none;">{{ t.cta_list }}</a>
-    <a href="Contact.dc.html" style="border:1px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:11px 22px; border-radius:100px; font-size:14px; text-decoration:none;">{{ t.cta_contact }}</a>
   </div>
 
   <!-- ============ FEATURED PROPERTIES ============ -->
