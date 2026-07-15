@@ -52,18 +52,39 @@
         </sc-if>
       </div>
 
-      <div style="font-size:13px; font-weight:600; color:oklch(45% 0.02 60); margin-bottom:10px;">อัปเกรดแพ็กเกจ</div>
+      <div style="font-size:13px; font-weight:600; color:oklch(45% 0.02 60); margin-bottom:4px;">บันไดสมาชิก 5 ระดับ</div>
+      <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">ไต่ระดับขึ้นทีละขั้น — ระดับสูงกว่าได้ทุกสิทธิ์จากระดับล่างกว่าด้วย</div>
       <div style="display:flex; gap:14px; flex-wrap:wrap;">
-        <div style="flex:1; min-width:220px; background:white; border-radius:8px; padding:20px;">
-          <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60); margin-bottom:6px;">Pro</div>
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">โพสต์ได้ 5 หลัง + Featured 1 รายการ</div>
-          <div onClick="{{ onUpgradePro }}" style="{{ proButtonStyle }}">{{ proButtonLabel }}</div>
+        <div style="flex:1; min-width:200px; background:white; border-radius:8px; padding:20px; opacity:0.7;">
+          <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60); margin-bottom:6px;">① ฟรี</div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60);">โพสต์ได้ 1 หลัง — ระดับเริ่มต้นของทุกคน</div>
         </div>
-        <div style="flex:1; min-width:220px; background:white; border-radius:8px; padding:20px;">
-          <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60); margin-bottom:6px;">Agency</div>
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">โพสต์ไม่จำกัด + Featured หลายรายการ + ป้าย Verified Agent</div>
-          <div onClick="{{ onUpgradeAgency }}" style="{{ agencyButtonStyle }}">{{ agencyButtonLabel }}</div>
-        </div>
+        <sc-if value="{{ showPremium }}">
+          <div style="flex:1; min-width:200px; background:white; border-radius:8px; padding:20px;">
+            <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60); margin-bottom:6px;">② Premium</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">โพสต์ได้ 5 หลัง + Featured 1 รายการ</div>
+            <div onClick="{{ onUpgradePro }}" style="{{ proButtonStyle }}">{{ proButtonLabel }}</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ showVip }}">
+          <div style="flex:1; min-width:200px; background:white; border-radius:8px; padding:20px;">
+            <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60); margin-bottom:6px;">③ 🥈 VIP เงิน</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">โพสต์ไม่จำกัด + เข้าพูลบ้านค่าคอม 3%</div>
+            <div onClick="{{ onUpgradeVipSilver }}" style="{{ vipSilverStyle }}">{{ vipSilverLabel }}</div>
+          </div>
+          <div style="flex:1; min-width:200px; background:white; border-radius:8px; padding:20px;">
+            <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60); margin-bottom:6px;">④ 🥇 VIP ทอง</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">ทุกอย่างจากเงิน + พูล 3%+5% + Featured หลายรายการ + ป้าย Verified</div>
+            <div onClick="{{ onUpgradeVipGold }}" style="{{ vipGoldStyle }}">{{ vipGoldLabel }}</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ showVipDiamond }}">
+          <div style="flex:1; min-width:200px; background:white; border-radius:8px; padding:20px;">
+            <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60); margin-bottom:6px;">⑤ 💎 VIP เพชร</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">ทุกอย่างจากทอง + พูลระดับสูงสุด + สิทธิพิเศษ</div>
+            <div onClick="{{ onUpgradeVipDiamond }}" style="{{ vipDiamondStyle }}">{{ vipDiamondLabel }}</div>
+          </div>
+        </sc-if>
       </div>
       <sc-if value="{{ showVip }}">
         <div style="font-size:13px; font-weight:600; color:oklch(45% 0.02 60); margin:28px 0 10px;">💎 Agent VIP — เข้าถึงพูลบ้านคุณภาพดีที่ตัวแทนทั่วไปไม่เห็น</div>
@@ -158,7 +179,7 @@ class Component extends DCLogic {
     const lister = this.state.lister || {};
     const status = lister.subscriptionStatus;
     const isActive = status === "active";
-    const tierLabels = { basic: "Basic (ฟรี)", pro: "Pro", agency: "Agency" };
+    const tierLabels = { basic: "① ฟรี", pro: "② Premium", agency: "② Premium", silver: "③ VIP เงิน", gold: "④ VIP ทอง", diamond: "⑤ VIP เพชร" };
     const btnBase = "display:inline-block; padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;";
     const btnActive = btnBase + "background:oklch(22% 0.02 60); color:white;";
     const btnBusy = btnBase + "background:oklch(85% 0.01 70); color:oklch(50% 0.02 60); cursor:default;";
@@ -173,11 +194,9 @@ class Component extends DCLogic {
       hasCustomerId: !!lister.stripeCustomerId,
       onManageBilling: () => this.manageBilling(),
       onUpgradePro: () => this.upgrade("pro"),
-      onUpgradeAgency: () => this.upgrade("agency"),
       proButtonStyle: this.state.busyTier === "pro" ? btnBusy : btnActive,
-      proButtonLabel: this.state.busyTier === "pro" ? "กำลังเปิด…" : "อัปเกรดเป็น Pro",
-      agencyButtonStyle: this.state.busyTier === "agency" ? btnBusy : btnActive,
-      agencyButtonLabel: this.state.busyTier === "agency" ? "กำลังเปิด…" : "อัปเกรดเป็น Agency",
+      proButtonLabel: this.state.busyTier === "pro" ? "กำลังเปิด…" : (lister.tier === "pro" || lister.tier === "agency" ? "สมาชิกอยู่แล้ว" : "อัปเกรดเป็น Premium"),
+      showPremium: this.state.rolloutLevel >= 2,
       showVip: this.state.rolloutLevel >= 3,
       vipTierLabel: { silver: "🥈 VIP เงิน", gold: "🥇 VIP ทอง", diamond: "💎 VIP เพชร" }[lister.vipTier] || "ยังไม่ได้เป็นสมาชิก VIP",
       vipSilverStyle: this.state.busyTier === "vipSilver" ? btnBusy : btnActive,

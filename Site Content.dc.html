@@ -218,11 +218,11 @@
       <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">สร้าง Product + Price ใน Stripe Dashboard ก่อน แล้ววาง Price ID (ขึ้นต้นด้วย price_) ที่นี่ — เปลี่ยนราคาได้เองโดยไม่ต้องแก้โค้ด</div>
       <div style="display:flex; flex-direction:column; gap:10px; max-width:420px;">
         <div>
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">แพ็กเกจ Pro — Price ID</div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">② Premium — Price ID</div>
           <input value="{{ stripePro }}" onChange="{{ onStripePro }}" placeholder="price_xxxxxxxxxxxx" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
         </div>
         <div>
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">แพ็กเกจ Agency — Price ID</div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">(เลิกใช้ — รวมเข้า VIP เงินแล้ว) Agency — Price ID</div>
           <input value="{{ stripeAgency }}" onChange="{{ onStripeAgency }}" placeholder="price_xxxxxxxxxxxx" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
         </div>
       </div>
@@ -811,7 +811,7 @@ class Component extends DCLogic {
       rolloutLevel: this.state.rolloutLevel,
       rolloutOptions: [1, 2, 3, 4].map((n) => ({
         n,
-        label: { 1: "ระดับ 1 — โพสต์ฟรีเท่านั้น", 2: "ระดับ 2 — เปิดแพ็กเกจสมาชิก Pro/Agency", 3: "ระดับ 3 — เปิด Agent VIP (เงิน/ทอง)", 4: "ระดับ 4 — เปิด Agent VIP ครบ (รวมเพชร)" }[n],
+        label: { 1: "① ระดับ 1 — โพสต์ฟรีเท่านั้น", 2: "② ระดับ 2 — เปิด Premium (590/ด.)", 3: "③④ ระดับ 3 — เปิด VIP เงิน+ทอง", 4: "⑤ ระดับ 4 — เปิด VIP เพชรด้วย (ครบ 5 ระดับ)" }[n],
         active: this.state.rolloutLevel === n,
         bg: this.state.rolloutLevel === n ? "oklch(22% 0.02 60)" : "transparent",
         color: this.state.rolloutLevel === n ? "oklch(98% 0.01 80)" : "oklch(30% 0.02 60)",
