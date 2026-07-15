@@ -98,7 +98,7 @@
       <div style="position:absolute; top:14px; right:14px; font-family:monospace; font-size:11px; color:oklch(95% 0.01 80 / 0.85); background:rgba(0,0,0,0.32); padding:4px 8px; border-radius:4px;">[photo placeholder]</div>
     </sc-if>
 
-    <div style="position:relative; z-index:2; padding:0 clamp(20px,4vw,56px) clamp(40px,7vw,64px); color:oklch(98% 0.01 80); max-width:760px;">
+    <div style="position:relative; z-index:2; padding:{{ heroTextPadding }}; color:oklch(98% 0.01 80); max-width:760px;">
       <div style="font-size:13px; letter-spacing:0.2em; text-transform:uppercase; opacity:0.88; margin-bottom:16px;">{{ t.hero_kicker }}</div>
       <div style="font-family:'Playfair Display',serif; font-weight:500; font-size:clamp(34px,6vw,64px); line-height:1.1; margin-bottom:18px;">{{ t.hero_title_1 }}<br>{{ t.hero_title_2 }}</div>
       <div style="font-size:clamp(14px,1.6vw,17px); line-height:1.6; max-width:520px; opacity:0.92; font-weight:300;">{{ t.hero_sub }}</div>
@@ -447,10 +447,12 @@ class Component extends DCLogic {
       onFeaturedNextPage: () => this.goToPage(Math.min(totalFeaturedPages, featuredPage + 1)),
       areaCards,
       heroStyle: {
-        position: "relative", height: "clamp(480px,70vh,680px)", display: "flex", alignItems: "flex-end",
+        position: "relative", height: "clamp(480px,70vh,680px)", display: "flex",
+        alignItems: this.state.isMobile ? "flex-start" : "flex-end",
         background: (sc.hero && sc.hero.photoUrl) ? `url('${sc.hero.photoUrl}') center/cover` : "repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(92% 0.015 75) 2px, oklch(92% 0.015 75) 22px)",
       },
       heroNoPhoto: !(sc.hero && sc.hero.photoUrl),
+      heroTextPadding: this.state.isMobile ? "clamp(24px,6vw,40px) clamp(16px,4vw,56px) 0" : "0 clamp(20px,4vw,56px) clamp(40px,7vw,64px)",
       hasTopBanner: (() => {
         const now = Date.now();
         const active = (this.state.banners || []).filter((b) => b.page === "home" && b.position === "top" && b.active !== false && b.imageUrl && (!b.expiresAt || b.expiresAt > now));
