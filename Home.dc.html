@@ -103,12 +103,6 @@
       <div style="font-family:'Playfair Display',serif; font-weight:500; font-size:clamp(34px,6vw,64px); line-height:1.1; margin-bottom:18px;">{{ t.hero_title_1 }}<br>{{ t.hero_title_2 }}</div>
       <div style="font-size:clamp(14px,1.6vw,17px); line-height:1.6; max-width:520px; opacity:0.92; font-weight:300;">{{ t.hero_sub }}</div>
     </div>
-    <div style="position:relative; z-index:2; display:flex; gap:{{ ctaGap }}; padding:0 clamp(20px,4vw,56px) clamp(20px,4vw,32px); max-width:640px; margin:0 auto;">
-      <a href="{{ buyHref }}" style="flex:1; text-align:center; border:1.5px solid rgba(255,255,255,0.85); color:white; padding:8px 4px; border-radius:100px; font-size:{{ ctaFontSize }}; text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; backdrop-filter:blur(2px);">{{ t.cta_find }}</a>
-      <a href="{{ rentHref }}" style="flex:1; text-align:center; border:1.5px solid rgba(255,255,255,0.85); color:white; padding:8px 4px; border-radius:100px; font-size:{{ ctaFontSize }}; text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; backdrop-filter:blur(2px);">{{ t.cta_rent }}</a>
-      <a href="Sell.dc.html" style="flex:1; text-align:center; background:oklch(40% 0.13 25); border:1.5px solid oklch(40% 0.13 25); color:white; padding:8px 4px; border-radius:100px; font-size:{{ ctaFontSize }}; text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.cta_list }}</a>
-      <a href="Contact.dc.html" style="flex:1; text-align:center; border:1.5px solid rgba(255,255,255,0.85); color:white; padding:8px 4px; border-radius:100px; font-size:{{ ctaFontSize }}; text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; backdrop-filter:blur(2px);">{{ t.cta_contact }}</a>
-    </div>
   </div>
 
   <!-- ============ SEARCH BOX ============ -->
@@ -165,6 +159,14 @@
       <a href="{{ searchHref }}" style="background:oklch(40% 0.13 25); color:oklch(98% 0.01 80); padding:0 30px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:500; letter-spacing:0.02em; white-space:nowrap; text-decoration:none; min-height:48px; flex:1; min-width:180px;">{{ t.search_cta }}</a>
       </div>
     </div>
+  </div>
+
+  <!-- ============ CTA ROW ============ -->
+  <div style="display:flex; gap:{{ ctaGap }}; justify-content:center; padding:16px clamp(20px,4vw,56px) 0; max-width:640px; margin:0 auto;">
+    <a href="{{ buyHref }}" style="flex:1; text-align:center; border:1.5px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:8px 2px; border-radius:8px; font-size:{{ ctaFontSize }}; text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.cta_find }}</a>
+    <a href="{{ rentHref }}" style="flex:1; text-align:center; border:1.5px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:8px 2px; border-radius:8px; font-size:{{ ctaFontSize }}; text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.cta_rent }}</a>
+    <a href="Sell.dc.html" style="flex:1; text-align:center; background:oklch(40% 0.13 25); border:1.5px solid oklch(40% 0.13 25); color:white; padding:8px 2px; border-radius:8px; font-size:{{ ctaFontSize }}; text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.cta_list }}</a>
+    <a href="Contact.dc.html" style="flex:1; text-align:center; border:1.5px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:8px 2px; border-radius:8px; font-size:{{ ctaFontSize }}; text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.cta_contact }}</a>
   </div>
 
   <!-- ============ FEATURED PROPERTIES ============ -->
@@ -452,8 +454,8 @@ class Component extends DCLogic {
       heroNoPhoto: !(sc.hero && sc.hero.photoUrl),
       heroTextPadding: this.state.isMobile ? "clamp(24px,6vw,40px) clamp(16px,4vw,56px) 0" : "0 clamp(20px,4vw,56px) clamp(40px,7vw,64px)",
       searchBoxTransform: this.state.isMobile ? "none" : "translateY(clamp(-24px,-3vw,-46px))",
-      ctaGap: this.state.isMobile ? "5px" : "12px",
-      ctaFontSize: this.state.isMobile ? "9.5px" : "14px",
+      ctaGap: this.state.isMobile ? "6px" : "12px",
+      ctaFontSize: this.state.isMobile ? "12px" : "14px",
       hasTopBanner: (() => {
         const now = Date.now();
         const active = (this.state.banners || []).filter((b) => b.page === "home" && b.position === "top" && b.active !== false && b.imageUrl && (!b.expiresAt || b.expiresAt > now));
