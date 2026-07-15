@@ -222,8 +222,8 @@
           <input value="{{ stripePro }}" onChange="{{ onStripePro }}" placeholder="price_xxxxxxxxxxxx" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
         </div>
         <div>
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">(เลิกใช้ — รวมเข้า VIP เงินแล้ว) Agency — Price ID</div>
-          <input value="{{ stripeAgency }}" onChange="{{ onStripeAgency }}" placeholder="price_xxxxxxxxxxxx" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">③ ระดับ 3 (15 หลัง) — Price ID</div>
+          <input value="{{ stripeLevel3 }}" onChange="{{ onStripeLevel3 }}" placeholder="price_xxxxxxxxxxxx" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
         </div>
       </div>
       <div style="margin-top:12px;">
@@ -356,7 +356,7 @@ class Component extends DCLogic {
     saveMsg: "",
     accUsername: "", accPassword: "", accEmail: "", accPhone: "", accMsg: "",
     fbFooter: "", fbFooterMsg: "",
-    stripePrices: { pro: "", agency: "" }, stripeMsg: "",
+    stripePrices: { pro: "", agency: "", level3: "" }, stripeMsg: "",
     featuredPrices: { p7: "", p30: "" }, featuredPriceMsg: "",
     bannerPrices: { top: "", mid: "", side: "" }, bannerPriceMsg: "",
     homeownerVipPrices: { silver: "", gold: "", diamond: "" }, homeownerVipMsg: "",
@@ -774,8 +774,8 @@ class Component extends DCLogic {
       fbFooterMsg: this.state.fbFooterMsg,
       stripePro: this.state.stripePrices.pro || "",
       onStripePro: (e) => this.setState((s) => ({ stripePrices: { ...s.stripePrices, pro: e.target.value } })),
-      stripeAgency: this.state.stripePrices.agency || "",
-      onStripeAgency: (e) => this.setState((s) => ({ stripePrices: { ...s.stripePrices, agency: e.target.value } })),
+      stripeLevel3: this.state.stripePrices.level3 || "",
+      onStripeLevel3: (e) => this.setState((s) => ({ stripePrices: { ...s.stripePrices, level3: e.target.value } })),
       onSaveStripePrices: () => this.saveStripePrices(),
       stripeMsg: this.state.stripeMsg,
       featured7Price: this.state.featuredPrices.p7 || "",
@@ -809,9 +809,9 @@ class Component extends DCLogic {
       onSaveAgentVip: () => this.saveAgentVipPrices(),
       agentVipMsg: this.state.agentVipMsg,
       rolloutLevel: this.state.rolloutLevel,
-      rolloutOptions: [1, 2, 3, 4].map((n) => ({
+      rolloutOptions: [1, 2, 3, 4, 5].map((n) => ({
         n,
-        label: { 1: "① ระดับ 1 — โพสต์ฟรีเท่านั้น", 2: "② ระดับ 2 — เปิด Premium (590/ด.)", 3: "③④ ระดับ 3 — เปิด VIP เงิน+ทอง", 4: "⑤ ระดับ 4 — เปิด VIP เพชรด้วย (ครบ 5 ระดับ)" }[n],
+        label: { 1: "① ระดับ 1 — โพสต์ฟรีเท่านั้น (1 หลัง)", 2: "② ระดับ 2 — เปิด 5 หลัง (590/ด.)", 3: "③ ระดับ 3 — เปิด 15 หลัง", 4: "④ ระดับ 4 — เปิด VIP เงิน+ทอง", 5: "⑤ ระดับ 5 — เปิด VIP เพชรด้วย (ครบทุกระดับ)" }[n],
         active: this.state.rolloutLevel === n,
         bg: this.state.rolloutLevel === n ? "oklch(22% 0.02 60)" : "transparent",
         color: this.state.rolloutLevel === n ? "oklch(98% 0.01 80)" : "oklch(30% 0.02 60)",

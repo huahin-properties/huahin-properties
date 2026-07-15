@@ -61,9 +61,16 @@
         </div>
         <sc-if value="{{ showPremium }}">
           <div style="flex:1; min-width:200px; background:white; border-radius:8px; padding:20px;">
-            <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60); margin-bottom:6px;">② Premium</div>
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">โพสต์ได้ 5 หลัง + Featured 1 รายการ</div>
+            <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60); margin-bottom:6px;">② ระดับ 2</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">โพสต์ได้ 5 หลัง + Featured 1 รายการ — 590 บาท/เดือน</div>
             <div onClick="{{ onUpgradePro }}" style="{{ proButtonStyle }}">{{ proButtonLabel }}</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ showLevel3 }}">
+          <div style="flex:1; min-width:200px; background:white; border-radius:8px; padding:20px;">
+            <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60); margin-bottom:6px;">③ ระดับ 3</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">โพสต์ได้ 15 หลัง + Featured หลายรายการ</div>
+            <div onClick="{{ onUpgradeLevel3 }}" style="{{ level3ButtonStyle }}">{{ level3ButtonLabel }}</div>
           </div>
         </sc-if>
         <sc-if value="{{ showVip }}">
@@ -117,7 +124,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { lister: null, prices: { pro: "", agency: "" }, vipPrices: { silver: "", gold: "", diamond: "" }, rolloutLevel: 1, loaded: false, notSignedIn: false, error: "", busyTier: null };
+  state = { lister: null, prices: { pro: "", agency: "", level3: "" }, vipPrices: { silver: "", gold: "", diamond: "" }, rolloutLevel: 1, loaded: false, notSignedIn: false, error: "", busyTier: null };
 
   async componentDidMount() {
     const fb = await import("./firebase-client.js");
@@ -197,13 +204,17 @@ class Component extends DCLogic {
       proButtonStyle: this.state.busyTier === "pro" ? btnBusy : btnActive,
       proButtonLabel: this.state.busyTier === "pro" ? "กำลังเปิด…" : (lister.tier === "pro" || lister.tier === "agency" ? "สมาชิกอยู่แล้ว" : "อัปเกรดเป็น Premium"),
       showPremium: this.state.rolloutLevel >= 2,
-      showVip: this.state.rolloutLevel >= 3,
+      showLevel3: this.state.rolloutLevel >= 3,
+      level3ButtonStyle: this.state.busyTier === "level3" ? btnBusy : btnActive,
+      level3ButtonLabel: this.state.busyTier === "level3" ? "กำลังเปิด…" : (lister.tier === "level3" ? "สมาชิกอยู่แล้ว" : "อัปเกรดเป็นระดับ 3"),
+      onUpgradeLevel3: () => this.upgrade("level3"),
+      showVip: this.state.rolloutLevel >= 4,
       vipTierLabel: { silver: "🥈 VIP เงิน", gold: "🥇 VIP ทอง", diamond: "💎 VIP เพชร" }[lister.vipTier] || "ยังไม่ได้เป็นสมาชิก VIP",
       vipSilverStyle: this.state.busyTier === "vipSilver" ? btnBusy : btnActive,
       vipSilverLabel: this.state.busyTier === "vipSilver" ? "กำลังเปิด…" : (lister.vipTier === "silver" ? "สมาชิกอยู่แล้ว" : "สมัคร VIP เงิน"),
       vipGoldStyle: this.state.busyTier === "vipGold" ? btnBusy : btnActive,
       vipGoldLabel: this.state.busyTier === "vipGold" ? "กำลังเปิด…" : (lister.vipTier === "gold" ? "สมาชิกอยู่แล้ว" : "สมัคร VIP ทอง"),
-      showVipDiamond: this.state.rolloutLevel >= 4,
+      showVipDiamond: this.state.rolloutLevel >= 5,
       vipDiamondStyle: this.state.busyTier === "vipDiamond" ? btnBusy : btnActive,
       vipDiamondLabel: this.state.busyTier === "vipDiamond" ? "กำลังเปิด…" : (lister.vipTier === "diamond" ? "สมาชิกอยู่แล้ว" : "สมัคร VIP เพชร"),
       onUpgradeVipSilver: () => this.upgradeVip("silver"),

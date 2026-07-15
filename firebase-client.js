@@ -521,7 +521,7 @@ export async function fetchMyListerDoc() {
 // hardcoded) so pricing/plan changes never require a code redeploy.
 export async function fetchStripePrices() {
   const doc = await db().collection("siteContent").doc("stripePrices").get();
-  return doc.exists ? doc.data() : { pro: "", agency: "" };
+  return doc.exists ? doc.data() : { pro: "", agency: "", level3: "" };
 }
 
 export async function saveStripePrices(prices) {
