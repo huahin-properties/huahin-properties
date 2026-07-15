@@ -7,12 +7,14 @@
 </head>
 <body>
 <x-dc>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 84"><rect width="120" height="84" fill="#3a2a22"/><text x="60" y="47" font-size="34" text-anchor="middle" fill="#f2e6d8" font-family="serif">🏠</text></svg></template>
 <helmet>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <title>หน้าทำงานของฉัน — huahin.properties</title>
   <style>
     body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
@@ -75,6 +77,9 @@
               <sc-if value="{{ p.assistedSale }}">
                 <div style="font-size:11px; color:oklch(45% 0.13 145); margin-top:8px;">🤝 เปิดใช้ "ให้ทีมช่วยขาย"</div>
               </sc-if>
+              <sc-if value="{{ p.needsNudge }}">
+                <div style="font-size:11px; color:oklch(50% 0.15 60); margin-top:8px;">💡 ยังไม่ขาย? ลองให้ทีมช่วยขายดูไหม</div>
+              </sc-if>
             </div>
           </sc-for>
         </div>
@@ -85,6 +90,28 @@
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
             <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60);">{{ editTitle }}</div>
             <div onClick="{{ onBackToList }}" style="font-size:13px; color:oklch(50% 0.02 60); cursor:pointer;">← กลับไปหน้ารายการ</div>
+          </div>
+
+          <div style="margin-bottom:18px;">
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">รูปภาพ (สูงสุด 10 รูป — รูปแรกเป็นภาพปก)</div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+              <sc-for list="{{ existingPhotos }}" as="ph" hint-placeholder-count="2">
+                <div style="position:relative; width:90px; height:68px; border-radius:6px; overflow:hidden; background-image:url({{ ph.url }}); background-size:cover; background-position:center;">
+                  <div onClick="{{ ph.onRemove }}" style="position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%; background:rgba(0,0,0,0.6); color:white; font-size:11px; display:flex; align-items:center; justify-content:center; cursor:pointer;">×</div>
+                </div>
+              </sc-for>
+              <sc-for list="{{ newPhotos }}" as="np" hint-placeholder-count="1">
+                <div style="position:relative; width:90px; height:68px; border-radius:6px; overflow:hidden; background-image:url({{ np.url }}); background-size:cover; background-position:center;">
+                  <div onClick="{{ np.onRemove }}" style="position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%; background:rgba(0,0,0,0.6); color:white; font-size:11px; display:flex; align-items:center; justify-content:center; cursor:pointer;">×</div>
+                </div>
+              </sc-for>
+            </div>
+            <sc-if value="{{ canAddPhoto }}">
+              <label style="display:inline-flex; align-items:center; gap:8px; border:1px dashed oklch(80% 0.02 60); border-radius:6px; padding:10px 16px; cursor:pointer; font-size:13px; color:oklch(45% 0.02 60);">
+                <input type="file" accept="image/*" multiple="multiple" onChange="{{ onPhotosFile }}" style="display:none;" />
+                📷 เพิ่มรูป ({{ photoCount }}/10)
+              </label>
+            </sc-if>
           </div>
 
           <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:16px;">
@@ -133,20 +160,31 @@
             </div>
           </div>
 
-          <div style="margin-bottom:16px;">
+          <div style="margin-bottom:20px;">
             <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รายละเอียดเพิ่มเติม</div>
             <textarea rows="4" value="{{ f_description }}" onChange="{{ onFDescription }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
           </div>
 
-          <div style="background:oklch(97% 0.01 80); border:1px dashed oklch(82% 0.02 60); border-radius:6px; padding:16px 18px; display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+          <div onClick="{{ onSaveProperty }}" style="background:oklch(40% 0.13 25); color:white; text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:600; cursor:pointer;">{{ saveLabel }}</div>
+          <sc-if value="{{ saveError }}"><div style="font-size:13px; color:oklch(50% 0.18 30); text-align:center; margin-top:10px;">{{ saveError }}</div></sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showSaved }}">
+        <div style="background:white; border-radius:8px; padding:clamp(20px,4vw,30px);">
+          <div style="font-size:34px; margin-bottom:8px;">✅</div>
+          <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60); margin-bottom:6px;">บันทึกทรัพย์ {{ savedId }} สำเร็จ</div>
+          <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:22px;">ประกาศของคุณขึ้นเว็บเรียบร้อยแล้ว</div>
+
+          <div style="background:oklch(97% 0.01 80); border:1px dashed oklch(82% 0.02 60); border-radius:6px; padding:16px 18px; display:flex; flex-direction:column; gap:10px; margin-bottom:22px;">
             <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer;">
-              <input type="checkbox" checked="{{ f_assistedSale }}" onChange="{{ onFAssistedSale }}" style="margin-top:3px;" />
+              <input type="checkbox" checked="{{ ns_assistedSale }}" onChange="{{ onNsAssistedSale }}" style="margin-top:3px;" />
               <span style="font-size:13.5px; color:oklch(30% 0.02 60); line-height:1.6;">นอกจากลงประกาศในเว็บเราแล้ว ต้องการให้ทีมงานช่วยขาย/ปล่อยเช่าผ่านช่องทางอื่นเพิ่มเติมด้วยหรือไม่? ข้อความนี้เป็นความลับระหว่างคุณกับทีมงานเท่านั้น</span>
             </label>
-            <sc-if value="{{ f_assistedSale }}">
+            <sc-if value="{{ ns_assistedSale }}">
               <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                 <span style="font-size:12px; color:oklch(50% 0.02 60);">ค่าคอมมิชชันที่ยินดีให้เรา:</span>
-                <select value="{{ f_commissionPct }}" onChange="{{ onFCommissionPct }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 10px; font-size:13px; font-family:inherit; background:white;">
+                <select value="{{ ns_commissionPct }}" onChange="{{ onNsCommissionPct }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 10px; font-size:13px; font-family:inherit; background:white;">
                   <option value="1">1%</option>
                   <option value="2">2%</option>
                   <option value="5">5%</option>
@@ -156,10 +194,18 @@
               </div>
             </sc-if>
             <div style="font-size:11.5px; color:oklch(58% 0.02 60);">🔒 ส่วนตัว — เห็นเฉพาะทีมงานเราเท่านั้น ไม่แสดงต่อสาธารณะหรือผู้ลงประกาศรายอื่น</div>
+            <div style="display:flex; gap:10px; margin-top:6px;">
+              <div onClick="{{ onConfirmNudge }}" style="background:oklch(40% 0.13 25); color:white; padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">{{ nudgeConfirmLabel }}</div>
+              <div onClick="{{ onSkipNudge }}" style="color:oklch(50% 0.02 60); padding:9px 10px; font-size:13px; cursor:pointer;">ข้ามไปก่อน</div>
+            </div>
+            <sc-if value="{{ nudgeSavedMsg }}"><div style="font-size:12px; color:oklch(45% 0.13 145);">{{ nudgeSavedMsg }}</div></sc-if>
           </div>
 
-          <div onClick="{{ onSaveProperty }}" style="background:oklch(40% 0.13 25); color:white; text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:600; cursor:pointer;">{{ saveLabel }}</div>
-          <sc-if value="{{ saveError }}"><div style="font-size:13px; color:oklch(50% 0.18 30); text-align:center; margin-top:10px;">{{ saveError }}</div></sc-if>
+          <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:8px;">📝 ข้อความสำหรับโพสต์ขาย (คัดลอกไปวางได้เลย)</div>
+          <textarea readonly="readonly" rows="10" value="{{ postDraft }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:12px 14px; font-size:13px; font-family:inherit; resize:vertical; background:oklch(98% 0.005 80); margin-bottom:10px;"></textarea>
+          <div onClick="{{ onCopyPost }}" style="display:inline-block; background:oklch(22% 0.02 60); color:white; padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; margin-bottom:22px;">📋 {{ copyLabel }}</div>
+
+          <div onClick="{{ onGoToList }}" style="font-size:13px; color:oklch(42% 0.12 25); cursor:pointer;">← กลับไปหน้ารายการทรัพย์ทั้งหมด</div>
         </div>
       </sc-if>
     </sc-if>
@@ -173,7 +219,10 @@ class Component extends DCLogic {
     loaded: false, signedIn: false, lister: null, properties: [], view: "list",
     editingId: null, f_type: "villa", f_area: "hua-hin", f_zone: "", f_status: "sale",
     f_price: "", f_bedrooms: "", f_bathrooms: "", f_livingArea: "", f_landSize: "",
-    f_description: "", f_assistedSale: false, f_commissionPct: "5", saveError: "", saving: false,
+    f_description: "", saveError: "", saving: false,
+    existingPhotos: [], newPhotos: [],
+    savedId: "", savedPayload: null, ns_assistedSale: false, ns_commissionPct: "5",
+    nudgeSaving: false, nudgeSavedMsg: "", copyLabel: "คัดลอกข้อความ",
   };
 
   async componentDidMount() {
@@ -201,24 +250,51 @@ class Component extends DCLogic {
     this.setState({
       view: "edit", editingId: null, f_type: "villa", f_area: "hua-hin", f_zone: "",
       f_status: "sale", f_price: "", f_bedrooms: "", f_bathrooms: "", f_livingArea: "",
-      f_landSize: "", f_description: "", f_assistedSale: false, f_commissionPct: "5", saveError: "",
+      f_landSize: "", f_description: "", saveError: "", existingPhotos: [], newPhotos: [],
     });
   }
 
-  startEdit(p) {
+  async startEdit(p) {
     this.setState({
       view: "edit", editingId: p.id, f_type: p.type || "villa", f_area: p.area || "hua-hin",
       f_zone: p.zone || "", f_status: p.status === "rent" ? "rent" : "sale",
       f_price: p.price != null ? String(p.price) : "", f_bedrooms: p.bedrooms != null ? String(p.bedrooms) : "",
       f_bathrooms: p.bathrooms != null ? String(p.bathrooms) : "", f_livingArea: p.livingArea != null ? String(p.livingArea) : "",
       f_landSize: p.landSize != null ? String(p.landSize) : "", f_description: p.description || "",
-      f_assistedSale: !!p.assistedSale, f_commissionPct: p.commissionPct || "5", saveError: "",
+      saveError: "", existingPhotos: [], newPhotos: [],
     });
+    try {
+      const photos = await this._fb.fetchPhotosFor(p.id);
+      photos.sort((a, b) => (a.id > b.id ? 1 : -1));
+      this.setState({ existingPhotos: photos.map((ph) => ({ id: ph.id, url: ph.dataUrl })) });
+    } catch (e) { console.warn("Failed to load photos:", e); }
   }
 
   genCode(area) {
     const prefix = { "hua-hin": "HH", "pranburi": "PB", "cha-am": "CA" }[area] || "LST";
     return prefix + "-" + String(Date.now()).slice(-5);
+  }
+
+  totalPhotoCount() { return this.state.existingPhotos.length + this.state.newPhotos.length; }
+
+  async onPhotosFile(e) {
+    const files = [...(e.target.files || [])];
+    if (!files.length) return;
+    const room = 10 - this.totalPhotoCount();
+    const use = files.slice(0, Math.max(0, room));
+    for (const file of use) {
+      const dataUrl = await this._fb.fileToDataUrl(file, 1000);
+      this.setState((s) => ({ newPhotos: [...s.newPhotos, { url: dataUrl }] }));
+    }
+  }
+
+  removeNewPhoto(idx) {
+    this.setState((s) => ({ newPhotos: s.newPhotos.filter((_, i) => i !== idx) }));
+  }
+
+  async removeExistingPhoto(ph) {
+    this.setState((s) => ({ existingPhotos: s.existingPhotos.filter((x) => x.id !== ph.id) }));
+    try { await this._fb.deleteDocById("propertyPhotos", ph.id); } catch (e) { console.warn("Failed to delete photo:", e); }
   }
 
   async saveProperty() {
@@ -238,22 +314,78 @@ class Component extends DCLogic {
       livingArea: this.state.f_livingArea ? Number(this.state.f_livingArea) : null,
       landSize: this.state.f_landSize ? Number(this.state.f_landSize) : null,
       description: this.state.f_description,
-      assistedSale: this.state.f_assistedSale,
-      commissionPct: this.state.f_assistedSale ? this.state.f_commissionPct : null,
       currency: "THB", updatedAt: Date.now(),
     };
     try {
       await this._fb.setDoc("properties", id, payload);
+      const usedIdx = new Set(this.state.existingPhotos.map((ph) => Number(ph.id.split("-").pop())));
+      let idx = 0;
+      for (const np of this.state.newPhotos) {
+        while (usedIdx.has(idx)) idx++;
+        await this._fb.savePhoto(id, idx, np.url);
+        usedIdx.add(idx);
+      }
       const properties = await this._fb.fetchWhere("properties", "listerId", this.state.lister.id);
-      this.setState({ saving: false, view: "list", properties });
+      this.setState({
+        saving: false, view: "saved", properties, savedId: id, savedPayload: payload,
+        ns_assistedSale: false, ns_commissionPct: "5", nudgeSavedMsg: "",
+      });
     } catch (e) {
       console.warn("Failed to save property:", e);
-      this.setState({ saving: false, saveError: "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง" });
+      this.setState({ saving: false, saveError: "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง — ถ้ายังไม่ได้อีก แจ้งแอดมินให้ตรวจสอบสิทธิ์การเขียนข้อมูล (Firestore rules)" });
     }
+  }
+
+  async confirmNudge() {
+    if (this.state.nudgeSaving || !this.state.savedPayload) return;
+    this.setState({ nudgeSaving: true });
+    const merged = { ...this.state.savedPayload, assistedSale: this.state.ns_assistedSale, commissionPct: this.state.ns_assistedSale ? this.state.ns_commissionPct : null };
+    try {
+      await this._fb.setDoc("properties", this.state.savedId, merged);
+      this.setState({ nudgeSaving: false, savedPayload: merged, nudgeSavedMsg: "บันทึกแล้ว — ขอบคุณครับ/ค่ะ ทีมงานจะติดต่อกลับเร็วๆ นี้" });
+    } catch (e) {
+      this.setState({ nudgeSaving: false, nudgeSavedMsg: "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง" });
+    }
+  }
+
+  buildPostDraft() {
+    const p = this.state.savedPayload;
+    if (!p) return "";
+    const areaLabels = { "hua-hin": "หัวหิน", "pranburi": "ปราณบุรี", "cha-am": "ชะอำ" };
+    const typeLabels = { villa: "พูลวิลล่า", house: "บ้านเดี่ยว", condo: "คอนโด", land: "ที่ดิน", commercial: "อาคารพาณิชย์" };
+    const statusLabel = p.status === "rent" ? "ประกาศเช่า" : "ประกาศขาย";
+    const lines = [];
+    lines.push(`🏡 ${typeLabels[p.type] || p.type} ${statusLabel} — ${p.zone}, ${areaLabels[p.area] || p.area}`);
+    lines.push(`💰 ราคา ${(Number(p.price) || 0).toLocaleString()} บาท${p.status === "rent" ? "/เดือน" : ""}`);
+    if (p.bedrooms || p.bathrooms) lines.push(`🛏️ ${p.bedrooms || 0} ห้องนอน · 🚿 ${p.bathrooms || 0} ห้องน้ำ`);
+    if (p.livingArea) lines.push(`📐 พื้นที่ใช้สอย ${p.livingArea} ตร.ม.`);
+    if (p.landSize) lines.push(`🌳 ที่ดิน ${p.landSize} ตร.ว.`);
+    if (p.description) { lines.push(""); lines.push(p.description); }
+    lines.push("");
+    lines.push(`รหัสทรัพย์: ${this.state.savedId}`);
+    lines.push("");
+    lines.push(this._fbFooter || "");
+    return lines.join("\n");
+  }
+
+  async loadFooterAndDraft() {
+    try { this._fbFooter = await this._fb.fetchFacebookFooter(); } catch (e) { this._fbFooter = ""; }
+    this.forceUpdate();
+  }
+
+  copyPost() {
+    const text = this.buildPostDraft();
+    if (navigator.clipboard) navigator.clipboard.writeText(text).catch(() => {});
+    this.setState({ copyLabel: "คัดลอกแล้ว ✓" });
+    setTimeout(() => this.setState({ copyLabel: "คัดลอกข้อความ" }), 2000);
   }
 
   renderVals() {
     const mod = this._mod;
+    if (this.state.view === "saved" && this._fbFooter === undefined) {
+      this._fbFooter = null;
+      this.loadFooterAndDraft();
+    }
     const tierLabels = { basic: "① ฟรี", pro: "② Premium", agency: "② Premium", level3: "③ ระดับ 3", silver: "🥈 VIP เงิน", gold: "🥇 VIP ทอง", diamond: "💎 VIP เพชร" };
     const lister = this.state.lister || {};
     const areaLabels = { "hua-hin": "หัวหิน", "pranburi": "ปราณบุรี", "cha-am": "ชะอำ" };
@@ -265,16 +397,18 @@ class Component extends DCLogic {
       reserved: { label: "จอง", bg: "oklch(93% 0.05 80)", color: "oklch(45% 0.1 80)" },
       rented: { label: "เช่าแล้ว", bg: "oklch(90% 0.01 70)", color: "oklch(45% 0.02 60)" },
     };
-
+    const now = Date.now();
     const properties = (this.state.properties || []).map((p) => {
       const st = statusMap[p.status] || statusMap.sale;
       const bedBath = (p.bedrooms || p.bathrooms) ? `${p.bedrooms || 0} นอน / ${p.bathrooms || 0} น้ำ` : "-";
+      const ageDays = p.updatedAt ? (now - p.updatedAt) / 86400000 : 0;
       return {
         id: p.id, code: p.id, zone: p.zone || "-", areaLabel: areaLabels[p.area] || p.area || "-",
         typeLabel: typeLabels[p.type] || p.type || "-", bedBath,
         priceLabel: "฿" + (Number(p.price) || 0).toLocaleString() + (p.status === "rent" ? "/เดือน" : ""),
         statusLabel: st.label, statusBg: st.bg, statusColor: st.color,
         assistedSale: !!p.assistedSale,
+        needsNudge: !p.assistedSale && ageDays > 30 && (p.status === "sale" || p.status === "rent"),
         onEdit: () => this.startEdit(p),
       };
     });
@@ -284,11 +418,12 @@ class Component extends DCLogic {
       listerName: lister.name ? " " + lister.name : "", listerEmail: lister.email || "",
       tierLabel: tierLabels[lister.tier] || tierLabels[lister.vipTier] || "① ฟรี",
       onLogout: () => this.onLogout(),
-      showList: this.state.view === "list", showEdit: this.state.view === "edit",
+      showList: this.state.view === "list", showEdit: this.state.view === "edit", showSaved: this.state.view === "saved",
       propCount: properties.length, hasNoProps: properties.length === 0,
       properties,
       onNewProperty: () => this.startNew(),
       onBackToList: () => this.setState({ view: "list" }),
+      onGoToList: () => this.setState({ view: "list" }),
       editTitle: this.state.editingId ? `แก้ไขทรัพย์ ${this.state.editingId}` : "เพิ่มทรัพย์ใหม่",
       typeOptions: mod ? mod.TYPES.map((ty) => ({ id: ty.id, label: ty.label.th })) : [],
       areaOptions: mod ? mod.AREAS.map((a) => ({ id: a.id, label: a.label.th })) : [],
@@ -302,11 +437,26 @@ class Component extends DCLogic {
       f_livingArea: this.state.f_livingArea, onFLivingArea: (e) => this.setState({ f_livingArea: e.target.value }),
       f_landSize: this.state.f_landSize, onFLandSize: (e) => this.setState({ f_landSize: e.target.value }),
       f_description: this.state.f_description, onFDescription: (e) => this.setState({ f_description: e.target.value }),
-      f_assistedSale: this.state.f_assistedSale, onFAssistedSale: (e) => this.setState({ f_assistedSale: e.target.checked }),
-      f_commissionPct: this.state.f_commissionPct, onFCommissionPct: (e) => this.setState({ f_commissionPct: e.target.value }),
+      existingPhotos: this.state.existingPhotos.map((ph) => ({ ...ph, onRemove: () => this.removeExistingPhoto(ph) })),
+      newPhotos: this.state.newPhotos.map((np, i) => ({ ...np, onRemove: () => this.removeNewPhoto(i) })),
+      canAddPhoto: this.totalPhotoCount() < 10,
+      photoCount: this.totalPhotoCount(),
+      onPhotosFile: (e) => this.onPhotosFile(e),
       saveLabel: this.state.saving ? "กำลังบันทึก…" : "บันทึกทรัพย์นี้",
       onSaveProperty: () => this.saveProperty(),
       saveError: this.state.saveError,
+      savedId: this.state.savedId,
+      ns_assistedSale: this.state.ns_assistedSale,
+      onNsAssistedSale: (e) => this.setState({ ns_assistedSale: e.target.checked }),
+      ns_commissionPct: this.state.ns_commissionPct,
+      onNsCommissionPct: (e) => this.setState({ ns_commissionPct: e.target.value }),
+      nudgeConfirmLabel: this.state.nudgeSaving ? "กำลังบันทึก…" : "ยืนยัน",
+      onConfirmNudge: () => this.confirmNudge(),
+      onSkipNudge: () => this.setState({ nudgeSavedMsg: "" }),
+      nudgeSavedMsg: this.state.nudgeSavedMsg,
+      postDraft: this.buildPostDraft(),
+      onCopyPost: () => this.copyPost(),
+      copyLabel: this.state.copyLabel,
     };
   }
 }

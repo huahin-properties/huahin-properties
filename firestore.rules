@@ -35,8 +35,25 @@ service cloud.firestore {
     }
 
     // Public, read-only data the site renders for every visitor.
-    match /properties/{id} { allow read: if true; allow write: if isAdmin(); }
-    match /propertyPhotos/{id} { allow read: if true; allow write: if isAdmin(); }
+    // Public read. Admin can write anything. A signed-in lister may create/
+    // edit/delete ONLY their own property (listerId must match their own
+    // Auth UID both before and after the write) — self-serve listing (see
+    // BLUEPRINT.md "Lister Dashboard").
+    match /properties/{id} {
+      allow read: if true;
+      allow create: if isAdmin() || (request.auth != null && request.resource.data.listerId == request.auth.uid);
+      allow update: if isAdmin() || (request.auth != null && resource.data.listerId == request.auth.uid && request.resource.data.listerId == request.auth.uid);
+      allow delete: if isAdmin() || (request.auth != null && resource.data.listerId == request.auth.uid);
+    }
+    // Public read. Admin can write anything. A signed-in lister may write a
+    // photo doc for a property they own (checked via the linked property's
+    // listerId) — needed for self-serve photo upload in Lister Dashboard.
+    match /propertyPhotos/{id} {
+      allow read: if true;
+      allow write: if isAdmin() || (request.auth != null &&
+        exists(/databases/$(database)/documents/properties/$(request.resource.data.propertyId)) &&
+        get(/databases/$(database)/documents/properties/$(request.resource.data.propertyId)).data.listerId == request.auth.uid);
+    }
     match /siteContent/{id} { allow read: if true; allow write: if isOwner(); }
     match /profilePhotos/{id} { allow read: if true; allow write: if isAdmin(); }
     match /aiNotes/{id} { allow read: if true; allow write: if isOwner(); }
