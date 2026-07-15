@@ -30,27 +30,33 @@
   <div style="max-width:640px; margin:0 auto; padding:clamp(20px,4vw,40px);">
 
     <sc-if value="{{ notSignedIn }}" hint-placeholder-val="{{ false }}">
-      <div style="background:white; border-radius:8px; padding:32px; text-align:center;">
-        <div style="font-size:15px; color:oklch(35% 0.02 60); margin-bottom:16px;">กรุณาเข้าสู่ระบบก่อน</div>
+      <div style="background:white; border-radius:8px; padding:20px 24px; text-align:center; margin-bottom:20px;">
+        <div style="font-size:14px; color:oklch(35% 0.02 60);">ดูราคาแพ็กเกจได้เลย — สมัคร/เข้าสู่ระบบตอนพร้อมอัปเกรด</div>
         <a href="Agent Signup.dc.html" style="display:inline-block; background:oklch(22% 0.02 60); color:white; padding:10px 24px; border-radius:6px; text-decoration:none; font-size:14px;">ไปที่หน้าสมัคร/เข้าสู่ระบบ</a>
       </div>
     </sc-if>
 
     <sc-if value="{{ loaded }}">
-      <div style="font-family:'Playfair Display',serif; font-size:22px; color:oklch(20% 0.02 60); margin-bottom:4px;">สถานะสมาชิกของฉัน</div>
-      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:24px;">{{ lister.email }}</div>
+      <sc-if value="{{ hasLister }}">
+        <div style="font-family:'Playfair Display',serif; font-size:22px; color:oklch(20% 0.02 60); margin-bottom:4px;">สถานะสมาชิกของฉัน</div>
+        <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:24px;">{{ lister.email }}</div>
 
-      <div style="background:white; border-radius:8px; padding:22px; margin-bottom:20px;">
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
-          <div style="width:9px; height:9px; border-radius:50%; background:{{ statusDotColor }};"></div>
-          <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60);">{{ statusLabel }}</div>
+        <div style="background:white; border-radius:8px; padding:22px; margin-bottom:20px;">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+            <div style="width:9px; height:9px; border-radius:50%; background:{{ statusDotColor }};"></div>
+            <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60);">{{ statusLabel }}</div>
+          </div>
+          <div style="font-size:13px; color:oklch(50% 0.02 60);">แพ็กเกจปัจจุบัน: {{ tierLabel }}</div>
+
+          <sc-if value="{{ hasCustomerId }}">
+            <div onClick="{{ onManageBilling }}" style="display:inline-block; margin-top:16px; background:oklch(22% 0.02 60); color:white; padding:10px 22px; border-radius:6px; font-size:13px; cursor:pointer;">จัดการการชำระเงิน / ยกเลิก</div>
+          </sc-if>
         </div>
-        <div style="font-size:13px; color:oklch(50% 0.02 60);">แพ็กเกจปัจจุบัน: {{ tierLabel }}</div>
-
-        <sc-if value="{{ hasCustomerId }}">
-          <div onClick="{{ onManageBilling }}" style="display:inline-block; margin-top:16px; background:oklch(22% 0.02 60); color:white; padding:10px 22px; border-radius:6px; font-size:13px; cursor:pointer;">จัดการการชำระเงิน / ยกเลิก</div>
-        </sc-if>
-      </div>
+      </sc-if>
+      <sc-if value="{{ notHasLister }}">
+        <div style="font-family:'Playfair Display',serif; font-size:22px; color:oklch(20% 0.02 60); margin-bottom:4px;">แพ็กเกจ &amp; ราคา</div>
+        <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:24px;">ดูราคาทุกระดับได้เลย สมัคร/เข้าสู่ระบบตอนพร้อมอัปเกรด</div>
+      </sc-if>
 
       <div style="font-size:13px; font-weight:600; color:oklch(45% 0.02 60); margin-bottom:4px;">บันไดสมาชิก 5 ระดับ</div>
       <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">ไต่ระดับขึ้นทีละขั้น — ระดับสูงกว่าได้ทุกสิทธิ์จากระดับล่างกว่าด้วย</div>
@@ -130,15 +136,16 @@ class Component extends DCLogic {
     const fb = await import("./firebase-client.js");
     this._fb = fb;
     await fb.onAdminAuthReady().catch(() => {});
-    if (!fb.isAdminAuthed()) {
-      this.setState({ notSignedIn: true, loaded: false });
-      return;
-    }
+    // Pricing/packages are always public — anyone can see what each level
+    // costs and unlocks before signing up. Only the "upgrade" action itself
+    // requires a signed-in lister account (redirects to signup if not).
+    const signedIn = fb.isAdminAuthed();
     try {
       const [lister, prices, vipPrices, rolloutLevel] = await Promise.all([
-        fb.fetchMyListerDoc(), fb.fetchStripePrices(), fb.fetchAgentVipPrices(), fb.fetchRolloutLevel(),
+        signedIn ? fb.fetchMyListerDoc() : Promise.resolve(null),
+        fb.fetchStripePrices(), fb.fetchAgentVipPrices(), fb.fetchRolloutLevel(),
       ]);
-      this.setState({ lister, prices, vipPrices, rolloutLevel, loaded: true });
+      this.setState({ lister, prices, vipPrices, rolloutLevel, loaded: true, notSignedIn: !signedIn });
     } catch (e) {
       console.warn("Failed to load billing info:", e);
       this.setState({ loaded: true, error: "โหลดข้อมูลไม่สำเร็จ" });
@@ -146,6 +153,7 @@ class Component extends DCLogic {
   }
 
   async upgrade(tier) {
+    if (!this.state.lister) { window.location.href = "Agent Signup.dc.html"; return; }
     const priceId = this.state.prices[tier];
     if (!priceId) {
       this.setState({ error: "แอดมินยังไม่ได้ตั้งราคาแพ็กเกจนี้ — ติดต่อแอดมิน" });
@@ -160,6 +168,7 @@ class Component extends DCLogic {
   }
 
   async upgradeVip(tier) {
+    if (!this.state.lister) { window.location.href = "Agent Signup.dc.html"; return; }
     const priceId = this.state.vipPrices[tier];
     if (!priceId) {
       this.setState({ error: "แอดมินยังไม่เปิดแพ็กเกจ VIP นี้ — ติดต่อแอดมิน" });
@@ -193,7 +202,9 @@ class Component extends DCLogic {
 
     return {
       notSignedIn: this.state.notSignedIn,
-      loaded: this.state.loaded && !this.state.notSignedIn,
+      loaded: this.state.loaded,
+      hasLister: !!this.state.lister,
+      notHasLister: !this.state.lister,
       lister,
       statusDotColor: isActive ? "oklch(50% 0.13 145)" : "oklch(70% 0.01 70)",
       statusLabel: isActive ? "สมาชิกใช้งานอยู่" : "ยังไม่ได้อัปเกรด (ใช้แพ็กเกจฟรี)",
