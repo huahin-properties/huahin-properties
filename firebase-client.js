@@ -604,6 +604,88 @@ export async function cancelArchival(propertyId) {
   await setDoc("properties", propertyId, { archiveScheduledAt: null });
 }
 
+// Full delete — used by the lister's own "ลบทรัพย์ทั้งใบ" button (Lister
+// Dashboard). Removes photo files from Storage, their Firestore docs, and
+// finally the property doc itself. Irreversible — unlike archival (which
+// only strips photos and keeps the listing record for history).
+export async function deletePropertyFully(propertyId) {
+  const photos = await fetchPhotosFor(propertyId);
+  for (const ph of photos) {
+    try {
+      if (ph.dataUrl && ph.dataUrl.startsWith("https://")) {
+        const path = decodeURIComponent(new URL(ph.dataUrl).pathname.split("/o/")[1].split("?")[0]);
+        await storageRef().ref(path).delete().catch(() => {});
+      }
+    } catch (e) {}
+    await deleteDocById("propertyPhotos", ph.id).catch(() => {});
+  }
+  await deleteDocById("properties", propertyId);
+}
+
+// ── Buyer Registration / Agent Code (BLUEPRINT.md §2 ทาง 4) ──────────────
+// Procuring-cause style dispute prevention for VIP agents: whoever registers
+// a buyer for a property FIRST keeps the claim for a protection window.
+
+export function generateAgentCode() {
+  const n = Math.floor(1000 + Math.random() * 9000);
+  return `HHP-A${n}`;
+}
+
+export async function ensureAgentCode(listerId, existingCode) {
+  if (existingCode) return existingCode;
+  const code = generateAgentCode();
+  await setDoc("listers", listerId, { agentCode: code });
+  return code;
+}
+
+const BUYER_PROTECTION_DAYS = 60;
+
+// Returns { ok:true, registration } on success, or { ok:false, conflict }
+// if this phone/email is already registered for this property by someone
+// else within the protection window (first timestamp wins).
+export async function registerBuyer(propertyId, listerId, agentCode, buyer) {
+  const phone = (buyer.phone || "").replace(/\D/g, "");
+  const email = (buyer.email || "").trim().toLowerCase();
+  const snap = await db().collection("buyerRegistrations").where("propertyId", "==", propertyId).get();
+  const now = Date.now();
+  const existing = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  const conflict = existing.find((r) => {
+    if (r.listerId === listerId) return false;
+    if (r.protectionUntil && r.protectionUntil < now) return false;
+    const samePhone = phone && r.phone === phone;
+    const sameEmail = email && r.email === email;
+    return samePhone || sameEmail;
+  });
+  if (conflict) return { ok: false, conflict };
+  const id = "buyer-" + Date.now();
+  const registration = {
+    propertyId, listerId, agentCode: agentCode || "",
+    buyerName: buyer.name || "", phone, email,
+    registeredAt: now, protectionUntil: now + BUYER_PROTECTION_DAYS * 24 * 60 * 60 * 1000,
+  };
+  await setDoc("buyerRegistrations", id, registration);
+  return { ok: true, registration: { id, ...registration } };
+}
+
+// Teaser stats (BLUEPRINT.md §2 ทาง 4 — "Mutual Social Proof") — counts of
+// properties/agents in each VIP pool, shown as a locked preview to whoever
+// hasn't unlocked that tier yet (numbers only, no identifying details).
+export async function fetchVipPoolStats() {
+  const now = Date.now();
+  const [propsSnap, listersSnap] = await Promise.all([
+    db().collection("properties").where("vipTier", "in", ["silver", "gold", "diamond"]).get(),
+    db().collection("listers").where("vipTier", "in", ["silver", "gold", "diamond"]).get(),
+  ]);
+  const count = (snap, tier, field) => snap.docs.filter((d) => {
+    const data = d.data();
+    return data.vipTier === tier && (field ? data[field] > now : true);
+  }).length;
+  return {
+    silverProps: count(propsSnap, "silver", "vipUntil"), goldProps: count(propsSnap, "gold", "vipUntil"), diamondProps: count(propsSnap, "diamond", "vipUntil"),
+    silverAgents: count(listersSnap, "silver"), goldAgents: count(listersSnap, "gold"), diamondAgents: count(listersSnap, "diamond"),
+  };
+}
+
 export async function runArchivalSweep(properties) {
   const now = Date.now();
   const due = (properties || []).filter(

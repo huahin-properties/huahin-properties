@@ -50,6 +50,7 @@
         <div>
           <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">แพ็กเกจปัจจุบันของคุณ</div>
           <div style="font-size:16px; font-weight:600; color:oklch(25% 0.02 60);">{{ tierLabel }}</div>
+          <sc-if value="{{ agentCodeLabel }}"><div style="font-size:12px; color:oklch(45% 0.13 250); margin-top:4px;">{{ agentCodeLabel }}</div></sc-if>
         </div>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
           <div onClick="{{ onOpenMySite }}" style="background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:11px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;">🌐 เว็บไซต์ของฉัน</div>
@@ -169,8 +170,12 @@
                   <div onClick="{{ p.onEdit }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:oklch(35% 0.02 60); cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">✏️<br/>แก้ไข</div>
                   <div onClick="{{ p.onPublish }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:{{ p.publishColor }}; cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">{{ p.publishIcon }}<br/>{{ p.publishLabel }}</div>
                   <div onClick="{{ p.onPostText }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:oklch(35% 0.02 60); cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">🤖<br/>ข้อความโพสต์ AI</div>
-                  <div onClick="{{ p.onShare }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:oklch(35% 0.02 60); cursor:pointer;">🔗<br/>แชร์</div>
+                  <div onClick="{{ p.onShare }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:oklch(35% 0.02 60); cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">🔗<br/>แชร์</div>
+                  <div onClick="{{ p.onDeleteClick }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:oklch(50% 0.18 30); cursor:pointer;">🗑️<br/>ลบ</div>
                 </div>
+                <sc-if value="{{ p.isVip }}">
+                  <div onClick="{{ p.onOpenBuyer }}" style="text-align:center; padding:8px 4px; font-size:11.5px; color:oklch(45% 0.13 250); cursor:pointer; border-top:1px solid oklch(93% 0.01 70); background:oklch(97% 0.02 250);">👤 ลงเบิดโดนโดดีชีกม</div>
+                </sc-if>
               </div>
             </sc-for>
           </div>
@@ -201,6 +206,10 @@
                   <div onClick="{{ p.onPublish }}" style="padding:0 14px; text-align:center; font-size:11px; color:{{ p.publishColor }}; cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">{{ p.publishIcon }}<br/>{{ p.publishLabel }}</div>
                   <div onClick="{{ p.onPostText }}" style="padding:0 14px; text-align:center; font-size:11px; color:oklch(35% 0.02 60); cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">🤖<br/>AI</div>
                   <div onClick="{{ p.onShare }}" style="padding:0 14px; text-align:center; font-size:11px; color:oklch(35% 0.02 60); cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">🔗<br/>แชร์</div>
+                  <div onClick="{{ p.onDeleteClick }}" style="padding:0 14px; text-align:center; font-size:11px; color:oklch(50% 0.18 30); cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">🗑️<br/>ลบ</div>
+                  <sc-if value="{{ p.isVip }}">
+                    <div onClick="{{ p.onOpenBuyer }}" style="padding:0 14px; text-align:center; font-size:11px; color:oklch(45% 0.13 250); cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70); background:oklch(97% 0.02 250);">👤<br/>ผู้ซื้อ</div>
+                  </sc-if>
                 </div>
               </div>
             </sc-for>
@@ -361,6 +370,38 @@
           </div>
         </div>
       </sc-if>
+
+      <sc-if value="{{ showDeleteConfirm }}">
+        <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:100;" onClick="{{ onCancelDelete }}">
+          <div style="background:white; border-radius:10px; padding:24px; width:min(380px,90vw);" onClick="{{ stopProp }}">
+            <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:6px;">ลบทรัพย์ {{ deleteTargetId }} ทั้งใบ?</div>
+            <div style="font-size:13px; color:oklch(45% 0.02 60); margin-bottom:18px; line-height:1.6;">การลบนี้ถาวร ไม่สามารถกู้คืนได้ — รูปภาพและข้อมูลทั้งหมดของทรัพย์นี้จะถูกลบออกจากระบบทันที</div>
+            <div style="display:flex; gap:10px;">
+              <div onClick="{{ onCancelDelete }}" style="flex:1; text-align:center; background:oklch(93% 0.01 70); color:oklch(30% 0.02 60); padding:11px; border-radius:6px; font-size:13px; cursor:pointer;">ยกเลิก</div>
+              <div onClick="{{ onConfirmDelete }}" style="flex:1; text-align:center; background:oklch(50% 0.18 30); color:white; padding:11px; border-radius:6px; font-size:13px; cursor:pointer;">{{ deleteConfirmLabel }}</div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showBuyerModal }}">
+        <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:100;" onClick="{{ onCloseBuyer }}">
+          <div style="background:white; border-radius:10px; padding:24px; width:min(400px,90vw);" onClick="{{ stopProp }}">
+            <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:6px;">👤 ลงทะเบียนผู้ซื้อ {{ buyerTargetId }}</div>
+            <div style="font-size:12.5px; color:oklch(50% 0.02 60); margin-bottom:16px; line-height:1.6;">ลงทะเบียนก่อนพาผู้ซื้อไปดูบ้านเสมอ — เก็บเป็นหลักฐานป้องกันข้อพิพาทกับ Agent อื่น (คุ้มครอง 60 วัน)</div>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:14px;">
+              <input value="{{ buyer_name }}" onChange="{{ onBuyerName }}" placeholder="ชื่อผู้ซื้อ" style="border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit;" />
+              <input value="{{ buyer_phone }}" onChange="{{ onBuyerPhone }}" placeholder="เบอร์โทร" style="border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit;" />
+              <input value="{{ buyer_email }}" onChange="{{ onBuyerEmail }}" placeholder="อีเมล (ไม่บังคับ)" style="border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit;" />
+            </div>
+            <sc-if value="{{ buyerMsg }}"><div style="{{ buyerMsgStyle }}">{{ buyerMsg }}</div></sc-if>
+            <div style="display:flex; gap:10px; margin-top:14px;">
+              <div onClick="{{ onCloseBuyer }}" style="flex:1; text-align:center; background:oklch(93% 0.01 70); color:oklch(30% 0.02 60); padding:11px; border-radius:6px; font-size:13px; cursor:pointer;">ปิด</div>
+              <div onClick="{{ onSubmitBuyer }}" style="flex:1; text-align:center; background:oklch(35% 0.1 250); color:white; padding:11px; border-radius:6px; font-size:13px; cursor:pointer;">{{ buyerSubmitLabel }}</div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
     </sc-if>
   </div>
 </div>
@@ -377,6 +418,8 @@ class Component extends DCLogic {
     savedId: "", savedPayload: null, ns_assistedSale: false, ns_commissionPct: "5",
     nudgeSaving: false, nudgeSavedMsg: "", copyLabel: "คัดลอกข้อความ",
     shareId: "", shareUrl: "", shareCopyLabel: "คัดลอกลิงก์", quotaMsg: "", listLayout: "list",
+    showDeleteConfirm: false, deleteTargetId: "", deleting: false,
+    showBuyerModal: false, buyerTargetId: "", buyer_name: "", buyer_phone: "", buyer_email: "", buyerMsg: "", buyerIsError: false, buyerSaving: false,
     showProfileSettings: false, ps_displayName: "", ps_profilePhotoUrl: "", ps_coverPhotoUrl: "",
     ps_aiPersonaText: "", ps_themeColor: "", ps_saving: false, ps_saveMsg: "",
   };
@@ -401,6 +444,10 @@ class Component extends DCLogic {
         ps_profilePhotoUrl: lister.profilePhotoUrl || "", ps_coverPhotoUrl: lister.coverPhotoUrl || "",
         ps_aiPersonaText: lister.aiPersonaText || "", ps_themeColor: lister.themeColor || "",
       });
+      if (lister.vipTier && !lister.agentCode) {
+        const agentCode = await fb.ensureAgentCode(lister.id, lister.agentCode).catch(() => "");
+        if (agentCode) this.setState((s) => ({ lister: { ...s.lister, agentCode } }));
+      }
     } catch (e) {
       console.warn("Failed to load dashboard:", e);
       this.setState({ loaded: true, signedIn: true, lister: null, properties: [] });
@@ -650,6 +697,70 @@ class Component extends DCLogic {
     setTimeout(() => this.setState({ copyLabel: "คัดลอกข้อความ" }), 2000);
   }
 
+  openBuyerModal(p) {
+    this.setState({
+      showBuyerModal: true, buyerTargetId: p.id, buyer_name: "", buyer_phone: "", buyer_email: "",
+      buyerMsg: "", buyerIsError: false, buyerSaving: false,
+    });
+  }
+
+  closeBuyerModal() {
+    this.setState({ showBuyerModal: false, buyerTargetId: "" });
+  }
+
+  async submitBuyerRegistration() {
+    const { buyerTargetId, buyer_name, buyer_phone, buyer_email, lister, buyerSaving } = this.state;
+    if (buyerSaving || !buyer_name.trim() || !buyer_phone.trim()) {
+      this.setState({ buyerMsg: "กรุณากรอกชื่อและเบอร์โทรผู้ซื้อ", buyerIsError: true });
+      return;
+    }
+    this.setState({ buyerSaving: true, buyerMsg: "" });
+    try {
+      const res = await this._fb.registerBuyer(buyerTargetId, lister.id, lister.agentCode, {
+        name: buyer_name.trim(), phone: buyer_phone.trim(), email: buyer_email.trim(),
+      });
+      if (res.ok) {
+        this.setState({
+          buyerMsg: `✓ ลงทะเบียนแล้ว — คุ้มครองสิทธิ์จนถึง ${new Date(res.registration.protectionUntil).toLocaleDateString("th-TH")}`,
+          buyerIsError: false, buyerSaving: false,
+        });
+      } else {
+        const d = new Date(res.conflict.registeredAt).toLocaleDateString("th-TH");
+        this.setState({
+          buyerMsg: `⚠️ มีคนลงทะเบียนผู้ซื้อรายนี้ไว้ก่อนแล้วเมื่อ ${d} (รหัส Agent: ${res.conflict.agentCode || "-"}) — ติดต่อแอดมินหากคิดว่าเป็นความผิดพลาด`,
+          buyerIsError: true, buyerSaving: false,
+        });
+      }
+    } catch (e) {
+      console.warn("registerBuyer failed:", e);
+      this.setState({ buyerMsg: "เกิดข้อผิดพลาด กรุณาลองใหม่", buyerIsError: true, buyerSaving: false });
+    }
+  }
+
+  requestDelete(p) {
+    this.setState({ showDeleteConfirm: true, deleteTargetId: p.id, deleting: false });
+  }
+
+  cancelDelete() {
+    this.setState({ showDeleteConfirm: false, deleteTargetId: "" });
+  }
+
+  async confirmDelete() {
+    const id = this.state.deleteTargetId;
+    if (!id || this.state.deleting) return;
+    this.setState({ deleting: true });
+    try {
+      await this._fb.deletePropertyFully(id);
+      this.setState((s) => ({
+        properties: s.properties.filter((p) => p.id !== id),
+        showDeleteConfirm: false, deleteTargetId: "", deleting: false,
+      }));
+    } catch (e) {
+      console.warn("deletePropertyFully failed:", e);
+      this.setState({ deleting: false });
+    }
+  }
+
   openShare(p) {
     const url = `${window.location.origin}/Property Details.dc.html?id=${p.id}`;
     this.setState({ view: this.state.view, shareId: p.id, shareUrl: url, shareCopyLabel: "คัดลอกลิงก์", showShareFlag: true });
@@ -746,6 +857,9 @@ class Component extends DCLogic {
         onPublish: () => this.togglePublish(p),
         onPostText: () => this.openPostView(p),
         onShare: () => this.openShare(p),
+        onDeleteClick: () => this.requestDelete(p),
+        isVip: !!lister.vipTier,
+        onOpenBuyer: () => this.openBuyerModal(p),
       };
     });
 
@@ -753,6 +867,7 @@ class Component extends DCLogic {
       loaded: this.state.loaded, signedIn: this.state.signedIn, notSignedIn: this.state.loaded && !this.state.signedIn,
       listerName: lister.name ? " " + lister.name : "", listerEmail: lister.email || "",
       tierLabel: tierLabels[lister.tier] || tierLabels[lister.vipTier] || "① ฟรี",
+      agentCodeLabel: lister.agentCode ? `รหัส Agent: ${lister.agentCode}` : "",
       onLogout: () => this.onLogout(),
       showList: this.state.view === "list", showEdit: this.state.view === "edit", showSaved: this.state.view === "saved",
       propCount: properties.length, hasNoProps: properties.length === 0,
@@ -820,6 +935,19 @@ class Component extends DCLogic {
       onCloseShare: () => this.setState({ showShareFlag: false }),
       stopProp: (e) => e.stopPropagation(),
       onCopyShareLink: () => this.copyShareLink(),
+      showBuyerModal: this.state.showBuyerModal, buyerTargetId: this.state.buyerTargetId,
+      buyer_name: this.state.buyer_name, onBuyerName: (e) => this.setState({ buyer_name: e.target.value }),
+      buyer_phone: this.state.buyer_phone, onBuyerPhone: (e) => this.setState({ buyer_phone: e.target.value }),
+      buyer_email: this.state.buyer_email, onBuyerEmail: (e) => this.setState({ buyer_email: e.target.value }),
+      buyerMsg: this.state.buyerMsg,
+      buyerMsgStyle: { fontSize: "12.5px", color: this.state.buyerIsError ? "oklch(50% 0.18 30)" : "oklch(40% 0.12 145)", lineHeight: "1.5" },
+      buyerSubmitLabel: this.state.buyerSaving ? "กำลังบันทึก…" : "ลงทะเบียน",
+      onCloseBuyer: () => this.closeBuyerModal(),
+      onSubmitBuyer: () => this.submitBuyerRegistration(),
+      showDeleteConfirm: this.state.showDeleteConfirm, deleteTargetId: this.state.deleteTargetId,
+      deleteConfirmLabel: this.state.deleting ? "กำลังลบ…" : "ลบถาวร",
+      onCancelDelete: () => this.cancelDelete(),
+      onConfirmDelete: () => this.confirmDelete(),
       shareCopyLabel: this.state.shareCopyLabel,
       onOpenMySite: () => this.openMySite(),
       onShareMySite: () => this.shareMySite(),

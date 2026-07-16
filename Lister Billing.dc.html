@@ -88,6 +88,38 @@
       </div>
       <sc-if value="{{ error }}"><div style="font-size:13px; color:oklch(50% 0.18 30); margin-top:14px;">{{ error }}</div></sc-if>
     </sc-if>
+
+    <sc-if value="{{ showVip }}">
+      <div style="margin-top:36px; background:white; border-radius:10px; padding:24px; box-shadow:0 1px 6px rgba(0,0,0,0.06);">
+        <div style="font-size:13px; font-weight:600; color:oklch(45% 0.02 60); margin-bottom:4px;">💎 Agent VIP</div>
+        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">สมัครสมาชิกรายเดือนเพื่อเข้าถึงพูลบ้านคุณภาพดีที่เจ้าของบ้านจ่ายเพื่อเร่งขาย — {{ vipTierLabel }}</div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:14px 16px; flex-wrap:wrap;">
+            <div>
+              <div style="font-size:13px; font-weight:600; color:oklch(25% 0.02 60);">🥈 VIP เงิน</div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60);">{{ silverTeaser }}</div>
+            </div>
+            <div onClick="{{ onUpgradeVipSilver }}" style="{{ vipSilverStyle }}">{{ vipSilverLabel }}</div>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:14px 16px; flex-wrap:wrap;">
+            <div>
+              <div style="font-size:13px; font-weight:600; color:oklch(25% 0.02 60);">🥇 VIP ทอง</div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60);">{{ goldTeaser }}</div>
+            </div>
+            <div onClick="{{ onUpgradeVipGold }}" style="{{ vipGoldStyle }}">{{ vipGoldLabel }}</div>
+          </div>
+          <sc-if value="{{ showVipDiamond }}">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:14px 16px; flex-wrap:wrap;">
+              <div>
+                <div style="font-size:13px; font-weight:600; color:oklch(25% 0.02 60);">💎 VIP เพชร</div>
+                <div style="font-size:12px; color:oklch(50% 0.02 60);">{{ diamondTeaser }}</div>
+              </div>
+              <div onClick="{{ onUpgradeVipDiamond }}" style="{{ vipDiamondStyle }}">{{ vipDiamondLabel }}</div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
   </div>
 </div>
 
@@ -129,7 +161,7 @@ const BILLING_I18N = {
 };
 
 class Component extends DCLogic {
-  state = { lister: null, prices: { pro: "", agency: "", level3: "" }, vipPrices: { silver: "", gold: "", diamond: "" }, rolloutLevel: 1, loaded: false, notSignedIn: false, error: "", busyTier: null, lang: "th" };
+  state = { lister: null, prices: { pro: "", agency: "", level3: "" }, vipPrices: { silver: "", gold: "", diamond: "" }, rolloutLevel: 1, loaded: false, notSignedIn: false, error: "", busyTier: null, vipStats: null, lang: "th" };
 
   async componentDidMount() {
     const fb = await import("./firebase-client.js");
@@ -149,6 +181,9 @@ class Component extends DCLogic {
         fb.fetchStripePrices(), fb.fetchAgentVipPrices(), fb.fetchRolloutLevel(),
       ]);
       this.setState({ lister, prices, vipPrices, rolloutLevel, loaded: true, notSignedIn: !signedIn });
+      if (rolloutLevel >= 4) {
+        fb.fetchVipPoolStats().then((vipStats) => this.setState({ vipStats })).catch(() => {});
+      }
     } catch (e) {
       console.warn("Failed to load billing info:", e);
       this.setState({ loaded: true, error: "โหลดข้อมูลไม่สำเร็จ" });
@@ -194,6 +229,17 @@ class Component extends DCLogic {
     }
   }
 
+  teaserFor(tier, myTier) {
+    const rank = { silver: 1, gold: 2, diamond: 3 };
+    const unlocked = myTier && rank[myTier] >= rank[tier];
+    const stats = this.state.vipStats;
+    if (!stats) return unlocked ? "กำลังโหลด…" : "🔒 อัปเกรดเพื่อดูรายละเอียด";
+    const props = stats[tier + "Props"] || 0;
+    const agents = stats[tier + "Agents"] || 0;
+    if (unlocked) return `📋 มีบ้านในพูลนี้ ${props} หลัง · Agent ระดับนี้ขึ้นไป ${agents} คน`;
+    return `🔒 มีบ้านในพูลนี้ ${props} หลัง — อัปเกรดเพื่อดูรายละเอียดและติดต่อเจ้าของ`;
+  }
+
   renderVals() {
     const lister = this.state.lister || {};
     const status = lister.subscriptionStatus;
@@ -235,6 +281,9 @@ class Component extends DCLogic {
       onUpgradeVipSilver: () => this.upgradeVip("silver"),
       onUpgradeVipGold: () => this.upgradeVip("gold"),
       onUpgradeVipDiamond: () => this.upgradeVip("diamond"),
+      silverTeaser: this.teaserFor("silver", lister.vipTier),
+      goldTeaser: this.teaserFor("gold", lister.vipTier),
+      diamondTeaser: this.teaserFor("diamond", lister.vipTier),
       error: this.state.error,
       t,
       tierCards: this.buildTierCards(t, lister),

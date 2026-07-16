@@ -69,6 +69,20 @@ service cloud.firestore {
     }
     match /externalServices/{id} { allow read, write: if isOwner(); }
 
+    // Buyer Registration (BLUEPRINT.md §2 ทาง 4 — "Procuring Cause" dispute
+    // prevention for VIP agents). A signed-in lister can create a
+    // registration under their own listerId, and read/list registrations
+    // (needed client-side to detect a duplicate buyer before creating one —
+    // the actual buyer contact details are only meant to be seen by admin
+    // and the registering agent themselves in the UI layer, but Firestore
+    // rules alone can't hide fields within a doc, so treat this collection
+    // as agent-visible, not fully private).
+    match /buyerRegistrations/{id} {
+      allow read: if request.auth != null || isAdmin();
+      allow create: if request.auth != null && request.resource.data.listerId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
     // Team management — Owner-only. Staff invites are keyed by lowercase
     // email until the invited person signs up (then moved to adminUsers/{uid}).
     match /adminUsers/{uid} {
@@ -105,10 +119,14 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // Self-serve accounts (Agent/owner) — Admin can see/approve, and the account
-    // owner (matched by Auth UID) can see/edit only their own status.
+    // Self-serve accounts (Agent/owner) — Admin can see/approve, the account
+    // owner can see/edit only their own status, and the public can read
+    // (needed for the public Agent Profile page — anyone visiting a
+    // lister's shared personal site must be able to look up their name/
+    // photo/contact info without being signed in).
     match /listers/{uid} {
-      allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == uid);
+      allow read: if true;
+      allow write: if isAdmin() || (request.auth != null && request.auth.uid == uid);
     }
 
     // Owner/tenant contact records — not meant for public browsing, but the
