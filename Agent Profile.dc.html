@@ -215,8 +215,8 @@ class Component extends DCLogic {
     if (!this.state.loaded) return { notFound: false, hasLister: false };
     if (!lister) return { notFound: true, hasLister: false };
     const tier = lister.tier || "basic";
-    const canCustomCover = tier === "pro" || tier === "agency" || tier === "level3";
-    const canCustomTheme = tier === "level3";
+    const canCustomCover = tier === "pro" || tier === "agency" || tier === "level3" || tier === "level4";
+    const canCustomTheme = tier === "level4";
     const brandColor = "oklch(40% 0.13 25)";
     const theme = (canCustomTheme && lister.themeColor) ? lister.themeColor : brandColor;
     const displayName = lister.displayName || lister.name || "เจ้าของทรัพย์";

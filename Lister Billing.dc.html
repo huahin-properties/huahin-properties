@@ -127,17 +127,19 @@
 <script type="text/x-dc" data-dc-script>
 const BILLING_I18N = {
   en: { ladderTitle: "Membership tiers", ladderSub: "Upgrade any time — higher tiers keep everything from lower ones",
-    free: "Free", tier2: "Level 2", tier3: "Level 3", contact: "Enterprise",
+    free: "Free", tier2: "Package 1 — Starter", tier3: "Package 2 — Professional", tier4: "Package 3 — Premium", contact: "Enterprise",
     freeDesc: ["1 listing", "8-language AI description", "Personal website (fixed design)", "Up to 10 photos/listing", "AI post caption: 1 generation/listing", "Basic support"],
     tier2Desc: ["5 listings", "8-language AI description", "Personal website — customize photo, cover & bio", "1 Featured slot", "Up to 15 photos/listing", "AI post caption: 5 generations/listing — refine until it's right", "Priority support"],
-    tier3Desc: ["15 listings", "8-language AI description", "Personal website — full customization: theme color + social links", "Multiple Featured slots", "Up to 20 photos/listing", "AI post caption: 10 generations/listing — full SEO keywords done for you", "Priority support"],
+    tier3Desc: ["12 listings", "8-language AI description", "Personal website — customize photo, cover & bio", "2 Featured slots", "Up to 18 photos/listing", "AI post caption: 8 generations/listing", "Priority support"],
+    tier4Desc: ["25 listings", "8-language AI description", "Personal website — full customization: theme color + social links", "Unlimited Featured slots", "Up to 20 photos/listing", "AI post caption: 10 generations/listing — full SEO keywords done for you", "Priority support"],
     contactDesc: ["Custom listing volume", "Dedicated support", "Custom terms"],
     perMonth: "/month", billedMonthly: "Billed monthly", currentlyFree: "You're using this for free", startFree: "Current plan", upgrade: "Upgrade", current: "Current plan", contactUs: "Contact us" },
   th: { ladderTitle: "บันไดสมาชิก", ladderSub: "ไต่ระดับขึ้นทีละขั้น — ระดับสูงกว่าได้ทุกสิทธิ์จากระดับล่างกว่าด้วย",
-    free: "ฟรี", tier2: "ระดับ 2", tier3: "ระดับ 3", contact: "ติดต่อเรา",
+    free: "ฟรี", tier2: "แพ็กเกจ 1 — เริ่มต้น", tier3: "แพ็กเกจ 2 — มืออาชีพ", tier4: "แพ็กเกจ 3 — พรีเมียม", contact: "ติดต่อเรา",
     freeDesc: ["โพสต์ได้ 1 หลัง", "ระบบแปลอัตโนมัติ 8 ภาษา", "เว็บไซต์ส่วนตัว (ดีไซน์สำเร็จรูป)", "📷 อัปโหลดรูปได้สูงสุด 10 รูป/หลัง", "🤖 AI ช่วยร่างข้อความโพสต์ 1 ครั้ง/รายการ", "ซัพพอร์ตพื้นฐาน"],
     tier2Desc: ["โพสต์ได้ 5 หลัง", "ระบบแปลอัตโนมัติ 8 ภาษา", "เว็บไซต์ส่วนตัว — ปรับรูปโปรไฟล์/ภาพปก/แนะนำตัวได้", "Featured 1 รายการ", "📷 อัปโหลดรูปได้สูงสุด 15 รูป/หลัง", "🤖 AI ช่วยร่างข้อความโพสต์ 5 ครั้ง/รายการ — ปรับคำได้จนกว่าจะโดนใจ", "ซัพพอร์ตพิเศษ"],
-    tier3Desc: ["โพสต์ได้ 15 หลัง", "ระบบแปลอัตโนมัติ 8 ภาษา", "เว็บไซต์ออกแบบได้เต็มรูปแบบ พร้อมลิงก์โซเชียลใช้งานครบครัน", "Featured หลายรายการ", "📷 อัปโหลดรูปได้สูงสุด 20 รูป/หลัง", "🤖 AI ช่วยร่างข้อความโพสต์ 10 ครั้ง/รายการ — ใส่คีย์เวิร์ด SEO ให้เต็มที่ ไม่ต้องคิดเอง", "ซัพพอร์ตพิเศษ"],
+    tier3Desc: ["โพสต์ได้ 12 หลัง", "ระบบแปลอัตโนมัติ 8 ภาษา", "เว็บไซต์ส่วนตัว — ปรับรูปโปรไฟล์/ภาพปก/แนะนำตัวได้", "Featured 2 รายการ", "📷 อัปโหลดรูปได้สูงสุด 18 รูป/หลัง", "🤖 AI ช่วยร่างข้อความโพสต์ 8 ครั้ง/รายการ", "ซัพพอร์ตพิเศษ"],
+    tier4Desc: ["โพสต์ได้ 25 หลัง", "ระบบแปลอัตโนมัติ 8 ภาษา", "เว็บไซต์ส่วนตัว — ปรับได้เต็มรูปแบบ: สีธีม + ลิงก์โซเชียล", "Featured ไม่จำกัด", "📷 อัปโหลดรูปได้สูงสุด 20 รูป/หลัง", "🤖 AI ช่วยร่างข้อความโพสต์ 10 ครั้ง/รายการ — ใส่คีย์เวิร์ด SEO ให้เต็มที่ ไม่ต้องคิดเอง", "ซัพพอร์ตพิเศษ"],
     contactDesc: ["ปริมาณโพสต์ตามตกลง", "ทีมซัพพอร์ตเฉพาะ", "เงื่อนไขพิเศษเฉพาะราย"],
     perMonth: "/เดือน", billedMonthly: "เรียกเก็บรายเดือน", currentlyFree: "คุณกำลังใช้งานฟรีอยู่", startFree: "แพ็กเกจปัจจุบัน", upgrade: "อัปเกรด", current: "สมาชิกอยู่แล้ว", contactUs: "ติดต่อเรา" },
   ru: { ladderTitle: "Уровни членства", ladderSub: "Повышайте уровень в любое время", free: "Бесплатно", tier2: "Уровень 2", tier3: "Уровень 3", contact: "Свяжитесь с нами",
@@ -296,21 +298,23 @@ class Component extends DCLogic {
         name: t.free, price: "฿0", priceSub: t.currentlyFree, features: t.freeDesc,
         isFree: true, buttonLabel: t.startFree },
     ];
-    // Levels 1-3 (free/tier2/level3) are always shown — only the higher VIP
-    // tiers (4-5) are gated behind rolloutLevel. See BLUEPRINT.md §2 ทาง 2.
+    // Package 1-3 (pro/level3/level4) are always shown — only the higher VIP
+    // tiers (rollout 4-5) are gated behind rolloutLevel. See BLUEPRINT.md §2 ทาง 2.
     cards.push({ key: "pro", bg: "white", accentColor: "oklch(40% 0.13 25)", textColor: "oklch(25% 0.02 60)", subTextColor: "oklch(55% 0.02 60)",
       name: t.tier2, price: "฿590", priceSub: t.perMonth + " · " + t.billedMonthly, features: t.tier2Desc,
       isPaid: true, badge: "",
-      buttonLabel: this.state.busyTier === "pro" ? "…" : (lister.tier === "pro" || lister.tier === "agency" || lister.tier === "level3" ? t.current : t.upgrade),
+      buttonLabel: this.state.busyTier === "pro" ? "…" : (lister.tier === "pro" || lister.tier === "agency" || lister.tier === "level3" || lister.tier === "level4" ? t.current : t.upgrade),
       onClick: () => this.upgrade("pro") });
     cards.push({ key: "level3", bg: "white", accentColor: "oklch(40% 0.13 25)", textColor: "oklch(25% 0.02 60)", subTextColor: "oklch(55% 0.02 60)",
       name: t.tier3, price: "฿1,190", priceSub: t.perMonth + " · " + t.billedMonthly, features: t.tier3Desc,
       isPaid: true, badge: "Most popular",
-      buttonLabel: this.state.busyTier === "level3" ? "…" : (lister.tier === "level3" ? t.current : t.upgrade),
+      buttonLabel: this.state.busyTier === "level3" ? "…" : (lister.tier === "level3" || lister.tier === "level4" ? t.current : t.upgrade),
       onClick: () => this.upgrade("level3") });
-    cards.push({ key: "contact", bg: "oklch(20% 0.02 60)", accentColor: "oklch(75% 0.1 25)", textColor: "white", subTextColor: "oklch(75% 0.01 70)",
-      name: t.contact, price: t.contactUs, priceSub: "", features: t.contactDesc,
-      isContact: true, buttonLabel: t.contactUs });
+    cards.push({ key: "level4", bg: "oklch(20% 0.02 60)", accentColor: "oklch(75% 0.1 25)", textColor: "white", subTextColor: "oklch(75% 0.01 70)",
+      name: t.tier4, price: "฿2,290", priceSub: t.perMonth + " · " + t.billedMonthly, features: t.tier4Desc,
+      isPaid: true, badge: "",
+      buttonLabel: this.state.busyTier === "level4" ? "…" : (lister.tier === "level4" ? t.current : t.upgrade),
+      onClick: () => this.upgrade("level4") });
     return cards;
   }
 }

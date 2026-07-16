@@ -253,12 +253,16 @@
       <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">สร้าง Product + Price ใน Stripe Dashboard ก่อน แล้ววาง Price ID (ขึ้นต้นด้วย price_) ที่นี่ — เปลี่ยนราคาได้เองโดยไม่ต้องแก้โค้ด</div>
       <div style="display:flex; flex-direction:column; gap:10px; max-width:420px;">
         <div>
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">② Premium — Price ID</div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">② ระดับ 1 (5 หลัง) — Price ID</div>
           <input value="{{ stripePro }}" onChange="{{ onStripePro }}" placeholder="price_xxxxxxxxxxxx" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
         </div>
         <div>
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">③ ระดับ 3 (15 หลัง) — Price ID</div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">③ ระดับ 2 (15 หลัง) — Price ID</div>
           <input value="{{ stripeLevel3 }}" onChange="{{ onStripeLevel3 }}" placeholder="price_xxxxxxxxxxxx" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
+        </div>
+        <div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">④ แพ็กเกจ 3 — พรีเมียม (25 หลัง) — Price ID</div>
+          <input value="{{ stripeLevel4 }}" onChange="{{ onStripeLevel4 }}" placeholder="price_xxxxxxxxxxxx" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
         </div>
       </div>
       <div style="margin-top:12px;">
@@ -848,6 +852,8 @@ class Component extends DCLogic {
       onStripePro: (e) => this.setState((s) => ({ stripePrices: { ...s.stripePrices, pro: e.target.value } })),
       stripeLevel3: this.state.stripePrices.level3 || "",
       onStripeLevel3: (e) => this.setState((s) => ({ stripePrices: { ...s.stripePrices, level3: e.target.value } })),
+      stripeLevel4: this.state.stripePrices.level4 || "",
+      onStripeLevel4: (e) => this.setState((s) => ({ stripePrices: { ...s.stripePrices, level4: e.target.value } })),
       onSaveStripePrices: () => this.saveStripePrices(),
       stripeMsg: this.state.stripeMsg,
       featured7Price: this.state.featuredPrices.p7 || "",
