@@ -30,7 +30,7 @@
     <div style="font-family:'Playfair Display',serif; font-size:26px; color:oklch(20% 0.02 60); margin-bottom:10px;">กำลังปรับปรุงเว็บไซต์</div>
     <div style="font-size:14px; color:oklch(50% 0.02 60); max-width:360px; margin-bottom:26px; line-height:1.6;">เรากำลังปรับปรุงเว็บไซต์อยู่ ขออภัยในความไม่สะดวก จะกลับมาเปิดให้บริการเร็วๆ นี้</div>
     <div style="width:100%; max-width:300px; display:flex; flex-direction:column; gap:10px;">
-      <input type="text" value="{{ gatePassword }}" onChange="{{ onGatePassword }}" placeholder="รหัสผ่านแอดมิน" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit; text-align:center;" />
+      <input type="text" ref="{{ gateInputRef }}" defaultValue="{{ gatePassword }}" onChange="{{ onGatePassword }}" placeholder="รหัสผ่านแอดมิน" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit; text-align:center;" />
       <div onClick="{{ onGateSubmit }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:12px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">เข้าดูตัวอย่าง</div>
       <sc-if value="{{ gateError }}"><div style="font-size:13px; color:oklch(50% 0.18 30);">{{ gateError }}</div></sc-if>
     </div>
@@ -313,7 +313,12 @@ class Component extends DCLogic {
         const creds = await this._fb.fetchAdminCredentials();
         if (creds && creds.username) email = creds.username;
       } catch (e0) { console.warn("Falling back to default admin email for gate:", e0); }
-      await this._fb.adminSignIn(email, this.state.gatePassword);
+      // Read straight from the DOM input at submit time, not React state —
+      // browser autofill can populate the visible field without firing the
+      // onChange React listens to, leaving state stale/empty while the
+      // input looks filled. This guarantees we send what's actually typed.
+      const typedPassword = (this._gateInputEl && this._gateInputEl.value) || this.state.gatePassword;
+      await this._fb.adminSignIn(email, typedPassword);
       this._fb.setSiteBypass();
       this.setState({ showGate: false, gateError: "" });
     } catch (e) {
@@ -326,7 +331,8 @@ class Component extends DCLogic {
       showGate: this.state.showGate,
       showChrome: !this.state.showGate,
       gatePassword: this.state.gatePassword,
-      onGatePassword: (e) => this.setState({ gatePassword: e.target.value, gateError: "" }),
+      gateInputRef: (el) => { this._gateInputEl = el; },
+      onGatePassword: (e) => { this.setState({ gatePassword: e.target.value, gateError: "" }); },
       onGateSubmit: () => this.submitGate(),
       gateError: this.state.gateError,
     };
