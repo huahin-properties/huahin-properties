@@ -431,6 +431,14 @@ export async function saveProfilePhoto(slotId, dataUrl) {
   const blob = await dataUrlToBlob(dataUrl);
   const url = await uploadImage(blob, `profilePhotos/${slotId}.webp`);
   await setDoc("profilePhotos", slotId, { dataUrl: url });
+  return url;
+}
+
+// Public-safe single-lister lookup (Agent Profile.dc.html — anyone visiting
+// a lister's shared personal site, no sign-in required, per firestore.rules).
+export async function fetchListerById(id) {
+  const doc = await db().collection("listers").doc(id).get();
+  return doc.exists ? { id: doc.id, ...doc.data() } : null;
 }
 
 export async function fetchAllProfilePhotos() {

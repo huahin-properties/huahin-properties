@@ -304,10 +304,16 @@ class Component extends DCLogic {
 
   async submitGate() {
     try {
-      // Uses the SAME Firebase Authentication credential as Admin Login —
-      // the stored "username" field now holds the admin's login email, so
-      // typing the real Firebase password here works everywhere at once.
-      await this._fb.adminSignIn("doothailand@gmail.com", this.state.gatePassword);
+      // Uses the SAME Firebase Authentication credential as Admin Login.
+      // Reads the current admin email from Site Content so this never goes
+      // stale if the admin changes their login email there — falls back to
+      // the original hardcoded account as a safety net if that fetch fails.
+      let email = "doothailand@gmail.com";
+      try {
+        const creds = await this._fb.fetchAdminCredentials();
+        if (creds && creds.username) email = creds.username;
+      } catch (e0) { console.warn("Falling back to default admin email for gate:", e0); }
+      await this._fb.adminSignIn(email, this.state.gatePassword);
       this._fb.setSiteBypass();
       this.setState({ showGate: false, gateError: "" });
     } catch (e) {

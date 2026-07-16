@@ -120,8 +120,7 @@ class Component extends DCLogic {
     this._listerId = params.get("id") || "";
     if (!this._listerId) { this.setState({ loaded: true, lister: null }); return; }
     try {
-      const listerDoc = await fb.db().collection("listers").doc(this._listerId).get();
-      const lister = listerDoc.exists ? { id: listerDoc.id, ...listerDoc.data() } : null;
+      const lister = await fb.fetchListerById(this._listerId);
       let properties = [];
       if (lister) {
         const all = await fb.fetchWhere("properties", "listerId", this._listerId);
