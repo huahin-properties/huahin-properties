@@ -55,7 +55,7 @@ service cloud.firestore {
         get(/databases/$(database)/documents/properties/$(request.resource.data.propertyId)).data.listerId == request.auth.uid);
     }
     match /siteContent/{id} { allow read: if true; allow write: if isOwner(); }
-    match /profilePhotos/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /profilePhotos/{id} { allow read: if true; allow write: if isAdmin() || request.auth != null; }
     match /aiNotes/{id} { allow read: if true; allow write: if isOwner(); }
     match /banners/{id} {
       allow read: if true;
