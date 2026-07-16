@@ -1362,9 +1362,10 @@ export async function getEffectiveProperties(mod) {
       fb.fetchAllPhotos(),
     ]);
     if (!properties || !properties.length) return mod.PROPERTIES;
+    const visible = properties.filter((p) => !p.isDraft);
     const photosById = {};
     allPhotos.forEach((ph) => { photosById[ph.id] = ph.dataUrl; });
-    return properties.map((p) => {
+    return visible.map((p) => {
       const photos = (p.photos || []).map((ph, i) => {
         const label = typeof ph === "string" ? ph : ph.label;
         const url = photosById[`${p.id}-${i}`] || (typeof ph === "object" && ph.url) || "";

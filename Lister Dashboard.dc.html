@@ -66,20 +66,37 @@
 
         <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px;">
           <sc-for list="{{ properties }}" as="p" hint-placeholder-count="2">
-            <div onClick="{{ p.onEdit }}" style="background:white; border-radius:8px; padding:18px; cursor:pointer; border:1px solid oklch(92% 0.01 70);">
-              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-                <div style="font-size:13px; font-weight:700; color:oklch(40% 0.13 25);">{{ p.code }}</div>
-                <div style="font-size:11px; padding:3px 9px; border-radius:100px; background:{{ p.statusBg }}; color:{{ p.statusColor }};">{{ p.statusLabel }}</div>
+            <div style="background:white; border-radius:8px; overflow:hidden; border:1px solid oklch(92% 0.01 70);">
+              <div style="width:100%; height:140px; background:oklch(93% 0.01 70); position:relative;">
+                <sc-if value="{{ p.coverUrl }}" hint-placeholder-val="{{ false }}">
+                  <img src="{{ p.coverUrl }}" style="width:100%; height:100%; object-fit:cover; display:block;" />
+                </sc-if>
+                <sc-if value="{{ p.noCover }}">
+                  <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:30px; color:oklch(75% 0.01 70);">🏠</div>
+                </sc-if>
+                <div style="position:absolute; top:8px; right:8px; font-size:11px; padding:3px 9px; border-radius:100px; background:{{ p.statusBg }}; color:{{ p.statusColor }};">{{ p.statusLabel }}</div>
+                <sc-if value="{{ p.isDraft }}">
+                  <div style="position:absolute; top:8px; left:8px; font-size:11px; padding:3px 9px; border-radius:100px; background:oklch(30% 0.02 60); color:white;">📝 ร่าง</div>
+                </sc-if>
               </div>
-              <div style="font-size:14px; color:oklch(25% 0.02 60); margin-bottom:4px;">{{ p.zone }}, {{ p.areaLabel }}</div>
-              <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:10px;">{{ p.typeLabel }} · {{ p.bedBath }}</div>
-              <div style="font-size:15px; font-weight:700; color:oklch(25% 0.02 60);">{{ p.priceLabel }}</div>
-              <sc-if value="{{ p.assistedSale }}">
-                <div style="font-size:11px; color:oklch(45% 0.13 145); margin-top:8px;">🤝 เปิดใช้ "ให้ทีมช่วยขาย"</div>
-              </sc-if>
-              <sc-if value="{{ p.needsNudge }}">
-                <div style="font-size:11px; color:oklch(50% 0.15 60); margin-top:8px;">💡 ยังไม่ขาย? ลองให้ทีมช่วยขายดูไหม</div>
-              </sc-if>
+              <div style="padding:14px 16px;">
+                <div style="font-size:13px; font-weight:700; color:oklch(40% 0.13 25); margin-bottom:4px;">{{ p.code }}</div>
+                <div style="font-size:14px; color:oklch(25% 0.02 60); margin-bottom:4px;">{{ p.zone }}, {{ p.areaLabel }}</div>
+                <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:8px;">{{ p.typeLabel }} · {{ p.bedBath }}</div>
+                <div style="font-size:15px; font-weight:700; color:oklch(25% 0.02 60); margin-bottom:6px;">{{ p.priceLabel }}</div>
+                <sc-if value="{{ p.assistedSale }}">
+                  <div style="font-size:11px; color:oklch(45% 0.13 145); margin-bottom:4px;">🤝 เปิดใช้ "ให้ทีมช่วยขาย"</div>
+                </sc-if>
+                <sc-if value="{{ p.needsNudge }}">
+                  <div style="font-size:11px; color:oklch(50% 0.15 60); margin-bottom:4px;">💡 ยังไม่ขาย? ลองให้ทีมช่วยขายดูไหม</div>
+                </sc-if>
+              </div>
+              <div style="display:flex; border-top:1px solid oklch(93% 0.01 70);">
+                <div onClick="{{ p.onEdit }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:oklch(35% 0.02 60); cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">✏️<br/>แก้ไข</div>
+                <div onClick="{{ p.onPublish }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:{{ p.publishColor }}; cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">{{ p.publishIcon }}<br/>{{ p.publishLabel }}</div>
+                <div onClick="{{ p.onPostText }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:oklch(35% 0.02 60); cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">🤖<br/>ข้อความโพสต์ AI</div>
+                <div onClick="{{ p.onShare }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:oklch(35% 0.02 60); cursor:pointer;">🔗<br/>แชร์</div>
+              </div>
             </div>
           </sc-for>
         </div>
@@ -95,13 +112,15 @@
           <div style="margin-bottom:18px;">
             <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">รูปภาพ (สูงสุด 10 รูป — รูปแรกเป็นภาพปก)</div>
             <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
-              <sc-for list="{{ existingPhotos }}" as="ph" hint-placeholder-count="2">
-                <div style="position:relative; width:90px; height:68px; border-radius:6px; overflow:hidden; background-image:url({{ ph.url }}); background-size:cover; background-position:center;">
+              <sc-for list="{{ existingPhotos }}" as="ph" hint-placeholder-count="0">
+                <div style="position:relative; width:90px; height:68px; border-radius:6px; overflow:hidden; background:oklch(93% 0.01 70);">
+                  <sc-if value="{{ ph.url }}" hint-placeholder-val="{{ false }}"><img src="{{ ph.url }}" style="width:100%; height:100%; object-fit:cover; display:block;" /></sc-if>
                   <div onClick="{{ ph.onRemove }}" style="position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%; background:rgba(0,0,0,0.6); color:white; font-size:11px; display:flex; align-items:center; justify-content:center; cursor:pointer;">×</div>
                 </div>
               </sc-for>
-              <sc-for list="{{ newPhotos }}" as="np" hint-placeholder-count="1">
-                <div style="position:relative; width:90px; height:68px; border-radius:6px; overflow:hidden; background-image:url({{ np.url }}); background-size:cover; background-position:center;">
+              <sc-for list="{{ newPhotos }}" as="np" hint-placeholder-count="0">
+                <div style="position:relative; width:90px; height:68px; border-radius:6px; overflow:hidden; background:oklch(93% 0.01 70);">
+                  <sc-if value="{{ np.url }}" hint-placeholder-val="{{ false }}"><img src="{{ np.url }}" style="width:100%; height:100%; object-fit:cover; display:block;" /></sc-if>
                   <div onClick="{{ np.onRemove }}" style="position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%; background:rgba(0,0,0,0.6); color:white; font-size:11px; display:flex; align-items:center; justify-content:center; cursor:pointer;">×</div>
                 </div>
               </sc-for>
@@ -166,15 +185,16 @@
           </div>
 
           <div onClick="{{ onSaveProperty }}" style="background:oklch(40% 0.13 25); color:white; text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:600; cursor:pointer;">{{ saveLabel }}</div>
+          <div style="font-size:11.5px; color:oklch(55% 0.02 60); text-align:center; margin-top:8px;">บันทึกเป็นร่างก่อน — ยังไม่ขึ้นเว็บสาธารณะจนกว่าคุณจะกด "โพสต์" ในหน้ารายการ</div>
           <sc-if value="{{ saveError }}"><div style="font-size:13px; color:oklch(50% 0.18 30); text-align:center; margin-top:10px;">{{ saveError }}</div></sc-if>
         </div>
       </sc-if>
 
       <sc-if value="{{ showSaved }}">
         <div style="background:white; border-radius:8px; padding:clamp(20px,4vw,30px);">
-          <div style="font-size:34px; margin-bottom:8px;">✅</div>
-          <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60); margin-bottom:6px;">บันทึกทรัพย์ {{ savedId }} สำเร็จ</div>
-          <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:22px;">ประกาศของคุณขึ้นเว็บเรียบร้อยแล้ว</div>
+          <div onClick="{{ onGoToList }}" style="font-size:13px; color:oklch(50% 0.02 60); cursor:pointer; margin-bottom:14px;">← กลับไปหน้ารายการ</div>
+          <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60); margin-bottom:6px;">ทรัพย์ {{ savedId }}</div>
+          <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:22px;">ข้อความโพสต์ + ตัวเลือกให้ทีมช่วยขาย</div>
 
           <div style="background:oklch(97% 0.01 80); border:1px dashed oklch(82% 0.02 60); border-radius:6px; padding:16px 18px; display:flex; flex-direction:column; gap:10px; margin-bottom:22px;">
             <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer;">
@@ -196,16 +216,28 @@
             <div style="font-size:11.5px; color:oklch(58% 0.02 60);">🔒 ส่วนตัว — เห็นเฉพาะทีมงานเราเท่านั้น ไม่แสดงต่อสาธารณะหรือผู้ลงประกาศรายอื่น</div>
             <div style="display:flex; gap:10px; margin-top:6px;">
               <div onClick="{{ onConfirmNudge }}" style="background:oklch(40% 0.13 25); color:white; padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">{{ nudgeConfirmLabel }}</div>
-              <div onClick="{{ onSkipNudge }}" style="color:oklch(50% 0.02 60); padding:9px 10px; font-size:13px; cursor:pointer;">ข้ามไปก่อน</div>
             </div>
             <sc-if value="{{ nudgeSavedMsg }}"><div style="font-size:12px; color:oklch(45% 0.13 145);">{{ nudgeSavedMsg }}</div></sc-if>
           </div>
 
-          <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:8px;">📝 ข้อความสำหรับโพสต์ขาย (คัดลอกไปวางได้เลย)</div>
+          <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:8px;">📝 ข้อความสำหรับโพสต์ขาย (คัดลอกไปวางที่ Facebook/LINE ได้เลย)</div>
           <textarea readonly="readonly" rows="10" value="{{ postDraft }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:12px 14px; font-size:13px; font-family:inherit; resize:vertical; background:oklch(98% 0.005 80); margin-bottom:10px;"></textarea>
-          <div onClick="{{ onCopyPost }}" style="display:inline-block; background:oklch(22% 0.02 60); color:white; padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; margin-bottom:22px;">📋 {{ copyLabel }}</div>
+          <div onClick="{{ onCopyPost }}" style="display:inline-block; background:oklch(22% 0.02 60); color:white; padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">📋 {{ copyLabel }}</div>
+        </div>
+      </sc-if>
 
-          <div onClick="{{ onGoToList }}" style="font-size:13px; color:oklch(42% 0.12 25); cursor:pointer;">← กลับไปหน้ารายการทรัพย์ทั้งหมด</div>
+      <sc-if value="{{ showShare }}">
+        <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:100;" onClick="{{ onCloseShare }}">
+          <div style="background:white; border-radius:10px; padding:24px; width:min(360px,90vw);" onClick="{{ stopProp }}">
+            <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:6px;">แชร์ประกาศ {{ shareId }}</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); word-break:break-all; margin-bottom:16px;">{{ shareUrl }}</div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <a href="{{ shareFbUrl }}" target="_blank" style="display:block; text-align:center; background:oklch(35% 0.1 250); color:white; padding:11px; border-radius:6px; font-size:13px; text-decoration:none;">แชร์ไป Facebook</a>
+              <a href="{{ shareLineUrl }}" target="_blank" style="display:block; text-align:center; background:oklch(55% 0.15 145); color:white; padding:11px; border-radius:6px; font-size:13px; text-decoration:none;">แชร์ไป LINE</a>
+              <div onClick="{{ onCopyShareLink }}" style="text-align:center; background:oklch(93% 0.01 70); color:oklch(30% 0.02 60); padding:11px; border-radius:6px; font-size:13px; cursor:pointer;">📋 {{ shareCopyLabel }}</div>
+            </div>
+            <div onClick="{{ onCloseShare }}" style="text-align:center; margin-top:16px; font-size:12px; color:oklch(50% 0.02 60); cursor:pointer;">ปิด</div>
+          </div>
         </div>
       </sc-if>
     </sc-if>
@@ -223,6 +255,7 @@ class Component extends DCLogic {
     existingPhotos: [], newPhotos: [],
     savedId: "", savedPayload: null, ns_assistedSale: false, ns_commissionPct: "5",
     nudgeSaving: false, nudgeSavedMsg: "", copyLabel: "คัดลอกข้อความ",
+    shareId: "", shareUrl: "", shareCopyLabel: "คัดลอกลิงก์",
   };
 
   async componentDidMount() {
@@ -236,12 +269,28 @@ class Component extends DCLogic {
     try {
       const lister = await fb.fetchMyListerDoc();
       if (!lister) { this.setState({ loaded: true, signedIn: false }); return; }
-      const properties = await fb.fetchWhere("properties", "listerId", lister.id);
+      const properties = await this.loadPropertiesWithCovers(lister.id);
       this.setState({ loaded: true, signedIn: true, lister, properties });
     } catch (e) {
       console.warn("Failed to load dashboard:", e);
       this.setState({ loaded: true, signedIn: true, lister: null, properties: [] });
     }
+  }
+
+  async loadPropertiesWithCovers(listerId) {
+    const properties = await this._fb.fetchWhere("properties", "listerId", listerId);
+    return Promise.all(properties.map(async (p) => {
+      try {
+        const photos = await this._fb.fetchPhotosFor(p.id);
+        const cover = photos.find((ph) => ph.id === `${p.id}-0`);
+        return { ...p, coverUrl: cover ? cover.dataUrl : null };
+      } catch (e) { return { ...p, coverUrl: null }; }
+    }));
+  }
+
+  async refreshProperties() {
+    const properties = await this.loadPropertiesWithCovers(this.state.lister.id);
+    this.setState({ properties });
   }
 
   onLogout() { this._fb.logoutAdmin(); window.location.href = "Home.dc.html"; }
@@ -292,9 +341,8 @@ class Component extends DCLogic {
     this.setState((s) => ({ newPhotos: s.newPhotos.filter((_, i) => i !== idx) }));
   }
 
-  async removeExistingPhoto(ph) {
+  removeExistingPhoto(ph) {
     this.setState((s) => ({ existingPhotos: s.existingPhotos.filter((x) => x.id !== ph.id) }));
-    try { await this._fb.deleteDocById("propertyPhotos", ph.id); } catch (e) { console.warn("Failed to delete photo:", e); }
   }
 
   async saveProperty() {
@@ -305,6 +353,7 @@ class Component extends DCLogic {
     }
     this.setState({ saving: true, saveError: "" });
     const id = this.state.editingId || this.genCode(this.state.f_area);
+    const allPhotoUrls = [...this.state.existingPhotos.map((p) => p.url), ...this.state.newPhotos.map((p) => p.url)].slice(0, 10);
     const payload = {
       listerId: this.state.lister.id,
       type: this.state.f_type, area: this.state.f_area, zone: this.state.f_zone,
@@ -314,34 +363,50 @@ class Component extends DCLogic {
       livingArea: this.state.f_livingArea ? Number(this.state.f_livingArea) : null,
       landSize: this.state.f_landSize ? Number(this.state.f_landSize) : null,
       description: this.state.f_description,
-      currency: "THB", updatedAt: Date.now(),
+      currency: "THB", updatedAt: Date.now(), isDraft: true,
+      photos: allPhotoUrls.map(() => ({ label: "" })),
     };
     try {
       await this._fb.setDoc("properties", id, payload);
-      const usedIdx = new Set(this.state.existingPhotos.map((ph) => Number(ph.id.split("-").pop())));
-      let idx = 0;
-      for (const np of this.state.newPhotos) {
-        while (usedIdx.has(idx)) idx++;
-        await this._fb.savePhoto(id, idx, np.url);
-        usedIdx.add(idx);
+      // Renumber all photos contiguously (0..n-1) every save — savePhoto
+      // re-fetches+re-uploads even already-hosted URLs, which is fine since
+      // Storage download URLs are publicly fetchable.
+      await Promise.all(allPhotoUrls.map((url, i) => this._fb.savePhoto(id, i, url)));
+      for (let i = allPhotoUrls.length; i < 10; i++) {
+        try { await this._fb.deleteDocById("propertyPhotos", `${id}-${i}`); } catch (e) {}
       }
-      const properties = await this._fb.fetchWhere("properties", "listerId", this.state.lister.id);
-      this.setState({
-        saving: false, view: "saved", properties, savedId: id, savedPayload: payload,
-        ns_assistedSale: false, ns_commissionPct: "5", nudgeSavedMsg: "",
-      });
+      await this.refreshProperties();
+      this.setState({ saving: false, view: "list" });
     } catch (e) {
       console.warn("Failed to save property:", e);
       this.setState({ saving: false, saveError: "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง — ถ้ายังไม่ได้อีก แจ้งแอดมินให้ตรวจสอบสิทธิ์การเขียนข้อมูล (Firestore rules)" });
     }
   }
 
+  async togglePublish(p) {
+    const merged = { ...p, isDraft: !p.isDraft };
+    delete merged.coverUrl;
+    try {
+      await this._fb.setDoc("properties", p.id, merged);
+      await this.refreshProperties();
+    } catch (e) { console.warn("Failed to publish:", e); }
+  }
+
+  openPostView(p) {
+    this.setState({
+      view: "saved", savedId: p.id, savedPayload: p,
+      ns_assistedSale: !!p.assistedSale, ns_commissionPct: p.commissionPct || "5", nudgeSavedMsg: "",
+    });
+  }
+
   async confirmNudge() {
     if (this.state.nudgeSaving || !this.state.savedPayload) return;
     this.setState({ nudgeSaving: true });
     const merged = { ...this.state.savedPayload, assistedSale: this.state.ns_assistedSale, commissionPct: this.state.ns_assistedSale ? this.state.ns_commissionPct : null };
+    delete merged.coverUrl;
     try {
       await this._fb.setDoc("properties", this.state.savedId, merged);
+      await this.refreshProperties();
       this.setState({ nudgeSaving: false, savedPayload: merged, nudgeSavedMsg: "บันทึกแล้ว — ขอบคุณครับ/ค่ะ ทีมงานจะติดต่อกลับเร็วๆ นี้" });
     } catch (e) {
       this.setState({ nudgeSaving: false, nudgeSavedMsg: "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง" });
@@ -363,6 +428,7 @@ class Component extends DCLogic {
     if (p.description) { lines.push(""); lines.push(p.description); }
     lines.push("");
     lines.push(`รหัสทรัพย์: ${this.state.savedId}`);
+    lines.push(`ดูรายละเอียดเพิ่มเติม 👉 ${window.location.origin}/Property Details.dc.html?id=${this.state.savedId}`);
     lines.push("");
     lines.push(this._fbFooter || "");
     return lines.join("\n");
@@ -378,6 +444,17 @@ class Component extends DCLogic {
     if (navigator.clipboard) navigator.clipboard.writeText(text).catch(() => {});
     this.setState({ copyLabel: "คัดลอกแล้ว ✓" });
     setTimeout(() => this.setState({ copyLabel: "คัดลอกข้อความ" }), 2000);
+  }
+
+  openShare(p) {
+    const url = `${window.location.origin}/Property Details.dc.html?id=${p.id}`;
+    this.setState({ view: this.state.view, shareId: p.id, shareUrl: url, shareCopyLabel: "คัดลอกลิงก์", showShareFlag: true });
+  }
+
+  copyShareLink() {
+    if (navigator.clipboard) navigator.clipboard.writeText(this.state.shareUrl).catch(() => {});
+    this.setState({ shareCopyLabel: "คัดลอกแล้ว ✓" });
+    setTimeout(() => this.setState({ shareCopyLabel: "คัดลอกลิงก์" }), 2000);
   }
 
   renderVals() {
@@ -409,7 +486,15 @@ class Component extends DCLogic {
         statusLabel: st.label, statusBg: st.bg, statusColor: st.color,
         assistedSale: !!p.assistedSale,
         needsNudge: !p.assistedSale && ageDays > 30 && (p.status === "sale" || p.status === "rent"),
+        coverUrl: p.coverUrl, noCover: !p.coverUrl,
+        isDraft: !!p.isDraft,
+        publishIcon: p.isDraft ? "📤" : "✅",
+        publishLabel: p.isDraft ? "โพสต์" : "โพสต์แล้ว",
+        publishColor: p.isDraft ? "oklch(35% 0.1 250)" : "oklch(45% 0.13 145)",
         onEdit: () => this.startEdit(p),
+        onPublish: () => this.togglePublish(p),
+        onPostText: () => this.openPostView(p),
+        onShare: () => this.openShare(p),
       };
     });
 
@@ -442,7 +527,7 @@ class Component extends DCLogic {
       canAddPhoto: this.totalPhotoCount() < 10,
       photoCount: this.totalPhotoCount(),
       onPhotosFile: (e) => this.onPhotosFile(e),
-      saveLabel: this.state.saving ? "กำลังบันทึก…" : "บันทึกทรัพย์นี้",
+      saveLabel: this.state.saving ? "กำลังบันทึก…" : "บันทึกแบบร่าง",
       onSaveProperty: () => this.saveProperty(),
       saveError: this.state.saveError,
       savedId: this.state.savedId,
@@ -452,11 +537,18 @@ class Component extends DCLogic {
       onNsCommissionPct: (e) => this.setState({ ns_commissionPct: e.target.value }),
       nudgeConfirmLabel: this.state.nudgeSaving ? "กำลังบันทึก…" : "ยืนยัน",
       onConfirmNudge: () => this.confirmNudge(),
-      onSkipNudge: () => this.setState({ nudgeSavedMsg: "" }),
       nudgeSavedMsg: this.state.nudgeSavedMsg,
       postDraft: this.buildPostDraft(),
       onCopyPost: () => this.copyPost(),
       copyLabel: this.state.copyLabel,
+      showShare: !!this.state.showShareFlag,
+      shareId: this.state.shareId, shareUrl: this.state.shareUrl,
+      shareFbUrl: "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(this.state.shareUrl),
+      shareLineUrl: "https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(this.state.shareUrl),
+      onCloseShare: () => this.setState({ showShareFlag: false }),
+      stopProp: (e) => e.stopPropagation(),
+      onCopyShareLink: () => this.copyShareLink(),
+      shareCopyLabel: this.state.shareCopyLabel,
     };
   }
 }
