@@ -28,12 +28,27 @@
 </sc-if>
 
 <sc-if value="{{ hasLister }}">
-  <div style="display:flex; align-items:center; justify-content:space-between; padding:16px clamp(20px,4vw,40px); border-bottom:1px solid oklch(93% 0.01 70); background:white;">
+  <div style="display:flex; align-items:center; justify-content:space-between; padding:16px clamp(20px,4vw,40px); border-bottom:1px solid oklch(93% 0.01 70); background:white; gap:14px; flex-wrap:wrap;">
     <a href="Home.dc.html" style="display:flex; align-items:center; gap:9px;">
       <img src="logo.png" alt="huahin.properties" style="height:30px; width:30px; object-fit:contain; border-radius:50%;" />
       <span style="font-family:'Playfair Display',serif; font-size:15px; color:oklch(20% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</span>
     </a>
-    <div style="font-size:12px; color:oklch(50% 0.02 60);">เว็บไซต์ส่วนตัวของ {{ displayName }}</div>
+    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+      <select value="{{ filterType }}" onChange="{{ onFilterType }}" style="{{ filterSelectStyle }}">
+        <sc-for list="{{ typeFilterOptions }}" as="o" hint-placeholder-count="0"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+      </select>
+      <select value="{{ filterZone }}" onChange="{{ onFilterZone }}" style="{{ filterSelectStyle }}">
+        <sc-for list="{{ zoneFilterOptions }}" as="o" hint-placeholder-count="0"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+      </select>
+      <select value="{{ filterBeds }}" onChange="{{ onFilterBeds }}" style="{{ filterSelectStyle }}">
+        <sc-for list="{{ bedsFilterOptions }}" as="o" hint-placeholder-count="0"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+      </select>
+      <select value="{{ filterPrice }}" onChange="{{ onFilterPrice }}" style="{{ filterSelectStyle }}">
+        <sc-for list="{{ priceFilterOptions }}" as="o" hint-placeholder-count="0"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+      </select>
+      <dc-import name="LanguageSwitcher" lang="{{ lang }}" options="{{ langOptions }}" on-select="{{ onSelectLang }}" compact="{{ true }}" hint-size="70px,36px"></dc-import>
+    </div>
+    <div style="font-size:12px; color:oklch(50% 0.02 60);">{{ headerSiteLabel }}</div>
   </div>
   <div style="{{ coverStyle }}"></div>
   <div style="max-width:1100px; margin:0 auto; padding:0 clamp(20px,4vw,40px) 50px;">
@@ -60,9 +75,9 @@
       <div style="font-size:14px; color:oklch(35% 0.02 60); line-height:1.7; max-width:640px; margin-bottom:28px; white-space:pre-wrap;">{{ bioText }}</div>
     </sc-if>
 
-    <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60); margin-bottom:14px;">ทรัพย์ทั้งหมด ({{ propCount }})</div>
+    <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60); margin-bottom:14px;">{{ allPropertiesLabel }} ({{ propCount }})</div>
     <sc-if value="{{ hasNoProps }}">
-      <div style="background:oklch(97% 0.01 80); border-radius:8px; padding:32px 20px; text-align:center; font-size:13px; color:oklch(50% 0.02 60);">ยังไม่มีทรัพย์ที่โพสต์</div>
+      <div style="background:oklch(97% 0.01 80); border-radius:8px; padding:32px 20px; text-align:center; font-size:13px; color:oklch(50% 0.02 60);">{{ noPropertiesLabel }}</div>
     </sc-if>
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:24px;">
       <sc-for list="{{ properties }}" as="p" hint-placeholder-count="0">
@@ -99,16 +114,16 @@
             <div style="font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:oklch(42% 0.12 25); margin-bottom:4px;">{{ modalZoneLine }}</div>
             <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:8px;">{{ modalTitle }}</div>
             <div style="display:flex; gap:18px; font-size:14px; color:oklch(40% 0.02 60); margin-bottom:12px; flex-wrap:wrap;">
-              <sc-if value="{{ modalHasBedrooms }}"><span>🛏️ {{ modalBedrooms }} ห้องนอน</span></sc-if>
-              <sc-if value="{{ modalHasBathrooms }}"><span>🛁 {{ modalBathrooms }} ห้องน้ำ</span></sc-if>
-              <sc-if value="{{ modalHasLivingArea }}"><span>📐 {{ modalLivingArea }} ตร.ม.</span></sc-if>
+              <sc-if value="{{ modalHasBedrooms }}"><span>🛏️ {{ modalBedrooms }} {{ tBedrooms }}</span></sc-if>
+              <sc-if value="{{ modalHasBathrooms }}"><span>🛁 {{ modalBathrooms }} {{ tBathrooms }}</span></sc-if>
+              <sc-if value="{{ modalHasLivingArea }}"><span>📐 {{ modalLivingArea }} {{ tSqm }}</span></sc-if>
             </div>
             <div style="font-size:22px; font-weight:700; color:oklch(25% 0.02 60); margin-bottom:16px;">{{ modalPriceLabel }}</div>
             <sc-if value="{{ modalHasDescription }}">
               <div style="font-size:14px; color:oklch(35% 0.02 60); line-height:1.7; margin-bottom:18px; white-space:pre-wrap;">{{ modalDescription }}</div>
             </sc-if>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
-              <sc-if value="{{ hasPhone }}"><a href="{{ telHref }}" style="{{ contactBtnStyle }}">📞 ติดต่อสอบถาม</a></sc-if>
+              <sc-if value="{{ hasPhone }}"><a href="{{ telHref }}" style="{{ contactBtnStyle }}">📞 {{ tContact }}</a></sc-if>
               <div onClick="{{ onOpenChatFromModal }}" style="background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:10px 18px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">💬 แชทสอบถาม</div>
             </div>
           </div>
@@ -173,11 +188,70 @@
 <script type="text/x-dc" data-dc-script>
 const CLOUD_FUNCTION_URL = "https://claudecomplete-3j4ldf4pja-as.a.run.app";
 
+const LANG_NAMES = { en: "English", th: "Thai", ru: "Russian", zh: "Chinese", de: "German", no: "Norwegian", fr: "French", it: "Italian" };
+const LANG_OPTIONS = [
+  { code: "th", label: "ไทย" }, { code: "en", label: "English" }, { code: "ru", label: "Русский" }, { code: "zh", label: "中文" },
+  { code: "de", label: "Deutsch" }, { code: "no", label: "Norsk" }, { code: "fr", label: "Français" }, { code: "it", label: "Italiano" },
+];
+const UI_I18N = {
+  th: { allTypes: "ทุกประเภท", villa: "พูลวิลล่า", house: "บ้านเดี่ยว", condo: "คอนโด", land: "ที่ดิน", commercial: "อาคารพาณิชย์",
+    allZones: "ทุกโซน", allBeds: "ห้องนอนทั้งหมด", bed1: "1+ ห้องนอน", bed2: "2+ ห้องนอน", bed3: "3+ ห้องนอน", bed4: "4+ ห้องนอน",
+    allPrices: "ทุกช่วงราคา", under5: "ต่ำกว่า 5 ล้าน", p5to10: "5-10 ล้าน", p10to20: "10-20 ล้าน", over20: "มากกว่า 20 ล้าน",
+    bedrooms: "ห้องนอน", bathrooms: "ห้องน้ำ", sqm: "ตร.ม.", contact: "ติดต่อสอบถาม", chatBtn: "แชทสอบถาม", close: "ปิด",
+    allProperties: "ทรัพย์ทั้งหมด", noProperties: "ยังไม่มีทรัพย์ที่โพสต์", perMonth: "/เดือน", personalSite: "เว็บไซต์ส่วนตัวของ" },
+  en: { allTypes: "All types", villa: "Pool Villa", house: "House", condo: "Condo", land: "Land", commercial: "Commercial",
+    allZones: "All zones", allBeds: "All bedrooms", bed1: "1+ bed", bed2: "2+ beds", bed3: "3+ beds", bed4: "4+ beds",
+    allPrices: "All prices", under5: "Under ฿5M", p5to10: "฿5-10M", p10to20: "฿10-20M", over20: "Over ฿20M",
+    bedrooms: "Bedrooms", bathrooms: "Bathrooms", sqm: "sqm", contact: "Contact", chatBtn: "Chat", close: "Close",
+    allProperties: "All Properties", noProperties: "No properties posted yet", perMonth: "/mo", personalSite: "Personal site of" },
+  ru: { allTypes: "Все типы", villa: "Вилла с бассейном", house: "Дом", condo: "Кондо", land: "Земля", commercial: "Коммерческая",
+    allZones: "Все районы", allBeds: "Все спальни", bed1: "1+ спальня", bed2: "2+ спальни", bed3: "3+ спальни", bed4: "4+ спальни",
+    allPrices: "Все цены", under5: "До 5 млн", p5to10: "5-10 млн", p10to20: "10-20 млн", over20: "Более 20 млн",
+    bedrooms: "Спальни", bathrooms: "Ванные", sqm: "кв.м", contact: "Связаться", chatBtn: "Чат", close: "Закрыть",
+    allProperties: "Все объекты", noProperties: "Пока нет объектов", perMonth: "/мес", personalSite: "Личный сайт" },
+  zh: { allTypes: "所有类型", villa: "泳池别墅", house: "独栋别墅", condo: "公寓", land: "土地", commercial: "商业地产",
+    allZones: "所有区域", allBeds: "全部卧室", bed1: "1+卧室", bed2: "2+卧室", bed3: "3+卧室", bed4: "4+卧室",
+    allPrices: "全部价格", under5: "低于500万", p5to10: "500-1000万", p10to20: "1000-2000万", over20: "2000万以上",
+    bedrooms: "卧室", bathrooms: "浴室", sqm: "平方米", contact: "联系咨询", chatBtn: "聊天咨询", close: "关闭",
+    allProperties: "全部房源", noProperties: "暂无房源", perMonth: "/月", personalSite: "个人网站" },
+  de: { allTypes: "Alle Typen", villa: "Pool-Villa", house: "Haus", condo: "Eigentumswohnung", land: "Grundstück", commercial: "Gewerbe",
+    allZones: "Alle Zonen", allBeds: "Alle Schlafzimmer", bed1: "1+ Schlafzimmer", bed2: "2+ Schlafzimmer", bed3: "3+ Schlafzimmer", bed4: "4+ Schlafzimmer",
+    allPrices: "Alle Preise", under5: "Unter ฿5M", p5to10: "฿5-10M", p10to20: "฿10-20M", over20: "Über ฿20M",
+    bedrooms: "Schlafzimmer", bathrooms: "Badezimmer", sqm: "qm", contact: "Kontakt", chatBtn: "Chat", close: "Schließen",
+    allProperties: "Alle Immobilien", noProperties: "Noch keine Immobilien", perMonth: "/Monat", personalSite: "Persönliche Seite von" },
+  no: { allTypes: "Alle typer", villa: "Bassengvilla", house: "Hus", condo: "Leilighet", land: "Tomt", commercial: "Næringseiendom",
+    allZones: "Alle soner", allBeds: "Alle soverom", bed1: "1+ soverom", bed2: "2+ soverom", bed3: "3+ soverom", bed4: "4+ soverom",
+    allPrices: "Alle priser", under5: "Under ฿5M", p5to10: "฿5-10M", p10to20: "฿10-20M", over20: "Over ฿20M",
+    bedrooms: "Soverom", bathrooms: "Bad", sqm: "kvm", contact: "Kontakt", chatBtn: "Chat", close: "Lukk",
+    allProperties: "Alle eiendommer", noProperties: "Ingen eiendommer ennå", perMonth: "/mnd", personalSite: "Personlig side til" },
+  fr: { allTypes: "Tous types", villa: "Villa avec piscine", house: "Maison", condo: "Condo", land: "Terrain", commercial: "Commercial",
+    allZones: "Toutes zones", allBeds: "Toutes chambres", bed1: "1+ chambre", bed2: "2+ chambres", bed3: "3+ chambres", bed4: "4+ chambres",
+    allPrices: "Tous prix", under5: "Moins de ฿5M", p5to10: "฿5-10M", p10to20: "฿10-20M", over20: "Plus de ฿20M",
+    bedrooms: "Chambres", bathrooms: "Salles de bain", sqm: "m²", contact: "Contact", chatBtn: "Chat", close: "Fermer",
+    allProperties: "Tous les biens", noProperties: "Aucun bien pour le moment", perMonth: "/mois", personalSite: "Site personnel de" },
+  it: { allTypes: "Tutti i tipi", villa: "Villa con piscina", house: "Casa", condo: "Condominio", land: "Terreno", commercial: "Commerciale",
+    allZones: "Tutte le zone", allBeds: "Tutte le camere", bed1: "1+ camera", bed2: "2+ camere", bed3: "3+ camere", bed4: "4+ camere",
+    allPrices: "Tutti i prezzi", under5: "Sotto ฿5M", p5to10: "฿5-10M", p10to20: "฿10-20M", over20: "Oltre ฿20M",
+    bedrooms: "Camere", bathrooms: "Bagni", sqm: "mq", contact: "Contatto", chatBtn: "Chat", close: "Chiudi",
+    allProperties: "Tutti gli immobili", noProperties: "Nessun immobile ancora", perMonth: "/mese", personalSite: "Sito personale di" },
+};
+const AREA_LABELS_BY_LANG = {
+  th: { "hua-hin": "หัวหิน", "pranburi": "ปราณบุรี", "cha-am": "ชะอำ" },
+  en: { "hua-hin": "Hua Hin", "pranburi": "Pranburi", "cha-am": "Cha-am" },
+  ru: { "hua-hin": "Хуахин", "pranburi": "Пранбури", "cha-am": "Чаам" },
+  zh: { "hua-hin": "华欣", "pranburi": "巴蜀差", "cha-am": "差安" },
+  de: { "hua-hin": "Hua Hin", "pranburi": "Pranburi", "cha-am": "Cha-am" },
+  no: { "hua-hin": "Hua Hin", "pranburi": "Pranburi", "cha-am": "Cha-am" },
+  fr: { "hua-hin": "Hua Hin", "pranburi": "Pranburi", "cha-am": "Cha-am" },
+  it: { "hua-hin": "Hua Hin", "pranburi": "Pranburi", "cha-am": "Cha-am" },
+};
+
 class Component extends DCLogic {
   state = {
     loaded: false, lister: null, properties: [], showShare: false, shareCopyLabel: "คัดลอกลิงก์",
     chatOpen: false, chatInput: "", chatMessages: [], chatThinking: false,
     showPropertyModal: false, modalProperty: null, modalPhotoIndex: 0,
+    lang: "th", filterType: "", filterZone: "", filterBeds: "", filterPrice: "",
   };
 
   async componentDidMount() {
@@ -207,6 +281,27 @@ class Component extends DCLogic {
       console.warn("Failed to load agent profile:", e);
       this.setState({ loaded: true, lister: null });
     }
+  }
+
+  onSelectLang(code) {
+    this.setState({ lang: code });
+  }
+
+  filteredProperties() {
+    const { filterType, filterZone, filterBeds, filterPrice } = this.state;
+    return this.state.properties.filter((p) => {
+      if (filterType && p.type !== filterType) return false;
+      if (filterZone && p.zone !== filterZone) return false;
+      if (filterBeds && !(Number(p.bedrooms) >= Number(filterBeds))) return false;
+      if (filterPrice) {
+        const price = Number(p.price) || 0;
+        if (filterPrice === "under5" && !(price < 5000000)) return false;
+        if (filterPrice === "p5to10" && !(price >= 5000000 && price < 10000000)) return false;
+        if (filterPrice === "p10to20" && !(price >= 10000000 && price < 20000000)) return false;
+        if (filterPrice === "over20" && !(price >= 20000000)) return false;
+      }
+      return true;
+    });
   }
 
   toggleChat() {
@@ -256,15 +351,15 @@ class Component extends DCLogic {
   // customer always stays inside this agent's own branded page.
   _extractPropertyCards(text) {
     if (!text) return [];
+    const t = UI_I18N[this.state.lang] || UI_I18N.th;
     const codes = [...new Set((text.match(/[A-Z]{2,3}-\d+/g) || []))];
     return codes.map((code) => this.state.properties.find((p) => p.id === code)).filter(Boolean).map((p) => {
-      const typeLabels = { villa: "พูลวิลล่า", house: "บ้านเดี่ยว", condo: "คอนโด", land: "ที่ดิน", commercial: "อาคารพาณิชย์" };
       return {
         id: p.id,
         cardStyle: { display: "flex", gap: "10px", alignItems: "center", background: "white", border: "1px solid oklch(88% 0.01 70)", borderRadius: "10px", padding: "8px", cursor: "pointer", maxWidth: "260px" },
         thumbStyle: { width: "56px", height: "56px", borderRadius: "6px", flexShrink: 0, background: p.coverUrl ? `url('${p.coverUrl}') center/cover` : "oklch(90% 0.01 70)" },
-        title: `${typeLabels[p.type] || p.type || ""} ${p.zone || ""}`.trim(),
-        priceLabel: "฿" + (Number(p.price) || 0).toLocaleString() + (p.status === "rent" ? "/เดือน" : ""),
+        title: `${t[p.type] || p.type || ""} ${p.zone || ""}`.trim(),
+        priceLabel: "฿" + (Number(p.price) || 0).toLocaleString() + (p.status === "rent" ? t.perMonth : ""),
         code: p.id,
         onClick: () => this.openPropertyModal(p),
       };
@@ -285,7 +380,7 @@ class Component extends DCLogic {
         code: p.id, type: p.type, zone: p.zone, area: p.area, status: p.status, price: p.price,
         bedrooms: p.bedrooms, bathrooms: p.bathrooms, livingArea: p.livingArea, description: p.description || "",
       }));
-      const system = `${personaText}\n\nYou ONLY know about and may discuss these specific properties (JSON below) — never mention or invent any other property, and never mention huahin.properties' other listers/agents or site-wide data:\n${JSON.stringify(propsSummary)}\n\nAnswer in the customer's language. Be warm and helpful.\n\nREPLY LENGTH: ALWAYS keep replies SHORT — 2-3 sentences maximum, no exceptions. Never list full specs, features, or descriptions in your text — the interface shows a clickable property card automatically whenever you mention a property code, so the customer can open it themselves for full details. Your job is just to guide the conversation and say which property code(s) fit, not describe them in depth. When a property matches what the customer is asking, just say so briefly and state its exact code (e.g. HH-109) — never invent a code. If nothing matches yet, ask one short clarifying question. If asked for contact info, give the phone/email above exactly as provided — never invent a different one.`;
+      const system = `${personaText}\n\nIMPORTANT: Always reply in ${LANG_NAMES[this.state.lang] || "Thai"}, regardless of what language the customer writes in — the customer has explicitly selected that language for this page.\n\nYou ONLY know about and may discuss these specific properties (JSON below) — never mention or invent any other property, and never mention huahin.properties' other listers/agents or site-wide data:\n${JSON.stringify(propsSummary)}\n\nAnswer in the customer's language. Be warm and helpful.\n\nREPLY LENGTH: ALWAYS keep replies SHORT — 2-3 sentences maximum, no exceptions. Never list full specs, features, or descriptions in your text — the interface shows a clickable property card automatically whenever you mention a property code, so the customer can open it themselves for full details. Your job is just to guide the conversation and say which property code(s) fit, not describe them in depth. When a property matches what the customer is asking, just say so briefly and state its exact code (e.g. HH-109) — never invent a code. If nothing matches yet, ask one short clarifying question. If asked for contact info, give the phone/email above exactly as provided — never invent a different one.`;
       const messages = history.slice(history.findIndex((m) => m.role === "user")).map((m) => ({ role: m.role, content: m.text }));
       let reply;
       if (window.claude && window.claude.complete) {
@@ -319,12 +414,13 @@ class Component extends DCLogic {
     const brandColor = "oklch(40% 0.13 25)";
     const theme = (canCustomTheme && lister.themeColor) ? lister.themeColor : brandColor;
     const displayName = lister.displayName || lister.name || "เจ้าของทรัพย์";
-    const areaLabels = { "hua-hin": "หัวหิน", "pranburi": "ปราณบุรี", "cha-am": "ชะอำ" };
-    const typeLabels = { villa: "พูลวิลล่า", house: "บ้านเดี่ยว", condo: "คอนโด", land: "ที่ดิน", commercial: "อาคารพาณิชย์" };
+    const areaLabels = AREA_LABELS_BY_LANG[this.state.lang] || AREA_LABELS_BY_LANG.th;
+    const t = UI_I18N[this.state.lang] || UI_I18N.th;
+    const typeLabels = { villa: t.villa, house: t.house, condo: t.condo, land: t.land, commercial: t.commercial };
     const statusMap = {
       sale: { label: "ประกาศขาย", color: brandColor }, rent: { label: "ประกาศเช่า", color: "oklch(40% 0.1 250)" },
     };
-    const properties = this.state.properties.map((p) => {
+    const properties = this.filteredProperties().map((p) => {
       const st = statusMap[p.status] || statusMap.sale;
       return {
         statusColor: st.color, statusLabel: st.label,
@@ -335,8 +431,8 @@ class Component extends DCLogic {
         propertyId: p.id, zone: p.zone || "-", areaLabel: areaLabels[p.area] || p.area || "-",
         title: `${typeLabels[p.type] || p.type} — ${p.zone || ""}`, typeLabel: typeLabels[p.type] || p.type || "-",
         hasBedrooms: !!p.bedrooms, bedrooms: p.bedrooms, hasBathrooms: !!p.bathrooms, bathrooms: p.bathrooms,
-        hasLivingArea: !!p.livingArea, livingArea: p.livingArea, sqmLabel: "ตร.ม.",
-        priceLabel: "฿" + (Number(p.price) || 0).toLocaleString() + (p.status === "rent" ? "/เดือน" : ""),
+        hasLivingArea: !!p.livingArea, livingArea: p.livingArea, sqmLabel: t.sqm,
+        priceLabel: "฿" + (Number(p.price) || 0).toLocaleString() + (p.status === "rent" ? t.perMonth : ""),
         onOpen: () => this.openPropertyModal(p),
       };
     });
@@ -359,7 +455,7 @@ class Component extends DCLogic {
       isVerifiedVip: !!lister.vipTier,
       vipBadgeLabel: { silver: "🥈 Verified VIP", gold: "🥇 Verified VIP", diamond: "💎 Verified VIP" }[lister.vipTier] || "",
       vipBadgeStyle: { fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "100px", background: "oklch(30% 0.02 60)", color: "oklch(85% 0.13 95)" },
-      displayName, propCountLabel: `${properties.length} รายการทรัพย์`,
+      displayName, propCountLabel: `${properties.length} ${this.state.lang === "th" ? "รายการทรัพย์" : t.allProperties}`,
       hasBio: !!(lister.bioText && lister.bioText.trim()), bioText: lister.bioText || "",
       socialIcons: [
         { key: "facebook", iconChar: "f", bg: "oklch(45% 0.15 260)", font: "Georgia,serif", url: (lister.socialLinks && lister.socialLinks.facebook) || "" },
@@ -388,9 +484,30 @@ class Component extends DCLogic {
       modalHasBedrooms: !!(mp && mp.bedrooms), modalBedrooms: mp && mp.bedrooms,
       modalHasBathrooms: !!(mp && mp.bathrooms), modalBathrooms: mp && mp.bathrooms,
       modalHasLivingArea: !!(mp && mp.livingArea), modalLivingArea: mp && mp.livingArea,
-      modalPriceLabel: mp ? "฿" + (Number(mp.price) || 0).toLocaleString() + (mp.status === "rent" ? "/เดือน" : "") : "",
+      modalPriceLabel: mp ? "฿" + (Number(mp.price) || 0).toLocaleString() + (mp.status === "rent" ? t.perMonth : "") : "",
       modalHasDescription: !!(mp && mp.description && mp.description.trim()),
       modalDescription: (mp && mp.description) || "",
+      allPropertiesLabel: t.allProperties, noPropertiesLabel: t.noProperties,
+      tBedrooms: t.bedrooms, tBathrooms: t.bathrooms, tSqm: t.sqm, tContact: t.contact,
+      lang: this.state.lang, langOptions: LANG_OPTIONS, onSelectLang: (code) => this.onSelectLang(code),
+      headerSiteLabel: `${t.personalSite} ${displayName}`,
+      filterSelectStyle: { border: "1px solid oklch(85% 0.01 70)", borderRadius: "100px", padding: "8px 12px", fontSize: "12.5px", fontFamily: "inherit", background: "white", color: "oklch(30% 0.02 60)", cursor: "pointer" },
+      filterType: this.state.filterType, onFilterType: (e) => this.setState({ filterType: e.target.value }),
+      filterZone: this.state.filterZone, onFilterZone: (e) => this.setState({ filterZone: e.target.value }),
+      filterBeds: this.state.filterBeds, onFilterBeds: (e) => this.setState({ filterBeds: e.target.value }),
+      filterPrice: this.state.filterPrice, onFilterPrice: (e) => this.setState({ filterPrice: e.target.value }),
+      typeFilterOptions: [
+        { value: "", label: t.allTypes }, { value: "villa", label: t.villa }, { value: "house", label: t.house },
+        { value: "condo", label: t.condo }, { value: "land", label: t.land }, { value: "commercial", label: t.commercial },
+      ],
+      zoneFilterOptions: [{ value: "", label: t.allZones }, ...[...new Set(this.state.properties.map((p) => p.zone).filter(Boolean))].map((z) => ({ value: z, label: z }))],
+      bedsFilterOptions: [
+        { value: "", label: t.allBeds }, { value: "1", label: t.bed1 }, { value: "2", label: t.bed2 }, { value: "3", label: t.bed3 }, { value: "4", label: t.bed4 },
+      ],
+      priceFilterOptions: [
+        { value: "", label: t.allPrices }, { value: "under5", label: t.under5 }, { value: "p5to10", label: t.p5to10 },
+        { value: "p10to20", label: t.p10to20 }, { value: "over20", label: t.over20 },
+      ],
       onOpenChatFromModal: () => {
         this.setState((s) => {
           const chatMessages = s.chatMessages.length ? s.chatMessages : [{ role: "assistant", text: `สวัสดีค่ะ/ครับ สนใจทรัพย์ของ${(s.lister && (s.lister.displayName || s.lister.name)) || "เรา"}สอบถามได้เลยค่ะ/ครับ`, bubbleStyle: this.bubbleStyle(false) }];
