@@ -163,6 +163,48 @@ export async function createListerAccount(email, password) {
   return cred.user.uid;
 }
 
+// ── Social / phone sign-in for self-serve listers (BLUEPRINT.md §2 ทาง 2:
+// "ล็อกอินง่าย ไม่ต้องพิมพ์อีเมล/รหัสผ่านเอง"). Each returns the signed-in
+// user's uid; the caller then creates the "listers" doc if this is a
+// brand-new account (checked via a Firestore read on that uid), exactly
+// like the email/password flow. Google/Facebook providers must be turned
+// on in the Firebase Console (Authentication → Sign-in method) before
+// these work — no code change needed after that.
+export async function signInWithGoogle() {
+  const a = authApp();
+  if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
+  const provider = new window.firebase.auth.GoogleAuthProvider();
+  const cred = await a.signInWithPopup(provider);
+  return cred.user.uid;
+}
+
+export async function signInWithFacebook() {
+  const a = authApp();
+  if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
+  const provider = new window.firebase.auth.FacebookAuthProvider();
+  const cred = await a.signInWithPopup(provider);
+  return cred.user.uid;
+}
+
+// Phone OTP is two steps: start (sends the SMS) then confirm (verifies the
+// code the user typed). recaptchaContainerId must be an element ID already
+// in the DOM (an invisible reCAPTCHA badge Firebase manages itself).
+let _phoneConfirmation = null;
+
+export async function startPhoneSignIn(phoneNumber, recaptchaContainerId) {
+  const a = authApp();
+  if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
+  const verifier = new window.firebase.auth.RecaptchaVerifier(recaptchaContainerId, { size: "invisible" });
+  _phoneConfirmation = await a.signInWithPhoneNumber(phoneNumber, verifier);
+}
+
+export async function confirmPhoneSignIn(code) {
+  if (!_phoneConfirmation) throw new Error("ยังไม่ได้ขอรหัส OTP");
+  const cred = await _phoneConfirmation.confirm(code);
+  _phoneConfirmation = null;
+  return cred.user.uid;
+}
+
 export async function saveLead(lead) {
   const id = "lead-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
   await setDoc("leads", id, { ...lead, createdAt: Date.now(), contacted: false });
@@ -496,6 +538,22 @@ export async function fetchRolloutLevel() {
 
 export async function saveRolloutLevel(level) {
   await setDoc("siteContent", "rollout", { level });
+}
+
+// Founding Agents (BLUEPRINT.md §2 ทาง 2) — capped free-signup window during
+// launch. limit=0/empty means unlimited (feature off).
+export async function fetchFoundingAgentSettings() {
+  const doc = await db().collection("siteContent").doc("foundingAgents").get();
+  return doc.exists ? { limit: doc.data().limit || 0, note: doc.data().note || "" } : { limit: 0, note: "" };
+}
+
+export async function saveFoundingAgentSettings(settings) {
+  await setDoc("siteContent", "foundingAgents", settings);
+}
+
+export async function countFoundingAgents() {
+  const snap = await db().collection("listers").where("foundingAgent", "==", true).get();
+  return snap.size;
 }
 
 export async function openBillingPortal(customerId) {

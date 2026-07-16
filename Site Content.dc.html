@@ -224,6 +224,29 @@
       </sc-if>
     </div>
 
+    <!-- FOUNDING AGENTS -->
+    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">🎉 Founding Agents (ช่องฟรีรุ่นแรก)</div>
+      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">จำกัดจำนวนผู้สมัครฟรีรุ่นแรก — เตือน 0 หรือเว้นโลก = ไม่จำกัด (ปีดฟีเจอร์กี้) หน้าสมัครจะเห็นจำนวนที่เหลือสดตลอดเวลา</div>
+      <div style="display:flex; gap:14px; flex-wrap:wrap; max-width:520px; margin-bottom:12px;">
+        <div style="flex:1; min-width:140px;">
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">จำนวนสูงสุด (0 = ไม่จำกัด)</div>
+          <input type="number" value="{{ foundingLimit }}" onChange="{{ onFoundingLimit }}" placeholder="50" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
+        </div>
+      </div>
+      <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ข้อความเงื่อนการเปลี่ยนผ่าน (โชว์ให้ Agent เห็นที่หน้าสมัคร)</div>
+      <textarea value="{{ foundingNote }}" onChange="{{ onFoundingNote }}" rows="3" placeholder="ช่วงนี้ฟรีชั่วคราวสำหรับผู้สมัครกลุ่มแรก จะเริ่มเก็บค่าบริการเมื่อเว็บมี lead เข้าสม่ำเสมอ" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical; line-height:1.6;"></textarea>
+      <div style="margin-top:12px;">
+        <div onClick="{{ onSaveFounding }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">บันทึก</div>
+        <sc-if value="{{ foundingMsg }}">
+          <span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ foundingMsg }}</span>
+        </sc-if>
+        <sc-if value="{{ foundingCountLabel }}">
+          <span style="margin-left:12px; font-size:12px; color:oklch(50% 0.02 60);">{{ foundingCountLabel }}</span>
+        </sc-if>
+      </div>
+    </div>
+
     <!-- STRIPE PRICE IDS (Owner) -->
     <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
       <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">💳 ราคาสมาชิก Agent/เจ้าของบ้าน (Stripe)</div>
@@ -378,6 +401,7 @@ class Component extends DCLogic {
     aiRestrictions: "", aiRestrictionsMsg: "",
     aiPersonaName: "", aiPersonaRole: "", aiPersonaMsg: "",
     banners: [], bannerDrafts: {}, bannerMsgs: {}, bannerFilter: "all",
+    foundingLimit: "", foundingNote: "", foundingMsg: "", foundingCount: 0,
     maintenanceOn: false,
   };
 
@@ -435,6 +459,14 @@ class Component extends DCLogic {
       this.setState({ featuredPrices });
     } catch (e) {
       console.warn("Failed to load Featured prices:", e);
+    }
+
+    try {
+      const founding = await fb.fetchFoundingAgentSettings();
+      const foundingCount = await fb.countFoundingAgents();
+      this.setState({ foundingLimit: founding.limit || "", foundingNote: founding.note || "", foundingCount });
+    } catch (e) {
+      console.warn("Failed to load founding agent settings:", e);
     }
 
     try {
@@ -625,6 +657,15 @@ class Component extends DCLogic {
       this.setState({ featuredPriceMsg: "บันทึกแล้ว" });
       setTimeout(() => this.setState({ featuredPriceMsg: "" }), 2500);
     } catch (e) { console.warn("saveFeaturedPrices failed:", e); }
+  }
+
+  async saveFoundingSettings() {
+    try {
+      const limit = Number(this.state.foundingLimit) || 0;
+      await this._fb.saveFoundingAgentSettings({ limit, note: this.state.foundingNote || "" });
+      this.setState({ foundingMsg: "บันทึกแล้ว" });
+      setTimeout(() => this.setState({ foundingMsg: "" }), 2500);
+    } catch (e) { console.warn("saveFoundingSettings failed:", e); }
   }
 
   filteredBanners() {
@@ -863,6 +904,11 @@ class Component extends DCLogic {
         };
       }),
       onAddBanner: () => this.addBanner(),
+      foundingLimit: this.state.foundingLimit, onFoundingLimit: (e) => this.setState({ foundingLimit: e.target.value }),
+      foundingNote: this.state.foundingNote, onFoundingNote: (e) => this.setState({ foundingNote: e.target.value }),
+      onSaveFounding: () => this.saveFoundingSettings(),
+      foundingMsg: this.state.foundingMsg,
+      foundingCountLabel: this.state.foundingLimit ? `\u0e2a\u0e21\u0e31\u0e04\u0e23\u0e40\u0e1b\u0e47\u0e19 Founding Agent \u0e44\u0e1b\u0e41\u0e25\u0e49\u0e27 ${this.state.foundingCount}/${this.state.foundingLimit} \u0e04\u0e19` : "",
       bannerFilterTabs: [
         { key: "all", label: "ทั้งหมด" },
         { key: "own", label: "ของเว็บเอง" },

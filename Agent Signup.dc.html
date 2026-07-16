@@ -31,6 +31,9 @@
     <div style="text-align:center; margin-bottom:44px;">
       <div style="font-family:'Playfair Display',serif; font-size:clamp(28px,4vw,40px); color:oklch(20% 0.02 60); line-height:1.25; margin-bottom:14px;">โพสต์ประกาศฟรีวันนี้<br>พร้อมผู้ช่วย AI ที่ทำงานแทนคุณ</div>
       <div style="font-size:15px; color:oklch(45% 0.02 60); max-width:560px; margin:0 auto; line-height:1.7;">เจาะกลุ่มผู้ซื้อ/ผู้เช่าในหัวหิน ปราณบุรี ชะอำโดยเฉพาะ — ช่วงเปิดตัวนี้สมัครและโพสต์ได้ฟรี ไม่มีค่าใช้จ่าย</div>
+      <sc-if value="{{ foundingBannerText }}">
+        <div style="display:inline-block; margin-top:16px; background:oklch(95% 0.06 75); border:1px solid oklch(80% 0.1 75); color:oklch(35% 0.1 40); font-size:13px; padding:8px 18px; border-radius:100px;">🎉 {{ foundingBannerText }}</div>
+      </sc-if>
     </div>
 
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-bottom:48px;">
@@ -55,6 +58,30 @@
       <div onClick="{{ onTabSignup }}" style="padding:10px 20px; font-size:14px; font-weight:600; cursor:pointer; border-bottom:2px solid {{ signupTabColor }}; color:{{ signupTabColor }};">Sign up Free</div>
       <div onClick="{{ onTabLogin }}" style="padding:10px 20px; font-size:14px; font-weight:600; cursor:pointer; border-bottom:2px solid {{ loginTabColor }}; color:{{ loginTabColor }};">Login</div>
     </div>
+
+    <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:20px clamp(24px,4vw,36px); margin-bottom:16px;">
+      <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:12px;">เข้าสู่ระบบ/สมัครแบบเร็ว — ไม่ต้องพิมพ์อีเมล/รหัสผ่าน</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
+        <div onClick="{{ onGoogleSignIn }}" style="display:flex; align-items:center; gap:8px; background:white; border:1px solid oklch(85% 0.01 70); padding:10px 18px; border-radius:6px; font-size:13px; cursor:pointer;">🔵 เข้าสู่ระบบด้วย Google</div>
+        <div onClick="{{ onFacebookSignIn }}" style="display:flex; align-items:center; gap:8px; background:oklch(35% 0.1 250); color:white; padding:10px 18px; border-radius:6px; font-size:13px; cursor:pointer;">📘 เข้าสู่ระบบด้วย Facebook</div>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
+        <div style="flex:1; min-width:180px;">
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">หรือใช้เบอร์โทร (OTP ผ่าน SMS)</div>
+          <input value="{{ phoneOtp }}" onChange="{{ onPhoneOtp }}" placeholder="+66812345678" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:13px; font-family:inherit;" />
+        </div>
+        <sc-if value="{{ showOtpCodeInput }}">
+          <div style="flex:1; min-width:120px;">
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รหัส OTP</div>
+            <input value="{{ otpCode }}" onChange="{{ onOtpCode }}" placeholder="123456" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:13px; font-family:inherit;" />
+          </div>
+        </sc-if>
+        <div onClick="{{ onOtpAction }}" style="background:oklch(22% 0.02 60); color:white; padding:10px 18px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">{{ otpActionLabel }}</div>
+      </div>
+      <div id="hh-recaptcha"></div>
+      <sc-if value="{{ socialError }}"><div style="font-size:12.5px; color:oklch(50% 0.18 30); margin-top:10px;">{{ socialError }}</div></sc-if>
+    </div>
+    <div style="text-align:center; font-size:12px; color:oklch(60% 0.02 60); margin-bottom:16px;">— หรือใช้อีเมล/รหัสผ่านแบบเดิมด้านล่าง —</div>
 
     <sc-if value="{{ showLoginForm }}">
       <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:clamp(24px,4vw,36px); margin-bottom:20px;">
@@ -107,7 +134,7 @@
         </div>
         <div onClick="{{ onSubmit }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:600; cursor:pointer;">{{ submitLabel }}</div>
         <sc-if value="{{ error }}"><div style="font-size:13px; color:oklch(50% 0.18 30); text-align:center; margin-top:10px;">{{ error }}</div></sc-if>
-        <div style="font-size:12px; color:oklch(55% 0.02 60); text-align:center; margin-top:14px; line-height:1.6;">ช่วงนี้ฟรีชั่วคราวสำหรับผู้สมัครกลุ่มแรก — จะแจ้งล่วงหน้าก่อนเริ่มเก็บค่าบริการในอนาคต</div>
+        <div style="font-size:12px; color:oklch(55% 0.02 60); text-align:center; margin-top:14px; line-height:1.6;">{{ foundingFinePrint }}</div>
       </div>
     </sc-if>
 
@@ -128,13 +155,82 @@ const SIGNUP_I18N = {
 };
 
 class Component extends DCLogic {
-  state = { tab: "signup", name: "", phone: "", email: "", password: "", submitted: false, submitting: false, error: "", loginEmail: "", loginPassword: "", loginBusy: false, loginError: "", packageChoice: null, lang: "th" };
+  state = { tab: "signup", name: "", phone: "", email: "", password: "", submitted: false, submitting: false, error: "", loginEmail: "", loginPassword: "", loginBusy: false, loginError: "", packageChoice: null, lang: "th", foundingLimit: 0, foundingCount: 0, foundingNote: "", phoneOtp: "", otpCode: "", otpSent: false, socialBusy: false, socialError: "" };
 
   async componentDidMount() {
     try {
       const mod = await import("./data.js");
       this.setState({ lang: mod.getLang() });
     } catch (e) {}
+    try {
+      const fb = await import("./firebase-client.js");
+      const [settings, count] = await Promise.all([fb.fetchFoundingAgentSettings(), fb.countFoundingAgents()]);
+      this.setState({ foundingLimit: settings.limit || 0, foundingNote: settings.note || "", foundingCount: count });
+    } catch (e) {}
+  }
+
+  async completeSocialSignIn(uid, fb) {
+    try {
+      const doc = await fb.fetchMyListerDoc();
+      if (!doc) {
+        const isFounding = this.state.foundingLimit > 0 && this.state.foundingCount < this.state.foundingLimit;
+        await fb.setDoc("listers", uid, {
+          name: "", role: "lister", phone: "", email: "",
+          status: "approved", tier: "basic", createdAt: Date.now(), foundingAgent: isFounding,
+        });
+      }
+      window.location.href = "Lister Dashboard.dc.html";
+    } catch (e) {
+      this.setState({ socialBusy: false, socialError: "เกิดข้อผิดพลาด ลองใหม่อีกครั้ง" });
+    }
+  }
+
+  async googleSignIn() {
+    if (this.state.socialBusy) return;
+    this.setState({ socialBusy: true, socialError: "" });
+    try {
+      const fb = await import("./firebase-client.js");
+      const uid = await fb.signInWithGoogle();
+      await this.completeSocialSignIn(uid, fb);
+    } catch (e) {
+      this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย Google ไม่สำเร็จ ลองใหม่อีกครั้ง" });
+    }
+  }
+
+  async facebookSignIn() {
+    if (this.state.socialBusy) return;
+    this.setState({ socialBusy: true, socialError: "" });
+    try {
+      const fb = await import("./firebase-client.js");
+      const uid = await fb.signInWithFacebook();
+      await this.completeSocialSignIn(uid, fb);
+    } catch (e) {
+      this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย Facebook ไม่สำเร็จ (อาจยังไม่เปิดใช้งาน — แจ้งแอดมิน)" });
+    }
+  }
+
+  async otpAction() {
+    if (this.state.socialBusy) return;
+    const fb = await import("./firebase-client.js");
+    if (!this.state.otpSent) {
+      if (!this.state.phoneOtp.trim()) { this.setState({ socialError: "กรอกเบอร์โทรแบบมี + รหัสประเทศ เช่น +66812345678" }); return; }
+      this.setState({ socialBusy: true, socialError: "" });
+      try {
+        await fb.startPhoneSignIn(this.state.phoneOtp.trim(), "hh-recaptcha");
+        this.setState({ otpSent: true, socialBusy: false });
+      } catch (e) {
+        this.setState({ socialBusy: false, socialError: "ส่ง OTP ไม่สำเร็จ ตรวจรูปแบบเบอร์โทรอีกครั้ง" });
+      }
+    } else {
+      if (!this.state.otpCode.trim()) { this.setState({ socialError: "กรอกรหัส OTP ที่ได้รับทาง SMS" }); return; }
+      this.setState({ socialBusy: true, socialError: "" });
+      try {
+        const uid = await fb.confirmPhoneSignIn(this.state.otpCode.trim());
+        await this.completeSocialSignIn(uid, fb);
+      } catch (e) {
+        this.setState({ socialBusy: false, socialError: "รหัส OTP ไม่ถูกต้อง ลองใหม่อีกครั้ง" });
+      }
+    }
   }
 
   async loginSubmit() {
@@ -164,12 +260,14 @@ class Component extends DCLogic {
     try {
       const fb = await import("./firebase-client.js");
       const uid = await fb.createListerAccount(email, password);
+      const isFounding = this.state.foundingLimit > 0 && this.state.foundingCount < this.state.foundingLimit;
       await fb.setDoc("listers", uid, {
         name, role: "lister", phone, email,
         // Auto-approved immediately (no admin queue), free tier by default —
         // upgrading to a paid tier happens on Lister Billing right after,
         // where all packages are shown side by side (BLUEPRINT.md §2).
         status: "approved", tier: "basic", createdAt: Date.now(),
+        foundingAgent: isFounding,
       });
       this.setState({ submitted: true, submitting: false });
       setTimeout(() => { window.location.href = "Lister Dashboard.dc.html"; }, 1400);
@@ -202,6 +300,20 @@ class Component extends DCLogic {
       submitLabel: this.state.submitting ? "กำลังส่ง…" : "สมัครเลย",
       error: this.state.error,
       onSubmit: () => this.submit(),
+      onGoogleSignIn: () => this.googleSignIn(),
+      onFacebookSignIn: () => this.facebookSignIn(),
+      phoneOtp: this.state.phoneOtp, onPhoneOtp: (e) => this.setState({ phoneOtp: e.target.value }),
+      otpCode: this.state.otpCode, onOtpCode: (e) => this.setState({ otpCode: e.target.value }),
+      showOtpCodeInput: this.state.otpSent,
+      otpActionLabel: this.state.socialBusy ? "กำลังดำเนินการ…" : (this.state.otpSent ? "ยืนยันรหัส" : "ส่งรหัส OTP"),
+      onOtpAction: () => this.otpAction(),
+      socialError: this.state.socialError,
+      foundingBannerText: (this.state.foundingLimit > 0)
+        ? (this.state.foundingCount < this.state.foundingLimit
+          ? `Founding Agents — เหลืออีก ${this.state.foundingLimit - this.state.foundingCount} จาก ${this.state.foundingLimit} ที่ สมัครฟรีช่วงเปิดตัว`
+          : "")
+        : "",
+      foundingFinePrint: this.state.foundingNote || "ช่วงนี้ฟรีชั่วคราวสำหรับผู้สมัครกลุ่มแรก — จะแจ้งล่วงหน้าก่อนเริ่มเก็บค่าบริการในอนาคต",
     };
   }
 }
