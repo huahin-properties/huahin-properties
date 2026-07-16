@@ -134,8 +134,20 @@
       <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">🖼️ แบนเนอร์โฆษณา</div>
       <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:16px;">ใส่แบนเนอร์ของตัวเองก่อนได้เลย (กันหน้าเว็บว่าง) แล้วสลับเป็นของลูกค้าจริงทีหลัง — ถ้ามีมากกว่า 1 อันในหน้า/ตำแหน่งเดียวกัน ระบบจะสุ่มหมุนเวียนให้เอง</div>
 
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
+        <sc-for list="{{ bannerFilterTabs }}" as="ft" hint-placeholder-count="4">
+          <div onClick="{{ ft.onClick }}" style="{{ ft.style }}">{{ ft.label }}</div>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{ hasNoBannerRows }}">
+        <div style="font-size:13px; color:oklch(55% 0.02 60); padding:12px 0;">ไม่มีแบนเนอร์ในหมวดนี้</div>
+      </sc-if>
+
       <sc-for list="{{ bannerRows }}" as="bn" hint-placeholder-count="1">
         <div style="border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:14px; margin-bottom:12px; display:flex; flex-direction:column; gap:8px;">
+          <sc-if value="{{ bn.statusBadge }}"><div style="{{ bn.statusBadgeStyle }}">{{ bn.statusBadge }}</div></sc-if>
+          <sc-if value="{{ bn.contactEmail }}"><div style="font-size:12px; color:oklch(50% 0.02 60);">ผู้ลงโฆษณาภายนอก — อีเมลติดต่อ: {{ bn.contactEmail }}</div></sc-if>
           <input value="{{ bn.propertyCode }}" onChange="{{ bn.onPropertyCode }}" placeholder="รหัสทรัพย์ (เช่น CA-301) — ระบบดึงรูปปก+ลิงก์ให้อัตโนมัติ" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
           <sc-if value="{{ bn.resolvedLabel }}"><div style="font-size:12px; color:oklch(40% 0.12 145);">{{ bn.resolvedLabel }}</div></sc-if>
           <sc-if value="{{ bn.resolveError }}"><div style="font-size:12px; color:oklch(50% 0.18 30);">{{ bn.resolveError }}</div></sc-if>
@@ -365,7 +377,7 @@ class Component extends DCLogic {
     aiNotes: [], noteDrafts: {}, noteMsgs: {},
     aiRestrictions: "", aiRestrictionsMsg: "",
     aiPersonaName: "", aiPersonaRole: "", aiPersonaMsg: "",
-    banners: [], bannerDrafts: {}, bannerMsgs: {},
+    banners: [], bannerDrafts: {}, bannerMsgs: {}, bannerFilter: "all",
     maintenanceOn: false,
   };
 
@@ -615,6 +627,15 @@ class Component extends DCLogic {
     } catch (e) { console.warn("saveFeaturedPrices failed:", e); }
   }
 
+  filteredBanners() {
+    const banners = this.state.banners;
+    const f = this.state.bannerFilter;
+    if (f === "own") return banners.filter((b) => b.pendingPayment === undefined);
+    if (f === "pending") return banners.filter((b) => b.pendingPayment === true);
+    if (f === "paid") return banners.filter((b) => b.pendingPayment === false);
+    return banners;
+  }
+
   async saveBannerPrices() {
     try {
       await this._fb.saveBannerPrices(this.state.bannerPrices);
@@ -842,12 +863,36 @@ class Component extends DCLogic {
         };
       }),
       onAddBanner: () => this.addBanner(),
-      bannerRows: this.state.banners.map((b) => {
+      bannerFilterTabs: [
+        { key: "all", label: "ทั้งหมด" },
+        { key: "own", label: "ของเว็บเอง" },
+        { key: "pending", label: "รอชำระเงิน" },
+        { key: "paid", label: "จ่ายแล้ว (ภายนอก)" },
+      ].map((t) => ({
+        label: t.label,
+        onClick: () => this.setState({ bannerFilter: t.key }),
+        style: {
+          padding: "7px 16px", borderRadius: "100px", fontSize: "12.5px", cursor: "pointer",
+          background: this.state.bannerFilter === t.key ? "oklch(22% 0.02 60)" : "oklch(93% 0.01 70)",
+          color: this.state.bannerFilter === t.key ? "white" : "oklch(35% 0.02 60)",
+        },
+      })),
+      hasNoBannerRows: this.filteredBanners().length === 0,
+      bannerRows: this.filteredBanners().map((b) => {
         const draft = this.state.bannerDrafts[b.id] || {};
+        const isExternal = b.pendingPayment !== undefined;
+        const badge = !isExternal ? "" : (b.pendingPayment ? "⏳ รอชำระเงิน" : "✓ จ่ายแล้ว (ภายนอก)");
         return {
           propertyCode: draft.propertyCode, onPropertyCode: (e) => this.onBannerField(b.id, "propertyCode", e.target.value),
           resolveError: draft.resolveError || "",
           resolvedLabel: draft.propertyTitle ? ("✓ ผูกกับ: " + draft.propertyTitle) : "",
+          contactEmail: b.contactEmail || "",
+          statusBadge: badge,
+          statusBadgeStyle: {
+            display: "inline-block", fontSize: "12px", fontWeight: "600", padding: "3px 10px", borderRadius: "100px", width: "fit-content",
+            background: b.pendingPayment ? "oklch(90% 0.08 75)" : "oklch(90% 0.08 145)",
+            color: b.pendingPayment ? "oklch(40% 0.12 60)" : "oklch(35% 0.12 145)",
+          },
           page: draft.page, onPage: (e) => this.onBannerField(b.id, "page", e.target.value),
           position: draft.position, onPosition: (e) => this.onBannerField(b.id, "position", e.target.value),
           active: draft.active, onActive: (e) => this.onBannerField(b.id, "active", e.target.checked),
