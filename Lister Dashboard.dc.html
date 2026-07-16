@@ -91,11 +91,31 @@
             </div>
             <div>
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รูปโปรไฟล์ (โลโก้/รูปของคุณ)</div>
-              <label style="display:inline-flex; align-items:center; gap:8px; border:1px dashed oklch(80% 0.02 60); border-radius:6px; padding:9px 14px; cursor:pointer; font-size:13px; color:oklch(45% 0.02 60);">
-                <input type="file" accept="image/*" onChange="{{ onPsProfilePhoto }}" style="display:none;" />
-                📷 {{ ps_profilePhotoLabel }}
-              </label>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <label style="display:inline-flex; align-items:center; gap:8px; border:1px dashed oklch(80% 0.02 60); border-radius:6px; padding:9px 14px; cursor:pointer; font-size:13px; color:oklch(45% 0.02 60);">
+                  <input type="file" accept="image/*" onChange="{{ onPsProfilePhoto }}" style="display:none;" />
+                  📷 {{ ps_profilePhotoLabel }}
+                </label>
+                <sc-if value="{{ ps_profilePhotoUrl }}"><div style="{{ psPhotoThumbStyle }}"></div></sc-if>
+              </div>
             </div>
+
+            <sc-if value="{{ canCustomSocial }}">
+              <div>
+                <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">🔗 ลิงก์โซเชียลมีเดีย (โชว์เป็นไอคอนบนเว็บไซต์ของคุณ)</div>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                  <sc-for list="{{ socialFields }}" as="s" hint-placeholder-count="4">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <span style="width:24px; text-align:center; font-size:15px;">{{ s.icon }}</span>
+                      <input value="{{ s.value }}" onChange="{{ s.onChange }}" placeholder="{{ s.placeholder }}" style="flex:1; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 12px; font-size:13px; font-family:inherit;" />
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ cannotCustomSocial }}">
+              <div style="font-size:11.5px; color:oklch(55% 0.02 60);">🔒 เพิ่มลิงก์ Facebook/TikTok/YouTube/Instagram ได้ตั้งแต่ระดับ 3 — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a></div>
+            </sc-if>
             <div>
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">📝 ข้อความแนะนำตัว (โชว์บนเว็บไซต์ส่วนตัวของคุณ)</div>
               <textarea rows="3" value="{{ ps_bioText }}" onChange="{{ onPsBioText }}" placeholder="เช่น ตัวแทนอสังหาริมทรัพย์มืออาชีพในหัวหิน 8 ปี เชี่ยวชาญพูลวิลล่าและคอนโดมิเนียม"style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical;"></textarea>
@@ -444,6 +464,7 @@ class Component extends DCLogic {
     showBuyerModal: false, buyerTargetId: "", buyer_name: "", buyer_phone: "", buyer_email: "", buyerMsg: "", buyerIsError: false, buyerSaving: false,
     showProfileSettings: false, ps_displayName: "", ps_profilePhotoUrl: "", ps_coverPhotoUrl: "",
     ps_aiPersonaText: "", ps_themeColor: "", ps_bioText: "", ps_saving: false, ps_saveMsg: "",
+    ps_fb: "", ps_tiktok: "", ps_youtube: "", ps_instagram: "",
   };
 
   THEME_COLORS = ["oklch(40% 0.13 25)", "oklch(45% 0.1 145)", "oklch(40% 0.12 250)", "oklch(55% 0.14 75)"];
@@ -465,6 +486,10 @@ class Component extends DCLogic {
         ps_displayName: lister.displayName || lister.name || "",
         ps_profilePhotoUrl: lister.profilePhotoUrl || "", ps_coverPhotoUrl: lister.coverPhotoUrl || "",
         ps_aiPersonaText: lister.aiPersonaText || "", ps_themeColor: lister.themeColor || "", ps_bioText: lister.bioText || "",
+        ps_fb: (lister.socialLinks && lister.socialLinks.facebook) || "",
+        ps_tiktok: (lister.socialLinks && lister.socialLinks.tiktok) || "",
+        ps_youtube: (lister.socialLinks && lister.socialLinks.youtube) || "",
+        ps_instagram: (lister.socialLinks && lister.socialLinks.instagram) || "",
       });
       if (lister.vipTier && !lister.agentCode) {
         const agentCode = await fb.ensureAgentCode(lister.id, lister.agentCode).catch(() => "");
@@ -826,6 +851,7 @@ class Component extends DCLogic {
       displayName: this.state.ps_displayName, profilePhotoUrl: this.state.ps_profilePhotoUrl,
       coverPhotoUrl: this.state.ps_coverPhotoUrl, aiPersonaText: this.state.ps_aiPersonaText,
       themeColor: this.state.ps_themeColor, bioText: this.state.ps_bioText,
+      socialLinks: { facebook: this.state.ps_fb, tiktok: this.state.ps_tiktok, youtube: this.state.ps_youtube, instagram: this.state.ps_instagram },
     };
     try {
       await this._fb.setDoc("listers", this.state.lister.id, merged);
@@ -998,6 +1024,14 @@ class Component extends DCLogic {
       canCustomCover: tier2Plus, cannotCustomCover: !tier2Plus,
       ps_coverPhotoLabel: this.state.ps_coverPhotoUrl ? "เปลี่ยนภาพปก" : "เลือกภาพปก",
       onPsCoverPhoto: (e) => this.onPsCoverPhoto(e),
+      canCustomSocial: tier3, cannotCustomSocial: !tier3,
+      psPhotoThumbStyle: { width: "40px", height: "40px", borderRadius: "6px", background: `url('${this.state.ps_profilePhotoUrl}') center/cover`, border: "1px solid oklch(88% 0.01 70)", flexShrink: 0 },
+      socialFields: [
+        { icon: "📘", value: this.state.ps_fb, placeholder: "Facebook URL", onChange: (e) => this.setState({ ps_fb: e.target.value }) },
+        { icon: "🎵", value: this.state.ps_tiktok, placeholder: "TikTok URL", onChange: (e) => this.setState({ ps_tiktok: e.target.value }) },
+        { icon: "▶️", value: this.state.ps_youtube, placeholder: "YouTube URL", onChange: (e) => this.setState({ ps_youtube: e.target.value }) },
+        { icon: "📸", value: this.state.ps_instagram, placeholder: "Instagram URL", onChange: (e) => this.setState({ ps_instagram: e.target.value }) },
+      ],
       canCustomTheme: tier3, cannotCustomTheme: !tier3,
       themeOptions: this.THEME_COLORS.map((c) => ({
         swatchStyle: { width: "32px", height: "32px", borderRadius: "50%", background: c, cursor: "pointer", border: this.state.ps_themeColor === c ? "3px solid oklch(20% 0.02 60)" : "3px solid white", boxShadow: "0 0 0 1px oklch(85% 0.01 70)" },
