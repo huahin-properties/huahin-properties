@@ -21,6 +21,12 @@ service firebase.storage {
       // so this is intentionally a bit looser than the Firestore rule.
       allow write: if isAdmin() || request.auth != null;
     }
+    match /profilePhotos/{fileName} {
+      allow read: if true;
+      // Any signed-in lister can upload their own avatar/cover photo (used
+      // by Lister Dashboard profile settings → Agent Profile public page).
+      allow write: if isAdmin() || request.auth != null;
+    }
     match /{allPaths=**} {
       allow read: if true;
       allow write: if isAdmin();
