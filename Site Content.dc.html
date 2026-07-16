@@ -723,17 +723,27 @@ class Component extends DCLogic {
 
   async saveAccount() {
     try {
+      // Change the REAL Firebase Auth password first (if the admin typed a
+      // new one) — this is the credential adminSignIn actually checks.
+      if (this.state.accPassword && this.state.accPassword.trim()) {
+        await this._fb.updateAdminPassword(this.state.accPassword.trim());
+      }
       await this._fb.saveAdminCredentials({
         username: this.state.accUsername,
         password: this.state.accPassword,
         recoveryEmail: this.state.accEmail,
         recoveryPhone: this.state.accPhone,
       });
-      this.setState({ accMsg: "Saved." });
-      setTimeout(() => this.setState({ accMsg: "" }), 2500);
+      this.setState({ accMsg: "บันทึกแล้ว — รหัสผ่านนี้ใช้ล็อกอินได้จริงแล้ว" });
+      setTimeout(() => this.setState({ accMsg: "" }), 3500);
     } catch (e) {
       console.warn("Failed to save admin credentials:", e);
-      this.setState({ accMsg: "Save failed — try again." });
+      const needsRelogin = e && e.code === "auth/requires-recent-login";
+      this.setState({
+        accMsg: needsRelogin
+          ? "ต้องล็อกเอาต์แล้วล็อกอินใหม่ก่อน ถึงจะเปลี่ยนรหัสผ่านได้ (Firebase กันเรื่องความปลอดภัย)"
+          : "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง",
+      });
     }
   }
 

@@ -317,6 +317,20 @@ export async function saveAdminCredentials(fields) {
   await setDoc("settings", "admin", { ...existing, ...fields });
 }
 
+// Actually changes the real Firebase Auth password used by adminSignIn —
+// saveAdminCredentials() above only stores a display copy in Firestore and
+// never touched the real login credential, which caused "รหัสผ่านไม่ถูกต้อง"
+// confusion (the stored text didn't match what Firebase Auth actually
+// checks). Requires the admin to be currently signed in; Firebase may throw
+// auth/requires-recent-login if the session is old — caller should ask the
+// admin to log out/in again and retry in that case.
+export async function updateAdminPassword(newPassword) {
+  const a = authApp();
+  const user = a && a.currentUser;
+  if (!user) throw new Error("ต้องล็อกอินก่อนถึงจะเปลี่ยนรหัสผ่านได้");
+  await user.updatePassword(newPassword);
+}
+
 // ── Admin auth (real Firebase Authentication — Email/Password) ───────────
 // Replaces the old sessionStorage-flag placeholder. Every admin-only page
 // must load firebase-auth-compat.js in <helmet> alongside the other
