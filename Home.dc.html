@@ -318,6 +318,7 @@ class Component extends DCLogic {
       // onChange React listens to, leaving state stale/empty while the
       // input looks filled. This guarantees we send what's actually typed.
       const typedPassword = (this._gateInputEl && this._gateInputEl.value) || this.state.gatePassword;
+      console.log("DEBUG gate email:", JSON.stringify(email), "password:", JSON.stringify(typedPassword));
       await this._fb.adminSignIn(email, typedPassword);
       this._fb.setSiteBypass();
       this.setState({ showGate: false, gateError: "" });
