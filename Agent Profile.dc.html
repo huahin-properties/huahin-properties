@@ -49,7 +49,7 @@
         <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ propCountLabel }}</div>
       </div>      <div style="display:flex; gap:10px; padding-bottom:10px; flex-wrap:wrap; align-items:center;">
         <sc-for list="{{ socialIcons }}" as="s" hint-placeholder-count="0">
-          <a href="{{ s.url }}" target="_blank" style="{{ s.style }}">{{ s.icon }}</a>
+          <a href="{{ s.url }}" target="_blank" style="{{ s.style }}">{{ s.iconChar }}</a>
         </sc-for>
         <sc-if value="{{ hasPhone }}"><a href="{{ telHref }}" style="{{ contactBtnStyle }}">📞 ติดต่อ</a></sc-if>
         <div onClick="{{ onOpenShare }}" style="background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:10px 18px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">🔗 แชร์</div>
@@ -258,11 +258,11 @@ class Component extends DCLogic {
       displayName, propCountLabel: `${properties.length} รายการทรัพย์`,
       hasBio: !!(lister.bioText && lister.bioText.trim()), bioText: lister.bioText || "",
       socialIcons: [
-        { key: "facebook", icon: "📘", url: (lister.socialLinks && lister.socialLinks.facebook) || "" },
-        { key: "tiktok", icon: "🎵", url: (lister.socialLinks && lister.socialLinks.tiktok) || "" },
-        { key: "youtube", icon: "▶️", url: (lister.socialLinks && lister.socialLinks.youtube) || "" },
-        { key: "instagram", icon: "📸", url: (lister.socialLinks && lister.socialLinks.instagram) || "" },
-      ].filter((s) => s.url).map((s) => ({ ...s, style: { width: "38px", height: "38px", borderRadius: "50%", background: "white", border: "1px solid oklch(85% 0.01 70)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px" } })),
+        { key: "facebook", iconChar: "f", bg: "oklch(45% 0.15 260)", font: "Georgia,serif", url: (lister.socialLinks && lister.socialLinks.facebook) || "" },
+        { key: "tiktok", iconChar: "♪", bg: "oklch(20% 0.01 60)", font: "inherit", url: (lister.socialLinks && lister.socialLinks.tiktok) || "" },
+        { key: "youtube", iconChar: "▶", bg: "oklch(55% 0.22 25)", font: "inherit", url: (lister.socialLinks && lister.socialLinks.youtube) || "" },
+        { key: "instagram", iconChar: "◎", bg: "linear-gradient(135deg, oklch(70% 0.18 30), oklch(55% 0.2 340))", font: "inherit", url: (lister.socialLinks && lister.socialLinks.instagram) || "" },
+      ].filter((s) => s.url).map((s) => ({ ...s, style: { width: "38px", height: "38px", borderRadius: "50%", background: s.bg, color: "white", border: "1px solid oklch(85% 0.01 70)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", fontFamily: s.font } })),
       hasPhone: !!lister.phone, telHref: `tel:${lister.phone}`,
       contactBtnStyle: { background: theme, color: "white", padding: "10px 18px", borderRadius: "100px", fontSize: "13px", fontWeight: "600" },
       propCount: properties.length, hasNoProps: properties.length === 0, properties,
