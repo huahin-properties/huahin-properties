@@ -196,7 +196,7 @@ class Component extends DCLogic {
           method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ system, messages }),
         });
         const data = await res.json();
-        reply = data.reply || data.text || "ขออภัย ระบบไม่สามารถตอบได้ในขณะนี้";
+        reply = data.completion || data.reply || data.text || "ขออภัย ระบบไม่สามารถตอบได้ในขณะนี้";
       }
       this.setState((s) => ({ chatMessages: [...s.chatMessages, { role: "assistant", text: reply, bubbleStyle: this.bubbleStyle(false) }], chatThinking: false }));
       try {
