@@ -187,7 +187,7 @@ class Component extends DCLogic {
         bedrooms: p.bedrooms, bathrooms: p.bathrooms, livingArea: p.livingArea, description: p.description || "",
       }));
       const system = `${personaText}\n\nYou ONLY know about and may discuss these specific properties (JSON below) — never mention or invent any other property, and never mention huahin.properties' other listers/agents or site-wide data:\n${JSON.stringify(propsSummary)}\n\nAnswer in the customer's language. Be warm and helpful. If asked for contact info, give the phone/email above exactly as provided — never invent a different one.`;
-      const messages = history.map((m) => ({ role: m.role, content: m.text }));
+      const messages = history.slice(history.findIndex((m) => m.role === "user")).map((m) => ({ role: m.role, content: m.text }));
       let reply;
       if (window.claude && window.claude.complete) {
         reply = await window.claude.complete({ system, messages, model: "claude-haiku-4-5", max_tokens: 400 });
