@@ -51,8 +51,71 @@
           <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">แพ็กเกจปัจจุบันของคุณ</div>
           <div style="font-size:16px; font-weight:600; color:oklch(25% 0.02 60);">{{ tierLabel }}</div>
         </div>
-        <a href="Lister Billing.dc.html" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:11px 22px; border-radius:100px; font-size:13px; font-weight:600; text-decoration:none; white-space:nowrap;">📦 ดู/อัปเกรดแพ็กเกจ</a>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <div onClick="{{ onOpenMySite }}" style="background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:11px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;">🌐 เว็บไซต์ของฉัน</div>
+          <div onClick="{{ onShareMySite }}" style="background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:11px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;">🔗 แชร์เว็บไซต์</div>
+          <a href="Lister Billing.dc.html" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:11px 22px; border-radius:100px; font-size:13px; font-weight:600; text-decoration:none; white-space:nowrap;">📦 ดู/อัปเกรดแพ็กเกจ</a>
+        </div>
       </div>
+
+      <div style="background:white; border-radius:8px; padding:20px 22px; margin-bottom:22px;">
+        <div onClick="{{ onToggleProfileSettings }}" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+          <div style="font-size:14px; font-weight:600; color:oklch(25% 0.02 60);">⚙️ ตั้งค่าเว็บไซต์ส่วนตัวของฉัน</div>
+          <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ profileSettingsToggleLabel }}</div>
+        </div>
+        <sc-if value="{{ showProfileSettings }}">
+          <div style="margin-top:18px; display:flex; flex-direction:column; gap:16px;">
+            <div style="font-size:12px; color:oklch(50% 0.02 60); line-height:1.6;">ตั้งค่านี้ใช้กับเว็บไซต์ส่วนตัวของคุณเท่านั้น (หน้าที่รวมทรัพย์ทั้งหมดของคุณ แชร์ให้ลูกค้าดูได้) ไม่กระทบประกาศในเว็บหลัก</div>
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ชื่อที่แสดงให้ลูกค้าเห็น</div>
+              <input value="{{ ps_displayName }}" onChange="{{ onPsDisplayName }}" style="width:100%; max-width:360px; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+            </div>
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รูปโปรไฟล์ (โลโก้/รูปของคุณ)</div>
+              <label style="display:inline-flex; align-items:center; gap:8px; border:1px dashed oklch(80% 0.02 60); border-radius:6px; padding:9px 14px; cursor:pointer; font-size:13px; color:oklch(45% 0.02 60);">
+                <input type="file" accept="image/*" onChange="{{ onPsProfilePhoto }}" style="display:none;" />
+                📷 {{ ps_profilePhotoLabel }}
+              </label>
+            </div>
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">🤖 บุคลิก AI ผู้ช่วยของคุณ</div>
+              <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:8px; line-height:1.6;">สิ่งที่คุณกรอกตรงนี้ AI จะนำไปใช้ตอบลูกค้าที่ทักเข้ามาในเว็บไซต์ส่วนตัวของคุณ — เช่น บอกชื่อคุณ, เวลาที่ติดต่อได้, น้ำเสียงการตอบ ฯลฯ ถ้าไม่กรอก AI จะใช้ชื่อ+เบอร์ติดต่อของคุณจากตอนสมัครแทน</div>
+              <textarea rows="4" value="{{ ps_aiPersonaText }}" onChange="{{ onPsAiPersonaText }}" placeholder="{{ ps_aiPersonaPlaceholder }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical;"></textarea>
+            </div>
+
+            <sc-if value="{{ canCustomCover }}">
+              <div>
+                <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ภาพปก (เหมือน Facebook cover)</div>
+                <label style="display:inline-flex; align-items:center; gap:8px; border:1px dashed oklch(80% 0.02 60); border-radius:6px; padding:9px 14px; cursor:pointer; font-size:13px; color:oklch(45% 0.02 60);">
+                  <input type="file" accept="image/*" onChange="{{ onPsCoverPhoto }}" style="display:none;" />
+                  🖼️ {{ ps_coverPhotoLabel }}
+                </label>
+              </div>
+            </sc-if>
+            <sc-if value="{{ cannotCustomCover }}">
+              <div style="font-size:11.5px; color:oklch(55% 0.02 60);">🔒 เปลี่ยนภาพปกได้ตั้งแต่ระดับ 2 ขึ้นไป — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a></div>
+            </sc-if>
+
+            <sc-if value="{{ canCustomTheme }}">
+              <div>
+                <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">สีธีมเว็บไซต์ของคุณ</div>
+                <div style="display:flex; gap:10px;">
+                  <sc-for list="{{ themeOptions }}" as="c" hint-placeholder-count="4">
+                    <div onClick="{{ c.onSelect }}" style="{{ c.swatchStyle }}"></div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ cannotCustomTheme }}">
+              <div style="font-size:11.5px; color:oklch(55% 0.02 60);">🔒 เปลี่ยนสีธีมได้ในระดับ 3 — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a></div>
+            </sc-if>
+
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div onClick="{{ onSaveProfileSettings }}" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:10px 22px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">{{ ps_saveLabel }}</div>
+              <sc-if value="{{ ps_saveMsg }}"><div style="font-size:12px; color:oklch(45% 0.13 145);">{{ ps_saveMsg }}</div></sc-if>
+            </div>
+          </div>
+        </sc-if>
 
       <sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
@@ -81,10 +144,7 @@
           <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px;">
             <sc-for list="{{ properties }}" as="p" hint-placeholder-count="0">
               <div style="background:white; border-radius:8px; overflow:hidden; border:1px solid oklch(92% 0.01 70);">
-                <div style="width:100%; height:140px; background:oklch(93% 0.01 70); position:relative;">
-                  <sc-if value="{{ p.coverUrl }}" hint-placeholder-val="{{ false }}">
-                    <img src="{{ p.coverUrl }}" style="width:100%; height:100%; object-fit:cover; display:block;" />
-                  </sc-if>
+                <div style="{{ p.coverStyle }}">
                   <sc-if value="{{ p.noCover }}">
                     <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:30px; color:oklch(75% 0.01 70);">🏠</div>
                   </sc-if>
@@ -120,10 +180,7 @@
           <div style="display:flex; flex-direction:column; gap:10px;">
             <sc-for list="{{ properties }}" as="p" hint-placeholder-count="0">
               <div style="background:white; border-radius:8px; border:1px solid oklch(92% 0.01 70); display:flex; align-items:stretch; overflow:hidden;">
-                <div style="width:110px; min-width:110px; height:88px; background:oklch(93% 0.01 70); position:relative;">
-                  <sc-if value="{{ p.coverUrl }}" hint-placeholder-val="{{ false }}">
-                    <img src="{{ p.coverUrl }}" style="width:100%; height:100%; object-fit:cover; display:block;" />
-                  </sc-if>
+                <div style="{{ p.coverStyleSmall }}">
                   <sc-if value="{{ p.noCover }}">
                     <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:24px; color:oklch(75% 0.01 70);">🏠</div>
                   </sc-if>
@@ -162,14 +219,12 @@
             <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">รูปภาพ (สูงสุด {{ photoLimit }} รูปตามแพ็กเกจของคุณ — รูปแรกเป็นภาพปก)</div>
             <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
               <sc-for list="{{ existingPhotos }}" as="ph" hint-placeholder-count="0">
-                <div style="position:relative; width:90px; height:68px; border-radius:6px; overflow:hidden; background:oklch(93% 0.01 70);">
-                  <sc-if value="{{ ph.url }}" hint-placeholder-val="{{ false }}"><img src="{{ ph.url }}" style="width:100%; height:100%; object-fit:cover; display:block;" /></sc-if>
+                <div style="{{ ph.thumbStyle }}">
                   <div onClick="{{ ph.onRemove }}" style="position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%; background:rgba(0,0,0,0.6); color:white; font-size:11px; display:flex; align-items:center; justify-content:center; cursor:pointer;">×</div>
                 </div>
               </sc-for>
               <sc-for list="{{ newPhotos }}" as="np" hint-placeholder-count="0">
-                <div style="position:relative; width:90px; height:68px; border-radius:6px; overflow:hidden; background:oklch(93% 0.01 70);">
-                  <sc-if value="{{ np.url }}" hint-placeholder-val="{{ false }}"><img src="{{ np.url }}" style="width:100%; height:100%; object-fit:cover; display:block;" /></sc-if>
+                <div style="{{ np.thumbStyle }}">
                   <div onClick="{{ np.onRemove }}" style="position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%; background:rgba(0,0,0,0.6); color:white; font-size:11px; display:flex; align-items:center; justify-content:center; cursor:pointer;">×</div>
                 </div>
               </sc-for>
@@ -322,7 +377,11 @@ class Component extends DCLogic {
     savedId: "", savedPayload: null, ns_assistedSale: false, ns_commissionPct: "5",
     nudgeSaving: false, nudgeSavedMsg: "", copyLabel: "คัดลอกข้อความ",
     shareId: "", shareUrl: "", shareCopyLabel: "คัดลอกลิงก์", quotaMsg: "", listLayout: "list",
+    showProfileSettings: false, ps_displayName: "", ps_profilePhotoUrl: "", ps_coverPhotoUrl: "",
+    ps_aiPersonaText: "", ps_themeColor: "", ps_saving: false, ps_saveMsg: "",
   };
+
+  THEME_COLORS = ["oklch(40% 0.13 25)", "oklch(45% 0.1 145)", "oklch(40% 0.12 250)", "oklch(55% 0.14 75)"];
 
   async componentDidMount() {
     const fb = await import("./firebase-client.js");
@@ -336,7 +395,12 @@ class Component extends DCLogic {
       const lister = await fb.fetchMyListerDoc();
       if (!lister) { this.setState({ loaded: true, signedIn: false }); return; }
       const properties = await this.loadPropertiesWithCovers(lister.id);
-      this.setState({ loaded: true, signedIn: true, lister, properties });
+      this.setState({
+        loaded: true, signedIn: true, lister, properties,
+        ps_displayName: lister.displayName || lister.name || "",
+        ps_profilePhotoUrl: lister.profilePhotoUrl || "", ps_coverPhotoUrl: lister.coverPhotoUrl || "",
+        ps_aiPersonaText: lister.aiPersonaText || "", ps_themeColor: lister.themeColor || "",
+      });
     } catch (e) {
       console.warn("Failed to load dashboard:", e);
       this.setState({ loaded: true, signedIn: true, lister: null, properties: [] });
@@ -591,6 +655,53 @@ class Component extends DCLogic {
     this.setState({ view: this.state.view, shareId: p.id, shareUrl: url, shareCopyLabel: "คัดลอกลิงก์", showShareFlag: true });
   }
 
+  async onPsProfilePhoto(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const dataUrl = await this._fb.fileToDataUrl(file, 500);
+    const slotId = "lister-avatar-" + this.state.lister.id;
+    try {
+      await this._fb.saveProfilePhoto(slotId, dataUrl);
+      this.setState({ ps_profilePhotoUrl: dataUrl });
+    } catch (e2) { console.warn("Failed to save profile photo:", e2); }
+  }
+
+  async onPsCoverPhoto(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const dataUrl = await this._fb.fileToDataUrl(file, 1400);
+    const slotId = "lister-cover-" + this.state.lister.id;
+    try {
+      await this._fb.saveProfilePhoto(slotId, dataUrl);
+      this.setState({ ps_coverPhotoUrl: dataUrl });
+    } catch (e2) { console.warn("Failed to save cover photo:", e2); }
+  }
+
+  async saveProfileSettings() {
+    if (this.state.ps_saving) return;
+    this.setState({ ps_saving: true, ps_saveMsg: "" });
+    const merged = {
+      ...this.state.lister,
+      displayName: this.state.ps_displayName, profilePhotoUrl: this.state.ps_profilePhotoUrl,
+      coverPhotoUrl: this.state.ps_coverPhotoUrl, aiPersonaText: this.state.ps_aiPersonaText,
+      themeColor: this.state.ps_themeColor,
+    };
+    try {
+      await this._fb.setDoc("listers", this.state.lister.id, merged);
+      this.setState({ ps_saving: false, ps_saveMsg: "บันทึกแล้ว ✓", lister: merged });
+      setTimeout(() => this.setState({ ps_saveMsg: "" }), 2000);
+    } catch (e) {
+      this.setState({ ps_saving: false, ps_saveMsg: "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง" });
+    }
+  }
+
+  openMySite() { window.open(`Agent Profile.dc.html?id=${this.state.lister.id}`, "_blank"); }
+
+  shareMySite() {
+    const url = `${window.location.origin}/Agent Profile.dc.html?id=${this.state.lister.id}`;
+    this.setState({ shareId: "เว็บไซต์ของฉัน", shareUrl: url, shareCopyLabel: "คัดลอกลิงก์", showShareFlag: true });
+  }
+
   copyShareLink() {
     if (navigator.clipboard) navigator.clipboard.writeText(this.state.shareUrl).catch(() => {});
     this.setState({ shareCopyLabel: "คัดลอกแล้ว ✓" });
@@ -601,6 +712,8 @@ class Component extends DCLogic {
     const mod = this._mod;
     const tierLabels = { basic: "① ฟรี", pro: "② Premium", agency: "② Premium", level3: "③ ระดับ 3", silver: "🥈 VIP เงิน", gold: "🥇 VIP ทอง", diamond: "💎 VIP เพชร" };
     const lister = this.state.lister || {};
+    const tier2Plus = lister.tier === "pro" || lister.tier === "agency" || lister.tier === "level3";
+    const tier3 = lister.tier === "level3";
     const areaLabels = { "hua-hin": "หัวหิน", "pranburi": "ปราณบุรี", "cha-am": "ชะอำ" };
     const typeLabels = { villa: "พูลวิลล่า", house: "บ้านเดี่ยว", condo: "คอนโด", land: "ที่ดิน", commercial: "อาคารพาณิชย์" };
     const statusMap = {
@@ -623,6 +736,8 @@ class Component extends DCLogic {
         assistedSale: !!p.assistedSale,
         needsNudge: !p.assistedSale && ageDays > 30 && (p.status === "sale" || p.status === "rent"),
         coverUrl: p.coverUrl, noCover: !p.coverUrl,
+        coverStyle: { width: "100%", height: "140px", background: p.coverUrl ? `url('${p.coverUrl}') center/cover` : "oklch(93% 0.01 70)", position: "relative" },
+        coverStyleSmall: { width: "110px", minWidth: "110px", height: "88px", background: p.coverUrl ? `url('${p.coverUrl}') center/cover` : "oklch(93% 0.01 70)", position: "relative" },
         isDraft: !!p.isDraft,
         publishIcon: p.isDraft ? "📤" : "✅",
         publishLabel: p.isDraft ? "โพสต์" : "โพสต์แล้ว",
@@ -667,8 +782,8 @@ class Component extends DCLogic {
       f_livingArea: this.state.f_livingArea, onFLivingArea: (e) => this.setState({ f_livingArea: e.target.value }),
       f_landSize: this.state.f_landSize, onFLandSize: (e) => this.setState({ f_landSize: e.target.value }),
       f_description: this.state.f_description, onFDescription: (e) => this.setState({ f_description: e.target.value }),
-      existingPhotos: this.state.existingPhotos.map((ph) => ({ ...ph, onRemove: () => this.removeExistingPhoto(ph) })),
-      newPhotos: this.state.newPhotos.map((np, i) => ({ ...np, onRemove: () => this.removeNewPhoto(i) })),
+      existingPhotos: this.state.existingPhotos.map((ph) => ({ ...ph, thumbStyle: { position: "relative", width: "90px", height: "68px", borderRadius: "6px", overflow: "hidden", background: ph.url ? `url('${ph.url}') center/cover` : "oklch(93% 0.01 70)" }, onRemove: () => this.removeExistingPhoto(ph) })),
+      newPhotos: this.state.newPhotos.map((np, i) => ({ ...np, thumbStyle: { position: "relative", width: "90px", height: "68px", borderRadius: "6px", overflow: "hidden", background: np.url ? `url('${np.url}') center/cover` : "oklch(93% 0.01 70)" }, onRemove: () => this.removeNewPhoto(i) })),
       canAddPhoto: this.totalPhotoCount() < this.myPhotoLimit(),
       photoCount: this.totalPhotoCount(),
       photoLimit: this.myPhotoLimit(),
@@ -706,6 +821,27 @@ class Component extends DCLogic {
       stopProp: (e) => e.stopPropagation(),
       onCopyShareLink: () => this.copyShareLink(),
       shareCopyLabel: this.state.shareCopyLabel,
+      onOpenMySite: () => this.openMySite(),
+      onShareMySite: () => this.shareMySite(),
+      showProfileSettings: this.state.showProfileSettings,
+      profileSettingsToggleLabel: this.state.showProfileSettings ? "ซ่อน ▲" : "แก้ไข ▼",
+      onToggleProfileSettings: () => this.setState((s) => ({ showProfileSettings: !s.showProfileSettings })),
+      ps_displayName: this.state.ps_displayName, onPsDisplayName: (e) => this.setState({ ps_displayName: e.target.value }),
+      ps_profilePhotoLabel: this.state.ps_profilePhotoUrl ? "เปลี่ยนรูป" : "เลือกรูป",
+      onPsProfilePhoto: (e) => this.onPsProfilePhoto(e),
+      ps_aiPersonaText: this.state.ps_aiPersonaText, onPsAiPersonaText: (e) => this.setState({ ps_aiPersonaText: e.target.value }),
+      ps_aiPersonaPlaceholder: `เช่น: ฉันชื่อ ${lister.name || "___"} ติดต่อได้ทุกวัน 9:00-20:00 พูดสุภาพเป็นกันเอง`,
+      canCustomCover: tier2Plus, cannotCustomCover: !tier2Plus,
+      ps_coverPhotoLabel: this.state.ps_coverPhotoUrl ? "เปลี่ยนภาพปก" : "เลือกภาพปก",
+      onPsCoverPhoto: (e) => this.onPsCoverPhoto(e),
+      canCustomTheme: tier3, cannotCustomTheme: !tier3,
+      themeOptions: this.THEME_COLORS.map((c) => ({
+        swatchStyle: { width: "32px", height: "32px", borderRadius: "50%", background: c, cursor: "pointer", border: this.state.ps_themeColor === c ? "3px solid oklch(20% 0.02 60)" : "3px solid white", boxShadow: "0 0 0 1px oklch(85% 0.01 70)" },
+        onSelect: () => this.setState({ ps_themeColor: c }),
+      })),
+      onSaveProfileSettings: () => this.saveProfileSettings(),
+      ps_saveLabel: this.state.ps_saving ? "กำลังบันทึก…" : "บันทึกการตั้งค่า",
+      ps_saveMsg: this.state.ps_saveMsg,
     };
   }
 }

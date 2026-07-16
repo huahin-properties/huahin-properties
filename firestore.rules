@@ -124,6 +124,15 @@ service cloud.firestore {
     // password fallback.
     match /settings/{id} { allow read, write: if isAdmin(); }
 
+    // Per-lister chat leads captured on their own Agent Profile page (scoped
+    // AI chat widget) — anyone can create one (that's the point), only the
+    // owning lister or admin can read them back.
+    match /listerLeads/{id} {
+      allow create: if true;
+      allow read: if isAdmin() || (request.auth != null && resource.data.listerId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
     // Default deny for anything not explicitly listed above.
     match /{document=**} { allow read, write: if false; }
   }
