@@ -645,6 +645,8 @@ class Component extends DCLogic {
         if (translated) descriptionValue = translated;
       } catch (e) { console.warn("Auto-translate failed, saving original text only:", e); }
     }
+    const isEditingExisting = !!this.state.editingId;
+    const previousIsDraft = isEditingExisting ? (this.state.properties.find((p) => p.id === id) || {}).isDraft : true;
     const payload = {
       listerId: this.state.lister.id,
       type: this.state.f_type, area: this.state.f_area, zone: this.state.f_zone,
@@ -654,7 +656,11 @@ class Component extends DCLogic {
       livingArea: this.state.f_livingArea ? Number(this.state.f_livingArea) : null,
       landSize: this.state.f_landSize ? Number(this.state.f_landSize) : null,
       description: descriptionValue,
-      currency: "THB", updatedAt: Date.now(), isDraft: true,
+      // Only brand-new listings start as a draft — editing an already-
+      // published property must NOT silently un-publish it (this was a real
+      // bug: isDraft was hardcoded true on every save, pulling live listings
+      // back off the public site the moment an agent edited them).
+      currency: "THB", updatedAt: Date.now(), isDraft: previousIsDraft === undefined ? true : previousIsDraft,
       photos: allPhotoUrls.map(() => ({ label: "" })),
     };
     try {

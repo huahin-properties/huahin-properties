@@ -617,7 +617,15 @@ export async function translateDescriptionAll(text) {
   try {
     const cleaned = raw.replace(/```json/gi, "").replace(/```/g, "").trim();
     const match = cleaned.match(/\{[\s\S]*\}/);
-    return JSON.parse(match ? match[0] : cleaned);
+    const parsed = JSON.parse(match ? match[0] : cleaned);
+    // Firestore rejects any field with an `undefined` value — guarantee all
+    // 8 keys are always present (falling back to the original text for any
+    // language the AI happened to skip) so a partial AI response can never
+    // corrupt the save.
+    const LANGS = ["th", "en", "ru", "zh", "de", "no", "fr", "it"];
+    const safe = {};
+    LANGS.forEach((l) => { safe[l] = (parsed && parsed[l]) || text; });
+    return safe;
   } catch (e) {
     console.warn("translateDescriptionAll: failed to parse AI response", e);
     return null;
