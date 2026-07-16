@@ -79,7 +79,7 @@
 
         <sc-if value="{{ isGridLayout }}">
           <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px;">
-            <sc-for list="{{ properties }}" as="p" hint-placeholder-count="2">
+            <sc-for list="{{ properties }}" as="p" hint-placeholder-count="0">
               <div style="background:white; border-radius:8px; overflow:hidden; border:1px solid oklch(92% 0.01 70);">
                 <div style="width:100%; height:140px; background:oklch(93% 0.01 70); position:relative;">
                   <sc-if value="{{ p.coverUrl }}" hint-placeholder-val="{{ false }}">
@@ -118,7 +118,7 @@
 
         <sc-if value="{{ isListLayout }}" hint-placeholder-val="{{ true }}">
           <div style="display:flex; flex-direction:column; gap:10px;">
-            <sc-for list="{{ properties }}" as="p" hint-placeholder-count="2">
+            <sc-for list="{{ properties }}" as="p" hint-placeholder-count="0">
               <div style="background:white; border-radius:8px; border:1px solid oklch(92% 0.01 70); display:flex; align-items:stretch; overflow:hidden;">
                 <div style="width:110px; min-width:110px; height:88px; background:oklch(93% 0.01 70); position:relative;">
                   <sc-if value="{{ p.coverUrl }}" hint-placeholder-val="{{ false }}">
@@ -159,7 +159,7 @@
           </div>
 
           <div style="margin-bottom:18px;">
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">รูปภาพ (สูงสุด 10 รูป — รูปแรกเป็นภาพปก)</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">รูปภาพ (สูงสุด {{ photoLimit }} รูปตามแพ็กเกจของคุณ — รูปแรกเป็นภาพปก)</div>
             <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
               <sc-for list="{{ existingPhotos }}" as="ph" hint-placeholder-count="0">
                 <div style="position:relative; width:90px; height:68px; border-radius:6px; overflow:hidden; background:oklch(93% 0.01 70);">
@@ -177,7 +177,7 @@
             <sc-if value="{{ canAddPhoto }}">
               <label style="display:inline-flex; align-items:center; gap:8px; border:1px dashed oklch(80% 0.02 60); border-radius:6px; padding:10px 16px; cursor:pointer; font-size:13px; color:oklch(45% 0.02 60);">
                 <input type="file" accept="image/*" multiple="multiple" onChange="{{ onPhotosFile }}" style="display:none;" />
-                📷 เพิ่มรูป ({{ photoCount }}/10)
+                📷 เพิ่มรูป ({{ photoCount }}/{{ photoLimit }})
               </label>
             </sc-if>
           </div>
@@ -269,9 +269,24 @@
             <sc-if value="{{ nudgeSavedMsg }}"><div style="font-size:12px; color:oklch(45% 0.13 145);">{{ nudgeSavedMsg }}</div></sc-if>
           </div>
 
-          <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:8px;">📝 ข้อความสำหรับโพสต์ขาย (คัดลอกไปวางที่ Facebook/LINE ได้เลย)</div>
-          <textarea readonly="readonly" rows="10" value="{{ postDraft }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:12px 14px; font-size:13px; font-family:inherit; resize:vertical; background:oklch(98% 0.005 80); margin-bottom:10px;"></textarea>
-          <div onClick="{{ onCopyPost }}" style="display:inline-block; background:oklch(22% 0.02 60); color:white; padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">📋 {{ copyLabel }}</div>
+          <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:8px;">🤖 ข้อความสำหรับโพสต์ขาย — ร่างด้วย AI พร้อมคีย์เวิร์ด SEO และช่องทางติดต่อของเว็บให้อัตโนมัติ ไม่ต้องคิดเอง</div>
+
+          <sc-if value="{{ hasGenerated }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:8px;">การเจนครั้งที่ {{ ns_genCount }} จาก {{ genLimit }} ครั้งที่ใช้ได้กับรายการนี้ (ตามแพ็กเกจ)</div>
+            <textarea readonly="readonly" rows="10" value="{{ postDraft }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:12px 14px; font-size:13px; font-family:inherit; resize:vertical; background:oklch(98% 0.005 80); margin-bottom:10px;"></textarea>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <div onClick="{{ onCopyPost }}" style="display:inline-block; background:oklch(22% 0.02 60); color:white; padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">📋 {{ copyLabel }}</div>
+              <sc-if value="{{ canRegenerate }}">
+                <div onClick="{{ onGeneratePost }}" style="display:inline-block; background:white; border:1px solid oklch(80% 0.02 60); color:oklch(35% 0.02 60); padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">🔄 เจนใหม่ (เหลือ {{ genRemaining }} ครั้ง)</div>
+              </sc-if>
+              <sc-if value="{{ quotaReached }}">
+                <div style="background:oklch(96% 0.06 60); border:1px solid oklch(80% 0.1 60); border-radius:6px; padding:10px 14px; font-size:12.5px; color:oklch(35% 0.1 40);">⚠️ ใช้โควตาการเจนข้อความ AI ของรายการนี้ครบแล้วตามแพ็กเกจ ({{ genLimit }} ครั้ง) — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a> เพื่อเจนเพิ่มได้อีก</div>
+              </sc-if>
+            </div>
+          </sc-if>
+          <sc-if value="{{ notGenerated }}">
+            <div onClick="{{ onGeneratePost }}" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:12px 24px; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer;">🤖 เจนข้อความโพสต์ด้วย AI</div>
+          </sc-if>
         </div>
       </sc-if>
 
@@ -347,6 +362,14 @@ class Component extends DCLogic {
     return { basic: 1, pro: 5, agency: 5, level3: 15 }[tier] || 1;
   }
 
+  photoLimit(tier) {
+    return { basic: 10, pro: 15, agency: 15, level3: 20 }[tier] || 10;
+  }
+
+  aiGenLimit(tier) {
+    return { basic: 1, pro: 5, agency: 5, level3: 10 }[tier] || 1;
+  }
+
   async loadPropertiesWithCovers(listerId) {
     const properties = await this._fb.fetchWhere("properties", "listerId", listerId);
     return Promise.all(properties.map(async (p) => {
@@ -403,10 +426,12 @@ class Component extends DCLogic {
 
   totalPhotoCount() { return this.state.existingPhotos.length + this.state.newPhotos.length; }
 
+  myPhotoLimit() { return this.photoLimit((this.state.lister || {}).tier); }
+
   async onPhotosFile(e) {
     const files = [...(e.target.files || [])];
     if (!files.length) return;
-    const room = 10 - this.totalPhotoCount();
+    const room = this.myPhotoLimit() - this.totalPhotoCount();
     const use = files.slice(0, Math.max(0, room));
     for (const file of use) {
       const dataUrl = await this._fb.fileToDataUrl(file, 1000);
@@ -430,7 +455,7 @@ class Component extends DCLogic {
     }
     this.setState({ saving: true, saveError: "" });
     const id = this.state.editingId || this.genCode(this.state.f_area);
-    const allPhotoUrls = [...this.state.existingPhotos.map((p) => p.url), ...this.state.newPhotos.map((p) => p.url)].slice(0, 10);
+    const allPhotoUrls = [...this.state.existingPhotos.map((p) => p.url), ...this.state.newPhotos.map((p) => p.url)].slice(0, this.myPhotoLimit());
     const payload = {
       listerId: this.state.lister.id,
       type: this.state.f_type, area: this.state.f_area, zone: this.state.f_zone,
@@ -449,7 +474,7 @@ class Component extends DCLogic {
       // re-fetches+re-uploads even already-hosted URLs, which is fine since
       // Storage download URLs are publicly fetchable.
       await Promise.all(allPhotoUrls.map((url, i) => this._fb.savePhoto(id, i, url)));
-      for (let i = allPhotoUrls.length; i < 10; i++) {
+      for (let i = allPhotoUrls.length; i < 20; i++) {
         try { await this._fb.deleteDocById("propertyPhotos", `${id}-${i}`); } catch (e) {}
       }
       await this.refreshProperties();
@@ -462,11 +487,16 @@ class Component extends DCLogic {
   }
 
   async togglePublish(p) {
+    const willPublish = !!p.isDraft;
     const merged = { ...p, isDraft: !p.isDraft };
     delete merged.coverUrl;
     try {
       await this._fb.setDoc("properties", p.id, merged);
       await this.refreshProperties();
+      // Publishing opens the real public listing page in a new tab — same
+      // page/template admin-posted listings use, so the lister sees exactly
+      // what buyers see (incl. the share button) right away.
+      if (willPublish) window.open(`Property Details.dc.html?id=${p.id}`, "_blank");
     } catch (e) { console.warn("Failed to publish:", e); }
   }
 
@@ -475,7 +505,18 @@ class Component extends DCLogic {
     this.setState({
       view: "saved", savedId: p.id, savedPayload: p,
       ns_assistedSale: !!p.assistedSale, ns_commissionPct: p.commissionPct || "5", nudgeSavedMsg: "",
+      ns_genCount: p.aiGenCount || 0,
     });
+  }
+
+  async generatePostText() {
+    const limit = this.aiGenLimit((this.state.lister || {}).tier);
+    if (this.state.ns_genCount >= limit || !this.state.savedPayload) return;
+    const nextCount = this.state.ns_genCount + 1;
+    const merged = { ...this.state.savedPayload, aiGenCount: nextCount };
+    delete merged.coverUrl;
+    this.setState({ ns_genCount: nextCount, savedPayload: merged });
+    try { await this._fb.setDoc("properties", this.state.savedId, merged); } catch (e) { console.warn("Failed to save gen count:", e); }
   }
 
   async confirmNudge() {
@@ -612,8 +653,9 @@ class Component extends DCLogic {
       f_description: this.state.f_description, onFDescription: (e) => this.setState({ f_description: e.target.value }),
       existingPhotos: this.state.existingPhotos.map((ph) => ({ ...ph, onRemove: () => this.removeExistingPhoto(ph) })),
       newPhotos: this.state.newPhotos.map((np, i) => ({ ...np, onRemove: () => this.removeNewPhoto(i) })),
-      canAddPhoto: this.totalPhotoCount() < 10,
+      canAddPhoto: this.totalPhotoCount() < this.myPhotoLimit(),
       photoCount: this.totalPhotoCount(),
+      photoLimit: this.myPhotoLimit(),
       onPhotosFile: (e) => this.onPhotosFile(e),
       saveLabel: this.state.saving ? "กำลังบันทึก…" : "บันทึกแบบร่าง",
       onSaveProperty: () => this.saveProperty(),
@@ -629,6 +671,14 @@ class Component extends DCLogic {
       postDraft: this.buildPostDraft(),
       onCopyPost: () => this.copyPost(),
       copyLabel: this.state.copyLabel,
+      hasGenerated: (this.state.ns_genCount || 0) > 0,
+      notGenerated: !((this.state.ns_genCount || 0) > 0),
+      ns_genCount: this.state.ns_genCount || 0,
+      genLimit: this.aiGenLimit(lister.tier),
+      genRemaining: Math.max(0, this.aiGenLimit(lister.tier) - (this.state.ns_genCount || 0)),
+      canRegenerate: (this.state.ns_genCount || 0) < this.aiGenLimit(lister.tier),
+      quotaReached: (this.state.ns_genCount || 0) >= this.aiGenLimit(lister.tier),
+      onGeneratePost: () => this.generatePostText(),
       showShare: !!this.state.showShareFlag,
       shareId: this.state.shareId, shareUrl: this.state.shareUrl,
       shareFbUrl: "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(this.state.shareUrl),

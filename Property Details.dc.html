@@ -110,6 +110,7 @@
       <div style="{{ heroPhotoStyle }}">
         <div style="position:absolute; top:14px; left:14px; background:{{ p.statusColor }}; color:oklch(99% 0.005 80); font-size:12px; font-weight:600; padding:5px 14px; border-radius:100px; pointer-events:none;">{{ p.statusLabel }}</div>
         <div onClick="{{ onToggleFav }}" title="{{ favTitle }}" style="position:absolute; top:14px; right:14px; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; font-size:19px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15); z-index:2;">{{ favIcon }}</div>
+        <div onClick="{{ onOpenShare }}" title="แชร์ประกาศ" style="position:absolute; top:14px; right:58px; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15); z-index:2;">🔗</div>
         <div style="position:absolute; bottom:14px; right:14px; font-family:monospace; font-size:11px; font-weight:600; letter-spacing:0.02em; color:oklch(20% 0.02 60); background:rgba(255,255,255,0.8); padding:4px 10px; border-radius:100px; pointer-events:none;">{{ p.propertyId }}</div>
         <sc-if value="{{ activePhotoNoPhoto }}">
           <div style="position:absolute; bottom:14px; left:14px; font-family:monospace; font-size:12px; color:oklch(20% 0.02 60 / 0.8); background:rgba(255,255,255,0.7); padding:5px 10px; border-radius:4px; pointer-events:none;">[{{ activePhotoLabel }}]</div>
@@ -220,6 +221,21 @@
 
 <sc-if value="{{ showChrome }}"><dc-import name="ContactRail" current-property-id="{{ currentPropertyId }}" hint-size="0,0"></dc-import></sc-if>
 
+<sc-if value="{{ showShare }}">
+  <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:200;" onClick="{{ onCloseShare }}">
+    <div style="background:white; border-radius:10px; padding:24px; width:min(360px,90vw);" onClick="{{ stopProp }}">
+      <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:6px;">แชร์ประกาศ {{ p.propertyId }}</div>
+      <div style="font-size:12px; color:oklch(50% 0.02 60); word-break:break-all; margin-bottom:16px;">{{ shareUrl }}</div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <a href="{{ shareFbUrl }}" target="_blank" style="display:block; text-align:center; background:oklch(35% 0.1 250); color:white; padding:11px; border-radius:6px; font-size:13px; text-decoration:none;">แชร์ไป Facebook</a>
+        <a href="{{ shareLineUrl }}" target="_blank" style="display:block; text-align:center; background:oklch(55% 0.15 145); color:white; padding:11px; border-radius:6px; font-size:13px; text-decoration:none;">แชร์ไป LINE</a>
+        <div onClick="{{ onCopyShareLink }}" style="text-align:center; background:oklch(93% 0.01 70); color:oklch(30% 0.02 60); padding:11px; border-radius:6px; font-size:13px; cursor:pointer;">📋 {{ shareCopyLabel }}</div>
+      </div>
+      <div onClick="{{ onCloseShare }}" style="text-align:center; margin-top:16px; font-size:12px; color:oklch(50% 0.02 60); cursor:pointer;">ปิด</div>
+    </div>
+  </div>
+</sc-if>
+
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
@@ -235,6 +251,7 @@ class Component extends DCLogic {
     filledPhotoIds: null,
     filterReady: false,
     showGate: false, gatePassword: "", gateError: "",
+    showShare: false, shareCopyLabel: "คัดลอกลิงก์",
   };
 
   async componentDidMount() {
@@ -445,6 +462,20 @@ class Component extends DCLogic {
       currentPropertyId: raw.id,
       favIcon: this.state.isFav ? "⭐" : "☆",
       favTitle: this.state.isFav ? "นำออกจากรายการโปรด" : "บันทึกไว้ในรายการโปรด",
+      showShare: this.state.showShare,
+      shareUrl: `${typeof window !== "undefined" ? window.location.origin : ""}/Property Details.dc.html?id=${this._id}`,
+      shareFbUrl: "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(`${typeof window !== "undefined" ? window.location.origin : ""}/Property Details.dc.html?id=${this._id}`),
+      shareLineUrl: "https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(`${typeof window !== "undefined" ? window.location.origin : ""}/Property Details.dc.html?id=${this._id}`),
+      onOpenShare: () => this.setState({ showShare: true }),
+      onCloseShare: () => this.setState({ showShare: false }),
+      stopProp: (e) => e.stopPropagation(),
+      shareCopyLabel: this.state.shareCopyLabel,
+      onCopyShareLink: () => {
+        const url = `${window.location.origin}/Property Details.dc.html?id=${this._id}`;
+        if (navigator.clipboard) navigator.clipboard.writeText(url).catch(() => {});
+        this.setState({ shareCopyLabel: "คัดลอกแล้ว ✓" });
+        setTimeout(() => this.setState({ shareCopyLabel: "คัดลอกลิงก์" }), 2000);
+      },
       onToggleFav: () => {
         if (!this._favs) return;
         const nowFav = this._favs.toggleFavorite(this._id);

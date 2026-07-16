@@ -1375,7 +1375,13 @@ export async function getEffectiveProperties(mod) {
       // string for title/shortDesc/fullDesc — wrap them so the rest of the
       // site (which expects { en, th, ru, zh }) still works.
       const wrap = (v) => (v && typeof v === "object" ? v : { en: v, th: v, ru: v, zh: v });
-      return { ...p, photos, title: wrap(p.title), shortDesc: wrap(p.shortDesc), fullDesc: wrap(p.fullDesc) };
+      return {
+        ...p, photos, title: wrap(p.title), shortDesc: wrap(p.shortDesc), fullDesc: wrap(p.fullDesc),
+        // Self-serve listings (Lister Dashboard) don't collect these fields
+        // yet — default them so pages that assume they're always arrays/
+        // numbers (feature filters, distance display) don't crash.
+        features: p.features || [], distanceBeach: p.distanceBeach || 0, distanceTown: p.distanceTown || 0,
+      };
     });
   } catch (e) {
     console.warn("getEffectiveProperties: Firebase fetch failed, using bundled sample data:", e);

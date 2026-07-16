@@ -11,6 +11,16 @@ service firebase.storage {
       return request.auth != null && request.auth.uid == "n7TZKSBscPXE1kRU8WzYpsqJh2g2";
     }
 
+    match /propertyPhotos/{fileName} {
+      allow read: if true;
+      // Any signed-in lister can upload/replace a property-photo file (the
+      // Firestore doc that actually links it to a listing is still gated by
+      // firestore.rules' listerId check) — needed for self-serve photo
+      // upload in Lister Dashboard. Storage rules can't easily parse the
+      // propertyId back out of the filename to check ownership precisely,
+      // so this is intentionally a bit looser than the Firestore rule.
+      allow write: if isAdmin() || request.auth != null;
+    }
     match /{allPaths=**} {
       allow read: if true;
       allow write: if isAdmin();
