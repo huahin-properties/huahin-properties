@@ -615,8 +615,9 @@ export async function translateDescriptionAll(text) {
   const data = await res.json();
   const raw = data.completion || data.reply || data.text || "";
   try {
-    const match = raw.match(/\{[\s\S]*\}/);
-    return JSON.parse(match ? match[0] : raw);
+    const cleaned = raw.replace(/```json/gi, "").replace(/```/g, "").trim();
+    const match = cleaned.match(/\{[\s\S]*\}/);
+    return JSON.parse(match ? match[0] : cleaned);
   } catch (e) {
     console.warn("translateDescriptionAll: failed to parse AI response", e);
     return null;
