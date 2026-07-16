@@ -69,7 +69,7 @@
             <div style="font-size:13px; font-weight:600; color:{{ c.accentColor }}; margin-bottom:6px;">{{ c.name }}</div>
             <div style="font-size:26px; font-weight:700; color:{{ c.textColor }}; margin-bottom:2px;">{{ c.price }}</div>
             <div style="font-size:11px; color:{{ c.subTextColor }}; margin-bottom:18px;">{{ c.priceSub }}</div>
-            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:22px; min-height:90px;">
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:22px; min-height:150px;">
               <sc-for list="{{ c.features }}" as="f" hint-placeholder-count="3">
                 <div style="font-size:12px; color:{{ c.textColor }}; display:flex; gap:6px;"><span>✓</span><span>{{ f }}</span></div>
               </sc-for>
@@ -96,16 +96,16 @@
 const BILLING_I18N = {
   en: { ladderTitle: "Membership tiers", ladderSub: "Upgrade any time — higher tiers keep everything from lower ones",
     free: "Free", tier2: "Level 2", tier3: "Level 3", contact: "Enterprise",
-    freeDesc: ["1 listing", "8-language AI description", "Basic support"],
-    tier2Desc: ["5 listings", "1 Featured slot", "Priority support"],
-    tier3Desc: ["15 listings", "Multiple Featured slots", "Priority support"],
+    freeDesc: ["1 listing", "8-language AI description", "Up to 10 photos/listing", "AI post caption: 1 generation/listing", "Basic support"],
+    tier2Desc: ["5 listings", "1 Featured slot", "Up to 15 photos/listing", "AI post caption: 5 generations/listing — refine until it's right", "Priority support"],
+    tier3Desc: ["15 listings", "Multiple Featured slots", "Up to 20 photos/listing", "AI post caption: 10 generations/listing — full SEO keywords done for you", "Priority support"],
     contactDesc: ["Custom listing volume", "Dedicated support", "Custom terms"],
     perMonth: "/month", billedMonthly: "Billed monthly", currentlyFree: "You're using this for free", startFree: "Current plan", upgrade: "Upgrade", current: "Current plan", contactUs: "Contact us" },
   th: { ladderTitle: "บันไดสมาชิก", ladderSub: "ไต่ระดับขึ้นทีละขั้น — ระดับสูงกว่าได้ทุกสิทธิ์จากระดับล่างกว่าด้วย",
     free: "ฟรี", tier2: "ระดับ 2", tier3: "ระดับ 3", contact: "ติดต่อเรา",
-    freeDesc: ["โพสต์ได้ 1 หลัง", "AI ร่างประกาศ 8 ภาษา", "ซัพพอร์ตพื้นฐาน"],
-    tier2Desc: ["โพสต์ได้ 5 หลัง", "Featured 1 รายการ", "ซัพพอร์ตพิเศษ"],
-    tier3Desc: ["โพสต์ได้ 15 หลัง", "Featured หลายรายการ", "ซัพพอร์ตพิเศษ"],
+    freeDesc: ["โพสต์ได้ 1 หลัง", "AI ร่างประกาศ 8 ภาษา", "📷 อัปโหลดรูปได้สูงสุด 10 รูป/หลัง", "🤖 AI ช่วยร่างข้อความโพสต์ 1 ครั้ง/รายการ", "ซัพพอร์ตพื้นฐาน"],
+    tier2Desc: ["โพสต์ได้ 5 หลัง", "Featured 1 รายการ", "📷 อัปโหลดรูปได้สูงสุด 15 รูป/หลัง", "🤖 AI ช่วยร่างข้อความโพสต์ 5 ครั้ง/รายการ — ปรับคำได้จนกว่าจะโดนใจ", "ซัพพอร์ตพิเศษ"],
+    tier3Desc: ["โพสต์ได้ 15 หลัง", "Featured หลายรายการ", "📷 อัปโหลดรูปได้สูงสุด 20 รูป/หลัง", "🤖 AI ช่วยร่างข้อความโพสต์ 10 ครั้ง/รายการ — ใส่คีย์เวิร์ด SEO ให้เต็มที่ ไม่ต้องคิดเอง", "ซัพพอร์ตพิเศษ"],
     contactDesc: ["ปริมาณโพสต์ตามตกลง", "ทีมซัพพอร์ตเฉพาะ", "เงื่อนไขพิเศษเฉพาะราย"],
     perMonth: "/เดือน", billedMonthly: "เรียกเก็บรายเดือน", currentlyFree: "คุณกำลังใช้งานฟรีอยู่", startFree: "แพ็กเกจปัจจุบัน", upgrade: "อัปเกรด", current: "สมาชิกอยู่แล้ว", contactUs: "ติดต่อเรา" },
   ru: { ladderTitle: "Уровни членства", ladderSub: "Повышайте уровень в любое время", free: "Бесплатно", tier2: "Уровень 2", tier3: "Уровень 3", contact: "Свяжитесь с нами",

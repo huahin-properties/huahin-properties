@@ -272,17 +272,19 @@
           <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:8px;">🤖 ข้อความสำหรับโพสต์ขาย — ร่างด้วย AI พร้อมคีย์เวิร์ด SEO และช่องทางติดต่อของเว็บให้อัตโนมัติ ไม่ต้องคิดเอง</div>
 
           <sc-if value="{{ hasGenerated }}" hint-placeholder-val="{{ false }}">
-            <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:8px;">การเจนครั้งที่ {{ ns_genCount }} จาก {{ genLimit }} ครั้งที่ใช้ได้กับรายการนี้ (ตามแพ็กเกจ)</div>
-            <textarea readonly="readonly" rows="10" value="{{ postDraft }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:12px 14px; font-size:13px; font-family:inherit; resize:vertical; background:oklch(98% 0.005 80); margin-bottom:10px;"></textarea>
+            <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:8px;">การเจนครั้งที่ {{ ns_genCount }} จาก {{ genLimit }} ครั้งที่ใช้ได้กับรายการนี้ (ตามแพ็กเกจ) — แก้ไขข้อความด้านล่างได้เองทุกเมื่อ</div>
+            <textarea rows="10" value="{{ ns_postText }}" onChange="{{ onPostTextChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:12px 14px; font-size:13px; font-family:inherit; resize:vertical; background:white; margin-bottom:10px;"></textarea>
             <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+              <div onClick="{{ onSavePostText }}" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">💾 บันทึกการแก้ไข</div>
               <div onClick="{{ onCopyPost }}" style="display:inline-block; background:oklch(22% 0.02 60); color:white; padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">📋 {{ copyLabel }}</div>
               <sc-if value="{{ canRegenerate }}">
                 <div onClick="{{ onGeneratePost }}" style="display:inline-block; background:white; border:1px solid oklch(80% 0.02 60); color:oklch(35% 0.02 60); padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">🔄 เจนใหม่ (เหลือ {{ genRemaining }} ครั้ง)</div>
               </sc-if>
-              <sc-if value="{{ quotaReached }}">
-                <div style="background:oklch(96% 0.06 60); border:1px solid oklch(80% 0.1 60); border-radius:6px; padding:10px 14px; font-size:12.5px; color:oklch(35% 0.1 40);">⚠️ ใช้โควตาการเจนข้อความ AI ของรายการนี้ครบแล้วตามแพ็กเกจ ({{ genLimit }} ครั้ง) — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a> เพื่อเจนเพิ่มได้อีก</div>
-              </sc-if>
+              <sc-if value="{{ postSaveMsg }}"><div style="font-size:12px; color:oklch(45% 0.13 145);">{{ postSaveMsg }}</div></sc-if>
             </div>
+            <sc-if value="{{ quotaReached }}">
+              <div style="background:oklch(96% 0.06 60); border:1px solid oklch(80% 0.1 60); border-radius:6px; padding:10px 14px; font-size:12.5px; color:oklch(35% 0.1 40); margin-top:10px;">⚠️ ใช้โควตาการเจนข้อความ AI ของรายการนี้ครบแล้วตามแพ็กเกจ ({{ genLimit }} ครั้ง) — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a> เพื่อเจนเพิ่มได้อีก (ยังแก้ไขข้อความเองด้านบนได้ตลอด ไม่จำกัด)</div>
+            </sc-if>
           </sc-if>
           <sc-if value="{{ notGenerated }}">
             <div onClick="{{ onGeneratePost }}" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:12px 24px; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer;">🤖 เจนข้อความโพสต์ด้วย AI</div>
@@ -505,7 +507,7 @@ class Component extends DCLogic {
     this.setState({
       view: "saved", savedId: p.id, savedPayload: p,
       ns_assistedSale: !!p.assistedSale, ns_commissionPct: p.commissionPct || "5", nudgeSavedMsg: "",
-      ns_genCount: p.aiGenCount || 0,
+      ns_genCount: p.aiGenCount || 0, ns_postText: p.postText || "", postSaveMsg: "",
     });
   }
 
@@ -513,10 +515,24 @@ class Component extends DCLogic {
     const limit = this.aiGenLimit((this.state.lister || {}).tier);
     if (this.state.ns_genCount >= limit || !this.state.savedPayload) return;
     const nextCount = this.state.ns_genCount + 1;
-    const merged = { ...this.state.savedPayload, aiGenCount: nextCount };
+    const text = this.buildPostDraft();
+    const merged = { ...this.state.savedPayload, aiGenCount: nextCount, postText: text };
     delete merged.coverUrl;
-    this.setState({ ns_genCount: nextCount, savedPayload: merged });
+    this.setState({ ns_genCount: nextCount, savedPayload: merged, ns_postText: text, postSaveMsg: "" });
     try { await this._fb.setDoc("properties", this.state.savedId, merged); } catch (e) { console.warn("Failed to save gen count:", e); }
+  }
+
+  async savePostText() {
+    if (!this.state.savedPayload) return;
+    const merged = { ...this.state.savedPayload, postText: this.state.ns_postText };
+    delete merged.coverUrl;
+    try {
+      await this._fb.setDoc("properties", this.state.savedId, merged);
+      this.setState({ savedPayload: merged, postSaveMsg: "บันทึกแล้ว ✓" });
+      setTimeout(() => this.setState({ postSaveMsg: "" }), 2000);
+    } catch (e) {
+      this.setState({ postSaveMsg: "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง" });
+    }
   }
 
   async confirmNudge() {
@@ -550,17 +566,21 @@ class Component extends DCLogic {
     lines.push(`รหัสทรัพย์: ${this.state.savedId}`);
     lines.push(`ดูรายละเอียดเพิ่มเติม 👉 ${window.location.origin}/Property Details.dc.html?id=${this.state.savedId}`);
     lines.push("");
-    lines.push(this._fbFooter || "");
+    // Contact block is the LISTER's own info (not the site's admin contact) —
+    // each self-serve listing should point buyers to whoever actually
+    // listed it.
+    const lister = this.state.lister || {};
+    lines.push("‼️ ติดต่อผู้ลงประกาศ");
+    if (lister.name) lines.push(`👤 ${lister.name}`);
+    if (lister.phone) lines.push(`📱 โทร/LINE: ${lister.phone}`);
+    if (lister.email) lines.push(`✉️ ${lister.email}`);
+    lines.push("");
+    lines.push("#HuaHinProperty #HuaHin #PranburiProperty #ChaAmProperty #RealEstate #huahinproperties");
     return lines.join("\n");
   }
 
-  async loadFooterAndDraft() {
-    try { this._fbFooter = await this._fb.fetchFacebookFooter(); } catch (e) { this._fbFooter = ""; }
-    this.forceUpdate();
-  }
-
   copyPost() {
-    const text = this.buildPostDraft();
+    const text = this.state.ns_postText || this.buildPostDraft();
     if (navigator.clipboard) navigator.clipboard.writeText(text).catch(() => {});
     this.setState({ copyLabel: "คัดลอกแล้ว ✓" });
     setTimeout(() => this.setState({ copyLabel: "คัดลอกข้อความ" }), 2000);
@@ -579,10 +599,6 @@ class Component extends DCLogic {
 
   renderVals() {
     const mod = this._mod;
-    if (this.state.view === "saved" && this._fbFooter === undefined) {
-      this._fbFooter = null;
-      this.loadFooterAndDraft();
-    }
     const tierLabels = { basic: "① ฟรี", pro: "② Premium", agency: "② Premium", level3: "③ ระดับ 3", silver: "🥈 VIP เงิน", gold: "🥇 VIP ทอง", diamond: "💎 VIP เพชร" };
     const lister = this.state.lister || {};
     const areaLabels = { "hua-hin": "หัวหิน", "pranburi": "ปราณบุรี", "cha-am": "ชะอำ" };
@@ -668,9 +684,12 @@ class Component extends DCLogic {
       nudgeConfirmLabel: this.state.nudgeSaving ? "กำลังบันทึก…" : "ยืนยัน",
       onConfirmNudge: () => this.confirmNudge(),
       nudgeSavedMsg: this.state.nudgeSavedMsg,
-      postDraft: this.buildPostDraft(),
       onCopyPost: () => this.copyPost(),
       copyLabel: this.state.copyLabel,
+      ns_postText: this.state.ns_postText || "",
+      onPostTextChange: (e) => this.setState({ ns_postText: e.target.value }),
+      onSavePostText: () => this.savePostText(),
+      postSaveMsg: this.state.postSaveMsg,
       hasGenerated: (this.state.ns_genCount || 0) > 0,
       notGenerated: !((this.state.ns_genCount || 0) > 0),
       ns_genCount: this.state.ns_genCount || 0,
