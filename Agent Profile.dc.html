@@ -64,11 +64,57 @@
     <sc-if value="{{ hasNoProps }}">
       <div style="background:oklch(97% 0.01 80); border-radius:8px; padding:32px 20px; text-align:center; font-size:13px; color:oklch(50% 0.02 60);">ยังไม่มีทรัพย์ที่โพสต์</div>
     </sc-if>
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:22px;">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:24px;">
       <sc-for list="{{ properties }}" as="p" hint-placeholder-count="0">
-        <dc-import name="PropertyCard" href="{{ p.href }}" status-color="{{ p.statusColor }}" status-label="{{ p.statusLabel }}" cover-photo-label="{{ p.coverPhotoLabel }}" cover-photo-bg="{{ p.coverPhotoBg }}" no-photo="{{ p.noPhoto }}" property-id="{{ p.propertyId }}" zone="{{ p.zone }}" area-label="{{ p.areaLabel }}" title="{{ p.title }}" type-label="{{ p.typeLabel }}" has-bedrooms="{{ p.hasBedrooms }}" bedrooms="{{ p.bedrooms }}" has-bathrooms="{{ p.hasBathrooms }}" bathrooms="{{ p.bathrooms }}" has-living-area="{{ p.hasLivingArea }}" living-area="{{ p.livingArea }}" sqm-label="{{ p.sqmLabel }}" price-label="{{ p.priceLabel }}" view-details-label="{{ p.viewDetailsLabel }}" hint-size="100%,380px"></dc-import>
+        <div onClick="{{ p.onOpen }}" style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:10px; overflow:hidden; cursor:pointer; transition:box-shadow 0.15s;">
+          <div style="{{ p.coverStyle }}">
+            <div style="position:absolute; top:12px; left:12px; background:{{ p.statusColor }}; color:white; font-size:12px; font-weight:600; padding:5px 12px; border-radius:100px;">{{ p.statusLabel }}</div>
+          </div>
+          <div style="padding:18px 20px 20px;">
+            <div style="font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:oklch(42% 0.12 25);">{{ p.zone }} · {{ p.areaLabel }}</div>
+            <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60); margin:4px 0;">{{ p.title }}</div>
+            <div style="display:flex; gap:14px; font-size:13px; color:oklch(45% 0.02 60); margin-bottom:8px;">
+              <sc-if value="{{ p.hasBedrooms }}"><span>🛏️ {{ p.bedrooms }}</span></sc-if>
+              <sc-if value="{{ p.hasBathrooms }}"><span>🛁 {{ p.bathrooms }}</span></sc-if>
+              <sc-if value="{{ p.hasLivingArea }}"><span>📐 {{ p.livingArea }} {{ p.sqmLabel }}</span></sc-if>
+            </div>
+            <div style="font-size:18px; font-weight:700; color:oklch(25% 0.02 60);">{{ p.priceLabel }}</div>
+          </div>
+        </div>
       </sc-for>
     </div>
+
+    <sc-if value="{{ showPropertyModal }}">
+      <div style="position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:700; display:flex; align-items:center; justify-content:center; padding:20px;" onClick="{{ onCloseModal }}">
+        <div style="background:white; border-radius:12px; max-width:760px; width:100%; max-height:90vh; overflow-y:auto;" onClick="{{ stopProp }}">
+          <div style="{{ modalPhotoStyle }}">
+            <sc-if value="{{ modalHasMultiplePhotos }}">
+              <div onClick="{{ onModalPrevPhoto }}" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px;">‹</div>
+              <div onClick="{{ onModalNextPhoto }}" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px;">›</div>
+              <div style="position:absolute; bottom:12px; right:12px; background:rgba(0,0,0,0.6); color:white; font-size:12px; padding:4px 10px; border-radius:100px;">{{ modalPhotoCounter }}</div>
+            </sc-if>
+            <div onClick="{{ onCloseModal }}" style="position:absolute; top:12px; right:12px; width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px;">✕</div>
+          </div>
+          <div style="padding:22px 26px 26px;">
+            <div style="font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:oklch(42% 0.12 25); margin-bottom:4px;">{{ modalZoneLine }}</div>
+            <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:8px;">{{ modalTitle }}</div>
+            <div style="display:flex; gap:18px; font-size:14px; color:oklch(40% 0.02 60); margin-bottom:12px; flex-wrap:wrap;">
+              <sc-if value="{{ modalHasBedrooms }}"><span>🛏️ {{ modalBedrooms }} ห้องนอน</span></sc-if>
+              <sc-if value="{{ modalHasBathrooms }}"><span>🛁 {{ modalBathrooms }} ห้องน้ำ</span></sc-if>
+              <sc-if value="{{ modalHasLivingArea }}"><span>📐 {{ modalLivingArea }} ตร.ม.</span></sc-if>
+            </div>
+            <div style="font-size:22px; font-weight:700; color:oklch(25% 0.02 60); margin-bottom:16px;">{{ modalPriceLabel }}</div>
+            <sc-if value="{{ modalHasDescription }}">
+              <div style="font-size:14px; color:oklch(35% 0.02 60); line-height:1.7; margin-bottom:18px; white-space:pre-wrap;">{{ modalDescription }}</div>
+            </sc-if>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <sc-if value="{{ hasPhone }}"><a href="{{ telHref }}" style="{{ contactBtnStyle }}">📞 ติดต่อสอบถาม</a></sc-if>
+              <div onClick="{{ onOpenChatFromModal }}" style="background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:10px 18px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">💬 แชทสอบถาม</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
 
     <div style="margin-top:60px; padding-top:20px; border-top:1px solid oklch(92% 0.01 70); text-align:center;">
       <a href="Home.dc.html" style="font-size:12px; color:oklch(55% 0.02 60);">🏠 ขับเคลื่อนโดย <span style="color:oklch(40% 0.13 25); font-weight:600;">huahin.properties</span></a>
@@ -122,6 +168,7 @@ class Component extends DCLogic {
   state = {
     loaded: false, lister: null, properties: [], showShare: false, shareCopyLabel: "คัดลอกลิงก์",
     chatOpen: false, chatInput: "", chatMessages: [], chatThinking: false,
+    showPropertyModal: false, modalProperty: null, modalPhotoIndex: 0,
   };
 
   async componentDidMount() {
@@ -142,7 +189,8 @@ class Component extends DCLogic {
         allPhotos.forEach((ph) => { photosById[ph.id] = ph.dataUrl; });
         properties = all.filter((p) => !p.isDraft).map((p) => {
           const cover = photosById[`${p.id}-0`];
-          return { ...p, coverUrl: cover || "" };
+          const gallery = allPhotos.filter((ph) => ph.propertyId === p.id).sort((a, b) => (a.index || 0) - (b.index || 0)).map((ph) => ph.dataUrl);
+          return { ...p, coverUrl: cover || "", gallery: gallery.length ? gallery : (cover ? [cover] : []) };
         });
       }
       this.setState({ loaded: true, lister, properties });
@@ -160,6 +208,28 @@ class Component extends DCLogic {
         return { chatOpen: open, chatMessages: [{ role: "assistant", text: `สวัสดีค่ะ/ครับ สนใจทรัพย์ของ${name}สอบถามได้เลยค่ะ/ครับ`, bubbleStyle: this.bubbleStyle(false) }] };
       }
       return { chatOpen: open };
+    });
+  }
+
+  openPropertyModal(p) {
+    this.setState({ showPropertyModal: true, modalProperty: p, modalPhotoIndex: 0 });
+  }
+
+  closePropertyModal() {
+    this.setState({ showPropertyModal: false, modalProperty: null });
+  }
+
+  modalPrevPhoto() {
+    this.setState((s) => {
+      const len = (s.modalProperty && s.modalProperty.gallery && s.modalProperty.gallery.length) || 1;
+      return { modalPhotoIndex: (s.modalPhotoIndex - 1 + len) % len };
+    });
+  }
+
+  modalNextPhoto() {
+    this.setState((s) => {
+      const len = (s.modalProperty && s.modalProperty.gallery && s.modalProperty.gallery.length) || 1;
+      return { modalPhotoIndex: (s.modalPhotoIndex + 1) % len };
     });
   }
 
@@ -228,18 +298,23 @@ class Component extends DCLogic {
     const properties = this.state.properties.map((p) => {
       const st = statusMap[p.status] || statusMap.sale;
       return {
-        href: `Property Details.dc.html?id=${p.id}`, statusColor: st.color, statusLabel: st.label,
-        coverPhotoLabel: p.description ? p.description.slice(0, 20) : "photo",
-        coverPhotoBg: p.coverUrl ? `url('${p.coverUrl}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
-        noPhoto: !p.coverUrl, propertyId: p.id, zone: p.zone || "-", areaLabel: areaLabels[p.area] || p.area || "-",
+        statusColor: st.color, statusLabel: st.label,
+        coverStyle: {
+          position: "relative", aspectRatio: "16/10", width: "100%",
+          background: p.coverUrl ? `url('${p.coverUrl}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
+        },
+        propertyId: p.id, zone: p.zone || "-", areaLabel: areaLabels[p.area] || p.area || "-",
         title: `${typeLabels[p.type] || p.type} — ${p.zone || ""}`, typeLabel: typeLabels[p.type] || p.type || "-",
         hasBedrooms: !!p.bedrooms, bedrooms: p.bedrooms, hasBathrooms: !!p.bathrooms, bathrooms: p.bathrooms,
-        hasLivingArea: !!p.livingArea, livingArea: p.livingArea, sqmLabel: "sqm",
-        priceLabel: "฿" + (Number(p.price) || 0).toLocaleString() + (p.status === "rent" ? "/mo" : ""),
-        viewDetailsLabel: "ดูรายละเอียด",
+        hasLivingArea: !!p.livingArea, livingArea: p.livingArea, sqmLabel: "ตร.ม.",
+        priceLabel: "฿" + (Number(p.price) || 0).toLocaleString() + (p.status === "rent" ? "/เดือน" : ""),
+        onOpen: () => this.openPropertyModal(p),
       };
     });
     const shareUrl = `${window.location.origin}/Agent Profile.dc.html?id=${this._listerId}`;
+    const mp = this.state.modalProperty;
+    const mpGallery = (mp && mp.gallery && mp.gallery.length) ? mp.gallery : [mp && mp.coverUrl].filter(Boolean);
+    const mpStatus = mp ? (statusMap[mp.status] || statusMap.sale) : null;
     return {
       notFound: false, hasLister: true,
       coverStyle: {
@@ -272,6 +347,27 @@ class Component extends DCLogic {
       onOpenShare: () => this.setState({ showShare: true }),
       onCloseShare: () => this.setState({ showShare: false }),
       stopProp: (e) => e.stopPropagation(),
+      showPropertyModal: this.state.showPropertyModal,
+      onCloseModal: () => this.closePropertyModal(),
+      onModalPrevPhoto: (e) => { e.stopPropagation(); this.modalPrevPhoto(); },
+      onModalNextPhoto: (e) => { e.stopPropagation(); this.modalNextPhoto(); },
+      modalHasMultiplePhotos: mpGallery.length > 1,
+      modalPhotoCounter: mpGallery.length ? `${this.state.modalPhotoIndex + 1}/${mpGallery.length}` : "",
+      modalPhotoStyle: { position: "relative", width: "100%", aspectRatio: "16/10", borderRadius: "12px 12px 0 0", background: mpGallery[this.state.modalPhotoIndex] ? `url('${mpGallery[this.state.modalPhotoIndex]}') center/cover` : "oklch(93% 0.01 70)" },
+      modalZoneLine: mp ? `${mp.zone || "-"} · ${areaLabels[mp.area] || mp.area || "-"}` : "",
+      modalTitle: mp ? `${typeLabels[mp.type] || mp.type} — ${mp.zone || ""}` : "",
+      modalHasBedrooms: !!(mp && mp.bedrooms), modalBedrooms: mp && mp.bedrooms,
+      modalHasBathrooms: !!(mp && mp.bathrooms), modalBathrooms: mp && mp.bathrooms,
+      modalHasLivingArea: !!(mp && mp.livingArea), modalLivingArea: mp && mp.livingArea,
+      modalPriceLabel: mp ? "฿" + (Number(mp.price) || 0).toLocaleString() + (mp.status === "rent" ? "/เดือน" : "") : "",
+      modalHasDescription: !!(mp && mp.description && mp.description.trim()),
+      modalDescription: (mp && mp.description) || "",
+      onOpenChatFromModal: () => {
+        this.setState((s) => {
+          const chatMessages = s.chatMessages.length ? s.chatMessages : [{ role: "assistant", text: `สวัสดีค่ะ/ครับ สนใจทรัพย์ของ${(s.lister && (s.lister.displayName || s.lister.name)) || "เรา"}สอบถามได้เลยค่ะ/ครับ`, bubbleStyle: this.bubbleStyle(false) }];
+          return { showPropertyModal: false, chatOpen: true, chatMessages };
+        });
+      },
       shareCopyLabel: this.state.shareCopyLabel,
       onCopyShareLink: () => {
         if (navigator.clipboard) navigator.clipboard.writeText(shareUrl).catch(() => {});
