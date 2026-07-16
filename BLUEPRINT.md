@@ -462,7 +462,7 @@ Registration/Procuring Cause, รหัส Agent เฉพาะตัว) **ถ
 
 ## 5. ความปลอดภัย & ป้องกันสแปม/แฮก
 
-1. **Firestore Security Rules แบบ role-based** — ⚠️ rules ชั่วคราวเปิดโล่งหมดอายุ **8 ส.ค. 2026** ต้องล็อกก่อนวันนี้
+1. **Firestore Security Rules แบบ role-based** — ✅ ตรวจสอบแล้ว (16 ก.ค. 2026): ใช้ role-based + deny-by-default (`match /{document=**} { allow read, write: if false; }`) จริงแล้ว ไม่ใช่ rules เปิดโล่งชั่วคราวอีกต่อไป
 2. **Firebase App Check** — กันบอทยิง request ตรงเข้า DB (ฟรี)
 3. **Rate limiting ที่ Cloud Functions** — จำกัดฟอร์ม/แชท/webhook ต่อ IP
 4. **reCAPTCHA v3 แบบเงียบ** — ติดฟอร์ม inquiry/สมัครสมาชิก
@@ -477,7 +477,7 @@ Registration/Procuring Cause, รหัส Agent เฉพาะตัว) **ถ
 1. URL ถาวรต่อประกาศ (เช่น `/property/hh-109-pool-villa-hua-hin`)
 2. Meta title/description เฉพาะหน้า + Open Graph
 3. Structured data (schema.org RealEstateListing) เป็น JSON-LD ต่อประกาศ
-4. Sitemap.xml อัตโนมัติ + ยื่น Google Search Console
+4. Sitemap.xml อัตโนมัติ + ยื่น Google Search Console — ✅ **ทำแล้ว (ขั้นพื้นฐาน)**: `sitemap.xml` + `robots.txt` ที่ root ครอบคลุมหน้า static หลัก (Home, Search Results, Sell, About, Contact, Agent Signup, Advertise) — **ยังไม่ครอบคลุม URL รายทรัพย์แต่ละหลัง** เพราะเป็นไฟล์ static ที่เขียนมือ ไม่ได้ query Firestore สด (ต้องมี build step/Cloud Function ถึงจะทำได้ — ยังไม่ได้สร้าง) ยังไม่ได้ยื่น Google Search Console จริง
 5. Prerendering/dynamic rendering สำหรับ crawler — วางแผนคู่กับ URL ต่อประกาศ (รื้อทีหลังยากกว่า)
 6. ความเร็วโหลดหน้า (Core Web Vitals) — resize/compress รูปอัตโนมัติตอนย้ายไป Storage
 7. ชื่อไฟล์รูป/alt text SEO-friendly ให้ครบทุกจุด

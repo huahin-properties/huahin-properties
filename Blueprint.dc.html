@@ -104,10 +104,10 @@
     <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
       <p><strong>การเงิน</strong>: Stripe ledger + webhook + auto-hide เมื่อจ่ายไม่ผ่าน — เสร็จสมบูรณ์</p>
       <p><strong>ความปลอดภัย</strong>: Firestore/Storage rules role-based ✓ deploy แล้ว — App Check, rate limiting, reCAPTCHA v3, backup อัตโนมัติ ยังไม่ได้ทำ</p>
-      <div style="background:oklch(95% 0.15 45); border:1px solid oklch(75% 0.18 45); border-radius:7px; padding:11px 14px; margin:10px 0;">
-        <div style="font-size:13.5px; color:oklch(35% 0.15 30);">⚠️ <strong>Firestore rules ชั่วคราวหมดอายุ 8 ส.ค. 2026</strong> — ตรวจสอบให้แน่ใจว่าตอนนี้ใช้ rules ตัวจริง (role-based) แล้ว ไม่ใช่ rules เปิดโล่งชั่วคราว</div>
+      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin:10px 0;">
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ ตรวจสอบแล้ว (16 ก.ค. 2026): ใช้ role-based + deny-by-default จริงแล้ว ไม่ใช่ rules เปิดโล่งชั่วคราวอีกต่อไป</div>
       </div>
-      <p><strong>SEO</strong>: URL ถาวร + Open Graph + JSON-LD ที่ Property Details ✓ — Sitemap, Search Console, prerendering ยังไม่ได้ทำ</p>
+      <p><strong>SEO</strong>: URL ถาวร + Open Graph + JSON-LD ที่ Property Details ✓, sitemap.xml + robots.txt (หน้า static หลัก) ✓ — ยังไม่ได้ทำ: sitemap รายทรัพย์แต่ละหลัง (ต้อง prerendering), ยื่น Search Console จริง</p>
     </div>
 
     <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">7-10. แดชบอร์ดสถานะระบบ / แจ้งเตือน / วงจรชีวิตประกาศ / แบนเนอร์</h2>
