@@ -305,20 +305,11 @@ class Component extends DCLogic {
   async submitGate() {
     try {
       // Uses the SAME Firebase Authentication credential as Admin Login.
-      // Reads the current admin email from Site Content so this never goes
-      // stale if the admin changes their login email there — falls back to
-      // the original hardcoded account as a safety net if that fetch fails.
-      let email = "doothailand@gmail.com";
-      try {
-        const creds = await this._fb.fetchAdminCredentials();
-        if (creds && creds.username) email = creds.username;
-      } catch (e0) { console.warn("Falling back to default admin email for gate:", e0); }
-      // Read straight from the DOM input at submit time, not React state —
-      // browser autofill can populate the visible field without firing the
-      // onChange React listens to, leaving state stale/empty while the
-      // input looks filled. This guarantees we send what's actually typed.
+      // Always the fixed admin account — a prior attempt to look up the
+      // email dynamically from Site Content picked up a corrupted/stale
+      // value and broke sign-in, so this stays hardcoded and simple.
+      const email = "doothailand@gmail.com";
       const typedPassword = (this._gateInputEl && this._gateInputEl.value) || this.state.gatePassword;
-      console.log("DEBUG gate email:", JSON.stringify(email), "password:", JSON.stringify(typedPassword));
       await this._fb.adminSignIn(email, typedPassword);
       this._fb.setSiteBypass();
       this.setState({ showGate: false, gateError: "" });
