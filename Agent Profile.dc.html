@@ -385,11 +385,13 @@ class Component extends DCLogic {
       const lister = this.state.lister || {};
       const personaText = (lister.aiPersonaText && lister.aiPersonaText.trim()) ||
         `You are a helpful assistant answering on behalf of ${lister.displayName || lister.name || "the lister"}. Contact: phone/LINE ${lister.phone || "n/a"}, email ${lister.email || "n/a"}.`;
+      const langKey = this.state.lang;
+      const descFor = (d) => (d && typeof d === "object") ? (d[langKey] || d.en || d.th || "") : (d || "");
       const propsSummary = this.state.properties.map((p) => ({
         code: p.id, type: p.type, zone: p.zone, area: p.area, status: p.status, price: p.price,
-        bedrooms: p.bedrooms, bathrooms: p.bathrooms, livingArea: p.livingArea, description: p.description || "",
+        bedrooms: p.bedrooms, bathrooms: p.bathrooms, livingArea: p.livingArea, description: descFor(p.description),
       }));
-      const system = `${personaText}\n\nIMPORTANT: Always reply in ${LANG_NAMES[this.state.lang] || "Thai"}, regardless of what language the customer writes in — the customer has explicitly selected that language for this page.\n\nYou ONLY know about and may discuss these specific properties (JSON below) — never mention or invent any other property, and never mention huahin.properties' other listers/agents or site-wide data:\n${JSON.stringify(propsSummary)}\n\nAnswer in the customer's language. Be warm and helpful.\n\nREPLY LENGTH: ALWAYS keep replies SHORT — 2-3 sentences maximum, no exceptions. Never list full specs, features, or descriptions in your text — the interface shows a clickable property card automatically whenever you mention a property code, so the customer can open it themselves for full details. Your job is just to guide the conversation and say which property code(s) fit, not describe them in depth. When a property matches what the customer is asking, just say so briefly and state its exact code (e.g. HH-109) — never invent a code. If nothing matches yet, ask one short clarifying question. If asked for contact info, give the phone/email above exactly as provided — never invent a different one.`;
+      const system = `${personaText}\n\nIMPORTANT: Reply in ${LANG_NAMES[this.state.lang] || "Thai"} by default (the customer has this page set to that language) — but if the customer actually types in a DIFFERENT language, switch and reply in THEIR language instead, exactly like a real bilingual agent would.\n\nYou ONLY know about and may discuss these specific properties (JSON below) — never mention or invent any other property, and never mention huahin.properties' other listers/agents or site-wide data:\n${JSON.stringify(propsSummary)}\n\nAnswer in the customer's language. Be warm and helpful.\n\nREPLY LENGTH: ALWAYS keep replies SHORT — 2-3 sentences maximum, no exceptions. Never list full specs, features, or descriptions in your text — the interface shows a clickable property card automatically whenever you mention a property code, so the customer can open it themselves for full details. Your job is just to guide the conversation and say which property code(s) fit, not describe them in depth. When a property matches what the customer is asking, just say so briefly and state its exact code (e.g. HH-109) — never invent a code. If nothing matches yet, ask one short clarifying question. If asked for contact info, give the phone/email above exactly as provided — never invent a different one.`;
       const messages = history.slice(history.findIndex((m) => m.role === "user")).map((m) => ({ role: m.role, content: m.text }));
       let reply;
       if (window.claude && window.claude.complete) {
@@ -494,8 +496,8 @@ class Component extends DCLogic {
       modalHasBathrooms: !!(mp && mp.bathrooms), modalBathrooms: mp && mp.bathrooms,
       modalHasLivingArea: !!(mp && mp.livingArea), modalLivingArea: mp && mp.livingArea,
       modalPriceLabel: mp ? "฿" + (Number(mp.price) || 0).toLocaleString() + (mp.status === "rent" ? t.perMonth : "") : "",
-      modalHasDescription: !!(mp && mp.description && mp.description.trim()),
-      modalDescription: (mp && mp.description) || "",
+      modalHasDescription: !!(mp && mp.description && (typeof mp.description === "object" ? (mp.description[this.state.lang] || mp.description.en || mp.description.th) : mp.description.trim())),
+      modalDescription: mp ? ((typeof mp.description === "object") ? (mp.description[this.state.lang] || mp.description.en || mp.description.th || "") : (mp.description || "")) : "",
       allPropertiesLabel: t.allProperties, noPropertiesLabel: t.noProperties,
       tBedrooms: t.bedrooms, tBathrooms: t.bathrooms, tSqm: t.sqm, tContact: t.contact,
       lang: this.state.lang, langOptions: LANG_OPTIONS, onSelectLang: (code) => this.onSelectLang(code),

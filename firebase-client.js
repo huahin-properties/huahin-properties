@@ -599,6 +599,30 @@ export async function fetchMyListerDoc() {
 
 // Stripe Price IDs per tier — kept admin-editable in Site Content (not
 // hardcoded) so pricing/plan changes never require a code redeploy.
+// Auto-translates a self-serve listing description into all 8 site languages
+// in one AI call — used by Lister Dashboard when an agent saves a property,
+// so the description shows correctly translated everywhere (cards, modal,
+// AI chat) without a separate "translate" button, same pre-translated
+// approach as the main site's AI Quick Add (one AI call at save time, never
+// a live per-view translation).
+export async function translateDescriptionAll(text) {
+  if (!text || !text.trim()) return null;
+  const system = `Translate the following real-estate listing description into all 8 languages. Respond with ONLY a JSON object, no markdown, no explanation, in this exact shape: {"th":"...","en":"...","ru":"...","zh":"...","de":"...","no":"...","fr":"...","it":"..."} — each value must be the FULL translation written entirely and naturally in that language's own script (never mixed languages), preserving the original meaning and tone.`;
+  const messages = [{ role: "user", content: text }];
+  const res = await fetch("https://claudecomplete-3j4ldf4pja-as.a.run.app", {
+    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ system, messages }),
+  });
+  const data = await res.json();
+  const raw = data.completion || data.reply || data.text || "";
+  try {
+    const match = raw.match(/\{[\s\S]*\}/);
+    return JSON.parse(match ? match[0] : raw);
+  } catch (e) {
+    console.warn("translateDescriptionAll: failed to parse AI response", e);
+    return null;
+  }
+}
+
 export async function fetchStripePrices() {
   const doc = await db().collection("siteContent").doc("stripePrices").get();
   return doc.exists ? doc.data() : { pro: "", agency: "", level3: "", level4: "" };

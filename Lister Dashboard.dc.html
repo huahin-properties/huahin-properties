@@ -587,7 +587,7 @@ class Component extends DCLogic {
       f_zone: p.zone || "", f_status: p.status === "rent" ? "rent" : "sale",
       f_price: p.price != null ? String(p.price) : "", f_bedrooms: p.bedrooms != null ? String(p.bedrooms) : "",
       f_bathrooms: p.bathrooms != null ? String(p.bathrooms) : "", f_livingArea: p.livingArea != null ? String(p.livingArea) : "",
-      f_landSize: p.landSize != null ? String(p.landSize) : "", f_description: p.description || "",
+      f_landSize: p.landSize != null ? String(p.landSize) : "", f_description: (p.description && typeof p.description === "object") ? (p.description.th || p.description.en || "") : (p.description || ""),
       saveError: "", existingPhotos: [], newPhotos: [], quotaMsg: "",
     });
     try {
@@ -634,6 +634,16 @@ class Component extends DCLogic {
     this.setState({ saving: true, saveError: "" });
     const id = this.state.editingId || this.genCode(this.state.f_area);
     const allPhotoUrls = [...this.state.existingPhotos.map((p) => p.url), ...this.state.newPhotos.map((p) => p.url)].slice(0, this.myPhotoLimit());
+    // Auto-translate the description into all 8 site languages on every
+    // save — no separate "translate" button, same as the main site's AI
+    // Quick Add (one AI call now, never a live per-view translation later).
+    let descriptionValue = this.state.f_description;
+    if (this.state.f_description && this.state.f_description.trim()) {
+      try {
+        const translated = await this._fb.translateDescriptionAll(this.state.f_description.trim());
+        if (translated) descriptionValue = translated;
+      } catch (e) { console.warn("Auto-translate failed, saving original text only:", e); }
+    }
     const payload = {
       listerId: this.state.lister.id,
       type: this.state.f_type, area: this.state.f_area, zone: this.state.f_zone,
@@ -642,7 +652,7 @@ class Component extends DCLogic {
       bathrooms: this.state.f_bathrooms ? Number(this.state.f_bathrooms) : null,
       livingArea: this.state.f_livingArea ? Number(this.state.f_livingArea) : null,
       landSize: this.state.f_landSize ? Number(this.state.f_landSize) : null,
-      description: this.state.f_description,
+      description: descriptionValue,
       currency: "THB", updatedAt: Date.now(), isDraft: true,
       photos: allPhotoUrls.map(() => ({ label: "" })),
     };
