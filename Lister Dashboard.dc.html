@@ -97,6 +97,10 @@
               </label>
             </div>
             <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">📝 ข้อความแนะนำตัว (โชว์บนเว็บไซต์ส่วนตัวของคุณ)</div>
+              <textarea rows="3" value="{{ ps_bioText }}" onChange="{{ onPsBioText }}" placeholder="เช่น ตัวแทนอสังหาริมทรัพย์มืออาชีพในหัวหิน 8 ปี เชี่ยวชาญพูลวิลล่าและคอนโดมิเนียม"style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical;"></textarea>
+            </div>
+            <div>
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">🤖 บุคลิก AI ผู้ช่วยของคุณ</div>
               <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:8px; line-height:1.6;">สิ่งที่คุณกรอกตรงนี้ AI จะนำไปใช้ตอบลูกค้าที่ทักเข้ามาในเว็บไซต์ส่วนตัวของคุณ — เช่น บอกชื่อคุณ, เวลาที่ติดต่อได้, น้ำเสียงการตอบ ฯลฯ ถ้าไม่กรอก AI จะใช้ชื่อ+เบอร์ติดต่อของคุณจากตอนสมัครแทน</div>
               <textarea rows="4" value="{{ ps_aiPersonaText }}" onChange="{{ onPsAiPersonaText }}" placeholder="{{ ps_aiPersonaPlaceholder }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical;"></textarea>
@@ -439,7 +443,7 @@ class Component extends DCLogic {
     showDeleteConfirm: false, deleteTargetId: "", deleting: false,
     showBuyerModal: false, buyerTargetId: "", buyer_name: "", buyer_phone: "", buyer_email: "", buyerMsg: "", buyerIsError: false, buyerSaving: false,
     showProfileSettings: false, ps_displayName: "", ps_profilePhotoUrl: "", ps_coverPhotoUrl: "",
-    ps_aiPersonaText: "", ps_themeColor: "", ps_saving: false, ps_saveMsg: "",
+    ps_aiPersonaText: "", ps_themeColor: "", ps_bioText: "", ps_saving: false, ps_saveMsg: "",
   };
 
   THEME_COLORS = ["oklch(40% 0.13 25)", "oklch(45% 0.1 145)", "oklch(40% 0.12 250)", "oklch(55% 0.14 75)"];
@@ -460,7 +464,7 @@ class Component extends DCLogic {
         loaded: true, signedIn: true, lister, properties,
         ps_displayName: lister.displayName || lister.name || "",
         ps_profilePhotoUrl: lister.profilePhotoUrl || "", ps_coverPhotoUrl: lister.coverPhotoUrl || "",
-        ps_aiPersonaText: lister.aiPersonaText || "", ps_themeColor: lister.themeColor || "",
+        ps_aiPersonaText: lister.aiPersonaText || "", ps_themeColor: lister.themeColor || "", ps_bioText: lister.bioText || "",
       });
       if (lister.vipTier && !lister.agentCode) {
         const agentCode = await fb.ensureAgentCode(lister.id, lister.agentCode).catch(() => "");
@@ -788,22 +792,30 @@ class Component extends DCLogic {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     const dataUrl = await this._fb.fileToDataUrl(file, 500);
+    this.setState({ ps_profilePhotoUrl: dataUrl, ps_saveMsg: "กำลังอัปโหลด…" }); // instant preview
     const slotId = "lister-avatar-" + this.state.lister.id;
     try {
-      await this._fb.saveProfilePhoto(slotId, dataUrl);
-      this.setState({ ps_profilePhotoUrl: dataUrl });
-    } catch (e2) { console.warn("Failed to save profile photo:", e2); }
+      const url = await this._fb.saveProfilePhoto(slotId, dataUrl);
+      this.setState({ ps_profilePhotoUrl: url, ps_saveMsg: "" });
+    } catch (e2) {
+      console.warn("Failed to save profile photo:", e2);
+      this.setState({ ps_saveMsg: "อัปโหลดรูปไม่สำเร็จ ลองใหม่อีกครั้ง" });
+    }
   }
 
   async onPsCoverPhoto(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     const dataUrl = await this._fb.fileToDataUrl(file, 1400);
+    this.setState({ ps_coverPhotoUrl: dataUrl, ps_saveMsg: "กำลังอัปโหลด…" });
     const slotId = "lister-cover-" + this.state.lister.id;
     try {
-      await this._fb.saveProfilePhoto(slotId, dataUrl);
-      this.setState({ ps_coverPhotoUrl: dataUrl });
-    } catch (e2) { console.warn("Failed to save cover photo:", e2); }
+      const url = await this._fb.saveProfilePhoto(slotId, dataUrl);
+      this.setState({ ps_coverPhotoUrl: url, ps_saveMsg: "" });
+    } catch (e2) {
+      console.warn("Failed to save cover photo:", e2);
+      this.setState({ ps_saveMsg: "อัปโหลดรูปไม่สำเร็จ ลองใหม่อีกครั้ง" });
+    }
   }
 
   async saveProfileSettings() {
@@ -813,7 +825,7 @@ class Component extends DCLogic {
       ...this.state.lister,
       displayName: this.state.ps_displayName, profilePhotoUrl: this.state.ps_profilePhotoUrl,
       coverPhotoUrl: this.state.ps_coverPhotoUrl, aiPersonaText: this.state.ps_aiPersonaText,
-      themeColor: this.state.ps_themeColor,
+      themeColor: this.state.ps_themeColor, bioText: this.state.ps_bioText,
     };
     try {
       await this._fb.setDoc("listers", this.state.lister.id, merged);
@@ -981,6 +993,7 @@ class Component extends DCLogic {
       ps_profilePhotoLabel: this.state.ps_profilePhotoUrl ? "เปลี่ยนรูป" : "เลือกรูป",
       onPsProfilePhoto: (e) => this.onPsProfilePhoto(e),
       ps_aiPersonaText: this.state.ps_aiPersonaText, onPsAiPersonaText: (e) => this.setState({ ps_aiPersonaText: e.target.value }),
+      ps_bioText: this.state.ps_bioText, onPsBioText: (e) => this.setState({ ps_bioText: e.target.value }),
       ps_aiPersonaPlaceholder: `เช่น: ฉันชื่อ ${lister.name || "___"} ติดต่อได้ทุกวัน 9:00-20:00 พูดสุภาพเป็นกันเอง`,
       canCustomCover: tier2Plus, cannotCustomCover: !tier2Plus,
       ps_coverPhotoLabel: this.state.ps_coverPhotoUrl ? "เปลี่ยนภาพปก" : "เลือกภาพปก",
