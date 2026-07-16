@@ -467,7 +467,8 @@ class Component extends DCLogic {
       vipBadgeLabel: { silver: "🥈 Verified VIP", gold: "🥇 Verified VIP", diamond: "💎 Verified VIP" }[lister.vipTier] || "",
       vipBadgeStyle: { fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "100px", background: "oklch(30% 0.02 60)", color: "oklch(85% 0.13 95)" },
       displayName, propCountLabel: `${properties.length} ${this.state.lang === "th" ? "รายการทรัพย์" : t.allProperties}`,
-      hasBio: !!(lister.bioText && lister.bioText.trim()), bioText: lister.bioText || "",
+      hasBio: !!(lister.bioText && (typeof lister.bioText === "object" ? (lister.bioText[this.state.lang] || lister.bioText.en || lister.bioText.th) : lister.bioText.trim())),
+      bioText: (lister.bioText && typeof lister.bioText === "object") ? (lister.bioText[this.state.lang] || lister.bioText.en || lister.bioText.th || "") : (lister.bioText || ""),
       socialIcons: [
         { key: "facebook", iconChar: "f", bg: "oklch(45% 0.15 260)", font: "Georgia,serif", url: (lister.socialLinks && lister.socialLinks.facebook) || "" },
         { key: "tiktok", iconChar: "♪", bg: "oklch(20% 0.01 60)", font: "inherit", url: (lister.socialLinks && lister.socialLinks.tiktok) || "" },

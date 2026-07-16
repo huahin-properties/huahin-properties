@@ -503,7 +503,8 @@ class Component extends DCLogic {
         loaded: true, signedIn: true, lister, properties,
         ps_displayName: lister.displayName || lister.name || "",
         ps_profilePhotoUrl: lister.profilePhotoUrl || "", ps_coverPhotoUrl: lister.coverPhotoUrl || "",
-        ps_aiPersonaText: lister.aiPersonaText || "", ps_themeColor: lister.themeColor || "", ps_bioText: lister.bioText || "",
+        ps_aiPersonaText: lister.aiPersonaText || "", ps_themeColor: lister.themeColor || "",
+        ps_bioText: (lister.bioText && typeof lister.bioText === "object") ? (lister.bioText.th || lister.bioText.en || "") : (lister.bioText || ""),
         ps_fb: (lister.socialLinks && lister.socialLinks.facebook) || "",
         ps_tiktok: (lister.socialLinks && lister.socialLinks.tiktok) || "",
         ps_youtube: (lister.socialLinks && lister.socialLinks.youtube) || "",
@@ -874,11 +875,21 @@ class Component extends DCLogic {
   async saveProfileSettings() {
     if (this.state.ps_saving) return;
     this.setState({ ps_saving: true, ps_saveMsg: "" });
+    // Auto-translate the bio into all 8 site languages on every save — same
+    // one-shot AI call approach as property descriptions, no separate
+    // "translate" button.
+    let bioValue = this.state.ps_bioText;
+    if (this.state.ps_bioText && this.state.ps_bioText.trim()) {
+      try {
+        const translated = await this._fb.translateDescriptionAll(this.state.ps_bioText.trim());
+        if (translated) bioValue = translated;
+      } catch (e) { console.warn("Auto-translate bio failed, saving original text only:", e); }
+    }
     const merged = {
       ...this.state.lister,
       displayName: this.state.ps_displayName, profilePhotoUrl: this.state.ps_profilePhotoUrl,
       coverPhotoUrl: this.state.ps_coverPhotoUrl, aiPersonaText: this.state.ps_aiPersonaText,
-      themeColor: this.state.ps_themeColor, bioText: this.state.ps_bioText,
+      themeColor: this.state.ps_themeColor, bioText: bioValue,
       socialLinks: { facebook: this.state.ps_fb, tiktok: this.state.ps_tiktok, youtube: this.state.ps_youtube, instagram: this.state.ps_instagram },
     };
     try {
