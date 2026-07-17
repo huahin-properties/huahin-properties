@@ -374,9 +374,38 @@ export async function adminSignIn(email, password) {
   await a.signInWithEmailAndPassword(email, password);
 }
 
+// Tracks whether the CURRENT signed-in user has actually been verified as
+// admin/staff (matches Firestore's isAdmin() rule: hardcoded owner UID OR
+// an adminUsers/{uid} doc exists) — set by onAdminAuthReady() below. Before
+// this fix, isAdminAuthed() only checked "is ANY Firebase user signed in",
+// so a ordinary lister/trial account (signed in for their own Lister
+// Dashboard) could open every admin-only page (Admin Dashboard, Owners,
+// Site Content, Property Map, AI Quick Add) and see internal data — the
+// UI never verified the signed-in identity was actually an admin, it just
+// checked "signed in at all". Firestore Rules already correctly restrict
+// actual writes to real admins, but the page itself must not render for a
+// non-admin visitor at all.
+let _verifiedAdminUid = null; // uid string once confirmed admin, else null
+
+async function verifyRealAdmin(uid) {
+  if (!uid) { _verifiedAdminUid = null; return false; }
+  try {
+    // This exact read is gated by `allow read: if isAdmin();` in
+    // firestore.rules — it throws permission-denied for any non-admin uid,
+    // so a successful (even empty) result IS the admin proof. Mirrors the
+    // server-side isAdmin() check instead of trusting "just signed in".
+    await db().collection("adminUsers").doc(uid).get();
+    _verifiedAdminUid = uid;
+    return true;
+  } catch (e) {
+    _verifiedAdminUid = null;
+    return false;
+  }
+}
+
 export function isAdminAuthed() {
   const a = authApp();
-  return !!(a && a.currentUser);
+  return !!(a && a.currentUser && _verifiedAdminUid === a.currentUser.uid);
 }
 
 export function logoutAdmin() {
@@ -399,7 +428,18 @@ export function onAdminAuthReady() {
     let waited = 0;
     const poll = () => {
       const a = authApp();
-      if (a) { const unsub = a.onAuthStateChanged((user) => { unsub(); resolve(user); }); return; }
+      if (a) {
+        const unsub = a.onAuthStateChanged(async (user) => {
+          unsub();
+          // Verify real admin status (see verifyRealAdmin above) BEFORE
+          // resolving, so requireAdminAuth()'s synchronous check right
+          // after this await already has the correct answer.
+          if (user) await verifyRealAdmin(user.uid);
+          else _verifiedAdminUid = null;
+          resolve(user);
+        });
+        return;
+      }
       waited += 50;
       if (waited >= 8000) { resolve(null); return; }
       setTimeout(poll, 50);
@@ -412,6 +452,13 @@ export function onAdminAuthReady() {
 // awaiting onAdminAuthReady()); redirects immediately if not signed in.
 export function requireAdminAuth() {
   if (!isAdminAuthed()) {
+    // Signed in as SOME account but not a verified admin (e.g. a lister/
+    // trial account that stumbled onto an admin URL) — sign them out of
+    // that non-admin session before sending to the login screen, so the
+    // Admin Login page doesn't see a leftover non-admin session and so a
+    // shared/public device doesn't stay signed in as that other person.
+    const a = authApp();
+    if (a && a.currentUser) a.signOut().catch(() => {});
     window.location.href = "Admin Login.dc.html";
     return false;
   }
