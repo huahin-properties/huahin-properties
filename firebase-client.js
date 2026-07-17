@@ -51,6 +51,15 @@ export async function setDoc(collectionName, id, data) {
   await db().collection(collectionName).doc(String(id)).set(data);
 }
 
+// Fresh single-doc read (bypasses any client-cached list) — use this right
+// before merging/overwriting a doc's non-editable lifecycle fields, so a
+// change made elsewhere (e.g. an admin approval) in between page load and
+// save isn't silently clobbered by a stale client-side copy.
+export async function fetchDocById(collectionName, id) {
+  const snap = await db().collection(collectionName).doc(String(id)).get();
+  return snap.exists ? { ...snap.data(), id: snap.id } : null;
+}
+
 export async function deleteDocById(collectionName, id) {
   await db().collection(collectionName).doc(String(id)).delete();
 }
@@ -363,9 +372,20 @@ export function logoutAdmin() {
 // false "not signed in yet" read.
 export function onAdminAuthReady() {
   return new Promise((resolve) => {
-    const a = authApp();
-    if (!a) { resolve(null); return; }
-    const unsub = a.onAuthStateChanged((user) => { unsub(); resolve(user); });
+    // The Firebase SDK <script> tags load async in <helmet> — on a slow
+    // connection/cold cache, window.firebase can still be undefined the
+    // instant componentDidMount runs. Poll briefly instead of treating
+    // "SDK not loaded yet" as "definitely signed out": that was a real bug
+    // that permanently bounced genuinely signed-in users back to login.
+    let waited = 0;
+    const poll = () => {
+      const a = authApp();
+      if (a) { const unsub = a.onAuthStateChanged((user) => { unsub(); resolve(user); }); return; }
+      waited += 50;
+      if (waited >= 8000) { resolve(null); return; }
+      setTimeout(poll, 50);
+    };
+    poll();
   });
 }
 

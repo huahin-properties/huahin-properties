@@ -269,14 +269,14 @@
         <sc-if value="{{ isListLayout }}" hint-placeholder-val="{{ true }}">
           <div style="display:flex; flex-direction:column; gap:10px;">
             <sc-for list="{{ properties }}" as="p" hint-placeholder-count="0">
-              <div style="background:white; border-radius:8px; border:1px solid oklch(92% 0.01 70); display:flex; align-items:stretch; overflow:hidden;">
+              <div style="background:white; border-radius:8px; border:1px solid oklch(92% 0.01 70); display:flex; align-items:stretch; overflow:hidden; flex-wrap:wrap;">
                 <div style="{{ p.coverStyleSmall }}">
                   <sc-if value="{{ p.noCover }}">
                     <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:24px; color:oklch(75% 0.01 70);">🏠</div>
                   </sc-if>
                   <div style="position:absolute; top:4px; left:4px; font-size:10px; padding:2px 7px; border-radius:100px; background:{{ p.lifecycleBg }}; color:{{ p.lifecycleColor }};">{{ p.lifecycleLabel }}</div>
                 </div>
-                <div style="flex:1; padding:10px 14px; min-width:0;">
+                <div style="flex:1 1 180px; min-width:180px; padding:10px 14px;">
                   <div style="display:flex; align-items:center; gap:8px; margin-bottom:2px; flex-wrap:wrap;">
                     <span style="font-size:12.5px; font-weight:700; color:oklch(40% 0.13 25);">{{ p.code }}</span>
                     <span style="font-size:10.5px; padding:2px 8px; border-radius:100px; background:{{ p.statusBg }}; color:{{ p.statusColor }};">{{ p.statusLabel }}</span>
@@ -288,7 +288,7 @@
                     <sc-if value="{{ p.expiryLabel }}"><span>⏳ {{ p.expiryLabel }}</span></sc-if>
                   </div>
                 </div>
-                <div style="display:flex; align-items:center; border-left:1px solid oklch(93% 0.01 70);">
+                <div style="display:flex; align-items:center; flex-wrap:wrap; border-left:1px solid oklch(93% 0.01 70);">
                   <div onClick="{{ p.onEdit }}" style="padding:0 14px; text-align:center; font-size:11px; color:oklch(35% 0.02 60); cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;">✏️<br/>แก้ไข</div>
                   <div onClick="{{ p.onPublish }}" style="padding:0 14px; text-align:center; font-size:11px; color:{{ p.publishColor }}; cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">{{ p.publishIcon }}<br/>{{ p.publishLabel }}</div>
                   <div onClick="{{ p.onPostText }}" style="padding:0 14px; text-align:center; font-size:11px; color:oklch(35% 0.02 60); cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">🤖<br/>AI</div>
@@ -741,7 +741,16 @@ class Component extends DCLogic {
       } catch (e) { console.warn("Auto-translate failed, saving original text only:", e); }
     }
     const isEditingExisting = !!this.state.editingId;
-    const existing = isEditingExisting ? (this.state.properties.find((p) => p.id === id) || {}) : {};
+    // Fresh read right before merging — NOT this.state.properties (a cache
+    // from page-load/last-refresh). If an admin approved/rejected/expired
+    // this listing after this tab loaded but before this save, using the
+    // cache here would silently overwrite that status change back to
+    // whatever it was on load (verified reproducible during audit).
+    let existing = {};
+    if (isEditingExisting) {
+      try { existing = (await this._fb.fetchDocById("properties", id)) || {}; }
+      catch (e) { existing = this.state.properties.find((p) => p.id === id) || {}; }
+    }
     const previousIsDraft = isEditingExisting ? existing.isDraft : true;
     // setDoc() below is a plain .set() (full overwrite, no merge) — must
     // carry forward every listing-lifecycle field (status/dates/view count)
