@@ -139,13 +139,16 @@
           <div style="font-family:'Playfair Display',serif; font-size:26px; color:oklch(20% 0.02 60);">{{ p.priceLabel }}</div>
         </div>
 
-        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:16px; padding:20px; background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:6px;">
-          <sc-for list="{{ specs }}" as="s" hint-placeholder-count="6">
+        <div>
+          <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60); margin-bottom:12px;">{{ t.property_overview }}</div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:16px; padding:20px; background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:6px;">
+            <sc-for list="{{ specs }}" as="s" hint-placeholder-count="6">
             <div>
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">{{ s.label }}</div>
               <div style="font-size:16px; color:oklch(22% 0.02 60); font-weight:500;">{{ s.value }}</div>
             </div>
           </sc-for>
+        </div>
         </div>
 
         <div>

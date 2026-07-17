@@ -312,8 +312,12 @@ class Component extends DCLogic {
     const onLangChange = (code) => this.selectLang(code);
     const langOptions = mod.LANGS.map((l) => ({ code: l, label: mod.LANG_LABELS[l] }));
 
-    const areaLabelOf = (id) => mod.AREAS.find((a) => a.id === id).label[lang];
-    const typeLabelOf = (id) => mod.TYPES.find((ty) => ty.id === id).label[lang];
+    // Guarded — a self-serve listing can have an area/type value that
+    // doesn't match anything in mod.AREAS/mod.TYPES (empty/legacy/bad data);
+    // .find() returning undefined must degrade to showing the raw id
+    // instead of crashing the whole results page.
+    const areaLabelOf = (id) => { const f = mod.AREAS.find((a) => a.id === id); return f ? f.label[lang] : (id || ""); };
+    const typeLabelOf = (id) => { const f = mod.TYPES.find((ty) => ty.id === id); return f ? f.label[lang] : (id || ""); };
     const statusColorOf = (s) => ({ sale: "oklch(40% 0.13 25)", rent: "oklch(45% 0.09 230)", sold: "oklch(45% 0.02 60)", reserved: "oklch(62% 0.16 85)" }[s]);
 
     const f = this.state.filters;
@@ -335,8 +339,8 @@ class Component extends DCLogic {
         // label was never part of the searchable text. Include the area +
         // type label (Thai/current-lang name) and description explicitly.
         const descText = p.description && (typeof p.description === "object" ? p.description[lang] : p.description);
-        const areaText = p.area && mod.AREAS.find((a) => a.id === p.area);
-        const typeText = p.type && mod.TYPES.find((ty) => ty.id === p.type);
+        const areaText = p.area ? mod.AREAS.find((a) => a.id === p.area) : null;
+        const typeText = p.type ? mod.TYPES.find((ty) => ty.id === p.type) : null;
         const haystack = [
           p.id, p.zone, p.title && p.title[lang], p.shortDesc && p.shortDesc[lang], descText,
           areaText && areaText.label[lang], areaText && areaText.label.th, areaText && areaText.label.en,
@@ -373,13 +377,16 @@ class Component extends DCLogic {
       statusLabel: mod.STATUS[p.status][lang],
       isFeatured: !!(p.featuredUntil && p.featuredUntil > now0),
       isVip: !!(p.vipTier && p.vipUntil > now0),
-      coverPhotoLabel: (p.photos[0] && p.photos[0].label) || p.photos[0] || "photo",
-      coverPhotoBg: (p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
-      noPhoto: !(p.photos[0] && p.photos[0].url),
+      coverPhotoLabel: (p.photos && p.photos[0] && p.photos[0].label) || (p.photos && p.photos[0]) || "photo",
+      coverPhotoBg: (p.photos && p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
+      noPhoto: !(p.photos && p.photos[0] && p.photos[0].url),
       zone: p.zone,
       propertyId: p.id,
       areaLabel: areaLabelOf(p.area),
-      title: p.title[lang],
+      // Self-serve listings (Lister Dashboard) have no `title` field at
+      // all — fall back to zone, then the property code, so a card can
+      // still render instead of crashing the whole results page.
+      title: (p.title && p.title[lang]) || p.zone || p.id,
       typeLabel: typeLabelOf(p.type),
       hasBedrooms: !!p.bedrooms,
       bedrooms: p.bedrooms,
