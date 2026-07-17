@@ -308,10 +308,10 @@ function defaultDashboardV2() {
       checklist: [chk(true,"หน้าแสดงผลเปิดได้"), chk(true,"รายละเอียดประกาศแสดงถูกต้อง"), chk(true,"รูปภาพ 8 รูปแสดงถูกต้อง"), chk(true,"Trial user เข้าถึงได้")],
       evidence: [{ text: "17/07/2569 · ตรวจสอบ read-only ผ่าน Firestore + หน้าเว็บจริง · PASS" }],
     }),
-    mod("listerdash", "Lister Dashboard", "p2", "ready_for_review", {
+    mod("listerdash", "Lister Dashboard", "p2", "completed", {
       completionCriteria: "ทดสอบครบทุกฟังก์ชัน (โพสต์/แก้ไข/ลบ/อัปโหลดรูป/ต่ออายุ) ก่อนถือว่า Completed",
-      checklist: [chk(true,"Dashboard access"), chk(true,"Edit flow (reassign ownership)"), chk(false,"ฟังก์ชันอื่นยังไม่ได้ตรวจครบ")],
-      evidence: [{ text: "17/07/2569 · ตรวจ dashboard access + edit flow เฉพาะจุด · PASS" }],
+      checklist: [chk(true,"Dashboard access"), chk(true,"Edit flow (reassign ownership)"), chk(true,"Core Feature Audit: Login→Dashboard→List→Details→Edit→Save→Image mgmt→Responsive"), chk(true,"Production verification: แก้ไขประกาศที่มีรูปเดิม + บันทึกสำเร็จ ไม่มี CORS error")],
+      evidence: [{ text: "17/07/2569 · Core Feature Audit ผ่านทุกจุด + ยืนยันบน Production จริง · PASS" }],
     }),
     mod("admindash", "Admin Dashboard", "p2", "not_verified"),
     mod("ownermgmt", "Owner Management", "p2", "not_verified"),
@@ -327,6 +327,11 @@ function defaultDashboardV2() {
       checklist: [chk(true,"Ownership/reassign ทดสอบแล้ว"), chk(false,"Trial flow อื่นยังไม่ตรวจครบ")],
     }),
     mod("billing", "Subscription and Payment", "p3", "not_verified"),
+    mod("minisite", "Agent Mini-Site / Custom Profile URL", "p3", "waiting_decision", {
+      completionCriteria: "publicSlug data model + reserved slugs + Mini-Site template + package entitlement + SEO canonical/sitemap ออกแบบและสร้างเสร็จ",
+      notes: "อนุมัติเข้า Roadmap แล้ว (17/07/2569) — ยังไม่เริ่มเขียนโค้ด. แนวคิด: สมาชิกเลือก URL ส่วนตัว เช่น huahin.properties/pim ผ่าน field publicSlug (a-z0-9- เท่านั้น, ห้ามซ้ำ, มี reserved slugs เช่น admin/login/search/about/contact/owner/lister/dashboard). หน้า Mini-Site แสดงชื่อ/โลโก้/ภาพปก/สีแบรนด์/แนะนำตัว/เบอร์โทร/LINE/WhatsApp/Email/รายการทรัพย์/QR/ปุ่มแชร์ — สมาชิกแก้ได้เฉพาะเนื้อหาแบรนด์ ระบบคุม Layout/Responsive/SEO/Performance เอง. Package: Trial=URL ระบบกำหนด, Basic=Custom slug, Pro=Custom slug+โลโก้+สี, Premium=Custom Domain (อนาคต).",
+      checklist: [chk(false,"ออกแบบ data model publicSlug"), chk(false,"ออกแบบ reserved slug rules"), chk(false,"ออกแบบ Mini-Site template"), chk(false,"วาง package entitlement"), chk(false,"วาง SEO canonical และ sitemap")],
+    }),
     mod("seo", "SEO", "p4", "not_verified"),
     mod("perf", "Performance", "p5", "not_verified"),
     mod("security", "Security", "p1", "in_progress", {
@@ -369,6 +374,9 @@ function defaultDashboardV2() {
     nextActions: [
       { text: "ล็อก Firestore Security Rules ให้ครบก่อน 08/08/2569", meta: "" },
       { text: "Deploy firestore.rules ที่แก้ไขล่าสุด", meta: "" },
+      { text: "[Roadmap] Agent Mini-Site: ออกแบบ data model publicSlug", meta: "High priority" },
+      { text: "[Roadmap] Agent Mini-Site: ออกแบบ reserved slug rules", meta: "High priority" },
+      { text: "[Roadmap] Agent Mini-Site: ออกแบบ Mini-Site template", meta: "High priority" },
       { text: "ตรวจสอบ Storage orphan files ของ HH-70724", meta: "" },
     ],
     needsDecision: [
@@ -378,6 +386,7 @@ function defaultDashboardV2() {
     recentlyCompleted: [
       { text: "HH-13293 ownership reassigned สำเร็จ — ตรวจสอบแล้ว PASS", meta: "17/07/2569" },
       { text: "Trial user เห็น/แก้ไข HH-13293 ได้ — ตรวจสอบแล้ว PASS", meta: "17/07/2569" },
+      { text: "Lister Dashboard Core Feature Audit เสร็จสมบูรณ์ — ตรวจสอบแล้ว PASS", meta: "17/07/2569" },
       { text: "Property Details ตรวจสอบผ่านทุกจุด", meta: "17/07/2569" },
       { text: "Dashboard access ตรวจสอบผ่าน", meta: "17/07/2569" },
       { text: "โควตารูปจำกัดถูกต้องที่ 8 รูป", meta: "17/07/2569" },
@@ -394,6 +403,7 @@ function defaultDashboardV2() {
       { text: "ยังไม่ได้ตัดสินใจเรื่องประกาศสาธิต 22 รายการ", meta: "" },
     ],
     decisions: [
+      { text: "อนุมัติ Agent Mini-Site และ Custom Profile URL เป็นฟีเจอร์หลักของแพลตฟอร์ม เพื่อให้สมาชิกมีเว็บไซต์ส่วนตัวภายใต้ huahin.properties", meta: "17/07/2569 · Product Owner" },
       { text: "อนุมัติ Reassign เจ้าของ HH-13293 ไปยังบัญชีทดลองปัจจุบัน", meta: "17/07/2569 · Product Owner" },
       { text: "อนุมัติลบ properties/HH-70724 + propertyPhotos ที่เกี่ยวข้อง", meta: "17/07/2569 · Product Owner" },
       { text: "อนุมัติลดรูปเกินโควตาของ HH-13293/HH-70724 เหลือ 8 รูป", meta: "17/07/2569 · Product Owner" },
@@ -403,6 +413,7 @@ function defaultDashboardV2() {
       { text: "เพิ่ม fallback รายละเอียด + checklist คุณสมบัติใน Lister Dashboard | ผล: PASS", meta: "17/07/2569 · Claude" },
       { text: "สร้าง CEO Dashboard v1 | ผล: PASS", meta: "17/07/2569 · Claude" },
       { text: "อัปเกรด CEO Dashboard v2 — Command Center, Milestones, module detail | ผล: รอตรวจสอบ", meta: "17/07/2569 · Claude" },
+      { text: "Production verification: แก้ไขประกาศที่มีรูปเดิมและบันทึก | ผล: PASS", meta: "17/07/2569 · Product Owner" },
     ],
     updatedAt: null, updatedBy: "system (ค่าเริ่มต้น)",
   };
