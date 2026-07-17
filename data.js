@@ -775,7 +775,7 @@ export const I18N = {
     sqm: "sqm", per_month: "/ month",
     beach: "beach", town: "town",
     gallery_photo: "Photo",
-    property_overview: "Overview", property_description: "Property Description", property_features: "Features & Amenities", property_location: "Location", similar_properties: "Similar Properties",
+    property_overview: "Overview", property_description: "Property Description", no_description: "No description provided yet.", property_features: "Features & Amenities", property_location: "Location", similar_properties: "Similar Properties",
     contact_agent: "Contact an Agent", enquiry_form: "Send an Enquiry", name_label: "Name", email_label: "Email", phone_label: "Phone", message_label: "Message", send: "Send Enquiry",
     call: "Call", whatsapp: "WhatsApp", line_app: "Line", email_cta: "Email",
     sell_title: "List Your Property", sell_sub: "Tell us about your property — for sale or for rent — and our team will get in touch within 24 hours.",
@@ -844,7 +844,7 @@ export const I18N = {
     sqm: "ตร.ม.", per_month: "/ เดือน",
     beach: "ชายหาด", town: "ตัวเมือง",
     gallery_photo: "รูปภาพ",
-    property_overview: "รายละเอียดสรุป", property_description: "รายละเอียดประกาศ", property_features: "คุณสมบัติและสิ่งอำนวยความสะดวก", property_location: "ทำเล", similar_properties: "ทรัพย์ใกล้เคียง",
+    property_overview: "รายละเอียดสรุป", property_description: "รายละเอียดประกาศ", no_description: "ยังไม่มีรายละเอียด", property_features: "คุณสมบัติและสิ่งอำนวยความสะดวก", property_location: "ทำเล", similar_properties: "ทรัพย์ใกล้เคียง",
     contact_agent: "ติดต่อเอเจนต์", enquiry_form: "ส่งข้อความสอบถาม", name_label: "ชื่อ", email_label: "อีเมล", phone_label: "เบอร์โทร", message_label: "ข้อความ", send: "ส่งข้อความ",
     call: "โทร", whatsapp: "WhatsApp", line_app: "Line", email_cta: "อีเมล",
     sell_title: "ฝากขาย / ฝากให้เช่าทรัพย์", sell_sub: "บอกรายละเอียดทรัพย์ของคุณ ทั้งขายหรือเช่า ทีมงานจะติดต่อกลับภายใน 24 ชั่วโมง",
@@ -913,7 +913,7 @@ export const I18N = {
     sqm: "кв.м", per_month: "/ месяц",
     beach: "пляж", town: "город",
     gallery_photo: "Фото",
-    property_overview: "Обзор", property_description: "Описание", property_features: "Особенности и удобства", property_location: "Расположение", similar_properties: "Похожие объекты",
+    property_overview: "Обзор", property_description: "Описание", no_description: "Описание пока не добавлено.", property_features: "Особенности и удобства", property_location: "Расположение", similar_properties: "Похожие объекты",
     contact_agent: "Связаться с агентом", enquiry_form: "Отправить запрос", name_label: "Имя", email_label: "Email", phone_label: "Телефон", message_label: "Сообщение", send: "Отправить запрос",
     call: "Позвонить", whatsapp: "WhatsApp", line_app: "Line", email_cta: "Email",
     sell_title: "Разместить объект", sell_sub: "Расскажите нам о вашей недвижимости — на продажу или в аренду — и наша команда свяжется с вами в течение 24 часов.",
@@ -982,7 +982,7 @@ export const I18N = {
     sqm: "kvm", per_month: "/ måned",
     beach: "strand", town: "by",
     gallery_photo: "Bilde",
-    property_overview: "Oversikt", property_description: "Beskrivelse", property_features: "Fasiliteter", property_location: "Beliggenhet", similar_properties: "Lignende eiendommer",
+    property_overview: "Oversikt", property_description: "Beskrivelse", no_description: "Ingen beskrivelse ennå.", property_features: "Fasiliteter", property_location: "Beliggenhet", similar_properties: "Lignende eiendommer",
     contact_agent: "Kontakt megler", enquiry_form: "Send en forespørsel", name_label: "Navn", email_label: "E-post", phone_label: "Telefon", message_label: "Melding", send: "Send forespørsel",
     call: "Ring", whatsapp: "WhatsApp", line_app: "Line", email_cta: "E-post",
     sell_title: "Legg ut din eiendom", sell_sub: "Fortell oss om eiendommen din — til salgs eller utleie — så tar teamet vårt kontakt innen 24 timer.",
@@ -1051,7 +1051,7 @@ export const I18N = {
     sqm: "m²", per_month: "/ Monat",
     beach: "Strand", town: "Stadt",
     gallery_photo: "Foto",
-    property_overview: "Übersicht", property_description: "Beschreibung", property_features: "Ausstattung & Annehmlichkeiten", property_location: "Lage", similar_properties: "Ähnliche Immobilien",
+    property_overview: "Übersicht", property_description: "Beschreibung", no_description: "Noch keine Beschreibung vorhanden.", property_features: "Ausstattung & Annehmlichkeiten", property_location: "Lage", similar_properties: "Ähnliche Immobilien",
     contact_agent: "Makler kontaktieren", enquiry_form: "Anfrage senden", name_label: "Name", email_label: "E-Mail", phone_label: "Telefon", message_label: "Nachricht", send: "Anfrage senden",
     call: "Anrufen", whatsapp: "WhatsApp", line_app: "Line", email_cta: "E-Mail",
     sell_title: "Immobilie inserieren", sell_sub: "Erzählen Sie uns von Ihrer Immobilie — zum Verkauf oder zur Miete — und unser Team meldet sich innerhalb von 24 Stunden.",
@@ -1120,7 +1120,7 @@ export const I18N = {
     sqm: "平方米", per_month: "/ 月",
     beach: "海滩", town: "市中心",
     gallery_photo: "照片",
-    property_overview: "概览", property_description: "详细描述", property_features: "特色与设施", property_location: "位置", similar_properties: "相似房源",
+    property_overview: "概览", property_description: "详细描述", no_description: "暂无描述。", property_features: "特色与设施", property_location: "位置", similar_properties: "相似房源",
     contact_agent: "联系经纪人", enquiry_form: "发送咨询", name_label: "姓名", email_label: "邮箱", phone_label: "电话", message_label: "留言", send: "发送咨询",
     call: "致电", whatsapp: "WhatsApp", line_app: "Line", email_cta: "邮箱",
     sell_title: "委托出售/出租房产", sell_sub: "告诉我们您的房产信息——出售或出租——我们的团队将在24小时内与您联系。",
@@ -1189,7 +1189,7 @@ export const I18N = {
     sqm: "m²", per_month: "/ mois",
     beach: "Plage", town: "Ville",
     gallery_photo: "Photo",
-    property_overview: "Aperçu", property_description: "Description", property_features: "Équipements & prestations", property_location: "Emplacement", similar_properties: "Biens similaires",
+    property_overview: "Aperçu", property_description: "Description", no_description: "Aucune description pour le moment.", property_features: "Équipements & prestations", property_location: "Emplacement", similar_properties: "Biens similaires",
     contact_agent: "Contacter un agent", enquiry_form: "Envoyer une demande", name_label: "Nom", email_label: "E-mail", phone_label: "Téléphone", message_label: "Message", send: "Envoyer la demande",
     call: "Appeler", whatsapp: "WhatsApp", line_app: "Line", email_cta: "E-mail",
     sell_title: "Confier un bien", sell_sub: "Parlez-nous de votre bien — à vendre ou à louer — et notre équipe vous contactera sous 24 heures.",
@@ -1258,7 +1258,7 @@ export const I18N = {
     sqm: "m²", per_month: "/ mese",
     beach: "Spiaggia", town: "Città",
     gallery_photo: "Foto",
-    property_overview: "Panoramica", property_description: "Descrizione", property_features: "Caratteristiche e servizi", property_location: "Posizione", similar_properties: "Immobili simili",
+    property_overview: "Panoramica", property_description: "Descrizione", no_description: "Nessuna descrizione ancora disponibile.", property_features: "Caratteristiche e servizi", property_location: "Posizione", similar_properties: "Immobili simili",
     contact_agent: "Contatta un agente", enquiry_form: "Invia una richiesta", name_label: "Nome", email_label: "E-mail", phone_label: "Telefono", message_label: "Messaggio", send: "Invia richiesta",
     call: "Chiama", whatsapp: "WhatsApp", line_app: "Line", email_cta: "E-mail",
     sell_title: "Affida un immobile", sell_sub: "Raccontaci del tuo immobile — in vendita o in affitto — e il nostro team ti contatterà entro 24 ore.",
@@ -1370,7 +1370,7 @@ export async function getEffectiveProperties(mod) {
     const visible = properties.filter((p) => p.listingStatus === "live" || (p.listingStatus === undefined && !p.isDraft));
     const photosById = {};
     allPhotos.forEach((ph) => { photosById[ph.id] = ph.dataUrl; });
-    return visible.map((p) => {
+    const fromFirestore = visible.map((p) => {
       const photos = (p.photos || []).map((ph, i) => {
         const label = typeof ph === "string" ? ph : ph.label;
         const url = photosById[`${p.id}-${i}`] || (typeof ph === "object" && ph.url) || "";
@@ -1388,6 +1388,18 @@ export async function getEffectiveProperties(mod) {
         features: p.features || [], distanceBeach: p.distanceBeach || 0, distanceTown: p.distanceTown || 0,
       };
     });
+    // CRITICAL: the bundled sample catalog (mod.PROPERTIES — HH-101, CA-301,
+    // etc.) must stay visible even after Firestore has real data, otherwise
+    // every demo listing silently vanishes site-wide (Home/Search/Property
+    // Details) the moment even ONE real self-serve listing exists — this
+    // was happening because the code used to RETURN ONLY the Firestore
+    // results once Firestore was non-empty, never merging in the bundled
+    // catalog. Firestore is the source of truth for any id it already has
+    // (an admin/seed doc may have been edited there); any bundled sample id
+    // NOT present in Firestore at all is appended as-is.
+    const firestoreIds = new Set(properties.map((p) => p.id));
+    const staticOnly = (mod.PROPERTIES || []).filter((p) => !firestoreIds.has(p.id));
+    return [...fromFirestore, ...staticOnly];
   } catch (e) {
     console.warn("getEffectiveProperties: Firebase fetch failed, using bundled sample data:", e);
     return mod.PROPERTIES;
