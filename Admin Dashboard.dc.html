@@ -1022,10 +1022,26 @@ class Component extends DCLogic {
 
   requestDelete(id) { this.setState({ confirmingDeleteId: id }); }
   cancelDelete() { this.setState({ confirmingDeleteId: null }); }
-  confirmDelete(id) {
+  async confirmDelete(id) {
     this.persist(this.state.properties.filter((p) => p.id !== id));
     this.setState({ confirmingDeleteId: null });
-    this._fb.deleteDocById("properties", id).catch((e) => console.warn("Firebase delete failed:", e));
+    try {
+      // Delete propertyPhotos docs BEFORE the property doc itself: the
+      // propertyPhotos write rule (for a non-admin caller) requires the
+      // parent properties/{id} doc to still exist, so deleting photos
+      // first is the order that works for every caller, not just Admin.
+      // Not doing this left orphan propertyPhotos docs behind on every
+      // delete (this exact issue needed manual Firestore cleanup earlier
+      // for HH-70724). Underlying Storage .webp files still aren't removed
+      // here (no client-side Storage delete helper exists yet) — same
+      // known limitation already tracked on the CEO Dashboard as "Storage
+      // orphan files", not new scope for this fix.
+      const orphanPhotos = await this._fb.fetchPhotosFor(id);
+      await Promise.all(orphanPhotos.map((ph) => this._fb.deleteDocById("propertyPhotos", ph.id)));
+      await this._fb.deleteDocById("properties", id);
+    } catch (e) {
+      console.warn("Firebase delete failed:", e);
+    }
   }
 
   renderVals() {

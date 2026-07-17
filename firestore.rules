@@ -77,9 +77,20 @@ service cloud.firestore {
     // listerId) — needed for self-serve photo upload in Lister Dashboard.
     match /propertyPhotos/{id} {
       allow read: if true;
-      allow write: if isAdmin() || (request.auth != null &&
+      // create/update carry the new doc as request.resource; a delete has
+      // no request.resource at all (there's no incoming data), so the old
+      // single "allow write" rule read request.resource.data.propertyId on
+      // EVERY operation including delete — that threw and silently denied
+      // every non-admin photo delete, which is exactly what made this rule
+      // impossible to test as a plain lister (found auditing Admin
+      // Dashboard's delete-cleanup fix). Delete must check resource (the
+      // doc being removed) instead.
+      allow create, update: if isAdmin() || (request.auth != null &&
         exists(/databases/$(database)/documents/properties/$(request.resource.data.propertyId)) &&
         get(/databases/$(database)/documents/properties/$(request.resource.data.propertyId)).data.listerId == request.auth.uid);
+      allow delete: if isAdmin() || (request.auth != null &&
+        exists(/databases/$(database)/documents/properties/$(resource.data.propertyId)) &&
+        get(/databases/$(database)/documents/properties/$(resource.data.propertyId)).data.listerId == request.auth.uid);
     }
     // CEO Project Dashboard doc is internal-only (risks/decisions not meant
     // for public eyes) — carved out of the otherwise-public siteContent
