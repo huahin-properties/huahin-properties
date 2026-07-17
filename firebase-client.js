@@ -137,9 +137,28 @@ async function dataUrlToBlob(dataUrl) {
 // bit when many/large photos were embedded as base64 data: URLs directly.
 // The Firestore field is still named "dataUrl" for backward compatibility
 // with every page that already reads it — its value is just a URL now.
-export async function savePhoto(propertyId, index, dataUrl) {
+//
+// IMPORTANT: `photoUrl` here is EITHER a brand-new "data:" URL straight out
+// of fileToDataUrl() (a photo the user just picked), OR an already-hosted
+// "https://...firebasestorage..." URL for a photo that existed before this
+// save (just possibly moved to a new index because an earlier photo was
+// deleted/reordered). Only the first case needs re-uploading. Fetching an
+// already-hosted Storage download URL back into the browser to re-upload
+// it fails with a CORS error — Firebase Storage's default bucket has no
+// CORS policy for plain fetch() (an <img src> tag can display the URL with
+// no CORS involved, but JS fetch() of the same URL is a real cross-origin
+// request and gets blocked) — this doesn't need gsutil CORS setup to fix;
+// simply never re-fetch bytes we already have hosted. So: if it's already
+// an https URL, just (re)point the Firestore doc at it directly, no
+// upload. If a caller explicitly needs to force a re-upload of an https
+// URL for some other reason, they can still call uploadImage directly.
+export async function savePhoto(propertyId, index, photoUrl) {
   const id = `${propertyId}-${index}`;
-  const blob = await dataUrlToBlob(dataUrl);
+  if (typeof photoUrl === "string" && /^https?:\/\//i.test(photoUrl)) {
+    await setDoc("propertyPhotos", id, { propertyId, index, dataUrl: photoUrl });
+    return id;
+  }
+  const blob = await dataUrlToBlob(photoUrl);
   const url = await uploadImage(blob, `propertyPhotos/${id}.webp`);
   await setDoc("propertyPhotos", id, { propertyId, index, dataUrl: url });
   return id;

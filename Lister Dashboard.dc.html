@@ -779,9 +779,14 @@ class Component extends DCLogic {
     };
     try {
       await this._fb.setDoc("properties", id, payload);
-      // Renumber all photos contiguously (0..n-1) every save — savePhoto
-      // re-fetches+re-uploads even already-hosted URLs, which is fine since
-      // Storage download URLs are publicly fetchable.
+      // Renumber all photos contiguously (0..n-1) every save. savePhoto()
+      // (firebase-client.js) only re-uploads bytes for brand-new "data:"
+      // URLs; for an existing photo whose URL is already an https Storage
+      // link it just re-points the Firestore doc at that same URL with no
+      // fetch/upload — re-fetching an already-hosted Storage URL from JS
+      // hits a CORS error (a plain <img> tag can show it with no CORS
+      // involved, but fetch() of the same URL is a real cross-origin
+      // request the default Storage bucket rejects).
       await Promise.all(allPhotoUrls.map((url, i) => this._fb.savePhoto(id, i, url)));
       for (let i = allPhotoUrls.length; i < 20; i++) {
         try { await this._fb.deleteDocById("propertyPhotos", `${id}-${i}`); } catch (e) {}
