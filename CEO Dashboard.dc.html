@@ -314,7 +314,12 @@ function defaultDashboardV2() {
       evidence: [{ text: "17/07/2569 · Core Feature Audit ผ่านทุกจุด + ยืนยันบน Production จริง · PASS" }],
     }),
     mod("admindash", "Admin Dashboard", "p2", "not_verified"),
-    mod("ownermgmt", "Owner Management", "p2", "not_verified"),
+    mod("ownermgmt", "Owner Management", "p2", "completed", {
+      completionCriteria: "List/Search ถูกต้อง, ไม่มี orphan property↔owner, Firestore Rules ป้องกันผู้ใช้ทั่วไปครบ",
+      checklist: [chk(true,"Owner List + Search"), chk(true,"Property↔Owner ไม่มี orphan (ตรวจข้อมูลจริง 32 ทรัพย์/26 owner = 0 orphan)"), chk(true,"Firestore Rules: non-admin เข้าไม่ได้เลยทั้งหน้า"), chk(true,"Reassign ผ่านฟอร์มแก้ไขทรัพย์ (Admin Dashboard)")],
+      evidence: [{ text: "17/07/2569 · Core Feature Audit: ตรวจข้อมูลจริงบน Production, ไม่มี orphan, auth gate บล็อกผู้ใช้ทั่วไปสำเร็จ · PASS" }],
+      notes: "หน้านี้เป็น Contact Directory (อ่านอย่างเดียว) — ไม่มีปุ่ม Delete Owner หรือ Create Owner แยกในหน้านี้ (สร้าง/แก้ไข Owner ทำผ่านฟอร์มแก้ไขทรัพย์ใน Admin Dashboard) และยังไม่มีการตรวจชื่อ/เบอร์ซ้ำตอนสร้าง Owner ใหม่ — ไม่ใช่บั๊ก เป็นขอบเขตฟีเจอร์ปัจจุบัน",
+    }),
     mod("aiquickadd", "AI Quick Add", "p2", "not_verified"),
     mod("i18n", "Multi-language", "p2", "not_verified"),
     mod("images", "Image Management", "p1", "in_progress", {

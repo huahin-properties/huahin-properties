@@ -90,7 +90,7 @@ class Component extends DCLogic {
     const fb = await import("./firebase-client.js");
     this._fb = fb;
     await fb.onAdminAuthReady();
-    if (!fb.isAdminAuthed()) { window.location.href = "Admin Login.dc.html"; return; }
+    if (!fb.requireAdminAuth()) return;
     try {
       const [properties, listers, suspects] = await Promise.all([
         fb.fetchCollection("properties"),

@@ -47,8 +47,20 @@ export async function fetchCollection(name) {
   return snap.docs.map((d) => ({ ...d.data(), id: d.id }));
 }
 
+// merge:true is critical here — WITHOUT it, .set() fully REPLACES the
+// document, so every partial-patch caller in this file (approveListing,
+// rejectListing, scheduleArchival, cancelArchival, the archival/expiry/
+// photo-purge sweeps, markLeadContacted, etc. — each only passes 1-3
+// changed fields) would silently WIPE OUT every other field on that
+// document (title, price, description, photos, ownerId, everything) each
+// time it ran. Found auditing Listing Approvals: approveListing() only
+// ever sent {listingStatus, publishedAt, expiresAt, approvedAt, expiredAt,
+// photosDeletedAt} — clicking "อนุมัติ" would have destroyed the rest of
+// the listing's data. merge:true makes every partial-patch call a safe,
+// targeted update while leaving full-object callers (Admin/Lister
+// Dashboard saves, which always pass the complete built object) unchanged.
 export async function setDoc(collectionName, id, data) {
-  await db().collection(collectionName).doc(String(id)).set(data);
+  await db().collection(collectionName).doc(String(id)).set(data, { merge: true });
 }
 
 // Fresh single-doc read (bypasses any client-cached list) — use this right
@@ -734,14 +746,14 @@ export async function fetchProjectDashboard() {
 export async function saveProjectDashboardBackup(oldData) {
   const existing = await db().collection("siteContent").doc("projectDashboard_backup_v1").get();
   if (existing.exists) return false;
-  await db().collection("siteContent").doc("projectDashboard_backup_v1").set({ ...oldData, backedUpAt: Date.now() });
+  await db().collection("siteContent").doc("projectDashboard_backup_v1").set({ ...oldData, backedUpAt: Date.now() }, { merge: true });
   return true;
 }
 
 export async function saveProjectDashboard(data, updatedByLabel) {
   await db().collection("siteContent").doc("projectDashboard").set({
     ...data, updatedAt: Date.now(), updatedBy: updatedByLabel || "admin",
-  });
+  }, { merge: true });
 }
 
 export async function fetchStripePrices() {
