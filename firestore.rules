@@ -87,7 +87,11 @@ service cloud.firestore {
     // request if ANY grants it, so the general rule must explicitly
     // exclude this id or it would still be publicly readable.
     match /siteContent/projectDashboard { allow read, write: if isAdmin(); }
-    match /siteContent/{id} { allow read: if id != "projectDashboard"; allow write: if isOwner() && id != "projectDashboard"; }
+    // Pre-migration safety backup of the dashboard doc — same sensitivity
+    // as projectDashboard itself (risks/decisions), so it gets the same
+    // admin-only lockdown instead of falling through to the public rule.
+    match /siteContent/projectDashboard_backup_v1 { allow read, write: if isAdmin(); }
+    match /siteContent/{id} { allow read: if id != "projectDashboard" && id != "projectDashboard_backup_v1"; allow write: if isOwner() && id != "projectDashboard" && id != "projectDashboard_backup_v1"; }
     match /profilePhotos/{id} { allow read: if true; allow write: if isAdmin() || request.auth != null; }
     match /aiNotes/{id} { allow read: if true; allow write: if isOwner(); }
     match /banners/{id} {

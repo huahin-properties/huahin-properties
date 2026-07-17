@@ -362,7 +362,8 @@ function defaultDashboardV2() {
     project: { name: "huahin.properties", version: "v2 (membership rebuild)", status: "Development / Testing" },
     phases, modules, milestones,
     currentWork: [
-      { text: "ตรวจสอบและทำความสะอาดข้อมูลทดลอง (Database Cleanup)", meta: "17/07/2569" },
+      { text: "ตรวจสอบ Firebase Storage orphan files ของ HH-70724 (propertyPhotos/HH-70724-*.webp)", meta: "" },
+      { text: "ตรวจสอบ Firestore Indexes ก่อน Final Cleanup", meta: "" },
       { text: "ตรวจสอบ AI Quick Add: การคำนวณระยะทาง/POI ให้ครบ 10+ จุดทั้ง EN/TH", meta: "" },
     ],
     nextActions: [
@@ -552,9 +553,14 @@ class Component extends DCLogic {
     const verifiedCount = modules.filter((m) => VERIFIED_STATUSES.has(m.status)).length;
     const verificationCoverage = total ? Math.round((verifiedCount / total) * 100) : 0;
 
+    // Never "Healthy" while any module isn't Completed, any risk is open, or
+    // core milestones (Security/Production Ready, Core Feature Audit) are
+    // unfinished — Healthy is reserved for a genuinely production-ready state.
+    const openRisks = (dash.risks || []).length;
+    const auditMilestoneDone = (dash.milestones || []).every((ms) => ms.id !== "m6" || ms.status === "completed");
     let health = { label: "Healthy", icon: "🟢", cardStyle: "background:oklch(94% 0.06 150); border:1px solid oklch(80% 0.1 150); border-radius:10px; padding:14px; color:oklch(25% 0.05 150);" };
     if (counts.blocked > 0) health = { label: "Blocked", icon: "🔴", cardStyle: "background:oklch(93% 0.07 25); border:1px solid oklch(78% 0.12 25); border-radius:10px; padding:14px; color:oklch(28% 0.08 25);" };
-    else if (counts.waiting_decision > 0) health = { label: "Attention Needed", icon: "🟡", cardStyle: "background:oklch(93% 0.06 75); border:1px solid oklch(78% 0.12 75); border-radius:10px; padding:14px; color:oklch(30% 0.06 75);" };
+    else if (counts.completed < total || openRisks > 0 || !auditMilestoneDone) health = { label: "Attention Needed", icon: "🟡", cardStyle: "background:oklch(93% 0.06 75); border:1px solid oklch(78% 0.12 75); border-radius:10px; padding:14px; color:oklch(30% 0.06 75);" };
 
     const phaseRows = dash.phases.map((ph) => {
       const mods = modules.filter((m) => m.phaseId === ph.id);
@@ -565,12 +571,15 @@ class Component extends DCLogic {
       const completionPct = mods.length ? Math.round(pScore / (mods.length * 100) * 100) : 0;
       const pVerified = mods.filter((m) => VERIFIED_STATUSES.has(m.status)).length;
       const coveragePct = mods.length ? Math.round((pVerified / mods.length) * 100) : 0;
+      // Derived purely from the modules inside this phase — never hardcoded.
+      // Not Verified (not Not Started) is the true "nothing confirmed yet"
+      // state here, since no module in this dataset actually uses not_started.
       let meta;
       if (c.blocked > 0) meta = STATUS_META.blocked;
       else if (c.waiting_decision > 0) meta = STATUS_META.waiting_decision;
-      else if (c.in_progress > 0 || c.ready_for_review > 0) meta = STATUS_META.in_progress;
       else if (mods.length && c.completed === mods.length) meta = STATUS_META.completed;
-      else meta = STATUS_META.not_started;
+      else if (c.completed > 0 || c.in_progress > 0 || c.ready_for_review > 0) meta = STATUS_META.in_progress;
+      else meta = STATUS_META.not_verified;
       return {
         id: ph.id, name: ph.name,
         badgeLabel: meta.label,
