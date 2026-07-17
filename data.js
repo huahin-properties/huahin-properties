@@ -6,7 +6,7 @@ export const LANGS = ["en", "th", "ru", "zh", "de", "no", "fr", "it"];
 export const LANG_LABELS = { en: "English", th: "ไทย", ru: "Русский", zh: "中文", de: "Deutsch", no: "Norsk", fr: "Français", it: "Italiano" };
 
 export function getLang() {
-  try { return localStorage.getItem("hh_lang") || "en"; } catch (e) { return "en"; }
+  try { return localStorage.getItem("hh_lang") || "th"; } catch (e) { return "th"; }
 }
 export function setLang(l) {
   try { localStorage.setItem("hh_lang", l); } catch (e) {}

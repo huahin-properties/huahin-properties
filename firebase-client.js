@@ -957,10 +957,29 @@ export async function rejectListing(propertyId, reason) {
   await setDoc("properties", propertyId, { listingStatus: "rejected", rejectedAt: Date.now(), rejectReason: reason || "" });
 }
 
+// Client-side mirror of the Firestore rule's listerHasActivePaidPackage() —
+// used to decide what the UI shows (button vs. upgrade prompt). This is
+// NOT the real enforcement (that lives in firestore.rules and can't be
+// bypassed) — it's purely so the UI doesn't show a button that would then
+// fail with a confusing permission error.
+export function hasActivePaidPackage(lister) {
+  if (!lister) return false;
+  const paidTiers = ["pro", "agency", "level3", "level4"];
+  return lister.subscriptionStatus === "active" && paidTiers.includes(lister.tier);
+}
+
 // Renewing an expired listing does NOT require re-approval (per business
 // rule: owner can reactivate instantly without re-entering data) — resets
-// the 30-day clock immediately.
-export async function renewListing(propertyId) {
+// the 30-day clock immediately. ONLY allowed when the lister currently
+// holds an active PAID package (P1 fix "Membership Renewal Logic" —
+// trial/no-package listers must upgrade instead of renewing for free).
+// The real gate is the Firestore rule (listerHasActivePaidPackage there);
+// this client-side check just fails fast with a clear message instead of
+// letting Firestore's generic permission-denied bubble up unexplained.
+export async function renewListing(propertyId, lister) {
+  if (!hasActivePaidPackage(lister)) {
+    throw new Error("ต่ออายุฟรีได้เฉพาะบัญชีที่มีแพ็กเกจจ่ายเงินที่ยัง active อยู่ — กรุณาอัปเกรดแพ็กเกจก่อน");
+  }
   const now = Date.now();
   await setDoc("properties", propertyId, { listingStatus: "live", publishedAt: now, expiresAt: now + LISTING_DURATION_DAYS * 86400000, expiredAt: null, photosDeletedAt: null });
 }

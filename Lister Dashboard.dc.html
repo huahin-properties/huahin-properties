@@ -54,7 +54,7 @@
         </div>
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
           <div onClick="{{ onOpenMySite }}" style="background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:11px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;">🌐 เว็บไซต์ของฉัน</div>
-          <div onClick="{{ onShareMySite }}" style="background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:11px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;">🔗 แชร์เว็บไซต์</div>
+          <div onClick="{{ onShareMySite }}" style="{{ shareMySiteStyle }}">🔗 แชร์เว็บไซต์</div>
           <a href="Lister Billing.dc.html" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:11px 22px; border-radius:100px; font-size:13px; font-weight:600; text-decoration:none; white-space:nowrap;">📦 ดู/อัปเกรดแพ็กเกจ</a>
         </div>
       </div>
@@ -164,22 +164,22 @@
               </div>
             </div>
 
-            <sc-if value="{{ canCustomSocial }}">
-              <div>
-                <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">🔗 ลิงก์โซเชียลมีเดีย (โชว์เป็นไอคอนบนเว็บไซต์ของคุณ)</div>
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">🔗 ลิงก์โซเชียลมีเดีย (โชว์เป็นไอคอนบนเว็บไซต์ของคุณ)</div>
+              <div style="{{ socialSectionStyle }}">
                 <div style="display:flex; flex-direction:column; gap:8px;">
                   <sc-for list="{{ socialFields }}" as="s" hint-placeholder-count="4">
                     <div style="display:flex; align-items:center; gap:8px;">
                       <div style="{{ s.iconStyle }}">{{ s.iconChar }}</div>
-                      <input value="{{ s.value }}" onChange="{{ s.onChange }}" placeholder="{{ s.placeholder }}" style="flex:1; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 12px; font-size:13px; font-family:inherit;" />
+                      <input value="{{ s.value }}" onChange="{{ s.onChange }}" placeholder="{{ s.placeholder }}" disabled="{{ s.disabled }}" style="{{ s.inputStyle }}" />
                     </div>
                   </sc-for>
                 </div>
               </div>
-            </sc-if>
-            <sc-if value="{{ cannotCustomSocial }}">
-              <div style="font-size:11.5px; color:oklch(55% 0.02 60);">🔒 เพิ่มลิงก์ Facebook/TikTok/YouTube/Instagram ได้ตั้งแต่แพ็กเกจ 3 — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a></div>
-            </sc-if>
+              <sc-if value="{{ socialLockNote }}">
+                <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-top:6px;">{{ socialLockNote }} — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a></div>
+              </sc-if>
+            </div>
             <div>
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">📝 ข้อความแนะนำตัว (โชว์บนเว็บไซต์ส่วนตัวของคุณ)</div>
               <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:8px; line-height:1.6;">เขียนสั้นๆ ให้ลูกค้าอ่านแล้วรู้จักคุณทันที — ใครก็ได้ ไม่ต้องเก่งเขียน แค่ตอบ 3 อย่าง: คุณเป็นใคร/ทำมากี่ปี, ถนัดโซนไหน/ทรัพย์แบบไหน, จุดเด่นที่ทำให้ลูกค้าเลือกคุณ</div>
@@ -255,7 +255,7 @@
                   <div onClick="{{ p.onEdit }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:oklch(35% 0.02 60); cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">✏️<br/>แก้ไข</div>
                   <div onClick="{{ p.onPublish }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:{{ p.publishColor }}; cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">{{ p.publishIcon }}<br/>{{ p.publishLabel }}</div>
                   <div onClick="{{ p.onPostText }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:oklch(35% 0.02 60); cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">🤖<br/>ข้อความโพสต์ AI</div>
-                  <div onClick="{{ p.onShare }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:oklch(35% 0.02 60); cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">🔗<br/>แชร์</div>
+                  <div onClick="{{ p.onShare }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:{{ p.shareColor }}; cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">🔗<br/>แชร์</div>
                   <div onClick="{{ p.onDeleteClick }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:oklch(50% 0.18 30); cursor:pointer;">🗑️<br/>ลบ</div>
                 </div>
                 <sc-if value="{{ p.isVip }}">
@@ -292,7 +292,7 @@
                   <div onClick="{{ p.onEdit }}" style="padding:0 14px; text-align:center; font-size:11px; color:oklch(35% 0.02 60); cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;">✏️<br/>แก้ไข</div>
                   <div onClick="{{ p.onPublish }}" style="padding:0 14px; text-align:center; font-size:11px; color:{{ p.publishColor }}; cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">{{ p.publishIcon }}<br/>{{ p.publishLabel }}</div>
                   <div onClick="{{ p.onPostText }}" style="padding:0 14px; text-align:center; font-size:11px; color:oklch(35% 0.02 60); cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">🤖<br/>AI</div>
-                  <div onClick="{{ p.onShare }}" style="padding:0 14px; text-align:center; font-size:11px; color:oklch(35% 0.02 60); cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">🔗<br/>แชร์</div>
+                  <div onClick="{{ p.onShare }}" style="padding:0 14px; text-align:center; font-size:11px; color:{{ p.shareColor }}; cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">🔗<br/>แชร์</div>
                   <div onClick="{{ p.onDeleteClick }}" style="padding:0 14px; text-align:center; font-size:11px; color:oklch(50% 0.18 30); cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">🗑️<br/>ลบ</div>
                   <sc-if value="{{ p.isVip }}">
                     <div onClick="{{ p.onOpenBuyer }}" style="padding:0 14px; text-align:center; font-size:11px; color:oklch(45% 0.13 250); cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70); background:oklch(97% 0.02 250);">👤<br/>ผู้ซื้อ</div>
@@ -577,14 +577,16 @@ class Component extends DCLogic {
     return { trial: 5, basic: 1, pro: 5, agency: 5, level3: 12, level4: 25 }[tier] || 1;
   }
 
-  // Trial gets the BEST photo/AI-gen limits — "ใช้ฟีเจอร์ได้ครบทุกอย่าง" —
-  // only the listing COUNT is capped (tierLimit above), per the trial design.
+  // Trial gets full personal-website customization (cover/theme, see
+  // renderVals) but photo count + AI-gen count are capped like the
+  // lightest tier — per the finalized trial spec (impress with the
+  // visibility boost + full site customization, not raw quota).
   photoLimit(tier) {
-    return { trial: 20, basic: 10, pro: 15, agency: 15, level3: 20 }[tier] || 10;
+    return { trial: 8, basic: 10, pro: 15, agency: 15, level3: 20 }[tier] || 10;
   }
 
   aiGenLimit(tier) {
-    return { trial: 10, basic: 1, pro: 5, agency: 5, level3: 10 }[tier] || 1;
+    return { trial: 1, basic: 1, pro: 5, agency: 5, level3: 10 }[tier] || 1;
   }
 
   async loadPropertiesWithCovers(listerId) {
@@ -627,10 +629,19 @@ class Component extends DCLogic {
   }
 
   async renewListing(p) {
+    // Guarded client-side (real enforcement is the Firestore rule) — trial/
+    // no-package listers get sent to upgrade instead of a silent failure.
+    if (!this._fb.hasActivePaidPackage(this.state.lister)) {
+      window.location.href = "Lister Billing.dc.html";
+      return;
+    }
     try {
-      await this._fb.renewListing(p.id);
+      await this._fb.renewListing(p.id, this.state.lister);
       await this.refreshProperties();
-    } catch (e) { console.warn("renewListing failed:", e); }
+    } catch (e) {
+      console.warn("renewListing failed:", e);
+      window.alert(e.message || "ต่ออายุไม่สำเร็จ");
+    }
   }
 
   startNew() {
@@ -720,7 +731,7 @@ class Component extends DCLogic {
     // out an already-live/pending/expired listing's status silently.
     const payload = {
       listerId: this.state.lister.id,
-      listingStatus: existing.listingStatus, submittedAt: existing.submittedAt || null,
+      listingStatus: existing.listingStatus || null, submittedAt: existing.submittedAt || null,
       publishedAt: existing.publishedAt || null, expiresAt: existing.expiresAt || null,
       expiredAt: existing.expiredAt || null, approvedAt: existing.approvedAt || null,
       rejectedAt: existing.rejectedAt || null, rejectReason: existing.rejectReason || null,
@@ -986,8 +997,17 @@ class Component extends DCLogic {
     const mod = this._mod;
     const tierLabels = { trial: "🎁 ทดลองใช้ฟรี", basic: "① ฟรี", pro: "② ระดับ 1", agency: "② ระดับ 1", level3: "③ ระดับ 2", level4: "④ ระดับ 3", silver: "🥈 VIP เงิน", gold: "🥇 VIP ทอง", diamond: "💎 VIP เพชร" };
     const lister = this.state.lister || {};
-    const tier2Plus = lister.tier === "pro" || lister.tier === "agency" || lister.tier === "level3" || lister.tier === "level4";
-    const tier3 = lister.tier === "level4";
+    // Trial unlocks FULL site customization (cover photo + theme color) —
+    // same as the top paid tier — but NOT social links (locked/greyed,
+    // shown to demonstrate the feature exists, per the trial design.
+    const isTrial = lister.tier === "trial";
+    const tier2Plus = lister.tier === "pro" || lister.tier === "agency" || lister.tier === "level3" || lister.tier === "level4" || isTrial;
+    const tier3 = lister.tier === "level4" || isTrial; // cover+theme unlock
+    // Social links quota scales with paid tier — Package 1: 1 link,
+    // Package 2: 2 links, Package 3: 4 links (all). Trial: 0 (greyed,
+    // shown to demonstrate the feature, unlock on upgrade).
+    const socialLimit = { pro: 1, agency: 1, level3: 2, level4: 4 }[lister.tier] || 0;
+    const canSocial = socialLimit > 0;
     const areaLabels = { "hua-hin": "หัวหิน", "pranburi": "ปราณบุรี", "cha-am": "ชะอำ" };
     const typeLabels = { villa: "พูลวิลล่า", house: "บ้านเดี่ยว", condo: "คอนโด", land: "ที่ดิน", commercial: "อาคารพาณิชย์" };
     const statusMap = {
@@ -1019,7 +1039,13 @@ class Component extends DCLogic {
       if (lifecycle === "draft") { actionLabel = "ส่งขออนุมัติ"; actionIcon = "📤"; onAction = () => this.submitListing(p); }
       else if (lifecycle === "pending") { actionLabel = "รออนุมัติ"; actionIcon = "⏳"; actionColor = "oklch(50% 0.02 60)"; onAction = () => {}; }
       else if (lifecycle === "live") { actionLabel = "ดูประกาศ"; actionIcon = "✅"; actionColor = "oklch(45% 0.13 145)"; onAction = () => window.open(`Property Details.dc.html?id=${p.id}`, "_blank"); }
-      else if (lifecycle === "expired") { actionLabel = "ต่ออายุ"; actionIcon = "🔄"; actionColor = "oklch(45% 0.1 30)"; onAction = () => this.renewListing(p); }
+      else if (lifecycle === "expired") {
+        const canRenewFree = this._fb && this._fb.hasActivePaidPackage(lister);
+        actionLabel = canRenewFree ? "ต่ออายุ" : "อัปเกรดเพื่อต่ออายุ";
+        actionIcon = canRenewFree ? "🔄" : "🔒";
+        actionColor = "oklch(45% 0.1 30)";
+        onAction = () => this.renewListing(p);
+      }
       else if (lifecycle === "rejected") { actionLabel = "แก้ไข & ส่งใหม่"; actionIcon = "✏️"; actionColor = "oklch(45% 0.15 30)"; onAction = () => this.startEdit(p); }
       return {
         id: p.id, code: p.id, zone: p.zone || "-", areaLabel: areaLabels[p.area] || p.area || "-",
@@ -1040,7 +1066,8 @@ class Component extends DCLogic {
         onEdit: () => this.startEdit(p),
         onPublish: onAction,
         onPostText: () => this.openPostView(p),
-        onShare: () => this.openShare(p),
+        onShare: () => (lister.tier === "trial") ? window.alert("ฟีเจอร์แชร์ประกาศใช้งานได้ตั้งแต่แพ็กเกจ 1 ขึ้นไป — อัปเกรดแพ็กเกจเพื่อใช้งาน") : this.openShare(p),
+        shareColor: (lister.tier === "trial") ? "oklch(75% 0.01 70)" : "oklch(35% 0.02 60)",
         onDeleteClick: () => this.requestDelete(p),
         isVip: !!lister.vipTier,
         onOpenBuyer: () => this.openBuyerModal(p),
@@ -1148,7 +1175,12 @@ class Component extends DCLogic {
       previewInitial: (this.state.ps_displayName || lister.name || "?").slice(0, 1).toUpperCase(),
       previewName: this.state.ps_displayName || lister.name || "ชื่อของคุณ",
       onOpenMySite: () => this.openMySite(),
-      onShareMySite: () => this.shareMySite(),
+      // Share is greyed out (shown, non-functional) during trial — per the
+      // trial spec: demonstrate the feature exists, unlock on upgrade.
+      shareMySiteStyle: isTrial
+        ? "background:oklch(93% 0.005 70); border:1px solid oklch(88% 0.01 70); color:oklch(65% 0.01 70); padding:11px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:not-allowed; white-space:nowrap;"
+        : "background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:11px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;",
+      onShareMySite: () => isTrial ? window.alert("ฟีเจอร์แชร์เว็บไซต์ใช้งานได้ตั้งแต่แพ็กเกจ 1 ขึ้นไป — อัปเกรดแพ็กเกจเพื่อใช้งาน") : this.shareMySite(),
       showProfileSettings: this.state.showProfileSettings,
       profileSettingsToggleLabel: this.state.showProfileSettings ? "ซ่อน ▲" : "แก้ไข ▼",
       onToggleProfileSettings: () => this.setState((s) => ({ showProfileSettings: !s.showProfileSettings })),
@@ -1160,19 +1192,28 @@ class Component extends DCLogic {
       canCustomCover: tier2Plus, cannotCustomCover: !tier2Plus,
       ps_coverPhotoLabel: this.state.ps_coverPhotoUrl ? "เปลี่ยนภาพปก" : "เลือกภาพปก",
       onPsCoverPhoto: (e) => this.onPsCoverPhoto(e),
-      canCustomSocial: tier3, cannotCustomSocial: !tier3,
+      canCustomSocial: canSocial, cannotCustomSocial: !canSocial,
+      socialLockNote: !canSocial
+        ? (isTrial ? "🔒 ใส่ลิงก์ได้จริงตั้งแต่แพ็กเกจ 1 ขึ้นไป — ตอนนี้แสดงเป็นตัวอย่างเฉยๆ" : "🔒 เพิ่มลิงก์โซเชียลได้ตั้งแต่แพ็กเกจ 1 ขึ้นไป")
+        : (socialLimit < 4 ? `ใส่ลิงก์ได้ ${socialLimit} ช่องทางตามแพ็กเกจปัจจุบัน — แพ็กเกจ 3 ใส่ได้ครบ 4 ช่องทาง` : ""),
       psPhotoThumbStyle: { width: "56px", height: "56px", borderRadius: "8px", background: `url('${this.state.ps_profilePhotoUrl}') center/cover`, border: "1px solid oklch(88% 0.01 70)", flexShrink: 0 },
       psCoverThumbStyle: { width: "90px", height: "56px", borderRadius: "8px", background: `url('${this.state.ps_coverPhotoUrl}') center/cover`, border: "1px solid oklch(88% 0.01 70)", flexShrink: 0 },
       selectedThemeChipStyle: { width: "32px", height: "32px", borderRadius: "8px", background: this.state.ps_themeColor || "transparent", border: this.state.ps_themeColor ? "1px solid oklch(85% 0.01 70)" : "1px dashed oklch(80% 0.01 70)" },
       ps_themeColorHex: this.state.ps_themeColor || "#7A2E22",
       onPsThemeColorPicker: (e) => this.setState({ ps_themeColor: e.target.value }),
       hasThemeColor: !!this.state.ps_themeColor,
+      socialSectionStyle: {},
       socialFields: [
         { iconChar: "f", iconStyle: { width: "26px", height: "26px", borderRadius: "50%", background: "oklch(45% 0.15 260)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px", fontWeight: "700", fontFamily: "Georgia,serif", flexShrink: 0 }, value: this.state.ps_fb, placeholder: "Facebook URL", onChange: (e) => this.setState({ ps_fb: e.target.value }) },
         { iconChar: "♪", iconStyle: { width: "26px", height: "26px", borderRadius: "50%", background: "oklch(20% 0.01 60)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", flexShrink: 0 }, value: this.state.ps_tiktok, placeholder: "TikTok URL", onChange: (e) => this.setState({ ps_tiktok: e.target.value }) },
         { iconChar: "▶", iconStyle: { width: "26px", height: "26px", borderRadius: "7px", background: "oklch(55% 0.22 25)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", flexShrink: 0 }, value: this.state.ps_youtube, placeholder: "YouTube URL", onChange: (e) => this.setState({ ps_youtube: e.target.value }) },
         { iconChar: "◎", iconStyle: { width: "26px", height: "26px", borderRadius: "8px", background: "linear-gradient(135deg, oklch(70% 0.18 30), oklch(55% 0.2 340))", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", flexShrink: 0 }, value: this.state.ps_instagram, placeholder: "Instagram URL", onChange: (e) => this.setState({ ps_instagram: e.target.value }) },
-      ],
+      ].map((s, i) => {
+        const unlocked = i < socialLimit;
+        return { ...s, disabled: !unlocked,
+          iconStyle: { ...s.iconStyle, opacity: unlocked ? 1 : 0.4, filter: unlocked ? "none" : "grayscale(1)" },
+          inputStyle: { flex: 1, boxSizing: "border-box", border: "1px solid oklch(85% 0.01 70)", borderRadius: "4px", padding: "8px 12px", fontSize: "13px", fontFamily: "inherit", background: unlocked ? "white" : "oklch(95% 0.005 70)", color: unlocked ? "inherit" : "oklch(65% 0.01 70)" } };
+      }),
       canCustomTheme: tier3, cannotCustomTheme: !tier3,
       themeOptions: this.THEME_COLORS.map((c) => ({
         swatchStyle: { width: "32px", height: "32px", borderRadius: "50%", background: c, cursor: "pointer", border: this.state.ps_themeColor === c ? "3px solid oklch(20% 0.02 60)" : "3px solid white", boxShadow: "0 0 0 1px oklch(85% 0.01 70)" },

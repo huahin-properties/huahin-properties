@@ -73,6 +73,15 @@
               <sc-for list="{{ c.features }}" as="f" hint-placeholder-count="3">
                 <div style="font-size:12px; color:{{ c.textColor }}; display:flex; gap:6px;"><span>✓</span><span>{{ f }}</span></div>
               </sc-for>
+              <sc-if value="{{ c.socialIcons }}">
+                <div style="display:flex; gap:6px; align-items:center; margin-top:2px;">
+                  <div style="{{ c.linkGlyphStyle }}">🔗</div>
+                  <sc-for list="{{ c.socialIcons }}" as="si" hint-placeholder-count="4">
+                    <div style="{{ si.style }}">{{ si.char }}</div>
+                  </sc-for>
+                  <span style="font-size:10.5px; color:{{ c.subTextColor }}; margin-left:2px;">{{ c.socialIconsNote }}</span>
+                </div>
+              </sc-if>
             </div>
             <sc-if value="{{ c.isContact }}">
               <a href="Contact.dc.html" style="display:block; text-align:center; background:white; color:oklch(20% 0.02 60); padding:11px; border-radius:6px; font-size:13px; font-weight:600; text-decoration:none;">{{ c.buttonLabel }}</a>
@@ -129,36 +138,60 @@ const BILLING_I18N = {
   en: { ladderTitle: "Membership tiers", ladderSub: "Upgrade any time — higher tiers keep everything from lower ones",
     free: "Free", tier2: "Package 1 — Starter", tier3: "Package 2 — Professional", tier4: "Package 3 — Premium", contact: "Enterprise",
     freeDesc: ["1 listing", "8-language AI description", "Personal website (fixed design)", "Up to 10 photos/listing", "AI post caption: 1 generation/listing", "Basic support"],
-    tier2Desc: ["5 listings", "8-language AI description", "Personal website — customize photo, cover & bio", "1 Featured slot", "Up to 15 photos/listing", "AI post caption: 5 generations/listing — refine until it's right", "Priority support"],
-    tier3Desc: ["12 listings", "8-language AI description", "Personal website — customize photo, cover & bio", "2 Featured slots", "Up to 18 photos/listing", "AI post caption: 8 generations/listing", "Priority support"],
-    tier4Desc: ["25 listings", "8-language AI description", "Personal website — full customization: theme color + social links", "Unlimited Featured slots", "Up to 20 photos/listing", "AI post caption: 10 generations/listing — full SEO keywords done for you", "Priority support"],
+    trialName: "🎁 Free trial", trialSubActive: "days left", trialSubUsed: "Already used", trialSubUnused: "One-time use — no auto-renew",
+    trialDesc: ["5 listings", "8-language AI description", "Edit profile & customize website — full customization (cover + theme), same as top tier", "Featured tag + homepage on ALL listings (Package 3-level boost)", "Up to 8 photos/listing", "AI post caption: 1 generation/listing", "One-time use per person, 30 days"],
+    trialBtnActive: "Active now", trialBtnUsed: "Already used", trialBtnStart: "Start free trial",
+    tier2Desc: ["5 listings", "8-language AI description", "Edit profile & customize website — full customization (cover + theme)", "1 Featured slot", "Up to 15 photos/listing", "AI post caption: 5 generations/listing — refine until it's right", "Priority support"],
+    tier3Desc: ["12 listings", "8-language AI description", "Edit profile & customize website — full customization (cover + theme)", "2 Featured slots", "Up to 18 photos/listing", "AI post caption: 8 generations/listing — refine until it's right", "Priority support"],
+    tier4Desc: ["25 listings", "8-language AI description", "Edit profile & customize website — full customization (cover + theme + social links)", "Unlimited Featured slots", "Up to 20 photos/listing", "AI post caption: 10 generations/listing — full SEO keywords done for you", "Priority support"],
     contactDesc: ["Custom listing volume", "Dedicated support", "Custom terms"],
     perMonth: "/month", billedMonthly: "Billed monthly", currentlyFree: "You're using this for free", startFree: "Current plan", upgrade: "Upgrade", current: "Current plan", contactUs: "Contact us" },
   th: { ladderTitle: "บันไดสมาชิก", ladderSub: "ไต่ระดับขึ้นทีละขั้น — ระดับสูงกว่าได้ทุกสิทธิ์จากระดับล่างกว่าด้วย",
     free: "ฟรี", tier2: "แพ็กเกจ 1 — เริ่มต้น", tier3: "แพ็กเกจ 2 — มืออาชีพ", tier4: "แพ็กเกจ 3 — พรีเมียม", contact: "ติดต่อเรา",
     freeDesc: ["โพสต์ได้ 1 หลัง", "ระบบแปลอัตโนมัติ 8 ภาษา", "เว็บไซต์ส่วนตัว (ดีไซน์สำเร็จรูป)", "📷 อัปโหลดรูปได้สูงสุด 10 รูป/หลัง", "🤖 AI ช่วยร่างข้อความโพสต์ 1 ครั้ง/รายการ", "ซัพพอร์ตพื้นฐาน"],
-    tier2Desc: ["โพสต์ได้ 5 หลัง", "ระบบแปลอัตโนมัติ 8 ภาษา", "เว็บไซต์ส่วนตัว — ปรับรูปโปรไฟล์/ภาพปก/แนะนำตัวได้", "Featured 1 รายการ", "📷 อัปโหลดรูปได้สูงสุด 15 รูป/หลัง", "🤖 AI ช่วยร่างข้อความโพสต์ 5 ครั้ง/รายการ — ปรับคำได้จนกว่าจะโดนใจ", "ซัพพอร์ตพิเศษ"],
-    tier3Desc: ["โพสต์ได้ 12 หลัง", "ระบบแปลอัตโนมัติ 8 ภาษา", "เว็บไซต์ส่วนตัว — ปรับรูปโปรไฟล์/ภาพปก/แนะนำตัวได้", "Featured 2 รายการ", "📷 อัปโหลดรูปได้สูงสุด 18 รูป/หลัง", "🤖 AI ช่วยร่างข้อความโพสต์ 8 ครั้ง/รายการ", "ซัพพอร์ตพิเศษ"],
-    tier4Desc: ["โพสต์ได้ 25 หลัง", "ระบบแปลอัตโนมัติ 8 ภาษา", "เว็บไซต์ส่วนตัว — ปรับได้เต็มรูปแบบ: สีธีม + ลิงก์โซเชียล", "Featured ไม่จำกัด", "📷 อัปโหลดรูปได้สูงสุด 20 รูป/หลัง", "🤖 AI ช่วยร่างข้อความโพสต์ 10 ครั้ง/รายการ — ใส่คีย์เวิร์ด SEO ให้เต็มที่ ไม่ต้องคิดเอง", "ซัพพอร์ตพิเศษ"],
+    trialName: "🎁 ทดลองใช้ฟรี", trialSubActive: "วันที่เหลือ", trialSubUsed: "ใช้สิทธิ์ไปแล้ว", trialSubUnused: "ใช้ได้ครั้งเดียว ไม่ต่ออายุอัตโนมัติ",
+    trialDesc: ["โพสต์ได้ 5 หลัง", "ระบบแปลอัตโนมัติ 8 ภาษา", "แก้ไขโปรไฟล์ได้ ปรับแต่งเว็บไซต์ได้เต็มรูปแบบ (ภาพปก+สีธีม) เหมือนแพ็กเกจสูงสุด", "ป้ายแนะนำ + หน้าแรก ทุกประกาศ (เทียบเท่าแพ็กเกจ 3)", "📷 อัปโหลดรูปได้สูงสุด 8 รูป/หลัง", "🤖 AI ช่วยร่างข้อความโพสต์ 1 ครั้ง/รายการ", "ใช้ได้ครั้งเดียวต่อคน นาน 30 วัน"],
+    trialBtnActive: "กำลังใช้งานอยู่", trialBtnUsed: "ใช้สิทธิ์ครบแล้ว", trialBtnStart: "เริ่มทดลองใช้ฟรี",
+    tier2Desc: ["โพสต์ได้ 5 หลัง", "ระบบแปลอัตโนมัติ 8 ภาษา", "แก้ไขโปรไฟล์ได้ ปรับแต่งเว็บไซต์ได้เต็มรูปแบบ (ภาพปก+สีธีม)", "Featured 1 รายการ", "📷 อัปโหลดรูปได้สูงสุด 15 รูป/หลัง", "🤖 AI ช่วยร่างข้อความโพสต์ 5 ครั้ง/รายการ — ปรับคำได้จนกว่าจะโดนใจ", "ซัพพอร์ตพิเศษ"],
+    tier3Desc: ["โพสต์ได้ 12 หลัง", "ระบบแปลอัตโนมัติ 8 ภาษา", "แก้ไขโปรไฟล์ได้ ปรับแต่งเว็บไซต์ได้เต็มรูปแบบ (ภาพปก+สีธีม)", "Featured 2 รายการ", "📷 อัปโหลดรูปได้สูงสุด 18 รูป/หลัง", "🤖 AI ช่วยร่างข้อความโพสต์ 8 ครั้ง/รายการ — ปรับคำได้จนกว่าจะโดนใจ", "ซัพพอร์ตพิเศษ"],
+    tier4Desc: ["โพสต์ได้ 25 หลัง", "ระบบแปลอัตโนมัติ 8 ภาษา", "แก้ไขโปรไฟล์ได้ ปรับแต่งเว็บไซต์ได้เต็มรูปแบบ (ภาพปก+สีธีม+ลิงก์โซเชียล)", "Featured ไม่จำกัด", "📷 อัปโหลดรูปได้สูงสุด 20 รูป/หลัง", "🤖 AI ช่วยร่างข้อความโพสต์ 10 ครั้ง/รายการ — ใส่คีย์เวิร์ด SEO ให้เต็มที่ ไม่ต้องคิดเอง", "ซัพพอร์ตพิเศษ"],
     contactDesc: ["ปริมาณโพสต์ตามตกลง", "ทีมซัพพอร์ตเฉพาะ", "เงื่อนไขพิเศษเฉพาะราย"],
     perMonth: "/เดือน", billedMonthly: "เรียกเก็บรายเดือน", currentlyFree: "คุณกำลังใช้งานฟรีอยู่", startFree: "แพ็กเกจปัจจุบัน", upgrade: "อัปเกรด", current: "สมาชิกอยู่แล้ว", contactUs: "ติดต่อเรา" },
   ru: { ladderTitle: "Уровни членства", ladderSub: "Повышайте уровень в любое время", free: "Бесплатно", tier2: "Уровень 2", tier3: "Уровень 3", contact: "Свяжитесь с нами",
     freeDesc: ["1 объявление"], tier2Desc: ["5 объявлений"], tier3Desc: ["15 объявлений"], contactDesc: ["По договорённости"],
+    trialName: "🎁 Бесплатный пробный период", trialSubActive: "дней осталось", trialSubUsed: "Уже использовано", trialSubUnused: "Однократно, без автопродления",
+    trialDesc: ["5 объявлений", "8-язычное AI-описание", "Полная настройка личного сайта", "Featured на всех объявлениях", "До 8 фото/объявление", "AI-подпись: 1 раз/объявление"],
+    trialBtnActive: "Активен", trialBtnUsed: "Уже использовано", trialBtnStart: "Начать пробный период",
     perMonth: "/мес", billedMonthly: "Ежемесячно", currentlyFree: "Вы используете это бесплатно", startFree: "Текущий план", upgrade: "Улучшить", current: "Уже активен", contactUs: "Связаться" },
   zh: { ladderTitle: "会员等级", ladderSub: "随时升级 — 高等级保留所有低等级权益", free: "免费", tier2: "二级", tier3: "三级", contact: "联系我们",
     freeDesc: ["1个房源"], tier2Desc: ["5个房源"], tier3Desc: ["15个房源"], contactDesc: ["定制数量"],
+    trialName: "🎁 免费试用", trialSubActive: "剩余天数", trialSubUsed: "已使用", trialSubUnused: "每人限用一次，不自动续订",
+    trialDesc: ["5个房源", "8种语言AI描述", "个人网站完全自定义", "所有房源加精推荐", "每套房源最多8张照片", "AI文案：每套房源1次"],
+    trialBtnActive: "使用中", trialBtnUsed: "已用完", trialBtnStart: "开始免费试用",
     perMonth: "/月", billedMonthly: "按月计费", currentlyFree: "您正在免费使用", startFree: "当前套餐", upgrade: "升级", current: "已是会员", contactUs: "联系我们" },
   de: { ladderTitle: "Mitgliedschaftsstufen", ladderSub: "Jederzeit upgraden", free: "Kostenlos", tier2: "Stufe 2", tier3: "Stufe 3", contact: "Kontakt",
     freeDesc: ["1 Angebot"], tier2Desc: ["5 Angebote"], tier3Desc: ["15 Angebote"], contactDesc: ["Individuell"],
+    trialName: "🎁 Kostenlose Testversion", trialSubActive: "Tage übrig", trialSubUsed: "Bereits verwendet", trialSubUnused: "Einmalig, keine Auto-Verlängerung",
+    trialDesc: ["5 Angebote", "8-sprachige KI-Beschreibung", "Volle Website-Anpassung", "Featured auf allen Angeboten", "Bis zu 8 Fotos/Angebot", "KI-Text: 1x/Angebot"],
+    trialBtnActive: "Aktiv", trialBtnUsed: "Bereits verwendet", trialBtnStart: "Testversion starten",
     perMonth: "/Monat", billedMonthly: "Monatlich", currentlyFree: "Sie nutzen dies kostenlos", startFree: "Aktueller Plan", upgrade: "Upgrade", current: "Bereits aktiv", contactUs: "Kontaktieren" },
   no: { ladderTitle: "Medlemsnivåer", ladderSub: "Oppgrader når som helst", free: "Gratis", tier2: "Nivå 2", tier3: "Nivå 3", contact: "Kontakt oss",
     freeDesc: ["1 oppføring"], tier2Desc: ["5 oppføringer"], tier3Desc: ["15 oppføringer"], contactDesc: ["Tilpasset"],
+    trialName: "🎁 Gratis prøveperiode", trialSubActive: "dager igjen", trialSubUsed: "Allerede brukt", trialSubUnused: "Engangsbruk, ingen auto-fornyelse",
+    trialDesc: ["5 oppføringer", "8-språklig AI-beskrivelse", "Full tilpasning av nettside", "Featured på alle oppføringer", "Opptil 8 bilder/oppføring", "AI-tekst: 1x/oppføring"],
+    trialBtnActive: "Aktiv", trialBtnUsed: "Allerede brukt", trialBtnStart: "Start gratis prøveperiode",
     perMonth: "/mnd", billedMonthly: "Fakturert månedlig", currentlyFree: "Du bruker dette gratis", startFree: "Nåværende plan", upgrade: "Oppgrader", current: "Allerede aktiv", contactUs: "Kontakt oss" },
   fr: { ladderTitle: "Niveaux d'adhésion", ladderSub: "Passez au niveau supérieur à tout moment", free: "Gratuit", tier2: "Niveau 2", tier3: "Niveau 3", contact: "Contactez-nous",
     freeDesc: ["1 annonce"], tier2Desc: ["5 annonces"], tier3Desc: ["15 annonces"], contactDesc: ["Sur mesure"],
+    trialName: "🎁 Essai gratuit", trialSubActive: "jours restants", trialSubUsed: "Déjà utilisé", trialSubUnused: "Usage unique, sans renouvellement auto",
+    trialDesc: ["5 annonces", "Description IA en 8 langues", "Personnalisation complète du site", "Mise en avant sur toutes les annonces", "Jusqu'à 8 photos/annonce", "Texte IA : 1x/annonce"],
+    trialBtnActive: "Actif", trialBtnUsed: "Déjà utilisé", trialBtnStart: "Démarrer l'essai gratuit",
     perMonth: "/mois", billedMonthly: "Facturé mensuellement", currentlyFree: "Vous l'utilisez gratuitement", startFree: "Plan actuel", upgrade: "Mettre à niveau", current: "Déjà membre", contactUs: "Contactez-nous" },
   it: { ladderTitle: "Livelli di iscrizione", ladderSub: "Aggiorna in qualsiasi momento", free: "Gratuito", tier2: "Livello 2", tier3: "Livello 3", contact: "Contattaci",
     freeDesc: ["1 annuncio"], tier2Desc: ["5 annunci"], tier3Desc: ["15 annunci"], contactDesc: ["Su misura"],
+    trialName: "🎁 Prova gratuita", trialSubActive: "giorni rimasti", trialSubUsed: "Già utilizzato", trialSubUnused: "Uso singolo, nessun rinnovo automatico",
+    trialDesc: ["5 annunci", "Descrizione IA in 8 lingue", "Personalizzazione completa del sito", "In evidenza su tutti gli annunci", "Fino a 8 foto/annuncio", "Testo IA: 1x/annuncio"],
+    trialBtnActive: "Attivo", trialBtnUsed: "Già utilizzato", trialBtnStart: "Avvia prova gratuita",
     perMonth: "/mese", billedMonthly: "Fatturato mensilmente", currentlyFree: "Lo stai usando gratuitamente", startFree: "Piano attuale", upgrade: "Aggiorna", current: "Già membro", contactUs: "Contattaci" },
 };
 
@@ -300,14 +333,15 @@ class Component extends DCLogic {
   trialCard(t, lister) {
     const trial = this.state.trial;
     const base = { key: "trial", bg: "white", accentColor: "oklch(40% 0.1 250)", textColor: "oklch(25% 0.02 60)", subTextColor: "oklch(55% 0.02 60)",
-      name: "🎁 ทดลองใช้ฟรี", price: "฿0", features: ["โพสต์ได้ 5 หลัง", "ระบบแปลอัตโนมัติ 8 ภาษา", "ป้ายแนะนำ + หน้าแรก (เทียบเท่าแพ็กเกจ 3)", "ใช้งานได้นาน 30 วัน", "ทดลองได้ครั้งเดียวต่อคน"] };
+      name: t.trialName, price: "฿0", features: t.trialDesc,
+      socialIcons: this.socialIconsFor(0, false), socialIconsNote: "0/4 — ล็อกจนกว่าจะอัปเกรด", linkGlyphStyle: this.linkGlyphStyle(0, false) };
     if (trial && !trial.ended) {
-      return { ...base, priceSub: `เหลืออีก ${Math.max(0, trial.daysLeft)} วัน`, isFree: true, buttonLabel: "กำลังใช้งานอยู่" };
+      return { ...base, priceSub: `${Math.max(0, trial.daysLeft)} ${t.trialSubActive}`, isFree: true, buttonLabel: t.trialBtnActive };
     }
     if (lister && lister.trialUsed) {
-      return { ...base, priceSub: "ใช้สิทธิ์ไปแล้ว", isFree: true, buttonLabel: "ใช้สิทธิ์ครบแล้ว" };
+      return { ...base, priceSub: t.trialSubUsed, isFree: true, buttonLabel: t.trialBtnUsed };
     }
-    return { ...base, priceSub: "ใช้ได้ครั้งเดียว ไม่ต่ออายุอัตโนมัติ", isPaid: true, buttonLabel: this.state.busyTier === "trial" ? "กำลังเริ่ม…" : "เริ่มทดลองใช้ฟรี", onClick: () => this.startTrialFromBilling() };
+    return { ...base, priceSub: t.trialSubUnused, isPaid: true, buttonLabel: this.state.busyTier === "trial" ? "…" : t.trialBtnStart, onClick: () => this.startTrialFromBilling() };
   }
 
   async startTrialFromBilling() {
@@ -321,22 +355,59 @@ class Component extends DCLogic {
     }
   }
 
+  // Real colored/greyed social-media icons per card — shows the social-link
+  // quota AT A GLANCE (colored = unlocked, grey = locked) instead of making
+  // people read text. limit: how many of the 4 (FB/TikTok/YouTube/IG) are
+  // unlocked for that tier, in that fixed order.
+  // The 🔗 badge is a circle (matching the FB/TikTok/YouTube/Instagram
+  // circle pattern) — same symbol as before, just given a proper circular
+  // background instead of floating as bare colored text.
+  linkGlyphStyle(limit, dark) {
+    const on = limit > 0;
+    return `width:22px; height:22px; border-radius:50%; background:${on ? "oklch(40% 0.13 25)" : (dark ? "oklch(35% 0.01 60)" : "oklch(88% 0.01 70)")}; color:${on ? "white" : (dark ? "oklch(55% 0.01 70)" : "oklch(70% 0.01 70)")}; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;${on ? "" : " opacity:.6;"}`;
+  }
+
+  socialIconsFor(limit, dark) {
+    const defs = [
+      { char: "f", bg: "oklch(45% 0.15 260)" },
+      { char: "♪", bg: "oklch(20% 0.01 60)" },
+      { char: "▶", bg: "oklch(55% 0.22 25)" },
+      { char: "☏", bg: "transparent", border: "oklch(60% 0.15 145)", iconColor: "oklch(60% 0.15 145)" }, // WhatsApp — outline circle, green stroke + green handset silhouette (monochrome glyph so CSS color applies — the 📞 emoji ignores color and renders in fixed colors)
+    ];
+    return defs.map((d, i) => {
+      const unlocked = i < limit;
+      if (d.border) {
+        // Outline-style icon (WhatsApp): stroke + glyph in brand green when
+        // unlocked, grey stroke + grey glyph when locked — no fill.
+        const c = unlocked ? d.iconColor : (dark ? "oklch(55% 0.01 70)" : "oklch(75% 0.01 70)");
+        return { char: d.char, style: `width:22px;height:22px;border-radius:50%;background:transparent;border:1.5px solid ${c};color:${c};display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;` };
+      }
+      return {
+        char: d.char,
+        style: `width:22px;height:22px;border-radius:50%;background:${unlocked ? d.bg : (dark ? "oklch(35% 0.01 60)" : "oklch(88% 0.01 70)")};color:${unlocked ? "white" : (dark ? "oklch(55% 0.01 70)" : "oklch(70% 0.01 70)")};display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;${unlocked ? "" : "opacity:.6;"}`,
+      };
+    });
+  }
+
   buildTierCards(t, lister) {
     const cards = [this.trialCard(t, lister)];
     // Package 1-3 (pro/level3/level4) are always shown — only the higher VIP
     // tiers (rollout 4-5) are gated behind rolloutLevel. See BLUEPRINT.md §2 ทาง 2.
     cards.push({ key: "pro", bg: "white", accentColor: "oklch(40% 0.13 25)", textColor: "oklch(25% 0.02 60)", subTextColor: "oklch(55% 0.02 60)",
       name: t.tier2, price: "฿590", priceSub: t.perMonth + " · " + t.billedMonthly, features: t.tier2Desc,
+      socialIcons: this.socialIconsFor(1, false), socialIconsNote: "1/4 ลิงก์โซเชียล", linkGlyphStyle: this.linkGlyphStyle(1, false),
       isPaid: true, badge: "",
       buttonLabel: this.state.busyTier === "pro" ? "…" : (lister.tier === "pro" || lister.tier === "agency" || lister.tier === "level3" || lister.tier === "level4" ? t.current : t.upgrade),
       onClick: () => this.upgrade("pro") });
     cards.push({ key: "level3", bg: "white", accentColor: "oklch(40% 0.13 25)", textColor: "oklch(25% 0.02 60)", subTextColor: "oklch(55% 0.02 60)",
       name: t.tier3, price: "฿1,190", priceSub: t.perMonth + " · " + t.billedMonthly, features: t.tier3Desc,
+      socialIcons: this.socialIconsFor(2, false), socialIconsNote: "2/4 ลิงก์โซเชียล", linkGlyphStyle: this.linkGlyphStyle(2, false),
       isPaid: true, badge: "Most popular",
       buttonLabel: this.state.busyTier === "level3" ? "…" : (lister.tier === "level3" || lister.tier === "level4" ? t.current : t.upgrade),
       onClick: () => this.upgrade("level3") });
     cards.push({ key: "level4", bg: "oklch(20% 0.02 60)", accentColor: "oklch(75% 0.1 25)", textColor: "white", subTextColor: "oklch(75% 0.01 70)",
       name: t.tier4, price: "฿2,290", priceSub: t.perMonth + " · " + t.billedMonthly, features: t.tier4Desc,
+      socialIcons: this.socialIconsFor(4, true), socialIconsNote: "4/4 ครบทุกช่องทาง", linkGlyphStyle: this.linkGlyphStyle(4, true),
       isPaid: true, badge: "",
       buttonLabel: this.state.busyTier === "level4" ? "…" : (lister.tier === "level4" ? t.current : t.upgrade),
       onClick: () => this.upgrade("level4") });
