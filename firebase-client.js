@@ -642,6 +642,16 @@ export async function fetchProjectDashboard() {
   return doc.exists ? doc.data() : null;
 }
 
+// One-time safety copy of the pre-v2 doc, taken automatically the first time
+// the schema migration runs — never overwritten again, so the original v1
+// data is always recoverable even if something goes wrong with v2.
+export async function saveProjectDashboardBackup(oldData) {
+  const existing = await db().collection("siteContent").doc("projectDashboard_backup_v1").get();
+  if (existing.exists) return false;
+  await db().collection("siteContent").doc("projectDashboard_backup_v1").set({ ...oldData, backedUpAt: Date.now() });
+  return true;
+}
+
 export async function saveProjectDashboard(data, updatedByLabel) {
   await db().collection("siteContent").doc("projectDashboard").set({
     ...data, updatedAt: Date.now(), updatedBy: updatedByLabel || "admin",
