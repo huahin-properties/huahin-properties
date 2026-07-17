@@ -285,6 +285,26 @@
     <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); margin-bottom:4px;">ศูนย์ควบคุมโครงการ · Project Control Center</div>
     <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:16px;">พื้นที่เก็บข้อมูล ความรู้ สถานะ และข้อสรุปของโครงการ — คัดลอกไปวางเริ่มต้น Chat ใหม่ได้ทันที (Ctrl+F ค้นหาในหน้านี้ได้)</div>
 
+    <div style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); border-radius:10px; padding:16px 20px; margin-bottom:18px; font-size:12.5px; line-height:1.7;">
+      <div style="font-family:'Playfair Display',serif; font-size:16px; margin-bottom:6px;">{{ header.name }} — {{ header.title }}</div>
+      <div>Version: {{ header.version }} · Build: {{ header.build }} · Status: {{ header.status }} · Phase: {{ header.phase }}</div>
+      <div>Current Sprint: {{ header.currentSprint }} · Source of Truth: {{ header.sourceOfTruth }}</div>
+    </div>
+
+    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:14px 18px; margin-bottom:18px; font-size:12.5px; color:oklch(30% 0.02 60); line-height:1.7;">
+      <div style="font-weight:700; margin-bottom:6px;">AI SESSION METADATA</div>
+      <div>Project: {{ meta.projectName }} · Languages: {{ meta.primaryLanguage }} / {{ meta.secondaryLanguage }} · Timezone: {{ meta.timezone }}</div>
+      <div>Environment: {{ meta.currentEnvironment }} · Deployment Target: {{ meta.deploymentTarget }} · Architecture: {{ meta.architecture }}</div>
+      <div>Project Owner: {{ meta.projectOwner }} · Architecture Owner: {{ meta.architectureOwner }} · Implementation Owner: {{ meta.implementationOwner }} · Single Source of Truth: {{ meta.singleSourceOfTruth }}</div>
+    </div>
+
+    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:14px 18px; margin-bottom:22px; font-size:12.5px; color:oklch(30% 0.02 60);">
+      <div style="font-weight:700; margin-bottom:6px;">CHANGE LOG — v{{ header.version }}</div>
+      <sc-for list="{{ changelog }}" as="cl" hint-placeholder-count="5"><div style="padding:2px 0;">- {{ cl.text }}</div></sc-for>
+    </div>
+
+    <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:16px;">Dashboard Loaded: {{ sessionStatus.loaded }} · Last Saved: {{ sessionStatus.lastSaved }} · Unsaved Changes: {{ sessionStatus.unsaved }}</div>
+
     <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px;">
       <div onClick="{{ onCopyAll }}" style="background:oklch(35% 0.09 25); color:white; font-size:13px; font-weight:600; padding:9px 18px; border-radius:8px; cursor:pointer;">📋 คัดลอกทั้งหมด · Copy All Modules</div>
       <sc-if value="{{ copyToast }}"><div style="font-size:12px; color:oklch(40% 0.12 145); font-weight:600;">{{ copyToast }}</div></sc-if>
@@ -443,13 +463,14 @@ function defaultDashboardV2() {
     ],
     nextActions: [
       { text: "ล็อก Firestore Security Rules ให้ครบก่อน 08/08/2569", meta: "" },
-      { text: "Deploy firestore.rules ที่แก้ไขล่าสุด", meta: "" },
+      { text: "Review and test latest firestore.rules — Deployment pending explicit CEO approval", meta: "" },
       { text: "[Roadmap] Agent Mini-Site: ออกแบบ data model publicSlug", meta: "High priority" },
       { text: "[Roadmap] Agent Mini-Site: ออกแบบ reserved slug rules", meta: "High priority" },
       { text: "[Roadmap] Agent Mini-Site: ออกแบบ Mini-Site template", meta: "High priority" },
-      { text: "ตรวจสอบ Storage orphan files ของ HH-70724", meta: "" },
+      { text: "HH-70724: Firestore property + propertyPhotos cleanup เสร็จสมบูรณ์ — เหลือเฉพาะตรวจ Storage orphan files (ห้ามลบ Storage โดยไม่มี Production Write approval)", meta: "" },
     ],
     needsDecision: [
+      { text: "HH-58538: QA/Test Data — ตัดสินใจให้ลบทั้งหมดแล้ว ยังรอคำสั่ง Production Write โดยตรง (scope: property document, propertyPhotos, Storage files)", meta: "" },
       { text: "ตัดสินใจเรื่องประกาศสาธิต 22 รายการ (เก็บ/ลบ) — Database Cleanup Phase 2", meta: "" },
     ],
     blocked: [],
@@ -557,7 +578,7 @@ class Component extends DCLogic {
 
   async componentDidMount() {
     const ctrl = await import("./project-control-data.js");
-    this.setState({ controlModules: ctrl.MODULES });
+    this.setState({ controlModules: ctrl.MODULES, header: ctrl.PROJECT_HEADER, meta: ctrl.AI_SESSION_METADATA, changelog: ctrl.CHANGELOG_V2_1 });
     const fb = await import("./firebase-client.js");
     this._fb = fb;
     await fb.onAdminAuthReady();
@@ -902,6 +923,9 @@ class Component extends DCLogic {
       controlTabStyle: tabBase + (isControlSection ? "color:oklch(35% 0.09 25); border-bottom-color:oklch(35% 0.09 25);" : "color:oklch(55% 0.02 60);"),
       controlModules, copyToast: this.state.copyToast,
       onCopyAll: () => this.copyAllModules(),
+      header: this.state.header || {}, meta: this.state.meta || {},
+      changelog: (this.state.changelog || []).map((t) => ({ text: t })),
+      sessionStatus: { loaded: this.state.dash ? "Yes" : "Loading…", lastSaved: dash.updatedAt ? new Date(dash.updatedAt).toLocaleString("th-TH") : "Not yet saved", unsaved: this.state.dirty ? "Yes" : "No" },
       updatedAtLabel: dash.updatedAt ? new Date(dash.updatedAt).toLocaleString("th-TH") : "ยังไม่เคยบันทึก",
       health, completionProgress, verificationCoverage, verifiedCount, totalModules: total, counts,
       completionFormula: "สูตร: ผลรวมคะแนน (Completed=100, Ready for Review=75, In Progress=50, Blocked/Waiting=25, Not Started/Verified=0) ÷ จำนวน Module",

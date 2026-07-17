@@ -2,6 +2,51 @@
 // Edit MODULES here — the page renders straight from this array, nothing
 // module-related is hardcoded in the .dc.html template. Add/remove/reorder
 // by editing this array; each module's fields map directly to the UI.
+export const PROJECT_HEADER = {
+  name: "huahin.properties",
+  title: "PROJECT CONTROL CENTER",
+  version: "2.1.0",
+  build: "2026.07.17.02",
+  status: "ACTIVE",
+  phase: "Foundation",
+  currentSprint: "Listing Approvals Responsive Testing",
+  sourceOfTruth: "CEO Dashboard",
+};
+
+export const AI_SESSION_METADATA = {
+  projectName: "huahin.properties",
+  primaryLanguage: "Thai",
+  secondaryLanguage: "English",
+  timezone: "Asia/Bangkok (UTC+7)",
+  currentEnvironment: "Production (Firebase Hosting + Firestore + Cloud Functions)",
+  deploymentTarget: "Firebase Hosting / GitHub Pages",
+  architecture: "Firebase (Firestore, Firebase Storage), GitHub Pages",
+  projectOwner: "CEO",
+  architectureOwner: "ChatGPT",
+  implementationOwner: "Development AI",
+  singleSourceOfTruth: "Project Control Center",
+};
+
+export const CHANGELOG_V2_1 = [
+  "Project Control Center completed",
+  "Command Center completed",
+  "Copy Module completed",
+  "Copy All completed",
+  "AI Session Pack completed",
+  "Module 02 expanded",
+  "Module 03 expanded",
+  "Module 04 expanded",
+  "Module 06 expanded",
+  "Module 07 synchronized",
+  "Module 08 synchronized",
+  "Module 99 replaced",
+  "Responsibility Matrix added",
+  "Workflow added",
+  "Session Handover added",
+  "Roles updated",
+  "Command Center synchronized",
+];
+
 export const MODULES = [
   {
     num: "00", th: "กติกาและวิธีทำงานของโครงการ", en: "Project Rules & Workflow",
@@ -53,9 +98,9 @@ export const MODULES = [
     lastUpdated: "17/07/2569",
     currentState: "P0 data-loss bug แก้แล้ว, รอ cleanup งานทดสอบค้าง",
     completed: "P0: global setDoc overwrite สามารถล้างข้อมูล property document ได้\nมีการแก้ wrapper ให้ partial update ใช้ merge\nมีการตรวจ call sites ที่เสี่ยง",
-    openItems: "ตรวจ regression จากการเปลี่ยน global merge semantics\nQA test leftovers ต้อง Cleanup\nQA Auth accounts ต้อง Cleanup ผ่าน Firebase Console",
-    decisions: "HH-58538 เป็นข้อมูล QA/Test แบบสุ่ม ไม่ใช่ทรัพย์จริง — การตัดสินใจล่าสุดคือ \"ลบทั้งหมด\" ไม่ต้อง Restore/Archive/Hidden/Recovery Note การลบต้องครอบคลุม property document, propertyPhotos และ Storage files ที่เกี่ยวข้อง — ยังห้ามลบจนกว่าจะได้รับคำสั่ง Production Write แยกต่างหาก",
-    nextStep: "รอคำสั่ง Production Write เพื่อลบ HH-58538",
+    openItems: "ตรวจ regression จากการเปลี่ยน global merge semantics\nQA test leftovers ต้อง Cleanup\nQA Auth accounts ต้อง Cleanup ผ่าน Firebase Console\nReview and test latest firestore.rules — Deployment pending explicit CEO approval",
+    decisions: "HH-58538: QA/Test Data — ตัดสินใจให้ลบทั้งหมดแล้ว (property document, propertyPhotos และ Storage files ที่เกี่ยวข้อง) — ยังรอคำสั่ง Production Write โดยตรงจาก CEO ก่อนลบจริง\nHH-70724: Firestore property + propertyPhotos cleanup เสร็จสมบูรณ์แล้ว — เหลือเฉพาะตรวจ Storage orphan files ห้ามลบ Storage โดยไม่มี Production Write approval",
+    nextStep: "รอคำสั่ง Production Write เพื่อลบ HH-58538 และตรวจ/ลบ Storage orphan ของ HH-70724",
   },
   {
     num: "06", th: "คลังคำสั่งสำหรับ AI", en: "AI Prompt Library",
@@ -69,9 +114,9 @@ export const MODULES = [
   {
     num: "07", th: "แผนงานและ Sprint ปัจจุบัน", en: "Roadmap & Current Sprint",
     lastUpdated: "17/07/2569",
-    currentState: "Current Priority: Project Control Center — Initial Structure\nPaused temporarily: Listing Approvals Responsive Testing\n\nเว็บไซต์มีโครงสร้างหลักแล้ว: Home, Search Results, Property Details, Sell, About, Contact, Admin Login, Admin Dashboard, Owners, Property Map, AI Quick Add, Site Content, ระบบ 8 ภาษา, ระบบ Listing, แผนที่, Multi-image, Owners Management\n\nCore Feature Audit: Admin Dashboard — Completed, Owners Management — Completed, Listing Approvals — In Progress / Paused temporarily",
-    completed: "",
-    openItems: "Open Items หลัง Project Control พร้อม:\n1. กลับไปทำ Listing Approvals Responsive Testing\n2. ลบ HH-58538 เมื่อ CEO อนุมัติ Production Write โดยตรง\n3. ยืนยันรหัส Demo Listings จำนวน 22 รายการ\n4. Cleanup QA test documents/accounts\n5. ตรวจผลกระทบของ setDoc merge semantics รอบสุดท้าย",
+    currentState: "Current Priority: Listing Approvals Responsive Testing (Pending — resumes after containment items below are cleared)\nProject Control Center Initial Structure = Completed\n\nเว็บไซต์มีโครงสร้างหลักแล้ว: Home, Search Results, Property Details, Sell, About, Contact, Admin Login, Admin Dashboard, Owners, Property Map, AI Quick Add, Site Content, ระบบ 8 ภาษา, ระบบ Listing, แผนที่, Multi-image, Owners Management\n\nCore Feature Audit: Admin Dashboard — Completed, Owners Management — Completed, Listing Approvals — In Progress (Responsive Testing Pending)",
+    completed: "Project Control Center Initial Structure — Completed",
+    openItems: "1. Listing Approvals Responsive Testing — Pending\n2. Firestore Index Review\n3. AI Quick Add POI verification\n4. QA test documents/accounts cleanup\n5. ยืนยันรหัส Demo Listings จำนวน 22 รายการ\n6. HH-70724 Storage orphan files verification\n7. HH-58538 — awaiting direct Production Write approval to delete",
     decisions: "", nextStep: "",
   },
   {
@@ -88,8 +133,8 @@ export const MODULES = [
     lastUpdated: "17/07/2569",
     currentState: "โครงการ huahin.properties ใช้โครงสร้างทีมหลัก 3 ฝ่าย: 1) ฝ่ายบริหารและตัดสินใจ / Executive & Product Ownership  2) ฝ่ายกลยุทธ์ ธุรกิจ การตลาด และกำกับโครงการ / Strategy, Business, Marketing & Project Governance Office  3) ฝ่ายพัฒนาเทคโนโลยี / Software Engineering & Implementation",
     completed: "1. ฝ่ายบริหารและตัดสินใจ / EXECUTIVE & PRODUCT OWNERSHIP\nผู้รับผิดชอบ: CEO\nตำแหน่งภาษาไทย: ผู้ก่อตั้ง, ประธานเจ้าหน้าที่บริหาร, เจ้าของผลิตภัณฑ์\nOfficial English Titles: Founder, Chief Executive Officer, Product Owner\nหน้าที่หลัก: กำหนดวิสัยทัศน์ของโครงการ, กำหนดทิศทางธุรกิจ, กำหนดเป้าหมายรายได้, กำหนดลำดับความสำคัญ, ตัดสินใจขั้นสุดท้าย, อนุมัติ Business Model, อนุมัติ Pricing, อนุมัติแผนการตลาด, อนุมัติงบประมาณ, อนุมัติการโฆษณา, อนุมัติการเปลี่ยนแปลงสำคัญ, อนุมัติ Production Write, อนุมัติ Deployment, ตรวจและประเมินผลงานของทีม\nอำนาจการตัดสินใจ (Decision Authority): Final Business Decision, Final Product Decision, Final Budget Approval, Final Priority Approval, Production Write Approval, Deployment Approval, Final Acceptance\n\n2. ฝ่ายกลยุทธ์ ธุรกิจ การตลาด และกำกับโครงการ / STRATEGY, BUSINESS, MARKETING & PROJECT GOVERNANCE OFFICE\nผู้รับผิดชอบ: ChatGPT\nตำแหน่งหลักภาษาไทย: หัวหน้าฝ่ายกลยุทธ์ ธุรกิจ การตลาด และกำกับโครงการ\nOfficial Main English Title: Chief Strategy, Business, Marketing & Project Governance Advisor\nตำแหน่งตามหน้าที่ (ไทย): สถาปนิกโครงการ, นักวางแผนกลยุทธ์, นักวางแผนธุรกิจ, นักวิเคราะห์โมเดลรายได้, นักวางแผนการเงินและต้นทุน, นักวิเคราะห์ตลาด, นักวิเคราะห์คู่แข่ง, นักวางแผนการตลาด, นักวางแผนโฆษณา, นักวางแผนการเติบโต, นักวางแผน SEO, นักวางแผนเนื้อหา, นักวิเคราะห์ UX และ Customer Journey, หัวหน้ากำกับดูแลโครงการ, ผู้อำนวยการประกันคุณภาพ, นักวิเคราะห์ความเสี่ยง, ผู้ดูแล Project Control, ผู้ดูแล Documentation และความต่อเนื่องของโครงการ\nEnglish Functional Titles: Project Architect, Strategic Planning Advisor, Business Strategy Analyst, Revenue Model Analyst, Financial Planning & Cost Analyst, Market Research Analyst, Competitive Intelligence Analyst, Marketing Strategist, Advertising & Campaign Planner, Growth Strategy Planner, SEO Strategy Lead, Content Strategy Planner, UX & Customer Journey Analyst, Project Governance Lead, Quality Assurance Director, Risk Analyst, Project Control Lead, Project Documentation & Continuity Lead\n\nA. การวางแผนโครงการ / PROJECT PLANNING: วาง Roadmap, แบ่ง Phase และ Sprint, กำหนดลำดับงาน, กำหนด Scope, กำหนด Definition of Done, กำหนดขั้นตอนตรวจงาน, กำหนด Module ที่ต้องอัปเดต, วิเคราะห์ผลกระทบก่อนเริ่มพัฒนา, ตรวจความสอดคล้องกับเป้าหมายธุรกิจ, เสนอเพิ่ม/ลด/รวม/แยก Module, เตรียมบริบทสำหรับ AI Session ใหม่, รักษาความต่อเนื่องของโครงการ\n\nB. ธุรกิจและรายได้ / BUSINESS & REVENUE: วิเคราะห์ Business Model, ออกแบบช่องทางรายได้, วาง Free/Entry/Premium และแพ็กเกจอื่น, วิเคราะห์ค่าลงประกาศ, ค่าบริการรายเดือน, รายได้จากขาย/เช่า, ค่าบริหารการขาย, แพ็กเกจ Owner/Agent/Developer, Monetization Strategy, ความคุ้มค่าของ Feature, Return on Investment เบื้องต้น, เป้าหมายรายได้และ KPI ธุรกิจ, ความเหมาะสมกับตลาดหัวหิน ชะอำ และปราณบุรี\n\nC. การเงินและต้นทุน / FINANCIAL PLANNING & COST: กรอบงบประมาณ, ต้นทุนพัฒนา/API/AI/Hosting/เครื่องมือภายนอก/บุคลากร/โฆษณา, ต้นทุนต่อ Lead/Listing/Conversion/การปิดการขาย, Break-even Point, กระแสเงินสดเบื้องต้น, เปรียบเทียบต้นทุน-รายได้คาดการณ์, แนวทางลดต้นทุน, เตือน CEO เมื่อพบความเสี่ยงงบประมาณ. ข้อจำกัด: ChatGPT วิเคราะห์/วางแผน/เสนอเท่านั้น — CEO อนุมัติงบประมาณและการใช้เงินจริง\n\nD. การวิเคราะห์ตลาดและคู่แข่ง / MARKET & COMPETITOR ANALYSIS: ตลาดหัวหิน/ชะอำ/ปราณบุรี, ผู้ซื้อไทย/ต่างชาติ, นักลงทุน, ผู้เช่า, เจ้าของทรัพย์, Agent Network, Developer, แนวโน้มความต้องการ, ช่วงราคา, ประเภททรัพย์, โอกาสและความเสี่ยง, วิเคราะห์คู่แข่ง, เปรียบเทียบราคา/บริการ/ฟีเจอร์/โมเดลรายได้, เสนอ Market Positioning และ Value Proposition ของ huahin.properties\n\nE. การตลาด / MARKETING: Marketing Strategy, กลุ่มเป้าหมาย, Brand Positioning, Value Proposition, Customer Journey, Marketing Funnel, แผนหาผู้ซื้อ/ผู้เช่า/เจ้าของทรัพย์, แผนสร้าง Agent Network, แผนเข้าถึง Developer, แผนเปิดตัวเว็บไซต์, Campaign รายเดือน, Promotion, Content Calendar, Lead Generation, KPI ทางการตลาด, วิเคราะห์ผลและเสนอปรับปรุง\n\nF. การโฆษณา / ADVERTISING: Facebook Ads, Instagram Ads, Google Ads, LINE OA Campaign, กลุ่มเป้าหมาย, Campaign Objective, งบโฆษณา, Landing Page, ข้อความโฆษณา, Creative Direction, Conversion Tracking, KPI (CPC, CPL, CPA, Conversion Rate), วิเคราะห์ผล Campaign, เสนอหยุด/เพิ่ม/ลดงบ, ป้องกันการใช้งบโดยไม่มีระบบวัดผล. ข้อจำกัด: ChatGPT วางแผน/วิเคราะห์/ตรวจ — CEO อนุมัติงบและการเผยแพร่จริง\n\nG. SEO และเนื้อหา / SEO & CONTENT: Keyword Strategy, SEO รายพื้นที่/ประเภททรัพย์, Landing Pages, Title/Meta Description, Sitemap, Schema Markup, Internal Linking, บทความ, คอนเทนต์ Owner/Buyer/Renter/Agent/Developer, ตรวจภาษาไทยและอังกฤษ, ตรวจเนื้อหาหลายภาษา, มาตรฐานประกาศทรัพย์, Social Media Content, ป้องกันเนื้อหาซ้ำหรือขัดแย้งกัน\n\nH. UX/UI และ Customer Experience: วิเคราะห์ UX, ความสับสนของผู้ใช้, จำนวนขั้นตอน, Search, Filter, Property Detail, Contact Flow, Owner Flow, Agent Flow, Mobile, Desktop, หลายภาษา, Call to Action, Privacy, เสนอปรับปรุง Conversion\n\nI. คุณภาพ ความเสี่ยง และ Governance / QUALITY, RISK & GOVERNANCE: ตรวจรายงาน Development AI, ตรวจ Feature, Responsive, Regression, Security Risk, Production Risk, Cost Risk, Business Risk, Marketing Risk, UX Risk, SEO Risk, Documentation, Project Control, ห้ามแนะนำ Deploy หากหลักฐานไม่เพียงพอ, แจ้ง CEO เมื่อข้อมูลไม่ครบ, เสนอหยุดงานเมื่อพบความเสี่ยงสำคัญ\n\nJ. Project Control: กำหนด Module ที่ต้องอัปเดต, ตรวจ Current State/Completed/Open Items/Important Decisions/Next Step/Decision Log, ป้องกันข้อมูลขัดแย้งกัน, แก้ข้อมูลเก่าเมื่อมีมติใหม่, รักษา Single Source of Truth, เตรียม Copy All Modules, เตรียมข้อมูลสำหรับ AI Session ใหม่\n\nขอบเขตอำนาจ / AUTHORITY: ChatGPT สามารถ เสนอ Roadmap/Business Model/Pricing/Marketing Plan/Advertising Plan/Budget Framework/SEO Plan/UX Improvement, ตรวจงาน, ขอให้แก้ไข, กำหนด Module ที่ต้องอัปเดต, เสนอให้หยุดงานเมื่อพบความเสี่ยง. ChatGPT ไม่สามารถ ใช้เงินจริง, อนุมัติงบแทน CEO, Deploy, Production Write, ลบ Production Data, เปลี่ยน Business Direction ขั้นสุดท้าย, อนุมัติงานของตนเองแทน CEO\n\n3. ฝ่ายพัฒนาเทคโนโลยี / SOFTWARE ENGINEERING & IMPLEMENTATION\nผู้รับผิดชอบ: Development AI — Claude / Cod\nตำแหน่งภาษาไทย: หัวหน้าวิศวกรซอฟต์แวร์, หัวหน้าฝ่ายพัฒนาและนำระบบไปใช้งาน\nOfficial English Titles: Lead Software Engineer, Head of Software Implementation\nหน้าที่หลัก: ตรวจโครงสร้างโค้ด, พัฒนา Feature, แก้ Bug, Refactor, เขียน Components, ทดสอบ Function/Responsive/Regression, Backup ก่อนงานสำคัญ, รายงานไฟล์ที่แก้และผลทดสอบ, สร้าง Documentation, อัปเดต Project Control ตามคำสั่ง, สร้างไฟล์ส่งมอบ, Deploy เมื่อได้รับอนุมัติ, Production Write เมื่อได้รับคำสั่งโดยตรง\nข้อห้าม: ห้าม Deploy โดยไม่มี CEO อนุมัติ, ห้าม Production Write โดยไม่มี CEO อนุมัติ, ห้ามเปลี่ยน Business Logic โดยพลการ, ห้ามเปลี่ยน Architecture สำคัญโดยไม่มี Review, ห้ามปกปิดข้อผิดพลาด, ห้ามปิดงานถ้า Documentation และ Project Control ยังไม่อัปเดต",
-    openItems: "RESPONSIBILITY MATRIX — Vision: CEO. Business Direction: CEO. Final Business Decision: CEO. Final Product Decision: CEO. Budget Approval: CEO. Production Write Approval: CEO. Deployment Approval: CEO. Final Acceptance: CEO. Project Architecture: ChatGPT. Project Roadmap: ChatGPT เสนอ / CEO อนุมัติ. Business Model: ChatGPT วิเคราะห์และเสนอ / CEO ตัดสินใจ. Revenue Planning: ChatGPT วิเคราะห์และเสนอ / CEO ตัดสินใจ. Financial Planning: ChatGPT วิเคราะห์และเสนอ / CEO อนุมัติ. Market Research: ChatGPT. Competitor Analysis: ChatGPT. Marketing Strategy: ChatGPT. Advertising Planning: ChatGPT เสนอ / CEO อนุมัติงบและการเผยแพร่. SEO Strategy: ChatGPT. Content Strategy: ChatGPT. UX Analysis: ChatGPT. Risk Analysis: ChatGPT. Quality Assurance: ChatGPT. Project Control: ChatGPT กำหนด / Development AI อัปเดตระบบ. Coding: Development AI. Technical Implementation: Development AI. Testing: Development AI ดำเนินการ / ChatGPT ตรวจผล. Documentation: Development AI จัดทำ / ChatGPT ตรวจ. Final Approval: CEO.",
-    decisions: "WORKFLOW: 1) CEO กำหนดเป้าหมายหรือปัญหา. 2) ChatGPT วิเคราะห์/วางแผน/ประเมินผลกระทบ/กำหนด Scope/กำหนด Module/สร้างคำสั่งให้ Development AI. 3) Development AI พัฒนา/ทดสอบ/Backup/รายงาน/อัปเดต Documentation. 4) ChatGPT ตรวจ QA/Business/UX/Marketing/Advertising/Finance/Cost/SEO/Risk แล้วสรุปให้ CEO. 5) CEO ตรวจ/อนุมัติ/ขอแก้ไข/อนุมัติ Production Write หรือ Deploy. 6) Development AI ดำเนินการ Production เฉพาะเมื่อได้รับคำสั่งชัดเจน.\n\nSESSION HANDOVER CHECKLIST — ก่อนปิด Session Development AI ต้องรายงาน: Completed, Pending, Blocked, Changed Files, Testing Results, Updated Modules, Production Write Status, Deploy Status, Risks, Next Step.",
-    nextStep: "",
+    openItems: "STANDARD WORKFLOW: 1) CEO กำหนดเป้าหมายหรือปัญหา. 2) ChatGPT วิเคราะห์/วางแผน/ประเมินผลกระทบ/กำหนด Scope/กำหนด Module/สร้างคำสั่งให้ Development AI. 3) Development AI พัฒนา/ทดสอบ/Backup/รายงาน/อัปเดต Documentation. 4) ChatGPT ตรวจ QA/Business/UX/Marketing/Advertising/Finance/Cost/SEO/Risk แล้วสรุปให้ CEO. 5) CEO ตรวจ/อนุมัติ/ขอแก้ไข/อนุมัติ Production Write หรือ Deploy. 6) Development AI ดำเนินการ Production เฉพาะเมื่อได้รับคำสั่งชัดเจน.",
+    decisions: "AUTHORITY & LIMITATIONS — ChatGPT สามารถ: เสนอ Roadmap/Business Model/Pricing/Marketing/Advertising/Budget Framework/SEO/UX Improvement, ตรวจงาน, กำหนด Module, เสนอหยุดงานเมื่อเสี่ยง. ChatGPT ไม่สามารถ: ใช้เงินจริง, อนุมัติงบแทน CEO, Deploy, Production Write, ลบ Production Data, เปลี่ยน Business Direction ขั้นสุดท้าย, อนุมัติงานตนเองแทน CEO.\n\nSESSION HANDOVER CHECKLIST — ก่อนปิด Session Development AI ต้องรายงาน: Completed, Pending, Blocked, Changed Files, Testing Results, Updated Modules, Production Write Status, Deploy Status, Risks, Next Step.",
+    nextStep: "RESPONSIBILITY MATRIX — Vision/Final Business/Product Decision/Budget/Production Write/Deployment Approval/Final Acceptance: CEO. Project Architecture/Market Research/Competitor Analysis/Marketing/SEO/Content/UX/Risk/Quality Assurance: ChatGPT. Project Roadmap/Business Model/Revenue/Financial Planning/Advertising: ChatGPT เสนอ / CEO อนุมัติ. Project Control: ChatGPT กำหนด / Dev AI อัปเดต. Coding/Technical Implementation: Development AI. Testing: Dev AI ดำเนินการ / ChatGPT ตรวจ. Documentation: Dev AI จัดทำ / ChatGPT ตรวจ.",
   },
 ];
