@@ -59,8 +59,43 @@ export async function fetchCollection(name) {
 // the listing's data. merge:true makes every partial-patch call a safe,
 // targeted update while leaving full-object callers (Admin/Lister
 // Dashboard saves, which always pass the complete built object) unchanged.
+// merge:true is critical here — WITHOUT it, .set() fully REPLACES the
+// document, so every partial-patch caller in this file (approveListing,
+// rejectListing, scheduleArchival, cancelArchival, the archival/expiry/
+// photo-purge sweeps, markLeadContacted, etc. — each only passes 1-3
+// changed fields) would silently WIPE OUT every other field on that
+// document (title, price, description, photos, ownerId, everything) each
+// time it ran. Found auditing Listing Approvals: approveListing() only
+// ever sent {listingStatus, publishedAt, expiresAt, approvedAt, expiredAt,
+// photosDeletedAt} — clicking "อนุมัติ" would have destroyed the rest of
+// the listing's data. merge:true makes every partial-patch call a safe,
+// targeted update while leaving full-object callers (Admin/Lister
+// Dashboard saves, which always pass the complete built object) unchanged.
+//
+// Kept as the general-purpose function (many existing pages call this by
+// name) — updateDocFields/createDoc/replaceDoc below are the same
+// operation under clearer names for NEW call sites, so intent is explicit
+// at the call site instead of only in this comment.
 export async function setDoc(collectionName, id, data) {
   await db().collection(collectionName).doc(String(id)).set(data, { merge: true });
+}
+
+// Explicit-intent aliases (impact audit, July 2026 — see BLUEPRINT.md).
+// All three currently do the same safe merge:true write; createDoc/
+// replaceDoc are separated from updateDocFields only so a call site's
+// PURPOSE (new doc vs. full overwrite vs. partial patch) is readable at
+// a glance, not because their underlying behavior differs. If a genuine
+// full-replace-wipe-other-fields need ever comes up, give replaceDoc
+// its own real .set(data) (no merge) implementation instead of changing
+// this shared one.
+export async function updateDocFields(collectionName, id, fields) {
+  return setDoc(collectionName, id, fields);
+}
+export async function createDoc(collectionName, id, data) {
+  return setDoc(collectionName, id, data);
+}
+export async function replaceDoc(collectionName, id, data) {
+  return setDoc(collectionName, id, data);
 }
 
 // Fresh single-doc read (bypasses any client-cached list) — use this right
@@ -257,7 +292,7 @@ export async function fetchLeads() {
 }
 
 export async function markLeadContacted(id, contacted) {
-  await setDoc("leads", id, { contacted });
+  await updateDocFields("leads", id, { contacted });
 }
 
 // ── One-time migration: existing photos saved as huge base64 data: URLs
@@ -834,11 +869,11 @@ export async function completeStaffSignup(email) {
 // the dashboard, not on a fixed schedule. Note this limitation if a listing
 // needs to be archived exactly on time regardless of admin activity.
 export async function scheduleArchival(propertyId, archiveAt) {
-  await setDoc("properties", propertyId, { archiveScheduledAt: archiveAt, archived: false });
+  await updateDocFields("properties", propertyId, { archiveScheduledAt: archiveAt, archived: false });
 }
 
 export async function cancelArchival(propertyId) {
-  await setDoc("properties", propertyId, { archiveScheduledAt: null });
+  await updateDocFields("properties", propertyId, { archiveScheduledAt: null });
 }
 
 // Full delete — used by the lister's own "ลบทรัพย์ทั้งใบ" button (Lister
@@ -871,7 +906,7 @@ export function generateAgentCode() {
 export async function ensureAgentCode(listerId, existingCode) {
   if (existingCode) return existingCode;
   const code = generateAgentCode();
-  await setDoc("listers", listerId, { agentCode: code });
+  await updateDocFields("listers", listerId, { agentCode: code });
   return code;
 }
 
@@ -941,7 +976,7 @@ export async function runArchivalSweep(properties) {
         } catch (e) {}
         await deleteDocById("propertyPhotos", ph.id).catch(() => {});
       }
-      await setDoc("properties", p.id, { archived: true, archivedAt: now, photosDeletedAt: now });
+      await updateDocFields("properties", p.id, { archived: true, archivedAt: now, photosDeletedAt: now });
       archivedCount += 1;
     } catch (e) {
       console.warn("Archival failed for", p.id, e);
@@ -1043,7 +1078,7 @@ export async function startTrial(listerId) {
   if (data.trialUsed) throw new Error("คุณใช้สิทธิ์ทดลองฟรีไปแล้ว ไม่สามารถเริ่มใหม่ได้อีก");
   const now = Date.now();
   const trialEndsAt = now + TRIAL_DURATION_DAYS * 86400000;
-  await setDoc("listers", listerId, { tier: "trial", trialUsed: true, trialStartedAt: now, trialEndsAt });
+  await updateDocFields("listers", listerId, { tier: "trial", trialUsed: true, trialStartedAt: now, trialEndsAt });
   return trialEndsAt;
 }
 
@@ -1074,11 +1109,11 @@ export async function submitForApproval(propertyId, payload) {
 
 export async function approveListing(propertyId) {
   const now = Date.now();
-  await setDoc("properties", propertyId, { listingStatus: "live", publishedAt: now, expiresAt: now + LISTING_DURATION_DAYS * 86400000, approvedAt: now, expiredAt: null, photosDeletedAt: null });
+  await updateDocFields("properties", propertyId, { listingStatus: "live", publishedAt: now, expiresAt: now + LISTING_DURATION_DAYS * 86400000, approvedAt: now, expiredAt: null, photosDeletedAt: null });
 }
 
 export async function rejectListing(propertyId, reason) {
-  await setDoc("properties", propertyId, { listingStatus: "rejected", rejectedAt: Date.now(), rejectReason: reason || "" });
+  await updateDocFields("properties", propertyId, { listingStatus: "rejected", rejectedAt: Date.now(), rejectReason: reason || "" });
 }
 
 // Client-side mirror of the Firestore rule's listerHasActivePaidPackage() —
@@ -1105,7 +1140,7 @@ export async function renewListing(propertyId, lister) {
     throw new Error("ต่ออายุฟรีได้เฉพาะบัญชีที่มีแพ็กเกจจ่ายเงินที่ยัง active อยู่ — กรุณาอัปเกรดแพ็กเกจก่อน");
   }
   const now = Date.now();
-  await setDoc("properties", propertyId, { listingStatus: "live", publishedAt: now, expiresAt: now + LISTING_DURATION_DAYS * 86400000, expiredAt: null, photosDeletedAt: null });
+  await updateDocFields("properties", propertyId, { listingStatus: "live", publishedAt: now, expiresAt: now + LISTING_DURATION_DAYS * 86400000, expiredAt: null, photosDeletedAt: null });
 }
 
 export async function fetchPendingListings() {
@@ -1132,7 +1167,7 @@ export async function runExpirySweep(properties) {
   let expiredCount = 0, photosPurged = 0;
   for (const p of properties || []) {
     if (p.listingStatus === "live" && p.expiresAt && p.expiresAt <= now) {
-      try { await setDoc("properties", p.id, { listingStatus: "expired", expiredAt: now }); expiredCount++; } catch (e) {}
+      try { await updateDocFields("properties", p.id, { listingStatus: "expired", expiredAt: now }); expiredCount++; } catch (e) {}
     }
     if (p.listingStatus === "expired" && p.expiredAt && (now - p.expiredAt) > PHOTO_PURGE_DAYS_AFTER_EXPIRY * 86400000 && !p.photosDeletedAt) {
       try {
@@ -1147,7 +1182,7 @@ export async function runExpirySweep(properties) {
           } catch (e) {}
           await deleteDocById("propertyPhotos", ph.id).catch(() => {});
         }
-        await setDoc("properties", p.id, { photosDeletedAt: now });
+        await updateDocFields("properties", p.id, { photosDeletedAt: now });
         photosPurged++;
       } catch (e) { console.warn("Photo purge failed for", p.id, e); }
     }

@@ -100,7 +100,7 @@ class Component extends DCLogic {
 
   async setStatus(id, status) {
     this.setState((s) => ({ listers: s.listers.map((l) => (l.id === id ? { ...l, status } : l)) }));
-    try { await this._fb.setDoc("listers", id, { status }); } catch (e) { console.warn("setStatus failed:", e); }
+    try { await this._fb.updateDocFields("listers", id, { status }); } catch (e) { console.warn("setStatus failed:", e); }
   }
 
   renderVals() {

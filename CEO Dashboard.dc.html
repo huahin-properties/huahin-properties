@@ -41,6 +41,12 @@
     <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:4px;">แหล่งสถานะจริงของโครงการ (ต่อยอดจาก <a href="Blueprint.dc.html">BLUEPRINT.md</a>) — ไม่มีการเดาเปอร์เซ็นต์ ทุกค่าคำนวณจากสถานะ Module ที่บันทึกไว้จริงเท่านั้น</div>
     <div style="font-size:12px; color:oklch(55% 0.02 60); margin-bottom:20px;">อัปเดตล่าสุด: {{ updatedAtLabel }} โดย {{ dash.updatedBy }}</div>
 
+    <div style="display:flex; gap:8px; margin-bottom:22px; border-bottom:1px solid oklch(88% 0.01 70);">
+      <div onClick="{{ onShowCommand }}" style="{{ commandTabStyle }}">Command Center</div>
+      <div onClick="{{ onShowControl }}" style="{{ controlTabStyle }}">ส่วนควบคุมโครงการ · Project Control</div>
+    </div>
+
+    <sc-if value="{{ isCommandSection }}">
     <!-- ============ COMMAND CENTER SUMMARY ============ -->
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:28px;">
       <div style="{{ health.cardStyle }}">
@@ -267,6 +273,45 @@
     </sc-for>
 
     <sc-if value="{{ saveMsg }}"><div style="position:fixed; bottom:20px; right:20px; background:oklch(25% 0.02 60); color:white; font-size:13px; padding:10px 16px; border-radius:8px; z-index:50;">{{ saveMsg }}</div></sc-if>
+    </sc-if>
+
+    <sc-if value="{{ isControlSection }}">
+    <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); margin-bottom:4px;">ศูนย์ควบคุมโครงการ · Project Control Center</div>
+    <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:16px;">พื้นที่เก็บข้อมูล ความรู้ สถานะ และข้อสรุปของโครงการ — คัดลอกไปวางเริ่มต้น Chat ใหม่ได้ทันที (Ctrl+F ค้นหาในหน้านี้ได้)</div>
+
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px;">
+      <div onClick="{{ onCopyAll }}" style="background:oklch(35% 0.09 25); color:white; font-size:13px; font-weight:600; padding:9px 18px; border-radius:8px; cursor:pointer;">📋 คัดลอกทั้งหมด · Copy All Modules</div>
+      <sc-if value="{{ copyToast }}"><div style="font-size:12px; color:oklch(40% 0.12 145); font-weight:600;">{{ copyToast }}</div></sc-if>
+    </div>
+
+    <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:22px; padding:10px; background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px;">
+      <sc-for list="{{ controlModules }}" as="jm" hint-placeholder-count="10">
+        <a href="{{ jm.anchor }}" style="font-size:11px; color:oklch(35% 0.09 25); text-decoration:none; background:oklch(94% 0.02 70); padding:5px 10px; border-radius:100px; white-space:nowrap;">{{ jm.num }}</a>
+      </sc-for>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <sc-for list="{{ controlModules }}" as="m" hint-placeholder-count="10">
+        <div id="{{ m.id }}" style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:16px 18px;">
+          <div onClick="{{ m.onToggle }}" style="display:flex; align-items:center; justify-content:space-between; gap:10px; cursor:pointer; flex-wrap:wrap;">
+            <div style="font-family:'Playfair Display',serif; font-size:15px; color:oklch(22% 0.02 60);">{{ m.num }} — {{ m.th }} <span style="font-size:12px; color:oklch(55% 0.02 60); font-weight:400;">{{ m.en }}</span></div>
+            <div style="font-size:11px; color:oklch(55% 0.02 60); white-space:nowrap;">{{ m.expandIcon }} อัปเดต {{ m.lastUpdated }}</div>
+          </div>
+          <sc-if value="{{ m.expanded }}">
+            <div style="margin-top:12px; display:flex; flex-direction:column; gap:10px; font-size:13px; color:oklch(30% 0.02 60); line-height:1.6;">
+              <sc-if value="{{ m.currentState }}"><div><b>สถานะล่าสุด / Current State</b><div style="white-space:pre-wrap;">{{ m.currentState }}</div></div></sc-if>
+              <sc-if value="{{ m.completed }}"><div><b>สิ่งที่ทำเสร็จแล้ว / Completed</b><div style="white-space:pre-wrap;">{{ m.completed }}</div></div></sc-if>
+              <sc-if value="{{ m.openItems }}"><div><b>เรื่องที่ยังเปิดอยู่ / Open Items</b><div style="white-space:pre-wrap;">{{ m.openItems }}</div></div></sc-if>
+              <sc-if value="{{ m.decisions }}"><div><b>การตัดสินใจสำคัญ / Important Decisions</b><div style="white-space:pre-wrap;">{{ m.decisions }}</div></div></sc-if>
+              <sc-if value="{{ m.nextStep }}"><div><b>ขั้นตอนถัดไป / Next Step</b><div style="white-space:pre-wrap;">{{ m.nextStep }}</div></div></sc-if>
+              <sc-if value="{{ m.isEmpty }}"><div style="color:oklch(55% 0.02 60); font-style:italic;">Placeholder — ยังไม่มีข้อมูลบันทึกในโมดูลนี้</div></sc-if>
+              <div onClick="{{ m.onCopy }}" style="align-self:flex-start; background:oklch(94% 0.02 70); color:oklch(35% 0.09 25); font-size:12px; font-weight:600; padding:7px 14px; border-radius:6px; cursor:pointer;">📋 คัดลอก Module · Copy Module</div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+    </sc-if>
   </div>
 </div>
 </sc-if>
@@ -501,9 +546,12 @@ class Component extends DCLogic {
     expandedModuleId: null, editingModuleId: null, moduleDrafts: {},
     sectionEditing: {}, sectionDrafts: {}, sectionShowAll: {},
     saveMsg: "", saving: false, dirty: false,
+    section: "command", controlModules: null, expandedControlIds: [], copyToast: "",
   };
 
   async componentDidMount() {
+    const ctrl = await import("./project-control-data.js");
+    this.setState({ controlModules: ctrl.MODULES });
     const fb = await import("./firebase-client.js");
     this._fb = fb;
     await fb.onAdminAuthReady();
@@ -578,6 +626,47 @@ class Component extends DCLogic {
     this.persist({ [key]: fromLines(text) }).then(() => this.setState((s) => ({ sectionEditing: { ...s.sectionEditing, [key]: false } })));
   }
   toggleShowAll(key) { this.setState((s) => ({ sectionShowAll: { ...s.sectionShowAll, [key]: !s.sectionShowAll[key] } })); }
+
+  toggleControlModule(id) {
+    this.setState((s) => {
+      const has = s.expandedControlIds.includes(id);
+      return { expandedControlIds: has ? s.expandedControlIds.filter((x) => x !== id) : [...s.expandedControlIds, id] };
+    });
+  }
+
+  formatModuleText(m) {
+    const sections = [
+      ["สถานะล่าสุด / Current State", m.currentState],
+      ["สิ่งที่ทำเสร็จแล้ว / Completed", m.completed],
+      ["เรื่องที่ยังเปิดอยู่ / Open Items", m.openItems],
+      ["การตัดสินใจสำคัญ / Important Decisions", m.decisions],
+      ["ขั้นตอนถัดไป / Next Step", m.nextStep],
+    ].filter(([, v]) => v);
+    const body = sections.map(([label, v]) => `${label}\n${v}`).join("\n\n") || "(ยังไม่มีข้อมูล)";
+    return `==================================================\nMODULE ${m.num} — ${m.th} / ${m.en}\nLast Updated: ${m.lastUpdated}\n\n${body}\n==================================================`;
+  }
+
+  copyText(text, msg) {
+    const done = () => { this.setState({ copyToast: msg }); clearTimeout(this._copyTimer); this._copyTimer = setTimeout(() => this.setState({ copyToast: "" }), 2500); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(() => this._fallbackCopy(text, done));
+    } else {
+      this._fallbackCopy(text, done);
+    }
+  }
+  _fallbackCopy(text, done) {
+    const ta = document.createElement("textarea");
+    ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(ta); done();
+  }
+
+  copyModule(m) { this.copyText(this.formatModuleText(m), `✓ คัดลอก Module ${m.num} แล้ว`); }
+  copyAllModules() {
+    const all = (this.state.controlModules || []).map((m) => this.formatModuleText(m)).join("\n\n");
+    this.copyText(all, "✓ คัดลอกทั้งหมด " + (this.state.controlModules || []).length + " Modules แล้ว");
+  }
 
   renderVals() {
     const dash = this.state.dash;
@@ -698,8 +787,31 @@ class Component extends DCLogic {
       };
     });
 
+    const isCommandSection = this.state.section !== "control";
+    const isControlSection = this.state.section === "control";
+    const tabBase = "padding:10px 16px; font-size:13px; font-weight:600; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;";
+    const controlModules = (this.state.controlModules || []).map((m) => {
+      const expanded = this.state.expandedControlIds.includes(m.num);
+      const isEmpty = !m.currentState && !m.completed && !m.openItems && !m.decisions && !m.nextStep;
+      return {
+        id: "pc-module-" + m.num, anchor: "#pc-module-" + m.num,
+        num: m.num, th: m.th, en: m.en, lastUpdated: m.lastUpdated,
+        currentState: m.currentState, completed: m.completed, openItems: m.openItems, decisions: m.decisions, nextStep: m.nextStep,
+        isEmpty, expanded, expandIcon: expanded ? "▾" : "▸",
+        onToggle: () => this.toggleControlModule(m.num),
+        onCopy: () => this.copyModule(m),
+      };
+    });
+
     return {
       authChecked: true, isAdmin: this.state.isAdmin, dash,
+      isCommandSection, isControlSection,
+      onShowCommand: () => this.setState({ section: "command" }),
+      onShowControl: () => this.setState({ section: "control" }),
+      commandTabStyle: tabBase + (isCommandSection ? "color:oklch(35% 0.09 25); border-bottom-color:oklch(35% 0.09 25);" : "color:oklch(55% 0.02 60);"),
+      controlTabStyle: tabBase + (isControlSection ? "color:oklch(35% 0.09 25); border-bottom-color:oklch(35% 0.09 25);" : "color:oklch(55% 0.02 60);"),
+      controlModules, copyToast: this.state.copyToast,
+      onCopyAll: () => this.copyAllModules(),
       updatedAtLabel: dash.updatedAt ? new Date(dash.updatedAt).toLocaleString("th-TH") : "ยังไม่เคยบันทึก",
       health, completionProgress, verificationCoverage, verifiedCount, totalModules: total, counts,
       completionFormula: "สูตร: ผลรวมคะแนน (Completed=100, Ready for Review=75, In Progress=50, Blocked/Waiting=25, Not Started/Verified=0) ÷ จำนวน Module",
