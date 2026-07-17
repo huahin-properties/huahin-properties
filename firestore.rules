@@ -81,7 +81,13 @@ service cloud.firestore {
         exists(/databases/$(database)/documents/properties/$(request.resource.data.propertyId)) &&
         get(/databases/$(database)/documents/properties/$(request.resource.data.propertyId)).data.listerId == request.auth.uid);
     }
-    match /siteContent/{id} { allow read: if true; allow write: if isOwner(); }
+    // CEO Project Dashboard doc is internal-only (risks/decisions not meant
+    // for public eyes) — carved out of the otherwise-public siteContent
+    // rule below. Firestore evaluates ALL matching rules and allows the
+    // request if ANY grants it, so the general rule must explicitly
+    // exclude this id or it would still be publicly readable.
+    match /siteContent/projectDashboard { allow read, write: if isAdmin(); }
+    match /siteContent/{id} { allow read: if id != "projectDashboard"; allow write: if isOwner() && id != "projectDashboard"; }
     match /profilePhotos/{id} { allow read: if true; allow write: if isAdmin() || request.auth != null; }
     match /aiNotes/{id} { allow read: if true; allow write: if isOwner(); }
     match /banners/{id} {

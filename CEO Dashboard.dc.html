@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <title>CEO Project Dashboard — huahin.properties</title>
+  <style>
+    body { margin: 0; background: oklch(96% 0.015 75); font-family: 'Work Sans', sans-serif; }
+    a { color: oklch(35% 0.09 25); }
+    a:hover { color: oklch(28% 0.1 25); }
+    select, textarea { font-family: inherit; }
+  </style>
+</helmet>
+
+<sc-if value="{{ !authChecked }}" hint-placeholder-val="{{ true }}">
+  <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; color:oklch(45% 0.02 60); font-size:14px;">กำลังตรวจสอบสิทธิ์…</div>
+</sc-if>
+
+<sc-if value="{{ authChecked }}">
+<div style="min-height:100vh; padding:clamp(20px,4vw,56px); box-sizing:border-box;">
+  <div style="max-width:980px; margin:0 auto;">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:6px;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="width:40px; height:40px; border-radius:10px; background:oklch(35% 0.09 25); display:flex; align-items:center; justify-content:center; color:white; font-size:20px;">🏠</div>
+        <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60);">huahin . properties — CEO Project Dashboard</div>
+      </div>
+      <a href="Admin Dashboard.dc.html" style="font-size:13px; text-decoration:none;">← กลับ Admin Dashboard</a>
+    </div>
+    <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:8px;">แหล่งสถานะจริงของโครงการ (ต่อยอดจาก <a href="Blueprint.dc.html">BLUEPRINT.md</a>) — เริ่มติดตามสถานะแบบยืนยันได้จริงตั้งแต่ 17 ก.ค. 2569 เปอร์เซ็นต์จะขึ้นเมื่อแต่ละโมดูลผ่านการตรวจสอบแล้วเท่านั้น ไม่ได้แปลว่าเว็บใช้งานไม่ได้</div>
+    <div style="font-size:12px; color:oklch(55% 0.02 60); margin-bottom:24px;">อัปเดตล่าสุด: {{ updatedAtLabel }} โดย {{ dash.updatedBy }}</div>
+
+    <!-- ============ A. OVERVIEW ============ -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:32px;">
+      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:18px;">
+        <div style="font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:oklch(55% 0.02 60); margin-bottom:8px;">โครงการ</div>
+        <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(22% 0.02 60);">{{ dash.project.name }}</div>
+        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-top:4px;">เวอร์ชัน {{ dash.project.version }}</div>
+      </div>
+      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:18px;">
+        <div style="font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:oklch(55% 0.02 60); margin-bottom:8px;">Overall Progress</div>
+        <div style="font-family:'Playfair Display',serif; font-size:28px; color:oklch(22% 0.02 60);">{{ overallPercent }}%</div>
+        <div style="height:8px; border-radius:4px; background:oklch(90% 0.01 70); margin-top:8px; overflow:hidden;"><div style="{{ overallBarStyle }}"></div></div>
+      </div>
+      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:18px;">
+        <div style="font-size:11px; letter-spacing:0.06em; text-transform:uppercase; color:oklch(55% 0.02 60); margin-bottom:8px;">สถานะโครงการ</div>
+        <div style="font-size:15px; font-weight:600; color:oklch(30% 0.02 60);">{{ dash.project.status }}</div>
+      </div>
+    </div>
+
+    <!-- ============ B. PHASES ============ -->
+    <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60); margin:28px 0 12px;">Phase ตาม Roadmap</div>
+    <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:32px;">
+      <sc-for list="{{ phaseRows }}" as="ph" hint-placeholder-count="5">
+        <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:16px 18px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:8px;">
+            <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60);">{{ ph.name }}</div>
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span style="{{ ph.badgeStyle }}">{{ ph.badgeLabel }}</span>
+              <span style="font-size:12px; color:oklch(50% 0.02 60);">{{ ph.completedCount }}/{{ ph.totalCount }} โมดูล</span>
+            </div>
+          </div>
+          <div style="height:8px; border-radius:4px; background:oklch(90% 0.01 70); overflow:hidden;"><div style="{{ ph.barStyle }}"></div></div>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- ============ C. MODULES ============ -->
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin:28px 0 12px;">
+      <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60);">Module Status</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <select value="{{ filterPhase }}" onChange="{{ onFilterPhase }}" style="font-size:12px; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:6px 8px;">
+          <option value="all">ทุก Phase</option>
+          <sc-for list="{{ dash.phases }}" as="p" hint-placeholder-count="5"><option value="{{ p.id }}">{{ p.name }}</option></sc-for>
+        </select>
+        <select value="{{ filterStatus }}" onChange="{{ onFilterStatus }}" style="font-size:12px; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:6px 8px;">
+          <option value="all">ทุกสถานะ</option>
+          <option value="completed">✅ Completed</option>
+          <option value="in_progress">🟡 In Progress</option>
+          <option value="ready_for_review">🔵 Ready for Review</option>
+          <option value="blocked">🔴 Blocked</option>
+          <option value="not_started">⚪ Not Started</option>
+          <option value="not_verified">⚪ Not Verified</option>
+          <option value="waiting_decision">🟣 Waiting for Decision</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:32px;">
+      <sc-for list="{{ moduleRows }}" as="m" hint-placeholder-count="17">
+        <div style="{{ m.rowStyle }}">
+          <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+            <div style="{{ m.dotStyle }}">{{ m.dotIcon }}</div>
+            <div style="font-size:14px; color:oklch(25% 0.03 60); font-weight:500;">{{ m.name }}</div>
+            <div style="font-size:11px; color:oklch(55% 0.02 60);">· {{ m.phaseName }}</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="{{ m.badgeStyle }}">{{ m.badgeLabel }}</span>
+            <sc-if value="{{ isAdmin }}">
+              <select value="{{ m.status }}" onChange="{{ m.onStatusChange }}" style="font-size:11px; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:4px 6px;">
+                <option value="completed">✅ Completed</option>
+                <option value="in_progress">🟡 In Progress</option>
+                <option value="ready_for_review">🔵 Ready for Review</option>
+                <option value="blocked">🔴 Blocked</option>
+                <option value="not_started">⚪ Not Started</option>
+                <option value="not_verified">⚪ Not Verified</option>
+                <option value="waiting_decision">🟣 Waiting for Decision</option>
+              </select>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- ============ D/E/F/G/H/I — editable list sections ============ -->
+    <sc-for list="{{ listSections }}" as="sec" hint-placeholder-count="6">
+      <div style="margin-bottom:28px;">
+        <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60); margin-bottom:12px;">{{ sec.title }}</div>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:10px;">
+          <sc-for list="{{ sec.items }}" as="it" hint-placeholder-count="2">
+            <div style="{{ it.rowStyle }}">
+              <div style="font-size:13px; color:oklch(30% 0.02 60); flex:1; min-width:0; white-space:pre-wrap;">{{ it.text }}</div>
+              <sc-if value="{{ it.meta }}"><div style="font-size:11px; color:oklch(55% 0.02 60); white-space:nowrap;">{{ it.meta }}</div></sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ isAdmin }}">
+          <textarea value="{{ sec.draft }}" onChange="{{ sec.onDraftChange }}" rows="3" placeholder="1 รายการต่อบรรทัด — เช่น 17/07/2569 | หัวข้อ | รายละเอียด" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:8px 10px; font-size:12px; resize:vertical; margin-bottom:6px;"></textarea>
+          <div onClick="{{ sec.onSave }}" style="display:inline-block; background:oklch(35% 0.09 25); color:white; font-size:12px; padding:7px 14px; border-radius:6px; cursor:pointer;">บันทึก {{ sec.title }}</div>
+        </sc-if>
+      </div>
+    </sc-for>
+
+    <sc-if value="{{ saveMsg }}"><div style="position:fixed; bottom:20px; right:20px; background:oklch(25% 0.02 60); color:white; font-size:13px; padding:10px 16px; border-radius:8px;">{{ saveMsg }}</div></sc-if>
+  </div>
+</div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+
+const STATUS_META = {
+  completed:        { label: "✅ Completed",           bg: "oklch(94% 0.06 150)", border: "oklch(80% 0.1 150)",  dot: "oklch(45% 0.13 150)", text: "oklch(25% 0.05 150)", icon: "✓" },
+  in_progress:      { label: "🟡 In Progress",         bg: "oklch(93% 0.06 75)",  border: "oklch(78% 0.12 75)",  dot: "oklch(55% 0.15 75)",  text: "oklch(30% 0.06 75)", icon: "▶" },
+  ready_for_review: { label: "🔵 Ready for Review",    bg: "oklch(93% 0.05 250)", border: "oklch(78% 0.1 250)",  dot: "oklch(50% 0.13 250)", text: "oklch(28% 0.06 250)", icon: "◎" },
+  blocked:          { label: "🔴 Blocked",             bg: "oklch(93% 0.07 25)",  border: "oklch(78% 0.12 25)",  dot: "oklch(50% 0.16 25)",  text: "oklch(28% 0.08 25)", icon: "✕" },
+  not_started:      { label: "⚪ Not Started",          bg: "oklch(97% 0.005 80)", border: "oklch(90% 0.01 70)",  dot: "oklch(85% 0.01 70)", text: "oklch(45% 0.02 60)", icon: "○" },
+  not_verified:     { label: "⚪ Not Verified",         bg: "oklch(97% 0.005 80)", border: "oklch(90% 0.01 70)",  dot: "oklch(85% 0.01 70)", text: "oklch(45% 0.02 60)", icon: "?" },
+  waiting_decision: { label: "🟣 Waiting for Decision", bg: "oklch(93% 0.05 300)", border: "oklch(78% 0.1 300)",  dot: "oklch(50% 0.13 300)", text: "oklch(28% 0.06 300)", icon: "!" },
+};
+
+function defaultDashboard() {
+  const phases = [
+    { id: "p1", name: "Phase 1: Foundation & Database" },
+    { id: "p2", name: "Phase 2: Core Features" },
+    { id: "p3", name: "Phase 3: Business & Monetization" },
+    { id: "p4", name: "Phase 4: SEO & Marketing" },
+    { id: "p5", name: "Phase 5: Testing & Launch" },
+  ];
+  const mod = (id, name, phaseId, status) => ({ id, name, phaseId, status });
+  const modules = [
+    mod("auth", "Authentication", "p1", "not_verified"),
+    mod("propmgmt", "Property Management", "p2", "not_verified"),
+    mod("search", "Search and Filters", "p2", "not_verified"),
+    mod("propdetails", "Property Details", "p2", "in_progress"),
+    mod("listerdash", "Lister Dashboard", "p2", "in_progress"),
+    mod("admindash", "Admin Dashboard", "p2", "not_verified"),
+    mod("ownermgmt", "Owner Management", "p2", "not_verified"),
+    mod("aiquickadd", "AI Quick Add", "p2", "not_verified"),
+    mod("i18n", "Multi-language", "p2", "not_verified"),
+    mod("images", "Image Management", "p1", "in_progress"),
+    mod("trial", "Trial Package", "p3", "in_progress"),
+    mod("billing", "Subscription and Payment", "p3", "not_verified"),
+    mod("seo", "SEO", "p4", "not_verified"),
+    mod("perf", "Performance", "p5", "not_verified"),
+    mod("security", "Security", "p1", "in_progress"),
+    mod("db", "Database", "p1", "in_progress"),
+    mod("docs", "Documentation", "p5", "completed"),
+  ];
+  return {
+    schemaVersion: 1,
+    project: { name: "huahin.properties", version: "v2 (membership rebuild)", status: "Development / Testing" },
+    phases, modules,
+    currentWork: [
+      { text: "ตรวจสอบและทำความสะอาดข้อมูลทดลอง (Database Cleanup)", meta: "17/07/2569" },
+      { text: "ตรวจสอบ AI Quick Add: การคำนวณระยะทาง/POI ให้ครบ 10+ จุดทั้ง EN/TH", meta: "" },
+    ],
+    nextActions: [
+      { text: "ล็อก Firestore Security Rules ให้ครบก่อน 08/08/2569 (rules ชั่วคราวจะหมดอายุ)", meta: "" },
+      { text: "Deploy firestore.rules ที่แก้ไขล่าสุด (projectDashboard + listing v2)", meta: "" },
+      { text: "ตัดสินใจเรื่องประกาศสาธิต 22 รายการ (เก็บ/ลบ)", meta: "" },
+    ],
+    recentlyCompleted: [
+      { text: "HH-13293 ownership reassigned สำเร็จ — ตรวจสอบแล้ว PASS", meta: "17/07/2569" },
+      { text: "Trial user เห็น/แก้ไข HH-13293 ได้ — ตรวจสอบแล้ว PASS", meta: "17/07/2569" },
+      { text: "Property Details ตรวจสอบผ่านทุกจุด (รูป/รายละเอียด/คุณสมบัติ)", meta: "17/07/2569" },
+      { text: "Dashboard access ตรวจสอบผ่าน", meta: "17/07/2569" },
+      { text: "โควตารูปจำกัดถูกต้องที่ 8 รูป (HH-13293, HH-70724)", meta: "17/07/2569" },
+      { text: "properties/HH-70724 ลบเรียบร้อยแล้ว", meta: "17/07/2569" },
+      { text: "propertyPhotos/HH-70724-0 ถึง -7 ลบเรียบร้อยแล้ว", meta: "17/07/2569" },
+      { text: "Database Cleanup Phase 1 — Completed", meta: "17/07/2569" },
+      { text: "Firestore ownership issue (HH-13293) แก้ไขแล้ว", meta: "17/07/2569" },
+    ],
+    risks: [
+      { text: "Storage อาจมี orphan files ของ HH-70724 (propertyPhotos/HH-70724-*.webp) — ⚪ รอตรวจสอบ ไม่กระทบการทำงาน", meta: "" },
+      { text: "Firestore rules ชั่วคราวหมดอายุ 08/08/2569 ต้องล็อกก่อนวันนั้น", meta: "" },
+      { text: "ต้องตรวจ Firestore Indexes ก่อน Final Cleanup", meta: "" },
+      { text: "ห้ามลบ Lister โดยไม่ตรวจ Property Ownership ก่อนทุกครั้ง", meta: "" },
+      { text: "ยังไม่ได้ตัดสินใจเรื่องประกาศสาธิต 22 รายการ (เก็บ/ลบ)", meta: "" },
+    ],
+    decisions: [
+      { text: "อนุมัติ Reassign เจ้าของ HH-13293 ไปยังบัญชีทดลองปัจจุบัน (ไม่รีเซ็ต trial 30 วัน)", meta: "17/07/2569 · Product Owner" },
+      { text: "อนุมัติลบ properties/HH-70724 + propertyPhotos ที่เกี่ยวข้อง (Database Cleanup Phase 1)", meta: "17/07/2569 · Product Owner" },
+      { text: "อนุมัติลดรูปเกินโควตาของ HH-13293 และ HH-70724 เหลือ 8 รูปตามแพ็กเกจทดลอง", meta: "17/07/2569 · Product Owner" },
+    ],
+    developmentHistory: [
+      { text: "แก้บั๊ก getEffectiveProperties() ที่ทำให้ทรัพย์ตัวอย่างหายเมื่อมี Firestore data จริง | ผล: PASS", meta: "17/07/2569 · Claude" },
+      { text: "เพิ่ม fallback รายละเอียดประกาศ + checklist คุณสมบัติใน Lister Dashboard | ผล: PASS", meta: "17/07/2569 · Claude" },
+      { text: "สร้าง CEO Project Dashboard (นี้) ต่อยอดจาก BLUEPRINT.md | ผล: รอตรวจสอบ Desktop/Mobile", meta: "17/07/2569 · Claude" },
+    ],
+    updatedAt: null, updatedBy: "system (ค่าเริ่มต้น)",
+  };
+}
+
+function toLines(items) { return (items || []).map((i) => i.meta ? `${i.meta} | ${i.text}` : i.text).join("\n"); }
+function fromLines(text) {
+  return text.split("\n").map((l) => l.trim()).filter(Boolean).map((l) => {
+    const idx = l.indexOf(" | ");
+    return idx === -1 ? { text: l, meta: "" } : { meta: l.slice(0, idx), text: l.slice(idx + 3) };
+  });
+}
+
+class Component extends DCLogic {
+  state = { authChecked: false, isAdmin: false, dash: null, filterPhase: "all", filterStatus: "all", drafts: {}, saveMsg: "" };
+
+  async componentDidMount() {
+    const fb = await import("./firebase-client.js");
+    this._fb = fb;
+    await fb.onAdminAuthReady();
+    if (!fb.isAdminAuthed()) { window.location.href = "Admin Login.dc.html"; return; }
+    let dash = null;
+    try { dash = await fb.fetchProjectDashboard(); } catch (e) { console.warn("fetchProjectDashboard failed", e); }
+    if (!dash) dash = defaultDashboard();
+    this.setState({ authChecked: true, isAdmin: true, dash });
+  }
+
+  async persist(patch) {
+    const dash = { ...this.state.dash, ...patch };
+    this.setState({ dash });
+    try {
+      await this._fb.saveProjectDashboard(dash, (this._fb.isAdminAuthed && "admin"));
+      this.setState({ saveMsg: "บันทึกแล้ว ✓" });
+      setTimeout(() => this.setState({ saveMsg: "" }), 2000);
+    } catch (e) {
+      this.setState({ saveMsg: "บันทึกไม่สำเร็จ: " + e.message });
+    }
+  }
+
+  setModuleStatus(id, status) {
+    const modules = this.state.dash.modules.map((m) => (m.id === id ? { ...m, status } : m));
+    this.persist({ modules });
+  }
+
+  saveListSection(key, text) {
+    this.persist({ [key]: fromLines(text) });
+  }
+
+  renderVals() {
+    const dash = this.state.dash;
+    if (!this.state.authChecked || !dash) return { authChecked: this.state.authChecked };
+
+    const completedCount = dash.modules.filter((m) => m.status === "completed").length;
+    const overallPercent = dash.modules.length ? Math.round((completedCount / dash.modules.length) * 100) : 0;
+
+    const phaseRows = dash.phases.map((ph) => {
+      const mods = dash.modules.filter((m) => m.phaseId === ph.id);
+      const done = mods.filter((m) => m.status === "completed").length;
+      const pct = mods.length ? Math.round((done / mods.length) * 100) : 0;
+      const anyBlocked = mods.some((m) => m.status === "blocked");
+      const meta = anyBlocked ? STATUS_META.blocked : (pct === 100 ? STATUS_META.completed : (pct > 0 ? STATUS_META.in_progress : STATUS_META.not_started));
+      return {
+        id: ph.id, name: ph.name, completedCount: done, totalCount: mods.length,
+        badgeLabel: meta.label,
+        badgeStyle: `background:${meta.bg}; border:1px solid ${meta.border}; color:${meta.text}; font-size:11px; font-weight:600; padding:3px 10px; border-radius:100px;`,
+        barStyle: `height:100%; width:${pct}%; background:${meta.dot}; transition:width .3s;`,
+      };
+    });
+
+    const filteredModules = dash.modules.filter((m) =>
+      (this.state.filterPhase === "all" || m.phaseId === this.state.filterPhase) &&
+      (this.state.filterStatus === "all" || m.status === this.state.filterStatus)
+    );
+    const phaseName = (id) => (dash.phases.find((p) => p.id === id) || {}).name || "";
+    const moduleRows = filteredModules.map((m) => {
+      const meta = STATUS_META[m.status] || STATUS_META.not_verified;
+      return {
+        id: m.id, name: m.name, phaseName: phaseName(m.phaseId), status: m.status,
+        rowStyle: `display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; background:${meta.bg}; border:1px solid ${meta.border}; border-radius:8px; padding:10px 14px;`,
+        dotStyle: `width:20px; height:20px; border-radius:50%; background:${meta.dot}; color:white; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;`,
+        dotIcon: meta.icon,
+        badgeLabel: meta.label,
+        badgeStyle: `background:white; border:1px solid ${meta.border}; color:${meta.text}; font-size:11px; font-weight:600; padding:2px 9px; border-radius:100px; white-space:nowrap;`,
+        onStatusChange: (e) => this.setModuleStatus(m.id, e.target.value),
+      };
+    });
+
+    const listSectionDefs = [
+      ["currentWork", "งานที่กำลังดำเนินการ"],
+      ["nextActions", "งานถัดไป"],
+      ["recentlyCompleted", "งานที่เพิ่งเสร็จ"],
+      ["risks", "ปัญหาและความเสี่ยง"],
+      ["decisions", "Decisions Log"],
+      ["developmentHistory", "ประวัติการพัฒนา"],
+    ];
+    const listSections = listSectionDefs.map(([key, title]) => ({
+      key, title,
+      items: (dash[key] || []).map((it) => ({
+        text: it.text, meta: it.meta || "",
+        rowStyle: "display:flex; align-items:flex-start; justify-content:space-between; gap:10px; background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:10px 14px;",
+      })),
+      draft: this.state.drafts[key] !== undefined ? this.state.drafts[key] : toLines(dash[key]),
+      onDraftChange: (e) => this.setState((s) => ({ drafts: { ...s.drafts, [key]: e.target.value } })),
+      onSave: () => this.saveListSection(key, this.state.drafts[key] !== undefined ? this.state.drafts[key] : toLines(dash[key])),
+    }));
+
+    return {
+      authChecked: true, isAdmin: this.state.isAdmin, dash,
+      updatedAtLabel: dash.updatedAt ? new Date(dash.updatedAt).toLocaleString("th-TH") : "ยังไม่เคยบันทึก",
+      overallPercent,
+      overallBarStyle: `height:100%; width:${overallPercent}%; background:oklch(45% 0.13 150); transition:width .3s;`,
+      phaseRows, moduleRows,
+      filterPhase: this.state.filterPhase, filterStatus: this.state.filterStatus,
+      onFilterPhase: (e) => this.setState({ filterPhase: e.target.value }),
+      onFilterStatus: (e) => this.setState({ filterStatus: e.target.value }),
+      listSections,
+      saveMsg: this.state.saveMsg,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

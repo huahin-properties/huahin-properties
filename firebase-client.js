@@ -632,6 +632,22 @@ export async function translateDescriptionAll(text) {
   }
 }
 
+// CEO Project Dashboard (BLUEPRINT.md "living status" companion) — a single
+// structured doc, NOT plain text like saveSiteContentText. Firestore stores
+// nested objects/arrays natively so phases/modules/history all round-trip
+// as real arrays/objects, not a serialized blob. Locked to admin-only read
+// AND write in firestore.rules (carved out of the public siteContent rule).
+export async function fetchProjectDashboard() {
+  const doc = await db().collection("siteContent").doc("projectDashboard").get();
+  return doc.exists ? doc.data() : null;
+}
+
+export async function saveProjectDashboard(data, updatedByLabel) {
+  await db().collection("siteContent").doc("projectDashboard").set({
+    ...data, updatedAt: Date.now(), updatedBy: updatedByLabel || "admin",
+  });
+}
+
 export async function fetchStripePrices() {
   const doc = await db().collection("siteContent").doc("stripePrices").get();
   return doc.exists ? doc.data() : { pro: "", agency: "", level3: "", level4: "" };
