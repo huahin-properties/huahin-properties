@@ -47,6 +47,11 @@
     </div>
 
     <sc-if value="{{ isCommandSection }}">
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px;">
+      <div onClick="{{ onCopyCommandAll }}" style="background:oklch(35% 0.09 25); color:white; font-size:13px; font-weight:600; padding:9px 18px; border-radius:8px; cursor:pointer;">📋 คัดลอกทั้งหมด · Copy All</div>
+      <div onClick="{{ onCopyAiPack }}" style="background:oklch(30% 0.1 250); color:white; font-size:13px; font-weight:600; padding:9px 18px; border-radius:8px; cursor:pointer;">🧠 ชุดข้อมูลสำหรับ AI · AI Session Pack</div>
+      <sc-if value="{{ copyToast }}"><div style="font-size:12px; color:oklch(40% 0.12 145); font-weight:600;">{{ copyToast }}</div></sc-if>
+    </div>
     <!-- ============ COMMAND CENTER SUMMARY ============ -->
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:10px; margin-bottom:28px;">
       <div style="{{ health.cardStyle }}">
@@ -87,28 +92,28 @@
     <!-- ============ TODAY / CURRENT COMMAND ============ -->
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; margin-bottom:32px;">
       <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:16px;">
-        <div style="font-size:12px; font-weight:700; color:oklch(30% 0.02 60); margin-bottom:10px;">🟡 TODAY / CURRENT WORK</div>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;"><div style="font-size:12px; font-weight:700; color:oklch(30% 0.02 60);">🟡 TODAY / CURRENT WORK</div><div onClick="{{ onCopyCurrentWork }}" style="font-size:11px; color:oklch(35% 0.09 25); cursor:pointer; white-space:nowrap;">📋 Copy Section</div></div>
         <sc-for list="{{ currentWorkTop }}" as="it" hint-placeholder-count="2">
           <div style="font-size:12px; color:oklch(30% 0.02 60); padding:6px 0; border-bottom:1px solid oklch(93% 0.01 70);">{{ it.text }}<sc-if value="{{ it.meta }}"><div style="font-size:10px; color:oklch(55% 0.02 60); margin-top:2px;">{{ it.meta }}</div></sc-if></div>
         </sc-for>
         <sc-if value="{{ !currentWorkTop.length }}"><div style="font-size:12px; color:oklch(55% 0.02 60);">ไม่มีงานที่กำลังดำเนินการ</div></sc-if>
       </div>
       <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:16px;">
-        <div style="font-size:12px; font-weight:700; color:oklch(30% 0.02 60); margin-bottom:10px;">➡️ NEXT ACTIONS</div>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;"><div style="font-size:12px; font-weight:700; color:oklch(30% 0.02 60);">➡️ NEXT ACTIONS</div><div onClick="{{ onCopyNextActions }}" style="font-size:11px; color:oklch(35% 0.09 25); cursor:pointer; white-space:nowrap;">📋 Copy Section</div></div>
         <sc-for list="{{ nextActionsTop }}" as="it" hint-placeholder-count="3">
           <div style="font-size:12px; color:oklch(30% 0.02 60); padding:6px 0; border-bottom:1px solid oklch(93% 0.01 70);">{{ it.text }}</div>
         </sc-for>
         <sc-if value="{{ !nextActionsTop.length }}"><div style="font-size:12px; color:oklch(55% 0.02 60);">ไม่มีงานถัดไป</div></sc-if>
       </div>
       <div style="background:oklch(93% 0.05 300); border:1px solid oklch(78% 0.1 300); border-radius:10px; padding:16px;">
-        <div style="font-size:12px; font-weight:700; color:oklch(28% 0.06 300); margin-bottom:10px;">🟣 NEEDS CEO DECISION</div>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;"><div style="font-size:12px; font-weight:700; color:oklch(28% 0.06 300);">🟣 NEEDS CEO DECISION</div><div onClick="{{ onCopyNeedsDecision }}" style="font-size:11px; color:oklch(28% 0.06 300); text-decoration:underline; cursor:pointer; white-space:nowrap;">📋 Copy</div></div>
         <sc-for list="{{ needsDecisionItems }}" as="it" hint-placeholder-count="1">
           <div style="font-size:12px; color:oklch(28% 0.06 300); padding:6px 0; border-bottom:1px solid oklch(85% 0.04 300);">{{ it.text }}</div>
         </sc-for>
         <sc-if value="{{ !needsDecisionItems.length }}"><div style="font-size:12px; color:oklch(40% 0.04 300);">ไม่มีเรื่องรอตัดสินใจ</div></sc-if>
       </div>
       <div style="background:oklch(93% 0.07 25); border:1px solid oklch(78% 0.12 25); border-radius:10px; padding:16px;">
-        <div style="font-size:12px; font-weight:700; color:oklch(28% 0.08 25); margin-bottom:10px;">🔴 BLOCKED</div>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px;"><div style="font-size:12px; font-weight:700; color:oklch(28% 0.08 25);">🔴 BLOCKED</div><div onClick="{{ onCopyBlocked }}" style="font-size:11px; color:oklch(28% 0.08 25); text-decoration:underline; cursor:pointer; white-space:nowrap;">📋 Copy</div></div>
         <sc-for list="{{ blockedItems }}" as="it" hint-placeholder-count="0">
           <div style="font-size:12px; color:oklch(28% 0.08 25); padding:6px 0; border-bottom:1px solid oklch(85% 0.06 25);">{{ it.text }}</div>
         </sc-for>
@@ -249,6 +254,7 @@
         <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px;">
           <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60);">{{ sec.title }}</div>
           <div style="display:flex; gap:12px; align-items:center;">
+            <div onClick="{{ sec.onCopy }}" style="font-size:12px; color:oklch(35% 0.09 25); cursor:pointer; white-space:nowrap;">📋 Copy Section</div>
             <sc-if value="{{ sec.hasMore }}"><div onClick="{{ sec.onToggleShowAll }}" style="font-size:12px; color:oklch(35% 0.09 25); cursor:pointer; text-decoration:underline;">{{ sec.showAllLabel }}</div></sc-if>
             <sc-if value="{{ isAdmin }}"><div onClick="{{ sec.onEditToggle }}" style="font-size:12px; color:oklch(35% 0.09 25); cursor:pointer; text-decoration:underline;">{{ sec.editLabel }}</div></sc-if>
           </div>
@@ -668,6 +674,89 @@ class Component extends DCLogic {
     this.copyText(all, "✓ คัดลอกทั้งหมด " + (this.state.controlModules || []).length + " Modules แล้ว");
   }
 
+  formatItemLines(items) { return (items || []).map((it) => "- " + it.text + (it.meta ? " (" + it.meta + ")" : "")).join("\n") || "(ไม่มีรายการ)"; }
+
+  copySectionByKey(title, items) {
+    this.copyText(`${title}\n${this.formatItemLines(items)}`, `✓ คัดลอก ${title} แล้ว`);
+  }
+
+  buildCommandCenterText(dash) {
+    const lines = [];
+    lines.push("==================================================");
+    lines.push("huahin . properties — Project Command Center");
+    lines.push(`Last Updated: ${dash.updatedAt ? new Date(dash.updatedAt).toLocaleString("th-TH") : "ยังไม่เคยบันทึก"} โดย ${dash.updatedBy || "-"}`);
+    lines.push("==================================================");
+    lines.push("");
+    lines.push("CURRENT PRIORITY / CURRENT SPRINT (Module 07 Roadmap):");
+    lines.push(this.formatItemLines(dash.currentWork));
+    lines.push("");
+    lines.push("CURRENT TASKS / TODAY:");
+    lines.push(this.formatItemLines(dash.currentWork));
+    lines.push("");
+    lines.push("NEXT ACTIONS / NEXT STEPS:");
+    lines.push(this.formatItemLines(dash.nextActions));
+    lines.push("");
+    lines.push("OPEN ITEMS / NEEDS CEO DECISION:");
+    lines.push(this.formatItemLines(dash.needsDecision));
+    lines.push("");
+    lines.push("PENDING / BLOCKED:");
+    lines.push(this.formatItemLines(dash.blocked));
+    lines.push("");
+    lines.push("RECENTLY COMPLETED:");
+    lines.push(this.formatItemLines(dash.recentlyCompleted));
+    lines.push("");
+    lines.push("RISKS:");
+    lines.push(this.formatItemLines(dash.risks));
+    lines.push("");
+    lines.push("IMPORTANT DECISIONS:");
+    lines.push(this.formatItemLines(dash.decisions));
+    lines.push("");
+    lines.push("DEVELOPMENT HISTORY:");
+    lines.push(this.formatItemLines(dash.developmentHistory));
+    return lines.join("\n");
+  }
+
+  copyCommandCenterAll() {
+    this.copyText(this.buildCommandCenterText(this.state.dash || {}), "✓ คัดลอก Command Center ทั้งหมดแล้ว");
+  }
+
+  copyAiSessionPack() {
+    const dash = this.state.dash || {};
+    const modules = this.state.controlModules || [];
+    const now = new Date().toLocaleString("th-TH");
+    const hh58538 = "HH-58538: เสียหายจาก legacy setDoc overwrite (ก่อนแก้ merge:true) — เหลือแค่ 8 รูป, ข้อมูลอื่นกู้คืนไม่ได้ — decision ล่าสุด: ลบทั้งหมด (รอ CEO อนุมัติ Production Write)";
+    const listingApprovals = "Listing Approvals: 🟡 In Progress — P0 setDoc overwrite แก้แล้ว, impact audit เสร็จ, Responsive testing รอดำเนินการ";
+    const restrictions = "Production Write: ต้องได้รับอนุมัติจาก CEO ทุกครั้งก่อนเขียนข้อมูลจริง\nDeploy: ต้องได้รับอนุมัติจาก CEO ทุกครั้งก่อน Deploy";
+    const module99 = modules.find((m) => m.num === "99");
+    const module08 = modules.find((m) => m.num === "08");
+    const lines = [];
+    lines.push("==================================================");
+    lines.push("huahin.properties");
+    lines.push("AI SESSION PACK");
+    lines.push(`Generated: ${now}`);
+    lines.push("==================================================");
+    lines.push("");
+    lines.push("PROJECT ROLES"); lines.push(module99 ? this.formatModuleText(module99) : "(ไม่มีข้อมูล)"); lines.push("");
+    lines.push("CURRENT PROJECT PHASE"); lines.push(dash.project ? `${dash.project.name} — ${dash.project.version} — ${dash.project.status}` : "(ไม่มีข้อมูล)"); lines.push("");
+    lines.push("CURRENT SPRINT"); lines.push(this.formatItemLines(dash.currentWork)); lines.push("");
+    lines.push("CURRENT PRIORITY"); lines.push(this.formatItemLines(dash.currentWork)); lines.push("");
+    lines.push("CURRENT TASKS"); lines.push(this.formatItemLines(dash.currentWork)); lines.push("");
+    lines.push("OPEN ITEMS"); lines.push(this.formatItemLines(dash.needsDecision)); lines.push("");
+    lines.push("BLOCKED ITEMS"); lines.push(this.formatItemLines(dash.blocked)); lines.push("");
+    lines.push("CRITICAL BUGS & RISKS"); lines.push(this.formatItemLines(dash.risks) + "\n" + hh58538); lines.push("");
+    lines.push("IMPORTANT DECISIONS"); lines.push(this.formatItemLines(dash.decisions)); lines.push("");
+    lines.push("PRODUCTION STATUS"); lines.push(listingApprovals + "\n" + hh58538); lines.push("");
+    lines.push("DEPLOY STATUS"); lines.push(restrictions); lines.push("");
+    lines.push("NEXT STEPS"); lines.push(this.formatItemLines(dash.nextActions)); lines.push("");
+    lines.push("FULL PROJECT CONTROL MODULES"); lines.push(modules.map((m) => this.formatModuleText(m)).join("\n\n")); lines.push("");
+    lines.push("FULL COMMAND CENTER"); lines.push(this.buildCommandCenterText(dash));
+    lines.push("");
+    lines.push("==================================================");
+    lines.push("END OF AI SESSION PACK");
+    lines.push("==================================================");
+    this.copyText(lines.join("\n"), "✓ คัดลอก AI Session Pack แล้ว");
+  }
+
   renderVals() {
     const dash = this.state.dash;
     if (!this.state.authChecked || !dash) return { authChecked: this.state.authChecked };
@@ -774,6 +863,7 @@ class Component extends DCLogic {
       const editing = !!this.state.sectionEditing[key];
       return {
         key, title: sectionTitles[key],
+        onCopy: () => this.copySectionByKey(sectionTitles[key], all),
         items: shown.map((it) => ({ text: it.text, meta: it.meta || "", rowStyle: "display:flex; align-items:flex-start; justify-content:space-between; gap:10px; background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:10px 14px;" })),
         hasMore: all.length > 5,
         showAllLabel: showAll ? "ย่อรายการ" : `ดูทั้งหมด (${all.length})`,
@@ -820,6 +910,12 @@ class Component extends DCLogic {
       nextActionsTop: (dash.nextActions || []).slice(0, 5),
       needsDecisionItems: dash.needsDecision || [],
       blockedItems: dash.blocked || [],
+      onCopyCommandAll: () => this.copyCommandCenterAll(),
+      onCopyAiPack: () => this.copyAiSessionPack(),
+      onCopyCurrentWork: () => this.copySectionByKey("CURRENT WORK / TODAY", dash.currentWork),
+      onCopyNextActions: () => this.copySectionByKey("NEXT ACTIONS", dash.nextActions),
+      onCopyNeedsDecision: () => this.copySectionByKey("NEEDS CEO DECISION", dash.needsDecision),
+      onCopyBlocked: () => this.copySectionByKey("BLOCKED", dash.blocked),
       milestoneRows, phaseRows, moduleRows,
       filterPhase: this.state.filterPhase, filterStatus: this.state.filterStatus,
       onFilterPhase: (e) => this.setState({ filterPhase: e.target.value }),
