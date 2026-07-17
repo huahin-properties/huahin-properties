@@ -5,8 +5,8 @@
 export const PROJECT_HEADER = {
   name: "huahin.properties",
   title: "PROJECT CONTROL CENTER",
-  version: "2.1.0",
-  build: "2026.07.17.02",
+  version: "2.2.0",
+  build: "2026.07.18.01",
   status: "ACTIVE",
   phase: "Foundation",
   currentSprint: "Listing Approvals Responsive Testing",
@@ -27,7 +27,80 @@ export const AI_SESSION_METADATA = {
   singleSourceOfTruth: "Project Control Center",
 };
 
+export const SYSTEM_ARCHITECTURE = [
+  "Frontend: HTML (.dc.html), JavaScript, Shared Components",
+  "Backend: Firebase",
+  "Database: Firestore",
+  "Storage: Firebase Storage",
+  "Authentication: Firebase Authentication",
+  "Hosting: Firebase Hosting",
+  "Repository: GitHub",
+  "AI Development: ChatGPT, Claude / Cod",
+  "Deployment Flow: GitHub → Firebase Hosting",
+];
+
+export const TECH_STACK = [
+  "Language: JavaScript",
+  "Frontend: HTML, CSS",
+  "Backend: Firebase",
+  "Database: Firestore",
+  "Storage: Firebase Storage",
+  "Authentication: Firebase Authentication",
+  "Hosting: Firebase Hosting",
+  "Version Control: GitHub",
+  "AI: ChatGPT, Claude / Cod",
+];
+
+export const CRITICAL_FILES = [
+  "CEO Dashboard.dc.html — Main CEO Dashboard",
+  "Admin Dashboard.dc.html — Admin System",
+  "project-control-data.js — Project Control data source",
+  "firebase-client.js — Firebase interface",
+  "firestore.rules — Database Security",
+  "storage.rules — Storage Security",
+  "functions/ — Cloud Functions",
+  "Blueprint.dc.html — Project Blueprint",
+];
+
+export const CODING_RULES = [
+  "Never overwrite Firestore documents using setDoc() without merge when updating existing documents.",
+  "Use createDoc() only for new documents.",
+  "Use updateDocFields() for partial updates.",
+  "Use replaceDoc() only when full replacement is intentional.",
+  "Backup before high-risk changes.",
+  "Every completed task must include a report.",
+  "Update Project Control after important decisions.",
+  "No Production Write without explicit CEO approval.",
+  "No Deploy without explicit CEO approval.",
+  "Never hide failed tests.",
+  "Never mark work complete without documentation.",
+];
+
+export const PROJECT_GLOSSARY = [
+  "CEO — Project Owner",
+  "Project Control — Single Source of Truth",
+  "Command Center — Project Status Dashboard",
+  "AI Session Pack — Context for new AI Sessions",
+  "Owner — Property Owner",
+  "Lister — Property Manager",
+  "Trial — Free Package",
+  "Demo Listing — Internal Sample Listing",
+  "Production Write — Write to Production Database",
+  "Core Feature Audit — Complete Feature Verification",
+  "Responsive Testing — Desktop / Tablet / Mobile Testing",
+];
+
+export const PERMANENT_DECISIONS = [
+  "CEO Dashboard remains the main dashboard.",
+  "Project Control is the Single Source of Truth.",
+  "ChatGPT is responsible for: Strategy, Business, Marketing, SEO, UX, QA, Risk, Project Governance, Project Control.",
+  "Development AI is responsible for: Implementation, Coding, Testing, Documentation.",
+  "CEO has final authority for: Budget, Production Write, Deployment, Business Direction.",
+  "These decisions are permanent unless explicitly changed.",
+];
+
 export const CHANGELOG_V2_1 = [
+  "[v2.2.0] Added System Architecture, Tech Stack, Critical Files, Coding Rules, Project Glossary, Permanent Decisions sections",
   "Project Control Center completed",
   "Command Center completed",
   "Copy Module completed",

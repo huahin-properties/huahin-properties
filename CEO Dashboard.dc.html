@@ -305,6 +305,33 @@
 
     <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:16px;">Dashboard Loaded: {{ sessionStatus.loaded }} · Last Saved: {{ sessionStatus.lastSaved }} · Unsaved Changes: {{ sessionStatus.unsaved }}</div>
 
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-bottom:22px;">
+      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:14px 16px; font-size:12px; color:oklch(30% 0.02 60);">
+        <div style="font-weight:700; margin-bottom:6px;">SYSTEM ARCHITECTURE</div>
+        <sc-for list="{{ systemArchitecture }}" as="it" hint-placeholder-count="9"><div style="padding:1px 0;">{{ it.text }}</div></sc-for>
+      </div>
+      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:14px 16px; font-size:12px; color:oklch(30% 0.02 60);">
+        <div style="font-weight:700; margin-bottom:6px;">TECH STACK</div>
+        <sc-for list="{{ techStack }}" as="it" hint-placeholder-count="9"><div style="padding:1px 0;">{{ it.text }}</div></sc-for>
+      </div>
+      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:14px 16px; font-size:12px; color:oklch(30% 0.02 60);">
+        <div style="font-weight:700; margin-bottom:6px;">CRITICAL FILES</div>
+        <sc-for list="{{ criticalFiles }}" as="it" hint-placeholder-count="8"><div style="padding:1px 0;">{{ it.text }}</div></sc-for>
+      </div>
+      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:14px 16px; font-size:12px; color:oklch(30% 0.02 60);">
+        <div style="font-weight:700; margin-bottom:6px;">CODING RULES</div>
+        <sc-for list="{{ codingRules }}" as="it" hint-placeholder-count="11"><div style="padding:1px 0;">• {{ it.text }}</div></sc-for>
+      </div>
+      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:14px 16px; font-size:12px; color:oklch(30% 0.02 60);">
+        <div style="font-weight:700; margin-bottom:6px;">PROJECT GLOSSARY</div>
+        <sc-for list="{{ glossary }}" as="it" hint-placeholder-count="11"><div style="padding:1px 0;">{{ it.text }}</div></sc-for>
+      </div>
+      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:14px 16px; font-size:12px; color:oklch(30% 0.02 60);">
+        <div style="font-weight:700; margin-bottom:6px;">PERMANENT PROJECT DECISIONS</div>
+        <sc-for list="{{ permanentDecisions }}" as="it" hint-placeholder-count="5"><div style="padding:1px 0;">{{ it.text }}</div></sc-for>
+      </div>
+    </div>
+
     <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px;">
       <div onClick="{{ onCopyAll }}" style="background:oklch(35% 0.09 25); color:white; font-size:13px; font-weight:600; padding:9px 18px; border-radius:8px; cursor:pointer;">📋 คัดลอกทั้งหมด · Copy All Modules</div>
       <sc-if value="{{ copyToast }}"><div style="font-size:12px; color:oklch(40% 0.12 145); font-weight:600;">{{ copyToast }}</div></sc-if>
@@ -578,7 +605,11 @@ class Component extends DCLogic {
 
   async componentDidMount() {
     const ctrl = await import("./project-control-data.js");
-    this.setState({ controlModules: ctrl.MODULES, header: ctrl.PROJECT_HEADER, meta: ctrl.AI_SESSION_METADATA, changelog: ctrl.CHANGELOG_V2_1 });
+    this.setState({
+      controlModules: ctrl.MODULES, header: ctrl.PROJECT_HEADER, meta: ctrl.AI_SESSION_METADATA, changelog: ctrl.CHANGELOG_V2_1,
+      systemArchitecture: ctrl.SYSTEM_ARCHITECTURE, techStack: ctrl.TECH_STACK, criticalFiles: ctrl.CRITICAL_FILES,
+      codingRules: ctrl.CODING_RULES, glossary: ctrl.PROJECT_GLOSSARY, permanentDecisions: ctrl.PERMANENT_DECISIONS,
+    });
     const fb = await import("./firebase-client.js");
     this._fb = fb;
     await fb.onAdminAuthReady();
@@ -925,6 +956,12 @@ class Component extends DCLogic {
       onCopyAll: () => this.copyAllModules(),
       header: this.state.header || {}, meta: this.state.meta || {},
       changelog: (this.state.changelog || []).map((t) => ({ text: t })),
+      systemArchitecture: (this.state.systemArchitecture || []).map((t) => ({ text: t })),
+      techStack: (this.state.techStack || []).map((t) => ({ text: t })),
+      criticalFiles: (this.state.criticalFiles || []).map((t) => ({ text: t })),
+      codingRules: (this.state.codingRules || []).map((t) => ({ text: t })),
+      glossary: (this.state.glossary || []).map((t) => ({ text: t })),
+      permanentDecisions: (this.state.permanentDecisions || []).map((t) => ({ text: t })),
       sessionStatus: { loaded: this.state.dash ? "Yes" : "Loading…", lastSaved: dash.updatedAt ? new Date(dash.updatedAt).toLocaleString("th-TH") : "Not yet saved", unsaved: this.state.dirty ? "Yes" : "No" },
       updatedAtLabel: dash.updatedAt ? new Date(dash.updatedAt).toLocaleString("th-TH") : "ยังไม่เคยบันทึก",
       health, completionProgress, verificationCoverage, verifiedCount, totalModules: total, counts,
