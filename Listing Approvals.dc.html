@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <title>Listing Approvals — huahin.properties Admin</title>
+  <style>
+    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    a { color: oklch(42% 0.12 25); }
+    a:hover { color: oklch(32% 0.13 25); }
+  </style>
+</helmet>
+
+<div style="min-height:100vh;">
+  <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+    <a href="Admin Dashboard.dc.html" style="display:flex; align-items:center; gap:9px; text-decoration:none;">
+      <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
+      <span style="font-family:'Playfair Display',serif; font-size:19px; color:white;">huahin . properties</span>
+      <span style="color:oklch(70% 0.02 70); font-size:14px;">| Listing Approvals</span>
+    </a>
+    <a href="Admin Dashboard.dc.html" style="color:oklch(85% 0.02 70); font-size:13px; text-decoration:none;">← กลับแดชบอร์ด</a>
+  </div>
+
+  <div style="max-width:1000px; margin:0 auto; padding:clamp(20px,4vw,40px);">
+    <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:6px;">คิวอนุมัติประกาศ</div>
+    <div style="font-size:14px; color:oklch(50% 0.02 60); margin-bottom:24px;">ประกาศใหม่ทุกรายการต้องผ่านการอนุมัติที่นี่ก่อนขึ้นเว็บสาธารณะ</div>
+
+    <sc-if value="{{ hasSuspects }}">
+      <div style="background:oklch(96% 0.06 60); border:1px solid oklch(80% 0.1 60); border-radius:8px; padding:16px 20px; margin-bottom:22px;">
+        <div style="font-size:13.5px; font-weight:600; color:oklch(35% 0.1 40); margin-bottom:8px;">⚠️ พบข้อมูลซ้ำที่ส่อว่าสมัครทดลองใช้ซ้ำ (เบอร์โทรตรงกัน)</div>
+        <sc-for list="{{ suspects }}" as="grp" hint-placeholder-count="1">
+          <div style="font-size:12.5px; color:oklch(40% 0.08 50); margin-bottom:4px;">📱 {{ grp.phone }} — {{ grp.namesLabel }}</div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+      <div onClick="{{ onFilterAll }}" style="{{ tabAllStyle }}">ทั้งหมด ({{ countAll }})</div>
+      <div onClick="{{ onFilterPending }}" style="{{ tabPendingStyle }}">รออนุมัติ ({{ countPending }})</div>
+      <div onClick="{{ onFilterLive }}" style="{{ tabLiveStyle }}">กำลังแสดง ({{ countLive }})</div>
+      <div onClick="{{ onFilterExpired }}" style="{{ tabExpiredStyle }}">หมดอายุ ({{ countExpired }})</div>
+      <div onClick="{{ onFilterRejected }}" style="{{ tabRejectedStyle }}">ปฏิเสธ ({{ countRejected }})</div>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="2">
+        <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:16px 18px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+          <div style="{{ r.coverStyle }}"></div>
+          <div style="flex:1; min-width:200px;">
+            <div style="font-size:14px; font-weight:700; color:oklch(40% 0.13 25);">{{ r.code }} <span style="font-weight:400; color:oklch(50% 0.02 60); font-size:12.5px;">— {{ r.zone }}</span></div>
+            <div style="font-size:12.5px; color:oklch(50% 0.02 60);">{{ r.priceLabel }} · ผู้ลงประกาศ: {{ r.listerEmail }}</div>
+            <div style="font-size:11.5px; color:oklch(60% 0.02 60); margin-top:2px;">ส่งเมื่อ {{ r.dateLabel }}</div>
+          </div>
+          <div style="font-size:12px; font-weight:600; padding:5px 12px; border-radius:100px; background:{{ r.statusBg }}; color:{{ r.statusColor }}; white-space:nowrap;">{{ r.statusLabel }}</div>
+          <div style="display:flex; gap:8px;">
+            <a href="{{ r.viewUrl }}" target="_blank" style="background:oklch(93% 0.01 70); color:oklch(30% 0.02 60); padding:8px 14px; border-radius:6px; font-size:13px; text-decoration:none; white-space:nowrap;">👁️ ดู</a>
+            <sc-if value="{{ r.showApprove }}">
+              <div onClick="{{ r.onApprove }}" style="background:oklch(40% 0.13 150); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">✓ อนุมัติ</div>
+            </sc-if>
+            <sc-if value="{{ r.showReject }}">
+              <div onClick="{{ r.onReject }}" style="background:oklch(95% 0.02 30); color:oklch(45% 0.15 30); padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">✕ ปฏิเสธ</div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+      <sc-if value="{{ noRows }}">
+        <div style="text-align:center; padding:40px; color:oklch(55% 0.02 60); font-size:14px;">ไม่มีรายการในหมวดนี้</div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { properties: [], listersById: {}, suspects: [], filter: "pending", loaded: false };
+
+  async componentDidMount() {
+    const fb = await import("./firebase-client.js");
+    this._fb = fb;
+    await fb.onAdminAuthReady();
+    if (!fb.isAdminAuthed()) { window.location.href = "Admin Login.dc.html"; return; }
+    try {
+      const [properties, listers, suspects] = await Promise.all([
+        fb.fetchCollection("properties"),
+        fb.fetchCollection("listers"),
+        fb.findDuplicateTrialSuspects(),
+      ]);
+      const listersById = {};
+      listers.forEach((l) => { listersById[l.id] = l; });
+      this.setState({ properties: properties.filter((p) => p.listerId), listersById, suspects, loaded: true });
+    } catch (e) {
+      console.warn("fetch failed:", e);
+      this.setState({ loaded: true });
+    }
+  }
+
+  async approve(id) {
+    this.setState((s) => ({ properties: s.properties.map((p) => (p.id === id ? { ...p, listingStatus: "live" } : p)) }));
+    try { await this._fb.approveListing(id); } catch (e) { console.warn("approve failed:", e); }
+  }
+
+  async reject(id) {
+    const reason = window.prompt("เหตุผลที่ปฏิเสธ (จะแสดงให้ผู้ลงประกาศเห็น):", "") || "";
+    this.setState((s) => ({ properties: s.properties.map((p) => (p.id === id ? { ...p, listingStatus: "rejected", rejectReason: reason } : p)) }));
+    try { await this._fb.rejectListing(id, reason); } catch (e) { console.warn("reject failed:", e); }
+  }
+
+  renderVals() {
+    const all = this.state.properties || [];
+    const countAll = all.length;
+    const countPending = all.filter((p) => p.listingStatus === "pending").length;
+    const countLive = all.filter((p) => p.listingStatus === "live").length;
+    const countExpired = all.filter((p) => p.listingStatus === "expired").length;
+    const countRejected = all.filter((p) => p.listingStatus === "rejected").length;
+
+    const tabBase = "padding:8px 16px; border-radius:100px; font-size:13px; cursor:pointer;";
+    const tabActive = tabBase + "background:oklch(22% 0.02 60); color:white;";
+    const tabInactive = tabBase + "background:white; color:oklch(35% 0.02 60); border:1px solid oklch(88% 0.01 70);";
+
+    const filtered = this.state.filter === "all" ? all : all.filter((p) => p.listingStatus === this.state.filter);
+
+    const statusMap = {
+      pending: { label: "รออนุมัติ", bg: "oklch(95% 0.06 75)", color: "oklch(45% 0.13 75)" },
+      live: { label: "กำลังแสดง", bg: "oklch(93% 0.05 145)", color: "oklch(35% 0.12 145)" },
+      expired: { label: "หมดอายุ", bg: "oklch(93% 0.02 30)", color: "oklch(45% 0.1 30)" },
+      rejected: { label: "ปฏิเสธ", bg: "oklch(93% 0.03 30)", color: "oklch(45% 0.15 30)" },
+    };
+
+    const rows = filtered
+      .sort((a, b) => (b.submittedAt || b.updatedAt || 0) - (a.submittedAt || a.updatedAt || 0))
+      .map((p) => {
+        const st = statusMap[p.listingStatus] || statusMap.pending;
+        const lister = this.state.listersById[p.listerId] || {};
+        const dateVal = p.submittedAt || p.updatedAt;
+        return {
+          code: p.id, zone: p.zone || "-", priceLabel: "฿" + (Number(p.price) || 0).toLocaleString(),
+          listerEmail: lister.email || p.listerId,
+          dateLabel: dateVal ? new Date(dateVal).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" }) : "-",
+          statusLabel: st.label, statusBg: st.bg, statusColor: st.color,
+          coverStyle: { width: "64px", height: "48px", borderRadius: "6px", flexShrink: 0, background: "oklch(93% 0.01 70)" },
+          viewUrl: `Property Details.dc.html?id=${p.id}`,
+          showApprove: p.listingStatus === "pending",
+          showReject: p.listingStatus === "pending",
+          onApprove: () => this.approve(p.id),
+          onReject: () => this.reject(p.id),
+        };
+      });
+
+    return {
+      countAll, countPending, countLive, countExpired, countRejected,
+      tabAllStyle: this.state.filter === "all" ? tabActive : tabInactive,
+      tabPendingStyle: this.state.filter === "pending" ? tabActive : tabInactive,
+      tabLiveStyle: this.state.filter === "live" ? tabActive : tabInactive,
+      tabExpiredStyle: this.state.filter === "expired" ? tabActive : tabInactive,
+      tabRejectedStyle: this.state.filter === "rejected" ? tabActive : tabInactive,
+      onFilterAll: () => this.setState({ filter: "all" }),
+      onFilterPending: () => this.setState({ filter: "pending" }),
+      onFilterLive: () => this.setState({ filter: "live" }),
+      onFilterExpired: () => this.setState({ filter: "expired" }),
+      onFilterRejected: () => this.setState({ filter: "rejected" }),
+      rows, noRows: this.state.loaded && rows.length === 0,
+      hasSuspects: (this.state.suspects || []).length > 0,
+      suspects: (this.state.suspects || []).map((grp) => ({
+        phone: (grp[0].phone || "-"),
+        namesLabel: grp.map((l) => `${l.name || l.email} (${l.trialUsed ? "ใช้ trial แล้ว" : "ยังไม่ใช้"})`).join(", "),
+      })),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

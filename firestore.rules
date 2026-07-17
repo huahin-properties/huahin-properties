@@ -41,8 +41,24 @@ service cloud.firestore {
     // BLUEPRINT.md "Lister Dashboard").
     match /properties/{id} {
       allow read: if true;
-      allow create: if isAdmin() || (request.auth != null && request.resource.data.listerId == request.auth.uid);
-      allow update: if isAdmin() || (request.auth != null && resource.data.listerId == request.auth.uid && request.resource.data.listerId == request.auth.uid);
+      // Listing lifecycle v2 (trial/expiry/approval — BLUEPRINT.md §2 ทาง 2
+      // rewritten กรกฎาคม 2026): a lister may create/edit their own listing
+      // freely EXCEPT they can never write listingStatus == "live" directly
+      // — that transition is admin-only (approveListing Cloud-side call),
+      // UNLESS the listing is already "expired" (self-renew is allowed
+      // without re-approval, per business rule). Submitting to "pending"
+      // (new or edited listing) is always allowed by the owning lister.
+      function listerListingStatusOk() {
+        return request.resource.data.listingStatus == resource.data.listingStatus
+          || request.resource.data.listingStatus == "pending"
+          || (request.resource.data.listingStatus == "live" && resource.data.listingStatus == "expired");
+      }
+      allow create: if isAdmin() || (request.auth != null && request.resource.data.listerId == request.auth.uid && request.resource.data.listingStatus != "live");
+      allow update: if isAdmin() || (request.auth != null && resource.data.listerId == request.auth.uid && request.resource.data.listerId == request.auth.uid && listerListingStatusOk())
+        // Public view-count increment (Property Details page, any visitor,
+        // no auth) — restricted to ONLY the viewCount field changing so
+        // this can't be abused to alter price/status/etc.
+        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']);
       allow delete: if isAdmin() || (request.auth != null && resource.data.listerId == request.auth.uid);
     }
     // Public read. Admin can write anything. A signed-in lister may write a

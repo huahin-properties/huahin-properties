@@ -270,6 +270,10 @@ class Component extends DCLogic {
     this.setState({ lang: mod.getLang(), data: mod });
     const effProps = await mod.getEffectiveProperties(mod);
     this.setState({ effProps });
+    // Self-serve listings (Lister Dashboard) track a per-listing view count
+    // the owner sees on their dashboard — increment once per page view.
+    // Safe no-op for admin-created listings without listingStatus too.
+    fb0.incrementViewCount(this._id).catch(() => {});
     try {
       const allBanners = await fb0.fetchCollection("banners");
       this.setState({ banners: allBanners });

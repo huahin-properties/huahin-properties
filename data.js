@@ -1362,7 +1362,12 @@ export async function getEffectiveProperties(mod) {
       fb.fetchAllPhotos(),
     ]);
     if (!properties || !properties.length) return mod.PROPERTIES;
-    const visible = properties.filter((p) => !p.isDraft);
+    // "live" is the only publicly-visible state under the trial/expiry/
+    // approval model (pending/expired/rejected all hidden). Listings saved
+    // before this model existed have no listingStatus field at all — treat
+    // those as grandfathered-live as long as they were already published
+    // (!isDraft), so nothing already-live silently disappears.
+    const visible = properties.filter((p) => p.listingStatus === "live" || (p.listingStatus === undefined && !p.isDraft));
     const photosById = {};
     allPhotos.forEach((ph) => { photosById[ph.id] = ph.dataUrl; });
     return visible.map((p) => {

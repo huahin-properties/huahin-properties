@@ -59,6 +59,26 @@
         </div>
       </div>
 
+      <sc-if value="{{ showTrialOffer }}">
+        <div style="background:oklch(97% 0.05 60); border:1px solid oklch(85% 0.08 60); border-radius:8px; padding:18px 22px; margin-bottom:22px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
+          <div>
+            <div style="font-size:14px; font-weight:600; color:oklch(30% 0.1 50); margin-bottom:4px;">🎁 เริ่มทดลองใช้ฟรี 30 วัน — ใช้ฟีเจอร์ได้ครบทุกอย่าง</div>
+            <div style="font-size:12.5px; color:oklch(45% 0.06 50);">โพสต์ได้สูงสุด 5 หลัง พร้อมป้ายแนะนำ+หน้าแรกเทียบเท่าแพ็กเกจสูงสุด — ใช้สิทธิ์นี้ได้ครั้งเดียวเท่านั้น</div>
+            <sc-if value="{{ trialError }}"><div style="font-size:12px; color:oklch(50% 0.18 30); margin-top:6px;">{{ trialError }}</div></sc-if>
+          </div>
+          <div onClick="{{ onStartTrial }}" style="background:oklch(40% 0.13 25); color:white; padding:11px 22px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;">{{ trialStartLabel }}</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showTrialActive }}">
+        <div style="background:oklch(97% 0.02 250); border:1px solid oklch(88% 0.04 250); border-radius:8px; padding:16px 22px; margin-bottom:22px;">
+          <div style="font-size:13px; color:oklch(30% 0.1 250);">🎁 คุณกำลังทดลองใช้ฟรี — {{ trialDaysLeftLabel }}</div>
+          <sc-if value="{{ showTrialUpsell }}">
+            <div style="margin-top:8px; font-size:12.5px; color:oklch(40% 0.06 60); line-height:1.6;">{{ trialUpsellViewsLabel }}<br/>แพ็กเกจ 1 ใช้งานต่อได้ทุกฟีเจอร์พื้นฐาน แต่ป้ายแนะนำและตำแหน่งหน้าแรกที่คุณใช้อยู่ตอนนี้เป็นสิทธิ์ของแพ็กเกจ 3 เท่านั้น — <a href="Lister Billing.dc.html">ดูแพ็กเกจ</a></div>
+          </sc-if>
+        </div>
+      </sc-if>
+
       <div style="background:white; border-radius:8px; padding:20px 22px; margin-bottom:22px;">
         <div onClick="{{ onToggleProfileSettings }}" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
           <div style="font-size:14px; font-weight:600; color:oklch(25% 0.02 60);">⚙️ ตั้งค่าเว็บไซต์ส่วนตัวของฉัน</div>
@@ -210,15 +230,20 @@
                     <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:30px; color:oklch(75% 0.01 70);">🏠</div>
                   </sc-if>
                   <div style="position:absolute; top:8px; right:8px; font-size:11px; padding:3px 9px; border-radius:100px; background:{{ p.statusBg }}; color:{{ p.statusColor }};">{{ p.statusLabel }}</div>
-                  <sc-if value="{{ p.isDraft }}">
-                    <div style="position:absolute; top:8px; left:8px; font-size:11px; padding:3px 9px; border-radius:100px; background:oklch(30% 0.02 60); color:white;">📝 ร่าง</div>
-                  </sc-if>
+                  <div style="position:absolute; top:8px; left:8px; font-size:11px; padding:3px 9px; border-radius:100px; background:{{ p.lifecycleBg }}; color:{{ p.lifecycleColor }};">{{ p.lifecycleLabel }}</div>
                 </div>
                 <div style="padding:14px 16px;">
                   <div style="font-size:13px; font-weight:700; color:oklch(40% 0.13 25); margin-bottom:4px;">{{ p.code }}</div>
                   <div style="font-size:14px; color:oklch(25% 0.02 60); margin-bottom:4px;">{{ p.zone }}, {{ p.areaLabel }}</div>
                   <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:8px;">{{ p.typeLabel }} · {{ p.bedBath }}</div>
                   <div style="font-size:15px; font-weight:700; color:oklch(25% 0.02 60); margin-bottom:6px;">{{ p.priceLabel }}</div>
+                  <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:4px; display:flex; gap:10px;">
+                    <span>{{ p.viewCountLabel }}</span>
+                    <sc-if value="{{ p.expiryLabel }}"><span>⏳ {{ p.expiryLabel }}</span></sc-if>
+                  </div>
+                  <sc-if value="{{ p.rejectReasonLabel }}">
+                    <div style="font-size:11px; color:oklch(50% 0.18 30); margin-bottom:4px;">{{ p.rejectReasonLabel }}</div>
+                  </sc-if>
                   <sc-if value="{{ p.assistedSale }}">
                     <div style="font-size:11px; color:oklch(45% 0.13 145); margin-bottom:4px;">🤝 เปิดใช้ "ให้ทีมช่วยขาย"</div>
                   </sc-if>
@@ -249,9 +274,7 @@
                   <sc-if value="{{ p.noCover }}">
                     <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:24px; color:oklch(75% 0.01 70);">🏠</div>
                   </sc-if>
-                  <sc-if value="{{ p.isDraft }}">
-                    <div style="position:absolute; top:4px; left:4px; font-size:10px; padding:2px 7px; border-radius:100px; background:oklch(30% 0.02 60); color:white;">ร่าง</div>
-                  </sc-if>
+                  <div style="position:absolute; top:4px; left:4px; font-size:10px; padding:2px 7px; border-radius:100px; background:{{ p.lifecycleBg }}; color:{{ p.lifecycleColor }};">{{ p.lifecycleLabel }}</div>
                 </div>
                 <div style="flex:1; padding:10px 14px; min-width:0;">
                   <div style="display:flex; align-items:center; gap:8px; margin-bottom:2px; flex-wrap:wrap;">
@@ -260,6 +283,10 @@
                   </div>
                   <div style="font-size:13.5px; color:oklch(25% 0.02 60);">{{ p.zone }}, {{ p.areaLabel }} · {{ p.typeLabel }} · {{ p.bedBath }}</div>
                   <div style="font-size:14px; font-weight:700; color:oklch(25% 0.02 60);">{{ p.priceLabel }}</div>
+                  <div style="font-size:11px; color:oklch(55% 0.02 60); display:flex; gap:8px;">
+                    <span>{{ p.viewCountLabel }}</span>
+                    <sc-if value="{{ p.expiryLabel }}"><span>⏳ {{ p.expiryLabel }}</span></sc-if>
+                  </div>
                 </div>
                 <div style="display:flex; align-items:center; border-left:1px solid oklch(93% 0.01 70);">
                   <div onClick="{{ p.onEdit }}" style="padding:0 14px; text-align:center; font-size:11px; color:oklch(35% 0.02 60); cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;">✏️<br/>แก้ไข</div>
@@ -358,7 +385,7 @@
           </div>
 
           <div onClick="{{ onSaveProperty }}" style="background:oklch(40% 0.13 25); color:white; text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:600; cursor:pointer;">{{ saveLabel }}</div>
-          <div style="font-size:11.5px; color:oklch(55% 0.02 60); text-align:center; margin-top:8px;">บันทึกเป็นร่างก่อน — ยังไม่ขึ้นเว็บสาธารณะจนกว่าคุณจะกด "โพสต์" ในหน้ารายการ</div>
+          <div style="font-size:11.5px; color:oklch(55% 0.02 60); text-align:center; margin-top:8px;">บันทึกเป็นร่างก่อน — กด "ส่งขออนุมัติ" ในหน้ารายการเมื่อพร้อม ทีมงานจะตรวจสอบก่อนขึ้นเว็บสาธารณะ (ปกติภายใน 24 ชม.)</div>
           <sc-if value="{{ saveError }}"><div style="font-size:13px; color:oklch(50% 0.18 30); text-align:center; margin-top:10px;">{{ saveError }}</div></sc-if>
         </div>
       </sc-if>
@@ -483,6 +510,7 @@ class Component extends DCLogic {
     showProfileSettings: false, ps_displayName: "", ps_profilePhotoUrl: "", ps_coverPhotoUrl: "",
     ps_aiPersonaText: "", ps_themeColor: "", ps_bioText: "", ps_saving: false, ps_saveMsg: "",
     ps_fb: "", ps_tiktok: "", ps_youtube: "", ps_instagram: "",
+    trialStarting: false, trialError: "",
   };
 
   THEME_COLORS = ["#7A2E22", "#2F6B3A", "#1F4E8C", "#B8860B"];
@@ -498,7 +526,15 @@ class Component extends DCLogic {
     try {
       const lister = await fb.fetchMyListerDoc();
       if (!lister) { this.setState({ loaded: true, signedIn: false }); return; }
-      const properties = await this.loadPropertiesWithCovers(lister.id);
+      let properties = await this.loadPropertiesWithCovers(lister.id);
+      // Client-side expiry sweep (no server cron in this project — same
+      // pattern as the admin's archival sweep): flips any of MY listings
+      // whose 30-day clock ran out to "expired", and purges photos on
+      // listings expired 90+ days. Only fires while I have this page open.
+      try {
+        const { expiredCount } = await fb.runExpirySweep(properties);
+        if (expiredCount > 0) properties = await this.loadPropertiesWithCovers(lister.id);
+      } catch (e) { console.warn("expiry sweep failed:", e); }
       this.setState({
         loaded: true, signedIn: true, lister, properties,
         ps_displayName: lister.displayName || lister.name || "",
@@ -538,15 +574,17 @@ class Component extends DCLogic {
   }
 
   tierLimit(tier) {
-    return { basic: 1, pro: 5, agency: 5, level3: 12, level4: 25 }[tier] || 1;
+    return { trial: 5, basic: 1, pro: 5, agency: 5, level3: 12, level4: 25 }[tier] || 1;
   }
 
+  // Trial gets the BEST photo/AI-gen limits — "ใช้ฟีเจอร์ได้ครบทุกอย่าง" —
+  // only the listing COUNT is capped (tierLimit above), per the trial design.
   photoLimit(tier) {
-    return { basic: 10, pro: 15, agency: 15, level3: 20 }[tier] || 10;
+    return { trial: 20, basic: 10, pro: 15, agency: 15, level3: 20 }[tier] || 10;
   }
 
   aiGenLimit(tier) {
-    return { basic: 1, pro: 5, agency: 5, level3: 10 }[tier] || 1;
+    return { trial: 10, basic: 1, pro: 5, agency: 5, level3: 10 }[tier] || 1;
   }
 
   async loadPropertiesWithCovers(listerId) {
@@ -566,6 +604,34 @@ class Component extends DCLogic {
   }
 
   onLogout() { this._fb.logoutAdmin(); window.location.href = "Home.dc.html"; }
+
+  async startTrialNow() {
+    if (this.state.trialStarting) return;
+    this.setState({ trialStarting: true, trialError: "" });
+    try {
+      const trialEndsAt = await this._fb.startTrial(this.state.lister.id);
+      this.setState((s) => ({ trialStarting: false, lister: { ...s.lister, tier: "trial", trialUsed: true, trialStartedAt: Date.now(), trialEndsAt } }));
+    } catch (e) {
+      this.setState({ trialStarting: false, trialError: e.message || "เริ่มทดลองใช้ไม่สำเร็จ" });
+    }
+  }
+
+  // Replaces the old instant isDraft toggle — a brand-new/edited listing
+  // goes into the admin approval queue instead of publishing immediately.
+  async submitListing(p) {
+    const merged = { ...p }; delete merged.coverUrl;
+    try {
+      await this._fb.submitForApproval(p.id, merged);
+      await this.refreshProperties();
+    } catch (e) { console.warn("submitListing failed:", e); }
+  }
+
+  async renewListing(p) {
+    try {
+      await this._fb.renewListing(p.id);
+      await this.refreshProperties();
+    } catch (e) { console.warn("renewListing failed:", e); }
+  }
 
   startNew() {
     const limit = this.tierLimit((this.state.lister || {}).tier);
@@ -646,9 +712,19 @@ class Component extends DCLogic {
       } catch (e) { console.warn("Auto-translate failed, saving original text only:", e); }
     }
     const isEditingExisting = !!this.state.editingId;
-    const previousIsDraft = isEditingExisting ? (this.state.properties.find((p) => p.id === id) || {}).isDraft : true;
+    const existing = isEditingExisting ? (this.state.properties.find((p) => p.id === id) || {}) : {};
+    const previousIsDraft = isEditingExisting ? existing.isDraft : true;
+    // setDoc() below is a plain .set() (full overwrite, no merge) — must
+    // carry forward every listing-lifecycle field (status/dates/view count)
+    // explicitly on every edit-save, or an unrelated field edit would wipe
+    // out an already-live/pending/expired listing's status silently.
     const payload = {
       listerId: this.state.lister.id,
+      listingStatus: existing.listingStatus, submittedAt: existing.submittedAt || null,
+      publishedAt: existing.publishedAt || null, expiresAt: existing.expiresAt || null,
+      expiredAt: existing.expiredAt || null, approvedAt: existing.approvedAt || null,
+      rejectedAt: existing.rejectedAt || null, rejectReason: existing.rejectReason || null,
+      photosDeletedAt: existing.photosDeletedAt || null, viewCount: existing.viewCount || 0,
       type: this.state.f_type, area: this.state.f_area, zone: this.state.f_zone,
       status: this.state.f_status, price: Number(this.state.f_price) || 0,
       bedrooms: this.state.f_bedrooms ? Number(this.state.f_bedrooms) : null,
@@ -679,20 +755,6 @@ class Component extends DCLogic {
       console.warn("Failed to save property:", e);
       this.setState({ saving: false, saveError: "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง — ถ้ายังไม่ได้อีก แจ้งแอดมินให้ตรวจสอบสิทธิ์การเขียนข้อมูล (Firestore rules)" });
     }
-  }
-
-  async togglePublish(p) {
-    const willPublish = !!p.isDraft;
-    const merged = { ...p, isDraft: !p.isDraft };
-    delete merged.coverUrl;
-    try {
-      await this._fb.setDoc("properties", p.id, merged);
-      await this.refreshProperties();
-      // Publishing opens the real public listing page in a new tab — same
-      // page/template admin-posted listings use, so the lister sees exactly
-      // what buyers see (incl. the share button) right away.
-      if (willPublish) window.open(`Property Details.dc.html?id=${p.id}`, "_blank");
-    } catch (e) { console.warn("Failed to publish:", e); }
   }
 
   openPostView(p) {
@@ -922,7 +984,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const mod = this._mod;
-    const tierLabels = { basic: "① ฟรี", pro: "② ระดับ 1", agency: "② ระดับ 1", level3: "③ ระดับ 2", level4: "④ ระดับ 3", silver: "🥈 VIP เงิน", gold: "🥇 VIP ทอง", diamond: "💎 VIP เพชร" };
+    const tierLabels = { trial: "🎁 ทดลองใช้ฟรี", basic: "① ฟรี", pro: "② ระดับ 1", agency: "② ระดับ 1", level3: "③ ระดับ 2", level4: "④ ระดับ 3", silver: "🥈 VIP เงิน", gold: "🥇 VIP ทอง", diamond: "💎 VIP เพชร" };
     const lister = this.state.lister || {};
     const tier2Plus = lister.tier === "pro" || lister.tier === "agency" || lister.tier === "level3" || lister.tier === "level4";
     const tier3 = lister.tier === "level4";
@@ -936,10 +998,29 @@ class Component extends DCLogic {
       rented: { label: "เช่าแล้ว", bg: "oklch(90% 0.01 70)", color: "oklch(45% 0.02 60)" },
     };
     const now = Date.now();
+    // Lifecycle status shown on the card — independent from the sale/rent
+    // status badge above it (statusMap). See firebase-client.js "Listing
+    // lifecycle v2" for the state machine this reflects.
+    const lifecycleMap = {
+      draft: { label: "📝 ร่าง", bg: "oklch(90% 0.01 70)", color: "oklch(35% 0.02 60)" },
+      pending: { label: "⏳ รออนุมัติ", bg: "oklch(95% 0.06 75)", color: "oklch(45% 0.13 75)" },
+      live: { label: "✅ กำลังแสดง", bg: "oklch(93% 0.05 145)", color: "oklch(35% 0.12 145)" },
+      expired: { label: "⏰ หมดอายุ", bg: "oklch(93% 0.02 30)", color: "oklch(45% 0.1 30)" },
+      rejected: { label: "✕ ถูกปฏิเสธ", bg: "oklch(93% 0.03 30)", color: "oklch(45% 0.15 30)" },
+    };
     const properties = (this.state.properties || []).map((p) => {
       const st = statusMap[p.status] || statusMap.sale;
       const bedBath = (p.bedrooms || p.bathrooms) ? `${p.bedrooms || 0} นอน / ${p.bathrooms || 0} น้ำ` : "-";
       const ageDays = p.updatedAt ? (now - p.updatedAt) / 86400000 : 0;
+      const lifecycle = p.isDraft ? "draft" : (p.listingStatus || (p.listingStatus === undefined ? "live" : p.listingStatus));
+      const lc = lifecycleMap[lifecycle] || lifecycleMap.draft;
+      const daysLeft = p.expiresAt ? Math.max(0, Math.ceil((p.expiresAt - now) / 86400000)) : null;
+      let actionLabel = "", actionIcon = "📤", actionColor = "oklch(35% 0.1 250)", onAction = () => {};
+      if (lifecycle === "draft") { actionLabel = "ส่งขออนุมัติ"; actionIcon = "📤"; onAction = () => this.submitListing(p); }
+      else if (lifecycle === "pending") { actionLabel = "รออนุมัติ"; actionIcon = "⏳"; actionColor = "oklch(50% 0.02 60)"; onAction = () => {}; }
+      else if (lifecycle === "live") { actionLabel = "ดูประกาศ"; actionIcon = "✅"; actionColor = "oklch(45% 0.13 145)"; onAction = () => window.open(`Property Details.dc.html?id=${p.id}`, "_blank"); }
+      else if (lifecycle === "expired") { actionLabel = "ต่ออายุ"; actionIcon = "🔄"; actionColor = "oklch(45% 0.1 30)"; onAction = () => this.renewListing(p); }
+      else if (lifecycle === "rejected") { actionLabel = "แก้ไข & ส่งใหม่"; actionIcon = "✏️"; actionColor = "oklch(45% 0.15 30)"; onAction = () => this.startEdit(p); }
       return {
         id: p.id, code: p.id, zone: p.zone || "-", areaLabel: areaLabels[p.area] || p.area || "-",
         typeLabel: typeLabels[p.type] || p.type || "-", bedBath,
@@ -950,12 +1031,14 @@ class Component extends DCLogic {
         coverUrl: p.coverUrl, noCover: !p.coverUrl,
         coverStyle: { width: "100%", height: "140px", background: p.coverUrl ? `url('${p.coverUrl}') center/cover` : "oklch(93% 0.01 70)", position: "relative" },
         coverStyleSmall: { width: "110px", minWidth: "110px", height: "88px", background: p.coverUrl ? `url('${p.coverUrl}') center/cover` : "oklch(93% 0.01 70)", position: "relative" },
-        isDraft: !!p.isDraft,
-        publishIcon: p.isDraft ? "📤" : "✅",
-        publishLabel: p.isDraft ? "โพสต์" : "โพสต์แล้ว",
-        publishColor: p.isDraft ? "oklch(35% 0.1 250)" : "oklch(45% 0.13 145)",
+        isDraft: lifecycle === "draft",
+        lifecycleLabel: lc.label, lifecycleBg: lc.bg, lifecycleColor: lc.color,
+        expiryLabel: lifecycle === "live" && daysLeft !== null ? `เหลือ ${daysLeft} วัน` : "",
+        viewCountLabel: `👁️ ${p.viewCount || 0} ครั้ง`,
+        rejectReasonLabel: lifecycle === "rejected" && p.rejectReason ? `เหตุผล: ${p.rejectReason}` : "",
+        publishIcon: actionIcon, publishLabel: actionLabel, publishColor: actionColor,
         onEdit: () => this.startEdit(p),
-        onPublish: () => this.togglePublish(p),
+        onPublish: onAction,
         onPostText: () => this.openPostView(p),
         onShare: () => this.openShare(p),
         onDeleteClick: () => this.requestDelete(p),
@@ -963,12 +1046,21 @@ class Component extends DCLogic {
         onOpenBuyer: () => this.openBuyerModal(p),
       };
     });
+    const trial = this._fb ? this._fb.trialStatus(lister) : null;
 
     return {
       loaded: this.state.loaded, signedIn: this.state.signedIn, notSignedIn: this.state.loaded && !this.state.signedIn,
       listerName: lister.name ? " " + lister.name : "", listerEmail: lister.email || "",
-      tierLabel: tierLabels[lister.tier] || tierLabels[lister.vipTier] || "① ฟรี",
+      tierLabel: tierLabels[lister.tier] || tierLabels[lister.vipTier] || (lister.tier ? lister.tier : "ยังไม่ได้เลือกแพ็กเกจ"),
       agentCodeLabel: lister.agentCode ? `รหัส Agent: ${lister.agentCode}` : "",
+      showTrialOffer: !lister.tier && !lister.trialUsed,
+      trialStartLabel: this.state.trialStarting ? "กำลังเริ่ม…" : "เริ่มทดลองใช้ฟรี",
+      trialError: this.state.trialError,
+      onStartTrial: () => this.startTrialNow(),
+      showTrialActive: !!trial && !trial.ended,
+      trialDaysLeftLabel: trial ? (trial.daysLeft > 0 ? `เหลืออีก ${trial.daysLeft} วัน` : (trial.inGrace ? "หมดอายุแล้ว — อยู่ในช่วงผ่อนผัน" : "")) : "",
+      showTrialUpsell: !!trial && trial.nearEnd,
+      trialUpsellViewsLabel: trial ? `ยอดเข้าชมรวมทุกประกาศของคุณ: ${(this.state.properties || []).reduce((sum, p) => sum + (p.viewCount || 0), 0)} ครั้ง` : "",
       onLogout: () => this.onLogout(),
       showList: this.state.view === "list", showEdit: this.state.view === "edit", showSaved: this.state.view === "saved",
       propCount: properties.length, hasNoProps: properties.length === 0,

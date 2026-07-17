@@ -876,3 +876,154 @@ export async function fetchAiPersona() {
 export async function saveAiPersona(name, role) {
   await setDoc("siteContent", "aiPersona", { name, role });
 }
+
+// ── Listing lifecycle v2 (กรกฎาคม 2026) — Trial + 30-day expiry + admin
+// approval queue. Replaces the old "instant self-serve publish" model
+// (isDraft toggle only). See BLUEPRINT.md §2 ทาง 2 (rewritten) for the
+// full business rationale. Kept alongside the legacy `isDraft` field for
+// backward compatibility with any listing saved before this change.
+//
+// properties.listingStatus: "pending" | "live" | "expired" | "rejected"
+//   pending  — submitted by lister, awaiting admin approval, not public
+//   live     — approved, public, counts down from publishedAt+30d
+//   expired  — 30 days passed since publishedAt, hidden but NOT deleted
+//   rejected — admin declined (text stays, hidden, lister can resubmit)
+// properties.publishedAt / expiresAt — epoch ms, set on approve/renew
+// properties.viewCount — incremented on every Property Details view
+// listers.tier === "trial" + trialStartedAt/trialEndsAt/trialUsed(perm.)
+
+const LISTING_DURATION_DAYS = 30;
+const TRIAL_DURATION_DAYS = 30;
+const PHOTO_PURGE_DAYS_AFTER_EXPIRY = 90;
+
+// Listing quota per tier — trial shares Level 1's cap (5) per the "no
+// downgrade shock" design: trial → Level 1 keeps the same 5-listing room.
+export function tierQuota(tier) {
+  return { trial: 5, pro: 5, level3: 12, level4: 25 }[tier] || 0;
+}
+
+export async function isTrialEligible(listerId) {
+  const doc = await db().collection("listers").doc(listerId).get();
+  const data = doc.exists ? doc.data() : {};
+  return !data.trialUsed && !data.tier;
+}
+
+// One-time, non-renewing 30-day trial — 5 listings, full visibility
+// accelerator (equivalent to Level 3: all listings featured + homepage).
+// `trialUsed` is set permanently and never cleared, even after the trial
+// ends or the lister upgrades, so a person cannot re-trial with the same
+// account.
+export async function startTrial(listerId) {
+  const doc = await db().collection("listers").doc(listerId).get();
+  const data = doc.exists ? doc.data() : {};
+  if (data.trialUsed) throw new Error("คุณใช้สิทธิ์ทดลองฟรีไปแล้ว ไม่สามารถเริ่มใหม่ได้อีก");
+  const now = Date.now();
+  const trialEndsAt = now + TRIAL_DURATION_DAYS * 86400000;
+  await setDoc("listers", listerId, { tier: "trial", trialUsed: true, trialStartedAt: now, trialEndsAt });
+  return trialEndsAt;
+}
+
+// Grace period (3 days) after trial ends before the visibility accelerator
+// actually drops — softens the "everything disappears at once" shock and
+// gives one last countdown nudge to upgrade before losing it.
+const TRIAL_GRACE_DAYS = 3;
+
+export function trialStatus(lister) {
+  if (!lister || lister.tier !== "trial" || !lister.trialEndsAt) return null;
+  const now = Date.now();
+  const daysLeft = Math.ceil((lister.trialEndsAt - now) / 86400000);
+  const graceEndsAt = lister.trialEndsAt + TRIAL_GRACE_DAYS * 86400000;
+  return {
+    daysLeft, endsAt: lister.trialEndsAt,
+    inGrace: now > lister.trialEndsAt && now <= graceEndsAt,
+    ended: now > graceEndsAt,
+    nearEnd: daysLeft <= 7 && daysLeft >= 0,
+  };
+}
+
+// Submits a new/edited listing for admin approval — the lister's own write
+// is only ever allowed to move a listing INTO "pending" (see
+// firestore.rules); only the admin can move pending → live/rejected.
+export async function submitForApproval(propertyId, payload) {
+  await setDoc("properties", propertyId, { ...(payload || {}), listingStatus: "pending", submittedAt: Date.now(), isDraft: false });
+}
+
+export async function approveListing(propertyId) {
+  const now = Date.now();
+  await setDoc("properties", propertyId, { listingStatus: "live", publishedAt: now, expiresAt: now + LISTING_DURATION_DAYS * 86400000, approvedAt: now, expiredAt: null, photosDeletedAt: null });
+}
+
+export async function rejectListing(propertyId, reason) {
+  await setDoc("properties", propertyId, { listingStatus: "rejected", rejectedAt: Date.now(), rejectReason: reason || "" });
+}
+
+// Renewing an expired listing does NOT require re-approval (per business
+// rule: owner can reactivate instantly without re-entering data) — resets
+// the 30-day clock immediately.
+export async function renewListing(propertyId) {
+  const now = Date.now();
+  await setDoc("properties", propertyId, { listingStatus: "live", publishedAt: now, expiresAt: now + LISTING_DURATION_DAYS * 86400000, expiredAt: null, photosDeletedAt: null });
+}
+
+export async function fetchPendingListings() {
+  return fetchWhere("properties", "listingStatus", "pending");
+}
+
+export async function incrementViewCount(propertyId) {
+  try {
+    await db().collection("properties").doc(propertyId).update({
+      viewCount: window.firebase.firestore.FieldValue.increment(1),
+    });
+  } catch (e) { console.warn("incrementViewCount failed:", e); }
+}
+
+// Client-side sweep (no server-side cron in this project, same limitation
+// as runArchivalSweep above — only fires when an admin has the dashboard
+// open): (1) flips "live" listings past their expiresAt to "expired"
+// (hidden from public, all data + cover photo kept); (2) once a listing
+// has been expired 90+ days without renewal, deletes its non-cover photo
+// files from Storage to save space (cover photo + all text/price data are
+// kept forever).
+export async function runExpirySweep(properties) {
+  const now = Date.now();
+  let expiredCount = 0, photosPurged = 0;
+  for (const p of properties || []) {
+    if (p.listingStatus === "live" && p.expiresAt && p.expiresAt <= now) {
+      try { await setDoc("properties", p.id, { listingStatus: "expired", expiredAt: now }); expiredCount++; } catch (e) {}
+    }
+    if (p.listingStatus === "expired" && p.expiredAt && (now - p.expiredAt) > PHOTO_PURGE_DAYS_AFTER_EXPIRY * 86400000 && !p.photosDeletedAt) {
+      try {
+        const photos = await fetchPhotosFor(p.id);
+        const nonCover = photos.filter((ph) => ph.id !== `${p.id}-0`);
+        for (const ph of nonCover) {
+          try {
+            if (ph.dataUrl && ph.dataUrl.startsWith("https://")) {
+              const path = decodeURIComponent(new URL(ph.dataUrl).pathname.split("/o/")[1].split("?")[0]);
+              await storageRef().ref(path).delete().catch(() => {});
+            }
+          } catch (e) {}
+          await deleteDocById("propertyPhotos", ph.id).catch(() => {});
+        }
+        await setDoc("properties", p.id, { photosDeletedAt: now });
+        photosPurged++;
+      } catch (e) { console.warn("Photo purge failed for", p.id, e); }
+    }
+  }
+  return { expiredCount, photosPurged };
+}
+
+// Admin duplicate-trial detection (BLUEPRINT §2 ข้อ 6) — groups listers by
+// normalized phone number and flags any group where more than one account
+// shares a phone AND at least one of them already used a trial. Heuristic
+// only (phone numbers can be shared legitimately, e.g. family) — admin
+// makes the final call.
+export async function findDuplicateTrialSuspects() {
+  const listers = await fetchCollection("listers");
+  const byPhone = {};
+  listers.forEach((l) => {
+    const phone = (l.phone || "").replace(/\D/g, "");
+    if (!phone) return;
+    (byPhone[phone] = byPhone[phone] || []).push(l);
+  });
+  return Object.values(byPhone).filter((group) => group.length > 1 && group.some((l) => l.trialUsed));
+}

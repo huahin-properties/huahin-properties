@@ -182,7 +182,8 @@ class Component extends DCLogic {
         signedIn ? fb.fetchMyListerDoc() : Promise.resolve(null),
         fb.fetchStripePrices(), fb.fetchAgentVipPrices(), fb.fetchRolloutLevel(),
       ]);
-      this.setState({ lister, prices, vipPrices, rolloutLevel, loaded: true, notSignedIn: !signedIn });
+      const trial = lister ? fb.trialStatus(lister) : null;
+      this.setState({ lister, prices, vipPrices, rolloutLevel, loaded: true, notSignedIn: !signedIn, trial });
       if (rolloutLevel >= 4) {
         fb.fetchVipPoolStats().then((vipStats) => this.setState({ vipStats })).catch(() => {});
       }
@@ -292,12 +293,36 @@ class Component extends DCLogic {
     };
   }
 
+  // Trial card replaces the old permanent-free tier — a one-time 30-day
+  // trial (5 listings, full visibility accelerator equivalent to Level 3),
+  // never renews. Its state (offer / active countdown / already used)
+  // depends on whether the visitor is signed in and their lister doc.
+  trialCard(t, lister) {
+    const trial = this.state.trial;
+    const base = { key: "trial", bg: "white", accentColor: "oklch(40% 0.1 250)", textColor: "oklch(25% 0.02 60)", subTextColor: "oklch(55% 0.02 60)",
+      name: "🎁 ทดลองใช้ฟรี", price: "฿0", features: ["โพสต์ได้ 5 หลัง", "ระบบแปลอัตโนมัติ 8 ภาษา", "ป้ายแนะนำ + หน้าแรก (เทียบเท่าแพ็กเกจ 3)", "ใช้งานได้นาน 30 วัน", "ทดลองได้ครั้งเดียวต่อคน"] };
+    if (trial && !trial.ended) {
+      return { ...base, priceSub: `เหลืออีก ${Math.max(0, trial.daysLeft)} วัน`, isFree: true, buttonLabel: "กำลังใช้งานอยู่" };
+    }
+    if (lister && lister.trialUsed) {
+      return { ...base, priceSub: "ใช้สิทธิ์ไปแล้ว", isFree: true, buttonLabel: "ใช้สิทธิ์ครบแล้ว" };
+    }
+    return { ...base, priceSub: "ใช้ได้ครั้งเดียว ไม่ต่ออายุอัตโนมัติ", isPaid: true, buttonLabel: this.state.busyTier === "trial" ? "กำลังเริ่ม…" : "เริ่มทดลองใช้ฟรี", onClick: () => this.startTrialFromBilling() };
+  }
+
+  async startTrialFromBilling() {
+    if (!this.state.lister) { window.location.href = "Agent Signup.dc.html"; return; }
+    this.setState({ busyTier: "trial", error: "" });
+    try {
+      await this._fb.startTrial(this.state.lister.id);
+      window.location.href = "Lister Dashboard.dc.html";
+    } catch (e) {
+      this.setState({ busyTier: null, error: e.message || "เริ่มทดลองใช้ไม่สำเร็จ" });
+    }
+  }
+
   buildTierCards(t, lister) {
-    const cards = [
-      { key: "basic", bg: "white", accentColor: "oklch(40% 0.13 25)", textColor: "oklch(25% 0.02 60)", subTextColor: "oklch(55% 0.02 60)",
-        name: t.free, price: "฿0", priceSub: t.currentlyFree, features: t.freeDesc,
-        isFree: true, buttonLabel: t.startFree },
-    ];
+    const cards = [this.trialCard(t, lister)];
     // Package 1-3 (pro/level3/level4) are always shown — only the higher VIP
     // tiers (rollout 4-5) are gated behind rolloutLevel. See BLUEPRINT.md §2 ทาง 2.
     cards.push({ key: "pro", bg: "white", accentColor: "oklch(40% 0.13 25)", textColor: "oklch(25% 0.02 60)", subTextColor: "oklch(55% 0.02 60)",

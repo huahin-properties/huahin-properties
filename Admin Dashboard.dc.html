@@ -35,6 +35,7 @@
       <a href="Owners.dc.html" style="color:oklch(90% 0.02 70); text-decoration:none; white-space:nowrap;">👤 {{ t.admin_owners_nav }}</a>
       <a href="Site Content.dc.html" style="color:oklch(90% 0.02 70); text-decoration:none; white-space:nowrap;">🖼️ Site Content</a>
       <a href="Agent Approvals.dc.html" style="color:oklch(90% 0.02 70); text-decoration:none; white-space:nowrap;">🧑‍💼 Agent Approvals</a>
+      <a href="Listing Approvals.dc.html" style="color:oklch(90% 0.02 70); text-decoration:none; white-space:nowrap;">📋 Listing Approvals</a>
       <a href="Team.dc.html" style="color:oklch(90% 0.02 70); text-decoration:none; white-space:nowrap;">👥 Team</a>
       <span style="white-space:nowrap;">{{ t.admin_signed_in_as }}</span>
       <a href="#" onClick="{{ onLogout }}" style="color:oklch(85% 0.06 70); text-decoration:none; white-space:nowrap;">{{ t.admin_logout }}</a>
@@ -642,6 +643,10 @@ class Component extends DCLogic {
       const archivedCount = await fb.runArchivalSweep(properties.map((p) => p._raw));
       if (archivedCount > 0) this.setState({ archivedThisSession: archivedCount });
     } catch (e) { console.warn("archival sweep failed:", e); }
+    try {
+      const { expiredCount } = await fb.runExpirySweep(properties.map((p) => p._raw));
+      if (expiredCount > 0) this.setState({ expiredThisSession: expiredCount });
+    } catch (e) { console.warn("expiry sweep failed:", e); }
     this._onResize = () => this.setState({ isMobile: window.innerWidth < 760 });
     this._onResize();
     window.addEventListener("resize", this._onResize);
