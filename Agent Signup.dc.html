@@ -174,9 +174,13 @@ class Component extends DCLogic {
       const doc = await fb.fetchMyListerDoc();
       if (!doc) {
         const isFounding = this.state.foundingLimit > 0 && this.state.foundingCount < this.state.foundingLimit;
+        // No default tier — membership v2 (BLUEPRINT.md §2.3): new accounts
+        // start with NO tier at all so the Lister Dashboard's "start free
+        // trial" offer shows immediately. Do not default to "basic" here
+        // (that was the old permanent-free-tier model, replaced by trial).
         await fb.setDoc("listers", uid, {
           name: "", role: "lister", phone: "", email: "",
-          status: "approved", tier: "basic", createdAt: Date.now(), foundingAgent: isFounding,
+          status: "approved", createdAt: Date.now(), foundingAgent: isFounding,
         });
       }
       window.location.href = "Lister Dashboard.dc.html";
@@ -263,10 +267,12 @@ class Component extends DCLogic {
       const isFounding = this.state.foundingLimit > 0 && this.state.foundingCount < this.state.foundingLimit;
       await fb.setDoc("listers", uid, {
         name, role: "lister", phone, email,
-        // Auto-approved immediately (no admin queue), free tier by default —
-        // upgrading to a paid tier happens on Lister Billing right after,
-        // where all packages are shown side by side (BLUEPRINT.md §2).
-        status: "approved", tier: "basic", createdAt: Date.now(),
+        // Auto-approved immediately (no admin queue). No default tier —
+        // membership v2 (BLUEPRINT.md §2.3) replaced the old permanent-free
+        // tier with a one-time 30-day trial; leaving tier unset here is
+        // what makes the Lister Dashboard's "start free trial" banner show
+        // up right after signup instead of silently landing on "basic".
+        status: "approved", createdAt: Date.now(),
         foundingAgent: isFounding,
       });
       this.setState({ submitted: true, submitting: false });
