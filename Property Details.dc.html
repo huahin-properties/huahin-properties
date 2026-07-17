@@ -421,7 +421,14 @@ class Component extends DCLogic {
 
     const p = {
       ...cardProps(raw),
-      fullDesc: raw.fullDesc[lang],
+      // Self-serve listings (Lister Dashboard) never set `fullDesc` — they
+      // only have `description` (plain string, or a per-lang object after
+      // auto-translate). Fall back to that, then to a standard placeholder,
+      // so every listing shows SOME description text instead of a blank
+      // heading with nothing under it.
+      fullDesc: (raw.fullDesc && raw.fullDesc[lang])
+        || (raw.description && (typeof raw.description === "object" ? raw.description[lang] : raw.description))
+        || t.no_description,
       features: raw.features.map((f) => mod.FEATURES[f][lang]),
       distanceBeachLabel: `${raw.distanceBeach} km ${t.beach ? "to " + t.beach : ""}`,
       distanceTownLabel: `${raw.distanceTown} km to ${t.town}`,

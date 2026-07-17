@@ -380,6 +380,17 @@
           </div>
 
           <div style="margin-bottom:20px;">
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">คุณสมบัติและสิ่งอำนวยความสะดวก (เลือกได้หลายข้อ — จะแสดงในหน้าประกาศสาธารณะ)</div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:8px;">
+              <sc-for list="{{ featureOptions }}" as="feat" hint-placeholder-count="13">
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(30% 0.02 60); cursor:pointer;">
+                  <input type="checkbox" checked="{{ feat.checked }}" onChange="{{ feat.onToggle }}" />{{ feat.label }}
+                </label>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="margin-bottom:20px;">
             <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รายละเอียดเพิ่มเติม</div>
             <textarea rows="4" value="{{ f_description }}" onChange="{{ onFDescription }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
           </div>
@@ -500,7 +511,7 @@ class Component extends DCLogic {
     loaded: false, signedIn: false, lister: null, properties: [], view: "list",
     editingId: null, f_type: "villa", f_area: "hua-hin", f_zone: "", f_status: "sale",
     f_price: "", f_bedrooms: "", f_bathrooms: "", f_livingArea: "", f_landSize: "",
-    f_description: "", saveError: "", saving: false,
+    f_description: "", f_features: [], saveError: "", saving: false,
     existingPhotos: [], newPhotos: [],
     savedId: "", savedPayload: null, ns_assistedSale: false, ns_commissionPct: "5",
     nudgeSaving: false, nudgeSavedMsg: "", copyLabel: "คัดลอกข้อความ",
@@ -654,8 +665,14 @@ class Component extends DCLogic {
     this.setState({
       view: "edit", editingId: null, f_type: "villa", f_area: "hua-hin", f_zone: "",
       f_status: "sale", f_price: "", f_bedrooms: "", f_bathrooms: "", f_livingArea: "",
-      f_landSize: "", f_description: "", saveError: "", existingPhotos: [], newPhotos: [], quotaMsg: "",
+      f_landSize: "", f_description: "", f_features: [], saveError: "", existingPhotos: [], newPhotos: [], quotaMsg: "",
     });
+  }
+
+  toggleFeature(fid) {
+    this.setState((s) => ({
+      f_features: s.f_features.includes(fid) ? s.f_features.filter((x) => x !== fid) : [...s.f_features, fid],
+    }));
   }
 
   async startEdit(p) {
@@ -666,6 +683,7 @@ class Component extends DCLogic {
       f_price: p.price != null ? String(p.price) : "", f_bedrooms: p.bedrooms != null ? String(p.bedrooms) : "",
       f_bathrooms: p.bathrooms != null ? String(p.bathrooms) : "", f_livingArea: p.livingArea != null ? String(p.livingArea) : "",
       f_landSize: p.landSize != null ? String(p.landSize) : "", f_description: (p.description && typeof p.description === "object") ? (p.description.th || p.description.en || "") : (p.description || ""),
+      f_features: p.features || [],
       saveError: "", existingPhotos: [], newPhotos: [], quotaMsg: "",
     });
     try {
@@ -742,7 +760,7 @@ class Component extends DCLogic {
       bathrooms: this.state.f_bathrooms ? Number(this.state.f_bathrooms) : null,
       livingArea: this.state.f_livingArea ? Number(this.state.f_livingArea) : null,
       landSize: this.state.f_landSize ? Number(this.state.f_landSize) : null,
-      description: descriptionValue,
+      description: descriptionValue, features: this.state.f_features,
       // Only brand-new listings start as a draft — editing an already-
       // published property must NOT silently un-publish it (this was a real
       // bug: isDraft was hardcoded true on every save, pulling live listings
@@ -1107,6 +1125,10 @@ class Component extends DCLogic {
       editTitle: this.state.editingId ? `แก้ไขทรัพย์ ${this.state.editingId}` : "เพิ่มทรัพย์ใหม่",
       typeOptions: mod ? mod.TYPES.map((ty) => ({ id: ty.id, label: ty.label.th })) : [],
       areaOptions: mod ? mod.AREAS.map((a) => ({ id: a.id, label: a.label.th })) : [],
+      featureOptions: mod ? Object.keys(mod.FEATURES).map((fid) => ({
+        id: fid, label: mod.FEATURES[fid].th, checked: this.state.f_features.includes(fid),
+        onToggle: () => this.toggleFeature(fid),
+      })) : [],
       f_type: this.state.f_type, onFType: (e) => this.setState({ f_type: e.target.value }),
       f_area: this.state.f_area, onFArea: (e) => this.setState({ f_area: e.target.value }),
       f_zone: this.state.f_zone, onFZone: (e) => this.setState({ f_zone: e.target.value }),
