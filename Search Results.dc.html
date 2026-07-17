@@ -328,8 +328,26 @@ class Component extends DCLogic {
       if (f.priceMax && p.price > Number(f.priceMax)) return false;
       if (f.keyword && f.keyword.trim()) {
         const kw = f.keyword.trim().toLowerCase();
-        const haystack = [p.id, p.zone, p.title && p.title[lang], p.shortDesc && p.shortDesc[lang]].filter(Boolean).join(" ").toLowerCase();
-        if (!haystack.includes(kw)) return false;
+        // Self-serve listings (Lister Dashboard) have no title/shortDesc at
+        // all — only zone/area/type/description — so a keyword search that
+        // includes the area name (very common, e.g. "หัวหิน ซอย 88") used to
+        // find NOTHING for them even though they were live, since the area
+        // label was never part of the searchable text. Include the area +
+        // type label (Thai/current-lang name) and description explicitly.
+        const descText = p.description && (typeof p.description === "object" ? p.description[lang] : p.description);
+        const areaText = p.area && mod.AREAS.find((a) => a.id === p.area);
+        const typeText = p.type && mod.TYPES.find((ty) => ty.id === p.type);
+        const haystack = [
+          p.id, p.zone, p.title && p.title[lang], p.shortDesc && p.shortDesc[lang], descText,
+          areaText && areaText.label[lang], areaText && areaText.label.th, areaText && areaText.label.en,
+          typeText && typeText.label[lang],
+        ].filter(Boolean).join(" ").toLowerCase();
+        // Match each typed word separately (AND) rather than requiring the
+        // whole phrase as one contiguous substring — "หัวหิน ซอย 88" should
+        // match even though "zone" and "area label" don't sit adjacent in
+        // the haystack string above.
+        const words = kw.split(/\s+/).filter(Boolean);
+        if (!words.every((w) => haystack.includes(w))) return false;
       }
       if (f.features.length && !f.features.every((feat) => p.features.includes(feat))) return false;
       return true;
