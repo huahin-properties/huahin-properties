@@ -52,12 +52,32 @@
           <div style="font-size:16px; font-weight:600; color:oklch(25% 0.02 60);">{{ tierLabel }}</div>
           <sc-if value="{{ agentCodeLabel }}"><div style="font-size:12px; color:oklch(45% 0.13 250); margin-top:4px;">{{ agentCodeLabel }}</div></sc-if>
         </div>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-          <div onClick="{{ onOpenMySite }}" style="background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:11px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;">🌐 เว็บไซต์ของฉัน</div>
+        <!-- Sprint 01 Phase 3: Upgrade is the primary (business-priority) action here; Owner Website/Share demoted to lighter ghost buttons, same handlers as before -->
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+          <div onClick="{{ onOpenMySite }}" style="background:transparent; color:oklch(50% 0.02 60); padding:8px 4px; font-size:12.5px; font-weight:500; cursor:pointer; white-space:nowrap; text-decoration:underline;">🌐 เว็บไซต์ของฉัน</div>
           <div onClick="{{ onShareMySite }}" style="{{ shareMySiteStyle }}">🔗 แชร์เว็บไซต์</div>
-          <a href="Lister Billing.dc.html" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:11px 22px; border-radius:100px; font-size:13px; font-weight:600; text-decoration:none; white-space:nowrap;">📦 ดู/อัปเกรดแพ็กเกจ</a>
+          <a href="Lister Billing.dc.html" style="{{ upgradeTopBarStyle }}">📦 ดู/อัปเกรดแพ็กเกจ</a>
         </div>
       </div>
+
+      <sc-if value="{{ showKpiStrip }}">
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:22px;">
+          <div style="background:white; border-radius:8px; padding:16px 18px;">
+            <div style="font-size:11px; color:oklch(50% 0.02 60); margin-bottom:4px;">👁️ ยอดเข้าชมรวม</div>
+            <div style="font-size:24px; font-weight:700; color:oklch(25% 0.02 60);">{{ kpiTotalViews }}</div>
+          </div>
+          <div style="background:white; border-radius:8px; padding:16px 18px;">
+            <div style="font-size:11px; color:oklch(50% 0.02 60); margin-bottom:4px;">✅ ประกาศที่กำลังแสดง</div>
+            <div style="font-size:24px; font-weight:700; color:oklch(25% 0.02 60);">{{ kpiActiveListings }}</div>
+          </div>
+          <sc-if value="{{ showKpiTrialDays }}">
+            <div style="background:white; border-radius:8px; padding:16px 18px;">
+              <div style="font-size:11px; color:oklch(50% 0.02 60); margin-bottom:4px;">🎁 วันทดลองใช้เหลือ</div>
+              <div style="font-size:24px; font-weight:700; color:oklch(25% 0.02 60);">{{ kpiTrialDaysLabel }}</div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
 
       <sc-if value="{{ showTrialOffer }}">
         <div style="background:oklch(97% 0.05 60); border:1px solid oklch(85% 0.08 60); border-radius:8px; padding:18px 22px; margin-bottom:22px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
@@ -79,6 +99,145 @@
         </div>
       </sc-if>
 
+      <sc-if value="{{ showFirstTimeCta }}">
+        <div style="background:white; border-radius:10px; padding:48px 24px; text-align:center; margin-bottom:22px;">
+          <div style="font-family:'Playfair Display',serif; font-size:22px; color:oklch(20% 0.02 60); margin-bottom:10px;">เริ่มต้นเลย — ลงประกาศแรกของคุณ</div>
+          <div style="font-size:13.5px; color:oklch(50% 0.02 60); margin-bottom:24px;">เพิ่มทรัพย์แรก แล้วให้ AI ช่วยร่างโพสต์ขายให้อัตโนมัติ</div>
+          <div onClick="{{ onNewProperty }}" style="display:inline-block; background:oklch(22% 0.02 60); color:white; padding:16px 36px; border-radius:100px; font-size:16px; font-weight:700; cursor:pointer;">+ เพิ่มทรัพย์ใหม่</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
+          <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60);">ทรัพย์ของฉัน ({{ propCount }})</div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="display:flex; border:1px solid oklch(88% 0.01 70); border-radius:6px; overflow:hidden;">
+              <div onClick="{{ onSetListLayout }}" style="padding:8px 12px; font-size:12px; cursor:pointer; background:{{ listBtnBg }}; color:{{ listBtnColor }};">☰ รายการ</div>
+              <div onClick="{{ onSetGridLayout }}" style="padding:8px 12px; font-size:12px; cursor:pointer; background:{{ gridBtnBg }}; color:{{ gridBtnColor }};">⊞ การ์ด</div>
+            </div>
+            <div onClick="{{ onNewProperty }}" style="{{ newPropertyBtnStyle }}">+ เพิ่มทรัพย์ใหม่</div>
+          </div>
+        </div>
+
+        <!-- CTA State 4: quota genuinely full — proactive banner, Upgrade is now the primary contextual action -->
+        <sc-if value="{{ showProactiveQuotaFull }}">
+          <div style="background:oklch(96% 0.06 60); border:2px solid oklch(75% 0.13 60); border-radius:8px; padding:16px 18px; margin-bottom:16px; font-size:14px; color:oklch(30% 0.12 40); display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;">
+            <span style="font-weight:600;">⚠️ {{ quotaFullBannerMsg }}</span>
+            <a href="Lister Billing.dc.html" style="background:oklch(40% 0.13 25); color:white; padding:11px 22px; border-radius:100px; font-size:13.5px; font-weight:700; text-decoration:none; white-space:nowrap;">อัปเกรดแพ็กเกจ →</a>
+          </div>
+        </sc-if>
+        <!-- CTA State 3: near quota — contextual note only, "+เพิ่มทรัพย์ใหม่" stays primary and enabled -->
+        <sc-if value="{{ showQuotaNearNote }}">
+          <div style="background:oklch(97% 0.03 75); border:1px solid oklch(85% 0.06 75); border-radius:6px; padding:10px 14px; margin-bottom:14px; font-size:12.5px; color:oklch(40% 0.1 60);">💡 {{ quotaNearNoteMsg }}</div>
+        </sc-if>
+        <sc-if value="{{ quotaMsg }}">
+          <div style="background:oklch(96% 0.06 60); border:2px solid oklch(75% 0.13 60); border-radius:8px; padding:16px 18px; margin-bottom:16px; font-size:14px; color:oklch(30% 0.12 40); display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;">
+            <span style="font-weight:600;">⚠️ {{ quotaMsg }}</span>
+            <a href="Lister Billing.dc.html" style="background:oklch(40% 0.13 25); color:white; padding:11px 22px; border-radius:100px; font-size:13.5px; font-weight:700; text-decoration:none; white-space:nowrap;">อัปเกรดแพ็กเกจ →</a>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ hasNoProps }}">
+          <div style="background:white; border-radius:8px; padding:32px 20px; text-align:center; font-size:13px; color:oklch(50% 0.02 60);">ยังไม่มีทรัพย์ในระบบ — กด "เพิ่มทรัพย์ใหม่" เพื่อเริ่มลงประกาศ</div>
+        </sc-if>
+
+        <sc-if value="{{ isGridLayout }}">
+          <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px;">
+            <sc-for list="{{ properties }}" as="p" hint-placeholder-count="0">
+              <div style="background:white; border-radius:8px; overflow:hidden; border:1px solid oklch(92% 0.01 70);">
+                <div style="{{ p.coverStyle }}">
+                  <sc-if value="{{ p.noCover }}">
+                    <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:30px; color:oklch(75% 0.01 70);">🏠</div>
+                  </sc-if>
+                  <div style="position:absolute; top:8px; right:8px; font-size:11px; padding:3px 9px; border-radius:100px; background:{{ p.statusBg }}; color:{{ p.statusColor }};">{{ p.statusLabel }}</div>
+                  <div style="position:absolute; top:8px; left:8px; font-size:11px; padding:3px 9px; border-radius:100px; background:{{ p.lifecycleBg }}; color:{{ p.lifecycleColor }};">{{ p.lifecycleLabel }}</div>
+                </div>
+                <div style="padding:14px 16px;">
+                  <div style="font-size:13px; font-weight:700; color:oklch(40% 0.13 25); margin-bottom:4px;">{{ p.code }}</div>
+                  <div style="font-size:14px; color:oklch(25% 0.02 60); margin-bottom:4px;">{{ p.zone }}, {{ p.areaLabel }}</div>
+                  <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:8px;">{{ p.typeLabel }} · {{ p.bedBath }}</div>
+                  <div style="font-size:15px; font-weight:700; color:oklch(25% 0.02 60); margin-bottom:6px;">{{ p.priceLabel }}</div>
+                  <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:4px; display:flex; gap:10px;">
+                    <span>{{ p.viewCountLabel }}</span>
+                    <sc-if value="{{ p.expiryLabel }}"><span>⏳ {{ p.expiryLabel }}</span></sc-if>
+                  </div>
+                  <sc-if value="{{ p.rejectReasonLabel }}">
+                    <div style="font-size:11px; color:oklch(50% 0.18 30); margin-bottom:4px;">{{ p.rejectReasonLabel }}</div>
+                  </sc-if>
+                  <sc-if value="{{ p.assistedSale }}">
+                    <div style="font-size:11px; color:oklch(45% 0.13 145); margin-bottom:4px;">🤝 เปิดใช้ "ให้ทีมช่วยขาย"</div>
+                  </sc-if>
+                  <sc-if value="{{ p.needsNudge }}">
+                    <div style="font-size:11px; color:oklch(50% 0.15 60); margin-bottom:4px;">💡 ยังไม่ขาย? ลองให้ทีมช่วยขายดูไหม</div>
+                  </sc-if>
+                </div>
+                <div style="display:flex; border-top:1px solid oklch(93% 0.01 70); position:relative;">
+                  <div onClick="{{ p.onEdit }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:oklch(35% 0.02 60); cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">✏️<br/>แก้ไข</div>
+                  <div onClick="{{ p.onPublish }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; font-weight:700; color:{{ p.publishColor }}; cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">{{ p.publishIcon }}<br/>{{ p.publishLabel }}</div>
+                  <div onClick="{{ p.onToggleMenu }}" style="flex:0 0 44px; text-align:center; padding:11px 4px; font-size:15px; color:oklch(45% 0.02 60); cursor:pointer;">⋮</div>
+                  <sc-if value="{{ p.menuOpen }}">
+                    <div onClick="{{ p.onCloseMenu }}" style="position:fixed; inset:0; z-index:4;"></div>
+                    <div onClick="{{ stopProp }}" style="position:absolute; top:100%; right:0; background:white; border:1px solid oklch(88% 0.01 70); border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,0.12); z-index:5; min-width:170px; overflow:hidden;">
+                      <div onClick="{{ p.onPostText }}" style="padding:11px 16px; font-size:12.5px; color:oklch(30% 0.02 60); cursor:pointer; border-bottom:1px solid oklch(93% 0.01 70);">🤖 ข้อความโพสต์ AI</div>
+                      <div onClick="{{ p.onShare }}" style="padding:11px 16px; font-size:12.5px; color:{{ p.shareColor }}; cursor:pointer; border-bottom:1px solid oklch(93% 0.01 70);">🔗 แชร์</div>
+                      <sc-if value="{{ p.isVip }}">
+                        <div onClick="{{ p.onOpenBuyer }}" style="padding:11px 16px; font-size:12.5px; color:oklch(45% 0.13 250); cursor:pointer; border-bottom:1px solid oklch(93% 0.01 70);">👤 ลงทะเบียนผู้ซื้อ</div>
+                      </sc-if>
+                      <div onClick="{{ p.onDeleteClick }}" style="padding:11px 16px; font-size:12.5px; color:oklch(50% 0.18 30); cursor:pointer;">🗑️ ลบ</div>
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isListLayout }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <sc-for list="{{ properties }}" as="p" hint-placeholder-count="0">
+              <div style="background:white; border-radius:8px; border:1px solid oklch(92% 0.01 70); display:flex; align-items:stretch; overflow:hidden; flex-wrap:wrap;">
+                <div style="{{ p.coverStyleSmall }}">
+                  <sc-if value="{{ p.noCover }}">
+                    <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:24px; color:oklch(75% 0.01 70);">🏠</div>
+                  </sc-if>
+                  <div style="position:absolute; top:4px; left:4px; font-size:10px; padding:2px 7px; border-radius:100px; background:{{ p.lifecycleBg }}; color:{{ p.lifecycleColor }};">{{ p.lifecycleLabel }}</div>
+                </div>
+                <div style="flex:1 1 180px; min-width:180px; padding:10px 14px;">
+                  <div style="display:flex; align-items:center; gap:8px; margin-bottom:2px; flex-wrap:wrap;">
+                    <span style="font-size:12.5px; font-weight:700; color:oklch(40% 0.13 25);">{{ p.code }}</span>
+                    <span style="font-size:10.5px; padding:2px 8px; border-radius:100px; background:{{ p.statusBg }}; color:{{ p.statusColor }};">{{ p.statusLabel }}</span>
+                  </div>
+                  <div style="font-size:13.5px; color:oklch(25% 0.02 60);">{{ p.zone }}, {{ p.areaLabel }} · {{ p.typeLabel }} · {{ p.bedBath }}</div>
+                  <div style="font-size:14px; font-weight:700; color:oklch(25% 0.02 60);">{{ p.priceLabel }}</div>
+                  <div style="font-size:11px; color:oklch(55% 0.02 60); display:flex; gap:8px;">
+                    <span>{{ p.viewCountLabel }}</span>
+                    <sc-if value="{{ p.expiryLabel }}"><span>⏳ {{ p.expiryLabel }}</span></sc-if>
+                  </div>
+                </div>
+                <div style="display:flex; align-items:center; flex-wrap:wrap; border-left:1px solid oklch(93% 0.01 70); position:relative;">
+                  <div onClick="{{ p.onEdit }}" style="padding:0 14px; text-align:center; font-size:11px; color:oklch(35% 0.02 60); cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;">✏️<br/>แก้ไข</div>
+                  <div onClick="{{ p.onPublish }}" style="padding:0 14px; text-align:center; font-size:11px; font-weight:700; color:{{ p.publishColor }}; cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">{{ p.publishIcon }}<br/>{{ p.publishLabel }}</div>
+                  <div onClick="{{ p.onToggleMenu }}" style="padding:0 12px; text-align:center; font-size:16px; color:oklch(45% 0.02 60); cursor:pointer; height:100%; display:flex; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">⋮</div>
+                  <sc-if value="{{ p.menuOpen }}">
+                    <div onClick="{{ p.onCloseMenu }}" style="position:fixed; inset:0; z-index:4;"></div>
+                    <div onClick="{{ stopProp }}" style="position:absolute; top:100%; right:0; background:white; border:1px solid oklch(88% 0.01 70); border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,0.12); z-index:5; min-width:170px; overflow:hidden;">
+                      <div onClick="{{ p.onPostText }}" style="padding:11px 16px; font-size:12.5px; color:oklch(30% 0.02 60); cursor:pointer; border-bottom:1px solid oklch(93% 0.01 70);">🤖 ข้อความโพสต์ AI</div>
+                      <div onClick="{{ p.onShare }}" style="padding:11px 16px; font-size:12.5px; color:{{ p.shareColor }}; cursor:pointer; border-bottom:1px solid oklch(93% 0.01 70);">🔗 แชร์</div>
+                      <sc-if value="{{ p.isVip }}">
+                        <div onClick="{{ p.onOpenBuyer }}" style="padding:11px 16px; font-size:12.5px; color:oklch(45% 0.13 250); cursor:pointer; border-bottom:1px solid oklch(93% 0.01 70);">👤 ลงทะเบียนผู้ซื้อ</div>
+                      </sc-if>
+                      <div onClick="{{ p.onDeleteClick }}" style="padding:11px 16px; font-size:12.5px; color:oklch(50% 0.18 30); cursor:pointer;">🗑️ ลบ</div>
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </sc-if>
+
+      <!-- Sprint 01 Phase 4: Website Settings — moved below the property list, collapsed by default -->
+      <sc-if value="{{ showList }}">
       <div style="background:white; border-radius:8px; padding:20px 22px; margin-bottom:22px;">
         <div onClick="{{ onToggleProfileSettings }}" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
           <div style="font-size:14px; font-weight:600; color:oklch(25% 0.02 60);">⚙️ ตั้งค่าเว็บไซต์ส่วนตัวของฉัน</div>
@@ -197,111 +356,7 @@
             </div>
           </div>
         </sc-if>
-
-      <sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
-          <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60);">ทรัพย์ของฉัน ({{ propCount }})</div>
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div style="display:flex; border:1px solid oklch(88% 0.01 70); border-radius:6px; overflow:hidden;">
-              <div onClick="{{ onSetListLayout }}" style="padding:8px 12px; font-size:12px; cursor:pointer; background:{{ listBtnBg }}; color:{{ listBtnColor }};">☰ รายการ</div>
-              <div onClick="{{ onSetGridLayout }}" style="padding:8px 12px; font-size:12px; cursor:pointer; background:{{ gridBtnBg }}; color:{{ gridBtnColor }};">⊞ การ์ด</div>
-            </div>
-            <div onClick="{{ onNewProperty }}" style="background:oklch(22% 0.02 60); color:white; padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;">+ เพิ่มทรัพย์ใหม่</div>
-          </div>
-        </div>
-
-        <sc-if value="{{ quotaMsg }}">
-          <div style="background:oklch(96% 0.06 60); border:1px solid oklch(80% 0.1 60); border-radius:6px; padding:12px 16px; margin-bottom:14px; font-size:13px; color:oklch(35% 0.1 40); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-            <span>⚠️ {{ quotaMsg }}</span>
-            <a href="Lister Billing.dc.html" style="background:oklch(40% 0.13 25); color:white; padding:8px 16px; border-radius:6px; font-size:12px; font-weight:600; text-decoration:none; white-space:nowrap;">อัปเกรดแพ็กเกจ →</a>
-          </div>
-        </sc-if>
-
-        <sc-if value="{{ hasNoProps }}">
-          <div style="background:white; border-radius:8px; padding:32px 20px; text-align:center; font-size:13px; color:oklch(50% 0.02 60);">ยังไม่มีทรัพย์ในระบบ — กด "เพิ่มทรัพย์ใหม่" เพื่อเริ่มลงประกาศ</div>
-        </sc-if>
-
-        <sc-if value="{{ isGridLayout }}">
-          <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px;">
-            <sc-for list="{{ properties }}" as="p" hint-placeholder-count="0">
-              <div style="background:white; border-radius:8px; overflow:hidden; border:1px solid oklch(92% 0.01 70);">
-                <div style="{{ p.coverStyle }}">
-                  <sc-if value="{{ p.noCover }}">
-                    <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:30px; color:oklch(75% 0.01 70);">🏠</div>
-                  </sc-if>
-                  <div style="position:absolute; top:8px; right:8px; font-size:11px; padding:3px 9px; border-radius:100px; background:{{ p.statusBg }}; color:{{ p.statusColor }};">{{ p.statusLabel }}</div>
-                  <div style="position:absolute; top:8px; left:8px; font-size:11px; padding:3px 9px; border-radius:100px; background:{{ p.lifecycleBg }}; color:{{ p.lifecycleColor }};">{{ p.lifecycleLabel }}</div>
-                </div>
-                <div style="padding:14px 16px;">
-                  <div style="font-size:13px; font-weight:700; color:oklch(40% 0.13 25); margin-bottom:4px;">{{ p.code }}</div>
-                  <div style="font-size:14px; color:oklch(25% 0.02 60); margin-bottom:4px;">{{ p.zone }}, {{ p.areaLabel }}</div>
-                  <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:8px;">{{ p.typeLabel }} · {{ p.bedBath }}</div>
-                  <div style="font-size:15px; font-weight:700; color:oklch(25% 0.02 60); margin-bottom:6px;">{{ p.priceLabel }}</div>
-                  <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:4px; display:flex; gap:10px;">
-                    <span>{{ p.viewCountLabel }}</span>
-                    <sc-if value="{{ p.expiryLabel }}"><span>⏳ {{ p.expiryLabel }}</span></sc-if>
-                  </div>
-                  <sc-if value="{{ p.rejectReasonLabel }}">
-                    <div style="font-size:11px; color:oklch(50% 0.18 30); margin-bottom:4px;">{{ p.rejectReasonLabel }}</div>
-                  </sc-if>
-                  <sc-if value="{{ p.assistedSale }}">
-                    <div style="font-size:11px; color:oklch(45% 0.13 145); margin-bottom:4px;">🤝 เปิดใช้ "ให้ทีมช่วยขาย"</div>
-                  </sc-if>
-                  <sc-if value="{{ p.needsNudge }}">
-                    <div style="font-size:11px; color:oklch(50% 0.15 60); margin-bottom:4px;">💡 ยังไม่ขาย? ลองให้ทีมช่วยขายดูไหม</div>
-                  </sc-if>
-                </div>
-                <div style="display:flex; border-top:1px solid oklch(93% 0.01 70);">
-                  <div onClick="{{ p.onEdit }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:oklch(35% 0.02 60); cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">✏️<br/>แก้ไข</div>
-                  <div onClick="{{ p.onPublish }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:{{ p.publishColor }}; cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">{{ p.publishIcon }}<br/>{{ p.publishLabel }}</div>
-                  <div onClick="{{ p.onPostText }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:oklch(35% 0.02 60); cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">🤖<br/>ข้อความโพสต์ AI</div>
-                  <div onClick="{{ p.onShare }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:{{ p.shareColor }}; cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">🔗<br/>แชร์</div>
-                  <div onClick="{{ p.onDeleteClick }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:oklch(50% 0.18 30); cursor:pointer;">🗑️<br/>ลบ</div>
-                </div>
-                <sc-if value="{{ p.isVip }}">
-                  <div onClick="{{ p.onOpenBuyer }}" style="text-align:center; padding:8px 4px; font-size:11.5px; color:oklch(45% 0.13 250); cursor:pointer; border-top:1px solid oklch(93% 0.01 70); background:oklch(97% 0.02 250);">👤 ลงทะเบียนผู้ซื้อ</div>
-                </sc-if>
-              </div>
-            </sc-for>
-          </div>
-        </sc-if>
-
-        <sc-if value="{{ isListLayout }}" hint-placeholder-val="{{ true }}">
-          <div style="display:flex; flex-direction:column; gap:10px;">
-            <sc-for list="{{ properties }}" as="p" hint-placeholder-count="0">
-              <div style="background:white; border-radius:8px; border:1px solid oklch(92% 0.01 70); display:flex; align-items:stretch; overflow:hidden; flex-wrap:wrap;">
-                <div style="{{ p.coverStyleSmall }}">
-                  <sc-if value="{{ p.noCover }}">
-                    <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:24px; color:oklch(75% 0.01 70);">🏠</div>
-                  </sc-if>
-                  <div style="position:absolute; top:4px; left:4px; font-size:10px; padding:2px 7px; border-radius:100px; background:{{ p.lifecycleBg }}; color:{{ p.lifecycleColor }};">{{ p.lifecycleLabel }}</div>
-                </div>
-                <div style="flex:1 1 180px; min-width:180px; padding:10px 14px;">
-                  <div style="display:flex; align-items:center; gap:8px; margin-bottom:2px; flex-wrap:wrap;">
-                    <span style="font-size:12.5px; font-weight:700; color:oklch(40% 0.13 25);">{{ p.code }}</span>
-                    <span style="font-size:10.5px; padding:2px 8px; border-radius:100px; background:{{ p.statusBg }}; color:{{ p.statusColor }};">{{ p.statusLabel }}</span>
-                  </div>
-                  <div style="font-size:13.5px; color:oklch(25% 0.02 60);">{{ p.zone }}, {{ p.areaLabel }} · {{ p.typeLabel }} · {{ p.bedBath }}</div>
-                  <div style="font-size:14px; font-weight:700; color:oklch(25% 0.02 60);">{{ p.priceLabel }}</div>
-                  <div style="font-size:11px; color:oklch(55% 0.02 60); display:flex; gap:8px;">
-                    <span>{{ p.viewCountLabel }}</span>
-                    <sc-if value="{{ p.expiryLabel }}"><span>⏳ {{ p.expiryLabel }}</span></sc-if>
-                  </div>
-                </div>
-                <div style="display:flex; align-items:center; flex-wrap:wrap; border-left:1px solid oklch(93% 0.01 70);">
-                  <div onClick="{{ p.onEdit }}" style="padding:0 14px; text-align:center; font-size:11px; color:oklch(35% 0.02 60); cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;">✏️<br/>แก้ไข</div>
-                  <div onClick="{{ p.onPublish }}" style="padding:0 14px; text-align:center; font-size:11px; color:{{ p.publishColor }}; cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">{{ p.publishIcon }}<br/>{{ p.publishLabel }}</div>
-                  <div onClick="{{ p.onPostText }}" style="padding:0 14px; text-align:center; font-size:11px; color:oklch(35% 0.02 60); cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">🤖<br/>AI</div>
-                  <div onClick="{{ p.onShare }}" style="padding:0 14px; text-align:center; font-size:11px; color:{{ p.shareColor }}; cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">🔗<br/>แชร์</div>
-                  <div onClick="{{ p.onDeleteClick }}" style="padding:0 14px; text-align:center; font-size:11px; color:oklch(50% 0.18 30); cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">🗑️<br/>ลบ</div>
-                  <sc-if value="{{ p.isVip }}">
-                    <div onClick="{{ p.onOpenBuyer }}" style="padding:0 14px; text-align:center; font-size:11px; color:oklch(45% 0.13 250); cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70); background:oklch(97% 0.02 250);">👤<br/>ผู้ซื้อ</div>
-                  </sc-if>
-                </div>
-              </div>
-            </sc-for>
-          </div>
-        </sc-if>
+      </div>
       </sc-if>
 
       <sc-if value="{{ showEdit }}">
@@ -522,6 +577,7 @@ class Component extends DCLogic {
     ps_aiPersonaText: "", ps_themeColor: "", ps_bioText: "", ps_saving: false, ps_saveMsg: "",
     ps_fb: "", ps_tiktok: "", ps_youtube: "", ps_instagram: "",
     trialStarting: false, trialError: "",
+    openMenuId: "", // Sprint 01 Phase 5: per-card overflow menu (AI post/Share/Delete)
   };
 
   THEME_COLORS = ["#7A2E22", "#2F6B3A", "#1F4E8C", "#B8860B"];
@@ -573,7 +629,7 @@ class Component extends DCLogic {
       console.warn("Failed to load dashboard:", e);
       this.setState({ loaded: true, signedIn: true, lister: null, properties: [] });
     }
-    this._onPopState = () => this.setState({ view: "list", quotaMsg: "" });
+    this._onPopState = () => this.setState({ view: "list", quotaMsg: "", openMenuId: "" });
     window.addEventListener("popstate", this._onPopState);
   }
 
@@ -592,8 +648,9 @@ class Component extends DCLogic {
     else this.setState({ view: "list", quotaMsg: "" });
   }
 
+  // CAT-012 fix (Sprint 01 Code Freeze) — Build: SPRINT01-CAT012-20260718
   tierLimit(tier) {
-    return { trial: 5, basic: 1, pro: 5, agency: 5, level3: 12, level4: 25 }[tier] || 1;
+    return { trial: 5, basic: 5, pro: 5, agency: 12, level3: 25, level4: 25 }[tier] || 5;
   }
 
   // Trial gets full personal-website customization (cover/theme, see
@@ -621,7 +678,7 @@ class Component extends DCLogic {
 
   async refreshProperties() {
     const properties = await this.loadPropertiesWithCovers(this.state.lister.id);
-    this.setState({ properties });
+    this.setState({ properties, openMenuId: "" });
   }
 
   onLogout() { this._fb.logoutAdmin(); window.location.href = "Home.dc.html"; }
@@ -674,6 +731,7 @@ class Component extends DCLogic {
       view: "edit", editingId: null, f_type: "villa", f_area: "hua-hin", f_zone: "",
       f_status: "sale", f_price: "", f_bedrooms: "", f_bathrooms: "", f_livingArea: "",
       f_landSize: "", f_description: "", f_features: [], saveError: "", existingPhotos: [], newPhotos: [], quotaMsg: "",
+      openMenuId: "",
     });
   }
 
@@ -692,7 +750,7 @@ class Component extends DCLogic {
       f_bathrooms: p.bathrooms != null ? String(p.bathrooms) : "", f_livingArea: p.livingArea != null ? String(p.livingArea) : "",
       f_landSize: p.landSize != null ? String(p.landSize) : "", f_description: (p.description && typeof p.description === "object") ? (p.description.th || p.description.en || "") : (p.description || ""),
       f_features: p.features || [],
-      saveError: "", existingPhotos: [], newPhotos: [], quotaMsg: "",
+      saveError: "", existingPhotos: [], newPhotos: [], quotaMsg: "", openMenuId: "",
     });
     try {
       const photos = await this._fb.fetchPhotosFor(p.id);
@@ -801,6 +859,15 @@ class Component extends DCLogic {
       }
       await this.refreshProperties();
       this.setState({ saving: false });
+      // Sprint 01 Phase 6 (Product Owner approved): a brand-new listing now
+      // flows straight into the AI-post screen instead of back to the list
+      // — same openPostView()/generatePostText() functions as before, only
+      // the navigation target changed. Editing an EXISTING listing still
+      // returns to the list as before (no surprise redirect on a routine edit).
+      if (!isEditingExisting) {
+        const saved = this.state.properties.find((p) => p.id === id);
+        if (saved) { this.openPostView(saved); return; }
+      }
       this.goBackToList();
     } catch (e) {
       console.warn("Failed to save property:", e);
@@ -955,6 +1022,11 @@ class Component extends DCLogic {
       this.setState({ deleting: false });
     }
   }
+
+  toggleCardMenu(id) {
+    this.setState((s) => ({ openMenuId: s.openMenuId === id ? "" : id }));
+  }
+  closeCardMenu() { this.setState({ openMenuId: "" }); }
 
   openShare(p) {
     const url = `${window.location.origin}/Property Details.dc.html?id=${p.id}`;
@@ -1111,9 +1183,34 @@ class Component extends DCLogic {
         onDeleteClick: () => this.requestDelete(p),
         isVip: !!lister.vipTier,
         onOpenBuyer: () => this.openBuyerModal(p),
+        // Sprint 01 Phase 5: Edit + Publish/status stay always-visible
+        // (primary); AI post/Share/Delete move into a per-card "⋮" overflow
+        // menu — same click handlers as before, just regrouped visually.
+        menuOpen: this.state.openMenuId === p.id,
+        onToggleMenu: () => this.toggleCardMenu(p.id),
+        onCloseMenu: () => this.closeCardMenu(),
       };
     });
     const trial = this._fb ? this._fb.trialStatus(lister) : null;
+    // Sprint 01 Phase 1 KPI strip — uses data already fetched with the
+    // property list (viewCount, listingStatus/isDraft), no new Firestore
+    // reads or schema. Leads KPI deferred (Future Backlog) pending a
+    // listerId-on-leads schema check per the approved Design Proposal.
+    // Product Review fix: guard against non-numeric/null viewCount so a
+    // corrupted or legacy record can't produce NaN in the KPI strip.
+    const totalViews = (this.state.properties || []).reduce((sum, p) => {
+      const v = Number(p.viewCount);
+      return sum + (Number.isFinite(v) ? v : 0);
+    }, 0);
+    const activeListingsCount = (this.state.properties || []).filter((p) => !p.isDraft && p.listingStatus === "live").length;
+    // Product Review — CTA State Hierarchy (Section A). Computed purely
+    // from data already loaded (propCount vs. existing tierLimit()) — no
+    // new Business Logic or quota rule, just which CTA is visually primary.
+    const propCountNow = (this.state.properties || []).length;
+    const tierLimitNow = this.tierLimit(lister.tier);
+    const quotaFull = propCountNow >= tierLimitNow;
+    const quotaNear = !quotaFull && propCountNow >= tierLimitNow - 1;
+    const ctaState = propCountNow === 0 ? 1 : (quotaFull ? 4 : (quotaNear ? 3 : 2));
 
     return {
       loaded: this.state.loaded, signedIn: this.state.signedIn, notSignedIn: this.state.loaded && !this.state.signedIn,
@@ -1124,6 +1221,34 @@ class Component extends DCLogic {
       trialStartLabel: this.state.trialStarting ? "กำลังเริ่ม…" : "เริ่มทดลองใช้ฟรี",
       trialError: this.state.trialError,
       onStartTrial: () => this.startTrialNow(),
+      // Sprint 01 Phase 1: KPI strip. Only shown once the user has at least
+      // one property (an all-zero strip on a brand-new account adds noise
+      // instead of clarity — Phase 2 empty-state takes over before this).
+      // Product Review: only render once data has actually loaded, so an
+      // in-flight fetch never flashes a false "0" before real numbers arrive.
+      showKpiStrip: this.state.loaded && (this.state.properties || []).length > 0,
+      kpiTotalViews: totalViews,
+      kpiActiveListings: activeListingsCount,
+      // Trial-days KPI only for an ACTUAL trial account with days remaining
+      // (never negative, never shown for a paid tier — trialStatus() from
+      // firebase-client.js already returns ended:true past expiry).
+      showKpiTrialDays: isTrial && !!trial && !trial.ended && trial.daysLeft > 0,
+      kpiTrialDaysLabel: trial && trial.daysLeft > 0 ? `${trial.daysLeft} วัน` : "",
+      // CTA State Hierarchy (Product Review Section A)
+      ctaState,
+      showProactiveQuotaFull: quotaFull,
+      quotaFullBannerMsg: `คุณใช้โควตาแพ็กเกจปัจจุบันครบแล้ว (${propCountNow}/${tierLimitNow} รายการ) — ไม่สามารถเพิ่มประกาศใหม่ได้จนกว่าจะอัปเกรดแพ็กเกจ`,
+      showQuotaNearNote: quotaNear,
+      quotaNearNoteMsg: `ใกล้เต็มโควตาแล้ว (${propCountNow}/${tierLimitNow} รายการ)`,
+      // Top-bar Upgrade button visual weight follows ctaState: tertiary at
+      // State 1 (nothing to upgrade FOR yet), secondary at State 2/3,
+      // primary only at State 4 (quota genuinely full).
+      upgradeTopBarStyle: ctaState === 4
+        ? "display:inline-block; background:oklch(40% 0.13 25); color:white; padding:12px 26px; border-radius:100px; font-size:14px; font-weight:700; text-decoration:none; white-space:nowrap;"
+        : "display:inline-block; background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:10px 20px; border-radius:100px; font-size:13px; font-weight:600; text-decoration:none; white-space:nowrap;",
+      newPropertyBtnStyle: quotaFull
+        ? "background:oklch(90% 0.01 70); color:oklch(55% 0.02 60); padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;"
+        : "background:oklch(22% 0.02 60); color:white; padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;",
       showTrialActive: !!trial && !trial.ended,
       trialDaysLeftLabel: trial ? (trial.daysLeft > 0 ? `เหลืออีก ${trial.daysLeft} วัน` : (trial.inGrace ? "หมดอายุแล้ว — อยู่ในช่วงผ่อนผัน" : "")) : "",
       showTrialUpsell: !!trial && trial.nearEnd,
@@ -1131,6 +1256,9 @@ class Component extends DCLogic {
       onLogout: () => this.onLogout(),
       showList: this.state.view === "list", showEdit: this.state.view === "edit", showSaved: this.state.view === "saved",
       propCount: properties.length, hasNoProps: properties.length === 0,
+      // Sprint 01 Phase 2: first-time empty state gets one unmissable
+      // primary CTA instead of the old small centered text.
+      showFirstTimeCta: properties.length === 0,
       properties,
       onNewProperty: () => this.startNew(),
       onBackToList: () => this.goBackToList(),
