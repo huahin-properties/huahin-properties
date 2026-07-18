@@ -531,8 +531,16 @@ class Component extends DCLogic {
     this._fb = fb;
     const mod = await import("./data.js");
     this._mod = mod;
-    await fb.onAdminAuthReady().catch(() => {});
-    const signedIn = fb.isAdminAuthed();
+    // BUG FIX (18/07/2569): this used to check fb.isAdminAuthed(), which
+    // only returns true for a verified Admin (adminUsers/{uid} doc match) —
+    // a real, correctly-signed-in Lister/trial user always failed that
+    // check and got bounced back to Login even though Firebase Auth signed
+    // them in successfully. isAdminAuthed()/onAdminAuthReady() were
+    // repurposed for the Admin-only-page bypass fix; this page is a
+    // Lister page, not an admin-only one, so it must only check "is ANY
+    // Firebase user signed in" via the resolved user from onAuthReady().
+    const authedUser = await fb.onAdminAuthReady().catch(() => null);
+    const signedIn = !!authedUser;
     if (!signedIn) { this.setState({ loaded: true, signedIn: false }); return; }
     try {
       const lister = await fb.fetchMyListerDoc();
