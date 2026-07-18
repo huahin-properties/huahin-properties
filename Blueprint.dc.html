@@ -225,7 +225,7 @@
     </div>
 
     <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:8px; padding:16px 18px; margin-top:16px;">
-      <div style="font-size:13.5px; color:oklch(25% 0.05 150); line-height:1.7;">✓ <strong>กล่องรหัสผ่านปิดปรับปรุงเว็บไซต์ — แก้บั๊กแล้ว (16 ก.ค. 2026)</strong> — เคยเข้าไม่ได้เพราะ (1) โค้ดพยายามดึงอีเมลแอดมินแบบไดนามิกจาก Site Content แล้วได้ค่าผิดเพี้ยนมา ตอนนี้ตัดออกใช้อีเมล doothailand@gmail.com ตายตัวเหมือน Admin Login และ (2) ปุ่ม "Save Login Details" เดิมไม่ได้เปลี่ยนรหัสผ่าน Firebase Auth จริง แค่บันทึกเก็บโชว์ ตอนนี้เปลี่ยนรหัสผ่านจริงแล้ว — ถ้าลืมรหัสผ่านแอดมิน ไปที่ Firebase Console → Authentication → Users → Reset password ได้โดยตรง</div>
+      <div style="font-size:13.5px; color:oklch(25% 0.05 150); line-height:1.7;">✓ <strong>กล่องรหัสผ่านปิดปรับปรุงเว็บไซต์ — แก้บั๊กแล้ว (16 ก.ค. 2026)</strong> — เคยเข้าไม่ได้เพราะ (1) โค้ดพยายามดึงอีเมลแอดมินแบบไดนามิกจาก Site Content แล้วได้ค่าผิดเพี้ยนมา ตอนนี้ตัดออกใช้อีเมล <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ed89828299858c84818c8389ad8a808c8481c38e8280">[email&#160;protected]</a> ตายตัวเหมือน Admin Login และ (2) ปุ่ม "Save Login Details" เดิมไม่ได้เปลี่ยนรหัสผ่าน Firebase Auth จริง แค่บันทึกเก็บโชว์ ตอนนี้เปลี่ยนรหัสผ่านจริงแล้ว — ถ้าลืมรหัสผ่านแอดมิน ไปที่ Firebase Console → Authentication → Users → Reset password ได้โดยตรง</div>
     </div>
 
     <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">18. Project Governance &amp; AI Collaboration</h2>
@@ -248,6 +248,22 @@
       <div style="background:oklch(93% 0.05 150); border:1px solid oklch(78% 0.1 150); border-radius:7px; padding:11px 14px;">
         <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ <strong>Completed Milestone — Project Control Center v2.2 Foundation</strong> (2026-07-18): Governance system completed, AI Session Pack completed, Technical context completed, Coding rules completed, Permanent decisions documented, Blueprint synchronized — Ready to resume product development</div>
       </div>
+
+      <h3 style="font-size:15.5px; color:oklch(20% 0.02 60); margin:22px 0 8px;">Project Review Standard</h3>
+      <div style="font-size:13.5px; line-height:1.75;">
+        <p><strong>A. Purpose</strong> — วิธีร่วมกันของ CEO / ChatGPT (Product Owner) / Cod (Lead Developer) เพื่อตัดสินว่างานหนึ่งเสร็จสมบูรณ์ ปลอดภัย อยู่ในขอบเขต milestone ปัจจุบันหรือยังไม่หรือไม่ เพื่อให้การตัดสินใจสอดคล้องกัน ป้องกัน scope creep และรักษาความต่อเนื่องข้าม AI session</p>
+        <p><strong>B. สถานะการตรวจ 4 ระดับ</strong>:<br/>
+        🟢 <strong>PASS</strong> — งานเสร็จตามเป้าหมายที่ตกลงกันไว้ อยู่ในขอบเขต ไม่มี regression/ความเสี่ยงด้านความปลอดภัย/ข้อมูล — ไม่ได้หมายความว่าระบบสมบูรณ์แบบ 100%<br/>
+        🟡 <strong>PASS WITH OBSERVATIONS</strong> — เสร็จตาม milestone แล้ว แต่มีข้อสังเกตที่ไม่ block ถูกจดเป็น Technical Debt/Future Improvement ชัดเจนแล้ว<br/>
+        🟠 <strong>HOLD</strong> — ดูหน้าถูกต้อง แต่เครื่องยืนยันที่จำเป็นยังไม่ครบ (เช่น ยังยืนยัน Deploy จริงไม่ได้) — ไม่ใช่การล้มเหลว ต้องระบุชัดเจนว่าขาดหลักฐาน/การตรวจสอบอะไรอีกจึงจะปิดงานได้<br/>
+        🔴 <strong>NOT PASS</strong> — งานไม่เสร็จ/มี regression/เสี่ยงด้านความปลอดภัยหรือข้อมูล/ขัดกับมติที่อนุมัติไว้ — ต้องระบุสาเหตุ+หลักฐาน+ผลกระทบ+วิธีแก้ไขเสมอ</p>
+        <p><strong>C. Launch Blocker</strong>: Critical = block เสมอ 路 High = block เว้นแต่ CEO รับความเสี่ยงเป็นลายลักษณ์อักษร 路 Medium = ไม่ auto-block ต้อง escalate ตามความสำคัญ · Low/Future Improvement/Technical Debt/Nice-to-have = ไม่ block โดยค่าเริ่มต้น</p>
+        <p><strong>D. Scope Discipline</strong> — “ทำ milestone ปัจจุบันให้เสร็จก่อน บันทึกงานอนาคตแยกต่างหาก” — มีเฉพาะ Critical เท่านั้นที่ขัด milestone อัตโนมัติได้ สิ่งที่ดีกว่าที่เจอระหว่างทาง ต้องบันทึกไว้เพื่อ CEO อนุมัติก่อน ห้ามลงมือทำเองเงียบๆ</p>
+        <p><strong>E. ChatGPT Review Responsibility</strong> — Mandatory: ความสมบูรณ์ตามเป้าหมาย, scope, ความปลอดภัย/ข้อมูล, regression, open issues 路 Recommended: เป้าหมายธุรกิจ, UX, documentation, launch impact 路 Optional: ความสวยงาม/dev-experience/performance — ไม่ block PASS</p>
+        <p><strong>F. CEO Authority</strong> — CEO มีอำนาจสูงสุดเหนือ Production Deploy/Write, การอนุมัติเปิดตัว, งบ/ทิศทางธุรกิจ, การยอมรับ High risk, การเปลี่ยน scope/feature/roadmap, เรื่องกฎหมาย/ความเป็นส่วนตัว — Cod/ChatGPT ห้ามอนุมัติสิ่งเหล่านี้แทน CEO โดยเด็ดขาด</p>
+        <p><strong>G. Standard Review Output</strong>: [สถานะ] → Task/Module → Reason → Evidence Reviewed → Scope Alignment → Security/Data/Regression Impact → Remaining Issues → Future Improvements/Technical Debt → Launch Impact → Product Owner Recommendation → CEO Decision Required</p>
+        <p><strong>H. Effective Use</strong> — มีผลทันทีหลัง CEO ตรวจรับเอกสารนี้ ใช้กับทุกงานรีวิว technical/QA/UX/business/documentation/security/Production-readiness จากนี้เป็นต้นไป</p>
+      </div>
     </div>
 
     <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">19. งานถัดไป / Next Action</h2>
@@ -265,5 +281,5 @@
 </div>
 
 </x-dc>
-</body>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script></body>
 </html>
