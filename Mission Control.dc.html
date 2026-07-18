@@ -14,9 +14,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <title>Mission Control — huahin.properties</title>
+  <title>Mission Control — Project Memory — huahin.properties</title>
   <style>
-    body { margin: 0; background: oklch(96% 0.015 75); font-family: 'Work Sans', sans-serif; }
+    body { margin: 0; background: oklch(96% 0.012 75); font-family: 'Work Sans', sans-serif; }
     a { color: oklch(35% 0.09 25); }
     a:hover { color: oklch(28% 0.1 25); }
     textarea, input { font-family: inherit; }
@@ -38,146 +38,268 @@
 </sc-if>
 
 <sc-if value="{{ isAdmin }}">
-<div style="min-height:100vh; padding:clamp(16px,4vw,48px); box-sizing:border-box;">
-  <div style="max-width:820px; margin:0 auto;">
+<div style="min-height:100vh; padding:clamp(24px,5vw,64px) clamp(16px,4vw,48px); box-sizing:border-box;">
+  <div style="max-width:760px; margin:0 auto;">
 
-    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:22px;">
-      <div style="display:flex; align-items:center; gap:12px; min-width:0;">
-        <div style="width:40px; height:40px; border-radius:10px; background:oklch(35% 0.09 25); display:flex; align-items:center; justify-content:center; color:white; font-size:20px; flex-shrink:0;">🎛️</div>
-        <div>
-          <div style="font-family:'Playfair Display',serif; font-size:clamp(18px,3vw,24px); color:oklch(20% 0.02 60);">Mission Control</div>
-          <div style="font-size:12px; color:oklch(50% 0.02 60);">huahin.properties — ศูนย์บัญชาการโครงการ</div>
-        </div>
+    <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:8px;">
+      <div>
+        <div style="font-size:11px; font-weight:600; letter-spacing:0.14em; color:oklch(50% 0.1 25); margin-bottom:6px;">MISSION CONTROL</div>
+        <div style="font-family:'Playfair Display',serif; font-size:clamp(26px,4vw,36px); color:oklch(20% 0.02 60); line-height:1.15;">Project Memory</div>
       </div>
-      <a href="Admin Dashboard.dc.html" style="font-size:13px; text-decoration:none; white-space:nowrap;">← กลับ Admin Dashboard</a>
+      <a href="Admin Dashboard.dc.html" style="font-size:13px; text-decoration:none; white-space:nowrap; margin-top:8px;">← กลับ Admin Dashboard</a>
     </div>
+    <div style="font-size:14px; color:oklch(42% 0.02 60); line-height:1.75; max-width:60ch; margin-bottom:8px;">Project Memory คือความทรงจำของบริษัท huahin.properties — ไม่ใช่ Dashboard ไม่ใช่เอกสาร แต่คือที่ที่ CEO, ChatGPT, Claude และ AI รุ่นต่อไป อ่านแล้วเข้าใจโครงการทั้งหมดได้ทันที เสมือนอยู่กับโครงการมาตั้งแต่วันแรก โดยไม่ต้องมีใครมาอธิบาย</div>
+    <div style="font-size:11.5px; color:oklch(55% 0.1 25); font-weight:600; letter-spacing:0.03em; margin-bottom:36px;">PROJECT HEADQUARTERS — แหล่งความจริงเดียวของทั้งโครงการ</div>
 
     <sc-if value="{{ !loaded }}" hint-placeholder-val="{{ true }}">
       <div style="text-align:center; padding:60px 0; color:oklch(50% 0.02 60); font-size:14px;">กำลังโหลด…</div>
     </sc-if>
 
     <sc-if value="{{ loaded }}">
-    <div style="display:flex; flex-direction:column; gap:16px;">
+    <div style="display:flex; flex-direction:column; gap:40px;">
 
-      <!-- TODAY -->
-      <div style="background:white; border-radius:10px; padding:20px 22px;">
-        <div style="font-size:12px; font-weight:700; color:oklch(45% 0.13 25); letter-spacing:0.04em; margin-bottom:8px;">☀️ TODAY — วันนี้ต้องทำอะไร</div>
-        <textarea value="{{ today }}" onChange="{{ onTodayChange }}" placeholder="พิมพ์สิ่งที่ต้องทำวันนี้…" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:10px 12px; font-size:14px; min-height:56px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+      <!-- PROJECT MEMORY -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(22% 0.03 40); margin-bottom:4px;">Project Memory</div>
+        <div style="width:36px; height:2px; background:oklch(45% 0.13 25); margin-bottom:16px;"></div>
+        <div style="background:white; border-radius:10px; padding:22px 24px; display:flex; flex-direction:column; gap:14px;">
+          <div>
+            <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">ทำไม CEO จึงเริ่มโครงการนี้ — ปัญหาที่ต้องการแก้</div>
+            <textarea value="{{ problemText }}" onChange="{{ onProblemChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:9px 11px; font-size:13.5px; min-height:50px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+          </div>
+          <div>
+            <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">Vision — แนวคิดสำคัญของโครงการ</div>
+            <textarea value="{{ visionText }}" onChange="{{ onVisionChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:9px 11px; font-size:13.5px; min-height:50px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+          </div>
+          <div>
+            <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">Business Goal</div>
+            <textarea value="{{ businessGoal }}" onChange="{{ onBusinessGoalChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:9px 11px; font-size:13.5px; min-height:50px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+          </div>
+          <div>
+            <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">Project Philosophy — หลักคิดที่ยึดถือเสมอ</div>
+            <textarea value="{{ philosophy }}" onChange="{{ onPhilosophyChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:9px 11px; font-size:13.5px; min-height:50px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px;">
+            <div>
+              <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">เป้าหมายระยะสั้น</div>
+              <textarea value="{{ goalsShort }}" onChange="{{ onGoalsShortChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:9px 11px; font-size:13px; min-height:44px; resize:vertical;"></textarea>
+            </div>
+            <div>
+              <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">เป้าหมายระยะกลาง</div>
+              <textarea value="{{ goalsMid }}" onChange="{{ onGoalsMidChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:9px 11px; font-size:13px; min-height:44px; resize:vertical;"></textarea>
+            </div>
+            <div>
+              <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">เป้าหมายระยะยาว</div>
+              <textarea value="{{ goalsLong }}" onChange="{{ onGoalsLongChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:9px 11px; font-size:13px; min-height:44px; resize:vertical;"></textarea>
+            </div>
+          </div>
+          <div style="border-top:1px solid oklch(94% 0.01 70); padding-top:14px;">
+            <div onClick="{{ onToggleRoles }}" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+              <div style="font-size:11.5px; color:oklch(50% 0.02 60);">แนวคิดการทำงาน, โครงสร้างทีม AI &amp; ทิศทาง Architecture</div>
+              <div style="font-size:12.5px; color:oklch(50% 0.02 60);">{{ rolesToggleLabel }}</div>
+            </div>
+            <sc-if value="{{ rolesOpen }}">
+              <div style="margin-top:10px; display:flex; flex-direction:column; gap:10px;">
+                <div>
+                  <div style="font-size:11px; color:oklch(55% 0.02 60); margin-bottom:3px;">Working Principles — Mindset / Workflow</div>
+                  <textarea value="{{ workingPrinciples }}" onChange="{{ onWorkingPrinciplesChange }}" placeholder="Mindset / Workflow…" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:9px 11px; font-size:13.5px; min-height:56px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+                </div>
+                <div>
+                  <div style="font-size:11px; color:oklch(55% 0.02 60); margin-bottom:3px;">AI Team Structure — ใครทำหน้าที่อะไร</div>
+                  <textarea value="{{ aiTeamStructure }}" onChange="{{ onAiTeamStructureChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:9px 11px; font-size:13.5px; min-height:56px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+                </div>
+                <div>
+                  <div style="font-size:11px; color:oklch(55% 0.02 60); margin-bottom:3px;">Architecture Direction — ทิศทางเทคนิคที่ยึดถือ</div>
+                  <textarea value="{{ architectureDirection }}" onChange="{{ onArchitectureDirectionChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:9px 11px; font-size:13.5px; min-height:56px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+                </div>
+                <div style="font-size:13px; color:oklch(45% 0.02 60); line-height:1.7;"><b style="color:oklch(30% 0.02 60);">CEO</b> — อ่านสถานะล่าสุด ตัดสินใจเรื่องสำคัญ ติ๊ก Checklist เมื่องานเสร็จจริง</div>
+                <div style="font-size:13px; color:oklch(45% 0.02 60); line-height:1.7;"><b style="color:oklch(30% 0.02 60);">ChatGPT (Product Owner)</b> — โฟกัสเฉพาะ Current Task ห้ามออกนอก Sprint ห้ามสร้างระบบใหม่เอง</div>
+                <div style="font-size:13px; color:oklch(45% 0.02 60); line-height:1.7;"><b style="color:oklch(30% 0.02 60);">Claude (Developer)</b> — อ่าน Current Task → ทำ → รายงานผล → อัปเดต Project Memory ทุกครั้ง</div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROJECT EVOLUTION -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(22% 0.03 40); margin-bottom:4px;">Project Evolution</div>
+        <div style="width:36px; height:2px; background:oklch(45% 0.13 25); margin-bottom:6px;"></div>
+        <div style="font-size:12.5px; color:oklch(52% 0.02 60); margin-bottom:16px;">โครงการพัฒนามาอย่างไร มีการเปลี่ยนแนวคิดอะไร และเพราะเหตุผลอะไร — ล่าสุดอยู่บนสุด</div>
+        <div style="background:white; border-radius:10px; padding:22px 24px;">
+          <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:14px;">
+            <sc-for list="{{ evolutionItems }}" as="item" hint-placeholder-count="0">
+              <div style="display:flex; gap:10px; padding:8px 0; border-bottom:1px solid oklch(95% 0.01 70);">
+                <div style="font-size:12px; color:oklch(55% 0.02 60); white-space:nowrap; flex-shrink:0;">{{ item.date }}</div>
+                <div style="flex:1;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="{{ item.typeBadgeStyle }}">{{ item.typeLabel }}</div>
+                    <div style="font-size:13.5px; font-weight:600; color:oklch(25% 0.02 60);">{{ item.title }}</div>
+                  </div>
+                  <div style="font-size:12.5px; color:oklch(45% 0.02 60); margin-top:2px;">เหตุผล: {{ item.reason }}</div>
+                  <sc-if value="{{ item.result }}"><div style="font-size:12.5px; color:oklch(40% 0.1 150); margin-top:2px;">ผลที่เกิดขึ้น: {{ item.result }}</div></sc-if>
+                </div>
+                <div onClick="{{ item.onRemove }}" style="font-size:12px; color:oklch(70% 0.02 60); cursor:pointer; flex-shrink:0;">✕</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <sc-for list="{{ evoTypeOptions }}" as="opt" hint-placeholder-count="0">
+                <div onClick="{{ opt.onSelect }}" style="{{ opt.style }}">{{ opt.label }}</div>
+              </sc-for>
+            </div>
+            <input value="{{ newEvoTitle }}" onChange="{{ onNewEvoTitleChange }}" placeholder="หัวข้อการเปลี่ยนแปลง/ตัดสินใจ — เปลี่ยนอะไร…" style="border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
+            <div style="display:flex; gap:8px;">
+              <input value="{{ newEvoReason }}" onChange="{{ onNewEvoReasonChange }}" placeholder="ทำไมจึงเปลี่ยน…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
+              <input value="{{ newEvoResult }}" onChange="{{ onNewEvoResultChange }}" placeholder="ผลที่เกิดขึ้น (ถ้ามี)…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
+              <div onClick="{{ onAddEvo }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ บันทึก</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CURRENT SYSTEM -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(22% 0.03 40); margin-bottom:4px;">Current System</div>
+        <div style="width:36px; height:2px; background:oklch(45% 0.13 25); margin-bottom:16px;"></div>
+        <div style="background:white; border-radius:10px; padding:22px 24px;">
+          <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+            <sc-for list="{{ systemItems }}" as="item" hint-placeholder-count="0">
+              <div style="display:flex; align-items:center; gap:10px; padding:6px 0;">
+                <div style="{{ item.badgeStyle }}">{{ item.badgeLabel }}</div>
+                <div style="flex:1; font-size:13.5px; color:oklch(30% 0.02 60);">{{ item.text }}</div>
+                <div onClick="{{ item.onToggleActive }}" style="font-size:12px; color:oklch(45% 0.1 250); cursor:pointer; white-space:nowrap;">สลับสถานะ</div>
+                <div onClick="{{ item.onRemove }}" style="font-size:12px; color:oklch(70% 0.02 60); cursor:pointer;">✕</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input value="{{ newSystemText }}" onChange="{{ onNewSystemTextChange }}" placeholder="เพิ่มระบบ (เริ่มต้นเป็น 'ใช้งานอยู่')…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
+            <div onClick="{{ onAddSystem }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่ม</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CURRENT STATUS -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(22% 0.03 40); margin-bottom:4px;">Current Status</div>
+        <div style="width:36px; height:2px; background:oklch(45% 0.13 25); margin-bottom:16px;"></div>
+        <div style="background:white; border-radius:10px; padding:22px 24px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+            <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60);">Progress Checklist</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60);">{{ progressDoneCount }}/{{ progressTotalCount }}</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+            <sc-for list="{{ progressItems }}" as="item" hint-placeholder-count="3">
+              <div style="display:flex; align-items:center; gap:10px; padding:6px 0;">
+                <input type="checkbox" checked="{{ item.done }}" onChange="{{ item.onToggle }}" style="width:17px; height:17px; cursor:pointer; flex-shrink:0;" />
+                <div style="{{ item.textStyle }}">{{ item.text }}</div>
+                <div onClick="{{ item.onRemove }}" style="margin-left:auto; font-size:12px; color:oklch(70% 0.02 60); cursor:pointer; flex-shrink:0;">✕</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input value="{{ newProgressText }}" onChange="{{ onNewProgressTextChange }}" placeholder="เพิ่มงานใน Checklist…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
+            <div onClick="{{ onAddProgress }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่ม</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CURRENT SPRINT -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(22% 0.03 40); margin-bottom:4px;">Current Sprint</div>
+        <div style="width:36px; height:2px; background:oklch(45% 0.13 25); margin-bottom:16px;"></div>
+        <div style="background:white; border-radius:10px; padding:22px 24px;">
+          <textarea value="{{ currentTask }}" onChange="{{ onCurrentTaskChange }}" placeholder="Sprint ที่กำลังดำเนินการอยู่…" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:10px 12px; font-size:14px; min-height:50px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+        </div>
       </div>
 
       <!-- CURRENT TASK -->
-      <div style="background:white; border-radius:10px; padding:20px 22px;">
-        <div style="font-size:12px; font-weight:700; color:oklch(45% 0.13 25); letter-spacing:0.04em; margin-bottom:8px;">🔧 CURRENT TASK — กำลังทำอะไรอยู่</div>
-        <textarea value="{{ currentTask }}" onChange="{{ onCurrentTaskChange }}" placeholder="งานที่กำลังทำตอนนี้…" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:10px 12px; font-size:14px; min-height:56px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
-      </div>
-
-      <!-- PROGRESS -->
-      <div style="background:white; border-radius:10px; padding:20px 22px;">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
-          <div style="font-size:12px; font-weight:700; color:oklch(45% 0.13 25); letter-spacing:0.04em;">✅ PROGRESS — Checklist</div>
-          <div style="font-size:12px; color:oklch(50% 0.02 60);">{{ progressDoneCount }}/{{ progressTotalCount }}</div>
-        </div>
-        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
-          <sc-for list="{{ progressItems }}" as="item" hint-placeholder-count="3">
-            <div style="display:flex; align-items:center; gap:10px; padding:6px 0;">
-              <input type="checkbox" checked="{{ item.done }}" onChange="{{ item.onToggle }}" style="width:17px; height:17px; cursor:pointer; flex-shrink:0;" />
-              <div style="{{ item.textStyle }}">{{ item.text }}</div>
-              <div onClick="{{ item.onRemove }}" style="margin-left:auto; font-size:12px; color:oklch(70% 0.02 60); cursor:pointer; flex-shrink:0;">✕</div>
-            </div>
-          </sc-for>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <input value="{{ newProgressText }}" onChange="{{ onNewProgressTextChange }}" placeholder="เพิ่มงานใน Checklist…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
-          <div onClick="{{ onAddProgress }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่ม</div>
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(22% 0.03 40); margin-bottom:4px;">Current Task</div>
+        <div style="width:36px; height:2px; background:oklch(45% 0.13 25); margin-bottom:16px;"></div>
+        <div style="background:white; border-radius:10px; padding:22px 24px;">
+          <textarea value="{{ today }}" onChange="{{ onTodayChange }}" placeholder="วันนี้ต้องทำอะไร…" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:10px 12px; font-size:14px; min-height:50px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
         </div>
       </div>
 
-      <!-- NEXT TASKS -->
-      <div style="background:white; border-radius:10px; padding:20px 22px;">
-        <div style="font-size:12px; font-weight:700; color:oklch(45% 0.13 25); letter-spacing:0.04em; margin-bottom:10px;">➡️ NEXT TASKS — งานถัดไป</div>
-        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
-          <sc-for list="{{ nextItems }}" as="item" hint-placeholder-count="2">
-            <div style="display:flex; align-items:center; gap:10px; padding:6px 0; font-size:14px; color:oklch(30% 0.02 60);">
-              <div style="width:6px; height:6px; border-radius:50%; background:oklch(55% 0.1 250); flex-shrink:0;"></div>
-              <div style="flex:1;">{{ item.text }}</div>
-              <div onClick="{{ item.onRemove }}" style="font-size:12px; color:oklch(70% 0.02 60); cursor:pointer; flex-shrink:0;">✕</div>
-            </div>
-          </sc-for>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <input value="{{ newNextText }}" onChange="{{ onNewNextTextChange }}" placeholder="เพิ่มงานถัดไป…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
-          <div onClick="{{ onAddNext }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่ม</div>
-        </div>
-      </div>
-
-      <!-- BLOCKERS -->
-      <div style="background:white; border-radius:10px; padding:20px 22px;">
-        <div style="font-size:12px; font-weight:700; color:oklch(48% 0.15 30); letter-spacing:0.04em; margin-bottom:10px;">🚧 BLOCKERS — ปัญหาที่ติดอยู่</div>
-        <sc-if value="{{ hasNoBlockers }}"><div style="font-size:13.5px; color:oklch(55% 0.02 60); margin-bottom:10px;">ไม่มีปัญหาติดอยู่ตอนนี้</div></sc-if>
-        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
-          <sc-for list="{{ blockerItems }}" as="item" hint-placeholder-count="0">
-            <div style="display:flex; align-items:center; gap:10px; padding:8px 10px; background:oklch(97% 0.05 30); border-radius:6px; font-size:14px; color:oklch(35% 0.1 30);">
-              <div style="flex:1;">{{ item.text }}</div>
-              <div onClick="{{ item.onRemove }}" style="font-size:12px; color:oklch(55% 0.1 30); cursor:pointer; flex-shrink:0;">✕</div>
-            </div>
-          </sc-for>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <input value="{{ newBlockerText }}" onChange="{{ onNewBlockerTextChange }}" placeholder="เพิ่มปัญหาที่ติดอยู่…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
-          <div onClick="{{ onAddBlocker }}" style="background:oklch(40% 0.13 25); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่ม</div>
-        </div>
-      </div>
-
-      <!-- HANDOFF -->
-      <div style="background:white; border-radius:10px; padding:20px 22px;">
-        <div style="font-size:12px; font-weight:700; color:oklch(45% 0.13 25); letter-spacing:0.04em; margin-bottom:10px;">🔄 HANDOFF — ส่งต่อห้องแชตใหม่</div>
-        <div onClick="{{ onGenerateHandoff }}" style="display:inline-block; background:oklch(22% 0.02 60); color:white; padding:11px 24px; border-radius:100px; font-size:13.5px; font-weight:600; cursor:pointer; margin-bottom:12px;">⚡ Generate Handoff</div>
-        <sc-if value="{{ showHandoffBox }}">
-          <textarea readonly="{{ true }}" value="{{ handoffText }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(88% 0.01 70); border-radius:6px; padding:12px; font-size:12.5px; min-height:220px; font-family:monospace; color:oklch(25% 0.02 60); margin-bottom:8px;"></textarea>
-          <div onClick="{{ onCopyHandoff }}" style="display:inline-block; background:oklch(97% 0.02 250); color:oklch(35% 0.1 250); padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">{{ copyLabel }}</div>
-        </sc-if>
-      </div>
-
-      <!-- ROLES -->
-      <div style="background:white; border-radius:10px; padding:20px 22px;">
-        <div onClick="{{ onToggleRoles }}" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
-          <div style="font-size:12px; font-weight:700; color:oklch(45% 0.13 25); letter-spacing:0.04em;">👥 ROLES</div>
-          <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ rolesToggleLabel }}</div>
-        </div>
-        <sc-if value="{{ rolesOpen }}">
-          <div style="margin-top:14px; display:flex; flex-direction:column; gap:12px;">
-            <div>
-              <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:3px;">👤 CEO</div>
-              <div style="font-size:13px; color:oklch(45% 0.02 60); line-height:1.6;">ดู Mission Control ทุกเช้า อ่าน TODAY + BLOCKERS ตัดสินใจเรื่องสำคัญ ติ๊ก Checklist เมื่องานเสร็จจริง</div>
-            </div>
-            <div>
-              <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:3px;">🤖 ChatGPT (Product Owner)</div>
-              <div style="font-size:13px; color:oklch(45% 0.02 60); line-height:1.6;">โฟกัสเฉพาะ CURRENT TASK ห้ามออกนอก Sprint ห้ามสร้างระบบใหม่เอง — ทุกคำถามให้อ้างอิง Mission Control</div>
-            </div>
-            <div>
-              <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:3px;">👨‍💻 Claude (Developer)</div>
-              <div style="font-size:13px; color:oklch(45% 0.02 60); line-height:1.6;">อ่าน CURRENT TASK → ทำ → รายงานผล → อัปเดต PROGRESS/BLOCKERS ใน Mission Control ทุกครั้งที่งานเสร็จ</div>
-            </div>
+      <!-- NEXT TASK -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(22% 0.03 40); margin-bottom:4px;">Next Task</div>
+        <div style="width:36px; height:2px; background:oklch(45% 0.13 25); margin-bottom:16px;"></div>
+        <div style="background:white; border-radius:10px; padding:22px 24px; margin-bottom:12px;">
+          <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+            <sc-for list="{{ nextItems }}" as="item" hint-placeholder-count="2">
+              <div style="display:flex; align-items:center; gap:10px; padding:6px 0; font-size:14px; color:oklch(30% 0.02 60);">
+                <div style="width:6px; height:6px; border-radius:50%; background:oklch(55% 0.1 250); flex-shrink:0;"></div>
+                <div style="flex:1;">{{ item.text }}</div>
+                <div onClick="{{ item.onRemove }}" style="font-size:12px; color:oklch(70% 0.02 60); cursor:pointer; flex-shrink:0;">✕</div>
+              </div>
+            </sc-for>
           </div>
-        </sc-if>
+          <div style="display:flex; gap:8px;">
+            <input value="{{ newNextText }}" onChange="{{ onNewNextTextChange }}" placeholder="เพิ่มงานถัดไป…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
+            <div onClick="{{ onAddNext }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่ม</div>
+          </div>
+        </div>
+
+        <div style="background:white; border-radius:10px; padding:22px 24px; margin-bottom:12px;">
+          <div style="font-size:13px; font-weight:600; color:oklch(48% 0.15 30); margin-bottom:10px;">Blockers — ปัญหาที่ติดอยู่</div>
+          <sc-if value="{{ hasNoBlockers }}"><div style="font-size:13.5px; color:oklch(55% 0.02 60); margin-bottom:10px;">ไม่มีปัญหาติดอยู่ตอนนี้</div></sc-if>
+          <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+            <sc-for list="{{ blockerItems }}" as="item" hint-placeholder-count="0">
+              <div style="display:flex; align-items:center; gap:10px; padding:8px 10px; background:oklch(97% 0.05 30); border-radius:6px; font-size:14px; color:oklch(35% 0.1 30);">
+                <div style="flex:1;">{{ item.text }}</div>
+                <div onClick="{{ item.onRemove }}" style="font-size:12px; color:oklch(55% 0.1 30); cursor:pointer; flex-shrink:0;">✕</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input value="{{ newBlockerText }}" onChange="{{ onNewBlockerTextChange }}" placeholder="เพิ่มปัญหาที่ติดอยู่…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
+            <div onClick="{{ onAddBlocker }}" style="background:oklch(40% 0.13 25); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่ม</div>
+          </div>
+        </div>
+
+        <div style="background:white; border-radius:10px; padding:22px 24px; margin-bottom:12px;">
+          <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:10px;">Latest Decisions (ล่าสุด 10 ข้อ)</div>
+          <sc-if value="{{ hasNoDecisions }}"><div style="font-size:13.5px; color:oklch(55% 0.02 60); margin-bottom:10px;">ยังไม่มีมติที่บันทึกไว้</div></sc-if>
+          <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:10px;">
+            <sc-for list="{{ decisionItems }}" as="item" hint-placeholder-count="0">
+              <div style="display:flex; gap:10px; padding:8px 0; border-bottom:1px solid oklch(95% 0.01 70); font-size:13.5px;">
+                <div style="color:oklch(55% 0.02 60); white-space:nowrap;">{{ item.date }}</div>
+                <div style="flex:1; color:oklch(30% 0.02 60);">{{ item.text }}</div>
+                <div onClick="{{ item.onRemove }}" style="font-size:12px; color:oklch(70% 0.02 60); cursor:pointer; flex-shrink:0;">✕</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input value="{{ newDecisionText }}" onChange="{{ onNewDecisionTextChange }}" placeholder="บันทึกมติใหม่…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
+            <div onClick="{{ onAddDecision }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ บันทึก</div>
+          </div>
+        </div>
+
+        <div style="background:white; border-radius:10px; padding:22px 24px;">
+          <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:8px;">Working Context — ตอนนี้อยู่ช่วงไหน ต้องเริ่มต่อจากตรงไหน</div>
+          <textarea value="{{ workingContext }}" onChange="{{ onWorkingContextChange }}" placeholder="อธิบายให้ผู้รับช่วงเข้าใจสถานการณ์ปัจจุบัน…" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13.5px; min-height:70px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+        </div>
       </div>
 
-      <!-- LATEST DECISIONS -->
-      <div style="background:white; border-radius:10px; padding:20px 22px;">
-        <div style="font-size:12px; font-weight:700; color:oklch(45% 0.13 25); letter-spacing:0.04em; margin-bottom:10px;">📜 LATEST DECISIONS (ล่าสุด 10 ข้อ)</div>
-        <sc-if value="{{ hasNoDecisions }}"><div style="font-size:13.5px; color:oklch(55% 0.02 60); margin-bottom:10px;">ยังไม่มีมติที่บันทึกไว้</div></sc-if>
-        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:10px;">
-          <sc-for list="{{ decisionItems }}" as="item" hint-placeholder-count="0">
-            <div style="display:flex; gap:10px; padding:8px 0; border-bottom:1px solid oklch(95% 0.01 70); font-size:13.5px;">
-              <div style="color:oklch(55% 0.02 60); white-space:nowrap;">{{ item.date }}</div>
-              <div style="flex:1; color:oklch(30% 0.02 60);">{{ item.text }}</div>
-              <div onClick="{{ item.onRemove }}" style="font-size:12px; color:oklch(70% 0.02 60); cursor:pointer; flex-shrink:0;">✕</div>
-            </div>
-          </sc-for>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <input value="{{ newDecisionText }}" onChange="{{ onNewDecisionTextChange }}" placeholder="บันทึกมติใหม่…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
-          <div onClick="{{ onAddDecision }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ บันทึก</div>
+      <!-- COMPANY STORY ENGINE (formerly "Generate Context") -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(22% 0.03 40); margin-bottom:4px;">Company Story Engine</div>
+        <div style="width:36px; height:2px; background:oklch(45% 0.13 25); margin-bottom:6px;"></div>
+        <div style="font-size:12.5px; color:oklch(52% 0.02 60); margin-bottom:16px;">เล่าเรื่องราวของบริษัทจาก Project Memory ชุดเดียวกัน เสมือนคนในบริษัทเล่าให้พนักงานใหม่ฟัง — ต่างกันเฉพาะบทบาทของผู้รับ พร้อม Copy วางในห้องแชตใหม่</div>
+        <div style="background:oklch(22% 0.02 60); border-radius:10px; padding:22px 24px;">
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+            <div onClick="{{ onGenChatGPT }}" style="background:oklch(97% 0.02 250); color:oklch(30% 0.1 250); padding:10px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">ChatGPT Story</div>
+            <div onClick="{{ onGenClaude }}" style="background:oklch(97% 0.05 60); color:oklch(35% 0.1 40); padding:10px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">Claude Story</div>
+            <div onClick="{{ onGenCEO }}" style="background:oklch(97% 0.01 70); color:oklch(30% 0.02 60); padding:10px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">CEO Story</div>
+          </div>
+          <sc-if value="{{ showHandoffBox }}">
+            <textarea readonly="{{ true }}" value="{{ handoffText }}" style="width:100%; box-sizing:border-box; border:none; border-radius:6px; padding:12px; font-size:12.5px; min-height:280px; font-family:monospace; color:oklch(25% 0.02 60); margin-bottom:8px;"></textarea>
+            <div onClick="{{ onCopyHandoff }}" style="display:inline-block; background:white; color:oklch(30% 0.02 60); padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">{{ copyLabel }}</div>
+          </sc-if>
         </div>
       </div>
 
@@ -194,6 +316,10 @@
 class Component extends DCLogic {
   state = {
     authChecked: false, isAdmin: false, loaded: false,
+    problemText: "", visionText: "", businessGoal: "", philosophy: "", goalsShort: "", goalsMid: "", goalsLong: "",
+    workingPrinciples: "", aiTeamStructure: "", architectureDirection: "", workingContext: "",
+    evolution: [], newEvoTitle: "", newEvoReason: "", newEvoResult: "", newEvoType: "decision",
+    systems: [], newSystemText: "",
     today: "", currentTask: "",
     progress: [], nextTasks: [], blockers: [], decisions: [],
     newProgressText: "", newNextText: "", newBlockerText: "", newDecisionText: "",
@@ -213,35 +339,67 @@ class Component extends DCLogic {
       if (doc) {
         this.setState({
           loaded: true,
-          today: doc.today || "",
-          currentTask: doc.currentTask || "",
-          progress: doc.progress || [],
-          nextTasks: doc.nextTasks || [],
-          blockers: doc.blockers || [],
+          problemText: doc.problemText || "", visionText: doc.visionText || "", businessGoal: doc.businessGoal || "",
+          philosophy: doc.philosophy || "", goalsShort: doc.goalsShort || "", goalsMid: doc.goalsMid || "", goalsLong: doc.goalsLong || "",
+          workingPrinciples: doc.workingPrinciples || "", aiTeamStructure: doc.aiTeamStructure || "", architectureDirection: doc.architectureDirection || "",
+          workingContext: doc.workingContext || "",
+          evolution: doc.evolution || [], systems: doc.systems || [],
+          today: doc.today || "", currentTask: doc.currentTask || "",
+          progress: doc.progress || [], nextTasks: doc.nextTasks || [], blockers: doc.blockers || [],
           decisions: (doc.decisions || []).slice(0, 10),
           updatedAt: doc.updatedAt || null,
         });
       } else {
-        // First load — seed with real known current status, not placeholders.
-        const seed = {
-          today: "รอ CEO ทดสอบซ้ำ CAT-012 (โควตาแพ็กเกจ) บน Production หลังอัปโหลดไฟล์ล่าสุด",
-          currentTask: "Sprint 01 อยู่ระหว่าง CEO Acceptance Testing (CODE FREEZE / Support Mode) — รอผลทดสอบหรือ Bug ใหม่จาก CEO",
-          progress: [
-            { id: "p1", text: "Membership v2 (Trial/Package1/2/3, Approval Queue, Expiry)", done: true },
-            { id: "p2", text: "CEO Acceptance Testing รอบแรกเริ่มแล้ว", done: true },
-            { id: "p3", text: "CAT-012 โควตาแพ็กเกจผิด — แก้แล้ว รอ CEO ยืนยันซ้ำ", done: false },
-          ],
-          nextTasks: [{ id: "n1", text: "รอผล CEO Acceptance Testing รอบถัดไป" }],
-          blockers: [],
-          decisions: [{ id: "d1", date: this.todayStr(), text: "Sprint 01 เข้าสถานะ CODE FREEZE จนกว่า CEO Acceptance จะผ่าน" }],
-          updatedAt: Date.now(),
-        };
+        const seed = this.seedData();
         await fb.updateDocFields("siteContent", "missionControl", seed);
         this.setState({ loaded: true, ...seed });
       }
     } catch (e) {
       this.setState({ loaded: true });
     }
+  }
+
+  seedData() {
+    const today = this.todayStr();
+    return {
+      problemText: "ตลาดอสังหาฯ หัวหิน/ปราณบุรี/ชะอำ ขาดเว็บลงประกาศที่เป็นของเอเจนซีเอง ควบคุมคุณภาพและข้อมูลได้เต็มที่ พร้อมระบบสมาชิกที่โตไปกับเจ้าของทรัพย์",
+      visionText: "เว็บลงประกาศ + CMS ที่เจ้าของ (ไม่ใช่โปรแกรมเมอร์) ดูแลต่อเองได้ในระยะยาว ผ่านทีม AI (ChatGPT เป็น Product Owner, Claude เป็น Developer)",
+      businessGoal: "เปลี่ยนผู้ใช้ทดลองฟรีให้เป็นสมาชิกจ่ายเงินอย่างต่อเนื่อง ผ่านระบบแพ็กเกจ Trial/Package1/2/3 ที่ต่อยอดได้ตามจำนวนทรัพย์ที่โต",
+      philosophy: "ระบบต้องดูแลตัวเองได้โดยเจ้าของที่ไม่ใช่โปรแกรมเมอร์ — ทุก Feature ต้องอธิบายได้ด้วยภาษาธรรมดา ทุกการเปลี่ยนแปลงต้องมีเหตุผลทางธุรกิจรองรับ ไม่ใช่เทคนิคเพื่อเทคนิค และห้ามอ้างว่าเสร็จโดยไม่มีหลักฐานจริง",
+      goalsShort: "ปิด CEO Acceptance Testing ของ Sprint 01 (Membership v2) ให้ผ่านทุกข้อ",
+      goalsMid: "เปิดใช้งานระบบสมาชิก/แพ็กเกจจริงกับลูกค้า พร้อม Facebook auto-post และ LINE OA",
+      goalsLong: "เว็บที่ดูแลตัวเองได้เกือบทั้งหมดผ่าน AI, ขยายพื้นที่ให้บริการได้โดยไม่เพิ่มภาระแอดมิน",
+      workingPrinciples: "CEO ตัดสินใจเชิงธุรกิจ, ChatGPT เป็น Product Owner ควบคุม Sprint, Claude เป็น Developer ที่ทำเฉพาะ Current Task และรายงานผลจริงเสมอ (ห้ามเดา/ห้ามอ้างว่าเสร็จโดยไม่มีหลักฐาน)",
+      aiTeamStructure: "CEO: เจ้าของธุรกิจ ตัดสินใจเชิงธุรกิจและอนุมัติทุก Sprint | ChatGPT: Product Owner ควบคุมขอบเขตงาน แปลความต้องการ CEO เป็น Task | Claude: Lead Developer ลงมือทำจริงในทุก Sprint ผ่าน Design Component เดียวต่อหน้า",
+      architectureDirection: "ทุกหน้าเป็น Design Component (.dc.html) ไฟล์เดียว จบในตัว, ข้อมูลอยู่ใน Firebase Firestore, Deploy ด้วยการอัปโหลดไฟล์ผ่าน GitHub เว็บ (ไม่ใช้ git command เพราะเจ้าของไม่ใช่โปรแกรมเมอร์), Cloud Function เป็นเพียง Proxy ปิดบัง API Key เท่านั้น",
+      workingContext: "Sprint 01 (Membership v2) อยู่ระหว่าง CEO Acceptance Testing ภายใต้ CODE FREEZE — พบและแก้ CAT-012 (โควตาแพ็กเกจผิด) แล้ว รอ CEO ทดสอบซ้ำบน Production",
+      evolution: [
+        { id: "e1", date: today, type: "architecture", title: "Mission Control ยกระดับเป็น Project Memory", reason: "ให้ AI ทุกตัวรับช่วงงานได้ทันทีโดยไม่ต้องอธิบายประวัติซ้ำ — เป็น Single Source of Truth เดียวของทั้งโครงการ", result: "ChatGPT/Claude/CEO อ่านความจริงชุดเดียวกันเสมอ ต่างกันแค่มุมมอง" },
+        { id: "e2", date: today, type: "bug", title: "แก้ CAT-012 — โควตาแพ็กเกจ", reason: "tierLimit() มีค่าเก่าตกค้าง (basic:1, agency:5, level3:12) ไม่ตรงพิกัดแพ็กเกจ 5/12/25 ปัจจุบัน", result: "บัญชีใหม่ที่ยังไม่เลือกแพ็กเกจไม่ถูกจำกัดเหลือ 1 รายการอีกต่อไป" },
+        { id: "e3", date: today, type: "sprint", title: "Sprint 01 เข้า CODE FREEZE", reason: "Product Owner อนุมัติเข้าสู่ CEO Acceptance Testing", result: "หยุดเพิ่ม Feature ใหม่ชั่วคราว เพื่อให้ CEO ทดสอบของเดิมได้นิ่งจริง" },
+        { id: "e4", date: today, type: "decision", title: "เลิกใช้แพ็กเกจฟรีถาวร", reason: "เปลี่ยนเป็น Trial 30 วันครั้งเดียว + แพ็กเกจ 1/2/3 เท่านั้น เพื่อผลักดันให้ผู้ใช้ตัดสินใจจ่ายเงินเร็วขึ้น", result: "ทุกบัญชีมีเส้นทางสู่การจ่ายเงินชัดเจน ไม่มีทางออกแบบใช้ฟรีตลอดไป" },
+      ],
+      systems: [
+        { id: "s1", text: "Membership v2 — Trial/Package1(5)/Package2(12)/Package3(25), Approval Queue, 30-day Expiry", active: true },
+        { id: "s2", text: "AI Chatbot (ContactRail) ผ่าน Firebase Function proxy", active: true },
+        { id: "s3", text: "AI Quick Add — ร่างประกาศจากรูป/เสียง", active: true },
+        { id: "s4", text: "แพ็กเกจถาวรฟรี (permanent free tier) แบบเดิม", active: false },
+      ],
+      today: "รอ CEO ทดสอบซ้ำ CAT-012 (โควตาแพ็กเกจ) บน Production หลังอัปโหลดไฟล์ล่าสุด",
+      currentTask: "Sprint 01 — CEO Acceptance Testing (CODE FREEZE / Support Mode) — รอผลทดสอบหรือ Bug ใหม่จาก CEO",
+      progress: [
+        { id: "p1", text: "Membership v2 (Trial/Package1/2/3, Approval Queue, Expiry)", done: true },
+        { id: "p2", text: "CEO Acceptance Testing รอบแรกเริ่มแล้ว", done: true },
+        { id: "p3", text: "CAT-012 โควตาแพ็กเกจผิด — แก้แล้ว รอ CEO ยืนยันซ้ำ", done: false },
+      ],
+      nextTasks: [{ id: "n1", text: "รอผล CEO Acceptance Testing รอบถัดไป" }],
+      blockers: [],
+      decisions: [
+        { id: "d1", date: today, text: "Mission Control ยกระดับเป็น Project Memory ตามแนวทางสุดท้ายของ CEO" },
+        { id: "d2", date: today, text: "Sprint 01 เข้าสถานะ CODE FREEZE จนกว่า CEO Acceptance จะผ่าน" },
+      ],
+      updatedAt: Date.now(),
+    };
   }
 
   todayStr() {
@@ -258,6 +416,122 @@ class Component extends DCLogic {
 
   uid() { return Math.random().toString(36).slice(2, 9); }
 
+  evoTypeMeta(type) {
+    return {
+      architecture: "🏗️ Architecture", feature: "✨ Feature", bug: "🐛 Bug",
+      decision: "📜 Decision", workflow: "🔄 Workflow", sprint: "🏁 Sprint", completed: "✅ Completed", other: "• Other",
+    }[type] || "• Other";
+  }
+
+  // ============================================================
+  // UNIFIED CONTEXT PRINCIPLE (CEO Final Architecture directive)
+  // ------------------------------------------------------------
+  // There is exactly ONE Project Memory (this Firestore doc,
+  // siteContent/missionControl). ChatGPT, Claude and the CEO must
+  // never read a different Timeline, a different Decision log, or a
+  // different Current Status — that would let each audience drift
+  // into its own version of "what's true." generateFor(audience)
+  // below is the ONLY place that turns memory into text, and it
+  // always reads the exact same `this.state` for all three
+  // audiences. The only thing that changes per audience is FRAMING
+  // (which parts are foregrounded) and the closing "your role" line
+  // — never the underlying facts. If you add a new memory field,
+  // make every audience able to see it; never fork a field that only
+  // one audience gets.
+  //
+  // Context text itself is NEVER persisted — every click on
+  // ChatGPT/Claude/CEO Story re-derives fresh narrative prose from
+  // whatever is currently in state, so it can never go stale or
+  // contradict what's on-screen.
+  // ============================================================
+
+  // ============================================================
+  // FUTURE READY — automation hook points (NOT implemented in this
+  // version, intentionally — CEO asked to prepare structure/comments
+  // only). When this is built, wire it in at exactly these points:
+  //   1. onCurrentTaskChange / when currentTask text changes to a new
+  //      sprint name → offer to auto-draft an evolution entry
+  //      (type:"sprint") pre-filled with old vs new sprint text.
+  //   2. Any Progress Checklist item toggled done:true → offer to
+  //      auto-draft an evolution entry (type:"completed").
+  //   3. onAddDecision → offer to auto-mirror the same text into a
+  //      linked evolution entry (type:"decision") instead of the
+  //      admin re-typing it twice.
+  // Each hook would just pre-fill newEvoTitle/newEvoReason and open
+  // the Project Evolution add-form — never auto-save without a human
+  // confirming, to keep Project Memory intentional, not noisy.
+  // ============================================================
+  suggestEvolutionEntry(trigger, context) {
+    // Not called anywhere yet — placeholder for the future automation
+    // described above. Left unimplemented on purpose this version.
+  }
+
+  // Turns Project Memory into a first-person company narrative — written
+  // as one person telling a new hire the whole story, not a headings dump.
+  // See UNIFIED CONTEXT PRINCIPLE above: same facts for every audience.
+  generateFor(audience) {
+    const s = this.state;
+    const doneCount = s.progress.filter((p) => p.done).length;
+    const activeSystems = s.systems.filter((sy) => sy.active);
+    const deprecatedSystems = s.systems.filter((sy) => !sy.active);
+    const evoSorted = s.evolution; // already newest-first
+    const evoOldestFirst = [...s.evolution].reverse(); // tell the story in the order it happened
+
+    const audienceLabel = audience === "chatgpt" ? "ChatGPT" : audience === "claude" ? "Claude" : "CEO";
+    const openingLine = {
+      chatgpt: "คุณกำลังจะรับช่วงเป็น Product Owner ของโครงการนี้ต่อ นี่คือเรื่องราวทั้งหมดตั้งแต่วันแรก เล่าให้ฟังเหมือนเพื่อนร่วมงานที่อยู่มาตั้งแต่ต้น:",
+      claude: "คุณกำลังจะรับช่วงเป็น Lead Developer ของโครงการนี้ต่อ นี่คือเรื่องราวทั้งหมดตั้งแต่วันแรก เล่าให้ฟังเหมือนเพื่อนร่วมงานที่อยู่มาตั้งแต่ต้น:",
+      ceo: "นี่คือสรุปเรื่องราวโครงการของคุณเอง สำหรับทบทวนก่อนตัดสินใจ:",
+    }[audience];
+    const roleLine = {
+      chatgpt: "ตอนนี้คุณคือ Product Owner ของโครงการนี้ — ควบคุม Sprint, โฟกัสเฉพาะ Current Task, ห้ามออกนอก Sprint, ห้ามสร้างระบบใหม่เอง, ช่วย CEO ตัดสินใจเชิงธุรกิจ",
+      claude: "ตอนนี้คุณคือ Lead Developer ของโครงการนี้ — อ่าน Current Task แล้วลงมือทำจริง รายงานผลจริงเสมอ ห้ามเดา ห้ามอ้างว่าเสร็จโดยไม่มีหลักฐาน อัปเดต Project Memory ทุกครั้งที่งานเสร็จ",
+      ceo: "นี่คือสิ่งที่รอการตัดสินใจและติดตามของคุณตอนนี้",
+    }[audience];
+
+    const evoStory = evoOldestFirst.length
+      ? evoOldestFirst.map((e) => {
+          let line = `ต่อมา (${e.date}) ${this.evoTypeMeta(e.type)} — ${e.title} เพราะ${e.reason}`;
+          if (e.result) line += ` ผลที่ตามมาคือ ${e.result}`;
+          return line;
+        }).join(" ")
+      : "ยังไม่มีการบันทึกวิวัฒนาการของโครงการ";
+
+    const paragraphs = [
+      `=== เรื่องราวของ huahin.properties — สำหรับ ${audienceLabel} ===`,
+      `สร้างเมื่อ: ${this.todayStr()}`,
+      "",
+      openingLine,
+      "",
+      `huahin.properties เกิดขึ้นเพราะ ${s.problemText || "(ยังไม่มีบันทึกปัญหาตั้งต้น)"} จากปัญหานี้ CEO จึงตัดสินใจสร้างเว็บลงประกาศขาย/เช่าอสังหาริมทรัพย์ของตัวเองขึ้นมา แทนที่จะพึ่งแพลตฟอร์มอื่น`,
+      "",
+      `แนวคิดที่ยึดถือมาตั้งแต่ต้นคือ ${s.visionText || "(ไม่มี)"} โดยมีเป้าหมายทางธุรกิจว่า ${s.businessGoal || "(ไม่มี)"}${s.philosophy ? ` และหลักคิดที่ยึดถือเสมอในการตัดสินใจทุกเรื่องคือ ${s.philosophy}` : ""}`,
+      "",
+      `ระหว่างทาง โครงการไม่ได้หยุดนิ่ง — ${evoStory}`,
+      "",
+      `ทีมงานที่ดูแลโครงการนี้ทำงานร่วมกันแบบนี้: ${s.aiTeamStructure || s.workingPrinciples || "(ไม่มี)"}${s.architectureDirection ? ` ในเชิงเทคนิค ทิศทางที่ยึดถือคือ ${s.architectureDirection}` : ""}`,
+      "",
+      `วันนี้ระบบที่ใช้งานจริงอยู่มีทั้งหมด: ${activeSystems.length ? activeSystems.map((sy) => sy.text).join(", ") : "(ไม่มี)"}${deprecatedSystems.length ? ` ส่วนระบบที่เลิกใช้ไปแล้วและห้ามนำกลับมาใช้คือ: ${deprecatedSystems.map((sy) => sy.text).join(", ")}` : ""}`,
+      "",
+      `ตอนนี้โครงการอยู่ในช่วง "${s.currentTask || "(ไม่มี)"}" และงานที่กำลังทำอยู่ตรงหน้าคือ "${s.today || "(ไม่มี)"}" ความคืบหน้าตอนนี้คือ ${doneCount}/${s.progress.length} รายการในเช็คลิสต์เสร็จแล้ว (${s.progress.map((p) => `${p.done ? "✓" : "○"} ${p.text}`).join(", ") || "-"})`,
+      "",
+      `${s.workingContext || "(ไม่มีบันทึกสถานการณ์ปัจจุบัน)"}`,
+      "",
+      s.blockers.length ? `ตอนนี้มีปัญหาที่ยังติดอยู่คือ: ${s.blockers.map((b) => b.text).join(", ")}` : "ตอนนี้ไม่มีปัญหาที่ติดอยู่",
+      "",
+      `สิ่งที่ต้องทำต่อจากนี้คือ: ${s.nextTasks.length ? s.nextTasks.map((n) => n.text).join(", ") : "(ไม่มี)"}`,
+      "",
+      s.decisions.length ? `มติล่าสุดที่ CEO ตัดสินใจไว้ (ใหม่สุดก่อน): ${s.decisions.map((d) => `[${d.date}] ${d.text}`).join(" / ")}` : "",
+      "",
+      roleLine,
+      "",
+      "บริบทระบบ (สำหรับอ้างอิงทางเทคนิค): Firebase project huahin-properties-5f1b5, ทุกหน้าเป็น Design Component (.dc.html), เจ้าของ deploy เองผ่านอัปโหลดไฟล์ GitHub ทีละไฟล์ (ไม่ใช้ git command), Firestore + Firebase Auth + Cloud Function (Claude API proxy).",
+      "",
+      "อ่านทั้งหมดข้างต้นแล้วเริ่มทำงานต่อได้ทันที เสมือนคุณอยู่กับโครงการนี้มาตั้งแต่วันแรก",
+    ];
+    return paragraphs.filter((p) => p !== "").join("\n\n").replace(/\n\n(===|สร้างเมื่อ)/, "\n$1");
+  }
+
   renderVals() {
     const s = this.state;
     const progressItems = s.progress.map((item) => ({
@@ -269,11 +543,63 @@ class Component extends DCLogic {
     const nextItems = s.nextTasks.map((item) => ({ ...item, onRemove: () => this.persist({ nextTasks: s.nextTasks.filter((n) => n.id !== item.id) }) }));
     const blockerItems = s.blockers.map((item) => ({ ...item, onRemove: () => this.persist({ blockers: s.blockers.filter((b) => b.id !== item.id) }) }));
     const decisionItems = s.decisions.map((item) => ({ ...item, onRemove: () => this.persist({ decisions: s.decisions.filter((d) => d.id !== item.id) }) }));
+    const evolutionItems = s.evolution.map((item) => ({
+      ...item,
+      typeLabel: this.evoTypeMeta(item.type),
+      typeBadgeStyle: "font-size:10.5px; font-weight:600; padding:2px 8px; border-radius:100px; background:oklch(95% 0.02 250); color:oklch(40% 0.1 250); white-space:nowrap;",
+      result: item.result || "",
+      onRemove: () => this.persist({ evolution: s.evolution.filter((e) => e.id !== item.id) }),
+    }));
+    const evoTypeOptions = ["decision", "architecture", "feature", "bug", "workflow", "sprint", "completed"].map((t) => ({
+      value: t, label: this.evoTypeMeta(t),
+      style: `font-size:11px; padding:5px 11px; border-radius:100px; cursor:pointer; white-space:nowrap; ${s.newEvoType === t ? "background:oklch(22% 0.02 60); color:white;" : "background:oklch(95% 0.01 70); color:oklch(45% 0.02 60);"}`,
+      onSelect: () => this.setState({ newEvoType: t }),
+    }));
+    const systemItems = s.systems.map((item) => ({
+      ...item,
+      badgeLabel: item.active ? "ใช้งานอยู่" : "เลิกใช้แล้ว",
+      badgeStyle: item.active
+        ? "font-size:11px; font-weight:600; padding:3px 9px; border-radius:100px; background:oklch(94% 0.06 150); color:oklch(35% 0.1 150); white-space:nowrap; flex-shrink:0;"
+        : "font-size:11px; font-weight:600; padding:3px 9px; border-radius:100px; background:oklch(93% 0.01 70); color:oklch(55% 0.02 60); white-space:nowrap; flex-shrink:0;",
+      onToggleActive: () => this.persist({ systems: s.systems.map((sy) => sy.id === item.id ? { ...sy, active: !sy.active } : sy) }),
+      onRemove: () => this.persist({ systems: s.systems.filter((sy) => sy.id !== item.id) }),
+    }));
 
     const doneCount = s.progress.filter((p) => p.done).length;
 
     return {
       authChecked: s.authChecked, isAdmin: s.isAdmin, loaded: s.loaded,
+      problemText: s.problemText, onProblemChange: (e) => this.persist({ problemText: e.target.value }),
+      visionText: s.visionText, onVisionChange: (e) => this.persist({ visionText: e.target.value }),
+      businessGoal: s.businessGoal, onBusinessGoalChange: (e) => this.persist({ businessGoal: e.target.value }),
+      philosophy: s.philosophy, onPhilosophyChange: (e) => this.persist({ philosophy: e.target.value }),
+      goalsShort: s.goalsShort, onGoalsShortChange: (e) => this.persist({ goalsShort: e.target.value }),
+      goalsMid: s.goalsMid, onGoalsMidChange: (e) => this.persist({ goalsMid: e.target.value }),
+      goalsLong: s.goalsLong, onGoalsLongChange: (e) => this.persist({ goalsLong: e.target.value }),
+      workingPrinciples: s.workingPrinciples, onWorkingPrinciplesChange: (e) => this.persist({ workingPrinciples: e.target.value }),
+      aiTeamStructure: s.aiTeamStructure, onAiTeamStructureChange: (e) => this.persist({ aiTeamStructure: e.target.value }),
+      architectureDirection: s.architectureDirection, onArchitectureDirectionChange: (e) => this.persist({ architectureDirection: e.target.value }),
+      workingContext: s.workingContext, onWorkingContextChange: (e) => this.persist({ workingContext: e.target.value }),
+      rolesOpen: s.rolesOpen, rolesToggleLabel: s.rolesOpen ? "ย่อ ▲" : "ขยาย ▼", onToggleRoles: () => this.setState({ rolesOpen: !s.rolesOpen }),
+
+      evolutionItems, evoTypeOptions, newEvoTitle: s.newEvoTitle, onNewEvoTitleChange: (e) => this.setState({ newEvoTitle: e.target.value }),
+      newEvoReason: s.newEvoReason, onNewEvoReasonChange: (e) => this.setState({ newEvoReason: e.target.value }),
+      newEvoResult: s.newEvoResult, onNewEvoResultChange: (e) => this.setState({ newEvoResult: e.target.value }),
+      onAddEvo: () => {
+        const t = s.newEvoTitle.trim();
+        if (!t) return;
+        this.persist({ evolution: [{ id: this.uid(), date: this.todayStr(), type: s.newEvoType, title: t, reason: s.newEvoReason.trim() || "-", result: s.newEvoResult.trim() || "" }, ...s.evolution] });
+        this.setState({ newEvoTitle: "", newEvoReason: "", newEvoResult: "" });
+      },
+
+      systemItems, newSystemText: s.newSystemText, onNewSystemTextChange: (e) => this.setState({ newSystemText: e.target.value }),
+      onAddSystem: () => {
+        const t = s.newSystemText.trim();
+        if (!t) return;
+        this.persist({ systems: [...s.systems, { id: this.uid(), text: t, active: true }] });
+        this.setState({ newSystemText: "" });
+      },
+
       today: s.today, onTodayChange: (e) => this.persist({ today: e.target.value }),
       currentTask: s.currentTask, onCurrentTaskChange: (e) => this.persist({ currentTask: e.target.value }),
       progressItems, progressDoneCount: doneCount, progressTotalCount: s.progress.length,
@@ -307,34 +633,11 @@ class Component extends DCLogic {
         this.persist({ decisions: [{ id: this.uid(), date: this.todayStr(), text: t }, ...s.decisions].slice(0, 10) });
         this.setState({ newDecisionText: "" });
       },
-      rolesOpen: s.rolesOpen, rolesToggleLabel: s.rolesOpen ? "ย่อ ▲" : "ขยาย ▼", onToggleRoles: () => this.setState({ rolesOpen: !s.rolesOpen }),
+
       showHandoffBox: s.showHandoffBox, handoffText: s.handoffText, copyLabel: s.copyLabel,
-      onGenerateHandoff: () => {
-        const lines = [
-          "=== HUAHIN.PROPERTIES — HANDOFF ===",
-          `สร้างเมื่อ: ${this.todayStr()}`,
-          "",
-          "TODAY:", s.today || "(ไม่มี)",
-          "",
-          "CURRENT TASK:", s.currentTask || "(ไม่มี)",
-          "",
-          `PROGRESS (${doneCount}/${s.progress.length}):`,
-          ...s.progress.map((p) => `${p.done ? "[x]" : "[ ]"} ${p.text}`),
-          "",
-          "NEXT TASKS:",
-          ...(s.nextTasks.length ? s.nextTasks.map((n) => `- ${n.text}`) : ["(ไม่มี)"]),
-          "",
-          "BLOCKERS:",
-          ...(s.blockers.length ? s.blockers.map((b) => `- ${b.text}`) : ["(ไม่มี)"]),
-          "",
-          "LATEST DECISIONS:",
-          ...(s.decisions.length ? s.decisions.map((d) => `[${d.date}] ${d.text}`) : ["(ไม่มี)"]),
-          "",
-          "บริบทโครงการ: ระบบลงประกาศอสังหาฯ huahin.properties, Firebase project huahin-properties-5f1b5, Design Components (.dc.html), เจ้าของ deploy เองผ่านอัปโหลดไฟล์ GitHub ทีละไฟล์ (ไม่ใช้ git command).",
-          "โปรดอ่านสถานะข้างต้นแล้วทำงานต่อจาก CURRENT TASK ทันที",
-        ];
-        this.setState({ showHandoffBox: true, handoffText: lines.join("\n"), copyLabel: "📋 Copy" });
-      },
+      onGenChatGPT: () => this.setState({ showHandoffBox: true, handoffText: this.generateFor("chatgpt"), copyLabel: "📋 Copy" }),
+      onGenClaude: () => this.setState({ showHandoffBox: true, handoffText: this.generateFor("claude"), copyLabel: "📋 Copy" }),
+      onGenCEO: () => this.setState({ showHandoffBox: true, handoffText: this.generateFor("ceo"), copyLabel: "📋 Copy" }),
       onCopyHandoff: () => {
         navigator.clipboard.writeText(s.handoffText).then(() => {
           this.setState({ copyLabel: "✓ Copied" });
