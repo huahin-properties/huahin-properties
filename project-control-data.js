@@ -5,8 +5,8 @@
 export const PROJECT_HEADER = {
   name: "huahin.properties",
   title: "PROJECT CONTROL CENTER",
-  version: "2.2.0",
-  build: "2026.07.18.01",
+  version: "2.3.0",
+  build: "2026.07.18.02",
   status: "ACTIVE",
   phase: "Foundation",
   currentSprint: "Listing Approvals Responsive Testing",
@@ -100,6 +100,7 @@ export const PERMANENT_DECISIONS = [
 ];
 
 export const CHANGELOG_V2_1 = [
+  "[v2.3.0] QA Sprint Completion (18/07/2569) — Listing Approvals Responsive+Functional test PASS, Firestore Index Review Production Ready, AI Quick Add POI Verification conditional PASS (1 risk found: TH fullDesc non-deterministic), Firebase QA Cleanup plan drafted (no write), Demo Listing audit (28 found, not 22 — pending CEO confirmation), HH-70724 Storage verification (Firestore clean, Storage unconfirmed), Production Readiness estimated 85%",
   "[v2.2.0] Added System Architecture, Tech Stack, Critical Files, Coding Rules, Project Glossary, Permanent Decisions sections",
   "Project Control Center completed",
   "Command Center completed",
@@ -187,9 +188,9 @@ export const MODULES = [
   {
     num: "07", th: "แผนงานและ Sprint ปัจจุบัน", en: "Roadmap & Current Sprint",
     lastUpdated: "17/07/2569",
-    currentState: "Current Priority: Listing Approvals Responsive Testing (Pending — resumes after containment items below are cleared)\nProject Control Center Initial Structure = Completed\n\nเว็บไซต์มีโครงสร้างหลักแล้ว: Home, Search Results, Property Details, Sell, About, Contact, Admin Login, Admin Dashboard, Owners, Property Map, AI Quick Add, Site Content, ระบบ 8 ภาษา, ระบบ Listing, แผนที่, Multi-image, Owners Management\n\nCore Feature Audit: Admin Dashboard — Completed, Owners Management — Completed, Listing Approvals — In Progress (Responsive Testing Pending)",
-    completed: "Project Control Center Initial Structure — Completed",
-    openItems: "1. Listing Approvals Responsive Testing — Pending\n2. Firestore Index Review\n3. AI Quick Add POI verification\n4. QA test documents/accounts cleanup\n5. ยืนยันรหัส Demo Listings จำนวน 22 รายการ\n6. HH-70724 Storage orphan files verification\n7. HH-58538 — awaiting direct Production Write approval to delete",
+    currentState: "Current Priority: รอ CEO อนุมัติ QA Cleanup (Production Write) + ยืนยันจำนวน Demo Listings ที่ถูกต้อง (พบจริง 28 รายการ ไม่ใช่ 22)\nQA Sprint (18/07/2569) เสร็จแล้ว 6/6 งาน: Listing Approvals Responsive Testing (PASS), Firestore Index Review (Production Ready), AI Quick Add POI Verification (conditional PASS), Firebase QA Cleanup Planning, Demo Listing Verification, HH-70724 Storage Verification (Firestore-side clean)\nProduction Readiness: 85%\n\nเว็บไซต์มีโครงสร้างหลักแล้ว: Home, Search Results, Property Details, Sell, About, Contact, Admin Login, Admin Dashboard, Owners, Property Map, AI Quick Add, Site Content, ระบบ 8 ภาษา, ระบบ Listing, แผนที่, Multi-image, Owners Management\n\nCore Feature Audit: Admin Dashboard — Completed, Owners Management — Completed, Listing Approvals — Responsive+Functional Test PASS",
+    completed: "Project Control Center Initial Structure — Completed\nQA Sprint 18/07/2569 — 6/6 งานตรวจเสร็จ (Listing Approvals Responsive, Firestore Index Review, AI Quick Add POI Verification, QA Cleanup Planning, Demo Listing Verification, HH-70724 Storage Verification)",
+    openItems: "1. Deploy firestore.rules\n2. QA Cleanup (Production Write)\n3. Storage Verification (HH-70724)\n4. Demo Listing 28 รายการ (กำหนด isDemo / Badge)\n5. HH-111 เติม Zone\n6. Public Launch Preparation",
     decisions: "", nextStep: "",
   },
   {
