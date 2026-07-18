@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <title>Mission Control — huahin.properties</title>
+  <style>
+    body { margin: 0; background: oklch(96% 0.015 75); font-family: 'Work Sans', sans-serif; }
+    a { color: oklch(35% 0.09 25); }
+    a:hover { color: oklch(28% 0.1 25); }
+    textarea, input { font-family: inherit; }
+  </style>
+</helmet>
+
+<sc-if value="{{ !authChecked }}" hint-placeholder-val="{{ true }}">
+  <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; color:oklch(45% 0.02 60); font-size:14px;">กำลังตรวจสอบสิทธิ์…</div>
+</sc-if>
+
+<sc-if value="{{ authChecked }}">
+<sc-if value="{{ !isAdmin }}">
+  <div style="min-height:100vh; display:flex; align-items:center; justify-content:center;">
+    <div style="background:white; border-radius:8px; padding:24px; text-align:center;">
+      <div style="font-size:14px; color:oklch(35% 0.02 60); margin-bottom:14px;">หน้านี้สำหรับ Admin เท่านั้น</div>
+      <a href="Admin Login.dc.html" style="display:inline-block; background:oklch(22% 0.02 60); color:white; padding:10px 24px; border-radius:6px; text-decoration:none; font-size:14px;">ไปหน้าเข้าสู่ระบบ Admin</a>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ isAdmin }}">
+<div style="min-height:100vh; padding:clamp(16px,4vw,48px); box-sizing:border-box;">
+  <div style="max-width:820px; margin:0 auto;">
+
+    <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:22px;">
+      <div style="display:flex; align-items:center; gap:12px; min-width:0;">
+        <div style="width:40px; height:40px; border-radius:10px; background:oklch(35% 0.09 25); display:flex; align-items:center; justify-content:center; color:white; font-size:20px; flex-shrink:0;">🎛️</div>
+        <div>
+          <div style="font-family:'Playfair Display',serif; font-size:clamp(18px,3vw,24px); color:oklch(20% 0.02 60);">Mission Control</div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60);">huahin.properties — ศูนย์บัญชาการโครงการ</div>
+        </div>
+      </div>
+      <a href="Admin Dashboard.dc.html" style="font-size:13px; text-decoration:none; white-space:nowrap;">← กลับ Admin Dashboard</a>
+    </div>
+
+    <sc-if value="{{ !loaded }}" hint-placeholder-val="{{ true }}">
+      <div style="text-align:center; padding:60px 0; color:oklch(50% 0.02 60); font-size:14px;">กำลังโหลด…</div>
+    </sc-if>
+
+    <sc-if value="{{ loaded }}">
+    <div style="display:flex; flex-direction:column; gap:16px;">
+
+      <!-- TODAY -->
+      <div style="background:white; border-radius:10px; padding:20px 22px;">
+        <div style="font-size:12px; font-weight:700; color:oklch(45% 0.13 25); letter-spacing:0.04em; margin-bottom:8px;">☀️ TODAY — วันนี้ต้องทำอะไร</div>
+        <textarea value="{{ today }}" onChange="{{ onTodayChange }}" placeholder="พิมพ์สิ่งที่ต้องทำวันนี้…" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:10px 12px; font-size:14px; min-height:56px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+      </div>
+
+      <!-- CURRENT TASK -->
+      <div style="background:white; border-radius:10px; padding:20px 22px;">
+        <div style="font-size:12px; font-weight:700; color:oklch(45% 0.13 25); letter-spacing:0.04em; margin-bottom:8px;">🔧 CURRENT TASK — กำลังทำอะไรอยู่</div>
+        <textarea value="{{ currentTask }}" onChange="{{ onCurrentTaskChange }}" placeholder="งานที่กำลังทำตอนนี้…" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:10px 12px; font-size:14px; min-height:56px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+      </div>
+
+      <!-- PROGRESS -->
+      <div style="background:white; border-radius:10px; padding:20px 22px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+          <div style="font-size:12px; font-weight:700; color:oklch(45% 0.13 25); letter-spacing:0.04em;">✅ PROGRESS — Checklist</div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60);">{{ progressDoneCount }}/{{ progressTotalCount }}</div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+          <sc-for list="{{ progressItems }}" as="item" hint-placeholder-count="3">
+            <div style="display:flex; align-items:center; gap:10px; padding:6px 0;">
+              <input type="checkbox" checked="{{ item.done }}" onChange="{{ item.onToggle }}" style="width:17px; height:17px; cursor:pointer; flex-shrink:0;" />
+              <div style="{{ item.textStyle }}">{{ item.text }}</div>
+              <div onClick="{{ item.onRemove }}" style="margin-left:auto; font-size:12px; color:oklch(70% 0.02 60); cursor:pointer; flex-shrink:0;">✕</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <input value="{{ newProgressText }}" onChange="{{ onNewProgressTextChange }}" placeholder="เพิ่มงานใน Checklist…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
+          <div onClick="{{ onAddProgress }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่ม</div>
+        </div>
+      </div>
+
+      <!-- NEXT TASKS -->
+      <div style="background:white; border-radius:10px; padding:20px 22px;">
+        <div style="font-size:12px; font-weight:700; color:oklch(45% 0.13 25); letter-spacing:0.04em; margin-bottom:10px;">➡️ NEXT TASKS — งานถัดไป</div>
+        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+          <sc-for list="{{ nextItems }}" as="item" hint-placeholder-count="2">
+            <div style="display:flex; align-items:center; gap:10px; padding:6px 0; font-size:14px; color:oklch(30% 0.02 60);">
+              <div style="width:6px; height:6px; border-radius:50%; background:oklch(55% 0.1 250); flex-shrink:0;"></div>
+              <div style="flex:1;">{{ item.text }}</div>
+              <div onClick="{{ item.onRemove }}" style="font-size:12px; color:oklch(70% 0.02 60); cursor:pointer; flex-shrink:0;">✕</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <input value="{{ newNextText }}" onChange="{{ onNewNextTextChange }}" placeholder="เพิ่มงานถัดไป…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
+          <div onClick="{{ onAddNext }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่ม</div>
+        </div>
+      </div>
+
+      <!-- BLOCKERS -->
+      <div style="background:white; border-radius:10px; padding:20px 22px;">
+        <div style="font-size:12px; font-weight:700; color:oklch(48% 0.15 30); letter-spacing:0.04em; margin-bottom:10px;">🚧 BLOCKERS — ปัญหาที่ติดอยู่</div>
+        <sc-if value="{{ hasNoBlockers }}"><div style="font-size:13.5px; color:oklch(55% 0.02 60); margin-bottom:10px;">ไม่มีปัญหาติดอยู่ตอนนี้</div></sc-if>
+        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+          <sc-for list="{{ blockerItems }}" as="item" hint-placeholder-count="0">
+            <div style="display:flex; align-items:center; gap:10px; padding:8px 10px; background:oklch(97% 0.05 30); border-radius:6px; font-size:14px; color:oklch(35% 0.1 30);">
+              <div style="flex:1;">{{ item.text }}</div>
+              <div onClick="{{ item.onRemove }}" style="font-size:12px; color:oklch(55% 0.1 30); cursor:pointer; flex-shrink:0;">✕</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <input value="{{ newBlockerText }}" onChange="{{ onNewBlockerTextChange }}" placeholder="เพิ่มปัญหาที่ติดอยู่…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
+          <div onClick="{{ onAddBlocker }}" style="background:oklch(40% 0.13 25); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่ม</div>
+        </div>
+      </div>
+
+      <!-- HANDOFF -->
+      <div style="background:white; border-radius:10px; padding:20px 22px;">
+        <div style="font-size:12px; font-weight:700; color:oklch(45% 0.13 25); letter-spacing:0.04em; margin-bottom:10px;">🔄 HANDOFF — ส่งต่อห้องแชตใหม่</div>
+        <div onClick="{{ onGenerateHandoff }}" style="display:inline-block; background:oklch(22% 0.02 60); color:white; padding:11px 24px; border-radius:100px; font-size:13.5px; font-weight:600; cursor:pointer; margin-bottom:12px;">⚡ Generate Handoff</div>
+        <sc-if value="{{ showHandoffBox }}">
+          <textarea readonly="{{ true }}" value="{{ handoffText }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(88% 0.01 70); border-radius:6px; padding:12px; font-size:12.5px; min-height:220px; font-family:monospace; color:oklch(25% 0.02 60); margin-bottom:8px;"></textarea>
+          <div onClick="{{ onCopyHandoff }}" style="display:inline-block; background:oklch(97% 0.02 250); color:oklch(35% 0.1 250); padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">{{ copyLabel }}</div>
+        </sc-if>
+      </div>
+
+      <!-- ROLES -->
+      <div style="background:white; border-radius:10px; padding:20px 22px;">
+        <div onClick="{{ onToggleRoles }}" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+          <div style="font-size:12px; font-weight:700; color:oklch(45% 0.13 25); letter-spacing:0.04em;">👥 ROLES</div>
+          <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ rolesToggleLabel }}</div>
+        </div>
+        <sc-if value="{{ rolesOpen }}">
+          <div style="margin-top:14px; display:flex; flex-direction:column; gap:12px;">
+            <div>
+              <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:3px;">👤 CEO</div>
+              <div style="font-size:13px; color:oklch(45% 0.02 60); line-height:1.6;">ดู Mission Control ทุกเช้า อ่าน TODAY + BLOCKERS ตัดสินใจเรื่องสำคัญ ติ๊ก Checklist เมื่องานเสร็จจริง</div>
+            </div>
+            <div>
+              <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:3px;">🤖 ChatGPT (Product Owner)</div>
+              <div style="font-size:13px; color:oklch(45% 0.02 60); line-height:1.6;">โฟกัสเฉพาะ CURRENT TASK ห้ามออกนอก Sprint ห้ามสร้างระบบใหม่เอง — ทุกคำถามให้อ้างอิง Mission Control</div>
+            </div>
+            <div>
+              <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:3px;">👨‍💻 Claude (Developer)</div>
+              <div style="font-size:13px; color:oklch(45% 0.02 60); line-height:1.6;">อ่าน CURRENT TASK → ทำ → รายงานผล → อัปเดต PROGRESS/BLOCKERS ใน Mission Control ทุกครั้งที่งานเสร็จ</div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+
+      <!-- LATEST DECISIONS -->
+      <div style="background:white; border-radius:10px; padding:20px 22px;">
+        <div style="font-size:12px; font-weight:700; color:oklch(45% 0.13 25); letter-spacing:0.04em; margin-bottom:10px;">📜 LATEST DECISIONS (ล่าสุด 10 ข้อ)</div>
+        <sc-if value="{{ hasNoDecisions }}"><div style="font-size:13.5px; color:oklch(55% 0.02 60); margin-bottom:10px;">ยังไม่มีมติที่บันทึกไว้</div></sc-if>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:10px;">
+          <sc-for list="{{ decisionItems }}" as="item" hint-placeholder-count="0">
+            <div style="display:flex; gap:10px; padding:8px 0; border-bottom:1px solid oklch(95% 0.01 70); font-size:13.5px;">
+              <div style="color:oklch(55% 0.02 60); white-space:nowrap;">{{ item.date }}</div>
+              <div style="flex:1; color:oklch(30% 0.02 60);">{{ item.text }}</div>
+              <div onClick="{{ item.onRemove }}" style="font-size:12px; color:oklch(70% 0.02 60); cursor:pointer; flex-shrink:0;">✕</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <input value="{{ newDecisionText }}" onChange="{{ onNewDecisionTextChange }}" placeholder="บันทึกมติใหม่…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
+          <div onClick="{{ onAddDecision }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ บันทึก</div>
+        </div>
+      </div>
+
+      <div style="font-size:11px; color:oklch(60% 0.02 60); text-align:center; padding:8px 0 24px;">อัปเดตล่าสุด: {{ updatedAtLabel }}</div>
+    </div>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    authChecked: false, isAdmin: false, loaded: false,
+    today: "", currentTask: "",
+    progress: [], nextTasks: [], blockers: [], decisions: [],
+    newProgressText: "", newNextText: "", newBlockerText: "", newDecisionText: "",
+    rolesOpen: false, showHandoffBox: false, handoffText: "", copyLabel: "📋 Copy",
+    updatedAt: null,
+  };
+
+  async componentDidMount() {
+    const fb = await import("./firebase-client.js");
+    this._fb = fb;
+    const user = await fb.onAdminAuthReady().catch(() => null);
+    const isAdmin = !!user && fb.isAdminAuthed();
+    this.setState({ authChecked: true, isAdmin });
+    if (!isAdmin) return;
+    try {
+      const doc = await fb.fetchDocById("siteContent", "missionControl");
+      if (doc) {
+        this.setState({
+          loaded: true,
+          today: doc.today || "",
+          currentTask: doc.currentTask || "",
+          progress: doc.progress || [],
+          nextTasks: doc.nextTasks || [],
+          blockers: doc.blockers || [],
+          decisions: (doc.decisions || []).slice(0, 10),
+          updatedAt: doc.updatedAt || null,
+        });
+      } else {
+        // First load — seed with real known current status, not placeholders.
+        const seed = {
+          today: "รอ CEO ทดสอบซ้ำ CAT-012 (โควตาแพ็กเกจ) บน Production หลังอัปโหลดไฟล์ล่าสุด",
+          currentTask: "Sprint 01 อยู่ระหว่าง CEO Acceptance Testing (CODE FREEZE / Support Mode) — รอผลทดสอบหรือ Bug ใหม่จาก CEO",
+          progress: [
+            { id: "p1", text: "Membership v2 (Trial/Package1/2/3, Approval Queue, Expiry)", done: true },
+            { id: "p2", text: "CEO Acceptance Testing รอบแรกเริ่มแล้ว", done: true },
+            { id: "p3", text: "CAT-012 โควตาแพ็กเกจผิด — แก้แล้ว รอ CEO ยืนยันซ้ำ", done: false },
+          ],
+          nextTasks: [{ id: "n1", text: "รอผล CEO Acceptance Testing รอบถัดไป" }],
+          blockers: [],
+          decisions: [{ id: "d1", date: this.todayStr(), text: "Sprint 01 เข้าสถานะ CODE FREEZE จนกว่า CEO Acceptance จะผ่าน" }],
+          updatedAt: Date.now(),
+        };
+        await fb.updateDocFields("siteContent", "missionControl", seed);
+        this.setState({ loaded: true, ...seed });
+      }
+    } catch (e) {
+      this.setState({ loaded: true });
+    }
+  }
+
+  todayStr() {
+    const d = new Date();
+    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear() + 543}`;
+  }
+
+  async persist(fields) {
+    this.setState({ updatedAt: Date.now(), ...fields });
+    try {
+      await this._fb.updateDocFields("siteContent", "missionControl", { ...fields, updatedAt: Date.now() });
+    } catch (e) { /* best-effort — UI already reflects the change locally */ }
+  }
+
+  uid() { return Math.random().toString(36).slice(2, 9); }
+
+  renderVals() {
+    const s = this.state;
+    const progressItems = s.progress.map((item) => ({
+      ...item,
+      textStyle: item.done ? "font-size:14px; color:oklch(60% 0.02 60); text-decoration:line-through; flex:1;" : "font-size:14px; color:oklch(30% 0.02 60); flex:1;",
+      onToggle: () => this.persist({ progress: s.progress.map((p) => p.id === item.id ? { ...p, done: !p.done } : p) }),
+      onRemove: () => this.persist({ progress: s.progress.filter((p) => p.id !== item.id) }),
+    }));
+    const nextItems = s.nextTasks.map((item) => ({ ...item, onRemove: () => this.persist({ nextTasks: s.nextTasks.filter((n) => n.id !== item.id) }) }));
+    const blockerItems = s.blockers.map((item) => ({ ...item, onRemove: () => this.persist({ blockers: s.blockers.filter((b) => b.id !== item.id) }) }));
+    const decisionItems = s.decisions.map((item) => ({ ...item, onRemove: () => this.persist({ decisions: s.decisions.filter((d) => d.id !== item.id) }) }));
+
+    const doneCount = s.progress.filter((p) => p.done).length;
+
+    return {
+      authChecked: s.authChecked, isAdmin: s.isAdmin, loaded: s.loaded,
+      today: s.today, onTodayChange: (e) => this.persist({ today: e.target.value }),
+      currentTask: s.currentTask, onCurrentTaskChange: (e) => this.persist({ currentTask: e.target.value }),
+      progressItems, progressDoneCount: doneCount, progressTotalCount: s.progress.length,
+      newProgressText: s.newProgressText, onNewProgressTextChange: (e) => this.setState({ newProgressText: e.target.value }),
+      onAddProgress: () => {
+        const t = s.newProgressText.trim();
+        if (!t) return;
+        this.persist({ progress: [...s.progress, { id: this.uid(), text: t, done: false }] });
+        this.setState({ newProgressText: "" });
+      },
+      nextItems, newNextText: s.newNextText, onNewNextTextChange: (e) => this.setState({ newNextText: e.target.value }),
+      onAddNext: () => {
+        const t = s.newNextText.trim();
+        if (!t) return;
+        this.persist({ nextTasks: [...s.nextTasks, { id: this.uid(), text: t }] });
+        this.setState({ newNextText: "" });
+      },
+      blockerItems, hasNoBlockers: s.blockers.length === 0, newBlockerText: s.newBlockerText,
+      onNewBlockerTextChange: (e) => this.setState({ newBlockerText: e.target.value }),
+      onAddBlocker: () => {
+        const t = s.newBlockerText.trim();
+        if (!t) return;
+        this.persist({ blockers: [...s.blockers, { id: this.uid(), text: t }] });
+        this.setState({ newBlockerText: "" });
+      },
+      decisionItems, hasNoDecisions: s.decisions.length === 0, newDecisionText: s.newDecisionText,
+      onNewDecisionTextChange: (e) => this.setState({ newDecisionText: e.target.value }),
+      onAddDecision: () => {
+        const t = s.newDecisionText.trim();
+        if (!t) return;
+        this.persist({ decisions: [{ id: this.uid(), date: this.todayStr(), text: t }, ...s.decisions].slice(0, 10) });
+        this.setState({ newDecisionText: "" });
+      },
+      rolesOpen: s.rolesOpen, rolesToggleLabel: s.rolesOpen ? "ย่อ ▲" : "ขยาย ▼", onToggleRoles: () => this.setState({ rolesOpen: !s.rolesOpen }),
+      showHandoffBox: s.showHandoffBox, handoffText: s.handoffText, copyLabel: s.copyLabel,
+      onGenerateHandoff: () => {
+        const lines = [
+          "=== HUAHIN.PROPERTIES — HANDOFF ===",
+          `สร้างเมื่อ: ${this.todayStr()}`,
+          "",
+          "TODAY:", s.today || "(ไม่มี)",
+          "",
+          "CURRENT TASK:", s.currentTask || "(ไม่มี)",
+          "",
+          `PROGRESS (${doneCount}/${s.progress.length}):`,
+          ...s.progress.map((p) => `${p.done ? "[x]" : "[ ]"} ${p.text}`),
+          "",
+          "NEXT TASKS:",
+          ...(s.nextTasks.length ? s.nextTasks.map((n) => `- ${n.text}`) : ["(ไม่มี)"]),
+          "",
+          "BLOCKERS:",
+          ...(s.blockers.length ? s.blockers.map((b) => `- ${b.text}`) : ["(ไม่มี)"]),
+          "",
+          "LATEST DECISIONS:",
+          ...(s.decisions.length ? s.decisions.map((d) => `[${d.date}] ${d.text}`) : ["(ไม่มี)"]),
+          "",
+          "บริบทโครงการ: ระบบลงประกาศอสังหาฯ huahin.properties, Firebase project huahin-properties-5f1b5, Design Components (.dc.html), เจ้าของ deploy เองผ่านอัปโหลดไฟล์ GitHub ทีละไฟล์ (ไม่ใช้ git command).",
+          "โปรดอ่านสถานะข้างต้นแล้วทำงานต่อจาก CURRENT TASK ทันที",
+        ];
+        this.setState({ showHandoffBox: true, handoffText: lines.join("\n"), copyLabel: "📋 Copy" });
+      },
+      onCopyHandoff: () => {
+        navigator.clipboard.writeText(s.handoffText).then(() => {
+          this.setState({ copyLabel: "✓ Copied" });
+          setTimeout(() => this.setState({ copyLabel: "📋 Copy" }), 1800);
+        }).catch(() => {});
+      },
+      updatedAtLabel: s.updatedAt ? new Date(s.updatedAt).toLocaleString("th-TH") : "-",
+    };
+  }
+}
+</script>
+</body>
+</html>
