@@ -7,15 +7,14 @@
 </head>
 <body>
 <x-dc>
-<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 84"><rect width="120" height="84" fill="#3a2a22"/><text x="60" y="47" font-size="34" text-anchor="middle" fill="#f2e6d8" font-family="serif">🏠</text></svg></template>
+
 <helmet>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-  <title>หน้าทำงานของฉัน — huahin.properties</title>
+  <title>Listing Approvals — huahin.properties Admin</title>
   <style>
     body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
     a { color: oklch(42% 0.12 25); }
@@ -24,1376 +23,159 @@
 </helmet>
 
 <div style="min-height:100vh;">
-  <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-    <div style="display:flex; align-items:center; gap:9px;">
+  <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+    <a href="Admin Dashboard.dc.html" style="display:flex; align-items:center; gap:9px; text-decoration:none;">
       <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
       <span style="font-family:'Playfair Display',serif; font-size:19px; color:white;">huahin . properties</span>
-      <span style="color:oklch(70% 0.02 70); font-size:14px;">| หน้าทำงานของฉัน</span>
-    </div>
-    <div onClick="{{ onLogout }}" style="font-size:13px; color:oklch(75% 0.02 70); cursor:pointer;">ออกจากระบบ</div>
+      <span style="color:oklch(70% 0.02 70); font-size:14px;">| Listing Approvals</span>
+    </a>
+    <a href="Admin Dashboard.dc.html" style="color:oklch(85% 0.02 70); font-size:13px; text-decoration:none;">← กลับแดชบอร์ด</a>
   </div>
 
-  <div style="max-width:1080px; margin:0 auto; padding:clamp(20px,4vw,40px);">
+  <div style="max-width:1000px; margin:0 auto; padding:clamp(20px,4vw,40px);">
+    <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:6px;">คิวอนุมัติประกาศ</div>
+    <div style="font-size:14px; color:oklch(50% 0.02 60); margin-bottom:24px;">ประกาศใหม่ทุกรายการต้องผ่านการอนุมัติที่นี่ก่อนขึ้นเว็บสาธารณะ</div>
 
-    <sc-if value="{{ notSignedIn }}">
-      <div style="background:white; border-radius:8px; padding:24px; text-align:center;">
-        <div style="font-size:14px; color:oklch(35% 0.02 60); margin-bottom:14px;">กรุณาเข้าสู่ระบบเพื่อดูหน้าทำงานของคุณ</div>
-        <a href="Agent Signup.dc.html" style="display:inline-block; background:oklch(22% 0.02 60); color:white; padding:10px 24px; border-radius:6px; text-decoration:none; font-size:14px;">ไปที่หน้าเข้าสู่ระบบ</a>
+    <sc-if value="{{ hasSuspects }}">
+      <div style="background:oklch(96% 0.06 60); border:1px solid oklch(80% 0.1 60); border-radius:8px; padding:16px 20px; margin-bottom:22px;">
+        <div style="font-size:13.5px; font-weight:600; color:oklch(35% 0.1 40); margin-bottom:8px;">⚠️ พบข้อมูลซ้ำที่ส่อว่าสมัครทดลองใช้ซ้ำ (เบอร์โทรตรงกัน)</div>
+        <sc-for list="{{ suspects }}" as="grp" hint-placeholder-count="1">
+          <div style="font-size:12.5px; color:oklch(40% 0.08 50); margin-bottom:4px;">📱 {{ grp.phone }} — {{ grp.namesLabel }}</div>
+        </sc-for>
       </div>
     </sc-if>
 
-    <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
-      <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:2px;">สวัสดีคุณ{{ listerName }}</div>
-      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:22px;">{{ listerEmail }}</div>
+    <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+      <div onClick="{{ onFilterAll }}" style="{{ tabAllStyle }}">ทั้งหมด ({{ countAll }})</div>
+      <div onClick="{{ onFilterPending }}" style="{{ tabPendingStyle }}">รออนุมัติ ({{ countPending }})</div>
+      <div onClick="{{ onFilterLive }}" style="{{ tabLiveStyle }}">กำลังแสดง ({{ countLive }})</div>
+      <div onClick="{{ onFilterExpired }}" style="{{ tabExpiredStyle }}">หมดอายุ ({{ countExpired }})</div>
+      <div onClick="{{ onFilterRejected }}" style="{{ tabRejectedStyle }}">ปฏิเสธ ({{ countRejected }})</div>
+    </div>
 
-      <div style="background:white; border-radius:8px; padding:20px 22px; margin-bottom:22px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
-        <div>
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">แพ็กเกจปัจจุบันของคุณ</div>
-          <div style="font-size:16px; font-weight:600; color:oklch(25% 0.02 60);">{{ tierLabel }}</div>
-          <sc-if value="{{ agentCodeLabel }}"><div style="font-size:12px; color:oklch(45% 0.13 250); margin-top:4px;">{{ agentCodeLabel }}</div></sc-if>
-        </div>
-        <!-- Sprint 01 Phase 3: Upgrade is the primary (business-priority) action here; Owner Website/Share demoted to lighter ghost buttons, same handlers as before -->
-        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-          <div onClick="{{ onOpenMySite }}" style="background:transparent; color:oklch(50% 0.02 60); padding:8px 4px; font-size:12.5px; font-weight:500; cursor:pointer; white-space:nowrap; text-decoration:underline;">🌐 เว็บไซต์ของฉัน</div>
-          <div onClick="{{ onShareMySite }}" style="{{ shareMySiteStyle }}">🔗 แชร์เว็บไซต์</div>
-          <a href="Lister Billing.dc.html" style="{{ upgradeTopBarStyle }}">📦 ดู/อัปเกรดแพ็กเกจ</a>
-        </div>
-      </div>
-
-      <sc-if value="{{ showKpiStrip }}">
-        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:22px;">
-          <div style="background:white; border-radius:8px; padding:16px 18px;">
-            <div style="font-size:11px; color:oklch(50% 0.02 60); margin-bottom:4px;">👁️ ยอดเข้าชมรวม</div>
-            <div style="font-size:24px; font-weight:700; color:oklch(25% 0.02 60);">{{ kpiTotalViews }}</div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="2">
+        <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:16px 18px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+          <div style="{{ r.coverStyle }}"></div>
+          <div style="flex:1; min-width:200px;">
+            <div style="font-size:14px; font-weight:700; color:oklch(40% 0.13 25);">{{ r.code }} <span style="font-weight:400; color:oklch(50% 0.02 60); font-size:12.5px;">— {{ r.zone }}</span></div>
+            <div style="font-size:12.5px; color:oklch(50% 0.02 60);">{{ r.priceLabel }} · ผู้ลงประกาศ: {{ r.listerEmail }}</div>
+            <div style="font-size:11.5px; color:oklch(60% 0.02 60); margin-top:2px;">ส่งเมื่อ {{ r.dateLabel }}</div>
           </div>
-          <div style="background:white; border-radius:8px; padding:16px 18px;">
-            <div style="font-size:11px; color:oklch(50% 0.02 60); margin-bottom:4px;">✅ ประกาศที่กำลังแสดง</div>
-            <div style="font-size:24px; font-weight:700; color:oklch(25% 0.02 60);">{{ kpiActiveListings }}</div>
-          </div>
-          <sc-if value="{{ showKpiTrialDays }}">
-            <div style="background:white; border-radius:8px; padding:16px 18px;">
-              <div style="font-size:11px; color:oklch(50% 0.02 60); margin-bottom:4px;">🎁 วันทดลองใช้เหลือ</div>
-              <div style="font-size:24px; font-weight:700; color:oklch(25% 0.02 60);">{{ kpiTrialDaysLabel }}</div>
-            </div>
-          </sc-if>
-        </div>
-      </sc-if>
-
-      <sc-if value="{{ showTrialOffer }}">
-        <div style="background:oklch(97% 0.05 60); border:1px solid oklch(85% 0.08 60); border-radius:8px; padding:18px 22px; margin-bottom:22px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
-          <div>
-            <div style="font-size:14px; font-weight:600; color:oklch(30% 0.1 50); margin-bottom:4px;">🎁 เริ่มทดลองใช้ฟรี 30 วัน — ใช้ฟีเจอร์ได้ครบทุกอย่าง</div>
-            <div style="font-size:12.5px; color:oklch(45% 0.06 50);">โพสต์ได้สูงสุด 5 หลัง พร้อมป้ายแนะนำ+หน้าแรกเทียบเท่าแพ็กเกจสูงสุด — ใช้สิทธิ์นี้ได้ครั้งเดียวเท่านั้น</div>
-            <sc-if value="{{ trialError }}"><div style="font-size:12px; color:oklch(50% 0.18 30); margin-top:6px;">{{ trialError }}</div></sc-if>
-          </div>
-          <div onClick="{{ onStartTrial }}" style="background:oklch(40% 0.13 25); color:white; padding:11px 22px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;">{{ trialStartLabel }}</div>
-        </div>
-      </sc-if>
-
-      <sc-if value="{{ showTrialActive }}">
-        <div style="background:oklch(97% 0.02 250); border:1px solid oklch(88% 0.04 250); border-radius:8px; padding:16px 22px; margin-bottom:22px;">
-          <div style="font-size:13px; color:oklch(30% 0.1 250);">🎁 คุณกำลังทดลองใช้ฟรี — {{ trialDaysLeftLabel }}</div>
-          <sc-if value="{{ showTrialUpsell }}">
-            <div style="margin-top:8px; font-size:12.5px; color:oklch(40% 0.06 60); line-height:1.6;">{{ trialUpsellViewsLabel }}<br/>แพ็กเกจ 1 ใช้งานต่อได้ทุกฟีเจอร์พื้นฐาน แต่ป้ายแนะนำและตำแหน่งหน้าแรกที่คุณใช้อยู่ตอนนี้เป็นสิทธิ์ของแพ็กเกจ 3 เท่านั้น — <a href="Lister Billing.dc.html">ดูแพ็กเกจ</a></div>
-          </sc-if>
-        </div>
-      </sc-if>
-
-      <sc-if value="{{ showFirstTimeCta }}">
-        <div style="background:white; border-radius:10px; padding:48px 24px; text-align:center; margin-bottom:22px;">
-          <div style="font-family:'Playfair Display',serif; font-size:22px; color:oklch(20% 0.02 60); margin-bottom:10px;">เริ่มต้นเลย — ลงประกาศแรกของคุณ</div>
-          <div style="font-size:13.5px; color:oklch(50% 0.02 60); margin-bottom:24px;">เพิ่มทรัพย์แรก แล้วให้ AI ช่วยร่างโพสต์ขายให้อัตโนมัติ</div>
-          <div onClick="{{ onNewProperty }}" style="display:inline-block; background:oklch(22% 0.02 60); color:white; padding:16px 36px; border-radius:100px; font-size:16px; font-weight:700; cursor:pointer;">+ เพิ่มทรัพย์ใหม่</div>
-        </div>
-      </sc-if>
-
-      <sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
-          <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60);">ทรัพย์ของฉัน ({{ propCount }})</div>
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div style="display:flex; border:1px solid oklch(88% 0.01 70); border-radius:6px; overflow:hidden;">
-              <div onClick="{{ onSetListLayout }}" style="padding:8px 12px; font-size:12px; cursor:pointer; background:{{ listBtnBg }}; color:{{ listBtnColor }};">☰ รายการ</div>
-              <div onClick="{{ onSetGridLayout }}" style="padding:8px 12px; font-size:12px; cursor:pointer; background:{{ gridBtnBg }}; color:{{ gridBtnColor }};">⊞ การ์ด</div>
-            </div>
-            <div onClick="{{ onNewProperty }}" style="{{ newPropertyBtnStyle }}">+ เพิ่มทรัพย์ใหม่</div>
-          </div>
-        </div>
-
-        <!-- CTA State 4: quota genuinely full — proactive banner, Upgrade is now the primary contextual action -->
-        <sc-if value="{{ showProactiveQuotaFull }}">
-          <div style="background:oklch(96% 0.06 60); border:2px solid oklch(75% 0.13 60); border-radius:8px; padding:16px 18px; margin-bottom:16px; font-size:14px; color:oklch(30% 0.12 40); display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;">
-            <span style="font-weight:600;">⚠️ {{ quotaFullBannerMsg }}</span>
-            <a href="Lister Billing.dc.html" style="background:oklch(40% 0.13 25); color:white; padding:11px 22px; border-radius:100px; font-size:13.5px; font-weight:700; text-decoration:none; white-space:nowrap;">อัปเกรดแพ็กเกจ →</a>
-          </div>
-        </sc-if>
-        <!-- CTA State 3: near quota — contextual note only, "+เพิ่มทรัพย์ใหม่" stays primary and enabled -->
-        <sc-if value="{{ showQuotaNearNote }}">
-          <div style="background:oklch(97% 0.03 75); border:1px solid oklch(85% 0.06 75); border-radius:6px; padding:10px 14px; margin-bottom:14px; font-size:12.5px; color:oklch(40% 0.1 60);">💡 {{ quotaNearNoteMsg }}</div>
-        </sc-if>
-        <sc-if value="{{ quotaMsg }}">
-          <div style="background:oklch(96% 0.06 60); border:2px solid oklch(75% 0.13 60); border-radius:8px; padding:16px 18px; margin-bottom:16px; font-size:14px; color:oklch(30% 0.12 40); display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;">
-            <span style="font-weight:600;">⚠️ {{ quotaMsg }}</span>
-            <a href="Lister Billing.dc.html" style="background:oklch(40% 0.13 25); color:white; padding:11px 22px; border-radius:100px; font-size:13.5px; font-weight:700; text-decoration:none; white-space:nowrap;">อัปเกรดแพ็กเกจ →</a>
-          </div>
-        </sc-if>
-
-        <sc-if value="{{ hasNoProps }}">
-          <div style="background:white; border-radius:8px; padding:32px 20px; text-align:center; font-size:13px; color:oklch(50% 0.02 60);">ยังไม่มีทรัพย์ในระบบ — กด "เพิ่มทรัพย์ใหม่" เพื่อเริ่มลงประกาศ</div>
-        </sc-if>
-
-        <sc-if value="{{ isGridLayout }}">
-          <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px;">
-            <sc-for list="{{ properties }}" as="p" hint-placeholder-count="0">
-              <div style="background:white; border-radius:8px; overflow:hidden; border:1px solid oklch(92% 0.01 70);">
-                <div style="{{ p.coverStyle }}">
-                  <sc-if value="{{ p.noCover }}">
-                    <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:30px; color:oklch(75% 0.01 70);">🏠</div>
-                  </sc-if>
-                  <div style="position:absolute; top:8px; right:8px; font-size:11px; padding:3px 9px; border-radius:100px; background:{{ p.statusBg }}; color:{{ p.statusColor }};">{{ p.statusLabel }}</div>
-                  <div style="position:absolute; top:8px; left:8px; font-size:11px; padding:3px 9px; border-radius:100px; background:{{ p.lifecycleBg }}; color:{{ p.lifecycleColor }};">{{ p.lifecycleLabel }}</div>
-                </div>
-                <div style="padding:14px 16px;">
-                  <div style="font-size:13px; font-weight:700; color:oklch(40% 0.13 25); margin-bottom:4px;">{{ p.code }}</div>
-                  <div style="font-size:14px; color:oklch(25% 0.02 60); margin-bottom:4px;">{{ p.zone }}, {{ p.areaLabel }}</div>
-                  <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:8px;">{{ p.typeLabel }} · {{ p.bedBath }}</div>
-                  <div style="font-size:15px; font-weight:700; color:oklch(25% 0.02 60); margin-bottom:6px;">{{ p.priceLabel }}</div>
-                  <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:4px; display:flex; gap:10px;">
-                    <span>{{ p.viewCountLabel }}</span>
-                    <sc-if value="{{ p.expiryLabel }}"><span>⏳ {{ p.expiryLabel }}</span></sc-if>
-                  </div>
-                  <sc-if value="{{ p.rejectReasonLabel }}">
-                    <div style="font-size:11px; color:oklch(50% 0.18 30); margin-bottom:4px;">{{ p.rejectReasonLabel }}</div>
-                  </sc-if>
-                  <sc-if value="{{ p.assistedSale }}">
-                    <div style="font-size:11px; color:oklch(45% 0.13 145); margin-bottom:4px;">🤝 เปิดใช้ "ให้ทีมช่วยขาย"</div>
-                  </sc-if>
-                  <sc-if value="{{ p.needsNudge }}">
-                    <div style="font-size:11px; color:oklch(50% 0.15 60); margin-bottom:4px;">💡 ยังไม่ขาย? ลองให้ทีมช่วยขายดูไหม</div>
-                  </sc-if>
-                </div>
-                <div style="display:flex; border-top:1px solid oklch(93% 0.01 70); position:relative;">
-                  <div onClick="{{ p.onEdit }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:oklch(35% 0.02 60); cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">✏️<br/>แก้ไข</div>
-                  <div onClick="{{ p.onPublish }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; font-weight:700; color:{{ p.publishColor }}; cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">{{ p.publishIcon }}<br/>{{ p.publishLabel }}</div>
-                  <div onClick="{{ p.onToggleMenu }}" style="flex:0 0 44px; text-align:center; padding:11px 4px; font-size:15px; color:oklch(45% 0.02 60); cursor:pointer;">⋮</div>
-                  <sc-if value="{{ p.menuOpen }}">
-                    <div onClick="{{ p.onCloseMenu }}" style="position:fixed; inset:0; z-index:4;"></div>
-                    <div onClick="{{ stopProp }}" style="position:absolute; top:100%; right:0; background:white; border:1px solid oklch(88% 0.01 70); border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,0.12); z-index:5; min-width:170px; overflow:hidden;">
-                      <div onClick="{{ p.onPostText }}" style="padding:11px 16px; font-size:12.5px; color:oklch(30% 0.02 60); cursor:pointer; border-bottom:1px solid oklch(93% 0.01 70);">🤖 ข้อความโพสต์ AI</div>
-                      <div onClick="{{ p.onShare }}" style="padding:11px 16px; font-size:12.5px; color:{{ p.shareColor }}; cursor:pointer; border-bottom:1px solid oklch(93% 0.01 70);">🔗 แชร์</div>
-                      <sc-if value="{{ p.isVip }}">
-                        <div onClick="{{ p.onOpenBuyer }}" style="padding:11px 16px; font-size:12.5px; color:oklch(45% 0.13 250); cursor:pointer; border-bottom:1px solid oklch(93% 0.01 70);">👤 ลงทะเบียนผู้ซื้อ</div>
-                      </sc-if>
-                      <div onClick="{{ p.onDeleteClick }}" style="padding:11px 16px; font-size:12.5px; color:oklch(50% 0.18 30); cursor:pointer;">🗑️ ลบ</div>
-                    </div>
-                  </sc-if>
-                </div>
-              </div>
-            </sc-for>
-          </div>
-        </sc-if>
-
-        <sc-if value="{{ isListLayout }}" hint-placeholder-val="{{ true }}">
-          <div style="display:flex; flex-direction:column; gap:10px;">
-            <sc-for list="{{ properties }}" as="p" hint-placeholder-count="0">
-              <div style="background:white; border-radius:8px; border:1px solid oklch(92% 0.01 70); display:flex; align-items:stretch; overflow:hidden; flex-wrap:wrap;">
-                <div style="{{ p.coverStyleSmall }}">
-                  <sc-if value="{{ p.noCover }}">
-                    <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:24px; color:oklch(75% 0.01 70);">🏠</div>
-                  </sc-if>
-                  <div style="position:absolute; top:4px; left:4px; font-size:10px; padding:2px 7px; border-radius:100px; background:{{ p.lifecycleBg }}; color:{{ p.lifecycleColor }};">{{ p.lifecycleLabel }}</div>
-                </div>
-                <div style="flex:1 1 180px; min-width:180px; padding:10px 14px;">
-                  <div style="display:flex; align-items:center; gap:8px; margin-bottom:2px; flex-wrap:wrap;">
-                    <span style="font-size:12.5px; font-weight:700; color:oklch(40% 0.13 25);">{{ p.code }}</span>
-                    <span style="font-size:10.5px; padding:2px 8px; border-radius:100px; background:{{ p.statusBg }}; color:{{ p.statusColor }};">{{ p.statusLabel }}</span>
-                  </div>
-                  <div style="font-size:13.5px; color:oklch(25% 0.02 60);">{{ p.zone }}, {{ p.areaLabel }} · {{ p.typeLabel }} · {{ p.bedBath }}</div>
-                  <div style="font-size:14px; font-weight:700; color:oklch(25% 0.02 60);">{{ p.priceLabel }}</div>
-                  <div style="font-size:11px; color:oklch(55% 0.02 60); display:flex; gap:8px;">
-                    <span>{{ p.viewCountLabel }}</span>
-                    <sc-if value="{{ p.expiryLabel }}"><span>⏳ {{ p.expiryLabel }}</span></sc-if>
-                  </div>
-                </div>
-                <div style="display:flex; align-items:center; flex-wrap:wrap; border-left:1px solid oklch(93% 0.01 70); position:relative;">
-                  <div onClick="{{ p.onEdit }}" style="padding:0 14px; text-align:center; font-size:11px; color:oklch(35% 0.02 60); cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;">✏️<br/>แก้ไข</div>
-                  <div onClick="{{ p.onPublish }}" style="padding:0 14px; text-align:center; font-size:11px; font-weight:700; color:{{ p.publishColor }}; cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">{{ p.publishIcon }}<br/>{{ p.publishLabel }}</div>
-                  <div onClick="{{ p.onToggleMenu }}" style="padding:0 12px; text-align:center; font-size:16px; color:oklch(45% 0.02 60); cursor:pointer; height:100%; display:flex; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">⋮</div>
-                  <sc-if value="{{ p.menuOpen }}">
-                    <div onClick="{{ p.onCloseMenu }}" style="position:fixed; inset:0; z-index:4;"></div>
-                    <div onClick="{{ stopProp }}" style="position:absolute; top:100%; right:0; background:white; border:1px solid oklch(88% 0.01 70); border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,0.12); z-index:5; min-width:170px; overflow:hidden;">
-                      <div onClick="{{ p.onPostText }}" style="padding:11px 16px; font-size:12.5px; color:oklch(30% 0.02 60); cursor:pointer; border-bottom:1px solid oklch(93% 0.01 70);">🤖 ข้อความโพสต์ AI</div>
-                      <div onClick="{{ p.onShare }}" style="padding:11px 16px; font-size:12.5px; color:{{ p.shareColor }}; cursor:pointer; border-bottom:1px solid oklch(93% 0.01 70);">🔗 แชร์</div>
-                      <sc-if value="{{ p.isVip }}">
-                        <div onClick="{{ p.onOpenBuyer }}" style="padding:11px 16px; font-size:12.5px; color:oklch(45% 0.13 250); cursor:pointer; border-bottom:1px solid oklch(93% 0.01 70);">👤 ลงทะเบียนผู้ซื้อ</div>
-                      </sc-if>
-                      <div onClick="{{ p.onDeleteClick }}" style="padding:11px 16px; font-size:12.5px; color:oklch(50% 0.18 30); cursor:pointer;">🗑️ ลบ</div>
-                    </div>
-                  </sc-if>
-                </div>
-              </div>
-            </sc-for>
-          </div>
-        </sc-if>
-      </sc-if>
-
-      <!-- Sprint 01 Phase 4: Website Settings — moved below the property list, collapsed by default -->
-      <sc-if value="{{ showList }}">
-      <div style="background:white; border-radius:8px; padding:20px 22px; margin-bottom:22px;">
-        <div onClick="{{ onToggleProfileSettings }}" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
-          <div style="font-size:14px; font-weight:600; color:oklch(25% 0.02 60);">⚙️ ตั้งค่าเว็บไซต์ส่วนตัวของฉัน</div>
-          <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ profileSettingsToggleLabel }}</div>
-        </div>
-        <sc-if value="{{ showProfileSettings }}">
-          <div style="margin-top:18px; display:flex; flex-direction:column; gap:20px;">
-            <div style="font-size:12px; color:oklch(50% 0.02 60); line-height:1.6;">ตั้งค่านี้ใช้กับเว็บไซต์ส่วนตัวของคุณเท่านั้น (หน้าที่รวมทรัพย์ทั้งหมดของคุณ แชร์ให้ลูกค้าดูได้) ไม่กระทบประกาศในเว็บหลัก</div>
-
-            <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ชื่อที่แสดงให้ลูกค้าเห็น</div>
-              <input value="{{ ps_displayName }}" onChange="{{ onPsDisplayName }}" style="width:100%; max-width:360px; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
-            </div>
-
-            <div style="display:flex; gap:24px; flex-wrap:wrap-reverse; align-items:flex-start;">
-              <div style="flex:1; min-width:280px; display:flex; flex-direction:column; gap:16px;">
-                <div>
-                  <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รูปโปรไฟล์ (โลโก้/รูปของคุณ)</div>
-                  <div style="display:flex; align-items:center; gap:10px;">
-                    <label style="display:inline-flex; align-items:center; gap:8px; border:1px dashed oklch(80% 0.02 60); border-radius:6px; padding:9px 14px; cursor:pointer; font-size:13px; color:oklch(45% 0.02 60);">
-                      <input type="file" accept="image/*" onChange="{{ onPsProfilePhoto }}" style="display:none;" />
-                      📷 {{ ps_profilePhotoLabel }}
-                    </label>
-                    <sc-if value="{{ ps_profilePhotoUrl }}"><div style="{{ psPhotoThumbStyle }}"></div></sc-if>
-                  </div>
-                </div>
-
-                <sc-if value="{{ canCustomCover }}">
-                  <div>
-                    <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ภาพปก (เหมือน Facebook cover)</div>
-                    <div style="display:flex; align-items:center; gap:10px;">
-                      <label style="display:inline-flex; align-items:center; gap:8px; border:1px dashed oklch(80% 0.02 60); border-radius:6px; padding:9px 14px; cursor:pointer; font-size:13px; color:oklch(45% 0.02 60);">
-                        <input type="file" accept="image/*" onChange="{{ onPsCoverPhoto }}" style="display:none;" />
-                        🖼️ {{ ps_coverPhotoLabel }}
-                      </label>
-                      <sc-if value="{{ ps_coverPhotoUrl }}"><div style="{{ psCoverThumbStyle }}"></div></sc-if>
-                    </div>
-                  </div>
-                </sc-if>
-                <sc-if value="{{ cannotCustomCover }}">
-                  <div style="font-size:11.5px; color:oklch(55% 0.02 60);">🔒 เปลี่ยนภาพปกได้ตั้งแต่แพ็กเกจ 1 ขึ้นไป — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a></div>
-                </sc-if>
-
-                <sc-if value="{{ canCustomTheme }}">
-                  <div>
-                    <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">สีธีมเว็บไซต์ของคุณ</div>
-                    <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
-                      <div style="display:flex; gap:10px;">
-                        <sc-for list="{{ themeOptions }}" as="c" hint-placeholder-count="4">
-                          <div onClick="{{ c.onSelect }}" style="{{ c.swatchStyle }}"></div>
-                        </sc-for>
-                      </div>
-                      <div style="display:flex; align-items:center; gap:8px;">
-                        <input type="color" value="{{ ps_themeColorHex }}" onChange="{{ onPsThemeColorPicker }}" style="width:38px; height:38px; border:none; border-radius:8px; padding:0; cursor:pointer; background:none;" />
-                        <span style="font-size:11px; color:oklch(55% 0.02 60);">กำหนดเอง</span>
-                      </div>
-                    </div>
-                  </div>
-                </sc-if>
-                <sc-if value="{{ cannotCustomTheme }}">
-                  <div style="font-size:11.5px; color:oklch(55% 0.02 60);">🔒 เปลี่ยนสีธีมได้ในแพ็กเกจ 3 — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a></div>
-                </sc-if>
-              </div>
-
-              <div style="width:280px; flex-shrink:0;">
-                <div style="font-size:11px; color:oklch(50% 0.02 60); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.03em;">👁️ ตัวอย่างสด</div>
-                <div style="border:1px solid oklch(90% 0.01 70); border-radius:10px; overflow:hidden; background:white;">
-                  <div style="{{ previewCoverStyle }}"></div>
-                  <div style="padding:0 16px 18px; margin-top:-36px;">
-                    <div style="{{ previewAvatarStyle }}">
-                      <sc-if value="{{ previewNoAvatar }}"><span>{{ previewInitial }}</span></sc-if>
-                    </div>
-                    <div style="font-size:16px; font-weight:600; color:oklch(20% 0.02 60); margin-top:8px;">{{ previewName }}</div>
-                    <div style="font-size:12px; color:oklch(55% 0.02 60); margin-bottom:8px;">{{ propCount }} รายการทรัพย์</div>
-                    <sc-if value="{{ hasThemeColor }}">
-                      <div style="display:flex; align-items:center; gap:8px;">
-                        <div style="{{ selectedThemeChipStyle }}"></div>
-                        <span style="font-size:10.5px; color:oklch(55% 0.02 60);">สีธีมที่เลือก — {{ ps_themeColorHex }}</span>
-                      </div>
-                    </sc-if>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">🔗 ลิงก์โซเชียลมีเดีย (โชว์เป็นไอคอนบนเว็บไซต์ของคุณ)</div>
-              <div style="{{ socialSectionStyle }}">
-                <div style="display:flex; flex-direction:column; gap:8px;">
-                  <sc-for list="{{ socialFields }}" as="s" hint-placeholder-count="4">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                      <div style="{{ s.iconStyle }}">{{ s.iconChar }}</div>
-                      <input value="{{ s.value }}" onChange="{{ s.onChange }}" placeholder="{{ s.placeholder }}" disabled="{{ s.disabled }}" style="{{ s.inputStyle }}" />
-                    </div>
-                  </sc-for>
-                </div>
-              </div>
-              <sc-if value="{{ socialLockNote }}">
-                <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-top:6px;">{{ socialLockNote }} — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a></div>
-              </sc-if>
-            </div>
-            <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">📝 ข้อความแนะนำตัว (โชว์บนเว็บไซต์ส่วนตัวของคุณ)</div>
-              <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:8px; line-height:1.6;">เขียนสั้นๆ ให้ลูกค้าอ่านแล้วรู้จักคุณทันที — ใครก็ได้ ไม่ต้องเก่งเขียน แค่ตอบ 3 อย่าง: คุณเป็นใคร/ทำมากี่ปี, ถนัดโซนไหน/ทรัพย์แบบไหน, จุดเด่นที่ทำให้ลูกค้าเลือกคุณ</div>
-              <textarea rows="3" value="{{ ps_bioText }}" onChange="{{ onPsBioText }}" placeholder="ตัวอย่าง: สวัสดีค่ะ ดิฉันปิ่ม ตัวแทนอสังหาริมทรัพย์มืออาชีพในหัวหินมา 8 ปี ถนัดพูลวิลล่าและคอนโดโซนเขาเต่า-หัวหินใต้ เคยดูแลลูกค้าต่างชาติมามากกว่า 50 ครอบครัว พร้อมช่วยตั้งแต่หาบ้าน เจรจาราคา ไปจนถึงจดทะเบียนโอนกรรมสิทธิ์ให้ครบจบในที่เดียว" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical;"></textarea>
-            </div>
-            <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">🤖 บุคลิก AI ผู้ช่วยของคุณ</div>
-              <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:8px; line-height:1.6;">สิ่งที่คุณกรอกตรงนี้ AI จะนำไปใช้ตอบลูกค้าที่ทักเข้ามาในเว็บไซต์ส่วนตัวของคุณ ให้ AI "เป็นคุณ" ได้จริง เขียนแบบเล่าให้เพื่อนฟัง — บอกว่าคุณเป็นใคร (ชื่อ/เพศ/นิสัย), พูดจาแบบไหน, ทักทายลูกค้ายังไงเป็นประโยคแรก, เชี่ยวชาญโซน/ทรัพย์แบบไหนเป็นพิเศษ ถ้าไม่กรอก AI จะใช้ชื่อ+เบอร์ติดต่อของคุณจากตอนสมัครแทน</div>
-              <textarea rows="6" value="{{ ps_aiPersonaText }}" onChange="{{ onPsAiPersonaText }}" placeholder="ตัวอย่าง: ฉันชื่อปิ่ม เป็นผู้หญิงค่ะ นิสัยเป็นกันเอง พูดจาสุภาพอบอุ่นเหมือนคุยกับเพื่อน ทักทายลูกค้าคนแรกด้วยประโยค &quot;สวัสดีค่ะ สนใจบ้านหลังไหนเป็นพิเศษไหมคะ ยินดีช่วยแนะนำเลยค่ะ&quot; ฉันเชี่ยวชาญพูลวิลล่าราคา 5-15 ล้านบาทโซนเขาเต่าและหัวหินใต้ รู้จักทำเลดีในปราณบุรีด้วย ติดต่อได้ทุกวัน 9:00-20:00 ถ้าลูกค้าถามราคาต่อรองได้ ให้บอกว่าคุยกับเจ้าของบ้านให้ได้ก่อนนัดดูจริง" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical;"></textarea>
-            </div>
-
-            <div style="display:flex; align-items:center; gap:12px;">
-              <div onClick="{{ onSaveProfileSettings }}" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:10px 22px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">{{ ps_saveLabel }}</div>
-              <sc-if value="{{ ps_saveMsg }}"><div style="font-size:12px; color:oklch(45% 0.13 145);">{{ ps_saveMsg }}</div></sc-if>
-            </div>
-          </div>
-        </sc-if>
-      </div>
-      </sc-if>
-
-      <sc-if value="{{ showEdit }}">
-        <div style="background:white; border-radius:8px; padding:clamp(20px,4vw,30px);">
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
-            <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60);">{{ editTitle }}</div>
-            <div onClick="{{ onBackToList }}" style="font-size:13px; color:oklch(50% 0.02 60); cursor:pointer;">← กลับไปหน้ารายการ</div>
-          </div>
-
-          <div style="margin-bottom:18px;">
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">รูปภาพ (สูงสุด {{ photoLimit }} รูปตามแพ็กเกจของคุณ — รูปแรกเป็นภาพปก)</div>
-            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
-              <sc-for list="{{ existingPhotos }}" as="ph" hint-placeholder-count="0">
-                <div style="{{ ph.thumbStyle }}">
-                  <div onClick="{{ ph.onRemove }}" style="position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%; background:rgba(0,0,0,0.6); color:white; font-size:11px; display:flex; align-items:center; justify-content:center; cursor:pointer;">×</div>
-                </div>
-              </sc-for>
-              <sc-for list="{{ newPhotos }}" as="np" hint-placeholder-count="0">
-                <div style="{{ np.thumbStyle }}">
-                  <div onClick="{{ np.onRemove }}" style="position:absolute; top:2px; right:2px; width:18px; height:18px; border-radius:50%; background:rgba(0,0,0,0.6); color:white; font-size:11px; display:flex; align-items:center; justify-content:center; cursor:pointer;">×</div>
-                </div>
-              </sc-for>
-            </div>
-            <sc-if value="{{ canAddPhoto }}">
-              <label style="display:inline-flex; align-items:center; gap:8px; border:1px dashed oklch(80% 0.02 60); border-radius:6px; padding:10px 16px; cursor:pointer; font-size:13px; color:oklch(45% 0.02 60);">
-                <input type="file" accept="image/*" multiple="multiple" onChange="{{ onPhotosFile }}" style="display:none;" />
-                📷 เพิ่มรูป ({{ photoCount }}/{{ photoLimit }})
-              </label>
+          <div style="font-size:12px; font-weight:600; padding:5px 12px; border-radius:100px; background:{{ r.statusBg }}; color:{{ r.statusColor }}; white-space:nowrap;">{{ r.statusLabel }}</div>
+          <div style="display:flex; gap:8px;">
+            <a href="{{ r.viewUrl }}" target="_blank" style="background:oklch(93% 0.01 70); color:oklch(30% 0.02 60); padding:8px 14px; border-radius:6px; font-size:13px; text-decoration:none; white-space:nowrap;">👁️ ดู</a>
+            <sc-if value="{{ r.showApprove }}">
+              <div onClick="{{ r.onApprove }}" style="background:oklch(40% 0.13 150); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">✓ อนุมัติ</div>
+            </sc-if>
+            <sc-if value="{{ r.showReject }}">
+              <div onClick="{{ r.onReject }}" style="background:oklch(95% 0.02 30); color:oklch(45% 0.15 30); padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">✕ ปฏิเสธ</div>
             </sc-if>
           </div>
-
-          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:16px;">
-            <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ประเภททรัพย์</div>
-              <select value="{{ f_type }}" onChange="{{ onFType }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white;">
-                <sc-for list="{{ typeOptions }}" as="ty" hint-placeholder-count="5"><option value="{{ ty.id }}">{{ ty.label }}</option></sc-for>
-              </select>
-            </div>
-            <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">โซน/พื้นที่</div>
-              <select value="{{ f_area }}" onChange="{{ onFArea }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white;">
-                <sc-for list="{{ areaOptions }}" as="a" hint-placeholder-count="3"><option value="{{ a.id }}">{{ a.label }}</option></sc-for>
-              </select>
-            </div>
-            <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ชื่อทำเล/ซอย</div>
-              <input value="{{ f_zone }}" onChange="{{ onFZone }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
-            </div>
-            <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">สถานะ</div>
-              <select value="{{ f_status }}" onChange="{{ onFStatus }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white;">
-                <option value="sale">ประกาศขาย</option>
-                <option value="rent">ประกาศเช่า</option>
-              </select>
-            </div>
-            <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ราคา (บาท)</div>
-              <input type="number" value="{{ f_price }}" onChange="{{ onFPrice }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
-            </div>
-            <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ห้องนอน</div>
-              <input type="number" value="{{ f_bedrooms }}" onChange="{{ onFBedrooms }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
-            </div>
-            <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ห้องน้ำ</div>
-              <input type="number" value="{{ f_bathrooms }}" onChange="{{ onFBathrooms }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
-            </div>
-            <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">พื้นที่ใช้สอย (ตร.ม.)</div>
-              <input type="number" value="{{ f_livingArea }}" onChange="{{ onFLivingArea }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
-            </div>
-            <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ขนาดที่ดิน (ตร.ว.)</div>
-              <input type="number" value="{{ f_landSize }}" onChange="{{ onFLandSize }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
-            </div>
-          </div>
-
-          <div style="margin-bottom:20px;">
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">คุณสมบัติและสิ่งอำนวยความสะดวก (เลือกได้หลายข้อ — จะแสดงในหน้าประกาศสาธารณะ)</div>
-            <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:8px;">
-              <sc-for list="{{ featureOptions }}" as="feat" hint-placeholder-count="13">
-                <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(30% 0.02 60); cursor:pointer;">
-                  <input type="checkbox" checked="{{ feat.checked }}" onChange="{{ feat.onToggle }}" />{{ feat.label }}
-                </label>
-              </sc-for>
-            </div>
-          </div>
-
-          <div style="margin-bottom:20px;">
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รายละเอียดเพิ่มเติม</div>
-            <textarea rows="4" value="{{ f_description }}" onChange="{{ onFDescription }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
-          </div>
-
-          <div onClick="{{ onSaveProperty }}" style="background:oklch(40% 0.13 25); color:white; text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:600; cursor:pointer;">{{ saveLabel }}</div>
-          <div style="font-size:11.5px; color:oklch(55% 0.02 60); text-align:center; margin-top:8px;">บันทึกเป็นร่างก่อน — กด "ส่งขออนุมัติ" ในหน้ารายการเมื่อพร้อม ทีมงานจะตรวจสอบก่อนขึ้นเว็บสาธารณะ (ปกติภายใน 24 ชม.)</div>
-          <sc-if value="{{ saveError }}"><div style="font-size:13px; color:oklch(50% 0.18 30); text-align:center; margin-top:10px;">{{ saveError }}</div></sc-if>
         </div>
+      </sc-for>
+      <sc-if value="{{ noRows }}">
+        <div style="text-align:center; padding:40px; color:oklch(55% 0.02 60); font-size:14px;">ไม่มีรายการในหมวดนี้</div>
       </sc-if>
-
-      <sc-if value="{{ showSaved }}">
-        <div style="background:white; border-radius:8px; padding:clamp(20px,4vw,30px);">
-          <div onClick="{{ onGoToList }}" style="font-size:13px; color:oklch(50% 0.02 60); cursor:pointer; margin-bottom:14px;">← กลับไปหน้ารายการ</div>
-          <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60); margin-bottom:6px;">ทรัพย์ {{ savedId }}</div>
-          <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:22px;">ข้อความโพสต์ + ตัวเลือกให้ทีมช่วยขาย</div>
-
-          <div style="background:oklch(97% 0.01 80); border:1px dashed oklch(82% 0.02 60); border-radius:6px; padding:16px 18px; display:flex; flex-direction:column; gap:10px; margin-bottom:22px;">
-            <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer;">
-              <input type="checkbox" checked="{{ ns_assistedSale }}" onChange="{{ onNsAssistedSale }}" style="margin-top:3px;" />
-              <span style="font-size:13.5px; color:oklch(30% 0.02 60); line-height:1.6;">นอกจากลงประกาศในเว็บเราแล้ว ต้องการให้ทีมงานช่วยขาย/ปล่อยเช่าผ่านช่องทางอื่นเพิ่มเติมด้วยหรือไม่? ข้อความนี้เป็นความลับระหว่างคุณกับทีมงานเท่านั้น</span>
-            </label>
-            <sc-if value="{{ ns_assistedSale }}">
-              <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                <span style="font-size:12px; color:oklch(50% 0.02 60);">ค่าคอมมิชชันที่ยินดีให้เรา:</span>
-                <select value="{{ ns_commissionPct }}" onChange="{{ onNsCommissionPct }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 10px; font-size:13px; font-family:inherit; background:white;">
-                  <option value="1">1%</option>
-                  <option value="2">2%</option>
-                  <option value="5">5%</option>
-                  <option value="10">10%</option>
-                  <option value="15">15%</option>
-                </select>
-              </div>
-            </sc-if>
-            <div style="font-size:11.5px; color:oklch(58% 0.02 60);">🔒 ส่วนตัว — เห็นเฉพาะทีมงานเราเท่านั้น ไม่แสดงต่อสาธารณะหรือผู้ลงประกาศรายอื่น</div>
-            <div style="display:flex; gap:10px; margin-top:6px;">
-              <div onClick="{{ onConfirmNudge }}" style="background:oklch(40% 0.13 25); color:white; padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">{{ nudgeConfirmLabel }}</div>
-            </div>
-            <sc-if value="{{ nudgeSavedMsg }}"><div style="font-size:12px; color:oklch(45% 0.13 145);">{{ nudgeSavedMsg }}</div></sc-if>
-          </div>
-
-          <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:8px;">🤖 ข้อความสำหรับโพสต์ขาย — ร่างด้วย AI พร้อมคีย์เวิร์ด SEO และช่องทางติดต่อของเว็บให้อัตโนมัติ ไม่ต้องคิดเอง</div>
-
-          <sc-if value="{{ hasGenerated }}" hint-placeholder-val="{{ false }}">
-            <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:8px;">การเจนครั้งที่ {{ ns_genCount }} จาก {{ genLimit }} ครั้งที่ใช้ได้กับรายการนี้ (ตามแพ็กเกจ) — แก้ไขข้อความด้านล่างได้เองทุกเมื่อ</div>
-            <textarea rows="10" value="{{ ns_postText }}" onChange="{{ onPostTextChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:12px 14px; font-size:13px; font-family:inherit; resize:vertical; background:white; margin-bottom:10px;"></textarea>
-            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-              <div onClick="{{ onSavePostText }}" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">💾 บันทึกการแก้ไข</div>
-              <div onClick="{{ onCopyPost }}" style="display:inline-block; background:oklch(22% 0.02 60); color:white; padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">📋 {{ copyLabel }}</div>
-              <sc-if value="{{ canRegenerate }}">
-                <div onClick="{{ onGeneratePost }}" style="display:inline-block; background:white; border:1px solid oklch(80% 0.02 60); color:oklch(35% 0.02 60); padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">🔄 เจนใหม่ (เหลือ {{ genRemaining }} ครั้ง)</div>
-              </sc-if>
-              <sc-if value="{{ postSaveMsg }}"><div style="font-size:12px; color:oklch(45% 0.13 145);">{{ postSaveMsg }}</div></sc-if>
-            </div>
-            <sc-if value="{{ quotaReached }}">
-              <div style="background:oklch(96% 0.06 60); border:1px solid oklch(80% 0.1 60); border-radius:6px; padding:10px 14px; font-size:12.5px; color:oklch(35% 0.1 40); margin-top:10px;">⚠️ ใช้โควตาการเจนข้อความ AI ของรายการนี้ครบแล้วตามแพ็กเกจ ({{ genLimit }} ครั้ง) — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a> เพื่อเจนเพิ่มได้อีก (ยังแก้ไขข้อความเองด้านบนได้ตลอด ไม่จำกัด)</div>
-            </sc-if>
-          </sc-if>
-          <sc-if value="{{ notGenerated }}">
-            <div onClick="{{ onGeneratePost }}" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:12px 24px; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer;">🤖 เจนข้อความโพสต์ด้วย AI</div>
-          </sc-if>
-        </div>
-      </sc-if>
-
-      <sc-if value="{{ showShare }}">
-        <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:100;" onClick="{{ onCloseShare }}">
-          <div style="background:white; border-radius:10px; padding:24px; width:min(360px,90vw);" onClick="{{ stopProp }}">
-            <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:6px;">แชร์ประกาศ {{ shareId }}</div>
-            <div style="font-size:12px; color:oklch(50% 0.02 60); word-break:break-all; margin-bottom:16px;">{{ shareUrl }}</div>
-            <div style="display:flex; flex-direction:column; gap:10px;">
-              <a href="{{ shareFbUrl }}" target="_blank" style="display:block; text-align:center; background:oklch(35% 0.1 250); color:white; padding:11px; border-radius:6px; font-size:13px; text-decoration:none;">แชร์ไป Facebook</a>
-              <a href="{{ shareLineUrl }}" target="_blank" style="display:block; text-align:center; background:oklch(55% 0.15 145); color:white; padding:11px; border-radius:6px; font-size:13px; text-decoration:none;">แชร์ไป LINE</a>
-              <div onClick="{{ onCopyShareLink }}" style="text-align:center; background:oklch(93% 0.01 70); color:oklch(30% 0.02 60); padding:11px; border-radius:6px; font-size:13px; cursor:pointer;">📋 {{ shareCopyLabel }}</div>
-            </div>
-            <div onClick="{{ onCloseShare }}" style="text-align:center; margin-top:16px; font-size:12px; color:oklch(50% 0.02 60); cursor:pointer;">ปิด</div>
-          </div>
-        </div>
-      </sc-if>
-
-      <sc-if value="{{ showDeleteConfirm }}">
-        <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:100;" onClick="{{ onCancelDelete }}">
-          <div style="background:white; border-radius:10px; padding:24px; width:min(380px,90vw);" onClick="{{ stopProp }}">
-            <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:6px;">ลบทรัพย์ {{ deleteTargetId }} ทั้งใบ?</div>
-            <div style="font-size:13px; color:oklch(45% 0.02 60); margin-bottom:18px; line-height:1.6;">การลบนี้ถาวร ไม่สามารถกู้คืนได้ — รูปภาพและข้อมูลทั้งหมดของทรัพย์นี้จะถูกลบออกจากระบบทันที</div>
-            <div style="display:flex; gap:10px;">
-              <div onClick="{{ onCancelDelete }}" style="flex:1; text-align:center; background:oklch(93% 0.01 70); color:oklch(30% 0.02 60); padding:11px; border-radius:6px; font-size:13px; cursor:pointer;">ยกเลิก</div>
-              <div onClick="{{ onConfirmDelete }}" style="flex:1; text-align:center; background:oklch(50% 0.18 30); color:white; padding:11px; border-radius:6px; font-size:13px; cursor:pointer;">{{ deleteConfirmLabel }}</div>
-            </div>
-          </div>
-        </div>
-      </sc-if>
-
-      <sc-if value="{{ showBuyerModal }}">
-        <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:100;" onClick="{{ onCloseBuyer }}">
-          <div style="background:white; border-radius:10px; padding:24px; width:min(400px,90vw);" onClick="{{ stopProp }}">
-            <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:6px;">👤 ลงทะเบียนผู้ซื้อ {{ buyerTargetId }}</div>
-            <div style="font-size:12.5px; color:oklch(50% 0.02 60); margin-bottom:16px; line-height:1.6;">ลงทะเบียนก่อนพาผู้ซื้อไปดูบ้านเสมอ — เก็บเป็นหลักฐานป้องกันข้อพิพาทกับ Agent อื่น (คุ้มครอง 60 วัน)</div>
-            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:14px;">
-              <input value="{{ buyer_name }}" onChange="{{ onBuyerName }}" placeholder="ชื่อผู้ซื้อ" style="border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit;" />
-              <input value="{{ buyer_phone }}" onChange="{{ onBuyerPhone }}" placeholder="เบอร์โทร" style="border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit;" />
-              <input value="{{ buyer_email }}" onChange="{{ onBuyerEmail }}" placeholder="อีเมล (ไม่บังคับ)" style="border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit;" />
-            </div>
-            <sc-if value="{{ buyerMsg }}"><div style="{{ buyerMsgStyle }}">{{ buyerMsg }}</div></sc-if>
-            <div style="display:flex; gap:10px; margin-top:14px;">
-              <div onClick="{{ onCloseBuyer }}" style="flex:1; text-align:center; background:oklch(93% 0.01 70); color:oklch(30% 0.02 60); padding:11px; border-radius:6px; font-size:13px; cursor:pointer;">ปิด</div>
-              <div onClick="{{ onSubmitBuyer }}" style="flex:1; text-align:center; background:oklch(35% 0.1 250); color:white; padding:11px; border-radius:6px; font-size:13px; cursor:pointer;">{{ buyerSubmitLabel }}</div>
-            </div>
-          </div>
-        </div>
-      </sc-if>
-    </sc-if>
+    </div>
   </div>
 </div>
 
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = {
-    loaded: false, signedIn: false, lister: null, properties: [], view: "list",
-    editingId: null, f_type: "villa", f_area: "hua-hin", f_zone: "", f_status: "sale",
-    f_price: "", f_bedrooms: "", f_bathrooms: "", f_livingArea: "", f_landSize: "",
-    f_description: "", f_features: [], saveError: "", saving: false,
-    existingPhotos: [], newPhotos: [],
-    savedId: "", savedPayload: null, ns_assistedSale: false, ns_commissionPct: "5",
-    nudgeSaving: false, nudgeSavedMsg: "", copyLabel: "คัดลอกข้อความ",
-    shareId: "", shareUrl: "", shareCopyLabel: "คัดลอกลิงก์", quotaMsg: "", listLayout: "list",
-    showDeleteConfirm: false, deleteTargetId: "", deleting: false,
-    showBuyerModal: false, buyerTargetId: "", buyer_name: "", buyer_phone: "", buyer_email: "", buyerMsg: "", buyerIsError: false, buyerSaving: false,
-    showProfileSettings: false, ps_displayName: "", ps_profilePhotoUrl: "", ps_coverPhotoUrl: "",
-    ps_aiPersonaText: "", ps_themeColor: "", ps_bioText: "", ps_saving: false, ps_saveMsg: "",
-    ps_fb: "", ps_tiktok: "", ps_youtube: "", ps_instagram: "",
-    trialStarting: false, trialError: "",
-    openMenuId: "", // Sprint 01 Phase 5: per-card overflow menu (AI post/Share/Delete)
-  };
-
-  THEME_COLORS = ["#7A2E22", "#2F6B3A", "#1F4E8C", "#B8860B"];
+  state = { properties: [], listersById: {}, suspects: [], filter: "pending", loaded: false };
 
   async componentDidMount() {
     const fb = await import("./firebase-client.js");
     this._fb = fb;
-    const mod = await import("./data.js");
-    this._mod = mod;
-    // BUG FIX (18/07/2569): this used to check fb.isAdminAuthed(), which
-    // only returns true for a verified Admin (adminUsers/{uid} doc match) —
-    // a real, correctly-signed-in Lister/trial user always failed that
-    // check and got bounced back to Login even though Firebase Auth signed
-    // them in successfully. isAdminAuthed()/onAdminAuthReady() were
-    // repurposed for the Admin-only-page bypass fix; this page is a
-    // Lister page, not an admin-only one, so it must only check "is ANY
-    // Firebase user signed in" via the resolved user from onAuthReady().
-    const authedUser = await fb.onAdminAuthReady().catch(() => null);
-    const signedIn = !!authedUser;
-    if (!signedIn) { this.setState({ loaded: true, signedIn: false }); return; }
+    await fb.onAdminAuthReady();
+    if (!fb.requireAdminAuth()) return;
     try {
-      const lister = await fb.fetchMyListerDoc();
-      if (!lister) { this.setState({ loaded: true, signedIn: false }); return; }
-      let properties = await this.loadPropertiesWithCovers(lister.id);
-      // Client-side expiry sweep (no server cron in this project — same
-      // pattern as the admin's archival sweep): flips any of MY listings
-      // whose 30-day clock ran out to "expired", and purges photos on
-      // listings expired 90+ days. Only fires while I have this page open.
-      try {
-        const { expiredCount } = await fb.runExpirySweep(properties);
-        if (expiredCount > 0) properties = await this.loadPropertiesWithCovers(lister.id);
-      } catch (e) { console.warn("expiry sweep failed:", e); }
-      this.setState({
-        loaded: true, signedIn: true, lister, properties,
-        ps_displayName: lister.displayName || lister.name || "",
-        ps_profilePhotoUrl: lister.profilePhotoUrl || "", ps_coverPhotoUrl: lister.coverPhotoUrl || "",
-        ps_aiPersonaText: lister.aiPersonaText || "", ps_themeColor: lister.themeColor || "",
-        ps_bioText: (lister.bioText && typeof lister.bioText === "object") ? (lister.bioText.th || lister.bioText.en || "") : (lister.bioText || ""),
-        ps_fb: (lister.socialLinks && lister.socialLinks.facebook) || "",
-        ps_tiktok: (lister.socialLinks && lister.socialLinks.tiktok) || "",
-        ps_youtube: (lister.socialLinks && lister.socialLinks.youtube) || "",
-        ps_instagram: (lister.socialLinks && lister.socialLinks.instagram) || "",
-      });
-      if (lister.vipTier && !lister.agentCode) {
-        const agentCode = await fb.ensureAgentCode(lister.id, lister.agentCode).catch(() => "");
-        if (agentCode) this.setState((s) => ({ lister: { ...s.lister, agentCode } }));
-      }
+      const [properties, listers, suspects] = await Promise.all([
+        fb.fetchCollection("properties"),
+        fb.fetchCollection("listers"),
+        fb.findDuplicateTrialSuspects(),
+      ]);
+      const listersById = {};
+      listers.forEach((l) => { listersById[l.id] = l; });
+      this.setState({ properties: properties.filter((p) => p.listerId), listersById, suspects, loaded: true });
     } catch (e) {
-      console.warn("Failed to load dashboard:", e);
-      this.setState({ loaded: true, signedIn: true, lister: null, properties: [] });
-    }
-    this._onPopState = () => this.setState({ view: "list", quotaMsg: "", openMenuId: "" });
-    window.addEventListener("popstate", this._onPopState);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener("popstate", this._onPopState);
-  }
-
-  // Push a history entry whenever we leave the list — so the browser/phone
-  // back gesture returns to the list instead of leaving the whole page.
-  pushViewHistory() {
-    try { window.history.pushState({ dcView: true }, "", window.location.href); } catch (e) {}
-  }
-
-  goBackToList() {
-    if (window.history.state && window.history.state.dcView) window.history.back();
-    else this.setState({ view: "list", quotaMsg: "" });
-  }
-
-  // CAT-012 fix (Sprint 01 Code Freeze) — Build: SPRINT01-CAT012-20260718
-  tierLimit(tier) {
-    return { trial: 5, basic: 5, pro: 5, agency: 12, level3: 25, level4: 25 }[tier] || 5;
-  }
-
-  // Trial gets full personal-website customization (cover/theme, see
-  // renderVals) but photo count + AI-gen count are capped like the
-  // lightest tier — per the finalized trial spec (impress with the
-  // visibility boost + full site customization, not raw quota).
-  photoLimit(tier) {
-    return { trial: 8, basic: 10, pro: 15, agency: 15, level3: 20 }[tier] || 10;
-  }
-
-  aiGenLimit(tier) {
-    return { trial: 1, basic: 1, pro: 5, agency: 5, level3: 10 }[tier] || 1;
-  }
-
-  async loadPropertiesWithCovers(listerId) {
-    const properties = await this._fb.fetchWhere("properties", "listerId", listerId);
-    return Promise.all(properties.map(async (p) => {
-      try {
-        const photos = await this._fb.fetchPhotosFor(p.id);
-        const cover = photos.find((ph) => ph.id === `${p.id}-0`);
-        return { ...p, coverUrl: cover ? cover.dataUrl : null };
-      } catch (e) { return { ...p, coverUrl: null }; }
-    }));
-  }
-
-  async refreshProperties() {
-    const properties = await this.loadPropertiesWithCovers(this.state.lister.id);
-    this.setState({ properties, openMenuId: "" });
-  }
-
-  onLogout() { this._fb.logoutAdmin(); window.location.href = "Home.dc.html"; }
-
-  async startTrialNow() {
-    if (this.state.trialStarting) return;
-    this.setState({ trialStarting: true, trialError: "" });
-    try {
-      const trialEndsAt = await this._fb.startTrial(this.state.lister.id);
-      this.setState((s) => ({ trialStarting: false, lister: { ...s.lister, tier: "trial", trialUsed: true, trialStartedAt: Date.now(), trialEndsAt } }));
-    } catch (e) {
-      this.setState({ trialStarting: false, trialError: e.message || "เริ่มทดลองใช้ไม่สำเร็จ" });
+      console.warn("fetch failed:", e);
+      this.setState({ loaded: true });
     }
   }
 
-  // Replaces the old instant isDraft toggle — a brand-new/edited listing
-  // goes into the admin approval queue instead of publishing immediately.
-  async submitListing(p) {
-    const merged = { ...p }; delete merged.coverUrl;
-    try {
-      await this._fb.submitForApproval(p.id, merged);
-      await this.refreshProperties();
-    } catch (e) { console.warn("submitListing failed:", e); }
+  async approve(id) {
+    this.setState((s) => ({ properties: s.properties.map((p) => (p.id === id ? { ...p, listingStatus: "live" } : p)) }));
+    try { await this._fb.approveListing(id); } catch (e) { console.warn("approve failed:", e); }
   }
 
-  async renewListing(p) {
-    // Guarded client-side (real enforcement is the Firestore rule) — trial/
-    // no-package listers get sent to upgrade instead of a silent failure.
-    if (!this._fb.hasActivePaidPackage(this.state.lister)) {
-      window.location.href = "Lister Billing.dc.html";
-      return;
-    }
-    try {
-      await this._fb.renewListing(p.id, this.state.lister);
-      await this.refreshProperties();
-    } catch (e) {
-      console.warn("renewListing failed:", e);
-      window.alert(e.message || "ต่ออายุไม่สำเร็จ");
-    }
-  }
-
-  startNew() {
-    const limit = this.tierLimit((this.state.lister || {}).tier);
-    if ((this.state.properties || []).length >= limit) {
-      this.setState({ quotaMsg: `คุณใช้โควตาแพ็กเกจปัจจุบันครบแล้ว (${this.state.properties.length}/${limit} รายการ) — อัปเกรดแพ็กเกจเพื่อเพิ่มทรัพย์ได้อีก` });
-      return;
-    }
-    this.pushViewHistory();
-    this.setState({
-      view: "edit", editingId: null, f_type: "villa", f_area: "hua-hin", f_zone: "",
-      f_status: "sale", f_price: "", f_bedrooms: "", f_bathrooms: "", f_livingArea: "",
-      f_landSize: "", f_description: "", f_features: [], saveError: "", existingPhotos: [], newPhotos: [], quotaMsg: "",
-      openMenuId: "",
-    });
-  }
-
-  toggleFeature(fid) {
-    this.setState((s) => ({
-      f_features: s.f_features.includes(fid) ? s.f_features.filter((x) => x !== fid) : [...s.f_features, fid],
-    }));
-  }
-
-  async startEdit(p) {
-    this.pushViewHistory();
-    this.setState({
-      view: "edit", editingId: p.id, f_type: p.type || "villa", f_area: p.area || "hua-hin",
-      f_zone: p.zone || "", f_status: p.status === "rent" ? "rent" : "sale",
-      f_price: p.price != null ? String(p.price) : "", f_bedrooms: p.bedrooms != null ? String(p.bedrooms) : "",
-      f_bathrooms: p.bathrooms != null ? String(p.bathrooms) : "", f_livingArea: p.livingArea != null ? String(p.livingArea) : "",
-      f_landSize: p.landSize != null ? String(p.landSize) : "", f_description: (p.description && typeof p.description === "object") ? (p.description.th || p.description.en || "") : (p.description || ""),
-      f_features: p.features || [],
-      saveError: "", existingPhotos: [], newPhotos: [], quotaMsg: "", openMenuId: "",
-    });
-    try {
-      const photos = await this._fb.fetchPhotosFor(p.id);
-      photos.sort((a, b) => (a.id > b.id ? 1 : -1));
-      this.setState({ existingPhotos: photos.map((ph) => ({ id: ph.id, url: ph.dataUrl })) });
-    } catch (e) { console.warn("Failed to load photos:", e); }
-  }
-
-  genCode(area) {
-    const prefix = { "hua-hin": "HH", "pranburi": "PB", "cha-am": "CA" }[area] || "LST";
-    return prefix + "-" + String(Date.now()).slice(-5);
-  }
-
-  totalPhotoCount() { return this.state.existingPhotos.length + this.state.newPhotos.length; }
-
-  myPhotoLimit() { return this.photoLimit((this.state.lister || {}).tier); }
-
-  async onPhotosFile(e) {
-    const files = [...(e.target.files || [])];
-    if (!files.length) return;
-    const room = this.myPhotoLimit() - this.totalPhotoCount();
-    const use = files.slice(0, Math.max(0, room));
-    for (const file of use) {
-      const dataUrl = await this._fb.fileToDataUrl(file, 1000);
-      this.setState((s) => ({ newPhotos: [...s.newPhotos, { url: dataUrl }] }));
-    }
-  }
-
-  removeNewPhoto(idx) {
-    this.setState((s) => ({ newPhotos: s.newPhotos.filter((_, i) => i !== idx) }));
-  }
-
-  removeExistingPhoto(ph) {
-    this.setState((s) => ({ existingPhotos: s.existingPhotos.filter((x) => x.id !== ph.id) }));
-  }
-
-  async saveProperty() {
-    if (this.state.saving) return;
-    if (!this.state.f_zone.trim() || !this.state.f_price) {
-      this.setState({ saveError: "กรุณากรอกชื่อทำเลและราคาให้ครบ" });
-      return;
-    }
-    this.setState({ saving: true, saveError: "" });
-    const id = this.state.editingId || this.genCode(this.state.f_area);
-    const allPhotoUrls = [...this.state.existingPhotos.map((p) => p.url), ...this.state.newPhotos.map((p) => p.url)].slice(0, this.myPhotoLimit());
-    // Auto-translate the description into all 8 site languages on every
-    // save — no separate "translate" button, same as the main site's AI
-    // Quick Add (one AI call now, never a live per-view translation later).
-    let descriptionValue = this.state.f_description;
-    if (this.state.f_description && this.state.f_description.trim()) {
-      try {
-        const translated = await this._fb.translateDescriptionAll(this.state.f_description.trim());
-        if (translated) descriptionValue = translated;
-      } catch (e) { console.warn("Auto-translate failed, saving original text only:", e); }
-    }
-    const isEditingExisting = !!this.state.editingId;
-    // Fresh read right before merging — NOT this.state.properties (a cache
-    // from page-load/last-refresh). If an admin approved/rejected/expired
-    // this listing after this tab loaded but before this save, using the
-    // cache here would silently overwrite that status change back to
-    // whatever it was on load (verified reproducible during audit).
-    let existing = {};
-    if (isEditingExisting) {
-      try { existing = (await this._fb.fetchDocById("properties", id)) || {}; }
-      catch (e) { existing = this.state.properties.find((p) => p.id === id) || {}; }
-    }
-    const previousIsDraft = isEditingExisting ? existing.isDraft : true;
-    // setDoc() below is a plain .set() (full overwrite, no merge) — must
-    // carry forward every listing-lifecycle field (status/dates/view count)
-    // explicitly on every edit-save, or an unrelated field edit would wipe
-    // out an already-live/pending/expired listing's status silently.
-    const payload = {
-      listerId: this.state.lister.id,
-      listingStatus: existing.listingStatus || null, submittedAt: existing.submittedAt || null,
-      publishedAt: existing.publishedAt || null, expiresAt: existing.expiresAt || null,
-      expiredAt: existing.expiredAt || null, approvedAt: existing.approvedAt || null,
-      rejectedAt: existing.rejectedAt || null, rejectReason: existing.rejectReason || null,
-      photosDeletedAt: existing.photosDeletedAt || null, viewCount: existing.viewCount || 0,
-      type: this.state.f_type, area: this.state.f_area, zone: this.state.f_zone,
-      status: this.state.f_status, price: Number(this.state.f_price) || 0,
-      bedrooms: this.state.f_bedrooms ? Number(this.state.f_bedrooms) : null,
-      bathrooms: this.state.f_bathrooms ? Number(this.state.f_bathrooms) : null,
-      livingArea: this.state.f_livingArea ? Number(this.state.f_livingArea) : null,
-      landSize: this.state.f_landSize ? Number(this.state.f_landSize) : null,
-      description: descriptionValue, features: this.state.f_features,
-      // Only brand-new listings start as a draft — editing an already-
-      // published property must NOT silently un-publish it (this was a real
-      // bug: isDraft was hardcoded true on every save, pulling live listings
-      // back off the public site the moment an agent edited them).
-      currency: "THB", updatedAt: Date.now(), isDraft: previousIsDraft === undefined ? true : previousIsDraft,
-      photos: allPhotoUrls.map(() => ({ label: "" })),
-    };
-    try {
-      await this._fb.setDoc("properties", id, payload);
-      // Renumber all photos contiguously (0..n-1) every save. savePhoto()
-      // (firebase-client.js) only re-uploads bytes for brand-new "data:"
-      // URLs; for an existing photo whose URL is already an https Storage
-      // link it just re-points the Firestore doc at that same URL with no
-      // fetch/upload — re-fetching an already-hosted Storage URL from JS
-      // hits a CORS error (a plain <img> tag can show it with no CORS
-      // involved, but fetch() of the same URL is a real cross-origin
-      // request the default Storage bucket rejects).
-      await Promise.all(allPhotoUrls.map((url, i) => this._fb.savePhoto(id, i, url)));
-      for (let i = allPhotoUrls.length; i < 20; i++) {
-        try { await this._fb.deleteDocById("propertyPhotos", `${id}-${i}`); } catch (e) {}
-      }
-      await this.refreshProperties();
-      this.setState({ saving: false });
-      // Sprint 01 Phase 6 (Product Owner approved): a brand-new listing now
-      // flows straight into the AI-post screen instead of back to the list
-      // — same openPostView()/generatePostText() functions as before, only
-      // the navigation target changed. Editing an EXISTING listing still
-      // returns to the list as before (no surprise redirect on a routine edit).
-      if (!isEditingExisting) {
-        const saved = this.state.properties.find((p) => p.id === id);
-        if (saved) { this.openPostView(saved); return; }
-      }
-      this.goBackToList();
-    } catch (e) {
-      console.warn("Failed to save property:", e);
-      this.setState({ saving: false, saveError: "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง — ถ้ายังไม่ได้อีก แจ้งแอดมินให้ตรวจสอบสิทธิ์การเขียนข้อมูล (Firestore rules)" });
-    }
-  }
-
-  openPostView(p) {
-    this.pushViewHistory();
-    this.setState({
-      view: "saved", savedId: p.id, savedPayload: p,
-      ns_assistedSale: !!p.assistedSale, ns_commissionPct: p.commissionPct || "5", nudgeSavedMsg: "",
-      ns_genCount: p.aiGenCount || 0, ns_postText: p.postText || "", postSaveMsg: "",
-    });
-  }
-
-  async generatePostText() {
-    const limit = this.aiGenLimit((this.state.lister || {}).tier);
-    if (this.state.ns_genCount >= limit || !this.state.savedPayload) return;
-    const nextCount = this.state.ns_genCount + 1;
-    const text = this.buildPostDraft();
-    const merged = { ...this.state.savedPayload, aiGenCount: nextCount, postText: text };
-    delete merged.coverUrl;
-    this.setState({ ns_genCount: nextCount, savedPayload: merged, ns_postText: text, postSaveMsg: "" });
-    try { await this._fb.setDoc("properties", this.state.savedId, merged); } catch (e) { console.warn("Failed to save gen count:", e); }
-  }
-
-  async savePostText() {
-    if (!this.state.savedPayload) return;
-    const merged = { ...this.state.savedPayload, postText: this.state.ns_postText };
-    delete merged.coverUrl;
-    try {
-      await this._fb.setDoc("properties", this.state.savedId, merged);
-      this.setState({ savedPayload: merged, postSaveMsg: "บันทึกแล้ว ✓" });
-      setTimeout(() => this.setState({ postSaveMsg: "" }), 2000);
-    } catch (e) {
-      this.setState({ postSaveMsg: "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง" });
-    }
-  }
-
-  async confirmNudge() {
-    if (this.state.nudgeSaving || !this.state.savedPayload) return;
-    this.setState({ nudgeSaving: true });
-    const merged = { ...this.state.savedPayload, assistedSale: this.state.ns_assistedSale, commissionPct: this.state.ns_assistedSale ? this.state.ns_commissionPct : null };
-    delete merged.coverUrl;
-    try {
-      await this._fb.setDoc("properties", this.state.savedId, merged);
-      await this.refreshProperties();
-      this.setState({ nudgeSaving: false, savedPayload: merged, nudgeSavedMsg: "บันทึกแล้ว — ขอบคุณครับ/ค่ะ ทีมงานจะติดต่อกลับเร็วๆ นี้" });
-    } catch (e) {
-      this.setState({ nudgeSaving: false, nudgeSavedMsg: "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง" });
-    }
-  }
-
-  buildPostDraft() {
-    const p = this.state.savedPayload;
-    if (!p) return "";
-    const areaLabels = { "hua-hin": "หัวหิน", "pranburi": "ปราณบุรี", "cha-am": "ชะอำ" };
-    const typeLabels = { villa: "พูลวิลล่า", house: "บ้านเดี่ยว", condo: "คอนโด", land: "ที่ดิน", commercial: "อาคารพาณิชย์" };
-    const statusLabel = p.status === "rent" ? "ประกาศเช่า" : "ประกาศขาย";
-    const lines = [];
-    lines.push(`🏡 ${typeLabels[p.type] || p.type} ${statusLabel} — ${p.zone}, ${areaLabels[p.area] || p.area}`);
-    lines.push(`💰 ราคา ${(Number(p.price) || 0).toLocaleString()} บาท${p.status === "rent" ? "/เดือน" : ""}`);
-    if (p.bedrooms || p.bathrooms) lines.push(`🛏️ ${p.bedrooms || 0} ห้องนอน · 🚿 ${p.bathrooms || 0} ห้องน้ำ`);
-    if (p.livingArea) lines.push(`📐 พื้นที่ใช้สอย ${p.livingArea} ตร.ม.`);
-    if (p.landSize) lines.push(`🌳 ที่ดิน ${p.landSize} ตร.ว.`);
-    if (p.description) { lines.push(""); lines.push(p.description); }
-    lines.push("");
-    lines.push(`รหัสทรัพย์: ${this.state.savedId}`);
-    lines.push(`ดูรายละเอียดเพิ่มเติม 👉 ${window.location.origin}/Property Details.dc.html?id=${this.state.savedId}`);
-    lines.push("");
-    // Contact block is the LISTER's own info (not the site's admin contact) —
-    // each self-serve listing should point buyers to whoever actually
-    // listed it.
-    const lister = this.state.lister || {};
-    lines.push("‼️ ติดต่อผู้ลงประกาศ");
-    if (lister.name) lines.push(`👤 ${lister.name}`);
-    if (lister.phone) lines.push(`📱 โทร/LINE: ${lister.phone}`);
-    if (lister.email) lines.push(`✉️ ${lister.email}`);
-    lines.push("");
-    lines.push("#HuaHinProperty #HuaHin #PranburiProperty #ChaAmProperty #RealEstate #huahinproperties");
-    return lines.join("\n");
-  }
-
-  copyPost() {
-    const text = this.state.ns_postText || this.buildPostDraft();
-    if (navigator.clipboard) navigator.clipboard.writeText(text).catch(() => {});
-    this.setState({ copyLabel: "คัดลอกแล้ว ✓" });
-    setTimeout(() => this.setState({ copyLabel: "คัดลอกข้อความ" }), 2000);
-  }
-
-  openBuyerModal(p) {
-    this.setState({
-      showBuyerModal: true, buyerTargetId: p.id, buyer_name: "", buyer_phone: "", buyer_email: "",
-      buyerMsg: "", buyerIsError: false, buyerSaving: false,
-    });
-  }
-
-  closeBuyerModal() {
-    this.setState({ showBuyerModal: false, buyerTargetId: "" });
-  }
-
-  async submitBuyerRegistration() {
-    const { buyerTargetId, buyer_name, buyer_phone, buyer_email, lister, buyerSaving } = this.state;
-    if (buyerSaving || !buyer_name.trim() || !buyer_phone.trim()) {
-      this.setState({ buyerMsg: "กรุณากรอกชื่อและเบอร์โทรผู้ซื้อ", buyerIsError: true });
-      return;
-    }
-    this.setState({ buyerSaving: true, buyerMsg: "" });
-    try {
-      const res = await this._fb.registerBuyer(buyerTargetId, lister.id, lister.agentCode, {
-        name: buyer_name.trim(), phone: buyer_phone.trim(), email: buyer_email.trim(),
-      });
-      if (res.ok) {
-        this.setState({
-          buyerMsg: `✓ ลงทะเบียนแล้ว — คุ้มครองสิทธิ์จนถึง ${new Date(res.registration.protectionUntil).toLocaleDateString("th-TH")}`,
-          buyerIsError: false, buyerSaving: false,
-        });
-      } else {
-        const d = new Date(res.conflict.registeredAt).toLocaleDateString("th-TH");
-        this.setState({
-          buyerMsg: `⚠️ มีคนลงทะเบียนผู้ซื้อรายนี้ไว้ก่อนแล้วเมื่อ ${d} (รหัส Agent: ${res.conflict.agentCode || "-"}) — ติดต่อแอดมินหากคิดว่าเป็นความผิดพลาด`,
-          buyerIsError: true, buyerSaving: false,
-        });
-      }
-    } catch (e) {
-      console.warn("registerBuyer failed:", e);
-      this.setState({ buyerMsg: "เกิดข้อผิดพลาด กรุณาลองใหม่", buyerIsError: true, buyerSaving: false });
-    }
-  }
-
-  requestDelete(p) {
-    this.setState({ showDeleteConfirm: true, deleteTargetId: p.id, deleting: false });
-  }
-
-  cancelDelete() {
-    this.setState({ showDeleteConfirm: false, deleteTargetId: "" });
-  }
-
-  async confirmDelete() {
-    const id = this.state.deleteTargetId;
-    if (!id || this.state.deleting) return;
-    this.setState({ deleting: true });
-    try {
-      await this._fb.deletePropertyFully(id);
-      this.setState((s) => ({
-        properties: s.properties.filter((p) => p.id !== id),
-        showDeleteConfirm: false, deleteTargetId: "", deleting: false,
-      }));
-    } catch (e) {
-      console.warn("deletePropertyFully failed:", e);
-      this.setState({ deleting: false });
-    }
-  }
-
-  toggleCardMenu(id) {
-    this.setState((s) => ({ openMenuId: s.openMenuId === id ? "" : id }));
-  }
-  closeCardMenu() { this.setState({ openMenuId: "" }); }
-
-  openShare(p) {
-    const url = `${window.location.origin}/Property Details.dc.html?id=${p.id}`;
-    this.setState({ view: this.state.view, shareId: p.id, shareUrl: url, shareCopyLabel: "คัดลอกลิงก์", showShareFlag: true });
-  }
-
-  async onPsProfilePhoto(e) {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    const dataUrl = await this._fb.fileToDataUrl(file, 500);
-    this.setState({ ps_profilePhotoUrl: dataUrl, ps_saveMsg: "กำลังอัปโหลด…" }); // instant preview
-    const slotId = "lister-avatar-" + this.state.lister.id;
-    try {
-      const url = await this._fb.saveProfilePhoto(slotId, dataUrl);
-      this.setState({ ps_profilePhotoUrl: url, ps_saveMsg: "" });
-    } catch (e2) {
-      console.warn("Failed to save profile photo:", e2);
-      this.setState({ ps_saveMsg: "อัปโหลดรูปไม่สำเร็จ ลองใหม่อีกครั้ง" });
-    }
-  }
-
-  async onPsCoverPhoto(e) {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    const dataUrl = await this._fb.fileToDataUrl(file, 1400);
-    this.setState({ ps_coverPhotoUrl: dataUrl, ps_saveMsg: "กำลังอัปโหลด…" });
-    const slotId = "lister-cover-" + this.state.lister.id;
-    try {
-      const url = await this._fb.saveProfilePhoto(slotId, dataUrl);
-      this.setState({ ps_coverPhotoUrl: url, ps_saveMsg: "" });
-    } catch (e2) {
-      console.warn("Failed to save cover photo:", e2);
-      this.setState({ ps_saveMsg: "อัปโหลดรูปไม่สำเร็จ ลองใหม่อีกครั้ง" });
-    }
-  }
-
-  async saveProfileSettings() {
-    if (this.state.ps_saving) return;
-    this.setState({ ps_saving: true, ps_saveMsg: "" });
-    // Auto-translate the bio into all 8 site languages on every save — same
-    // one-shot AI call approach as property descriptions, no separate
-    // "translate" button.
-    let bioValue = this.state.ps_bioText;
-    if (this.state.ps_bioText && this.state.ps_bioText.trim()) {
-      try {
-        const translated = await this._fb.translateDescriptionAll(this.state.ps_bioText.trim());
-        if (translated) bioValue = translated;
-      } catch (e) { console.warn("Auto-translate bio failed, saving original text only:", e); }
-    }
-    const merged = {
-      ...this.state.lister,
-      displayName: this.state.ps_displayName, profilePhotoUrl: this.state.ps_profilePhotoUrl,
-      coverPhotoUrl: this.state.ps_coverPhotoUrl, aiPersonaText: this.state.ps_aiPersonaText,
-      themeColor: this.state.ps_themeColor, bioText: bioValue,
-      socialLinks: { facebook: this.state.ps_fb, tiktok: this.state.ps_tiktok, youtube: this.state.ps_youtube, instagram: this.state.ps_instagram },
-    };
-    try {
-      await this._fb.setDoc("listers", this.state.lister.id, merged);
-      this.setState({ ps_saving: false, ps_saveMsg: "บันทึกแล้ว ✓", lister: merged });
-      setTimeout(() => this.setState({ ps_saveMsg: "" }), 2000);
-    } catch (e) {
-      this.setState({ ps_saving: false, ps_saveMsg: "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง" });
-    }
-  }
-
-  openMySite() { window.open(`Agent Profile.dc.html?id=${this.state.lister.id}`, "_blank"); }
-
-  shareMySite() {
-    const url = `${window.location.origin}/Agent Profile.dc.html?id=${this.state.lister.id}`;
-    this.setState({ shareId: "เว็บไซต์ของฉัน", shareUrl: url, shareCopyLabel: "คัดลอกลิงก์", showShareFlag: true });
-  }
-
-  copyShareLink() {
-    if (navigator.clipboard) navigator.clipboard.writeText(this.state.shareUrl).catch(() => {});
-    this.setState({ shareCopyLabel: "คัดลอกแล้ว ✓" });
-    setTimeout(() => this.setState({ shareCopyLabel: "คัดลอกลิงก์" }), 2000);
+  async reject(id) {
+    const reason = window.prompt("เหตุผลที่ปฏิเสธ (จะแสดงให้ผู้ลงประกาศเห็น):", "") || "";
+    this.setState((s) => ({ properties: s.properties.map((p) => (p.id === id ? { ...p, listingStatus: "rejected", rejectReason: reason } : p)) }));
+    try { await this._fb.rejectListing(id, reason); } catch (e) { console.warn("reject failed:", e); }
   }
 
   renderVals() {
-    const mod = this._mod;
-    const tierLabels = { trial: "🎁 ทดลองใช้ฟรี", basic: "① ฟรี", pro: "② ระดับ 1", agency: "② ระดับ 1", level3: "③ ระดับ 2", level4: "④ ระดับ 3", silver: "🥈 VIP เงิน", gold: "🥇 VIP ทอง", diamond: "💎 VIP เพชร" };
-    const lister = this.state.lister || {};
-    // Trial unlocks FULL site customization (cover photo + theme color) —
-    // same as the top paid tier — but NOT social links (locked/greyed,
-    // shown to demonstrate the feature exists, per the trial design.
-    const isTrial = lister.tier === "trial";
-    const tier2Plus = lister.tier === "pro" || lister.tier === "agency" || lister.tier === "level3" || lister.tier === "level4" || isTrial;
-    const tier3 = lister.tier === "level4" || isTrial; // cover+theme unlock
-    // Social links quota scales with paid tier — Package 1: 1 link,
-    // Package 2: 2 links, Package 3: 4 links (all). Trial: 0 (greyed,
-    // shown to demonstrate the feature, unlock on upgrade).
-    const socialLimit = { pro: 1, agency: 1, level3: 2, level4: 4 }[lister.tier] || 0;
-    const canSocial = socialLimit > 0;
-    const areaLabels = { "hua-hin": "หัวหิน", "pranburi": "ปราณบุรี", "cha-am": "ชะอำ" };
-    const typeLabels = { villa: "พูลวิลล่า", house: "บ้านเดี่ยว", condo: "คอนโด", land: "ที่ดิน", commercial: "อาคารพาณิชย์" };
+    const all = this.state.properties || [];
+    const countAll = all.length;
+    const countPending = all.filter((p) => p.listingStatus === "pending").length;
+    const countLive = all.filter((p) => p.listingStatus === "live").length;
+    const countExpired = all.filter((p) => p.listingStatus === "expired").length;
+    const countRejected = all.filter((p) => p.listingStatus === "rejected").length;
+
+    const tabBase = "padding:8px 16px; border-radius:100px; font-size:13px; cursor:pointer;";
+    const tabActive = tabBase + "background:oklch(22% 0.02 60); color:white;";
+    const tabInactive = tabBase + "background:white; color:oklch(35% 0.02 60); border:1px solid oklch(88% 0.01 70);";
+
+    const filtered = this.state.filter === "all" ? all : all.filter((p) => p.listingStatus === this.state.filter);
+
     const statusMap = {
-      sale: { label: "ประกาศขาย", bg: "oklch(93% 0.03 145)", color: "oklch(35% 0.1 145)" },
-      rent: { label: "ประกาศเช่า", bg: "oklch(93% 0.03 250)", color: "oklch(40% 0.1 250)" },
-      sold: { label: "ขายแล้ว", bg: "oklch(90% 0.01 70)", color: "oklch(45% 0.02 60)" },
-      reserved: { label: "จอง", bg: "oklch(93% 0.05 80)", color: "oklch(45% 0.1 80)" },
-      rented: { label: "เช่าแล้ว", bg: "oklch(90% 0.01 70)", color: "oklch(45% 0.02 60)" },
+      pending: { label: "รออนุมัติ", bg: "oklch(95% 0.06 75)", color: "oklch(45% 0.13 75)" },
+      live: { label: "กำลังแสดง", bg: "oklch(93% 0.05 145)", color: "oklch(35% 0.12 145)" },
+      expired: { label: "หมดอายุ", bg: "oklch(93% 0.02 30)", color: "oklch(45% 0.1 30)" },
+      rejected: { label: "ปฏิเสธ", bg: "oklch(93% 0.03 30)", color: "oklch(45% 0.15 30)" },
     };
-    const now = Date.now();
-    // Lifecycle status shown on the card — independent from the sale/rent
-    // status badge above it (statusMap). See firebase-client.js "Listing
-    // lifecycle v2" for the state machine this reflects.
-    const lifecycleMap = {
-      draft: { label: "📝 ร่าง", bg: "oklch(90% 0.01 70)", color: "oklch(35% 0.02 60)" },
-      pending: { label: "⏳ รออนุมัติ", bg: "oklch(95% 0.06 75)", color: "oklch(45% 0.13 75)" },
-      live: { label: "✅ กำลังแสดง", bg: "oklch(93% 0.05 145)", color: "oklch(35% 0.12 145)" },
-      expired: { label: "⏰ หมดอายุ", bg: "oklch(93% 0.02 30)", color: "oklch(45% 0.1 30)" },
-      rejected: { label: "✕ ถูกปฏิเสธ", bg: "oklch(93% 0.03 30)", color: "oklch(45% 0.15 30)" },
-    };
-    const properties = (this.state.properties || []).map((p) => {
-      const st = statusMap[p.status] || statusMap.sale;
-      const bedBath = (p.bedrooms || p.bathrooms) ? `${p.bedrooms || 0} นอน / ${p.bathrooms || 0} น้ำ` : "-";
-      const ageDays = p.updatedAt ? (now - p.updatedAt) / 86400000 : 0;
-      const lifecycle = p.isDraft ? "draft" : (p.listingStatus || (p.listingStatus === undefined ? "live" : p.listingStatus));
-      const lc = lifecycleMap[lifecycle] || lifecycleMap.draft;
-      const daysLeft = p.expiresAt ? Math.max(0, Math.ceil((p.expiresAt - now) / 86400000)) : null;
-      let actionLabel = "", actionIcon = "📤", actionColor = "oklch(35% 0.1 250)", onAction = () => {};
-      if (lifecycle === "draft") { actionLabel = "ส่งขออนุมัติ"; actionIcon = "📤"; onAction = () => this.submitListing(p); }
-      else if (lifecycle === "pending") { actionLabel = "รออนุมัติ"; actionIcon = "⏳"; actionColor = "oklch(50% 0.02 60)"; onAction = () => {}; }
-      else if (lifecycle === "live") { actionLabel = "ดูประกาศ"; actionIcon = "✅"; actionColor = "oklch(45% 0.13 145)"; onAction = () => window.open(`Property Details.dc.html?id=${p.id}`, "_blank"); }
-      else if (lifecycle === "expired") {
-        const canRenewFree = this._fb && this._fb.hasActivePaidPackage(lister);
-        actionLabel = canRenewFree ? "ต่ออายุ" : "อัปเกรดเพื่อต่ออายุ";
-        actionIcon = canRenewFree ? "🔄" : "🔒";
-        actionColor = "oklch(45% 0.1 30)";
-        onAction = () => this.renewListing(p);
-      }
-      else if (lifecycle === "rejected") { actionLabel = "แก้ไข & ส่งใหม่"; actionIcon = "✏️"; actionColor = "oklch(45% 0.15 30)"; onAction = () => this.startEdit(p); }
-      return {
-        id: p.id, code: p.id, zone: p.zone || "-", areaLabel: areaLabels[p.area] || p.area || "-",
-        typeLabel: typeLabels[p.type] || p.type || "-", bedBath,
-        priceLabel: "฿" + (Number(p.price) || 0).toLocaleString() + (p.status === "rent" ? "/เดือน" : ""),
-        statusLabel: st.label, statusBg: st.bg, statusColor: st.color,
-        assistedSale: !!p.assistedSale,
-        needsNudge: !p.assistedSale && ageDays > 30 && (p.status === "sale" || p.status === "rent"),
-        coverUrl: p.coverUrl, noCover: !p.coverUrl,
-        coverStyle: { width: "100%", height: "140px", background: p.coverUrl ? `url('${p.coverUrl}') center/cover` : "oklch(93% 0.01 70)", position: "relative" },
-        coverStyleSmall: { width: "110px", minWidth: "110px", height: "88px", background: p.coverUrl ? `url('${p.coverUrl}') center/cover` : "oklch(93% 0.01 70)", position: "relative" },
-        isDraft: lifecycle === "draft",
-        lifecycleLabel: lc.label, lifecycleBg: lc.bg, lifecycleColor: lc.color,
-        expiryLabel: lifecycle === "live" && daysLeft !== null ? `เหลือ ${daysLeft} วัน` : "",
-        viewCountLabel: `👁️ ${p.viewCount || 0} ครั้ง`,
-        rejectReasonLabel: lifecycle === "rejected" && p.rejectReason ? `เหตุผล: ${p.rejectReason}` : "",
-        publishIcon: actionIcon, publishLabel: actionLabel, publishColor: actionColor,
-        onEdit: () => this.startEdit(p),
-        onPublish: onAction,
-        onPostText: () => this.openPostView(p),
-        onShare: () => (lister.tier === "trial") ? window.alert("ฟีเจอร์แชร์ประกาศใช้งานได้ตั้งแต่แพ็กเกจ 1 ขึ้นไป — อัปเกรดแพ็กเกจเพื่อใช้งาน") : this.openShare(p),
-        shareColor: (lister.tier === "trial") ? "oklch(75% 0.01 70)" : "oklch(35% 0.02 60)",
-        onDeleteClick: () => this.requestDelete(p),
-        isVip: !!lister.vipTier,
-        onOpenBuyer: () => this.openBuyerModal(p),
-        // Sprint 01 Phase 5: Edit + Publish/status stay always-visible
-        // (primary); AI post/Share/Delete move into a per-card "⋮" overflow
-        // menu — same click handlers as before, just regrouped visually.
-        menuOpen: this.state.openMenuId === p.id,
-        onToggleMenu: () => this.toggleCardMenu(p.id),
-        onCloseMenu: () => this.closeCardMenu(),
-      };
-    });
-    const trial = this._fb ? this._fb.trialStatus(lister) : null;
-    // Sprint 01 Phase 1 KPI strip — uses data already fetched with the
-    // property list (viewCount, listingStatus/isDraft), no new Firestore
-    // reads or schema. Leads KPI deferred (Future Backlog) pending a
-    // listerId-on-leads schema check per the approved Design Proposal.
-    // Product Review fix: guard against non-numeric/null viewCount so a
-    // corrupted or legacy record can't produce NaN in the KPI strip.
-    const totalViews = (this.state.properties || []).reduce((sum, p) => {
-      const v = Number(p.viewCount);
-      return sum + (Number.isFinite(v) ? v : 0);
-    }, 0);
-    const activeListingsCount = (this.state.properties || []).filter((p) => !p.isDraft && p.listingStatus === "live").length;
-    // Product Review — CTA State Hierarchy (Section A). Computed purely
-    // from data already loaded (propCount vs. existing tierLimit()) — no
-    // new Business Logic or quota rule, just which CTA is visually primary.
-    const propCountNow = (this.state.properties || []).length;
-    const tierLimitNow = this.tierLimit(lister.tier);
-    const quotaFull = propCountNow >= tierLimitNow;
-    const quotaNear = !quotaFull && propCountNow >= tierLimitNow - 1;
-    const ctaState = propCountNow === 0 ? 1 : (quotaFull ? 4 : (quotaNear ? 3 : 2));
+
+    const rows = filtered
+      .sort((a, b) => (b.submittedAt || b.updatedAt || 0) - (a.submittedAt || a.updatedAt || 0))
+      .map((p) => {
+        const st = statusMap[p.listingStatus] || statusMap.pending;
+        const lister = this.state.listersById[p.listerId] || {};
+        const dateVal = p.submittedAt || p.updatedAt;
+        return {
+          code: p.id, zone: p.zone || "-", priceLabel: "฿" + (Number(p.price) || 0).toLocaleString(),
+          listerEmail: lister.email || p.listerId,
+          dateLabel: dateVal ? new Date(dateVal).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" }) : "-",
+          statusLabel: st.label, statusBg: st.bg, statusColor: st.color,
+          coverStyle: { width: "64px", height: "48px", borderRadius: "6px", flexShrink: 0, background: "oklch(93% 0.01 70)" },
+          viewUrl: `Property Details.dc.html?id=${p.id}`,
+          showApprove: p.listingStatus === "pending",
+          showReject: p.listingStatus === "pending",
+          onApprove: () => this.approve(p.id),
+          onReject: () => this.reject(p.id),
+        };
+      });
 
     return {
-      loaded: this.state.loaded, signedIn: this.state.signedIn, notSignedIn: this.state.loaded && !this.state.signedIn,
-      listerName: lister.name ? " " + lister.name : "", listerEmail: lister.email || "",
-      tierLabel: tierLabels[lister.tier] || tierLabels[lister.vipTier] || (lister.tier ? lister.tier : "ยังไม่ได้เลือกแพ็กเกจ"),
-      agentCodeLabel: lister.agentCode ? `รหัส Agent: ${lister.agentCode}` : "",
-      showTrialOffer: !lister.tier && !lister.trialUsed,
-      trialStartLabel: this.state.trialStarting ? "กำลังเริ่ม…" : "เริ่มทดลองใช้ฟรี",
-      trialError: this.state.trialError,
-      onStartTrial: () => this.startTrialNow(),
-      // Sprint 01 Phase 1: KPI strip. Only shown once the user has at least
-      // one property (an all-zero strip on a brand-new account adds noise
-      // instead of clarity — Phase 2 empty-state takes over before this).
-      // Product Review: only render once data has actually loaded, so an
-      // in-flight fetch never flashes a false "0" before real numbers arrive.
-      showKpiStrip: this.state.loaded && (this.state.properties || []).length > 0,
-      kpiTotalViews: totalViews,
-      kpiActiveListings: activeListingsCount,
-      // Trial-days KPI only for an ACTUAL trial account with days remaining
-      // (never negative, never shown for a paid tier — trialStatus() from
-      // firebase-client.js already returns ended:true past expiry).
-      showKpiTrialDays: isTrial && !!trial && !trial.ended && trial.daysLeft > 0,
-      kpiTrialDaysLabel: trial && trial.daysLeft > 0 ? `${trial.daysLeft} วัน` : "",
-      // CTA State Hierarchy (Product Review Section A)
-      ctaState,
-      showProactiveQuotaFull: quotaFull,
-      quotaFullBannerMsg: `คุณใช้โควตาแพ็กเกจปัจจุบันครบแล้ว (${propCountNow}/${tierLimitNow} รายการ) — ไม่สามารถเพิ่มประกาศใหม่ได้จนกว่าจะอัปเกรดแพ็กเกจ`,
-      showQuotaNearNote: quotaNear,
-      quotaNearNoteMsg: `ใกล้เต็มโควตาแล้ว (${propCountNow}/${tierLimitNow} รายการ)`,
-      // Top-bar Upgrade button visual weight follows ctaState: tertiary at
-      // State 1 (nothing to upgrade FOR yet), secondary at State 2/3,
-      // primary only at State 4 (quota genuinely full).
-      upgradeTopBarStyle: ctaState === 4
-        ? "display:inline-block; background:oklch(40% 0.13 25); color:white; padding:12px 26px; border-radius:100px; font-size:14px; font-weight:700; text-decoration:none; white-space:nowrap;"
-        : "display:inline-block; background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:10px 20px; border-radius:100px; font-size:13px; font-weight:600; text-decoration:none; white-space:nowrap;",
-      newPropertyBtnStyle: quotaFull
-        ? "background:oklch(90% 0.01 70); color:oklch(55% 0.02 60); padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;"
-        : "background:oklch(22% 0.02 60); color:white; padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;",
-      showTrialActive: !!trial && !trial.ended,
-      trialDaysLeftLabel: trial ? (trial.daysLeft > 0 ? `เหลืออีก ${trial.daysLeft} วัน` : (trial.inGrace ? "หมดอายุแล้ว — อยู่ในช่วงผ่อนผัน" : "")) : "",
-      showTrialUpsell: !!trial && trial.nearEnd,
-      trialUpsellViewsLabel: trial ? `ยอดเข้าชมรวมทุกประกาศของคุณ: ${(this.state.properties || []).reduce((sum, p) => sum + (p.viewCount || 0), 0)} ครั้ง` : "",
-      onLogout: () => this.onLogout(),
-      showList: this.state.view === "list", showEdit: this.state.view === "edit", showSaved: this.state.view === "saved",
-      propCount: properties.length, hasNoProps: properties.length === 0,
-      // Sprint 01 Phase 2: first-time empty state gets one unmissable
-      // primary CTA instead of the old small centered text.
-      showFirstTimeCta: properties.length === 0,
-      properties,
-      onNewProperty: () => this.startNew(),
-      onBackToList: () => this.goBackToList(),
-      onGoToList: () => this.goBackToList(),
-      quotaMsg: this.state.quotaMsg,
-      isListLayout: this.state.listLayout === "list",
-      isGridLayout: this.state.listLayout === "grid",
-      onSetListLayout: () => this.setState({ listLayout: "list" }),
-      onSetGridLayout: () => this.setState({ listLayout: "grid" }),
-      listBtnBg: this.state.listLayout === "list" ? "oklch(22% 0.02 60)" : "white",
-      listBtnColor: this.state.listLayout === "list" ? "white" : "oklch(40% 0.02 60)",
-      gridBtnBg: this.state.listLayout === "grid" ? "oklch(22% 0.02 60)" : "white",
-      gridBtnColor: this.state.listLayout === "grid" ? "white" : "oklch(40% 0.02 60)",
-      editTitle: this.state.editingId ? `แก้ไขทรัพย์ ${this.state.editingId}` : "เพิ่มทรัพย์ใหม่",
-      typeOptions: mod ? mod.TYPES.map((ty) => ({ id: ty.id, label: ty.label.th })) : [],
-      areaOptions: mod ? mod.AREAS.map((a) => ({ id: a.id, label: a.label.th })) : [],
-      featureOptions: mod ? Object.keys(mod.FEATURES).map((fid) => ({
-        id: fid, label: mod.FEATURES[fid].th, checked: this.state.f_features.includes(fid),
-        onToggle: () => this.toggleFeature(fid),
-      })) : [],
-      f_type: this.state.f_type, onFType: (e) => this.setState({ f_type: e.target.value }),
-      f_area: this.state.f_area, onFArea: (e) => this.setState({ f_area: e.target.value }),
-      f_zone: this.state.f_zone, onFZone: (e) => this.setState({ f_zone: e.target.value }),
-      f_status: this.state.f_status, onFStatus: (e) => this.setState({ f_status: e.target.value }),
-      f_price: this.state.f_price, onFPrice: (e) => this.setState({ f_price: e.target.value }),
-      f_bedrooms: this.state.f_bedrooms, onFBedrooms: (e) => this.setState({ f_bedrooms: e.target.value }),
-      f_bathrooms: this.state.f_bathrooms, onFBathrooms: (e) => this.setState({ f_bathrooms: e.target.value }),
-      f_livingArea: this.state.f_livingArea, onFLivingArea: (e) => this.setState({ f_livingArea: e.target.value }),
-      f_landSize: this.state.f_landSize, onFLandSize: (e) => this.setState({ f_landSize: e.target.value }),
-      f_description: this.state.f_description, onFDescription: (e) => this.setState({ f_description: e.target.value }),
-      existingPhotos: this.state.existingPhotos.map((ph) => ({ ...ph, thumbStyle: { position: "relative", width: "90px", height: "68px", borderRadius: "6px", overflow: "hidden", background: ph.url ? `url('${ph.url}') center/cover` : "oklch(93% 0.01 70)" }, onRemove: () => this.removeExistingPhoto(ph) })),
-      newPhotos: this.state.newPhotos.map((np, i) => ({ ...np, thumbStyle: { position: "relative", width: "90px", height: "68px", borderRadius: "6px", overflow: "hidden", background: np.url ? `url('${np.url}') center/cover` : "oklch(93% 0.01 70)" }, onRemove: () => this.removeNewPhoto(i) })),
-      canAddPhoto: this.totalPhotoCount() < this.myPhotoLimit(),
-      photoCount: this.totalPhotoCount(),
-      photoLimit: this.myPhotoLimit(),
-      onPhotosFile: (e) => this.onPhotosFile(e),
-      saveLabel: this.state.saving ? "กำลังบันทึก…" : "บันทึกแบบร่าง",
-      onSaveProperty: () => this.saveProperty(),
-      saveError: this.state.saveError,
-      savedId: this.state.savedId,
-      ns_assistedSale: this.state.ns_assistedSale,
-      onNsAssistedSale: (e) => this.setState({ ns_assistedSale: e.target.checked }),
-      ns_commissionPct: this.state.ns_commissionPct,
-      onNsCommissionPct: (e) => this.setState({ ns_commissionPct: e.target.value }),
-      nudgeConfirmLabel: this.state.nudgeSaving ? "กำลังบันทึก…" : "ยืนยัน",
-      onConfirmNudge: () => this.confirmNudge(),
-      nudgeSavedMsg: this.state.nudgeSavedMsg,
-      onCopyPost: () => this.copyPost(),
-      copyLabel: this.state.copyLabel,
-      ns_postText: this.state.ns_postText || "",
-      onPostTextChange: (e) => this.setState({ ns_postText: e.target.value }),
-      onSavePostText: () => this.savePostText(),
-      postSaveMsg: this.state.postSaveMsg,
-      hasGenerated: (this.state.ns_genCount || 0) > 0,
-      notGenerated: !((this.state.ns_genCount || 0) > 0),
-      ns_genCount: this.state.ns_genCount || 0,
-      genLimit: this.aiGenLimit(lister.tier),
-      genRemaining: Math.max(0, this.aiGenLimit(lister.tier) - (this.state.ns_genCount || 0)),
-      canRegenerate: (this.state.ns_genCount || 0) < this.aiGenLimit(lister.tier),
-      quotaReached: (this.state.ns_genCount || 0) >= this.aiGenLimit(lister.tier),
-      onGeneratePost: () => this.generatePostText(),
-      showShare: !!this.state.showShareFlag,
-      shareId: this.state.shareId, shareUrl: this.state.shareUrl,
-      shareFbUrl: "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(this.state.shareUrl),
-      shareLineUrl: "https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(this.state.shareUrl),
-      onCloseShare: () => this.setState({ showShareFlag: false }),
-      stopProp: (e) => e.stopPropagation(),
-      onCopyShareLink: () => this.copyShareLink(),
-      showBuyerModal: this.state.showBuyerModal, buyerTargetId: this.state.buyerTargetId,
-      buyer_name: this.state.buyer_name, onBuyerName: (e) => this.setState({ buyer_name: e.target.value }),
-      buyer_phone: this.state.buyer_phone, onBuyerPhone: (e) => this.setState({ buyer_phone: e.target.value }),
-      buyer_email: this.state.buyer_email, onBuyerEmail: (e) => this.setState({ buyer_email: e.target.value }),
-      buyerMsg: this.state.buyerMsg,
-      buyerMsgStyle: { fontSize: "12.5px", color: this.state.buyerIsError ? "oklch(50% 0.18 30)" : "oklch(40% 0.12 145)", lineHeight: "1.5" },
-      buyerSubmitLabel: this.state.buyerSaving ? "กำลังบันทึก…" : "ลงทะเบียน",
-      onCloseBuyer: () => this.closeBuyerModal(),
-      onSubmitBuyer: () => this.submitBuyerRegistration(),
-      showDeleteConfirm: this.state.showDeleteConfirm, deleteTargetId: this.state.deleteTargetId,
-      deleteConfirmLabel: this.state.deleting ? "กำลังลบ…" : "ลบถาวร",
-      onCancelDelete: () => this.cancelDelete(),
-      onConfirmDelete: () => this.confirmDelete(),
-      shareCopyLabel: this.state.shareCopyLabel,
-      previewCoverStyle: { height: "60px", width: "100%", background: this.state.ps_coverPhotoUrl ? `url('${this.state.ps_coverPhotoUrl}') center/cover` : `linear-gradient(135deg, ${this.state.ps_themeColor || "oklch(40% 0.13 25)"}, oklch(65% 0.08 60))` },
-      previewAvatarStyle: { width: "48px", height: "48px", borderRadius: "50%", border: "3px solid white", background: this.state.ps_profilePhotoUrl ? `url('${this.state.ps_profilePhotoUrl}') center/cover oklch(90% 0.01 70)` : (this.state.ps_themeColor || "oklch(40% 0.13 25)"), display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "17px", fontFamily: "'Playfair Display',serif" },
-      previewNoAvatar: !this.state.ps_profilePhotoUrl,
-      previewInitial: (this.state.ps_displayName || lister.name || "?").slice(0, 1).toUpperCase(),
-      previewName: this.state.ps_displayName || lister.name || "ชื่อของคุณ",
-      onOpenMySite: () => this.openMySite(),
-      // Share is greyed out (shown, non-functional) during trial — per the
-      // trial spec: demonstrate the feature exists, unlock on upgrade.
-      shareMySiteStyle: isTrial
-        ? "background:oklch(93% 0.005 70); border:1px solid oklch(88% 0.01 70); color:oklch(65% 0.01 70); padding:11px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:not-allowed; white-space:nowrap;"
-        : "background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:11px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;",
-      onShareMySite: () => isTrial ? window.alert("ฟีเจอร์แชร์เว็บไซต์ใช้งานได้ตั้งแต่แพ็กเกจ 1 ขึ้นไป — อัปเกรดแพ็กเกจเพื่อใช้งาน") : this.shareMySite(),
-      showProfileSettings: this.state.showProfileSettings,
-      profileSettingsToggleLabel: this.state.showProfileSettings ? "ซ่อน ▲" : "แก้ไข ▼",
-      onToggleProfileSettings: () => this.setState((s) => ({ showProfileSettings: !s.showProfileSettings })),
-      ps_displayName: this.state.ps_displayName, onPsDisplayName: (e) => this.setState({ ps_displayName: e.target.value }),
-      ps_profilePhotoLabel: this.state.ps_profilePhotoUrl ? "เปลี่ยนรูป" : "เลือกรูป",
-      onPsProfilePhoto: (e) => this.onPsProfilePhoto(e),
-      ps_aiPersonaText: this.state.ps_aiPersonaText, onPsAiPersonaText: (e) => this.setState({ ps_aiPersonaText: e.target.value }),
-      ps_bioText: this.state.ps_bioText, onPsBioText: (e) => this.setState({ ps_bioText: e.target.value }),
-      canCustomCover: tier2Plus, cannotCustomCover: !tier2Plus,
-      ps_coverPhotoLabel: this.state.ps_coverPhotoUrl ? "เปลี่ยนภาพปก" : "เลือกภาพปก",
-      onPsCoverPhoto: (e) => this.onPsCoverPhoto(e),
-      canCustomSocial: canSocial, cannotCustomSocial: !canSocial,
-      socialLockNote: !canSocial
-        ? (isTrial ? "🔒 ใส่ลิงก์ได้จริงตั้งแต่แพ็กเกจ 1 ขึ้นไป — ตอนนี้แสดงเป็นตัวอย่างเฉยๆ" : "🔒 เพิ่มลิงก์โซเชียลได้ตั้งแต่แพ็กเกจ 1 ขึ้นไป")
-        : (socialLimit < 4 ? `ใส่ลิงก์ได้ ${socialLimit} ช่องทางตามแพ็กเกจปัจจุบัน — แพ็กเกจ 3 ใส่ได้ครบ 4 ช่องทาง` : ""),
-      psPhotoThumbStyle: { width: "56px", height: "56px", borderRadius: "8px", background: `url('${this.state.ps_profilePhotoUrl}') center/cover`, border: "1px solid oklch(88% 0.01 70)", flexShrink: 0 },
-      psCoverThumbStyle: { width: "90px", height: "56px", borderRadius: "8px", background: `url('${this.state.ps_coverPhotoUrl}') center/cover`, border: "1px solid oklch(88% 0.01 70)", flexShrink: 0 },
-      selectedThemeChipStyle: { width: "32px", height: "32px", borderRadius: "8px", background: this.state.ps_themeColor || "transparent", border: this.state.ps_themeColor ? "1px solid oklch(85% 0.01 70)" : "1px dashed oklch(80% 0.01 70)" },
-      ps_themeColorHex: this.state.ps_themeColor || "#7A2E22",
-      onPsThemeColorPicker: (e) => this.setState({ ps_themeColor: e.target.value }),
-      hasThemeColor: !!this.state.ps_themeColor,
-      socialSectionStyle: {},
-      socialFields: [
-        { iconChar: "f", iconStyle: { width: "26px", height: "26px", borderRadius: "50%", background: "oklch(45% 0.15 260)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "14px", fontWeight: "700", fontFamily: "Georgia,serif", flexShrink: 0 }, value: this.state.ps_fb, placeholder: "Facebook URL", onChange: (e) => this.setState({ ps_fb: e.target.value }) },
-        { iconChar: "♪", iconStyle: { width: "26px", height: "26px", borderRadius: "50%", background: "oklch(20% 0.01 60)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", flexShrink: 0 }, value: this.state.ps_tiktok, placeholder: "TikTok URL", onChange: (e) => this.setState({ ps_tiktok: e.target.value }) },
-        { iconChar: "▶", iconStyle: { width: "26px", height: "26px", borderRadius: "7px", background: "oklch(55% 0.22 25)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", flexShrink: 0 }, value: this.state.ps_youtube, placeholder: "YouTube URL", onChange: (e) => this.setState({ ps_youtube: e.target.value }) },
-        { iconChar: "◎", iconStyle: { width: "26px", height: "26px", borderRadius: "8px", background: "linear-gradient(135deg, oklch(70% 0.18 30), oklch(55% 0.2 340))", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "13px", flexShrink: 0 }, value: this.state.ps_instagram, placeholder: "Instagram URL", onChange: (e) => this.setState({ ps_instagram: e.target.value }) },
-      ].map((s, i) => {
-        const unlocked = i < socialLimit;
-        return { ...s, disabled: !unlocked,
-          iconStyle: { ...s.iconStyle, opacity: unlocked ? 1 : 0.4, filter: unlocked ? "none" : "grayscale(1)" },
-          inputStyle: { flex: 1, boxSizing: "border-box", border: "1px solid oklch(85% 0.01 70)", borderRadius: "4px", padding: "8px 12px", fontSize: "13px", fontFamily: "inherit", background: unlocked ? "white" : "oklch(95% 0.005 70)", color: unlocked ? "inherit" : "oklch(65% 0.01 70)" } };
-      }),
-      canCustomTheme: tier3, cannotCustomTheme: !tier3,
-      themeOptions: this.THEME_COLORS.map((c) => ({
-        swatchStyle: { width: "32px", height: "32px", borderRadius: "50%", background: c, cursor: "pointer", border: this.state.ps_themeColor === c ? "3px solid oklch(20% 0.02 60)" : "3px solid white", boxShadow: "0 0 0 1px oklch(85% 0.01 70)" },
-        onSelect: () => this.setState({ ps_themeColor: c }),
+      countAll, countPending, countLive, countExpired, countRejected,
+      tabAllStyle: this.state.filter === "all" ? tabActive : tabInactive,
+      tabPendingStyle: this.state.filter === "pending" ? tabActive : tabInactive,
+      tabLiveStyle: this.state.filter === "live" ? tabActive : tabInactive,
+      tabExpiredStyle: this.state.filter === "expired" ? tabActive : tabInactive,
+      tabRejectedStyle: this.state.filter === "rejected" ? tabActive : tabInactive,
+      onFilterAll: () => this.setState({ filter: "all" }),
+      onFilterPending: () => this.setState({ filter: "pending" }),
+      onFilterLive: () => this.setState({ filter: "live" }),
+      onFilterExpired: () => this.setState({ filter: "expired" }),
+      onFilterRejected: () => this.setState({ filter: "rejected" }),
+      rows, noRows: this.state.loaded && rows.length === 0,
+      hasSuspects: (this.state.suspects || []).length > 0,
+      suspects: (this.state.suspects || []).map((grp) => ({
+        phone: (grp[0].phone || "-"),
+        namesLabel: grp.map((l) => `${l.name || l.email} (${l.trialUsed ? "ใช้ trial แล้ว" : "ยังไม่ใช้"})`).join(", "),
       })),
-      onSaveProfileSettings: () => this.saveProfileSettings(),
-      ps_saveLabel: this.state.ps_saving ? "กำลังบันทึก…" : "บันทึกการตั้งค่า",
-      ps_saveMsg: this.state.ps_saveMsg,
     };
   }
 }

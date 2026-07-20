@@ -1,126 +1,23 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
-<a href="{{ href }}" style="display:flex; flex-direction:column; text-decoration:none; background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:6px; overflow:hidden; transition:box-shadow 0.2s; position:relative;" style-hover="box-shadow:0 18px 40px -14px rgba(30,20,10,0.28);">
-  <div style="{{ coverPhotoStyle }}">
-    <div style="position:absolute; top:12px; left:12px; display:flex; flex-direction:column; gap:6px; align-items:flex-start;">
-      <div style="background:{{ statusColor }}; color:oklch(99% 0.005 80); font-size:12px; font-weight:600; letter-spacing:0.03em; padding:5px 12px; border-radius:100px; pointer-events:none;">{{ statusLabel }}</div>
-      <sc-if value="{{ isFeatured }}">
-        <div style="background:oklch(74% 0.16 75); color:oklch(20% 0.05 60); font-size:11px; font-weight:700; letter-spacing:0.03em; padding:5px 10px; border-radius:100px; pointer-events:none;">🌟 {{ featuredLabel }}</div>
-      </sc-if>
-      <sc-if value="{{ isVip }}">
-        <div style="background:oklch(30% 0.02 60); color:oklch(85% 0.13 95); font-size:11px; font-weight:700; letter-spacing:0.03em; padding:5px 10px; border-radius:100px; pointer-events:none;">💎 VIP</div>
-      </sc-if>
-    </div>
-    <div onClick="{{ onToggleFav }}" title="{{ favTitle }}" style="{{ favBadgeStyle }}">
-      <span style="font-size:15px; line-height:1;">{{ favIcon }}</span>
-      <sc-if value="{{ isFav }}"><span style="font-size:10px; font-weight:600; letter-spacing:0.02em; white-space:nowrap;">{{ favLabel }}</span></sc-if>
-    </div>
-    <sc-if value="{{ noPhoto }}">
-      <div style="position:absolute; bottom:10px; left:10px; right:10px; display:inline-block; width:fit-content; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:monospace; font-size:11px; color:oklch(20% 0.02 60 / 0.75); background:rgba(255,255,255,0.65); padding:4px 8px; border-radius:4px; pointer-events:none;">[{{ coverPhotoLabel }}]</div>
-    </sc-if>
-    <div style="position:absolute; bottom:8px; right:10px; font-family:monospace; font-size:11px; letter-spacing:0.02em; color:oklch(99% 0.005 80 / 0.85); text-shadow:0 1px 3px rgba(0,0,0,0.5); pointer-events:none;">{{ propertyId }}</div>
-  </div>
-  <div style="padding:18px 20px 20px; display:flex; flex-direction:column; gap:8px; flex:1;">
-    <div style="font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:oklch(42% 0.12 25);">{{ zone }} · {{ areaLabel }}</div>
-    <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); line-height:1.3;">{{ title }}</div>
-    <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ typeLabel }}</div>
-    <div style="display:flex; gap:14px; font-size:13px; color:oklch(40% 0.02 60); margin-top:2px; flex-wrap:wrap;">
-      <sc-if value="{{ hasBedrooms }}"><span style="white-space:nowrap;">{{ bedrooms }} bd</span></sc-if>
-      <sc-if value="{{ hasBathrooms }}"><span style="white-space:nowrap;">{{ bathrooms }} ba</span></sc-if>
-      <sc-if value="{{ hasLivingArea }}"><span style="white-space:nowrap;">{{ livingArea }} {{ sqmLabel }}</span></sc-if>
-    </div>
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-top:10px; padding-top:12px; border-top:1px solid oklch(92% 0.01 70);">
-      <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60);">{{ priceLabel }}</div>
-      <div style="font-size:13px; color:oklch(42% 0.12 25); font-weight:600;">{{ viewDetailsLabel }} →</div>
-    </div>
-  </div>
-</a>
+# huahin.properties — เพิ่มโหมดปิดปรับปรุงเว็บไซต์ (Maintenance Mode)
 
-</x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 340, &quot;height&quot;: 380}, &quot;href&quot;: {&quot;editor&quot;: null, &quot;default&quot;: &quot;#&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;statusColor&quot;: {&quot;editor&quot;: null, &quot;default&quot;: &quot;#8A6D3B&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;statusLabel&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;For Sale&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;isFeatured&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;}, &quot;isVip&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;}, &quot;coverPhotoLabel&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;photo: villa exterior&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;coverPhotoBg&quot;: {&quot;editor&quot;: null, &quot;default&quot;: &quot;repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;noPhoto&quot;: {&quot;editor&quot;: null, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;}, &quot;propertyId&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;HH-101&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;zone&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;Khao Tao&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;areaLabel&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;Hua Hin&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;title&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;Sunset Cliff Pool Villa&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;typeLabel&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;Pool Villa&quot;, &quot;tsType&quot;: &quot;string&quot;}}">
-const FAV_LABELS = { en: "Favorite", th: "รายการโปรด", ru: "Избранное", zh: "收藏", de: "Favorit", no: "Favoritt", fr: "Favori", it: "Preferito" };
-const FEATURED_LABELS = { en: "Featured", th: "แนะนำ", ru: "Топ", zh: "精选", de: "Empfohlen", no: "Fremhevet", fr: "En vedette", it: "In evidenza" };
-const FAV_TITLES = {
-  en: ["Save to favorites", "Remove from favorites"],
-  th: ["บันทึกไว้ในรายการโปรด", "นำออกจากรายการโปรด"],
-  ru: ["Добавить в избранное", "Убрать из избранного"],
-  zh: ["收藏", "取消收藏"],
-  de: ["Zu Favoriten hinzufügen", "Aus Favoriten entfernen"],
-  no: ["Legg til favoritter", "Fjern fra favoritter"],
-  fr: ["Ajouter aux favoris", "Retirer des favoris"],
-  it: ["Aggiungi ai preferiti", "Rimuovi dai preferiti"],
-};
+## อัปเดตล่าสุด
+เพิ่มระบบ "โหมดปิดปรับปรุงเว็บไซต์" — ใช้ตอนกำลังแก้ไข/พัฒนาเว็บอยู่ ไม่อยากให้คนทั่วไปเห็นงานที่ยังไม่เสร็จ
 
-class Component extends DCLogic {
-  state = { isFav: false, lang: "en" };
+**วิธีใช้งาน (ไม่ต้องแก้โค้ด แก้ผ่านหน้าเว็บได้เลย):**
+1. เข้าสู่ระบบแอดมิน → ไปที่หน้า **Site Content**
+2. ด้านบนสุดจะเห็นกล่อง "🚧 โหมดปิดปรับปรุงเว็บไซต์" พร้อมปุ่มเปิด/ปิด
+3. กดปุ่ม **"เปิดโหมดนี้"** — ทุกหน้าสาธารณะ (หน้าแรก, ค้นหา, รายละเอียดทรัพย์, ขาย, เกี่ยวกับเรา, ติดต่อ) จะแสดงหน้า "กำลังปรับปรุงเว็บไซต์" แทนเนื้อหาจริงให้คนทั่วไปเห็น ทันทีไม่ต้องอัปโหลดใหม่
+4. สถานะจะแสดงเป็นตัวหนังสือ **สีแดง** "🔴 ปิดกั้นอยู่ — เห็นเฉพาะคุณเท่านั้น" เพื่อคอยเตือนตลอดว่าเว็บกำลังถูกซ่อนจากคนอื่นอยู่ ถ้ากด "ปิดโหมดนี้" สถานะจะเปลี่ยนเป็นตัวหนังสือ **สีเขียว** "🟢 เปิดให้ทุกคนดูได้แล้ว"
+5. ตัวคุณเองยังเข้าดูเว็บจริงได้ตามปกติทุกหน้า ไม่ต้องผ่านหน้ากั้นเลย เพราะระบบจำไว้ว่าคุณคือแอดมิน (ผ่านการล็อกอินแอดมิน)
+6. ถ้ามีคนอื่น (เช่น ทีมงาน) ต้องการดูตัวอย่างระหว่างปิดปรับปรุง — พิมพ์ **รหัสผ่านแอดมินเดิม** (ตัวเดียวกับที่ใช้เข้าสู่ระบบแอดมิน) ที่หน้ากั้นนั้นได้เลย ไม่ต้องจำรหัสใหม่ กดครั้งเดียวเบราว์เซอร์จะจำไว้ให้ไม่ต้องใส่ซ้ำ
 
-  async componentDidMount() {
-    const [favs, mod] = await Promise.all([import("./favorites.js"), import("./data.js")]);
-    this._favs = favs;
-    this.setState({ lang: mod.getLang() });
-    if (this.props.propertyId) this.setState({ isFav: favs.isFavorited(this.props.propertyId) });
-  }
+**ข้อควรรู้:** นี่คือการ "บังหน้าจอ" กันคนทั่วไปเข้าใจผิดว่าเว็บพังหรือยังไม่พร้อม ไม่ใช่ระบบรักษาความปลอดภัยระดับสูง เหมาะสำหรับช่วงพัฒนา/ทดสอบ ไม่ใช่การป้องกันข้อมูลลับ
 
-  toggleFav(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!this._favs || !this.props.propertyId) return;
-    const nowFav = this._favs.toggleFavorite(this.props.propertyId);
-    this.setState({ isFav: nowFav });
-  }
+## สิ่งที่แก้ในรอบก่อนหน้า
+- เมนูแอดมินล้นจอบนมือถือ (Admin Dashboard, Owners, Property Map, Site Content, AI Quick Add)
+- ช่องรหัสผ่านหน้า Admin Login ตอนนี้แสดงตัวอักษรที่พิมพ์ให้เห็นชัดเจน
 
-  renderVals() {
-    const p = this.props;
-    return {
-      href: p.href,
-      statusColor: p.statusColor,
-      statusLabel: p.statusLabel,
-      isFeatured: !!p.isFeatured,
-      isVip: !!p.isVip,
-      featuredLabel: FEATURED_LABELS[this.state.lang] || FEATURED_LABELS.en,
-      isFav: this.state.isFav,
-      favIcon: this.state.isFav ? "⭐" : "☆",
-      favLabel: FAV_LABELS[this.state.lang] || FAV_LABELS.en,
-      favTitle: (FAV_TITLES[this.state.lang] || FAV_TITLES.en)[this.state.isFav ? 1 : 0],
-      favBadgeStyle: this.state.isFav
-        ? "position:absolute; top:10px; right:10px; display:flex; align-items:center; gap:5px; background:oklch(35% 0.09 25); color:white; border-radius:100px; padding:6px 12px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.2); z-index:2;"
-        : "position:absolute; top:10px; right:10px; width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.85); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15); z-index:2;",
-      onToggleFav: (e) => this.toggleFav(e),
-      coverPhotoLabel: p.coverPhotoLabel,
-      propertyId: p.propertyId || "",
-      // Data-URL backgrounds contain a literal ";" (data:image/webp;base64,...)
-      // which breaks a mixed style STRING (interpolated attrs are built by
-      // string concatenation and the runtime splits on ";" per CSS rule).
-      // Passing the whole style as one object hole avoids that entirely.
-      coverPhotoStyle: {
-        position: "relative", aspectRatio: "4/3",
-        background: p.coverPhotoBg || "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
-      },
-      noPhoto: p.noPhoto,
-      zone: p.zone,
-      areaLabel: p.areaLabel,
-      title: p.title,
-      typeLabel: p.typeLabel,
-      hasBedrooms: p.hasBedrooms,
-      bedrooms: p.bedrooms,
-      hasBathrooms: p.hasBathrooms,
-      bathrooms: p.bathrooms,
-      hasLivingArea: p.hasLivingArea,
-      livingArea: p.livingArea,
-      sqmLabel: p.sqmLabel,
-      priceLabel: p.priceLabel,
-      viewDetailsLabel: p.viewDetailsLabel,
-    };
-  }
-}
-
-</script>
-</body>
-</html>
+## ยังไม่ได้แก้ (ค้างจากรอบก่อน)
+- ล็อก Firestore security rules ก่อนวันที่ 8 ส.ค. 2026 (ตอนนี้ยังเป็น rules แบบเปิดชั่วคราว)
+- ตรวจสอบ AI Quick Add ว่าคำนวณระยะทาง/สถานที่ใกล้เคียงจากพิกัดได้ครบ 10+ จุด ทั้ง EN/TH จริงหรือไม่
+- ตรวจว่าอัปโหลดรูปหลายรูปพร้อมกันใช้ได้ทุกจุดในแอดมิน

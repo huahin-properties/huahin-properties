@@ -1,660 +1,1407 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
-<div style="position:fixed; top:0; left:0; width:0; height:0; z-index:9999;">
-  <!-- ============ COLLAPSIBLE SIDE RAIL ============ -->
-  <!-- Toggle arrow stays pinned at the edge always (never slides away) so a
-       collapsed rail can still be reopened. Only the 3 tabs below it slide. -->
-  <div style="position:fixed; top:50%; right:0; transform:translateY(-160px); z-index:61;">
-    <div onClick="{{ onToggle }}" style="width:26px; height:44px; background:oklch(22% 0.02 60); border-radius:6px 0 0 6px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:-2px 2px 8px oklch(0% 0 0 / 0.15);">
-      <div style="color:oklch(97% 0.01 80); font-size:14px; transform:{{ arrowRotate }};">→</div>
-    </div>
-  </div>
-  <div style="position:fixed; top:50%; right:0; transform:translateY(-104px) {{ railTransform }}; transition:transform .28s ease; z-index:60; display:flex; flex-direction:column; align-items:flex-end;">
-    <!-- CONTACT US vertical tab -> opens form -->
-    <div onClick="{{ onOpenForm }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:16px 8px; border-radius:6px 0 0 6px; writing-mode:vertical-rl; text-orientation:mixed; font-size:12px; letter-spacing:0.12em; cursor:pointer; box-shadow:-2px 2px 8px oklch(0% 0 0 / 0.12);">{{ t.rail_contact_us }}</div>
-    <!-- LINE bubble -->
-    <a href="{{ lineUrl }}" target="_blank" rel="noopener" style="margin-top:10px; width:48px; height:48px; border-radius:50% 0 0 50%; background:#06C755; display:flex; align-items:center; justify-content:center; text-decoration:none; box-shadow:-2px 2px 8px oklch(0% 0 0 / 0.15);">
-      <span style="color:#fff; font-size:11px; font-weight:700; font-family:'Work Sans',sans-serif;">LINE</span>
-    </a>
-    <!-- WhatsApp pill -->
-    <a href="{{ whatsappUrl }}" target="_blank" rel="noopener" style="margin-top:10px; background:#25D366; color:#fff; padding:14px 16px; border-radius:6px 0 0 6px; text-decoration:none; font-size:13px; font-family:'Work Sans',sans-serif; font-weight:600; display:flex; align-items:center; gap:8px; box-shadow:-2px 2px 8px oklch(0% 0 0 / 0.15);">
-      WhatsApp
-    </a>
-  </div>
+// huahin.properties — shared data & i18n
+// Plain ES module: PROPERTIES (sample listings), I18N (UI strings), AREAS/TYPES/FEATURES/STATUS labels.
 
-  <!-- ============ MY FAVORITES (persistent, cart-style) ============ -->
-  <sc-if value="{{ showFavButton }}">
-    <div onClick="{{ onOpenFavorites }}" style="position:fixed; left:16px; bottom:16px; z-index:70; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); border-radius:100px; padding:{{ favButtonPadding }}; display:flex; align-items:center; gap:8px; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,0.18); font-family:'Work Sans',sans-serif;">
-      <span style="font-size:16px;">⭐</span>
-      <sc-if value="{{ showFavLabel }}"><span style="font-size:13px; white-space:nowrap;">{{ favButtonLabel }}</span></sc-if>
-      <sc-if value="{{ hasFavCount }}"><span style="background:oklch(97% 0.01 80); color:oklch(22% 0.02 60); border-radius:100px; min-width:20px; height:20px; padding:0 5px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;">{{ favCount }}</span></sc-if>
-    </div>
-  </sc-if>
+export const LANGS = ["en", "th", "ru", "zh", "de", "no", "fr", "it"];
 
-  <sc-if value="{{ favoritesOpen }}">
-    <div onClick="{{ onCloseFavorites }}" style="position:fixed; inset:0; background:oklch(15% 0.01 60 / 0.5); z-index:86; display:flex; align-items:flex-end; justify-content:flex-start; padding:20px;">
-      <div onClick="{{ stopProp }}" style="background:oklch(99% 0.005 80); border-radius:10px; width:100%; max-width:360px; max-height:70vh; display:flex; flex-direction:column; box-shadow:0 20px 60px oklch(0% 0 0 / 0.35); overflow:hidden;">
-        <div style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:16px 18px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
-          <div style="font-family:'Playfair Display',serif; font-size:16px;">⭐ {{ favButtonLabel }}</div>
-          <div onClick="{{ onCloseFavorites }}" style="cursor:pointer; padding:6px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></div>
-        </div>
-        <div style="flex:1; overflow-y:auto; padding:12px;">
-          <sc-for list="{{ favoriteRows }}" as="fr" hint-placeholder-count="1">
-            <a href="{{ fr.href }}" style="display:flex; gap:10px; align-items:center; padding:10px; border-radius:8px; text-decoration:none; margin-bottom:6px;" style-hover="background:oklch(96% 0.01 75);">
-              <div style="{{ fr.thumbStyle }}"></div>
-              <div style="flex:1; min-width:0;">
-                <div style="font-size:13px; color:oklch(25% 0.02 60); font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ fr.title }}</div>
-                <div style="font-size:12px; color:oklch(50% 0.02 60);">{{ fr.priceLabel }}</div>
-              </div>
-              <div onClick="{{ fr.onRemove }}" style="font-size:11px; color:oklch(50% 0.15 30); cursor:pointer; padding:6px; flex-shrink:0;">✕</div>
-            </a>
-          </sc-for>
-          <sc-if value="{{ noFavorites }}"><div style="text-align:center; padding:30px 10px; font-size:13px; color:oklch(55% 0.02 60);">{{ noFavoritesLabel }}</div></sc-if>
-        </div>
-      </div>
-    </div>
-  </sc-if>
+export const LANG_LABELS = { en: "English", th: "ไทย", ru: "Русский", zh: "中文", de: "Deutsch", no: "Norsk", fr: "Français", it: "Italiano" };
 
-  <!-- ============ PERSISTENT CHAT BUBBLE (always visible) ============ -->
-  <div style="position:fixed; right:16px; bottom:16px; z-index:70; display:flex; align-items:center; gap:10px;">
-    <sc-if value="{{ chatHintVisible }}">
-      <div onClick="{{ onOpenChat }}" style="background:#fff; color:oklch(25% 0.02 60); padding:10px 16px; border-radius:100px; font-size:14px; font-family:'Work Sans',sans-serif; box-shadow:0 4px 16px oklch(0% 0 0 / 0.15); cursor:pointer; white-space:nowrap;">{{ t.rail_chat_hint }} 👋</div>
-    </sc-if>
-    <div onClick="{{ onOpenChat }}" style="width:48px; height:48px; border-radius:50%; background:oklch(22% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 16px oklch(0% 0 0 / 0.2); font-size:20px; flex-shrink:0;">
-      <span style="color:oklch(97% 0.01 80);">💬</span>
-    </div>
-  </div>
+export function getLang() {
+  try { return localStorage.getItem("hh_lang") || "th"; } catch (e) { return "th"; }
+}
+export function setLang(l) {
+  try { localStorage.setItem("hh_lang", l); } catch (e) {}
+  try { window.dispatchEvent(new CustomEvent("langchange", { detail: l })); } catch (e) {}
+}
+export function t(dict, lang, key) {
+  return (dict[lang] && dict[lang][key]) ?? (dict.en && dict.en[key]) ?? key;
+}
 
-  <!-- ============ AI CHAT — MINIMIZED BAR ============ -->
-  <sc-if value="{{ chatBarOpen }}">
-    <div onClick="{{ onExpandChat }}" style="position:fixed; bottom:{{ chatBarBottom }}; right:{{ chatBarRight }}; z-index:85; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); border-radius:100px; padding:12px 18px; display:flex; align-items:center; gap:8px; cursor:pointer; box-shadow:0 12px 32px oklch(0% 0 0 / 0.25); max-width:{{ chatBarMaxWidth }};">
-      <span style="font-size:15px; flex-shrink:0;">💬</span>
-      <sc-if value="{{ showFavLabel }}"><span style="font-family:'Playfair Display',serif; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.chat_title }}</span></sc-if>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;"><path d="M6 15L12 9L18 15" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </div>
-  </sc-if>
+export const AREAS = [
+  { id: "hua-hin", label: { en: "Hua Hin", th: "หัวหิน", ru: "Хуахин", zh: "华欣", de: "Hua Hin", no: "Hua Hin", fr: "Hua Hin", it: "Hua Hin" } },
+  { id: "pranburi", label: { en: "Pranburi", th: "ปราณบุรี", ru: "Пранбури", zh: "巴蓝武里", de: "Pranburi", no: "Pranburi", fr: "Pranburi", it: "Pranburi" } },
+  { id: "cha-am", label: { en: "Cha-am", th: "ชะอำ", ru: "Ча-Ам", zh: "差安", de: "Cha-am", no: "Cha-am", fr: "Cha-am", it: "Cha-am" } },
+];
 
-  <!-- ============ AI CHAT MODAL ============ -->
-  <sc-if value="{{ chatPanelOpen }}">
-    <div onClick="{{ onMinimizeChat }}" style="position:fixed; inset:0; background:oklch(15% 0.01 60 / 0.5); z-index:85; display:flex; align-items:flex-end; justify-content:flex-end; padding:{{ chatOverlayPadding }};">
-      <div onClick="{{ stopProp }}" style="background:oklch(99% 0.005 80); border-radius:{{ chatPanelRadius }}; width:100%; max-width:{{ chatPanelMaxWidth }}; height:{{ chatPanelHeight }}; display:flex; flex-direction:column; box-shadow:0 20px 60px oklch(0% 0 0 / 0.35); overflow:hidden;">
-        <div style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:16px 18px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
-          <div>
-            <div style="font-family:'Playfair Display',serif; font-size:17px;">{{ t.chat_title }}</div>
-            <div style="font-size:11px; color:oklch(80% 0.01 70); margin-top:2px;">{{ t.chat_subtitle }}</div>
-          </div>
-          <div style="display:flex; align-items:center; gap:4px;">
-            <div onClick="{{ onMinimizeChat }}" title="ย่อหน้าต่างแชท" style="cursor:pointer; padding:8px; border-radius:8px; display:flex; align-items:center; justify-content:center;" style-hover="background:oklch(30% 0.02 60);">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-            <div onClick="{{ onClearChat }}" title="ล้างประวัติแชท เริ่มใหม่" style="cursor:pointer; padding:6px 10px 6px 6px; border-radius:8px; display:flex; align-items:center; gap:5px;" style-hover="background:oklch(30% 0.02 60);">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 7H20M9 7V4.5C9 4 9.4 3.5 10 3.5H14C14.6 3.5 15 4 15 4.5V7M18 7L17.3 19C17.25 19.8 16.6 20.5 15.8 20.5H8.2C7.4 20.5 6.75 19.8 6.7 19L6 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <span style="font-size:11px;">ล้าง</span>
-            </div>
-          </div>
-        </div>
-        <div ref="{{ chatScrollRef }}" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px;">
-          <sc-for list="{{ chatMessages }}" as="m" hint-placeholder-count="1">
-            <div style="{{ m.bubbleWrapStyle }}">
-              <div style="{{ m.bubbleStyle }}">{{ m.text }}</div>
-              <sc-for list="{{ m.links }}" as="lnk" hint-placeholder-count="0">
-                <sc-if value="{{ lnk.thumbBg }}">
-                  <div onClick="{{ lnk.onClick }}" style="display:flex; align-items:center; gap:0; margin-top:6px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); border-radius:12px; cursor:pointer; width:100%; min-height:72px; overflow:hidden;">
-                    <div style="width:72px; height:72px; background:{{ lnk.thumbBg }}; flex-shrink:0;"></div>
-                    <div style="min-width:0; flex:1; padding:8px 10px;">
-                      <div style="font-size:12.5px; font-weight:600;">{{ lnk.label }}</div>
-                      <sc-if value="{{ lnk.priceLabel }}"><div style="font-size:12px; color:oklch(85% 0.02 70);">{{ lnk.priceLabel }}</div></sc-if>
-                      <sc-if value="{{ lnk.specsLabel }}"><div style="font-size:11px; color:oklch(70% 0.02 70);">{{ lnk.specsLabel }}</div></sc-if>
-                    </div>
-                  </div>
-                </sc-if>
-                <sc-if value="{{ lnk.noThumb }}">
-                  <div onClick="{{ lnk.onClick }}" style="display:inline-block; margin-top:6px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:8px 16px; border-radius:100px; font-size:13px; cursor:pointer;">{{ lnk.label }}</div>
-                </sc-if>
-              </sc-for>
-            </div>
-          </sc-for>
-          <sc-if value="{{ chatLoading }}">
-            <div style="align-self:flex-start; background:oklch(93% 0.01 75); color:oklch(45% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px;">{{ t.chat_thinking }}</div>
-          </sc-if>
-        </div>
-        <div style="flex-shrink:0; border-top:1px solid oklch(90% 0.01 70); padding:12px; display:flex; gap:8px;">
-          <input value="{{ chatInput }}" onChange="{{ onChatInput }}" onKeyDown="{{ onChatKeyDown }}" placeholder="{{ t.chat_type_or_speak }}" style="flex:1; border:1px solid oklch(85% 0.01 70); border-radius:100px; padding:10px 16px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0;" />
-          <div onClick="{{ onChatSend }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; font-size:16px;">➤</div>
-        </div>
-        <div onClick="{{ onOpenFormFromChat }}" style="flex-shrink:0; text-align:center; padding:9px; font-size:12px; color:oklch(45% 0.02 60); border-top:1px solid oklch(93% 0.01 70); cursor:pointer;">{{ t.chat_talk_to_human }}</div>
-      </div>
-    </div>
-  </sc-if>
+export const TYPES = [
+  { id: "villa", label: { en: "Pool Villa", th: "พูลวิลล่า", ru: "Вилла с бассейном", zh: "泳池别墅", de: "Poolvilla", no: "Bassengvilla", fr: "Villa avec piscine", it: "Villa con piscina" } },
+  { id: "house", label: { en: "House", th: "บ้านเดี่ยว", ru: "Дом", zh: "独立屋", de: "Haus", no: "Hus", fr: "Maison", it: "Casa" } },
+  { id: "condo", label: { en: "Condo", th: "คอนโด", ru: "Кондо", zh: "公寓", de: "Eigentumswohnung", no: "Leilighet", fr: "Condo", it: "Condominio" } },
+  { id: "land", label: { en: "Land", th: "ที่ดิน", ru: "Земля", zh: "土地", de: "Grundstück", no: "Tomt", fr: "Terrain", it: "Terreno" } },
+  { id: "commercial", label: { en: "Commercial", th: "เชิงพาณิชย์", ru: "Коммерция", zh: "商业地产", de: "Gewerbe", no: "Næringseiendom", fr: "Commercial", it: "Commerciale" } },
+];
 
-  <!-- ============ CONTACT FORM MODAL ============ -->
-  <sc-if value="{{ formOpen }}">
-    <div onClick="{{ onCloseForm }}" style="position:fixed; inset:0; background:oklch(15% 0.01 60 / 0.5); z-index:80; display:flex; align-items:center; justify-content:center; padding:20px;">
-      <div onClick="{{ stopProp }}" style="background:oklch(99% 0.005 80); border-radius:8px; padding:28px; width:100%; max-width:420px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 60px oklch(0% 0 0 / 0.3);">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
-          <div style="font-family:'Playfair Display',serif; font-size:22px; color:oklch(20% 0.02 60);">{{ t.rail_form_title }}</div>
-          <div onClick="{{ onCloseForm }}" style="font-size:24px; line-height:1; color:oklch(50% 0.02 60); cursor:pointer; padding:4px;">&times;</div>
-        </div>
-        <sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
-          <div style="text-align:center; padding:30px 10px; color:oklch(35% 0.02 60); font-size:15px; line-height:1.6;">{{ t.rail_form_success }}</div>
-        </sc-if>
-        <sc-if value="{{ notSubmitted }}" hint-placeholder-val="{{ true }}">
-          <div style="display:flex; flex-direction:column; gap:12px;">
-            <input value="{{ name }}" onChange="{{ onName }}" placeholder="{{ t.name_label }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit; box-sizing:border-box;" />
-            <input value="{{ phone }}" onChange="{{ onPhone }}" placeholder="{{ t.phone_label }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit; box-sizing:border-box;" />
-            <input value="{{ email }}" onChange="{{ onEmail }}" placeholder="{{ t.email_label }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit; box-sizing:border-box;" />
-            <textarea value="{{ message }}" onChange="{{ onMessage }}" placeholder="{{ t.message_label }}" rows="4" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit; box-sizing:border-box; resize:vertical;"></textarea>
-            <div onClick="{{ onSubmit }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); text-align:center; padding:13px; border-radius:4px; font-size:14px; font-weight:600; cursor:pointer; margin-top:4px;">{{ t.send }}</div>
-            <div style="display:flex; gap:10px; margin-top:10px;">
-              <a href="{{ telUrl }}" style="flex:1; text-align:center; border:1px solid oklch(80% 0.01 70); color:oklch(30% 0.02 60); padding:11px; border-radius:4px; font-size:13px; text-decoration:none;">{{ t.call }}</a>
-              <a href="{{ whatsappUrl }}" target="_blank" rel="noopener" style="flex:1; text-align:center; background:#25D366; color:#fff; padding:11px; border-radius:4px; font-size:13px; text-decoration:none;">{{ t.whatsapp }}</a>
-              <a href="{{ lineUrl }}" target="_blank" rel="noopener" style="flex:1; text-align:center; background:#06C755; color:#fff; padding:11px; border-radius:4px; font-size:13px; text-decoration:none;">{{ t.line_app }}</a>
-            </div>
-          </div>
-        </sc-if>
-      </div>
-    </div>
-  </sc-if>
-</div>
-
-</x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 120, &quot;height&quot;: 400}, &quot;phone&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;+6632000000&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;lineUrl&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;https://line.me/ti/p/huahinproperties&quot;, &quot;tsType&quot;: &quot;string&quot;}}">
-const I18N_RAIL = {
-  en: { rail_contact_us: "CONTACT US", rail_chat_hint: "Chat with us", rail_form_title: "Send us a message", rail_form_success: "Thank you — we'll be in touch within 24 hours." },
-  th: { rail_contact_us: "ติดต่อเรา", rail_chat_hint: "แชทกับเรา", rail_form_title: "ส่งข้อความถึงเรา", rail_form_success: "ขอบคุณครับ — เราจะติดต่อกลับภายใน 24 ชั่วโมง" },
-  ru: { rail_contact_us: "СВЯЗЬ С НАМИ", rail_chat_hint: "Написать нам", rail_form_title: "Отправить сообщение", rail_form_success: "Спасибо — мы свяжемся с вами в течение 24 часов." },
-  zh: { rail_contact_us: "联系我们", rail_chat_hint: "在线咨询", rail_form_title: "给我们发消息", rail_form_success: "谢谢 — 我们将在24小时内与您联系。" },
-  de: { rail_contact_us: "KONTAKT", rail_chat_hint: "Chatten Sie mit uns", rail_form_title: "Senden Sie uns eine Nachricht", rail_form_success: "Danke — wir melden uns innerhalb von 24 Stunden." },
-  no: { rail_contact_us: "KONTAKT OSS", rail_chat_hint: "Chat med oss", rail_form_title: "Send oss en melding", rail_form_success: "Takk — vi tar kontakt innen 24 timer." },
-  fr: { rail_contact_us: "CONTACTEZ-NOUS", rail_chat_hint: "Discutez avec nous", rail_form_title: "Envoyez-nous un message", rail_form_success: "Merci — nous vous répondrons sous 24 heures." },
-  it: { rail_contact_us: "CONTATTACI", rail_chat_hint: "Chatta con noi", rail_form_title: "Inviaci un messaggio", rail_form_success: "Grazie — ti risponderemo entro 24 ore." },
+export const STATUS = {
+  sale: { en: "For Sale", th: "ประกาศขาย", ru: "Продаётся", zh: "出售", de: "Zu verkaufen", no: "Til salgs", fr: "À vendre", it: "In vendita" },
+  rent: { en: "For Rent", th: "ประกาศเช่า", ru: "В аренду", zh: "出租", de: "Zu vermieten", no: "Til leie", fr: "À louer", it: "In affitto" },
+  rented: { en: "Rented", th: "เช่าแล้ว", ru: "Сдано в аренду", zh: "已出租", de: "Vermietet", no: "Utleid", fr: "Loué", it: "Affittato" },
+  sold: { en: "Sold", th: "ขายแล้ว", ru: "Продано", zh: "已售", de: "Verkauft", no: "Solgt", fr: "Vendu", it: "Venduto" },
+  reserved: { en: "Reserved", th: "จองแล้ว", ru: "Забронировано", zh: "已预订", de: "Reserviert", no: "Reservert", fr: "Réservé", it: "Prenotato" },
 };
 
-const CHAT_I18N = {
-  en: { chat_title: "Ask about our properties", chat_subtitle: "AI assistant · huahin.properties listings only", chat_placeholder: "e.g. Any 4-bedroom pool villas?", chat_type_or_speak: "Type or tap 🎙️ to speak", chat_thinking: "Typing…", chat_talk_to_human: "Prefer a human? Leave your contact →", chat_greeting: "Hi! Ask me anything about our listings — bedrooms, price, area, property codes, availability.", chat_view_property: "View property", chat_contact_us: "Contact us", chat_autobot_intro: "Hi! I noticed you've been looking closely at", chat_autobot_help: "Want me to help with anything specific?" },
-  th: { chat_type_or_speak: "พิมพ์หรือกด 🎙️ เพื่อพูดก็ได้", chat_title: "ถามเกี่ยวกับทรัพย์ของเรา", chat_subtitle: "ผู้ช่วย AI · ข้อมูลจากประกาศใน huahin.properties เท่านั้น", chat_placeholder: "เช่น มีพูลวิลล่า 4 ห้องนอนไหม", chat_thinking: "กำลังพิมพ์…", chat_talk_to_human: "อยากคุยกับเจ้าหน้าที่? ฝากข้อมูลติดต่อ →", chat_greeting: "สวัสดีค่ะ ถามอะไรก็ได้เกี่ยวกับทรัพย์ของเรา เช่น จำนวนห้องนอน ราคา โซน รหัสทรัพย์ หรือสถานะว่าง/เช่าแล้ว", chat_view_property: "ดูรายละเอียด", chat_contact_us: "ติดต่อเรา", chat_autobot_intro: "สวัสดีค่ะ เห็นว่าคุณสนใจดู", chat_autobot_help: "อยากให้ช่วยอะไรเพิ่มเติมไหมคะ?" },
-  ru: { chat_title: "Спросите о наших объектах", chat_subtitle: "ИИ-ассистент · только объекты huahin.properties", chat_placeholder: "напр. Есть виллы с 4 спальнями?", chat_thinking: "Печатает…", chat_talk_to_human: "Хотите поговорить с человеком? Оставьте контакт →", chat_greeting: "Здравствуйте! Спрашивайте о наших объектах — спальни, цена, район, код объекта, наличие.", chat_view_property: "Смотреть объект", chat_contact_us: "Связаться с нами", chat_autobot_intro: "Здравствуйте! Я заметила, что вас заинтересовали", chat_autobot_help: "Могу чем-то помочь?" },
-  zh: { chat_title: "咨询我们的房源", chat_subtitle: "AI 助手 · 仅限 huahin.properties 房源信息", chat_placeholder: "例如：有4卧室泳池别墅吗？", chat_thinking: "输入中…", chat_talk_to_human: "想联系真人客服？留下联系方式 →", chat_greeting: "您好！可以问我关于房源的任何问题 — 卧室数、价格、区域、房源编号或是否可租。", chat_view_property: "查看房源", chat_contact_us: "联系我们", chat_autobot_intro: "您好！我注意到您一直在关注", chat_autobot_help: "需要我帮您什么吗？" },
-  de: { chat_title: "Fragen zu unseren Immobilien", chat_subtitle: "KI-Assistent · nur huahin.properties Angebote", chat_placeholder: "z.B. Poolvillen mit 4 Schlafzimmern?", chat_thinking: "Tippt…", chat_talk_to_human: "Lieber mit einem Menschen sprechen? Kontakt hinterlassen →", chat_greeting: "Hallo! Fragen Sie mich alles zu unseren Angeboten — Schlafzimmer, Preis, Gebiet, Objektcode oder Verfügbarkeit.", chat_view_property: "Immobilie ansehen", chat_contact_us: "Kontaktieren Sie uns", chat_autobot_intro: "Hallo! Mir ist aufgefallen, dass Sie sich für", chat_autobot_help: "interessieren. Kann ich Ihnen bei etwas Bestimmtem helfen?" },
-  no: { chat_title: "Spør om eiendommene våre", chat_subtitle: "AI-assistent · kun huahin.properties oppføringer", chat_placeholder: "f.eks. Bassengvillaer med 4 soverom?", chat_thinking: "Skriver…", chat_talk_to_human: "Vil du snakke med et menneske? Legg igjen kontaktinfo →", chat_greeting: "Hei! Spør meg om oppføringene våre — soverom, pris, område, eiendomskode eller tilgjengelighet.", chat_view_property: "Se eiendom", chat_contact_us: "Kontakt oss", chat_autobot_intro: "Hei! Jeg la merke til at du har sett nærmere på", chat_autobot_help: "Vil du at jeg skal hjelpe med noe spesifikt?" },
-  fr: { chat_title: "Posez une question sur nos biens", chat_subtitle: "Assistant IA · uniquement les annonces huahin.properties", chat_placeholder: "ex. Villas avec piscine 4 chambres ?", chat_thinking: "En train d'écrire…", chat_talk_to_human: "Préférez parler à un humain ? Laissez vos coordonnées →", chat_greeting: "Bonjour ! Posez-moi vos questions sur nos annonces — chambres, prix, secteur, code du bien ou disponibilité.", chat_view_property: "Voir le bien", chat_contact_us: "Contactez-nous", chat_autobot_intro: "Bonjour ! J'ai remarqué que vous vous intéressiez à", chat_autobot_help: "Voulez-vous que je vous aide pour quelque chose en particulier ?" },
-  it: { chat_title: "Chiedi sui nostri immobili", chat_subtitle: "Assistente IA · solo annunci huahin.properties", chat_placeholder: "es. Ville con piscina 4 camere?", chat_thinking: "Sta scrivendo…", chat_talk_to_human: "Preferisci parlare con una persona? Lascia i tuoi contatti →", chat_greeting: "Ciao! Chiedimi qualsiasi cosa sui nostri annunci — camere, prezzo, zona, codice immobile o disponibilità.", chat_view_property: "Vedi immobile", chat_contact_us: "Contattaci", chat_autobot_intro: "Ciao! Ho notato che ti interessano", chat_autobot_help: "Posso aiutarti con qualcosa di specifico?" },
+export const FEATURES = {
+  sea_view: { en: "Sea View", th: "วิวทะเล", ru: "Вид на море", zh: "海景", de: "Meerblick", no: "Sjøutsikt", fr: "Vue mer", it: "Vista mare" },
+  mountain_view: { en: "Mountain View", th: "วิวภูเขา", ru: "Вид на горы", zh: "山景", de: "Bergblick", no: "Fjellutsikt", fr: "Vue montagne", it: "Vista montagna" },
+  pool: { en: "Private Pool", th: "สระว่ายน้ำส่วนตัว", ru: "Частный бассейн", zh: "私人泳池", de: "Privater Pool", no: "Privat basseng", fr: "Piscine privée", it: "Piscina privata" },
+  shared_pool: { en: "Shared Pool", th: "สระว่ายน้ำส่วนกลาง", ru: "Общий бассейн", zh: "共用泳池", de: "Gemeinschaftspool", no: "Fellesbasseng", fr: "Piscine commune", it: "Piscina comune" },
+  furnished: { en: "Fully Furnished", th: "เฟอร์นิเจอร์ครบ", ru: "С мебелью", zh: "全套家具", de: "Voll möbliert", no: "Fullt møblert", fr: "Entièrement meublé", it: "Completamente arredato" },
+  new: { en: "New / Move-in Ready", th: "บ้านใหม่ พร้อมเข้าอยู่", ru: "Новый, готов к заселению", zh: "全新可入住", de: "Neu / Bezugsfertig", no: "Nytt / Innflytningsklart", fr: "Neuf / Prêt à emménager", it: "Nuovo / Pronto per trasferirsi" },
+  beachfront: { en: "Beachfront", th: "ติดชายหาด", ru: "На берегу моря", zh: "海滨第一排", de: "Direkt am Strand", no: "Ved stranden", fr: "Front de mer", it: "Fronte mare" },
+  gated: { en: "Gated Village", th: "หมู่บ้านมีระบบรักษาความปลอดภัย", ru: "Закрытый посёлок", zh: "封闭式社区", de: "Bewachte Siedlung", no: "Gjerdet boligområde", fr: "Résidence sécurisée", it: "Residence recintato" },
+  quiet: { en: "Quiet Soi", th: "ซอยเงียบสงบ", ru: "Тихая улица", zh: "安静巷弄", de: "Ruhige Straße", no: "Rolig gate", fr: "Rue calme", it: "Strada tranquilla" },
+  golf: { en: "Near Golf Course", th: "ใกล้สนามกอล์ฟ", ru: "Рядом с полем для гольфа", zh: "近高尔夫球场", de: "Nahe Golfplatz", no: "Nær golfbane", fr: "Près d'un golf", it: "Vicino al golf" },
+  riverside: { en: "Riverside", th: "ติดริมแม่น้ำ", ru: "У реки", zh: "河畔", de: "Am Fluss", no: "Ved elven", fr: "Bord de rivière", it: "Lungofiume" },
+  rental_yield: { en: "Strong Rental Yield", th: "ผลตอบแทนค่าเช่าดี", ru: "Высокая доходность аренды", zh: "租金回报高", de: "Hohe Mietrendite", no: "Høy leieavkastning", fr: "Rendement locatif élevé", it: "Alto rendimento locativo" },
+  pet_friendly: { en: "Pet Friendly", th: "เลี้ยงสัตว์ได้", ru: "Можно с животными", zh: "允许宠物", de: "Haustiere erlaubt", no: "Kjæledyr tillatt", fr: "Animaux acceptés", it: "Animali ammessi" },
 };
 
-const FAV_PANEL_LABELS = { en: "My Favorites", th: "รายการโปรดของฉัน", ru: "Избранное", zh: "我的收藏", de: "Meine Favoriten", no: "Mine favoritter", fr: "Mes favoris", it: "I miei preferiti" };
-const FAV_EMPTY_LABELS = { en: "No saved favorites yet — tap the star on any listing.", th: "ยังไม่มีรายการโปรด — กดดาวที่ประกาศที่สนใจได้เลย", ru: "Пока нет избранного — нажмите звезду на объекте.", zh: "暂无收藏 — 点击房源上的星标即可收藏", de: "Noch keine Favoriten — tippen Sie auf den Stern bei einem Angebot.", no: "Ingen favoritter ennå — trykk på stjernen på en oppføring.", fr: "Aucun favori pour l'instant — appuyez sur l'étoile d'une annonce.", it: "Nessun preferito ancora — tocca la stella su un annuncio." };
+export const PROPERTIES = [
+  {
+    id: "HH-101",
+    area: "hua-hin",
+    zone: "Khao Tao",
+    type: "villa",
+    status: "sale",
+    price: 18500000,
+    currency: "THB",
+    landSize: 800,
+    livingArea: 320,
+    bedrooms: 4,
+    bathrooms: 4,
+    parking: 2,
+    pool: true,
+    furnished: "full",
+    ownership: "Chanote",
+    distanceBeach: 1.2,
+    distanceTown: 8,
+    features: ["sea_view", "pool", "furnished", "new"],
+    title: { en: "Sunset Cliff Pool Villa", th: "พูลวิลล่าซันเซ็ทคลิฟ เขาเต่า", ru: "Вилла с бассейном Sunset Cliff", zh: "日落崖泳池别墅", de: "Sunset Cliff Poolvilla", no: "Sunset Cliff Bassengvilla" },
+    shortDesc: {
+      en: "A 4-bedroom clifftop pool villa above Khao Tao with uninterrupted Gulf views.",
+      th: "พูลวิลล่า 4 ห้องนอน บนหน้าผาเขาเต่า วิวอ่าวไทยแบบพาโนรามา",
+      ru: "Вилла с бассейном на 4 спальни на скале Khao Tao с панорамным видом на залив.",
+      zh: "位于考涛悬崖上的四卧室泳池别墅，享无遮挡的海湾全景。",
+      de: "Eine 4-Schlafzimmer-Poolvilla auf einer Klippe über Khao Tao mit ungestörtem Blick auf den Golf.",
+      no: "En firesoveromsvilla med basseng på en klippe over Khao Tao med uforstyrret utsikt over golfen.",
+    },
+    fullDesc: {
+      en: "Perched above Khao Tao's fishing village, this newly built villa pairs a 12-metre infinity pool with floor-to-ceiling glass overlooking the Gulf of Thailand. Interiors are finished in warm teak and limestone, fully furnished and ready to move in.",
+      th: "ตั้งอยู่เหนือหมู่บ้านชาวประมงเขาเต่า วิลล่าสร้างใหม่หลังนี้มาพร้อมสระอินฟินิตี้ยาว 12 เมตร และกระจกบานใหญ่มองเห็นอ่าวไทย ตกแต่งด้วยไม้สักและหินปูนโทนอบอุ่น พร้อมเฟอร์นิเจอร์ครบ เข้าอยู่ได้ทันที",
+      ru: "Расположенная над рыбацкой деревней Khao Tao, эта новая вилла сочетает бассейн-инфинити длиной 12 метров с панорамными окнами на залив. Интерьер отделан тиком и известняком, полностью меблирован и готов к заезду.",
+      zh: "别墅坐落于考涛渔村上方，配备12米无边泳池及落地玻璃窗，可俯瞰泰国湾全景。室内以柚木与石灰岩装饰，家具齐全，随时可入住。",
+      de: "Über dem Fischerdorf Khao Tao gelegen, verbindet diese neu erbaute Villa einen 12-Meter-Infinitypool mit bodentiefen Fenstern zum Golf von Thailand. Die Innenräume sind mit warmem Teakholz und Kalkstein gestaltet, voll möbliert und bezugsfertig.",
+      no: "Denne nybygde villaen ligger over fiskelandsbyen Khao Tao og kombinerer et 12-meters infinity-basseng med gulv-til-tak-vinduer mot Thailandsgolfen. Interiøret er utført i varm teak og kalkstein, fullt møblert og innflytningsklart.",
+    },
+    seo: { title: "Sunset Cliff Pool Villa For Sale in Khao Tao, Hua Hin", desc: "4-bed clifftop pool villa in Khao Tao with panoramic sea views. Fully furnished, Chanote title.", keywords: "Hua Hin pool villa, Khao Tao villa for sale, Hua Hin sea view villa" },
+    ownerId: "OWN-001",
+    mapLink: "https://www.google.com/maps/search/?api=1&query=Khao+Tao,+Hua+Hin,+Thailand",
+    owner: { name: "Khun Somchai Ruangrit", phone: "+66 81 234 5678", email: "somchai.r@example.com", line: "somchai_hh", notes: "Prefers contact after 6pm. Flexible on price if paid in full within 30 days." },
+    adminNotes: "Photographed March 2026. Owner considering a second viewing slot on weekends only.",
+    photos: ["Exterior — clifftop facade", "Infinity pool at dusk", "Living room, sea view", "Master bedroom", "Kitchen", "Aerial — Khao Tao coastline"],
+  },
+  {
+    id: "HH-102",
+    area: "hua-hin",
+    zone: "Hin Lek Fai",
+    type: "house",
+    status: "reserved",
+    price: 8900000,
+    currency: "THB",
+    landSize: 400,
+    livingArea: 220,
+    bedrooms: 3,
+    bathrooms: 3,
+    parking: 2,
+    pool: false,
+    furnished: "partial",
+    ownership: "Chanote",
+    distanceBeach: 6,
+    distanceTown: 3,
+    features: ["mountain_view", "golf", "quiet"],
+    title: { en: "Black Mountain Garden House", th: "บ้านสวนแบล็คเมาน์เทน หินเหล็กไฟ", ru: "Дом с садом Black Mountain", zh: "黑山花园别墅", de: "Black Mountain Gartenhaus", no: "Black Mountain Hagehus" },
+    shortDesc: {
+      en: "A quiet 3-bedroom garden house minutes from Black Mountain Golf Club.",
+      th: "บ้านสวน 3 ห้องนอน ซอยเงียบ ใกล้สนามกอล์ฟแบล็คเมาน์เทน",
+      ru: "Тихий дом с садом на 3 спальни, в нескольких минутах от гольф-клуба Black Mountain.",
+      zh: "安静的三卧室花园住宅，距黑山高尔夫球会仅数分钟车程。",
+      de: "Ein ruhiges 3-Schlafzimmer-Gartenhaus, wenige Minuten vom Black Mountain Golf Club entfernt.",
+      no: "Et rolig hagehus med tre soverom, få minutter fra Black Mountain golfklubb.",
+    },
+    fullDesc: {
+      en: "Set on a quiet soi in Hin Lek Fai, this single-storey house looks out to the Tenasserim hills and sits a short drive from two championship golf courses. Mature tropical planting wraps a covered outdoor dining terrace.",
+      th: "ตั้งอยู่ในซอยเงียบสงบย่านหินเหล็กไฟ บ้านชั้นเดียวหลังนี้มองเห็นทิวเขาตะนาวศรี ขับรถไม่กี่นาทีถึงสนามกอล์ฟระดับแชมเปี้ยนชิพสองแห่ง ล้อมรอบด้วยต้นไม้เขตร้อนและระเบียงทานอาหารกลางแจ้ง",
+      ru: "Расположенный на тихой улице в районе Hin Lek Fai, этот одноэтажный дом с видом на горы Тенассерим находится в нескольких минутах езды от двух чемпионских полей для гольфа. Тропический сад окружает крытую террасу для ужина на открытом воздухе.",
+      zh: "位于欣勒法伊安静巷弄内，这栋平房可远眺德纳沙林山脉，车程数分钟即达两座锦标赛级高尔夫球场。成熟热带植栽环绕着带顶户外用餐露台。",
+      de: "Auf einer ruhigen Straße in Hin Lek Fai gelegen, blickt dieses einstöckige Haus auf die Tenasserim-Berge und liegt nur wenige Autominuten von zwei Meisterschafts-Golfplätzen entfernt. Ausgewachsene tropische Bepflanzung umgibt eine überdachte Essterrasse im Freien.",
+      no: "Dette enetasjes huset ligger i en rolig gate i Hin Lek Fai med utsikt til Tenasserim-fjellene, kort kjøretur fra to mesterskaps-golfbaner. Frodig tropisk beplantning omgir en overbygd uteplass for spising.",
+    },
+    seo: { title: "3-Bed House For Sale Near Black Mountain Golf, Hua Hin", desc: "Quiet garden house in Hin Lek Fai near Black Mountain Golf Club, Hua Hin.", keywords: "house for sale Hua Hin, Hin Lek Fai house, Hua Hin golf property" },
+    ownerId: "OWN-002",
+    mapLink: "https://www.google.com/maps/search/?api=1&query=Hin+Lek+Fai,+Hua+Hin,+Thailand",
+    owner: { name: "Khun Ariya Boonmee", phone: "+66 89 555 1122", email: "ariya.b@example.com", line: "ariyab", notes: "Owner relocating to Bangkok end of quarter; motivated to close." },
+    adminNotes: "Deposit received 2026-06-20, awaiting bank transfer confirmation before marking sold.",
+    photos: ["Front facade", "Garden terrace", "Living room", "Master bedroom", "Kitchen"],
+  },
+  {
+    id: "HH-103",
+    area: "hua-hin",
+    zone: "Khao Takiab",
+    type: "condo",
+    status: "rented",
+    tenantId: "TEN-001",
+    leaseInfo: { leaseStart: "2025-08-20", leaseEnd: "2026-08-20" },
+    price: 45000,
+    currency: "THB",
+    landSize: null,
+    livingArea: 65,
+    bedrooms: 2,
+    bathrooms: 2,
+    parking: 1,
+    pool: true,
+    furnished: "full",
+    ownership: "Foreign Freehold Quota",
+    distanceBeach: 0.3,
+    distanceTown: 5,
+    features: ["sea_view", "furnished", "new", "shared_pool"],
+    title: { en: "Marina Bay Seaview Condo", th: "คอนโดวิวทะเล มารีน่า เบย์", ru: "Кондо с видом на море Marina Bay", zh: "海景公寓 Marina Bay", de: "Marina Bay Meerblick-Wohnung", no: "Marina Bay Sjøutsikt-leilighet" },
+    shortDesc: {
+      en: "Furnished 2-bedroom condo, 300m to Khao Takiab beach, sea-facing balcony.",
+      th: "คอนโด 2 ห้องนอน เฟอร์นิเจอร์ครบ ห่างหาดเขาตะเกียบ 300 เมตร ระเบียงวิวทะเล",
+      ru: "Меблированное кондо на 2 спальни, 300 м до пляжа Khao Takiab, балкон с видом на море.",
+      zh: "两卧室精装公寓，距考踏鹁海滩仅300米，阳台面海。",
+      de: "Möblierte 2-Zimmer-Wohnung, 300 m zum Strand Khao Takiab, Balkon mit Meerblick.",
+      no: "Møblert 2-roms leilighet, 300 m til Khao Takiab-stranden, balkong med sjøutsikt.",
+    },
+    fullDesc: {
+      en: "High-floor unit in a beachfront condominium at Khao Takiab, fully furnished with a wraparound sea-view balcony. Building amenities include a 25m infinity pool, gym and 24-hour security.",
+      th: "ยูนิตชั้นสูงในคอนโดมิเนียมริมชายหาดเขาตะเกียบ ตกแต่งครบพร้อมระเบียงวิวทะเลรอบด้าน สิ่งอำนวยความสะดวกในตึกมีสระอินฟินิตี้ 25 เมตร ฟิตเนส และรักษาความปลอดภัยตลอด 24 ชั่วโมง",
+      ru: "Апартаменты на высоком этаже в кондоминиуме на берегу моря в Khao Takiab, полностью меблированы, с балконом с видом на море. В здании есть бассейн-инфинити 25 м, тренажёрный зал и круглосуточная охрана.",
+      zh: "位于考踏鹁海滨公寓高楼层单位，全屋配备家具，环绕式海景阳台。大楼设施包括25米无边泳池、健身房及24小时保安。",
+      de: "Einheit im hohen Stockwerk eines Strand-Kondominiums in Khao Takiab, voll möbliert mit umlaufendem Meerblick-Balkon. Zur Gebäudeausstattung gehören ein 25-m-Infinitypool, Fitnessraum und 24-Stunden-Sicherheitsdienst.",
+      no: "Enhet i høy etasje i et strandkondominium i Khao Takiab, fullt møblert med en rundgående balkong med sjøutsikt. Fasilitetene inkluderer et 25 m infinity-basseng, treningsrom og døgnvakthold.",
+    },
+    seo: { title: "2-Bed Seaview Condo For Rent, Khao Takiab, Hua Hin", desc: "Furnished sea-view condo for rent 300m from Khao Takiab beach, Hua Hin.", keywords: "property for rent Hua Hin, Khao Takiab condo rent, Hua Hin sea view condo" },
+    ownerId: "OWN-003",
+    mapLink: "https://www.google.com/maps/search/?api=1&query=Khao+Takiab,+Hua+Hin,+Thailand",
+    owner: { name: "Khun Piyaporn Sae-lee", phone: "+66 92 345 6789", email: "piyaporn.s@example.com", line: "piyapornsl", notes: "Owner lives in Bangkok, manages via property manager Khun Toon (+66 87 111 2233)." },
+    adminNotes: "Available from 1 Aug 2026. Minimum lease 12 months preferred.",
+    photos: ["Balcony sea view", "Living room", "Bedroom 1", "Bathroom", "Building pool"],
+  },
+  {
+    id: "PB-201",
+    area: "pranburi",
+    zone: "Dolphin Bay",
+    type: "villa",
+    status: "sale",
+    price: 32000000,
+    currency: "THB",
+    landSize: 1200,
+    livingArea: 450,
+    bedrooms: 5,
+    bathrooms: 5,
+    parking: 3,
+    pool: true,
+    furnished: "full",
+    ownership: "Chanote",
+    distanceBeach: 0.05,
+    distanceTown: 25,
+    features: ["beachfront", "pool", "sea_view", "furnished"],
+    title: { en: "Dolphin Bay Beachfront Villa", th: "วิลล่าติดหาดดอลฟินเบย์", ru: "Пляжная вилла Dolphin Bay", zh: "海豚湾海滨别墅", de: "Dolphin Bay Strandvilla", no: "Dolphin Bay Strandvilla" },
+    shortDesc: {
+      en: "A rare 5-bedroom beachfront estate directly on the sands of Dolphin Bay.",
+      th: "บ้านหรูริมหาด 5 ห้องนอน ตั้งอยู่ติดชายหาดดอลฟินเบย์ หาได้ยาก",
+      ru: "Редкая пляжная резиденция на 5 спален прямо на песках Dolphin Bay.",
+      zh: "罕见的五卧室海滨庄园，直接坐落于海豚湾沙滩上。",
+      de: "Ein seltenes Anwesen mit 5 Schlafzimmern direkt am Sandstrand der Dolphin Bay.",
+      no: "Et sjeldent eiendomskompleks med fem soverom rett på sanden i Dolphin Bay.",
+    },
+    fullDesc: {
+      en: "One of only a handful of true beachfront estates in Dolphin Bay, this compound opens directly onto the sand with a 15-metre pool facing the water. Five ensuite bedrooms are arranged across two pavilions connected by a covered sala.",
+      th: "หนึ่งในบ้านหรูริมหาดไม่กี่หลังของดอลฟินเบย์ที่ติดชายหาดจริง พร้อมสระว่ายน้ำยาว 15 เมตรหันหน้าสู่ทะเล ห้องนอน 5 ห้องพร้อมห้องน้ำในตัวแยกเป็นสองอาคารเชื่อมด้วยศาลาโล่ง",
+      ru: "Одна из немногих настоящих пляжных резиденций в Dolphin Bay, этот комплекс выходит прямо на песок с 15-метровым бассейном, обращённым к воде. Пять спален с отдельными ванными расположены в двух павильонах, соединённых крытой салой.",
+      zh: "海豚湾少数真正的海滨庄园之一，庄园直通沙滩，配备面朝大海的15米泳池。五间带独立卫浴的卧室分布于两栋由开放式凉亭连接的建筑中。",
+      de: "Eines von nur wenigen echten Strandanwesen in Dolphin Bay, öffnet sich dieses Anwesen direkt zum Sand mit einem 15-Meter-Pool zum Wasser. Fünf Suiten verteilen sich auf zwei durch eine überdachte Sala verbundene Pavillons.",
+      no: "Ett av kun noen få ekte strandeiendommer i Dolphin Bay, dette anlegget åpner seg rett mot sanden med et 15-meters basseng vendt mot vannet. Fem soverom med eget bad er fordelt på to paviljonger forbundet med en overbygd sala.",
+    },
+    seo: { title: "Beachfront Pool Villa For Sale, Dolphin Bay, Pranburi", desc: "Rare 5-bed beachfront estate directly on Dolphin Bay sands, Pranburi.", keywords: "Pranburi property, Dolphin Bay villa for sale, Pranburi beachfront villa" },
+    ownerId: "OWN-004",
+    mapLink: "https://www.google.com/maps/search/?api=1&query=Dolphin+Bay,+Pranburi,+Thailand",
+    owner: { name: "Mr. James Whitfield", phone: "+66 81 999 4433", email: "j.whitfield@example.com", line: "jwhitfield", notes: "UK-based, communicates by email only. Agent has sole mandate through Dec 2026." },
+    adminNotes: "Flagship listing — feature on homepage. Drone footage scheduled next shoot.",
+    photos: ["Beachfront facade", "Pool facing the sea", "Sala & dining pavilion", "Master suite", "Aerial — Dolphin Bay"],
+  },
+  {
+    id: "PB-202",
+    area: "pranburi",
+    zone: "Pak Nam Pran",
+    type: "villa",
+    status: "sale",
+    price: 14500000,
+    currency: "THB",
+    landSize: 600,
+    livingArea: 280,
+    bedrooms: 3,
+    bathrooms: 3,
+    parking: 2,
+    pool: true,
+    furnished: "full",
+    ownership: "Chanote",
+    distanceBeach: 1.5,
+    distanceTown: 20,
+    features: ["pool", "quiet", "new"],
+    title: { en: "Pranburi Forest Pool Villa", th: "พูลวิลล่าป่าปราณบุรี ปากน้ำปราณ", ru: "Вилла с бассейном Pranburi Forest", zh: "巴蓝武里森林泳池别墅", de: "Pranburi Wald-Poolvilla", no: "Pranburi Skog-Bassengvilla" },
+    shortDesc: {
+      en: "A new 3-bedroom pool villa tucked in a quiet Pak Nam Pran garden compound.",
+      th: "พูลวิลล่า 3 ห้องนอน สร้างใหม่ ในโครงการสวนเงียบสงบย่านปากน้ำปราณ",
+      ru: "Новая вилла с бассейном на 3 спальни в тихом саду Pak Nam Pran.",
+      zh: "全新三卧室泳池别墅，坐落于巴南浦兰宁静花园社区内。",
+      de: "Eine neue 3-Zimmer-Poolvilla in einer ruhigen Gartenanlage in Pak Nam Pran.",
+      no: "En ny bassengvilla med tre soverom i et rolig hageanlegg i Pak Nam Pran.",
+    },
+    fullDesc: {
+      en: "Completed in 2025, this single-storey villa sits within a small gated compound of six homes surrounded by mature palms. A private 8-metre pool and outdoor kitchen make it well suited to full-time living or holiday rental.",
+      th: "สร้างเสร็จปี 2568 วิลล่าชั้นเดียวหลังนี้อยู่ในโครงการรั้วรอบขอบชิดขนาดเล็กเพียง 6 หลัง ล้อมรอบด้วยต้นปาล์มร่มรื่น มีสระว่ายน้ำส่วนตัวยาว 8 เมตร และครัวไทยกลางแจ้ง เหมาะทั้งอยู่อาศัยและปล่อยเช่า",
+      ru: "Построенная в 2025 году, эта одноэтажная вилла расположена в небольшом закрытом комплексе из шести домов, окружённом пальмами. Частный бассейн 8 метров и открытая кухня делают её подходящей для постоянного проживания или аренды.",
+      zh: "该平层别墅建于2025年，位于仅六户的小型封闭社区内，四周棕榈成荫。私人8米泳池及户外厨房，适合长住或度假出租。",
+      de: "Fertiggestellt 2025, liegt diese einstöckige Villa in einer kleinen bewachten Anlage mit sechs Häusern, umgeben von ausgewachsenen Palmen. Ein privater 8-Meter-Pool und Außenküche eignen sich für Dauerwohnen oder Ferienvermietung.",
+      no: "Ferdigstilt i 2025, denne enetasjes villaen ligger i et lite gjerdet anlegg med seks hus omgitt av palmer. Et privat 8-meters basseng og utekjøkken gjør den godt egnet for fast bosetting eller ferieutleie.",
+    },
+    seo: { title: "New 3-Bed Pool Villa For Sale, Pak Nam Pran, Pranburi", desc: "New pool villa in a quiet gated compound in Pak Nam Pran, Pranburi.", keywords: "Pranburi property, Pak Nam Pran pool villa, Pranburi pool villa for sale" },
+    ownerId: "OWN-001",
+    mapLink: "https://www.google.com/maps/search/?api=1&query=Pak+Nam+Pran,+Pranburi,+Thailand",
+    owner: { name: "Khun Natthaphong Chai", phone: "+66 83 222 7788", email: "natthaphong.c@example.com", line: "nutcha_pb", notes: "Developer's last unfurnished unit; will negotiate on furniture package." },
+    adminNotes: "Add to Pranburi landing page hero carousel.",
+    photos: ["Villa exterior", "Pool & garden", "Living/dining", "Bedroom", "Outdoor kitchen"],
+  },
+  {
+    id: "PB-203",
+    area: "pranburi",
+    zone: "Wang Phong",
+    type: "land",
+    status: "sold",
+    price: 6200000,
+    currency: "THB",
+    landSize: 1600,
+    livingArea: null,
+    bedrooms: 0,
+    bathrooms: 0,
+    parking: null,
+    pool: false,
+    furnished: null,
+    ownership: "Chanote",
+    distanceBeach: 4,
+    distanceTown: 18,
+    features: ["riverside", "quiet"],
+    title: { en: "Pranburi Riverside Land Plot", th: "ที่ดินริมแม่น้ำปราณบุรี วังก์พง", ru: "Земельный участок у реки Pranburi", zh: "巴蓝武里河畔地块", de: "Pranburi Grundstück am Fluss", no: "Pranburi Elvetomt" },
+    shortDesc: {
+      en: "1,600 sqm of riverside land in Wang Phong, ready to build, Chanote title.",
+      th: "ที่ดินริมแม่น้ำ 1,600 ตร.ว. ย่านวังก์พง โฉนดพร้อมปลูกสร้าง",
+      ru: "Участок у реки площадью 1600 кв.м в Wang Phong, готов к застройке, документ Chanote.",
+      zh: "位于旺蓬的1600平方米河畔地块，具备建屋条件，附产权证。",
+      de: "1.600 m² Grundstück am Fluss in Wang Phong, baureif, mit Chanote-Titel.",
+      no: "1600 kvm elvetomt i Wang Phong, byggeklar, med Chanote-skjøte.",
+    },
+    fullDesc: {
+      en: "Flat, cleared land fronting a quiet stretch of the Pranburi River, with road access and utilities at the boundary. Clean Chanote title, no floodplain restrictions on record.",
+      th: "ที่ดินราบเรียบเคลียร์พร้อมใช้งาน ติดแม่น้ำปราณบุรีช่วงเงียบสงบ มีถนนเข้าออกและระบบสาธารณูปโภคติดแนวเขต โฉนดสะอาด ไม่มีประวัติเขตน้ำท่วม",
+      ru: "Ровный, расчищенный участок у тихого участка реки Пранбури, с подъездной дорогой и коммуникациями по границе. Чистый документ Chanote, паводковых ограничений не зафиксировано.",
+      zh: "平整已清理的地块，毗邻宁静的巴蓝武里河段，边界处已通路及水电。产权清晰，无洪泛区限制记录。",
+      de: "Ebenes, gerodetes Grundstück an einem ruhigen Abschnitt des Pranburi-Flusses, mit Straßenzugang und Versorgungsanschlüssen an der Grenze. Sauberer Chanote-Titel, keine bekannten Überschwemmungsgebietsbeschränkungen.",
+      no: "Flat, ryddet tomt langs en rolig strekning av Pranburi-elven, med veitilgang og strøm/vann ved grensen. Ren Chanote-skjøte, ingen kjente restriksjoner for flomsone.",
+    },
+    seo: { title: "Riverside Land For Sale, Wang Phong, Pranburi", desc: "1,600 sqm riverside land plot in Wang Phong, Pranburi, ready to build.", keywords: "Pranburi property, Pranburi land for sale, riverside land Thailand" },
+    ownerId: "OWN-005",
+    mapLink: "https://www.google.com/maps/search/?api=1&query=Wang+Phong,+Pranburi,+Thailand",
+    owner: { name: "Khun Suda Thongdee", phone: "+66 86 444 9900", email: "suda.t@example.com", line: "sudatd", notes: "Sale completed 2026-05-14 via cash transfer. Keep listing for referral/testimonial." },
+    adminNotes: "Closed deal — used as case study for Pranburi land guide article.",
+    photos: ["Land — river frontage", "Land — road access", "Surveyor map"],
+  },
+  {
+    id: "CA-301",
+    area: "cha-am",
+    zone: "Cha-am Beach",
+    type: "condo",
+    status: "sale",
+    price: 4200000,
+    currency: "THB",
+    landSize: null,
+    livingArea: 48,
+    bedrooms: 1,
+    bathrooms: 1,
+    parking: 1,
+    pool: true,
+    furnished: "full",
+    ownership: "Foreign Freehold Quota",
+    distanceBeach: 0.1,
+    distanceTown: 2,
+    features: ["beachfront", "furnished", "rental_yield", "shared_pool"],
+    title: { en: "Cha-am Beachwalk Condo", th: "คอนโดชะอำ บีชวอล์ค", ru: "Кондо Cha-am Beachwalk", zh: "差安海滨步道公寓", de: "Cha-am Beachwalk Wohnung", no: "Cha-am Beachwalk Leilighet" },
+    shortDesc: {
+      en: "A compact 1-bedroom condo 100m from Cha-am beach, strong rental track record.",
+      th: "คอนโด 1 ห้องนอนขนาดกะทัดรัด ห่างหาดชะอำ 100 เมตร ปล่อยเช่าได้ผลตอบแทนดี",
+      ru: "Компактное кондо на 1 спальню в 100 м от пляжа Cha-am, хорошая история аренды.",
+      zh: "紧凑型一卧室公寓，距差安海滩仅100米，出租记录良好。",
+      de: "Eine kompakte 1-Zimmer-Wohnung 100 m vom Strand von Cha-am, gute Vermietungshistorie.",
+      no: "En kompakt ett-roms leilighet 100 m fra Cha-am-stranden, god utleiehistorikk.",
+    },
+    fullDesc: {
+      en: "Entry-level beachfront investment steps from Cha-am's promenade, currently on a short-term rental platform with an established booking history. Building includes a rooftop pool and direct beach access.",
+      th: "คอนโดลงทุนราคาเข้าถึงง่ายติดชายหาดชะอำ เพียงไม่กี่ก้าวจากถนนเลียบชายหาด ปัจจุบันปล่อยเช่าระยะสั้นผ่านแพลตฟอร์มพร้อมประวัติการจองที่ดี ตึกมีสระบนดาดฟ้าและทางเข้าหาดโดยตรง",
+      ru: "Начальная инвестиция на берегу моря в нескольких шагах от набережной Cha-am, сейчас сдаётся посуточно с хорошей историей бронирований. В здании есть бассейн на крыше и прямой выход на пляж.",
+      zh: "入门级海滨投资房，距差安海滨大道仅几步之遥，目前在短租平台上出租，预订记录良好。大楼设有屋顶泳池及直达沙滩通道。",
+      de: "Eine Einstiegsinvestition am Strand, wenige Schritte von der Strandpromenade Cha-ams entfernt, derzeit über eine Kurzzeitmietplattform vermietet mit guter Buchungshistorie. Das Gebäude verfügt über einen Dachpool und direkten Strandzugang.",
+      no: "En rimelig strandinvestering få skritt fra strandpromenaden i Cha-am, for tiden utleid via en korttidsutleieplattform med god bestillingshistorikk. Bygget har takbasseng og direkte strandtilgang.",
+    },
+    seo: { title: "1-Bed Beachfront Condo For Sale, Cha-am", desc: "Beachfront condo investment 100m from Cha-am beach with strong rental yield.", keywords: "Cha-am property, Cha-am condo for sale, บ้านขายหัวหิน ชะอำ" },
+    ownerId: "OWN-006",
+    mapLink: "https://www.google.com/maps/search/?api=1&query=Cha-am+Beach,+Cha-am,+Thailand",
+    owner: { name: "Khun Ladda Sirichai", phone: "+66 84 678 2200", email: "ladda.s@example.com", line: "laddasc", notes: "Selling to fund a larger purchase; open to keeping rental bookings honored post-sale." },
+    adminNotes: "Include current occupancy calendar in owner-only notes when buyer requests.",
+    photos: ["Building exterior", "Living area", "Bedroom", "Rooftop pool", "Beach access path"],
+  },
+  {
+    id: "CA-302",
+    area: "cha-am",
+    zone: "Nong Kae",
+    type: "villa",
+    status: "rented",
+    tenantId: "TEN-002",
+    leaseInfo: { leaseStart: "2025-12-05", leaseEnd: "2026-12-05" },
+    price: 85000,
+    currency: "THB",
+    landSize: 500,
+    livingArea: 260,
+    bedrooms: 4,
+    bathrooms: 3,
+    parking: 2,
+    pool: true,
+    furnished: "full",
+    ownership: "N/A (Rental)",
+    distanceBeach: 3,
+    distanceTown: 4,
+    features: ["pool", "gated", "furnished"],
+    title: { en: "Green Valley Pool Villa", th: "พูลวิลล่ากรีนวัลเลย์ หนองแก", ru: "Вилла с бассейном Green Valley", zh: "绿谷泳池别墅", de: "Green Valley Poolvilla", no: "Green Valley Bassengvilla" },
+    shortDesc: {
+      en: "Family-friendly 4-bedroom pool villa for rent in a gated Nong Kae village.",
+      th: "พูลวิลล่า 4 ห้องนอน ให้เช่า เหมาะครอบครัว ในหมู่บ้านรั้วรอบขอบชิดย่านหนองแก",
+      ru: "Семейная вилла с бассейном на 4 спальни в аренду в закрытом посёлке Nong Kae.",
+      zh: "适合家庭的四卧室泳池别墅，位于农凯封闭式社区内出租。",
+      de: "Eine familienfreundliche 4-Zimmer-Poolvilla zur Miete in einer bewachten Siedlung in Nong Kae.",
+      no: "En familievennlig bassengvilla med fire soverom til leie i et gjerdet boligområde i Nong Kae.",
+    },
+    fullDesc: {
+      en: "Long-term rental in a well-established gated village near Cha-am's international schools. Shaded pool terrace, enclosed garden and a live-in maid's quarters suit relocating families.",
+      th: "ให้เช่าระยะยาวในหมู่บ้านจัดสรรที่มั่นคง ใกล้โรงเรียนนานาชาติย่านชะอำ มีระเบียงสระว่ายน้ำร่มรื่น สวนรั้วรอบ และห้องพักแม่บ้าน เหมาะสำหรับครอบครัวที่ย้ายมาอยู่",
+      ru: "Долгосрочная аренда в устоявшемся закрытом посёлке рядом с международными школами Cha-am. Тенистая терраса у бассейна, огороженный сад и комната для прислуги подойдут переезжающим семьям.",
+      zh: "长租房源，位于差安国际学校附近成熟的封闭式社区。有遮荫泳池露台、围合花园及佣人房，适合搬迁家庭。",
+      de: "Langzeitmiete in einer etablierten bewachten Siedlung nahe den internationalen Schulen von Cha-am. Schattige Poolterrasse, umzäunter Garten und Personalquartier eignen sich für umziehende Familien.",
+      no: "Langtidsleie i et etablert gjerdet boligområde nær Cha-ams internasjonale skoler. Skyggefull bassengterrasse, inngjerdet hage og husholderskvarter passer for familier som flytter.",
+    },
+    seo: { title: "4-Bed Pool Villa For Rent, Nong Kae, Cha-am", desc: "Family pool villa for rent in a gated village near Cha-am international schools.", keywords: "property for rent Hua Hin, Cha-am villa rent, Nong Kae pool villa" },
+    ownerId: "OWN-007",
+    mapLink: "https://www.google.com/maps/search/?api=1&query=Nong+Kae,+Cha-am,+Thailand",
+    owner: { name: "Khun Pornthip Wattana", phone: "+66 88 321 6540", email: "pornthip.w@example.com", line: "pornthipw", notes: "Requires 2-month deposit, prefers tenants with school-age children references." },
+    adminNotes: "Renewed listing photos June 2026; update floor plan PDF in gallery.",
+    photos: ["Villa exterior", "Pool terrace", "Living room", "Kitchen", "Bedroom"],
+  },
+  {
+    id: "CA-303",
+    area: "cha-am",
+    zone: "Cha-am Hillside",
+    type: "house",
+    status: "reserved",
+    price: 55000,
+    currency: "THB",
+    landSize: 350,
+    livingArea: 200,
+    bedrooms: 3,
+    bathrooms: 2,
+    parking: 2,
+    pool: false,
+    furnished: "full",
+    ownership: "N/A (Rental)",
+    distanceBeach: 5,
+    distanceTown: 3,
+    features: ["golf", "quiet", "pet_friendly"],
+    title: { en: "Cha-am Golf Course House", th: "บ้านเช่าวิวกอล์ฟ ชะอำฮิลไซด์", ru: "Дом у гольф-поля Cha-am", zh: "差安高尔夫景观住宅", de: "Cha-am Golfplatz-Haus", no: "Cha-am Golfbane-hus" },
+    shortDesc: {
+      en: "Quiet 3-bedroom house for rent overlooking a Cha-am golf course, pets welcome.",
+      th: "บ้านเช่า 3 ห้องนอน เงียบสงบ วิวสนามกอล์ฟชะอำ เลี้ยงสัตว์ได้",
+      ru: "Тихий дом на 3 спальни в аренду с видом на поле для гольфа Cha-am, можно с животными.",
+      zh: "安静的三卧室出租住宅，俯瞰差安高尔夫球场，接受宠物。",
+      de: "Ruhiges 3-Zimmer-Mietshaus mit Blick auf einen Golfplatz in Cha-am, Haustiere willkommen.",
+      no: "Rolig utleiehus med tre soverom med utsikt over en golfbane i Cha-am, kjæledyr velkommen.",
+    },
+    fullDesc: {
+      en: "Single-storey rental home on the fairway edge of a Cha-am golf course, with a fenced garden and covered carport. Recently repainted and fitted with a new kitchen.",
+      th: "บ้านชั้นเดียวให้เช่า ติดขอบแฟร์เวย์สนามกอล์ฟชะอำ มีสวนรั้วรอบและที่จอดรถมีหลังคา ทาสีใหม่และติดตั้งครัวใหม่เมื่อไม่นานนี้",
+      ru: "Одноэтажный арендный дом на краю фервея гольф-поля Cha-am, с огороженным садом и крытым навесом для машины. Недавно перекрашен, установлена новая кухня.",
+      zh: "位于差安高尔夫球场球道边缘的平房出租屋，配有围栏花园及有顶车位。近期重新粉刷并更换了新厨房。",
+      de: "Einstöckiges Miethaus am Rande eines Fairways in Cha-am, mit eingezäuntem Garten und überdachtem Carport. Kürzlich neu gestrichen und mit neuer Küche ausgestattet.",
+      no: "Enetasjes utleiehus ved kanten av en fairway på en golfbane i Cha-am, med inngjerdet hage og overbygd carport. Nylig malt på nytt og utstyrt med nytt kjøkken.",
+    },
+    seo: { title: "3-Bed House For Rent, Cha-am Golf Course", desc: "Quiet house for rent overlooking a Cha-am golf course, pet friendly.", keywords: "Cha-am property, Cha-am house for rent, บ้านเช่าหัวหิน ชะอำ" },
+    ownerId: "OWN-008",
+    mapLink: "https://www.google.com/maps/search/?api=1&query=Cha-am+Hillside,+Cha-am,+Thailand",
+    owner: { name: "Khun Wichai Promsri", phone: "+66 87 909 3344", email: "wichai.p@example.com", line: "wichaip", notes: "Reserved by returning tenant; contract signing scheduled 2026-07-20." },
+    adminNotes: "Hold listing as Reserved until signed contract received.",
+    photos: ["Front exterior", "Garden & carport", "Living room", "Kitchen"],
+  },
+  {
+    id: "HH-104",
+    area: "hua-hin",
+    zone: "Hin Lek Fai",
+    type: "villa",
+    status: "sale",
+    price: 15900000,
+    currency: "THB",
+    landSize: 520,
+    livingArea: 260,
+    bedrooms: 3,
+    bathrooms: 3,
+    parking: 2,
+    pool: true,
+    furnished: "full",
+    ownership: "Chanote",
+    distanceBeach: 4.5,
+    distanceTown: 4,
+    features: ["mountain_view", "pool", "new", "gated"],
+    title: { en: "Hillside Sunset Villa", th: "วิลล่าเนินเขาซันเซ็ท หินเหล็กไฟ", ru: "Вилла Hillside Sunset", zh: "山丘日落别墅", de: "Hillside Sunset Villa", no: "Hillside Solnedgangsvilla" },
+    shortDesc: {
+      en: "A new 3-bedroom hillside villa in a gated Hin Lek Fai community with mountain sunset views.",
+      th: "วิลล่าเนินเขา 3 ห้องนอน สร้างใหม่ ในโครงการรั้วรอบขอบชิดย่านหินเหล็กไฟ วิวภูเขายามเย็น",
+      ru: "Новая вилла на 3 спальни на холме в закрытом посёлке Hin Lek Fai с видом на закат в горах.",
+      zh: "全新三卧室山丘别墅，位于欣勒法伊封闭式社区内，享山间日落美景。",
+      de: "Eine neue 3-Zimmer-Hügelvilla in einer bewachten Siedlung in Hin Lek Fai mit Bergsonnenuntergang.",
+      no: "En ny villa med tre soverom i åssiden i et gjerdet boligområde i Hin Lek Fai med utsikt over solnedgang i fjellet.",
+    },
+    fullDesc: {
+      en: "Completed in 2026, this villa sits on a raised plot overlooking the Tenasserim foothills with an 8-metre pool facing west for sunset views. Part of a small gated community with 24-hour security.",
+      th: "สร้างเสร็จปี 2569 วิลล่าหลังนี้ตั้งอยู่บนที่ดินยกระดับมองเห็นเชิงเขาตะนาวศรี พร้อมสระว่ายน้ำยาว 8 เมตรหันทิศตะวันตกรับพระอาทิตย์ตก อยู่ในโครงการรั้วรอบขอบชิดขนาดเล็กพร้อมรักษาความปลอดภัยตลอด 24 ชั่วโมง",
+      ru: "Построенная в 2026 году, вилла расположена на возвышенности с видом на предгорья Тенассерим, с 8-метровым бассейном, обращённым на запад для закатов. Часть небольшого закрытого посёлка с круглосуточной охраной.",
+      zh: "该别墅建于2026年，坐落于俯瞰德纳沙林山麓的高地，配备朝西的8米泳池，尽览日落美景。位于设有24小时保安的小型封闭社区内。",
+      de: "Fertiggestellt 2026, liegt diese Villa auf einem erhöhten Grundstück mit Blick auf die Ausläufer des Tenasserim-Gebirges, mit einem 8-Meter-Pool nach Westen für Sonnenuntergänge. Teil einer kleinen bewachten Siedlung mit 24-Stunden-Sicherheit.",
+      no: "Ferdigstilt i 2026, denne villaen ligger på en hevet tomt med utsikt over Tenasserim-forfjellene, med et 8-meters basseng vendt mot vest for solnedgang. Del av et lite gjerdet boligområde med døgnvakthold.",
+    },
+    seo: { title: "New 3-Bed Hillside Pool Villa For Sale, Hin Lek Fai, Hua Hin", desc: "New hillside pool villa with mountain sunset views in a gated Hin Lek Fai community.", keywords: "Hua Hin pool villa, Hin Lek Fai villa for sale, บ้านพูลวิลล่าหัวหิน" },
+    ownerId: "OWN-009",
+    mapLink: "https://www.google.com/maps/search/?api=1&query=Hin+Lek+Fai,+Hua+Hin,+Thailand",
+    adminNotes: "New listing, photographed June 2026.",
+    photos: ["Villa exterior at sunset", "Pool terrace", "Living room", "Master bedroom", "Kitchen"],
+  },
+  {
+    id: "PB-204",
+    area: "pranburi",
+    zone: "Sam Roi Yot",
+    type: "land",
+    status: "sale",
+    price: 8500000,
+    currency: "THB",
+    landSize: 2400,
+    livingArea: null,
+    bedrooms: 0,
+    bathrooms: 0,
+    parking: null,
+    pool: false,
+    furnished: null,
+    ownership: "Chanote",
+    distanceBeach: 6,
+    distanceTown: 22,
+    features: ["mountain_view", "quiet"],
+    title: { en: "Sam Roi Yot Mountain View Land", th: "ที่ดินวิวเขาสามร้อยยอด", ru: "Земля с видом на гору Sam Roi Yot", zh: "三百峰山景地块", de: "Sam Roi Yot Grundstück mit Bergblick", no: "Sam Roi Yot Tomt med Fjellutsikt" },
+    shortDesc: {
+      en: "2,400 sqm of elevated land facing Sam Roi Yot's limestone peaks, ready to build.",
+      th: "ที่ดินยกระดับ 2,400 ตร.ว. หันหน้าสู่เขาหินปูนสามร้อยยอด พร้อมปลูกสร้าง",
+      ru: "Возвышенный участок 2400 кв.м с видом на известняковые пики Sam Roi Yot, готов к застройке.",
+      zh: "2400平方米高地地块，面向三百峰石灰岩山峰，具备建屋条件。",
+      de: "2.400 m² erhöhtes Grundstück mit Blick auf die Kalksteingipfel von Sam Roi Yot, baureif.",
+      no: "2400 kvm hevet tomt med utsikt over kalksteinstoppene i Sam Roi Yot, byggeklar.",
+    },
+    fullDesc: {
+      en: "A quiet elevated plot on the edge of Sam Roi Yot National Park with uninterrupted views of the park's limestone karsts. Road access and electricity at the boundary, clean Chanote title.",
+      th: "ที่ดินยกระดับเงียบสงบ ติดขอบอุทยานแห่งชาติเขาสามร้อยยอด มองเห็นภูเขาหินปูนแบบไม่มีสิ่งบดบัง มีถนนเข้าออกและไฟฟ้าติดแนวเขต โฉนดสะอาด",
+      ru: "Тихий возвышенный участок на краю национального парка Sam Roi Yot с непрерывным видом на известняковые карсты парка. Подъездная дорога и электричество по границе, чистый документ Chanote.",
+      zh: "地块地处三百峰国家公园边缘，安静高地，可无遮挡欣赏公园石灰岩喀斯特地貌。边界已通路通电，产权清晰。",
+      de: "Ein ruhiges, erhöhtes Grundstück am Rande des Sam-Roi-Yot-Nationalparks mit ungestörtem Blick auf die Kalksteinkarste des Parks. Straßenzugang und Strom an der Grenze, sauberer Chanote-Titel.",
+      no: "En rolig, hevet tomt i utkanten av Sam Roi Yot nasjonalpark med uforstyrret utsikt over parkens kalksteinsformasjoner. Veitilgang og strøm ved grensen, ren Chanote-skjøte.",
+    },
+    seo: { title: "Land For Sale Near Sam Roi Yot National Park, Pranburi", desc: "2,400 sqm elevated land with mountain views near Sam Roi Yot National Park.", keywords: "Pranburi property, Pranburi land for sale, Sam Roi Yot land" },
+    ownerId: "OWN-010",
+    mapLink: "https://www.google.com/maps/search/?api=1&query=Sam+Roi+Yot,+Pranburi,+Thailand",
+    adminNotes: "Owner open to splitting into two plots if needed.",
+    photos: ["Land — mountain view", "Land — road frontage", "Surveyor map"],
+  },
+  {
+    id: "CA-304",
+    area: "cha-am",
+    zone: "Cha-am Town",
+    type: "house",
+    status: "rent",
+    price: 38000,
+    currency: "THB",
+    landSize: 280,
+    livingArea: 160,
+    bedrooms: 3,
+    bathrooms: 2,
+    parking: 1,
+    pool: false,
+    furnished: "full",
+    ownership: "N/A (Rental)",
+    distanceBeach: 2.5,
+    distanceTown: 1,
+    features: ["furnished", "quiet", "pet_friendly"],
+    title: { en: "Cha-am Seabreeze Townhome", th: "ทาวน์โฮมชะอำ ซีบรีซ", ru: "Таунхаус Cha-am Seabreeze", zh: "差安海风联排别墅", de: "Cha-am Seabreeze Reihenhaus", no: "Cha-am Seabreeze Rekkehus" },
+    shortDesc: {
+      en: "A furnished 3-bedroom townhome for rent minutes from Cha-am town centre and beach.",
+      th: "ทาวน์โฮม 3 ห้องนอน เฟอร์นิเจอร์ครบ ให้เช่า ใกล้ตัวเมืองและชายหาดชะอำ",
+      ru: "Меблированный таунхаус на 3 спальни в аренду, в нескольких минутах от центра Cha-am и пляжа.",
+      zh: "三卧室精装联排别墅出租，距差安市中心及海滩仅几分钟车程。",
+      de: "Ein möbliertes 3-Zimmer-Reihenhaus zur Miete, wenige Minuten vom Zentrum und Strand von Cha-am.",
+      no: "Et møblert rekkehus med tre soverom til leie, få minutter fra Cha-ams sentrum og strand.",
+    },
+    fullDesc: {
+      en: "A two-storey townhome in a quiet residential soi close to Cha-am's market street and beach, fully furnished with a small private garden. Ideal for a family or long-term remote worker.",
+      th: "ทาวน์โฮมสองชั้น ในซอยที่พักอาศัยเงียบสงบ ใกล้ถนนตลาดและชายหาดชะอำ ตกแต่งครบพร้อมสวนส่วนตัวขนาดเล็ก เหมาะสำหรับครอบครัวหรือผู้ที่ทำงานทางไกลระยะยาว",
+      ru: "Двухэтажный таунхаус на тихой жилой улице рядом с рыночной улицей и пляжем Cha-am, полностью меблирован, с небольшим частным садом. Идеально для семьи или удалённого работника.",
+      zh: "两层联排别墅位于安静的住宅巷内，靠近差安市场街及海滩，全屋配备家具及小型私人花园。适合家庭或长期远程办公者。",
+      de: "Ein zweistöckiges Reihenhaus in einer ruhigen Wohnstraße nahe der Marktstraße und dem Strand von Cha-am, voll möbliert mit kleinem Privatgarten. Ideal für eine Familie oder langfristige Fernarbeiter.",
+      no: "Et rekkehus i to etasjer i en rolig boliggate nær markedsgaten og stranden i Cha-am, fullt møblert med en liten privat hage. Ideelt for en familie eller langtids fjernarbeider.",
+    },
+    seo: { title: "3-Bed Furnished Townhome For Rent, Cha-am Town", desc: "Furnished townhome for rent near Cha-am town centre and beach.", keywords: "Cha-am property, Cha-am house for rent, บ้านเช่าชะอำ" },
+    ownerId: "OWN-011",
+    mapLink: "https://www.google.com/maps/search/?api=1&query=Cha-am+Town,+Cha-am,+Thailand",
+    adminNotes: "Available immediately. Owner prefers 12-month minimum lease.",
+    photos: ["Townhome exterior", "Living room", "Kitchen", "Bedroom", "Private garden"],
+  },
+  {
+    id: "HH-105",
+    area: "hua-hin", zone: "Thap Tai", type: "house", status: "sale",
+    price: 6900000, currency: "THB", landSize: 300, livingArea: 180,
+    bedrooms: 3, bathrooms: 2, parking: 2, pool: false, furnished: "partial", ownership: "Chanote",
+    distanceBeach: 7, distanceTown: 4, features: ["quiet", "new"],
+    title: { en: "Thap Tai Garden House", th: "บ้านสวนทับใต้", ru: "Дом с садом Thap Tai", zh: "塔拜花园住宅", de: "Thap Tai Gartenhaus", no: "Thap Tai Hagehus" },
+    shortDesc: { en: "A tidy 3-bedroom family house on a quiet Thap Tai soi.", th: "บ้านครอบครัว 3 ห้องนอน เรียบร้อย ในซอยเงียบย่านทับใต้", ru: "Аккуратный семейный дом на 3 спальни на тихой улице Thap Tai.", zh: "位于塔拜安静巷弄内的整洁三卧室家庭住宅。" , de: "Ein gepflegtes 3-Zimmer-Familienhaus in einer ruhigen Straße in Thap Tai.", no: "Et pent familiehus med tre soverom i en rolig gate i Thap Tai." },
+    fullDesc: { en: "Recently repainted single-storey house on a quiet residential soi, five minutes from Hua Hin's Bluport shopping centre.", th: "บ้านชั้นเดียวทาสีใหม่ ในซอยที่พักอาศัยเงียบสงบ ห่างศูนย์การค้าบลูพอร์ตหัวหินเพียง 5 นาที", ru: "Недавно перекрашенный одноэтажный дом на тихой жилой улице, в пяти минутах от торгового центра Bluport в Хуахине.", zh: "近期重新粉刷的平房，位于安静住宅巷内，距华欣蓝湾购物中心仅5分钟车程。" , de: "Kürzlich neu gestrichenes einstöckiges Haus in einer ruhigen Wohnstraße, fünf Minuten vom Bluport-Einkaufszentrum in Hua Hin.", no: "Nylig malt enetasjes hus i en rolig boliggate, fem minutter fra Bluport kjøpesenter i Hua Hin." },
+    seo: { title: "3-Bed House For Sale, Thap Tai, Hua Hin", desc: "Family house for sale in a quiet Thap Tai soi near Hua Hin town.", keywords: "Hua Hin house for sale, Thap Tai property, บ้านขายหัวหิน" },
+    ownerId: "OWN-002", mapLink: "https://www.google.com/maps/search/?api=1&query=Thap+Tai,+Hua+Hin,+Thailand",
+    adminNotes: "Owner also lists HH-102; prefers one point of contact.",
+    photos: ["Front exterior", "Living room", "Kitchen", "Bedroom"],
+  },
+  {
+    id: "HH-106",
+    area: "hua-hin", zone: "Soi 88", type: "condo", status: "rent",
+    price: 32000, currency: "THB", landSize: null, livingArea: 42,
+    bedrooms: 1, bathrooms: 1, parking: 1, pool: true, furnished: "full", ownership: "Foreign Freehold Quota",
+    distanceBeach: 1.5, distanceTown: 2, features: ["furnished", "shared_pool", "new"],
+    title: { en: "Soi 88 City Condo", th: "คอนโดซอย 88", ru: "Кондо Soi 88", zh: "88巷城市公寓", de: "Soi 88 Stadtwohnung", no: "Soi 88 Byleilighet" },
+    shortDesc: { en: "A compact furnished 1-bedroom condo close to Hua Hin's night market.", th: "คอนโด 1 ห้องนอน เฟอร์นิเจอร์ครบ ใกล้ตลาดโต้รุ่งหัวหิน", ru: "Компактное меблированное кондо на 1 спальню рядом с ночным рынком Хуахина.", zh: "紧凑型精装一卧室公寓，靠近华欣夜市。" , de: "Eine kompakte, möblierte 1-Zimmer-Wohnung nahe dem Nachtmarkt von Hua Hin.", no: "En kompakt, møblert ett-roms leilighet nær nattmarkedet i Hua Hin." },
+    fullDesc: { en: "Ground-up 2025 development a short walk from Hua Hin's Chatchai night market, with a rooftop pool and 24-hour security.", th: "โครงการสร้างใหม่ปี 2568 เดินไม่ไกลจากตลาดโต้รุ่งฉัตรชัยหัวหิน มีสระว่ายน้ำดาดฟ้าและรักษาความปลอดภัยตลอด 24 ชั่วโมง", ru: "Новостройка 2025 года в нескольких минутах ходьбы от ночного рынка Chatchai в Хуахине, с бассейном на крыше и круглосуточной охраной.", zh: "2025年全新开发项目，步行即达华欣察差夜市，设有屋顶泳池及24小时保安。" , de: "Neubau aus dem Jahr 2025, wenige Gehminuten vom Chatchai-Nachtmarkt in Hua Hin entfernt, mit Dachpool und 24-Stunden-Sicherheit.", no: "Nybygg fra 2025, kort gange fra Chatchai nattmarked i Hua Hin, med takbasseng og døgnvakthold." },
+    seo: { title: "1-Bed Condo For Rent, Soi 88, Hua Hin", desc: "Furnished condo for rent near Hua Hin night market.", keywords: "property for rent Hua Hin, Hua Hin condo rent" },
+    ownerId: "OWN-003", mapLink: "https://www.google.com/maps/search/?api=1&query=Soi+88,+Hua+Hin,+Thailand",
+    adminNotes: "Same owner as HH-103; manages both via property manager Khun Toon.",
+    photos: ["Building exterior", "Living area", "Bedroom", "Rooftop pool"],
+  },
+  {
+    id: "HH-107",
+    area: "hua-hin", zone: "Hin Lek Fai", type: "land", status: "sale",
+    price: 12000000, currency: "THB", landSize: 1600, livingArea: null,
+    bedrooms: 0, bathrooms: 0, parking: null, pool: false, furnished: null, ownership: "Chanote",
+    distanceBeach: 5, distanceTown: 3, features: ["mountain_view", "golf", "quiet"],
+    title: { en: "Hin Lek Fai Golf-View Land", th: "ที่ดินวิวกอล์ฟ หินเหล็กไฟ", ru: "Земля с видом на гольф Hin Lek Fai", zh: "欣勒法伊高尔夫景观地块", de: "Hin Lek Fai Grundstück mit Golfblick", no: "Hin Lek Fai Tomt med Golfutsikt" },
+    shortDesc: { en: "1,600 sqm of flat land facing Black Mountain Golf Club, ready to build.", th: "ที่ดินราบเรียบ 1,600 ตร.ว. หันหน้าสนามกอล์ฟแบล็คเมาน์เทน พร้อมปลูกสร้าง", ru: "Ровный участок 1600 кв.м с видом на гольф-клуб Black Mountain, готов к застройке.", zh: "1600平方米平整地块，面向黑山高尔夫球会，具备建屋条件。" , de: "1.600 m² ebenes Grundstück mit Blick auf den Black Mountain Golf Club, baureif.", no: "1600 kvm flat tomt med utsikt mot Black Mountain golfklubb, byggeklar." },
+    fullDesc: { en: "A cleared, level plot bordering Black Mountain Golf Club's back nine, with road frontage and utilities already connected.", th: "ที่ดินเคลียร์พร้อมใช้งาน ติดขอบสนามกอล์ฟแบล็คเมาน์เทนฝั่งหลุมท้าย มีถนนติดแนวเขตและระบบสาธารณูปโภคพร้อม", ru: "Расчищенный ровный участок на границе задней девятки гольф-клуба Black Mountain, с подъездной дорогой и подключёнными коммуникациями.", zh: "已清理平整地块，毗邻黑山高尔夫球会后九洞，临街道且水电已通。" , de: "Ein gerodetes, ebenes Grundstück an der hinteren neun Loch des Black Mountain Golf Club, mit Straßenanschluss und bereits angeschlossenen Versorgungsleitungen.", no: "En ryddet, flat tomt inntil de siste ni hullene på Black Mountain golfklubb, med veiadkomst og strøm/vann allerede tilkoblet." },
+    seo: { title: "Land For Sale Near Black Mountain Golf, Hua Hin", desc: "1,600 sqm land plot facing Black Mountain Golf Club, Hua Hin.", keywords: "Hua Hin land for sale, Hin Lek Fai land, ที่ดินขายหัวหิน" },
+    ownerId: "OWN-012", mapLink: "https://www.google.com/maps/search/?api=1&query=Hin+Lek+Fai+Golf,+Hua+Hin,+Thailand",
+    adminNotes: "Owner is a local land broker with several adjacent plots.",
+    photos: ["Land — golf course frontage", "Land — road access", "Surveyor map"],
+  },
+  {
+    id: "HH-108",
+    area: "hua-hin", zone: "Hua Hin Town", type: "commercial", status: "sale",
+    price: 22000000, currency: "THB", landSize: 200, livingArea: 340,
+    bedrooms: 0, bathrooms: 2, parking: 4, pool: false, furnished: "none", ownership: "Chanote",
+    distanceBeach: 0.5, distanceTown: 0.2, features: ["rental_yield"],
+    title: { en: "Hua Hin Town Shophouse", th: "ตึกแถวใจกลางเมืองหัวหิน", ru: "Коммерческое здание в центре Хуахина", zh: "华欣市中心商铺", de: "Hua Hin Stadt-Geschäftshaus", no: "Hua Hin By-Forretningsgård" },
+    shortDesc: { en: "A 3-storey commercial shophouse steps from Hua Hin's beach road, currently leased to a retail tenant.", th: "ตึกแถวเชิงพาณิชย์ 3 ชั้น ใกล้ถนนเลียบชายหาดหัวหิน ปัจจุบันปล่อยเช่าให้ผู้เช่าร้านค้า", ru: "3-этажное коммерческое здание в нескольких шагах от пляжной дороги Хуахина, сдано в аренду розничному арендатору.", zh: "三层商业铺面，距华欣海滨路仅几步之遥，目前出租给零售租户。" , de: "Ein 3-stöckiges Geschäftshaus wenige Schritte von der Strandpromenade Hua Hins, derzeit an einen Einzelhandelsmieter vermietet.", no: "Et forretningsbygg i tre etasjer få skritt fra strandpromenaden i Hua Hin, for tiden utleid til en butikkleietaker." },
+    fullDesc: { en: "Corner shophouse on a busy Hua Hin town street, ground floor leased to a long-running retail tenant with upper floors used as storage and staff quarters.", th: "ตึกแถวมุมถนนสายหลักใจกลางเมืองหัวหิน ชั้นล่างปล่อยเช่าให้ผู้เช่าร้านค้าระยะยาว ชั้นบนใช้เก็บของและเป็นที่พักพนักงาน", ru: "Угловое здание на оживлённой улице в центре Хуахина, первый этаж сдан давнему арендатору розничной торговли, верхние этажи используются как склад и жильё для персонала.", zh: "位于华欣市中心繁忙街道转角的商铺，一楼长期出租给零售租户，楼上用作仓储及员工宿舍。" , de: "Eckgeschäftshaus an einer belebten Straße im Zentrum von Hua Hin, Erdgeschoss langfristig an einen Einzelhandelsmieter vermietet, Obergeschosse als Lager und Personalunterkunft genutzt.", no: "Hjørneforretningsgård ved en travel gate i sentrum av Hua Hin, første etasje utleid til en langvarig butikkleietaker, øvre etasjer brukt som lager og ansattboliger." },
+    seo: { title: "Commercial Shophouse For Sale, Hua Hin Town", desc: "3-storey commercial shophouse for sale in central Hua Hin with existing rental income.", keywords: "Hua Hin commercial property, Hua Hin shophouse for sale" },
+    ownerId: "OWN-015", mapLink: "https://www.google.com/maps/search/?api=1&query=Hua+Hin+Town,+Thailand",
+    adminNotes: "Existing lease income; buyer to assume tenant agreement.",
+    photos: ["Shophouse exterior", "Ground floor retail", "Upper floor storage"],
+  },
+  {
+    id: "PB-205",
+    area: "pranburi", zone: "Pranburi Forest", type: "villa", status: "sale",
+    price: 19500000, currency: "THB", landSize: 700, livingArea: 340,
+    bedrooms: 4, bathrooms: 4, parking: 2, pool: true, furnished: "full", ownership: "Chanote",
+    distanceBeach: 2, distanceTown: 22, features: ["pool", "quiet", "new", "gated"],
+    title: { en: "Pranburi Forest Estate Villa", th: "วิลล่าเอสเตทป่าปราณบุรี", ru: "Вилла Pranburi Forest Estate", zh: "巴蓝武里森林庄园别墅", de: "Pranburi Forest Estate Villa", no: "Pranburi Forest Estate Villa" },
+    shortDesc: { en: "A gated 4-bedroom pool villa estate bordering Pranburi Forest Park.", th: "วิลล่าพูล 4 ห้องนอน ในโครงการรั้วรอบขอบชิด ติดอุทยานป่าปราณบุรี", ru: "Вилла с бассейном на 4 спальни в закрытом посёлке у парка Pranburi Forest.", zh: "四卧室泳池别墅庄园，毗邻巴蓝武里森林公园，位于封闭社区内。" , de: "Ein bewachtes Anwesen mit 4-Zimmer-Poolvilla am Rande des Pranburi Forest Park.", no: "En bassengvilla med fire soverom i et gjerdet boligområde ved Pranburi skogpark." },
+    fullDesc: { en: "Set within a small gated estate bordering Pranburi Forest Park, this villa pairs a 14-metre pool with a double-height living pavilion and staff quarters.", th: "ตั้งอยู่ในโครงการรั้วรอบขอบชิดขนาดเล็กติดอุทยานป่าปราณบุรี วิลล่าหลังนี้มาพร้อมสระว่ายน้ำยาว 14 เมตร ห้องนั่งเล่นเพดานสูง และห้องพักพนักงาน", ru: "Расположенная в небольшом закрытом комплексе у парка Pranburi Forest, эта вилла сочетает бассейн 14 метров с гостиной двойной высоты и жильём для персонала.", zh: "别墅位于毗邻巴蓃武里森林公园的小型封闭庄园内，配备14米泳池、挑高客厅及员工宿舍。" , de: "Diese Villa liegt in einem kleinen bewachten Anwesen am Rande des Pranburi Forest Park und verbindet einen 14-Meter-Pool mit einem doppelt hohen Wohnpavillon und Personalquartier.", no: "Denne villaen ligger i et lite gjerdet anlegg ved Pranburi skogpark og kombinerer et 14-meters basseng med en dobbelthøy stue og personalkvarter." },
+    seo: { title: "4-Bed Pool Villa For Sale, Pranburi Forest Park", desc: "Gated pool villa estate bordering Pranburi Forest Park.", keywords: "Pranburi property, Pranburi pool villa for sale" },
+    ownerId: "OWN-004", mapLink: "https://www.google.com/maps/search/?api=1&query=Pranburi+Forest+Park,+Pranburi,+Thailand",
+    adminNotes: "Same owner as PB-201 (James Whitfield); UK-based, email only.",
+    photos: ["Villa exterior", "Pool", "Living pavilion", "Master bedroom"],
+  },
+  {
+    id: "PB-206",
+    area: "pranburi", zone: "Pak Nam Pran", type: "house", status: "rent",
+    price: 28000, currency: "THB", landSize: 250, livingArea: 140,
+    bedrooms: 2, bathrooms: 2, parking: 1, pool: false, furnished: "full", ownership: "N/A (Rental)",
+    distanceBeach: 1, distanceTown: 20, features: ["furnished", "quiet", "pet_friendly"],
+    title: { en: "Pak Nam Pran Beachside Cottage", th: "บ้านเช่าริมหาดปากน้ำปราณ", ru: "Пляжный коттедж Pak Nam Pran", zh: "巴南浦兰海滨小屋", de: "Pak Nam Pran Strand-Cottage", no: "Pak Nam Pran Strandhytte" },
+    shortDesc: { en: "A furnished 2-bedroom cottage for rent, 1km from Pak Nam Pran beach.", th: "บ้านเช่า 2 ห้องนอน เฟอร์นิเจอร์ครบ ห่างหาดปากน้ำปราณ 1 กม.", ru: "Меблированный коттедж на 2 спальни в аренду, в 1 км от пляжа Pak Nam Pran.", zh: "两卧室精装小屋出租，距巴南浦兰海滩仅1公里。" , de: "Eine möblierte 2-Zimmer-Cottage zur Miete, 1 km vom Strand von Pak Nam Pran.", no: "En møblert hytte med to soverom til leie, 1 km fra Pak Nam Pran-stranden." },
+    fullDesc: { en: "Single-storey rental cottage in a quiet fishing village setting, an easy bicycle ride to Pak Nam Pran's beach cafes.", th: "บ้านเช่าชั้นเดียว บรรยากาศหมู่บ้านชาวประมงเงียบสงบ ปั่นจักรยานไม่ไกลถึงร้านกาแฟริมหาดปากน้ำปราณ", ru: "Одноэтажный арендный коттедж в тихой рыбацкой деревне, легко доехать на велосипеде до пляжных кафе Pak Nam Pran.", zh: "位于宁静渔村的平房出租屋，骑自行车即可轻松抵达巴南浦兰海滩咖啡馆。" , de: "Einstöckiges Miethaus in einem ruhigen Fischerdorf, mit dem Fahrrad bequem zu den Strandcafés von Pak Nam Pran erreichbar.", no: "Enetasjes utleiehytte i et rolig fiskevær, en enkel sykkeltur til strandkafeene i Pak Nam Pran." },
+    seo: { title: "2-Bed Cottage For Rent, Pak Nam Pran, Pranburi", desc: "Furnished beachside cottage for rent near Pak Nam Pran, Pranburi.", keywords: "property for rent Hua Hin, Pak Nam Pran house rent" },
+    ownerId: "OWN-009", mapLink: "https://www.google.com/maps/search/?api=1&query=Pak+Nam+Pran,+Pranburi,+Thailand",
+    adminNotes: "Owner also lists HH-104; developer investing across both areas.",
+    photos: ["Cottage exterior", "Living room", "Bedroom", "Garden"],
+  },
+  {
+    id: "PB-207",
+    area: "pranburi", zone: "Nong Chumsaeng", type: "land", status: "sale",
+    price: 9800000, currency: "THB", landSize: 3200, livingArea: null,
+    bedrooms: 0, bathrooms: 0, parking: null, pool: false, furnished: null, ownership: "Chanote",
+    distanceBeach: 8, distanceTown: 15, features: ["quiet", "riverside"],
+    title: { en: "Nong Chumsaeng Riverside Land", th: "ที่ดินริมน้ำหนองจำแสง", ru: "Земля у реки Nong Chumsaeng", zh: "农仲森河畔地块", de: "Nong Chumsaeng Grundstück am Fluss", no: "Nong Chumsaeng Elvetomt" },
+    shortDesc: { en: "3,200 sqm of quiet riverside farmland, suitable for a private retreat.", th: "ที่ดินเกษตรริมน้ำเงียบสงบ 3,200 ตร.ว. เหมาะสำหรับที่พักส่วนตัว", ru: "3200 кв.м тихой сельскохозяйственной земли у реки, подходит для частного ретрита.", zh: "3200平方米宁静河畔农地，适合打造私人度假住宅。" , de: "3.200 m² ruhiges Ackerland am Fluss, geeignet für einen privaten Rückzugsort.", no: "3200 kvm rolig jordbruksland ved elven, egnet for et privat tilfluktssted." },
+    fullDesc: { en: "Gently sloping farmland along a quiet tributary of the Pranburi River, currently used for fruit orchards, with a right of way to the nearest road.", th: "ที่ดินเกษตรลาดเอียงเล็กน้อยริมลำน้ำสาขาแม่น้ำปราณบุรี ปัจจุบันปลูกสวนผลไม้ มีทางเข้าออกสู่ถนนสายหลัก", ru: "Слегка наклонная сельскохозяйственная земля вдоль тихого притока реки Пранбури, в настоящее время используется под фруктовые сады, с проездом к ближайшей дороге.", zh: "地块沿巴蓝武里河宁静支流缓坡而建，目前种植果园，设有通往最近道路的通行权。" , de: "Sanft abfallendes Ackerland entlang eines ruhigen Nebenflusses des Pranburi, derzeit als Obstplantage genutzt, mit Wegerecht zur nächsten Straße.", no: "Svakt hellende jordbruksland langs en rolig sideelv til Pranburi-elven, for tiden brukt til fruktplantasjer, med veirett til nærmeste vei." },
+    seo: { title: "Riverside Farmland For Sale, Nong Chumsaeng, Pranburi", desc: "3,200 sqm riverside farmland for sale near Pranburi.", keywords: "Pranburi land for sale, Pranburi farmland, ที่ดินขายปราณบุรี" },
+    ownerId: "OWN-013", mapLink: "https://www.google.com/maps/search/?api=1&query=Nong+Chumsaeng,+Pranburi,+Thailand",
+    adminNotes: "Family land sale; multiple siblings co-own, allow extra time for paperwork.",
+    photos: ["Land — orchard view", "Land — river access", "Surveyor map"],
+  },
+  {
+    id: "PB-208",
+    area: "pranburi", zone: "Pranburi Beach", type: "condo", status: "sale",
+    price: 5600000, currency: "THB", landSize: null, livingArea: 55,
+    bedrooms: 1, bathrooms: 1, parking: 1, pool: true, furnished: "full", ownership: "Foreign Freehold Quota",
+    distanceBeach: 0.2, distanceTown: 24, features: ["beachfront", "furnished", "shared_pool", "rental_yield"],
+    title: { en: "Pranburi Beach Condo", th: "คอนโดหาดปราณบุรี", ru: "Кондо Pranburi Beach", zh: "巴蓝武里海滩公寓", de: "Pranburi Strandwohnung", no: "Pranburi Strandleilighet" },
+    shortDesc: { en: "A beachfront 1-bedroom condo with strong holiday rental demand.", th: "คอนโด 1 ห้องนอน ติดชายหาด ความต้องการเช่าช่วงวันหยุดสูง", ru: "Кондо на 1 спальню на берегу моря с высоким спросом на аренду для отдыха.", zh: "一卧室海滨公寓，度假租赁需求旺盛。" , de: "Eine 1-Zimmer-Wohnung am Strand mit hoher Nachfrage nach Ferienvermietung.", no: "En strandleilighet med ett soverom med høy etterspørsel etter ferieutleie." },
+    fullDesc: { en: "Low-rise beachfront building steps from Pranburi's quiet sands, popular with holidaymakers seeking a calmer alternative to Hua Hin.", th: "อาคารเตี้ยติดชายหาด เพียงไม่กี่ก้าวจากหาดปราณบุรีที่เงียบสงบ เป็นที่นิยมของนักท่องเที่ยวที่มองหาบรรยากาศเงียบกว่าหัวหิน", ru: "Малоэтажное здание на берегу моря в нескольких шагах от тихих песков Пранбури, популярно среди отдыхающих, ищущих более спокойную альтернативу Хуахину.", zh: "低层海滨建筑，距巴蓝武里宁静沙滩仅几步之遥，深受寻求比华欣更宁静氛围的度假者青睐。" , de: "Niedriges Gebäude am Strand, wenige Schritte von den ruhigen Sandstränden Pranburis, beliebt bei Urlaubern, die eine ruhigere Alternative zu Hua Hin suchen.", no: "Lavt bygg ved stranden, få skritt fra de rolige sandstrendene i Pranburi, populært blant feriegjester som søker et roligere alternativ til Hua Hin." },
+    seo: { title: "Beachfront Condo For Sale, Pranburi", desc: "1-bedroom beachfront condo for sale in Pranburi with strong rental demand.", keywords: "Pranburi property, Pranburi condo for sale" },
+    ownerId: "OWN-010", mapLink: "https://www.google.com/maps/search/?api=1&query=Pranburi+Beach,+Pranburi,+Thailand",
+    adminNotes: "Owner also lists PB-204 land plot.",
+    photos: ["Building exterior", "Living room", "Balcony sea view"],
+  },
+  {
+    id: "CA-305",
+    area: "cha-am", zone: "Cha-am Hillside", type: "house", status: "sale",
+    price: 7400000, currency: "THB", landSize: 320, livingArea: 190,
+    bedrooms: 3, bathrooms: 2, parking: 2, pool: false, furnished: "partial", ownership: "Chanote",
+    distanceBeach: 4, distanceTown: 3, features: ["golf", "quiet"],
+    title: { en: "Cha-am Hillside Family House", th: "บ้านครอบครัวเนินเขาชะอำ", ru: "Семейный дом Cha-am Hillside", zh: "差安山丘家庭住宅", de: "Cha-am Hillside Familienhaus", no: "Cha-am Hillside Familiehus" },
+    shortDesc: { en: "A 3-bedroom family house near Cha-am's golf courses, quiet and low-maintenance.", th: "บ้านครอบครัว 3 ห้องนอน ใกล้สนามกอล์ฟชะอำ เงียบสงบ ดูแลง่าย", ru: "Семейный дом на 3 спальни рядом с полями для гольфа Cha-am, тихий и простой в обслуживании.", zh: "三卧室家庭住宅，靠近差安高尔夫球场，安静且易于打理。" , de: "Ein 3-Zimmer-Familienhaus nahe den Golfplätzen von Cha-am, ruhig und pflegeleicht.", no: "Et familiehus med tre soverom nær golfbanene i Cha-am, rolig og lite vedlikehold." },
+    fullDesc: { en: "A low-maintenance single-storey house in a mature neighbourhood near Cha-am's golf courses, with a small covered carport and fenced yard.", th: "บ้านชั้นเดียวดูแลง่าย ในย่านที่พักอาศัยที่ลงตัว ใกล้สนามกอล์ฟชะอำ มีที่จอดรถมีหลังคาขนาดเล็กและสนามหญ้ารั้วรอบ", ru: "Простой в обслуживании одноэтажный дом в сложившемся районе рядом с полями для гольфа Cha-am, с небольшим крытым навесом и огороженным двором.", zh: "位于成熟社区的易打理平房，靠近差安高尔夫球场，配有小型有顶车位及围栏庭院。" , de: "Ein pflegeleichtes einstöckiges Haus in einer etablierten Nachbarschaft nahe den Golfplätzen von Cha-am, mit kleinem überdachtem Carport und eingezäuntem Hof.", no: "Et lite vedlikeholdskrevende enetasjes hus i et etablert nabolag nær golfbanene i Cha-am, med liten overbygd carport og inngjerdet hage." },
+    seo: { title: "3-Bed House For Sale, Cha-am Hillside", desc: "Family house for sale near Cha-am golf courses.", keywords: "Cha-am house for sale, Cha-am property, บ้านขายชะอำ" },
+    ownerId: "OWN-007", mapLink: "https://www.google.com/maps/search/?api=1&query=Cha-am+Hillside,+Cha-am,+Thailand",
+    adminNotes: "Owner also lists CA-302 rental villa.",
+    photos: ["Front exterior", "Living room", "Kitchen", "Bedroom"],
+  },
+  {
+    id: "CA-306",
+    area: "cha-am", zone: "Cha-am Beach", type: "villa", status: "rent",
+    price: 65000, currency: "THB", landSize: 400, livingArea: 220,
+    bedrooms: 3, bathrooms: 3, parking: 2, pool: true, furnished: "full", ownership: "N/A (Rental)",
+    distanceBeach: 0.4, distanceTown: 2, features: ["sea_view", "pool", "furnished", "beachfront"],
+    title: { en: "Cha-am Beachfront Pool Villa", th: "พูลวิลล่าติดหาดชะอำ", ru: "Пляжная вилла с бассейном Cha-am", zh: "差安海滨泳池别墅", de: "Cha-am Strand-Poolvilla", no: "Cha-am Strand-Bassengvilla" },
+    shortDesc: { en: "A 3-bedroom pool villa for rent, 400m from Cha-am beach with sea glimpses.", th: "พูลวิลล่า 3 ห้องนอน ให้เช่า ห่างหาดชะอำ 400 เมตร เห็นวิวทะเล", ru: "Вилла с бассейном на 3 спальни в аренду, в 400 м от пляжа Cha-am с видом на море.", zh: "三卧室泳池别墅出租，距差安海滩400米，可远眺海景。" , de: "Eine 3-Zimmer-Poolvilla zur Miete, 400 m vom Strand von Cha-am mit Meerblick.", no: "En bassengvilla med tre soverom til leie, 400 m fra Cha-am-stranden med glimt av sjøen." },
+    fullDesc: { en: "A long-term rental villa a short walk from Cha-am's beach promenade, with a shaded pool terrace and open-plan living area.", th: "วิลล่าให้เช่าระยะยาว เดินไม่ไกลจากถนนเลียบชายหาดชะอำ มีระเบียงสระว่ายน้ำร่มรื่นและพื้นที่นั่งเล่นโล่ง", ru: "Вилла для долгосрочной аренды в нескольких минутах ходьбы от набережной Cha-am, с тенистой террасой у бассейна и открытой гостиной.", zh: "长租别墅步行即达差安海滨大道，设有遮荫泳池露台及开放式起居空间。" , de: "Eine Langzeitmiet-Villa in kurzer Gehdistanz zur Strandpromenade von Cha-am, mit schattiger Poolterrasse und offenem Wohnbereich.", no: "En langtidsleievilla kort gange fra strandpromenaden i Cha-am, med skyggefull bassengterrasse og åpen stue." },
+    seo: { title: "3-Bed Pool Villa For Rent, Cha-am Beach", desc: "Pool villa for rent near Cha-am beach with sea glimpses.", keywords: "property for rent Hua Hin, Cha-am villa rent" },
+    ownerId: "OWN-011", mapLink: "https://www.google.com/maps/search/?api=1&query=Cha-am+Beach,+Cha-am,+Thailand",
+    adminNotes: "Owner also lists CA-304 townhome rental.",
+    photos: ["Villa exterior", "Pool terrace", "Living room", "Bedroom"],
+  },
+  {
+    id: "CA-307",
+    area: "cha-am", zone: "Nong Kae", type: "land", status: "sale",
+    price: 5200000, currency: "THB", landSize: 1200, livingArea: null,
+    bedrooms: 0, bathrooms: 0, parking: null, pool: false, furnished: null, ownership: "Chanote",
+    distanceBeach: 3, distanceTown: 4, features: ["quiet", "gated"],
+    title: { en: "Nong Kae Village Land Plot", th: "ที่ดินหมู่บ้านหนองแก", ru: "Земельный участок Nong Kae", zh: "农凯社区地块", de: "Nong Kae Grundstück im Dorf", no: "Nong Kae Tomt i Landsbyen" },
+    shortDesc: { en: "1,200 sqm of land in a gated Nong Kae village, ready to build.", th: "ที่ดิน 1,200 ตร.ว. ในหมู่บ้านจัดสรรรั้วรอบขอบชิดย่านหนองแก พร้อมปลูกสร้าง", ru: "1200 кв.м земли в закрытом посёлке Nong Kae, готова к застройке.", zh: "1200平方米地块，位于农凯封闭式社区内，具备建屋条件。" , de: "1.200 m² Grundstück in einer bewachten Siedlung in Nong Kae, baureif.", no: "1200 kvm tomt i et gjerdet boligområde i Nong Kae, byggeklar." },
+    fullDesc: { en: "A corner plot within an established gated village near Cha-am's international schools, with utilities connected and covenants allowing single-family homes only.", th: "ที่ดินมุมในหมู่บ้านจัดสรรรั้วรอบขอบชิดที่มั่นคง ใกล้โรงเรียนนานาชาติย่านชะอำ ระบบสาธารณูปโภคพร้อม ข้อบังคับอนุญาตเฉพาะบ้านเดี่ยว", ru: "Угловой участок в устоявшемся закрытом посёлке рядом с международными школами Cha-am, коммуникации подключены, правила разрешают только частные дома.", zh: "位于差安国际学校附近成熟封闭社区内的转角地块，水电已通，规约仅允许建造独立住宅。" , de: "Ein Eckgrundstück in einer etablierten bewachten Siedlung nahe den internationalen Schulen von Cha-am, mit angeschlossenen Versorgungsleitungen und Auflagen, die nur Einfamilienhäuser zulassen.", no: "En hjørnetomt i et etablert gjerdet boligområde nær Cha-ams internasjonale skoler, med tilkoblet strøm/vann og bestemmelser som kun tillater eneboliger." },
+    seo: { title: "Land For Sale, Nong Kae Village, Cha-am", desc: "1,200 sqm land plot in a gated Nong Kae village, Cha-am.", keywords: "Cha-am land for sale, Nong Kae land, ที่ดินขายชะอำ" },
+    ownerId: "OWN-014", mapLink: "https://www.google.com/maps/search/?api=1&query=Nong+Kae,+Cha-am,+Thailand",
+    adminNotes: "Village HOA approval required before construction.",
+    photos: ["Land — corner plot", "Village entrance", "Surveyor map"],
+  },
+  {
+    id: "CA-308",
+    area: "cha-am", zone: "Cha-am Town", type: "commercial", status: "sale",
+    price: 16500000, currency: "THB", landSize: 160, livingArea: 280,
+    bedrooms: 0, bathrooms: 2, parking: 3, pool: false, furnished: "none", ownership: "Chanote",
+    distanceBeach: 0.8, distanceTown: 0.1, features: ["rental_yield"],
+    title: { en: "Cha-am Town Commercial Building", th: "อาคารพาณิชย์ใจกลางชะอำ", ru: "Коммерческое здание в центре Cha-am", zh: "差安市中心商业楼", de: "Cha-am Stadt-Gewerbegebäude", no: "Cha-am By-Næringsbygg" },
+    shortDesc: { en: "A 3-storey commercial building on Cha-am's main road, currently rented to a restaurant tenant.", th: "อาคารพาณิชย์ 3 ชั้น บนถนนสายหลักชะอำ ปัจจุบันปล่อยเช่าให้ผู้เช่าร้านอาหาร", ru: "3-этажное коммерческое здание на главной улице Cha-am, сдано в аренду ресторану.", zh: "位于差安主干道的三层商业楼，目前出租给餐厅租户。" , de: "Ein 3-stöckiges Gewerbegebäude an der Hauptstraße von Cha-am, derzeit an ein Restaurant vermietet.", no: "Et næringsbygg i tre etasjer ved hovedveien i Cha-am, for tiden utleid til en restaurantleietaker." },
+    fullDesc: { en: "Prominent corner building on Cha-am's main commercial strip, ground floor leased to an established restaurant with upper floors configured as offices.", th: "อาคารมุมถนนโดดเด่นบนถนนพาณิชย์สายหลักชะอำ ชั้นล่างปล่อยเช่าให้ร้านอาหารที่มั่นคง ชั้นบนจัดเป็นสำนักงาน", ru: "Заметное угловое здание на главной коммерческой улице Cha-am, первый этаж сдан устоявшемуся ресторану, верхние этажи оборудованы под офисы.", zh: "位于差安主要商业街的显眼转角建筑，一楼出租给经营稳定的餐厅，楼上设为办公室。" , de: "Markantes Eckgebäude an der wichtigsten Geschäftsstraße von Cha-am, Erdgeschoss an ein etabliertes Restaurant vermietet, Obergeschosse als Büros eingerichtet.", no: "Fremtredende hjørnebygg ved hovedhandlegaten i Cha-am, første etasje utleid til en etablert restaurant, øvre etasjer innredet som kontorer." },
+    seo: { title: "Commercial Building For Sale, Cha-am Town", desc: "3-storey commercial building for sale in central Cha-am with rental income.", keywords: "Cha-am commercial property, Cha-am building for sale" },
+    ownerId: "OWN-015", mapLink: "https://www.google.com/maps/search/?api=1&query=Cha-am+Town,+Thailand",
+    adminNotes: "Same owner as HH-108; owns commercial buildings in both towns.",
+    photos: ["Building exterior", "Ground floor restaurant", "Office floor"],
+  },
+];
 
-class Component extends DCLogic {
-  state = {
-    isMobile: (typeof window !== "undefined" && window.innerWidth < 640),
-    railOpen: true, formOpen: false, submitted: false, favoritesOpen: false, favIds: [],
-    name: "", phone: "", email: "", message: "",
-    lang: "th",
-    chatOpen: false, chatMinimized: false, chatMessages: [], chatInput: "", chatLoading: false,
-  };
+export const I18N = {
+  en: {
+    site_name: "huahin.properties",
+    nav_buy: "Buy", nav_rent: "Rent", nav_sell: "Sell / List", nav_about: "About", nav_contact: "Contact", nav_admin: "Admin",
+    hero_kicker: "Hua Hin · Pranburi · Cha-am",
+    hero_title_1: "Coastal living,", hero_title_2: "quietly luxurious.",
+    hero_sub: "Curated pool villas, beachfront homes and land along Thailand's royal coast — for buyers, tenants and owners who expect more.",
+    want_label: "I want to", buy: "Buy", rent: "Rent",
+    location_label: "Location", all_zones: "All areas",
+    type_label: "Property Type", any_type: "Any type",
+    budget_label: "Budget", any_price: "Any price",
+    search_cta: "Search Properties",
+    cta_find: "Find Your Home", cta_buy: "Buy Property", cta_rent: "Rent Property", cta_list: "List Your Property", cta_contact: "Contact an Agent",
+    featured_title: "Featured Properties", featured_sub: "A hand-picked selection across the coast",
+    view_details: "View Details",
+    areas_title: "Explore by Area",
+    area_hua_hin_desc: "Thailand's original royal seaside town — beaches, golf and the historic railway.",
+    area_pranburi_desc: "Wide sandy beaches and quiet land, favoured for private retreats.",
+    area_cha_am_desc: "A relaxed beach town with strong rental demand and easy access to Bangkok.",
+    about_title: "Why huahin.properties",
+    about_body: "We are a boutique agency based in Hua Hin, working exclusively across Hua Hin, Pranburi and Cha-am. Every listing is verified in person, every owner vetted, and every buyer guided from first viewing to signed Chanote.",
+    footer_rights: "All rights reserved.",
+    listings_count: "listings",
+    sort_label: "Sort", sort_newest: "Newest", sort_price_asc: "Price: Low to High", sort_price_desc: "Price: High to Low",
+    view_grid: "Grid", view_list: "List",
+    filters: "Filters", apply_filters: "Apply Filters", clear_filters: "Clear",
+    keyword_label: "Keyword or Property Code", keyword_placeholder: "e.g. HH-101 or pool villa",
+    bedrooms_label: "Bedrooms", bathrooms_label: "Bathrooms", land_size_label: "Land Size", living_area_label: "Living Area", any: "Any",
+    status_label: "Status", features_label: "Features",
+    no_results: "No properties match your filters.",
+    sqm: "sqm", per_month: "/ month",
+    beach: "beach", town: "town",
+    gallery_photo: "Photo",
+    property_overview: "Overview", property_description: "Property Description", no_description: "No description provided yet.", property_features: "Features & Amenities", property_location: "Location", similar_properties: "Similar Properties",
+    contact_agent: "Contact an Agent", enquiry_form: "Send an Enquiry", name_label: "Name", email_label: "Email", phone_label: "Phone", message_label: "Message", send: "Send Enquiry",
+    call: "Call", whatsapp: "WhatsApp", line_app: "Line", email_cta: "Email",
+    sell_title: "List Your Property", sell_sub: "Tell us about your property — for sale or for rent — and our team will get in touch within 24 hours.",
+    sell_owner_name: "Your Name", sell_owner_phone: "Phone", sell_owner_email: "Email", sell_owner_line: "Line ID (optional)",
+    sell_property_type: "Property Type", sell_listing_type: "Listing Type", sell_area: "Area", sell_price: "Asking Price", sell_notes: "Tell us more",
+    sell_submit: "Submit Property",
+    contact_title: "Contact Us", contact_sub: "Questions about buying, renting or listing in Hua Hin, Pranburi or Cha-am? We're here.",
+    admin_login_title: "Admin Login", admin_username: "Username", admin_password: "Password", admin_login_cta: "Sign In",
+    admin_dashboard: "Dashboard", admin_listings: "Listings", admin_total: "Total Listings", admin_for_sale: "For Sale", admin_for_rent: "For Rent", admin_sold: "Sold", admin_reserved: "Reserved", admin_new: "New This Month",
+    admin_add_property: "Add Property", admin_edit: "Edit", admin_delete: "Delete", admin_search: "Search listings...",
+    admin_owner_info: "Owner Info (Private)", admin_internal_notes: "Internal Notes", admin_photos: "Photos", admin_set_cover: "Set as cover", admin_save: "Save Changes", admin_saving: "Saving…", admin_save_success: "Saved successfully", admin_photos_note: "Photos save instantly on upload — no need to wait for Save Changes.", admin_cancel: "Cancel",
+    admin_logout: "Log Out", admin_signed_in_as: "Signed in as Admin",
+    admin_field_title: "Title", admin_field_zone: "Zone", admin_field_price: "Price (THB)",
+    admin_field_land_size: "Land Size (sqm)", admin_field_living_area: "Living Area (sqm)",
+    admin_field_parking: "Parking", admin_field_ownership: "Ownership",
+    admin_field_distance_beach: "Distance to beach (km)", admin_field_distance_town: "Distance to town (km)",
+    admin_field_pool: "Swimming pool", admin_field_furnished: "Furnished",
+    admin_furnished_full: "Fully furnished", admin_furnished_partial: "Partially furnished", admin_furnished_none: "Unfurnished",
+    admin_field_short_desc: "Short Description", admin_field_full_desc: "Full Description",
+    admin_add_photo: "+ Add photo slot", admin_owner_disclaimer: "never shown publicly",
+    admin_owner_name_ph: "Owner name", admin_owner_phone_ph: "Owner phone", admin_owner_email_ph: "Owner email", admin_owner_line_ph: "Owner Line ID",
+    admin_owner_notes_ph: "Private notes about the owner",
+    admin_owners_nav: "Contacts", admin_owners_title: "Owner Directory", admin_owners_sub: "Every owner and every property they've listed with us — private, admin only.",
+    admin_owner_properties: "Properties", admin_view_on_map: "View on map", admin_view_edit_property: "View / Edit property",
+    admin_back_to_dashboard: "← Back to Dashboard", admin_new_owner: "+ New owner", admin_owner_select: "Owner",
+    admin_owner_photo1: "Owner photo / ID", admin_owner_photo2: "Contact screenshot", admin_map_link: "Map link (Google Maps URL)",
+    admin_tenant_photo1: "Tenant photo / ID", admin_tenant_photo2: "Contact screenshot",
+    admin_rented: "Currently Rented", admin_lease_ends: "Lease ends", admin_days_left: "days left", admin_tenant: "Tenant",
+    admin_showing_rented: "Showing rented properties, soonest lease end first", admin_clear_view: "✕ Clear",
+    status_rented: "Rented (occupied)", admin_lease_start: "Lease Start", admin_lease_end: "Lease End",
+    admin_tenant_info: "Tenant Info", admin_tenant_select: "Tenant", admin_new_tenant: "+ New tenant",
+    admin_tenant_name_ph: "Tenant name", admin_tenant_phone_ph: "Tenant phone", admin_tenant_email_ph: "Tenant email", admin_tenant_line_ph: "Tenant Line ID", admin_tenant_notes_ph: "Notes about the tenant",
+    contacts_title: "Contact Directory", contacts_sub: "Owners, tenants and every property linked to them — private, admin only.",
+    contacts_tab_owners: "Owners", contacts_tab_tenants: "Tenants", admin_lease_ends_col: "Lease ends",
+    admin_map_title: "Property Map", admin_map_sub: "Browse the live map of Hua Hin, Pranburi and Cha-am, then click any listing below to view it on the map or open it for editing.", admin_map_note: "Real Google Maps embed above (no API key configured for custom pins in this prototype) — use the color-coded list below to browse by type and click through to a listing.", admin_map_nav: "Map",
+  },
+  th: {
+    site_name: "huahin.properties",
+    nav_buy: "ซื้อ", nav_rent: "เช่า", nav_sell: "ฝากขาย/เช่า", nav_about: "เกี่ยวกับเรา", nav_contact: "ติดต่อ", nav_admin: "แอดมิน",
+    hero_kicker: "หัวหิน · ปราณบุรี · ชะอำ",
+    hero_title_1: "ใช้ชีวิตริมทะเล", hero_title_2: "หรูหราอย่างเงียบสงบ",
+    hero_sub: "คัดสรรพูลวิลล่า บ้านริมทะเล และที่ดินตลอดชายฝั่งเมืองหลวงเก่า สำหรับผู้ซื้อ ผู้เช่า และเจ้าของที่ต้องการมากกว่า",
+    want_label: "ฉันต้องการ", buy: "ซื้อ", rent: "เช่า",
+    location_label: "ทำเล", all_zones: "ทุกพื้นที่",
+    type_label: "ประเภททรัพย์", any_type: "ทุกประเภท",
+    budget_label: "งบประมาณ", any_price: "ทุกช่วงราคา",
+    search_cta: "ค้นหาทรัพย์",
+    cta_find: "ค้นหาบ้านของคุณ", cta_buy: "ซื้ออสังหาริมทรัพย์", cta_rent: "เช่าอสังหาริมทรัพย์", cta_list: "ฝากขาย/ฝากเช่า", cta_contact: "ติดต่อเอเจนต์",
+    featured_title: "ทรัพย์แนะนำ", featured_sub: "คัดสรรพิเศษจากทั่วชายฝั่ง",
+    view_details: "ดูรายละเอียด",
+    areas_title: "สำรวจตามพื้นที่",
+    area_hua_hin_desc: "เมืองชายทะเลหลวงดั้งเดิมของไทย พร้อมชายหาด สนามกอล์ฟ และสถานีรถไฟประวัติศาสตร์",
+    area_pranburi_desc: "หาดทรายกว้างและที่ดินเงียบสงบ เหมาะสำหรับที่พักส่วนตัว",
+    area_cha_am_desc: "เมืองชายทะเลบรรยากาศผ่อนคลาย ความต้องการเช่าสูง เดินทางจากกรุงเทพฯ สะดวก",
+    about_title: "ทำไมต้อง huahin.properties",
+    about_body: "เราคือเอเจนซี่บูทีคในหัวหิน ให้บริการเฉพาะพื้นที่หัวหิน ปราณบุรี และชะอำ ทุกรายการตรวจสอบด้วยตนเอง เจ้าของทุกรายผ่านการคัดกรอง และผู้ซื้อทุกคนได้รับการดูแลตั้งแต่ชมทรัพย์ครั้งแรกจนถึงวันโอนโฉนด",
+    footer_rights: "สงวนลิขสิทธิ์",
+    listings_count: "รายการ",
+    sort_label: "เรียงตาม", sort_newest: "ใหม่ล่าสุด", sort_price_asc: "ราคา: ต่ำไปสูง", sort_price_desc: "ราคา: สูงไปต่ำ",
+    view_grid: "ตาราง", view_list: "รายการ",
+    filters: "ตัวกรองรายละเอียดเพิ่มเติม", apply_filters: "ใช้ตัวกรอง", clear_filters: "ล้างค่า",
+    keyword_label: "คำค้นหาหรือรหัสทรัพย์", keyword_placeholder: "เช่น HH-101 หรือ พูลวิลล่า",
+    bedrooms_label: "ห้องนอน", bathrooms_label: "ห้องน้ำ", land_size_label: "ขนาดที่ดิน", living_area_label: "พื้นที่ใช้สอย", any: "ทั้งหมด",
+    status_label: "สถานะ", features_label: "คุณสมบัติ",
+    no_results: "ไม่พบทรัพย์ที่ตรงกับตัวกรองของคุณ",
+    sqm: "ตร.ม.", per_month: "/ เดือน",
+    beach: "ชายหาด", town: "ตัวเมือง",
+    gallery_photo: "รูปภาพ",
+    property_overview: "รายละเอียดสรุป", property_description: "รายละเอียดประกาศ", no_description: "ยังไม่มีรายละเอียด", property_features: "คุณสมบัติและสิ่งอำนวยความสะดวก", property_location: "ทำเล", similar_properties: "ทรัพย์ใกล้เคียง",
+    contact_agent: "ติดต่อเอเจนต์", enquiry_form: "ส่งข้อความสอบถาม", name_label: "ชื่อ", email_label: "อีเมล", phone_label: "เบอร์โทร", message_label: "ข้อความ", send: "ส่งข้อความ",
+    call: "โทร", whatsapp: "WhatsApp", line_app: "Line", email_cta: "อีเมล",
+    sell_title: "ฝากขาย / ฝากให้เช่าทรัพย์", sell_sub: "บอกรายละเอียดทรัพย์ของคุณ ทั้งขายหรือเช่า ทีมงานจะติดต่อกลับภายใน 24 ชั่วโมง",
+    sell_owner_name: "ชื่อของคุณ", sell_owner_phone: "เบอร์โทร", sell_owner_email: "อีเมล", sell_owner_line: "Line ID (ถ้ามี)",
+    sell_property_type: "ประเภททรัพย์", sell_listing_type: "ประเภทประกาศ", sell_area: "พื้นที่", sell_price: "ราคาที่ต้องการ", sell_notes: "รายละเอียดเพิ่มเติม",
+    sell_submit: "ส่งข้อมูลทรัพย์",
+    contact_title: "ติดต่อเรา", contact_sub: "มีคำถามเรื่องซื้อ เช่า หรือฝากขายในหัวหิน ปราณบุรี หรือชะอำ? เราพร้อมช่วยเหลือ",
+    admin_login_title: "เข้าสู่ระบบแอดมิน", admin_username: "ชื่อผู้ใช้", admin_password: "รหัสผ่าน", admin_login_cta: "เข้าสู่ระบบ",
+    admin_dashboard: "แดชบอร์ด", admin_listings: "รายการทรัพย์", admin_total: "รายการทั้งหมด", admin_for_sale: "ประกาศขาย", admin_for_rent: "ประกาศเช่า", admin_sold: "ขายแล้ว", admin_reserved: "จองแล้ว", admin_new: "รายการใหม่เดือนนี้",
+    admin_add_property: "เพิ่มทรัพย์", admin_edit: "แก้ไข", admin_delete: "ลบ", admin_search: "ค้นหารายการ...",
+    admin_owner_info: "ข้อมูลเจ้าของ (ส่วนตัว)", admin_internal_notes: "บันทึกภายใน", admin_photos: "รูปภาพ", admin_set_cover: "ตั้งเป็นรูปหลัก", admin_save: "บันทึกการเปลี่ยนแปลง", admin_saving: "กำลังบันทึก...", admin_save_success: "บันทึกสำเร็จ", admin_photos_note: "รูปภาพจะถูกบันทึกทันทีที่อัปโหลด ไม่ต้องรอกดปุ่มบันทึกการเปลี่ยนแปลง", admin_cancel: "ยกเลิก",
+    admin_logout: "ออกจากระบบ", admin_signed_in_as: "เข้าสู่ระบบในฐานะแอดมิน",
+    admin_field_title: "ชื่อทรัพย์", admin_field_zone: "โซน", admin_field_price: "ราคา (บาท)",
+    admin_field_land_size: "ขนาดที่ดิน (ตร.ม.)", admin_field_living_area: "พื้นที่ใช้สอย (ตร.ม.)",
+    admin_field_parking: "ที่จอดรถ", admin_field_ownership: "กรรมสิทธิ์",
+    admin_field_distance_beach: "ระยะห่างชายหาด (กม.)", admin_field_distance_town: "ระยะห่างตัวเมือง (กม.)",
+    admin_field_pool: "สระว่ายน้ำ", admin_field_furnished: "เฟอร์นิเจอร์",
+    admin_furnished_full: "ครบชุด", admin_furnished_partial: "บางส่วน", admin_furnished_none: "ไม่มีเฟอร์นิเจอร์",
+    admin_field_short_desc: "รายละเอียดโดยย่อ", admin_field_full_desc: "รายละเอียดเต็ม",
+    admin_add_photo: "+ เพิ่มช่องรูปภาพ", admin_owner_disclaimer: "ไม่แสดงต่อสาธารณะ",
+    admin_owner_name_ph: "ชื่อเจ้าของ", admin_owner_phone_ph: "เบอร์โทรเจ้าของ", admin_owner_email_ph: "อีเมลเจ้าของ", admin_owner_line_ph: "Line ID เจ้าของ",
+    admin_owner_notes_ph: "บันทึกส่วนตัวเกี่ยวกับเจ้าของ",
+    admin_owners_nav: "ผู้ติดต่อ", admin_owners_title: "ทำเนียบเจ้าของทรัพย์", admin_owners_sub: "เจ้าของทุกคนและทรัพย์ทุกรายการที่ฝากไว้กับเรา — ส่วนตัว เฉพาะแอดมิน",
+    admin_owner_properties: "ทรัพย์ที่ฝาก", admin_view_on_map: "ดูแผนที่", admin_view_edit_property: "ดู/แก้ไขทรัพย์",
+    admin_back_to_dashboard: "← กลับไปแดชบอร์ด", admin_new_owner: "+ เจ้าของใหม่", admin_owner_select: "เจ้าของ",
+    admin_owner_photo1: "รูปเจ้าของ / บัตรประชาชน", admin_owner_photo2: "ภาพแคปหน้าจอการติดต่อ", admin_map_link: "ลิงก์แผนที่ (Google Maps URL)",
+    admin_tenant_photo1: "รูปผู้เช่า / บัตรประชาชน", admin_tenant_photo2: "ภาพแคปหน้าจอการติดต่อ",
+    admin_rented: "เช่าแล้ว", admin_lease_ends: "สัญญาหมดอายุ", admin_days_left: "วัน", admin_tenant: "ผู้เช่า",
+    admin_showing_rented: "กำลังแสดงบ้านที่เช่าแล้ว เรียงจากใกล้หมดสัญญาที่สุด", admin_clear_view: "✕ ล้างตัวกรอง",
+    status_rented: "เช่าแล้ว (มีผู้เช่าอยู่)", admin_lease_start: "วันที่เริ่มเช่า", admin_lease_end: "วันที่สิ้นสุดสัญญา",
+    admin_tenant_info: "ข้อมูลผู้เช่า", admin_tenant_select: "ผู้เช่า", admin_new_tenant: "+ ผู้เช่าใหม่",
+    admin_tenant_name_ph: "ชื่อผู้เช่า", admin_tenant_phone_ph: "เบอร์โทรผู้เช่า", admin_tenant_email_ph: "อีเมลผู้เช่า", admin_tenant_line_ph: "Line ID ผู้เช่า", admin_tenant_notes_ph: "บันทึกเกี่ยวกับผู้เช่า",
+    contacts_title: "ทำเนียบผู้ติดต่อ", contacts_sub: "เจ้าของ ผู้เช่า และทรัพย์ทุกรายการที่เชื่อมโยงกัน — ส่วนตัว เฉพาะแอดมิน",
+    contacts_tab_owners: "เจ้าของทรัพย์", contacts_tab_tenants: "ผู้เช่า", admin_lease_ends_col: "สัญญาหมดอายุ",
+    admin_map_title: "แผนที่ทรัพย์สิน", admin_map_sub: "เลื่อนดูแผนที่จริงของหัวหิน ปราณบุรี และชะอำ จากนั้นคลิกที่รายการด้านล่างเพื่อดูบนแผนที่หรือเปิดแก้ไข", admin_map_note: "แผนที่ Google Maps จริงด้านบน (ยังไม่ได้ตั้งค่า API key สำหรับปักหมุดกำหนดเองในตัวอย่างนี้) — ใช้รายการด้านล่างที่แยกสีตามประเภทด้านล่างเพื่อเรียกดูและคลิกเข้าดูรายการได้", admin_map_nav: "แผนที่",
+  },
+  ru: {
+    site_name: "huahin.properties",
+    nav_buy: "Купить", nav_rent: "Снять", nav_sell: "Продать / Сдать", nav_about: "О нас", nav_contact: "Контакты", nav_admin: "Админ",
+    hero_kicker: "Хуахин · Пранбури · Ча-Ам",
+    hero_title_1: "Жизнь у моря,", hero_title_2: "тихая роскошь.",
+    hero_sub: "Избранные виллы с бассейном, дома у моря и земля вдоль королевского побережья Таиланда — для взыскательных покупателей, арендаторов и владельцев.",
+    want_label: "Я хочу", buy: "Купить", rent: "Снять",
+    location_label: "Локация", all_zones: "Все районы",
+    type_label: "Тип недвижимости", any_type: "Любой тип",
+    budget_label: "Бюджет", any_price: "Любая цена",
+    search_cta: "Найти недвижимость",
+    cta_find: "Найти дом", cta_buy: "Купить недвижимость", cta_rent: "Снять недвижимость", cta_list: "Разместить объект", cta_contact: "Связаться с агентом",
+    featured_title: "Избранные объекты", featured_sub: "Подборка лучших предложений побережья",
+    view_details: "Подробнее",
+    areas_title: "Выбрать по району",
+    area_hua_hin_desc: "Первый королевский приморский город Таиланда — пляжи, гольф и историческая железная дорога.",
+    area_pranburi_desc: "Широкие песчаные пляжи и тихая земля — предпочтение для частных резиденций.",
+    area_cha_am_desc: "Спокойный приморский город с высоким спросом на аренду и удобной связью с Бангкоком.",
+    about_title: "Почему huahin.properties",
+    about_body: "Мы бутик-агентство в Хуахине, работающее исключительно в Хуахине, Пранбури и Ча-Ам. Каждый объект проверяется лично, каждый владелец — с проверкой, а каждый покупатель сопровождается от первого просмотра до подписания документа Chanote.",
+    footer_rights: "Все права защищены.",
+    listings_count: "объектов",
+    sort_label: "Сортировка", sort_newest: "Сначала новые", sort_price_asc: "Цена: по возрастанию", sort_price_desc: "Цена: по убыванию",
+    view_grid: "Сетка", view_list: "Список",
+    filters: "Фильтры", apply_filters: "Применить фильтры", clear_filters: "Сбросить",
+    keyword_label: "Ключевое слово или код объекта", keyword_placeholder: "напр. HH-101 или вилла с бассейном",
+    bedrooms_label: "Спальни", bathrooms_label: "Ванные", land_size_label: "Площадь участка", living_area_label: "Жилая площадь", any: "Любое",
+    status_label: "Статус", features_label: "Особенности",
+    no_results: "Нет объектов, соответствующих фильтрам.",
+    sqm: "кв.м", per_month: "/ месяц",
+    beach: "пляж", town: "город",
+    gallery_photo: "Фото",
+    property_overview: "Обзор", property_description: "Описание", no_description: "Описание пока не добавлено.", property_features: "Особенности и удобства", property_location: "Расположение", similar_properties: "Похожие объекты",
+    contact_agent: "Связаться с агентом", enquiry_form: "Отправить запрос", name_label: "Имя", email_label: "Email", phone_label: "Телефон", message_label: "Сообщение", send: "Отправить запрос",
+    call: "Позвонить", whatsapp: "WhatsApp", line_app: "Line", email_cta: "Email",
+    sell_title: "Разместить объект", sell_sub: "Расскажите нам о вашей недвижимости — на продажу или в аренду — и наша команда свяжется с вами в течение 24 часов.",
+    sell_owner_name: "Ваше имя", sell_owner_phone: "Телефон", sell_owner_email: "Email", sell_owner_line: "Line ID (необязательно)",
+    sell_property_type: "Тип недвижимости", sell_listing_type: "Тип объявления", sell_area: "Район", sell_price: "Желаемая цена", sell_notes: "Дополнительная информация",
+    sell_submit: "Отправить объект",
+    contact_title: "Связаться с нами", contact_sub: "Вопросы о покупке, аренде или размещении в Хуахине, Пранбури или Ча-Ам? Мы на связи.",
+    admin_login_title: "Вход для админа", admin_username: "Логин", admin_password: "Пароль", admin_login_cta: "Войти",
+    admin_dashboard: "Панель управления", admin_listings: "Объекты", admin_total: "Всего объектов", admin_for_sale: "На продажу", admin_for_rent: "В аренду", admin_sold: "Продано", admin_reserved: "Забронировано", admin_new: "Новых за месяц",
+    admin_add_property: "Добавить объект", admin_edit: "Изменить", admin_delete: "Удалить", admin_search: "Поиск объектов...",
+    admin_owner_info: "Данные владельца (приватно)", admin_internal_notes: "Внутренние заметки", admin_photos: "Фото", admin_set_cover: "Сделать обложкой", admin_save: "Сохранить изменения", admin_saving: "Сохранение...", admin_save_success: "Успешно сохранено", admin_photos_note: "Фото сохраняются сразу при загрузке — не нужно ждать кнопку сохранения.", admin_cancel: "Отмена",
+    admin_logout: "Выйти", admin_signed_in_as: "Вход выполнен как админ",
+    admin_field_title: "Название", admin_field_zone: "Район", admin_field_price: "Цена (THB)",
+    admin_field_land_size: "Площадь участка (кв.м)", admin_field_living_area: "Жилая площадь (кв.м)",
+    admin_field_parking: "Парковка", admin_field_ownership: "Право собственности",
+    admin_field_distance_beach: "Расстояние до пляжа (км)", admin_field_distance_town: "Расстояние до города (км)",
+    admin_field_pool: "Бассейн", admin_field_furnished: "Меблировка",
+    admin_furnished_full: "Полностью меблировано", admin_furnished_partial: "Частично меблировано", admin_furnished_none: "Без мебели",
+    admin_field_short_desc: "Краткое описание", admin_field_full_desc: "Полное описание",
+    admin_add_photo: "+ Добавить фото", admin_owner_disclaimer: "никогда не показывается публично",
+    admin_owner_name_ph: "Имя владельца", admin_owner_phone_ph: "Телефон владельца", admin_owner_email_ph: "Email владельца", admin_owner_line_ph: "Line ID владельца",
+    admin_owner_notes_ph: "Приватные заметки о владельце",
+    admin_owners_nav: "Контакты", admin_owners_title: "Справочник владельцев", admin_owners_sub: "Все владельцы и все объекты, которые они разместили у нас — приватно, только для админа.",
+    admin_owner_properties: "Объекты", admin_view_on_map: "Смотреть на карте", admin_view_edit_property: "Смотреть / редактировать объект",
+    admin_back_to_dashboard: "← Назад к панели", admin_new_owner: "+ Новый владелец", admin_owner_select: "Владелец",
+    admin_owner_photo1: "Фото владельца / ID", admin_owner_photo2: "Скриншот переписки", admin_map_link: "Ссылка на карту (Google Maps URL)",
+    admin_tenant_photo1: "Фото арендатора / ID", admin_tenant_photo2: "Скриншот переписки",
+    admin_rented: "Сдано в аренду", admin_lease_ends: "Окончание аренды", admin_days_left: "дней осталось", admin_tenant: "Арендатор",
+    admin_showing_rented: "Показаны сданные объекты, ближайшее окончание аренды сначала", admin_clear_view: "✕ Сбросить",
+    status_rented: "Сдано (занято)", admin_lease_start: "Начало аренды", admin_lease_end: "Окончание аренды",
+    admin_tenant_info: "Данные арендатора", admin_tenant_select: "Арендатор", admin_new_tenant: "+ Новый арендатор",
+    admin_tenant_name_ph: "Имя арендатора", admin_tenant_phone_ph: "Телефон арендатора", admin_tenant_email_ph: "Email арендатора", admin_tenant_line_ph: "Line ID арендатора", admin_tenant_notes_ph: "Заметки об арендаторе",
+    contacts_title: "Справочник контактов", contacts_sub: "Владельцы, арендаторы и все связанные с ними объекты — приватно, только для админа.",
+    contacts_tab_owners: "Владельцы", contacts_tab_tenants: "Арендаторы", admin_lease_ends_col: "Окончание аренды",
+    admin_map_title: "Карта объектов", admin_map_sub: "Просмотрите живую карту Хуахина, Пранбури и Ча-Ам, затем нажмите любой объект ниже, чтобы посмотреть его на карте или открыть для редактирования.", admin_map_note: "Выше встроена настоящая карта Google (API-ключ для пользовательских меток в этом прототипе не настроен) — используйте список с цветовыми метками ниже, чтобы просматривать по типу и переходить к объектам.", admin_map_nav: "Карта",
+  },
+  no: {
+    site_name: "huahin.properties",
+    nav_buy: "Kjøp", nav_rent: "Leie", nav_sell: "Selg / Legg ut", nav_about: "Om oss", nav_contact: "Kontakt", nav_admin: "Admin",
+    hero_kicker: "Hua Hin · Pranburi · Cha-am",
+    hero_title_1: "Liv ved kysten,", hero_title_2: "stillferdig luksuriøst.",
+    hero_sub: "Utvalgte bassengvillaer, strandhus og tomter langs Thailands kongelige kyst — for kjøpere, leietakere og eiere som forventer mer.",
+    want_label: "Jeg vil", buy: "Kjøpe", rent: "Leie",
+    location_label: "Beliggenhet", all_zones: "Alle områder",
+    type_label: "Eiendomstype", any_type: "Alle typer",
+    budget_label: "Budsjett", any_price: "Alle priser",
+    search_cta: "Søk etter eiendom",
+    cta_find: "Finn ditt hjem", cta_buy: "Kjøp eiendom", cta_rent: "Lei eiendom", cta_list: "Legg ut eiendom", cta_contact: "Kontakt megler",
+    featured_title: "Utvalgte eiendommer", featured_sub: "Et håndplukket utvalg langs kysten",
+    view_details: "Se detaljer",
+    areas_title: "Utforsk etter område",
+    area_hua_hin_desc: "Thailands opprinnelige kongelige kystby — strender, golf og den historiske jernbanen.",
+    area_pranburi_desc: "Brede sandstrender og rolige tomter, populært for private tilfluktssteder.",
+    area_cha_am_desc: "En avslappet strandby med høy etterspørsel etter utleie og enkel tilgang til Bangkok.",
+    about_title: "Hvorfor huahin.properties",
+    about_body: "Vi er et boutique-byrå basert i Hua Hin, som utelukkende jobber i Hua Hin, Pranburi og Cha-am. Hver eiendom er verifisert personlig, hver eier er sjekket, og hver kjøper blir fulgt opp fra første visning til signert Chanote-skjøte.",
+    footer_rights: "Alle rettigheter reservert.",
+    listings_count: "annonser",
+    sort_label: "Sorter", sort_newest: "Nyeste", sort_price_asc: "Pris: lav til høy", sort_price_desc: "Pris: høy til lav",
+    view_grid: "Rutenett", view_list: "Liste",
+    filters: "Filtre", apply_filters: "Bruk filtre", clear_filters: "Tøm",
+    keyword_label: "Søkeord eller eiendomskode", keyword_placeholder: "f.eks. HH-101 eller bassengvilla",
+    bedrooms_label: "Soverom", bathrooms_label: "Bad", land_size_label: "Tomtestørrelse", living_area_label: "Boareal", any: "Alle",
+    status_label: "Status", features_label: "Fasiliteter",
+    no_results: "Ingen eiendommer samsvarer med filtrene dine.",
+    sqm: "kvm", per_month: "/ måned",
+    beach: "strand", town: "by",
+    gallery_photo: "Bilde",
+    property_overview: "Oversikt", property_description: "Beskrivelse", no_description: "Ingen beskrivelse ennå.", property_features: "Fasiliteter", property_location: "Beliggenhet", similar_properties: "Lignende eiendommer",
+    contact_agent: "Kontakt megler", enquiry_form: "Send en forespørsel", name_label: "Navn", email_label: "E-post", phone_label: "Telefon", message_label: "Melding", send: "Send forespørsel",
+    call: "Ring", whatsapp: "WhatsApp", line_app: "Line", email_cta: "E-post",
+    sell_title: "Legg ut din eiendom", sell_sub: "Fortell oss om eiendommen din — til salgs eller utleie — så tar teamet vårt kontakt innen 24 timer.",
+    sell_owner_name: "Ditt navn", sell_owner_phone: "Telefon", sell_owner_email: "E-post", sell_owner_line: "Line-ID (valgfritt)",
+    sell_property_type: "Eiendomstype", sell_listing_type: "Annonsetype", sell_area: "Område", sell_price: "Ønsket pris", sell_notes: "Fortell oss mer",
+    sell_submit: "Send inn eiendom",
+    contact_title: "Kontakt oss", contact_sub: "Spørsmål om kjøp, leie eller annonsering i Hua Hin, Pranburi eller Cha-am? Vi er her for deg.",
+    admin_login_title: "Admin-innlogging", admin_username: "Brukernavn", admin_password: "Passord", admin_login_cta: "Logg inn",
+    admin_dashboard: "Dashbord", admin_listings: "Annonser", admin_total: "Totalt antall annonser", admin_for_sale: "Til salgs", admin_for_rent: "Til leie", admin_sold: "Solgt", admin_reserved: "Reservert", admin_new: "Nye denne måneden",
+    admin_add_property: "Legg til eiendom", admin_edit: "Rediger", admin_delete: "Slett", admin_search: "Søk i annonser...",
+    admin_owner_info: "Eierinformasjon (privat)", admin_internal_notes: "Interne notater", admin_photos: "Bilder", admin_set_cover: "Sett som forsidebilde", admin_save: "Lagre endringer", admin_saving: "Lagrer…", admin_save_success: "Lagret", admin_photos_note: "Bilder lagres umiddelbart ved opplasting — ingen grunn til å vente på Lagre endringer.", admin_cancel: "Avbryt",
+    admin_logout: "Logg ut", admin_signed_in_as: "Logget inn som Admin",
+    admin_field_title: "Tittel", admin_field_zone: "Sone", admin_field_price: "Pris (THB)",
+    admin_field_land_size: "Tomtestørrelse (kvm)", admin_field_living_area: "Boareal (kvm)",
+    admin_field_parking: "Parkering", admin_field_ownership: "Eierform",
+    admin_field_distance_beach: "Avstand til stranden (km)", admin_field_distance_town: "Avstand til byen (km)",
+    admin_field_pool: "Svømmebasseng", admin_field_furnished: "Møblert",
+    admin_furnished_full: "Fullt møblert", admin_furnished_partial: "Delvis møblert", admin_furnished_none: "Umøblert",
+    admin_field_short_desc: "Kort beskrivelse", admin_field_full_desc: "Full beskrivelse",
+    admin_add_photo: "+ Legg til bildeplass", admin_owner_disclaimer: "vises aldri offentlig",
+    admin_owner_name_ph: "Eierens navn", admin_owner_phone_ph: "Eierens telefon", admin_owner_email_ph: "Eierens e-post", admin_owner_line_ph: "Eierens Line-ID",
+    admin_owner_notes_ph: "Private notater om eieren",
+    admin_owners_nav: "Kontakter", admin_owners_title: "Eierregister", admin_owners_sub: "Hver eier og hver eiendom de har lagt ut hos oss — privat, kun for admin.",
+    admin_owner_properties: "Eiendommer", admin_view_on_map: "Vis på kart", admin_view_edit_property: "Vis / rediger eiendom",
+    admin_back_to_dashboard: "← Tilbake til dashbordet", admin_new_owner: "+ Ny eier", admin_owner_select: "Eier",
+    admin_owner_photo1: "Eierens bilde / ID", admin_owner_photo2: "Skjermbilde av kontakt", admin_map_link: "Kartlenke (Google Maps-URL)",
+    admin_tenant_photo1: "Leietakerens bilde / ID", admin_tenant_photo2: "Skjermbilde av kontakt",
+    admin_rented: "Utleid nå", admin_lease_ends: "Leieavtale slutter", admin_days_left: "dager igjen", admin_tenant: "Leietaker",
+    admin_showing_rented: "Viser utleide eiendommer, nærmeste leieslutt først", admin_clear_view: "✕ Tøm",
+    status_rented: "Utleid (opptatt)", admin_lease_start: "Leiestart", admin_lease_end: "Leieslutt",
+    admin_tenant_info: "Leietakerinformasjon", admin_tenant_select: "Leietaker", admin_new_tenant: "+ Ny leietaker",
+    admin_tenant_name_ph: "Leietakerens navn", admin_tenant_phone_ph: "Leietakerens telefon", admin_tenant_email_ph: "Leietakerens e-post", admin_tenant_line_ph: "Leietakerens Line-ID", admin_tenant_notes_ph: "Notater om leietakeren",
+    contacts_title: "Kontaktregister", contacts_sub: "Eiere, leietakere og alle eiendommer knyttet til dem — privat, kun for admin.",
+    contacts_tab_owners: "Eiere", contacts_tab_tenants: "Leietakere", admin_lease_ends_col: "Leieslutt",
+    admin_map_title: "Eiendomskart", admin_map_sub: "Bla gjennom det direkte kartet over Hua Hin, Pranburi og Cha-am, og klikk deretter på en annonse nedenfor for å se den på kartet eller åpne den for redigering.", admin_map_note: "Ekte Google Maps-innbygging over (ingen API-nøkkel konfigurert for egendefinerte pinner i denne prototypen) — bruk den fargekodede listen nedenfor for å bla etter type og gå til annonser.", admin_map_nav: "Kart",
+  },
+  de: {
+    site_name: "huahin.properties",
+    nav_buy: "Kaufen", nav_rent: "Mieten", nav_sell: "Verkaufen / Inserieren", nav_about: "Über uns", nav_contact: "Kontakt", nav_admin: "Admin",
+    hero_kicker: "Hua Hin · Pranburi · Cha-am",
+    hero_title_1: "Leben an der Küste,", hero_title_2: "leise luxuriös.",
+    hero_sub: "Ausgewählte Poolvillen, Strandhäuser und Grundstücke entlang Thailands königlicher Küste — für Käufer, Mieter und Eigentümer, die mehr erwarten.",
+    want_label: "Ich möchte", buy: "Kaufen", rent: "Mieten",
+    location_label: "Standort", all_zones: "Alle Gebiete",
+    type_label: "Immobilientyp", any_type: "Alle Typen",
+    budget_label: "Budget", any_price: "Jeder Preis",
+    search_cta: "Immobilien suchen",
+    cta_find: "Finden Sie Ihr Zuhause", cta_buy: "Immobilie kaufen", cta_rent: "Immobilie mieten", cta_list: "Immobilie inserieren", cta_contact: "Makler kontaktieren",
+    featured_title: "Ausgewählte Immobilien", featured_sub: "Eine handverlesene Auswahl entlang der Küste",
+    view_details: "Details ansehen",
+    areas_title: "Nach Gebiet erkunden",
+    area_hua_hin_desc: "Thailands ursprüngliche königliche Küstenstadt — Strände, Golf und die historische Eisenbahn.",
+    area_pranburi_desc: "Weite Sandstrände und ruhiges Land, beliebt für private Rückzugsorte.",
+    area_cha_am_desc: "Eine entspannte Strandstadt mit hoher Mietnachfrage und einfacher Anbindung nach Bangkok.",
+    about_title: "Warum huahin.properties",
+    about_body: "Wir sind eine Boutique-Agentur mit Sitz in Hua Hin, die ausschließlich in Hua Hin, Pranburi und Cha-am tätig ist. Jedes Angebot wird persönlich geprüft, jeder Eigentümer überprüft, und jeder Käufer wird von der ersten Besichtigung bis zur Unterzeichnung des Chanote begleitet.",
+    footer_rights: "Alle Rechte vorbehalten.",
+    listings_count: "Angebote",
+    sort_label: "Sortieren", sort_newest: "Neueste", sort_price_asc: "Preis: aufsteigend", sort_price_desc: "Preis: absteigend",
+    view_grid: "Raster", view_list: "Liste",
+    filters: "Filter", apply_filters: "Filter anwenden", clear_filters: "Zurücksetzen",
+    keyword_label: "Suchbegriff oder Objektcode", keyword_placeholder: "z.B. HH-101 oder Pool-Villa",
+    bedrooms_label: "Schlafzimmer", bathrooms_label: "Badezimmer", land_size_label: "Grundstücksgröße", living_area_label: "Wohnfläche", any: "Beliebig",
+    status_label: "Status", features_label: "Ausstattung",
+    no_results: "Keine Immobilien entsprechen Ihren Filtern.",
+    sqm: "m²", per_month: "/ Monat",
+    beach: "Strand", town: "Stadt",
+    gallery_photo: "Foto",
+    property_overview: "Übersicht", property_description: "Beschreibung", no_description: "Noch keine Beschreibung vorhanden.", property_features: "Ausstattung & Annehmlichkeiten", property_location: "Lage", similar_properties: "Ähnliche Immobilien",
+    contact_agent: "Makler kontaktieren", enquiry_form: "Anfrage senden", name_label: "Name", email_label: "E-Mail", phone_label: "Telefon", message_label: "Nachricht", send: "Anfrage senden",
+    call: "Anrufen", whatsapp: "WhatsApp", line_app: "Line", email_cta: "E-Mail",
+    sell_title: "Immobilie inserieren", sell_sub: "Erzählen Sie uns von Ihrer Immobilie — zum Verkauf oder zur Miete — und unser Team meldet sich innerhalb von 24 Stunden.",
+    sell_owner_name: "Ihr Name", sell_owner_phone: "Telefon", sell_owner_email: "E-Mail", sell_owner_line: "Line-ID (optional)",
+    sell_property_type: "Immobilientyp", sell_listing_type: "Angebotstyp", sell_area: "Gebiet", sell_price: "Preisvorstellung", sell_notes: "Mehr erzählen",
+    sell_submit: "Immobilie einreichen",
+    contact_title: "Kontaktieren Sie uns", contact_sub: "Fragen zum Kauf, zur Miete oder zum Inserieren in Hua Hin, Pranburi oder Cha-am? Wir sind für Sie da.",
+    admin_login_title: "Admin-Anmeldung", admin_username: "Benutzername", admin_password: "Passwort", admin_login_cta: "Anmelden",
+    admin_dashboard: "Dashboard", admin_listings: "Angebote", admin_total: "Angebote gesamt", admin_for_sale: "Zu verkaufen", admin_for_rent: "Zu vermieten", admin_sold: "Verkauft", admin_reserved: "Reserviert", admin_new: "Neu diesen Monat",
+    admin_add_property: "Immobilie hinzufügen", admin_edit: "Bearbeiten", admin_delete: "Löschen", admin_search: "Angebote suchen...",
+    admin_owner_info: "Eigentümerdaten (privat)", admin_internal_notes: "Interne Notizen", admin_photos: "Fotos", admin_set_cover: "Als Titelbild festlegen", admin_save: "Änderungen speichern", admin_saving: "Wird gespeichert…", admin_save_success: "Erfolgreich gespeichert", admin_photos_note: "Fotos werden sofort beim Hochladen gespeichert — kein Warten auf Speichern nötig.", admin_cancel: "Abbrechen",
+    admin_logout: "Abmelden", admin_signed_in_as: "Angemeldet als Admin",
+    admin_field_title: "Titel", admin_field_zone: "Zone", admin_field_price: "Preis (THB)",
+    admin_field_land_size: "Grundstücksgröße (m²)", admin_field_living_area: "Wohnfläche (m²)",
+    admin_field_parking: "Parkplätze", admin_field_ownership: "Eigentumsverhältnis",
+    admin_field_distance_beach: "Entfernung zum Strand (km)", admin_field_distance_town: "Entfernung zur Stadt (km)",
+    admin_field_pool: "Schwimmbad", admin_field_furnished: "Möbliert",
+    admin_furnished_full: "Voll möbliert", admin_furnished_partial: "Teilmöbliert", admin_furnished_none: "Unmöbliert",
+    admin_field_short_desc: "Kurzbeschreibung", admin_field_full_desc: "Vollständige Beschreibung",
+    admin_add_photo: "+ Fotoplatz hinzufügen", admin_owner_disclaimer: "niemals öffentlich angezeigt",
+    admin_owner_name_ph: "Name des Eigentümers", admin_owner_phone_ph: "Telefon des Eigentümers", admin_owner_email_ph: "E-Mail des Eigentümers", admin_owner_line_ph: "Line-ID des Eigentümers",
+    admin_owner_notes_ph: "Private Notizen zum Eigentümer",
+    admin_owners_nav: "Kontakte", admin_owners_title: "Eigentümerverzeichnis", admin_owners_sub: "Jeder Eigentümer und jede bei uns gelistete Immobilie — privat, nur für Admin.",
+    admin_owner_properties: "Immobilien", admin_view_on_map: "Auf Karte ansehen", admin_view_edit_property: "Immobilie ansehen / bearbeiten",
+    admin_back_to_dashboard: "← Zurück zum Dashboard", admin_new_owner: "+ Neuer Eigentümer", admin_owner_select: "Eigentümer",
+    admin_owner_photo1: "Foto / Ausweis des Eigentümers", admin_owner_photo2: "Kontakt-Screenshot", admin_map_link: "Kartenlink (Google Maps URL)",
+    admin_tenant_photo1: "Foto / Ausweis des Mieters", admin_tenant_photo2: "Kontakt-Screenshot",
+    admin_rented: "Aktuell vermietet", admin_lease_ends: "Mietende", admin_days_left: "Tage verbleibend", admin_tenant: "Mieter",
+    admin_showing_rented: "Vermietete Immobilien werden angezeigt, frühestes Mietende zuerst", admin_clear_view: "✕ Zurücksetzen",
+    status_rented: "Vermietet (belegt)", admin_lease_start: "Mietbeginn", admin_lease_end: "Mietende",
+    admin_tenant_info: "Mieterdaten", admin_tenant_select: "Mieter", admin_new_tenant: "+ Neuer Mieter",
+    admin_tenant_name_ph: "Name des Mieters", admin_tenant_phone_ph: "Telefon des Mieters", admin_tenant_email_ph: "E-Mail des Mieters", admin_tenant_line_ph: "Line-ID des Mieters", admin_tenant_notes_ph: "Notizen zum Mieter",
+    contacts_title: "Kontaktverzeichnis", contacts_sub: "Eigentümer, Mieter und alle damit verbundenen Immobilien — privat, nur für Admin.",
+    contacts_tab_owners: "Eigentümer", contacts_tab_tenants: "Mieter", admin_lease_ends_col: "Mietende",
+    admin_map_title: "Immobilienkarte", admin_map_sub: "Durchsuchen Sie die Live-Karte von Hua Hin, Pranburi und Cha-am und klicken Sie dann auf ein Angebot unten, um es auf der Karte anzuzeigen oder zu bearbeiten.", admin_map_note: "Echte Google-Maps-Einbettung oben (kein API-Schlüssel für benutzerdefinierte Pins in diesem Prototyp konfiguriert) — nutzen Sie die farblich codierte Liste unten, um nach Typ zu durchsuchen und zu Angeboten zu gelangen.", admin_map_nav: "Karte",
+  },
+  zh: {
+    site_name: "huahin.properties",
+    nav_buy: "购买", nav_rent: "租赁", nav_sell: "委托出售/出租", nav_about: "关于我们", nav_contact: "联系我们", nav_admin: "管理后台",
+    hero_kicker: "华欣 · 巴蓝武里 · 差安",
+    hero_title_1: "海岸生活，", hero_title_2: "低调奢华。",
+    hero_sub: "精选泰国皇家海岸沿线的泳池别墅、海滨住宅与土地——献给追求更多的买家、租客与业主。",
+    want_label: "我想要", buy: "购买", rent: "租赁",
+    location_label: "地区", all_zones: "所有地区",
+    type_label: "房产类型", any_type: "任意类型",
+    budget_label: "预算", any_price: "不限价格",
+    search_cta: "搜索房源",
+    cta_find: "寻找您的家", cta_buy: "购买房产", cta_rent: "租赁房产", cta_list: "委托出售/出租", cta_contact: "联系经纪人",
+    featured_title: "精选房源", featured_sub: "沿海岸精心挑选",
+    view_details: "查看详情",
+    areas_title: "按地区探索",
+    area_hua_hin_desc: "泰国原始的皇家海滨小镇——沙滩、高尔夫与历史悠久的火车站。",
+    area_pranburi_desc: "宽阔的沙滩与宁静的土地，深受私人度假住宅青睐。",
+    area_cha_am_desc: "悠闲的海滨小镇，租赁需求旺盛，往返曼谷交通便利。",
+    about_title: "为什么选择 huahin.properties",
+    about_body: "我们是总部位于华欣的精品地产公司，专注于华欣、巴蓝武里与差安地区。每套房源均经实地核实，每位业主均经过审核，每位买家从首次看房到过户均获得全程陪同。",
+    footer_rights: "版权所有。",
+    listings_count: "套房源",
+    sort_label: "排序", sort_newest: "最新发布", sort_price_asc: "价格：从低到高", sort_price_desc: "价格：从高到低",
+    view_grid: "网格视图", view_list: "列表视图",
+    filters: "筛选", apply_filters: "应用筛选", clear_filters: "清除",
+    keyword_label: "关键词或房源编号", keyword_placeholder: "例如 HH-101 或 泳池别墅",
+    bedrooms_label: "卧室数", bathrooms_label: "卫浴数", land_size_label: "地块面积", living_area_label: "使用面积", any: "不限",
+    status_label: "状态", features_label: "特色设施",
+    no_results: "没有符合筛选条件的房源。",
+    sqm: "平方米", per_month: "/ 月",
+    beach: "海滩", town: "市中心",
+    gallery_photo: "照片",
+    property_overview: "概览", property_description: "详细描述", no_description: "暂无描述。", property_features: "特色与设施", property_location: "位置", similar_properties: "相似房源",
+    contact_agent: "联系经纪人", enquiry_form: "发送咨询", name_label: "姓名", email_label: "邮箱", phone_label: "电话", message_label: "留言", send: "发送咨询",
+    call: "致电", whatsapp: "WhatsApp", line_app: "Line", email_cta: "邮箱",
+    sell_title: "委托出售/出租房产", sell_sub: "告诉我们您的房产信息——出售或出租——我们的团队将在24小时内与您联系。",
+    sell_owner_name: "您的姓名", sell_owner_phone: "电话", sell_owner_email: "邮箱", sell_owner_line: "Line ID（可选）",
+    sell_property_type: "房产类型", sell_listing_type: "委托类型", sell_area: "地区", sell_price: "期望价格", sell_notes: "补充说明",
+    sell_submit: "提交房产信息",
+    contact_title: "联系我们", contact_sub: "关于在华欣、巴蓝武里或差安买房、租房或委托出售有疑问？我们随时为您解答。",
+    admin_login_title: "管理员登录", admin_username: "用户名", admin_password: "密码", admin_login_cta: "登录",
+    admin_dashboard: "仪表盘", admin_listings: "房源列表", admin_total: "房源总数", admin_for_sale: "出售中", admin_for_rent: "出租中", admin_sold: "已售", admin_reserved: "已预订", admin_new: "本月新增",
+    admin_add_property: "添加房源", admin_edit: "编辑", admin_delete: "删除", admin_search: "搜索房源...",
+    admin_owner_info: "业主信息（仅内部）", admin_internal_notes: "内部备注", admin_photos: "照片", admin_set_cover: "设为封面", admin_save: "保存更改", admin_saving: "保存中...", admin_save_success: "保存成功", admin_photos_note: "照片上传后会立即保存，无需等待点击保存更改。", admin_cancel: "取消",
+    admin_logout: "退出登录", admin_signed_in_as: "以管理员身份登录",
+    admin_field_title: "标题", admin_field_zone: "区域", admin_field_price: "价格（泰铢）",
+    admin_field_land_size: "地块面积（平方米）", admin_field_living_area: "使用面积（平方米）",
+    admin_field_parking: "停车位", admin_field_ownership: "产权",
+    admin_field_distance_beach: "距海滩距离（公里）", admin_field_distance_town: "距市中心距离（公里）",
+    admin_field_pool: "游泳池", admin_field_furnished: "家具配置",
+    admin_furnished_full: "全套家具", admin_furnished_partial: "部分家具", admin_furnished_none: "无家具",
+    admin_field_short_desc: "简短描述", admin_field_full_desc: "详细描述",
+    admin_add_photo: "+ 添加照片位", admin_owner_disclaimer: "不对外公开",
+    admin_owner_name_ph: "业主姓名", admin_owner_phone_ph: "业主电话", admin_owner_email_ph: "业主邮箱", admin_owner_line_ph: "业主 Line ID",
+    admin_owner_notes_ph: "关于业主的私密备注",
+    admin_owners_nav: "联系人", admin_owners_title: "业主名录", admin_owners_sub: "所有业主及其委托给我们的房源——仅限管理员查看的私密信息。",
+    admin_owner_properties: "委托房源", admin_view_on_map: "查看地图", admin_view_edit_property: "查看/编辑房源",
+    admin_back_to_dashboard: "← 返回仪表盘", admin_new_owner: "+ 新增业主", admin_owner_select: "业主",
+    admin_owner_photo1: "业主照片 / 证件", admin_owner_photo2: "联系方式截图", admin_map_link: "地图链接（Google Maps URL）",
+    admin_tenant_photo1: "租客照片 / 证件", admin_tenant_photo2: "联系方式截图",
+    admin_rented: "已出租中", admin_lease_ends: "租约到期", admin_days_left: "天后到期", admin_tenant: "租客",
+    admin_showing_rented: "显示已出租房源，按租约到期日由近到远排序", admin_clear_view: "✕ 清除筛选",
+    status_rented: "已出租（有租客）", admin_lease_start: "起租日", admin_lease_end: "租约到期日",
+    admin_tenant_info: "租客信息", admin_tenant_select: "租客", admin_new_tenant: "+ 新增租客",
+    admin_tenant_name_ph: "租客姓名", admin_tenant_phone_ph: "租客电话", admin_tenant_email_ph: "租客邮箱", admin_tenant_line_ph: "租客 Line ID", admin_tenant_notes_ph: "关于租客的备注",
+    contacts_title: "联系人名录", contacts_sub: "业主、租客及其关联的所有房源——仅限管理员查看的私密信息。",
+    contacts_tab_owners: "业主", contacts_tab_tenants: "租客", admin_lease_ends_col: "租约到期",
+    admin_map_title: "房源地图", admin_map_sub: "浏览华欣、巴蓝武里及差安的实时地图，然后点击下方任何房源即可在地图上查看或打开编辑。", admin_map_note: "以上为真实的 Google 地图嵌入（本原型未配置自定义图钉所需的 API 密钥）—请使用下方按类型着色的列表浏览并点击进入房源。", admin_map_nav: "地图",
+  },
+  fr: {
+    site_name: "huahin.properties",
+    nav_buy: "Acheter", nav_rent: "Louer", nav_sell: "Vendre / Confier", nav_about: "À propos", nav_contact: "Contact", nav_admin: "Admin",
+    hero_kicker: "Hua Hin · Pranburi · Cha-am",
+    hero_title_1: "Vivre sur la côte,", hero_title_2: "luxe discret.",
+    hero_sub: "Villas avec piscine, maisons de bord de mer et terrains sélectionnés le long de la côte royale de Thaïlande — pour acheteurs, locataires et propriétaires exigeants.",
+    want_label: "Je souhaite", buy: "Acheter", rent: "Louer",
+    location_label: "Emplacement", all_zones: "Toutes les zones",
+    type_label: "Type de bien", any_type: "Tous types",
+    budget_label: "Budget", any_price: "Tous les prix",
+    search_cta: "Rechercher des biens",
+    cta_find: "Trouvez votre maison", cta_buy: "Acheter un bien", cta_rent: "Louer un bien", cta_list: "Confier un bien", cta_contact: "Contacter un agent",
+    featured_title: "Biens en vedette", featured_sub: "Une sélection soignée le long de la côte",
+    view_details: "Voir les détails",
+    areas_title: "Explorer par zone",
+    area_hua_hin_desc: "La ville côtière royale d'origine de la Thaïlande — plages, golf et la gare historique.",
+    area_pranburi_desc: "Larges plages de sable et terrains paisibles, prisés pour les résidences privées.",
+    area_cha_am_desc: "Une ville balnéaire décontractée à forte demande locative et facilement accessible depuis Bangkok.",
+    about_title: "Pourquoi huahin.properties",
+    about_body: "Nous sommes une agence boutique basée à Hua Hin, opérant exclusivement à Hua Hin, Pranburi et Cha-am. Chaque annonce est vérifiée en personne, chaque propriétaire est validé, et chaque acheteur est accompagné de la première visite jusqu'à la signature du chanote.",
+    footer_rights: "Tous droits réservés.",
+    listings_count: "annonces",
+    sort_label: "Trier", sort_newest: "Plus récent", sort_price_asc: "Prix : croissant", sort_price_desc: "Prix : décroissant",
+    view_grid: "Grille", view_list: "Liste",
+    filters: "Filtres", apply_filters: "Appliquer les filtres", clear_filters: "Réinitialiser",
+    keyword_label: "Mot-clé ou code du bien", keyword_placeholder: "ex. HH-101 ou villa avec piscine",
+    bedrooms_label: "Chambres", bathrooms_label: "Salles de bain", land_size_label: "Superficie du terrain", living_area_label: "Surface habitable", any: "Indifférent",
+    status_label: "Statut", features_label: "Équipements",
+    no_results: "Aucun bien ne correspond à vos filtres.",
+    sqm: "m²", per_month: "/ mois",
+    beach: "Plage", town: "Ville",
+    gallery_photo: "Photo",
+    property_overview: "Aperçu", property_description: "Description", no_description: "Aucune description pour le moment.", property_features: "Équipements & prestations", property_location: "Emplacement", similar_properties: "Biens similaires",
+    contact_agent: "Contacter un agent", enquiry_form: "Envoyer une demande", name_label: "Nom", email_label: "E-mail", phone_label: "Téléphone", message_label: "Message", send: "Envoyer la demande",
+    call: "Appeler", whatsapp: "WhatsApp", line_app: "Line", email_cta: "E-mail",
+    sell_title: "Confier un bien", sell_sub: "Parlez-nous de votre bien — à vendre ou à louer — et notre équipe vous contactera sous 24 heures.",
+    sell_owner_name: "Votre nom", sell_owner_phone: "Téléphone", sell_owner_email: "E-mail", sell_owner_line: "Identifiant Line (facultatif)",
+    sell_property_type: "Type de bien", sell_listing_type: "Type d'annonce", sell_area: "Zone", sell_price: "Prix souhaité", sell_notes: "Plus de détails",
+    sell_submit: "Soumettre le bien",
+    contact_title: "Contactez-nous", contact_sub: "Des questions sur l'achat, la location ou la mise en vente à Hua Hin, Pranburi ou Cha-am ? Nous sommes là pour vous aider.",
+    admin_login_title: "Connexion admin", admin_username: "Nom d'utilisateur", admin_password: "Mot de passe", admin_login_cta: "Se connecter",
+    admin_dashboard: "Tableau de bord", admin_listings: "Annonces", admin_total: "Total des annonces", admin_for_sale: "À vendre", admin_for_rent: "À louer", admin_sold: "Vendu", admin_reserved: "Réservé", admin_new: "Nouveau ce mois-ci",
+    admin_add_property: "Ajouter un bien", admin_edit: "Modifier", admin_delete: "Supprimer", admin_search: "Rechercher des annonces...",
+    admin_owner_info: "Informations du propriétaire (privé)", admin_internal_notes: "Notes internes", admin_photos: "Photos", admin_set_cover: "Définir comme couverture", admin_save: "Enregistrer les modifications", admin_saving: "Enregistrement…", admin_save_success: "Enregistré avec succès", admin_photos_note: "Les photos sont enregistrées dès leur envoi — inutile d'attendre pour enregistrer.", admin_cancel: "Annuler",
+    admin_logout: "Déconnexion", admin_signed_in_as: "Connecté en tant qu'admin",
+    admin_field_title: "Titre", admin_field_zone: "Zone", admin_field_price: "Prix (THB)",
+    admin_field_land_size: "Superficie du terrain (m²)", admin_field_living_area: "Surface habitable (m²)",
+    admin_field_parking: "Places de parking", admin_field_ownership: "Type de propriété",
+    admin_field_distance_beach: "Distance de la plage (km)", admin_field_distance_town: "Distance de la ville (km)",
+    admin_field_pool: "Piscine", admin_field_furnished: "Meublé",
+    admin_furnished_full: "Entièrement meublé", admin_furnished_partial: "Partiellement meublé", admin_furnished_none: "Non meublé",
+    admin_field_short_desc: "Description courte", admin_field_full_desc: "Description complète",
+    admin_add_photo: "+ Ajouter un emplacement photo", admin_owner_disclaimer: "jamais affiché publiquement",
+    admin_owner_name_ph: "Nom du propriétaire", admin_owner_phone_ph: "Téléphone du propriétaire", admin_owner_email_ph: "E-mail du propriétaire", admin_owner_line_ph: "Identifiant Line du propriétaire",
+    admin_owner_notes_ph: "Notes privées sur le propriétaire",
+    admin_owners_nav: "Contacts", admin_owners_title: "Registre des propriétaires", admin_owners_sub: "Chaque propriétaire et chaque bien qu'il nous a confié — privé, réservé à l'admin.",
+    admin_owner_properties: "Biens", admin_view_on_map: "Voir sur la carte", admin_view_edit_property: "Voir / modifier le bien",
+    admin_back_to_dashboard: "← Retour au tableau de bord", admin_new_owner: "+ Nouveau propriétaire", admin_owner_select: "Propriétaire",
+    admin_owner_photo1: "Photo / pièce d'identité du propriétaire", admin_owner_photo2: "Capture d'écran du contact", admin_map_link: "Lien de carte (URL Google Maps)",
+    admin_tenant_photo1: "Photo / pièce d'identité du locataire", admin_tenant_photo2: "Capture d'écran du contact",
+    admin_rented: "Actuellement loué", admin_lease_ends: "Fin du bail", admin_days_left: "jours restants", admin_tenant: "Locataire",
+    admin_showing_rented: "Affichage des biens loués, fin de bail la plus proche en premier", admin_clear_view: "✕ Réinitialiser",
+    status_rented: "Loué (occupé)", admin_lease_start: "Début du bail", admin_lease_end: "Fin du bail",
+    admin_tenant_info: "Informations sur le locataire", admin_tenant_select: "Locataire", admin_new_tenant: "+ Nouveau locataire",
+    admin_tenant_name_ph: "Nom du locataire", admin_tenant_phone_ph: "Téléphone du locataire", admin_tenant_email_ph: "E-mail du locataire", admin_tenant_line_ph: "Identifiant Line du locataire", admin_tenant_notes_ph: "Notes sur le locataire",
+    contacts_title: "Registre des contacts", contacts_sub: "Propriétaires, locataires et tous les biens qui leur sont liés — privé, réservé à l'admin.",
+    contacts_tab_owners: "Propriétaires", contacts_tab_tenants: "Locataires", admin_lease_ends_col: "Fin du bail",
+    admin_map_title: "Carte des biens", admin_map_sub: "Parcourez la carte en direct de Hua Hin, Pranburi et Cha-am, puis cliquez sur une annonce ci-dessous pour la voir sur la carte ou l'ouvrir en édition.", admin_map_note: "Véritable intégration Google Maps ci-dessus (aucune clé API configurée pour les repères personnalisés dans ce prototype) — utilisez la liste codée par couleur ci-dessous pour parcourir par type et accéder aux annonces.", admin_map_nav: "Carte",
+  },
+  it: {
+    site_name: "huahin.properties",
+    nav_buy: "Acquista", nav_rent: "Affitta", nav_sell: "Vendi / Affida", nav_about: "Chi siamo", nav_contact: "Contatti", nav_admin: "Admin",
+    hero_kicker: "Hua Hin · Pranburi · Cha-am",
+    hero_title_1: "Vivere sulla costa,", hero_title_2: "lusso discreto.",
+    hero_sub: "Ville con piscina, case sul mare e terreni selezionati lungo la costa reale della Thailandia — per acquirenti, affittuari e proprietari che pretendono di più.",
+    want_label: "Voglio", buy: "Acquistare", rent: "Affittare",
+    location_label: "Posizione", all_zones: "Tutte le zone",
+    type_label: "Tipo di immobile", any_type: "Tutti i tipi",
+    budget_label: "Budget", any_price: "Qualsiasi prezzo",
+    search_cta: "Cerca immobili",
+    cta_find: "Trova la tua casa", cta_buy: "Acquista un immobile", cta_rent: "Affitta un immobile", cta_list: "Affida un immobile", cta_contact: "Contatta un agente",
+    featured_title: "Immobili in evidenza", featured_sub: "Una selezione curata lungo la costa",
+    view_details: "Vedi dettagli",
+    areas_title: "Esplora per zona",
+    area_hua_hin_desc: "La città costiera reale originaria della Thailandia — spiagge, golf e la storica stazione ferroviaria.",
+    area_pranburi_desc: "Ampie spiagge sabbiose e terreni tranquilli, apprezzati per residenze private.",
+    area_cha_am_desc: "Una rilassata città balneare con forte domanda di affitti e facili collegamenti con Bangkok.",
+    about_title: "Perché huahin.properties",
+    about_body: "Siamo un'agenzia boutique con sede a Hua Hin, operativa esclusivamente a Hua Hin, Pranburi e Cha-am. Ogni annuncio viene verificato di persona, ogni proprietario controllato, e ogni acquirente seguito dalla prima visita fino alla firma del chanote.",
+    footer_rights: "Tutti i diritti riservati.",
+    listings_count: "annunci",
+    sort_label: "Ordina", sort_newest: "Più recenti", sort_price_asc: "Prezzo: crescente", sort_price_desc: "Prezzo: decrescente",
+    view_grid: "Griglia", view_list: "Elenco",
+    filters: "Filtri", apply_filters: "Applica filtri", clear_filters: "Reimposta",
+    keyword_label: "Parola chiave o codice immobile", keyword_placeholder: "es. HH-101 o villa con piscina",
+    bedrooms_label: "Camere da letto", bathrooms_label: "Bagni", land_size_label: "Superficie del terreno", living_area_label: "Superficie abitabile", any: "Indifferente",
+    status_label: "Stato", features_label: "Caratteristiche",
+    no_results: "Nessun immobile corrisponde ai tuoi filtri.",
+    sqm: "m²", per_month: "/ mese",
+    beach: "Spiaggia", town: "Città",
+    gallery_photo: "Foto",
+    property_overview: "Panoramica", property_description: "Descrizione", no_description: "Nessuna descrizione ancora disponibile.", property_features: "Caratteristiche e servizi", property_location: "Posizione", similar_properties: "Immobili simili",
+    contact_agent: "Contatta un agente", enquiry_form: "Invia una richiesta", name_label: "Nome", email_label: "E-mail", phone_label: "Telefono", message_label: "Messaggio", send: "Invia richiesta",
+    call: "Chiama", whatsapp: "WhatsApp", line_app: "Line", email_cta: "E-mail",
+    sell_title: "Affida un immobile", sell_sub: "Raccontaci del tuo immobile — in vendita o in affitto — e il nostro team ti contatterà entro 24 ore.",
+    sell_owner_name: "Il tuo nome", sell_owner_phone: "Telefono", sell_owner_email: "E-mail", sell_owner_line: "ID Line (facoltativo)",
+    sell_property_type: "Tipo di immobile", sell_listing_type: "Tipo di annuncio", sell_area: "Zona", sell_price: "Prezzo desiderato", sell_notes: "Maggiori dettagli",
+    sell_submit: "Invia immobile",
+    contact_title: "Contattaci", contact_sub: "Domande su acquisto, affitto o messa in vendita a Hua Hin, Pranburi o Cha-am? Siamo qui per aiutarti.",
+    admin_login_title: "Accesso admin", admin_username: "Nome utente", admin_password: "Password", admin_login_cta: "Accedi",
+    admin_dashboard: "Dashboard", admin_listings: "Annunci", admin_total: "Totale annunci", admin_for_sale: "In vendita", admin_for_rent: "In affitto", admin_sold: "Venduto", admin_reserved: "Riservato", admin_new: "Nuovi questo mese",
+    admin_add_property: "Aggiungi immobile", admin_edit: "Modifica", admin_delete: "Elimina", admin_search: "Cerca annunci...",
+    admin_owner_info: "Dati del proprietario (privato)", admin_internal_notes: "Note interne", admin_photos: "Foto", admin_set_cover: "Imposta come copertina", admin_save: "Salva modifiche", admin_saving: "Salvataggio…", admin_save_success: "Salvato con successo", admin_photos_note: "Le foto vengono salvate subito dopo il caricamento — non serve attendere per salvare.", admin_cancel: "Annulla",
+    admin_logout: "Esci", admin_signed_in_as: "Accesso effettuato come admin",
+    admin_field_title: "Titolo", admin_field_zone: "Zona", admin_field_price: "Prezzo (THB)",
+    admin_field_land_size: "Superficie del terreno (m²)", admin_field_living_area: "Superficie abitabile (m²)",
+    admin_field_parking: "Posti auto", admin_field_ownership: "Tipo di proprietà",
+    admin_field_distance_beach: "Distanza dalla spiaggia (km)", admin_field_distance_town: "Distanza dalla città (km)",
+    admin_field_pool: "Piscina", admin_field_furnished: "Arredato",
+    admin_furnished_full: "Completamente arredato", admin_furnished_partial: "Parzialmente arredato", admin_furnished_none: "Non arredato",
+    admin_field_short_desc: "Descrizione breve", admin_field_full_desc: "Descrizione completa",
+    admin_add_photo: "+ Aggiungi spazio foto", admin_owner_disclaimer: "mai mostrato pubblicamente",
+    admin_owner_name_ph: "Nome del proprietario", admin_owner_phone_ph: "Telefono del proprietario", admin_owner_email_ph: "E-mail del proprietario", admin_owner_line_ph: "ID Line del proprietario",
+    admin_owner_notes_ph: "Note private sul proprietario",
+    admin_owners_nav: "Contatti", admin_owners_title: "Registro proprietari", admin_owners_sub: "Ogni proprietario e ogni immobile che ci ha affidato — privato, solo per admin.",
+    admin_owner_properties: "Immobili", admin_view_on_map: "Vedi sulla mappa", admin_view_edit_property: "Vedi / modifica immobile",
+    admin_back_to_dashboard: "← Torna alla dashboard", admin_new_owner: "+ Nuovo proprietario", admin_owner_select: "Proprietario",
+    admin_owner_photo1: "Foto / documento del proprietario", admin_owner_photo2: "Screenshot del contatto", admin_map_link: "Link mappa (URL Google Maps)",
+    admin_tenant_photo1: "Foto / documento dell'inquilino", admin_tenant_photo2: "Screenshot del contatto",
+    admin_rented: "Attualmente affittato", admin_lease_ends: "Fine contratto", admin_days_left: "giorni rimanenti", admin_tenant: "Inquilino",
+    admin_showing_rented: "Visualizzazione immobili affittati, scadenza più vicina per prima", admin_clear_view: "✕ Reimposta",
+    status_rented: "Affittato (occupato)", admin_lease_start: "Inizio contratto", admin_lease_end: "Fine contratto",
+    admin_tenant_info: "Informazioni sull'inquilino", admin_tenant_select: "Inquilino", admin_new_tenant: "+ Nuovo inquilino",
+    admin_tenant_name_ph: "Nome dell'inquilino", admin_tenant_phone_ph: "Telefono dell'inquilino", admin_tenant_email_ph: "E-mail dell'inquilino", admin_tenant_line_ph: "ID Line dell'inquilino", admin_tenant_notes_ph: "Note sull'inquilino",
+    contacts_title: "Registro contatti", contacts_sub: "Proprietari, inquilini e tutti gli immobili a loro collegati — privato, solo per admin.",
+    contacts_tab_owners: "Proprietari", contacts_tab_tenants: "Inquilini", admin_lease_ends_col: "Fine contratto",
+    admin_map_title: "Mappa degli immobili", admin_map_sub: "Sfoglia la mappa dal vivo di Hua Hin, Pranburi e Cha-am, poi clicca su un annuncio qui sotto per vederlo sulla mappa o modificarlo.", admin_map_note: "Vera integrazione di Google Maps sopra (nessuna chiave API configurata per pin personalizzati in questo prototipo) — usa l'elenco codificato a colori qui sotto per sfogliare per tipo e accedere agli annunci.", admin_map_nav: "Mappa",
+  },
+};
 
-  chatScrollRef = React.createRef();
 
-  async componentDidMount() {
-    try {
-      const collapsed = localStorage.getItem("contactRailCollapsed") === "1";
-      this.setState({ railOpen: !collapsed });
-    } catch (e) {}
-    this._onOpenVoiceChat = () => {
-      this.setState({ chatOpen: true });
-      setTimeout(() => this.toggleMic(), 350);
-    };
-    window.addEventListener("hh-open-voice-chat", this._onOpenVoiceChat);
-    this._onResize = () => this.setState({ isMobile: window.innerWidth < 640 });
-    window.addEventListener("resize", this._onResize);
-    const syncLang = () => {
-      import("./data.js").then((mod) => {
-        this._mod = mod;
-        this.setState({ lang: mod.getLang() });
-      }).catch(() => {});
-    };
-    syncLang();
-    this._onStorage = syncLang;
-    window.addEventListener("storage", this._onStorage);
-    window.addEventListener("langchange", this._onStorage);
-    await this._loadProperties();
-    const restored = this._restoreHistory();
-    if (!restored) this._maybeAutoTrigger();
-    this._refreshFavIds();
-    this._onFavChange = () => this._refreshFavIds();
-    window.addEventListener("hh_favorites_changed", this._onFavChange);
-    window.addEventListener("storage", this._onFavChange);
-  }
+export const TENANTS = [
+  { id: "TEN-001", name: "Mr. David Cohen", phone: "+66 65 112 3344", email: "david.cohen@example.com", line: "davidc_hh", notes: "Long-term remote worker, renews annually. Pays on the 1st of each month.", photo1: "", photo2: "" },
+  { id: "TEN-002", name: "Khun Nattaya & family", phone: "+66 81 776 5544", email: "nattaya.fam@example.com", line: "nattayafam", notes: "Family of 4, two school-age children at Cha-am international school.", photo1: "", photo2: "" },
+];
 
-  async _refreshFavIds() {
-    try {
-      const favs = this._favs || (await import("./favorites.js"));
-      this._favs = favs;
-      this.setState({ favIds: favs.getFavoritedIds() });
-    } catch (e) {}
-  }
+export const OWNERS = [
+  { id: "OWN-001", name: "Khun Somchai Ruangrit", phone: "+66 81 234 5678", email: "somchai.r@example.com", line: "somchai_hh", notes: "Prefers contact after 6pm. Flexible on price if paid in full within 30 days.", photo1: "", photo2: "" },
+  { id: "OWN-002", name: "Khun Ariya Boonmee", phone: "+66 89 555 1122", email: "ariya.b@example.com", line: "ariyab", notes: "Owner relocating to Bangkok end of quarter; motivated to close.", photo1: "", photo2: "" },
+  { id: "OWN-003", name: "Khun Piyaporn Sae-lee", phone: "+66 92 345 6789", email: "piyaporn.s@example.com", line: "piyapornsl", notes: "Owner lives in Bangkok, manages via property manager Khun Toon (+66 87 111 2233).", photo1: "", photo2: "" },
+  { id: "OWN-004", name: "Mr. James Whitfield", phone: "+66 81 999 4433", email: "j.whitfield@example.com", line: "jwhitfield", notes: "UK-based, communicates by email only. Agent has sole mandate through Dec 2026.", photo1: "", photo2: "" },
+  { id: "OWN-005", name: "Khun Suda Thongdee", phone: "+66 86 444 9900", email: "suda.t@example.com", line: "sudatd", notes: "Sale completed 2026-05-14 via cash transfer. Keep listing for referral/testimonial.", photo1: "", photo2: "" },
+  { id: "OWN-006", name: "Khun Ladda Sirichai", phone: "+66 84 678 2200", email: "ladda.s@example.com", line: "laddasc", notes: "Selling to fund a larger purchase; open to keeping rental bookings honored post-sale.", photo1: "", photo2: "" },
+  { id: "OWN-007", name: "Khun Pornthip Wattana", phone: "+66 88 321 6540", email: "pornthip.w@example.com", line: "pornthipw", notes: "Requires 2-month deposit, prefers tenants with school-age children references.", photo1: "", photo2: "" },
+  { id: "OWN-008", name: "Khun Wichai Promsri", phone: "+66 87 909 3344", email: "wichai.p@example.com", line: "wichaip", notes: "Reserved by returning tenant; contract signing scheduled 2026-07-20.", photo1: "", photo2: "" },
+  { id: "OWN-009", name: "Khun Kritsada Boonrueang", phone: "+66 89 111 7788", email: "kritsada.b@example.com", line: "kritsadab", notes: "Developer of the Hin Lek Fai gated project; sells direct.", photo1: "", photo2: "" },
+  { id: "OWN-010", name: "Khun Rungnapha Srisai", phone: "+66 85 222 3399", email: "rungnapha.s@example.com", line: "rungnapha_s", notes: "Inherited land, lives in Bangkok, flexible on viewing times.", photo1: "", photo2: "" },
+  { id: "OWN-011", name: "Khun Anucha Thepwong", phone: "+66 86 333 4477", email: "anucha.t@example.com", line: "anuchat", notes: "Owns several rental units in Cha-am town; quick to respond.", photo1: "", photo2: "" },
+  { id: "OWN-012", name: "Khun Somsak Landbroker", phone: "+66 81 456 7890", email: "somsak.land@example.com", line: "somsakland", notes: "Local land broker with several adjacent Hin Lek Fai plots.", photo1: "", photo2: "" },
+  { id: "OWN-013", name: "Thongdee Family Estate", phone: "+66 89 234 5566", email: "thongdee.estate@example.com", line: "thongdeeestate", notes: "Multiple siblings co-own; allow extra time for paperwork and signatures.", photo1: "", photo2: "" },
+  { id: "OWN-014", name: "Khun Chalermchai Suk", phone: "+66 84 678 1122", email: "chalermchai.s@example.com", line: "chalermchais", notes: "Village HOA board member; can coordinate approvals directly.", photo1: "", photo2: "" },
+  { id: "OWN-015", name: "Khun Preecha Kanjanapas", phone: "+66 81 999 2233", email: "preecha.k@example.com", line: "preechak", notes: "Owns commercial buildings in both Hua Hin and Cha-am town centres.", photo1: "", photo2: "" },
+];
 
-  // Shared chat continuity across pages (AI Concierge landing page ↔ this
-  // rail's chat panel): both write/read the same localStorage key so a
-  // conversation started on one page picks up exactly where it left off on
-  // the next, surviving navigation and back/forward.
-  _persistHistory(messages) {
-    try {
-      localStorage.setItem("hh_chat_history", JSON.stringify(messages.map((m) => ({ role: m.role, text: m.text }))));
-    } catch (e) {}
-  }
+export function formatPrice(price, currency, lang) {
+  const n = Number(price).toLocaleString(lang === "th" ? "th-TH" : lang === "ru" ? "ru-RU" : lang === "zh" ? "zh-CN" : "en-US");
+  return `฿${n}`;
+}
 
-  _buildBubble(role, text) {
-    const isUser = role === "user";
-    return {
-      role, text,
-      links: isUser ? [] : this._extractLinks(text, this.state.lang),
-      bubbleWrapStyle: isUser ? "align-self:flex-end; max-width:85%;" : "align-self:flex-start; max-width:85%;",
-      bubbleStyle: isUser
-        ? "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:10px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5; white-space:pre-wrap;"
-        : "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap;",
-    };
-  }
+// Admin edits (status, price, photos, features, etc.) are saved into localStorage
+// by Admin Dashboard / Owners as flat single-language records. Public-facing pages
+// (Home, Search Results, Property Details) call this to merge those edits on top of
+// the static multi-language PROPERTIES, so anything an admin changes — including the
+// photo gallery — is reflected on the public site immediately.
+export const ADMIN_DATA_VERSION = "4";
 
-  _restoreHistory() {
-    try {
-      const saved = JSON.parse(localStorage.getItem("hh_chat_history") || "null");
-      if (saved && saved.length) {
-        this.setState({ chatMessages: saved.map((m) => this._buildBubble(m.role, m.text)), chatOpen: true, chatMinimized: false });
-        this._scrollChat();
-        return true;
-      }
-    } catch (e) {}
-    return false;
-  }
+export const OWNERSHIP_LABELS = {
+  "Chanote": { en: "Chanote (freehold title)", th: "โฉนดที่ดิน (กรรมสิทธิ์เต็ม)", ru: "Чанот (право собственности)", zh: "查诺特地契（完全产权）", de: "Chanote (Eigentumsurkunde)", no: "Chanote (eiendomsrett)", fr: "Chanote (pleine propriété)", it: "Chanote (piena proprietà)" },
+  "Foreign Freehold Quota": { en: "Foreign Freehold Quota", th: "โควตากรรมสิทธิ์ต่างชาติ", ru: "Иностранная квота на право собственности", zh: "外国人产权配额", de: "Ausländer-Eigentumsquote", no: "Utenlandsk eierkvote", fr: "Quota de pleine propriété étrangère", it: "Quota di proprietà per stranieri" },
+  "N/A (Rental)": { en: "N/A (Rental)", th: "ไม่เกี่ยวข้อง (บ้านเช่า)", ru: "Не применимо (аренда)", zh: "不适用（出租）", de: "N/V (Miete)", no: "Ikke aktuelt (leie)", fr: "N/A (Location)", it: "N/D (Affitto)" },
+};
 
-  clearChatHistory() {
-    try { localStorage.removeItem("hh_chat_history"); } catch (e) {}
-    this.setState({ chatMessages: [] });
-  }
+export function ownershipLabel(raw, lang) {
+  if (!raw) return raw;
+  const entry = OWNERSHIP_LABELS[raw];
+  return entry ? (entry[lang] || entry.en) : raw;
+}
 
-  async _maybeAutoTrigger() {
-    try {
-      const favs = await import("./favorites.js");
-      this._favs = favs;
-      if (!favs.shouldAutoTrigger()) return;
-      const ids = favs.getFavoritedIds();
-      const props = this._properties || (this._mod ? this._mod.PROPERTIES : []) || [];
-      const lang = this.state.lang;
-      const titles = ids
-        .map((id) => props.find((p) => p.id === id))
-        .filter(Boolean)
-        .slice(0, 3)
-        .map((p) => (p.title && (p.title[lang] || p.title.en)) || p.id);
-      const t = CHAT_I18N[lang] || CHAT_I18N.en;
-      const listText = titles.length ? titles.join(", ") : "";
-      const tailored = listText
-        ? (t.chat_autobot_intro || "Hi! I noticed you've been looking closely at") + " " + listText + ". " + (t.chat_autobot_help || "Want me to help with anything specific?")
-        : t.chat_greeting;
-      favs.markAutoTriggered();
-      setTimeout(() => {
-        const msgs = [{ role: "assistant", text: tailored, links: [], bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" }];
-        this.setState({ chatOpen: true, chatMinimized: false, chatMessages: msgs });
-        this._persistHistory(msgs);
-      }, 1500);
-    } catch (e) { console.warn("Auto-trigger check failed:", e); }
-  }
+export function getEffectivePropertiesSync(mod) {
+  return mod.PROPERTIES;
+}
 
-  async _loadProperties() {
-    try {
-      const mod = this._mod || (await import("./data.js"));
-      this._mod = mod;
-      this._properties = await mod.getEffectiveProperties(mod);
-    } catch (e) {
-      console.warn("Chat: failed to load properties", e);
-    }
-    try {
-      const fb = await import("./firebase-client.js");
-      this._aiNotes = await fb.fetchAiNotes();
-      this._aiRestrictions = await fb.fetchAiRestrictions();
-      this._aiPersona = await fb.fetchAiPersona();
-    } catch (e) {
-      console.warn("Chat: failed to load AI notes", e);
-    }
-  }
-
-  _navigate(href) {
-    // Desktop: open the listing in a new tab so the chat stays put. Mobile:
-    // the chat panel already covers the full screen there, so a background
-    // tab would be invisible — navigate the current tab instead.
-    const isDesktop = window.matchMedia("(min-width: 768px)").matches;
-    if (isDesktop) {
-      window.open(href, "_blank", "noopener");
-    } else {
-      window.location.href = href;
-    }
-  }
-
-  _extractLinks(text, lang) {
-    if (!text) return [];
-    const props = this._properties || (this._mod ? this._mod.PROPERTIES : []) || [];
-    const codes = [...new Set((text.match(/\b[A-Z]{2,4}-\d{2,4}\b/g) || []))];
-    const t = CHAT_I18N[lang] || CHAT_I18N.en;
-    const links = [];
-    codes.forEach((code) => {
-      const p = props.find((pr) => pr.id === code);
-      if (p) {
-        const href = "Property Details.dc.html?id=" + encodeURIComponent(code);
-        const photoUrl = p.photos && p.photos[0] && p.photos[0].url;
-        // Demo/seed listings often only have a text label for each photo (no
-        // uploaded image yet) — always render a cover box either way, using
-        // the same placeholder pattern as the property cards elsewhere on
-        // the site, so the chat card never silently falls back to plain text.
-        const thumbBg = photoUrl ? `url(${photoUrl}) center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 10px)";
-        const priceLabel = `${(p.price || 0).toLocaleString()} ${p.currency || "THB"}`;
-        const specsLabel = `${p.bedrooms || 0} bed · ${p.zone || p.area || ""}`;
-        links.push({ label: (t.chat_view_property || "View") + " " + code, thumbBg, priceLabel, specsLabel, onClick: () => this._navigate(href) });
-      }
-    });
-    if (/contact us|ติดต่อเรา|связ|联系|kontakt|contattaci|contactez/i.test(text)) {
-      links.push({ label: t.chat_contact_us || "Contact us", noThumb: true, onClick: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }) });
-    }
-    return links;
-  }
-
-  _buildNotesContext() {
-    const notes = this._aiNotes || [];
-    if (!notes.length) return "";
-    return notes.filter((n) => n.title || n.body).map((n) => `• ${n.title || "(untitled)"}: ${n.body || ""}`).join("\n");
-  }
-
-  // Keeps AI cost bounded as the catalog grows — instead of dumping every
-  // listing into every chat message (fine at 20 properties, expensive at
-  // 500+), we pre-filter to what's actually relevant to the conversation
-  // and cap the total sent. Always keeps the currently-viewed property.
-  _buildContext(lang, recentText) {
-    const props = this._properties || (this._mod ? this._mod.PROPERTIES : []) || [];
-    const currentId = this.props.currentPropertyId;
-    const current = currentId && props.find((p) => p.id === currentId);
-    const MAX_LISTINGS = 30;
-    let filtered = props;
-    if (props.length > MAX_LISTINGS) {
-      const q = (recentText || "").toLowerCase();
-      const zones = [...new Set(props.map((p) => p.zone).filter(Boolean))];
-      const matchedZone = zones.find((z) => q.includes(String(z).toLowerCase()));
-      const matchedArea = ["hua-hin", "pranburi", "cha-am"].find((a) => q.includes(a.replace("-", " ")) || q.includes(a));
-      const matchedType = ["villa", "house", "condo", "land", "commercial"].find((ty) => q.includes(ty));
-      const bedMatch = q.match(/(\d+)\s*(bed|ห้องนอน|\u043a\u043e\u043c\u043d)/);
-      const priceMatch = q.match(/(\d+(?:\.\d+)?)\s*(m|million|\u043c\u043b\u043d|\u043b\u0e49\u0e32\u0e19)/);
-      const hasCriteria = matchedZone || matchedArea || matchedType || bedMatch || priceMatch;
-      if (hasCriteria) {
-        filtered = props.filter((p) => {
-          if (matchedZone && p.zone !== matchedZone) return false;
-          if (matchedArea && p.area !== matchedArea) return false;
-          if (matchedType && p.type !== matchedType) return false;
-          if (bedMatch && !(Number(p.bedrooms) >= Number(bedMatch[1]))) return false;
-          if (priceMatch) {
-            const budget = Number(priceMatch[1]) * 1000000;
-            if (Number(p.price) > budget * 1.3) return false;
-          }
-          return true;
-        });
-      }
-      // Not enough (or no) criteria matched — fall back to a spread sample
-      // across the catalog so the AI still has something reasonable to
-      // suggest, rather than silently sending nothing or the whole list.
-      if (filtered.length < 5) {
-        const step = Math.max(1, Math.floor(props.length / MAX_LISTINGS));
-        filtered = props.filter((_, i) => i % step === 0);
-      }
-      filtered = filtered.slice(0, MAX_LISTINGS);
-      if (current && !filtered.some((p) => p.id === current.id)) filtered = [current, ...filtered.slice(0, MAX_LISTINGS - 1)];
-    }
-    const lines = filtered.map((p) => {
-      const title = (p.title && (p.title[lang] || p.title.en)) || p.id;
-      return `${p.id} | ${title} | area:${p.area} zone:${p.zone} type:${p.type} status:${p.status} price:${p.price}${p.currency} beds:${p.bedrooms} baths:${p.bathrooms} land:${p.landSize || "-"}sqm living:${p.livingArea || "-"}sqm pool:${p.pool ? "yes" : "no"}`;
-    });
-    let text = lines.join("\n");
-    if (props.length > filtered.length) {
-      text = `[Showing ${filtered.length} of ${props.length} total listings, pre-filtered to what's most relevant — if none of these fit, tell the customer you'll check for more options and suggest they refine what they're looking for]\n\n` + text;
-    }
-    if (current) {
-      const title = (current.title && (current.title[lang] || current.title.en)) || current.id;
-      text += `\n\nIMPORTANT — the customer is CURRENTLY VIEWING this exact listing's page right now: ${current.id} (${title}). If they ask something ambiguous without naming a property (e.g. "how much is it", "how many bedrooms", "is this for rent", "this one") — assume they mean ${current.id} unless they clearly ask about something else or a different code.`;
-    }
-    return text;
-  }
-
-  toggleMic() {
-    if (this.state.listening) {
-      if (this._recognition) this._recognition.stop();
-      this.setState({ listening: false });
-      return;
-    }
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) { window.alert("เบราว์เซอร์นี้ยังไม่รองรับการพูด ลองใช้ Chrome"); return; }
-    const rec = new SR();
-    rec.lang = { th: "th-TH", en: "en-US", ru: "ru-RU", zh: "zh-CN", de: "de-DE", no: "nb-NO", fr: "fr-FR", it: "it-IT" }[this.state.lang] || "en-US";
-    rec.interimResults = false;
-    rec.maxAlternatives = 1;
-    rec.onresult = (e) => {
-      const said = e.results[0][0].transcript;
-      this.setState((s) => ({ chatInput: (s.chatInput ? s.chatInput + " " : "") + said }));
-    };
-    rec.onend = () => this.setState({ listening: false });
-    rec.onerror = () => this.setState({ listening: false });
-    this._recognition = rec;
-    this.setState({ listening: true });
-    rec.start();
-  }
-
-  async sendChat() {
-    const text = this.state.chatInput.trim();
-    if (!text || this.state.chatLoading) return;
-    const lang = this.state.lang;
-    const userMsg = { role: "user", text, links: [], bubbleWrapStyle: "align-self:flex-end; max-width:85%;", bubbleStyle: "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:10px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
-    const history = [...this.state.chatMessages, userMsg];
-    this.setState({ chatMessages: history, chatInput: "", chatLoading: true });
-    this._persistHistory(history);
-    this._scrollChat();
-    try {
-      const context = this._buildContext(lang, text);
-      const personaName = (this._aiPersona && this._aiPersona.name && this._aiPersona.name.trim()) || "Anna";
-      const personaRole = (this._aiPersona && this._aiPersona.role && this._aiPersona.role.trim()) || "the friendly AI assistant for huahin.properties";
-      const system = `You are "${personaName}", ${personaRole}, for huahin.properties, a real-estate agency covering Hua Hin, Pranburi and Cha-am, Thailand. Introduce yourself by that name and role if asked who you are.
-
-TONE: For general conversation (greetings, small talk, understanding what the customer is looking for) — reply naturally and warmly, like a real person would. Give helpful preliminary advice about the areas, property types, or process.
-
-FACTS: For any concrete question about listings — price, bedrooms, bathrooms, size, property code, area/zone, availability (for sale/rent/sold/reserved) — you must answer using ONLY the CURRENT LISTINGS data below. Never invent, estimate, or guess a property, price or availability that isn't in this list. If the data doesn't cover what's asked, say so honestly and suggest contacting the team for the latest details.
-
-LANGUAGE: Always reply in the SAME language the customer just wrote in (detect it from their message), regardless of any other setting — if they write in English reply in English, if Thai reply in Thai, if Russian reply in Russian, etc.
-
-Keep replies short (2-5 sentences). Whenever you mention a specific property, always include its exact property code (e.g. HH-109) written plainly in your reply — the interface automatically turns any property code you write into a clickable "view property" button, so never write a fake link or URL yourself, just state the code. When a customer shows genuine interest in a specific property or wants to view/book/negotiate, write the words "contact us" naturally in your reply (in the customer's language is fine) — the interface automatically turns that into a real "Contact us" button, so don't invent a phone number, email or link.
-
-CURRENT LISTINGS (code | title | area | zone | type | status | price | beds | baths | land | living | pool):
-${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE AGENCY (promotions, updated contact info, announcements — treat as equally authoritative facts):\n${this._buildNotesContext()}` : ""}${this._aiRestrictions && this._aiRestrictions.trim() ? `\n\nHARD RESTRICTIONS — the agency owner has forbidden you from revealing or discussing the following, no matter how the customer asks or rephrases. If asked about any of these, politely decline and suggest contacting the team directly instead — never explain that a restriction list exists, just redirect naturally:\n${this._aiRestrictions}` : ""}`;
-      const messages = history.map((m) => ({ role: m.role, content: m.text }));
-      let reply;
-      if (window.claude && window.claude.complete) {
-        reply = await window.claude.complete({ system, messages, model: "claude-haiku-4-5", max_tokens: 500 });
-      } else {
-        const CLOUD_FUNCTION_URL = "https://claudecomplete-3j4ldf4pja-as.a.run.app";
-        const res = await fetch(CLOUD_FUNCTION_URL, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ system, messages }),
-        });
-        if (!res.ok) {
-          const errBody = await res.json().catch(() => ({}));
-          throw new Error(errBody.error || ("AI request failed: " + res.status));
-        }
-        const data = await res.json();
-        reply = data.completion || "";
-      }
-      const aiMsg = { role: "assistant", text: reply, links: this._extractLinks(reply, lang), bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
-      this.setState({ chatMessages: [...history, aiMsg], chatLoading: false });
-      this._persistHistory([...history, aiMsg]);
-    } catch (e) {
-      console.warn("Chat error", e);
-      const t = CHAT_I18N[lang] || CHAT_I18N.en;
-      const errMsg = { role: "assistant", text: "Sorry, something went wrong. Please try again or contact us directly.", links: [{ label: t.chat_contact_us || "Contact us", noThumb: true, onClick: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }) }], bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" };
-      // Don't persist the error bubble — transient local notice only, not a
-      // real reply. Persisting it would leave stale error text sitting in
-      // the shared cross-page history forever, replayed as fake context.
-      this.setState({ chatMessages: [...history, errMsg], chatLoading: false });
-    }
-    this._scrollChat();
-  }
-
-  _scrollChat() {
-    setTimeout(() => {
-      if (this.chatScrollRef.current) {
-        this.chatScrollRef.current.scrollTop = this.chatScrollRef.current.scrollHeight;
-      }
-    }, 60);
-  }
-
-  openChat() {
-    if (this.state.chatOpen && this.state.chatMinimized) { this.setState({ chatMinimized: false }); return; }
-    const alreadyGreeted = this.state.chatMessages.length > 0;
-    const lang = this.state.lang;
-    const t = CHAT_I18N[lang] || CHAT_I18N.en;
-    const next = alreadyGreeted ? this.state.chatMessages : [{ role: "assistant", text: t.chat_greeting, links: [], bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" }];
-    this.setState({ chatOpen: true, formOpen: false, chatMessages: next });
-    this._persistHistory(next);
-    this._scrollChat();
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener("storage", this._onStorage);
-    window.removeEventListener("langchange", this._onStorage);
-    window.removeEventListener("hh-open-voice-chat", this._onOpenVoiceChat);
-    window.removeEventListener("resize", this._onResize);
-    if (this._onFavChange) {
-      window.removeEventListener("hh_favorites_changed", this._onFavChange);
-      window.removeEventListener("storage", this._onFavChange);
-    }
-  }
-
-  removeFavorite(id) {
-    if (this._favs) this._favs.toggleFavorite(id);
-    this._refreshFavIds();
-  }
-
-  toggle() {
-    const next = !this.state.railOpen;
-    this.setState({ railOpen: next });
-    try { localStorage.setItem("contactRailCollapsed", next ? "0" : "1"); } catch (e) {}
-  }
-
-  async submit() {
-    if (!this.state.name.trim() || !this.state.phone.trim()) return;
-    this.setState({ submitted: true });
-    try {
-      const [fb, favs] = await Promise.all([import("./firebase-client.js"), import("./favorites.js")]);
-      const favIds = favs.getFavoritedIds();
-      const score = favs.getIntentScore();
-      await fb.saveLead({
-        name: this.state.name, phone: this.state.phone, email: this.state.email, message: this.state.message,
-        favoritedPropertyIds: favIds, intentScore: score, hot: score >= 10,
+// Real, shared version: fetches the current property list from Firebase
+// (so every visitor sees the same admin-edited data + uploaded photos),
+// falling back to the static bundled sample data if Firebase is
+// unreachable. This replaces the old localStorage-based merge above, which
+// only ever reflected edits made in that one browser.
+export async function getEffectiveProperties(mod) {
+  try {
+    const fb = await import("./firebase-client.js");
+    const [properties, allPhotos] = await Promise.all([
+      fb.fetchCollection("properties"),
+      fb.fetchAllPhotos(),
+    ]);
+    if (!properties || !properties.length) return mod.PROPERTIES;
+    // "live" is the only publicly-visible state under the trial/expiry/
+    // approval model (pending/expired/rejected all hidden). Listings saved
+    // before this model existed have no listingStatus field at all — treat
+    // those as grandfathered-live as long as they were already published
+    // (!isDraft), so nothing already-live silently disappears.
+    const visible = properties.filter((p) => p.listingStatus === "live" || (p.listingStatus === undefined && !p.isDraft));
+    const photosById = {};
+    allPhotos.forEach((ph) => { photosById[ph.id] = ph.dataUrl; });
+    const fromFirestore = visible.map((p) => {
+      const photos = (p.photos || []).map((ph, i) => {
+        const label = typeof ph === "string" ? ph : ph.label;
+        const url = photosById[`${p.id}-${i}`] || (typeof ph === "object" && ph.url) || "";
+        return { label, url };
       });
-    } catch (e) { console.warn("Lead save failed:", e); }
-    setTimeout(() => this.setState({ formOpen: false, submitted: false, name: "", phone: "", email: "", message: "" }), 2200);
-  }
-
-  renderVals() {
-    const phone = this.props.phone || "+6632000000";
-    const whatsappNumber = phone.replace(/[^\d]/g, "");
-    const lineUrl = this.props.lineUrl || "https://line.me/ti/p/huahinproperties";
-    const t = I18N_RAIL[this.state.lang] || I18N_RAIL.en;
-    // Reuse the site's own full I18N dictionary for the shared field/button
-    // labels (name/phone/email/message/send/call/whatsapp/line) so all 8
-    // languages are covered consistently instead of duplicating them here.
-    const fullDict = (this._mod && this._mod.I18N && this._mod.I18N[this.state.lang]) || {};
-    const shared = {
-      name_label: fullDict.name_label || "Name", phone_label: fullDict.phone_label || "Phone",
-      email_label: fullDict.email_label || "Email", message_label: fullDict.message_label || "Message",
-      send: fullDict.send || "Send message", call: fullDict.call || "Call",
-      whatsapp: fullDict.whatsapp || "WhatsApp", line_app: fullDict.line_app || "Line",
-    };
-
-    const chatT = CHAT_I18N[this.state.lang] || CHAT_I18N.en;
-
-    return {
-      t: { ...t, ...shared, ...chatT },
-      railTransform: this.state.railOpen ? "translateX(0)" : "translateX(100%)",
-      arrowRotate: this.state.railOpen ? "rotate(0deg)" : "rotate(180deg)",
-      onToggle: () => this.toggle(),
-      lineUrl,
-      whatsappUrl: "https://wa.me/" + whatsappNumber,
-      telUrl: "tel:" + phone,
-      chatHintVisible: !this.state.isMobile,
-      formOpen: this.state.formOpen,
-      onOpenForm: () => this.setState({ formOpen: true, chatOpen: false, submitted: false }),
-      onCloseForm: () => this.setState({ formOpen: false }),
-      stopProp: (e) => e.stopPropagation(),
-      submitted: this.state.submitted,
-      notSubmitted: !this.state.submitted,
-      name: this.state.name, onName: (e) => this.setState({ name: e.target.value }),
-      phone: this.state.phone, onPhone: (e) => this.setState({ phone: e.target.value }),
-      email: this.state.email, onEmail: (e) => this.setState({ email: e.target.value }),
-      message: this.state.message, onMessage: (e) => this.setState({ message: e.target.value }),
-      onSubmit: () => this.submit(),
-
-      chatOpen: this.state.chatOpen,
-      chatPanelOpen: this.state.chatOpen && !this.state.chatMinimized,
-      chatBarBottom: this.state.isMobile ? "16px" : "20px",
-      chatBarRight: this.state.isMobile ? "16px" : "20px",
-      chatBarLeft: "auto",
-      chatOverlayPadding: this.state.isMobile ? "0" : "20px",
-      chatPanelRadius: this.state.isMobile ? "0" : "10px",
-      chatPanelMaxWidth: this.state.isMobile ? "100%" : "380px",
-      chatPanelHeight: this.state.isMobile ? "100dvh" : "min(560px, 80vh)",
-      chatBarOpen: this.state.chatOpen && this.state.chatMinimized,
-      chatBarMaxWidth: this.state.isMobile ? "52px" : "260px",
-      onMinimizeChat: () => this.setState({ chatMinimized: true }),
-      onClearChat: () => this.clearChatHistory(),
-      onExpandChat: () => this.setState({ chatMinimized: false }),
-      chatMessages: this.state.chatMessages,
-      chatLoading: this.state.chatLoading,
-      chatInput: this.state.chatInput,
-      chatScrollRef: this.chatScrollRef,
-      onOpenChat: () => this.openChat(),
-      onCloseChat: () => this.setState({ chatOpen: false, chatMinimized: false }),
-      showFavButton: true,
-      showFavLabel: !this.state.isMobile,
-      favButtonPadding: this.state.isMobile ? "12px" : "12px 18px",
-      favButtonLabel: FAV_PANEL_LABELS[this.state.lang] || FAV_PANEL_LABELS.en,
-      favCount: this.state.favIds.length,
-      hasFavCount: this.state.favIds.length > 0,
-      onOpenFavorites: () => this.setState({ favoritesOpen: true }),
-      onCloseFavorites: () => this.setState({ favoritesOpen: false }),
-      favoritesOpen: this.state.favoritesOpen,
-      noFavoritesLabel: FAV_EMPTY_LABELS[this.state.lang] || FAV_EMPTY_LABELS.en,
-      noFavorites: this.state.favIds.length === 0,
-      favoriteRows: this.state.favIds.map((id) => {
-        const props = this._properties || (this._mod ? this._mod.PROPERTIES : []) || [];
-        const p = props.find((pr) => pr.id === id);
-        const title = p ? ((p.title && (p.title[this.state.lang] || p.title.en)) || p.id) : id;
-        const cover = p && p.photos && p.photos[0] && p.photos[0].url;
-        return {
-          href: `Property Details.dc.html?id=${encodeURIComponent(id)}`,
-          title,
-          priceLabel: p ? `${(p.price || 0).toLocaleString()} ${p.currency || "THB"}` : "",
-          thumbStyle: `width:48px; height:48px; border-radius:6px; flex-shrink:0; background:${cover ? `url(${cover}) center/cover` : "oklch(90% 0.01 70)"};`,
-          onRemove: (e) => { e.preventDefault(); e.stopPropagation(); this.removeFavorite(id); },
-        };
-      }),
-      onChatInput: (e) => this.setState({ chatInput: e.target.value }),
-      onChatSend: () => this.sendChat(),
-      onChatKeyDown: (e) => { if (e.key === "Enter") { e.preventDefault(); this.sendChat(); } },
-
-      onOpenFormFromChat: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }),
-    };
+      // Brand-new properties added via Admin only have a single-language
+      // string for title/shortDesc/fullDesc — wrap them so the rest of the
+      // site (which expects { en, th, ru, zh }) still works.
+      const wrap = (v) => (v && typeof v === "object" ? v : { en: v, th: v, ru: v, zh: v });
+      return {
+        ...p, photos, title: wrap(p.title), shortDesc: wrap(p.shortDesc), fullDesc: wrap(p.fullDesc),
+        // Self-serve listings (Lister Dashboard) don't collect these fields
+        // yet — default them so pages that assume they're always arrays/
+        // numbers (feature filters, distance display) don't crash.
+        features: p.features || [], distanceBeach: p.distanceBeach || 0, distanceTown: p.distanceTown || 0,
+      };
+    });
+    // CRITICAL: the bundled sample catalog (mod.PROPERTIES — HH-101, CA-301,
+    // etc.) must stay visible even after Firestore has real data, otherwise
+    // every demo listing silently vanishes site-wide (Home/Search/Property
+    // Details) the moment even ONE real self-serve listing exists — this
+    // was happening because the code used to RETURN ONLY the Firestore
+    // results once Firestore was non-empty, never merging in the bundled
+    // catalog. Firestore is the source of truth for any id it already has
+    // (an admin/seed doc may have been edited there); any bundled sample id
+    // NOT present in Firestore at all is appended as-is.
+    const firestoreIds = new Set(properties.map((p) => p.id));
+    const staticOnly = (mod.PROPERTIES || []).filter((p) => !firestoreIds.has(p.id));
+    return [...fromFirestore, ...staticOnly];
+  } catch (e) {
+    console.warn("getEffectiveProperties: Firebase fetch failed, using bundled sample data:", e);
+    return mod.PROPERTIES;
   }
 }
-</script>
-</body>
-</html>

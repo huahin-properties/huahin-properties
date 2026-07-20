@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="google-site-verification" content="C9fJ87hFrHAyUH7DjPlzBCHg0Ac_hHJhMycdTbCuYl0" />
 <script src="./support.js"></script>
 </head>
 <body>
@@ -10,182 +11,514 @@
 <helmet>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <meta name="design_doc_mode" content="canvas">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <title>huahin.properties — Luxury Pool Villas &amp; Homes in Hua Hin, Pranburi, Cha-am</title>
+  <meta name="description" content="Curated pool villas, beachfront homes and land for sale and rent across Hua Hin, Pranburi and Cha-am, Thailand.">
   <style>
-    body { margin: 0; background: oklch(96% 0.015 75); }
-    .stripe-bg {
-      background-image: repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(92% 0.015 75) 2px, oklch(92% 0.015 75) 22px);
-    }
+    body { margin: 0; background: oklch(98% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    a { color: oklch(42% 0.12 25); }
+    a:hover { color: oklch(32% 0.13 25); }
   </style>
 </helmet>
 
-<div style="padding:48px 40px 120px; font-family:'Work Sans',sans-serif;">
+<sc-if value="{{ showGate }}">
+  <div style="position:fixed; inset:0; background:oklch(96% 0.015 75); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
+    <img src="logo.png" alt="huahin.properties logo" style="height:56px; width:56px; object-fit:contain; border-radius:50%; margin-bottom:20px;" />
+    <div style="font-family:'Playfair Display',serif; font-size:26px; color:oklch(20% 0.02 60); margin-bottom:10px;">กำลังปรับปรุงเว็บไซต์</div>
+    <div style="font-size:14px; color:oklch(50% 0.02 60); max-width:360px; margin-bottom:26px; line-height:1.6;">เรากำลังปรับปรุงเว็บไซต์อยู่ ขออภัยในความไม่สะดวก จะกลับมาเปิดให้บริการเร็วๆ นี้</div>
+    <div style="width:100%; max-width:300px; display:flex; flex-direction:column; gap:10px;">
+      <input type="text" ref="{{ gateInputRef }}" defaultValue="{{ gatePassword }}" onChange="{{ onGatePassword }}" placeholder="รหัสผ่านแอดมิน" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit; text-align:center;" />
+      <div onClick="{{ onGateSubmit }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:12px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">เข้าดูตัวอย่าง</div>
+      <sc-if value="{{ gateError }}"><div style="font-size:13px; color:oklch(50% 0.18 30);">{{ gateError }}</div></sc-if>
+    </div>
+  </div>
+</sc-if>
 
-  <div style="max-width:900px; margin:0 0 40px 4px;">
-    <div style="font-family:'Work Sans',sans-serif; font-size:13px; letter-spacing:0.12em; text-transform:uppercase; color:oklch(45% 0.06 70); margin-bottom:8px;">Turn 1 — Home Hero Concepts</div>
-    <div style="font-family:'Playfair Display',serif; font-size:30px; color:oklch(22% 0.02 60);">huahin.properties — pick a direction: <a href="#1a" style="color:oklch(45% 0.09 70); text-decoration:underline;">1a</a> or <a href="#1b" style="color:oklch(45% 0.09 70); text-decoration:underline;">1b</a></div>
+<div style="max-width:1600px; margin:0 auto; background:oklch(98% 0.01 80);">
+
+  <!-- ============ HEADER ============ -->
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:14px clamp(10px,4vw,56px); border-bottom:1px solid oklch(90% 0.01 70); position:relative;">
+    <a href="Home.dc.html" style="{{ logoStyle }}"><img src="logo.png" alt="huahin.properties logo" style="height:36px; width:36px; object-fit:contain; border-radius:50%; flex-shrink:0;" />huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</a>
+
+    <sc-if value="{{ isDesktopNav }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; gap:32px; align-items:center; font-size:15px; color:oklch(30% 0.02 60); white-space:nowrap;">
+        <a href="{{ buyHref }}" style="text-decoration:none; color:inherit;">{{ t.nav_buy }}</a>
+        <a href="{{ rentHref }}" style="text-decoration:none; color:inherit;">{{ t.nav_rent }}</a>
+        <a href="Sell.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_sell }}</a>
+        <a href="About.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_about }}</a>
+        <a href="Contact.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_contact }}</a>
+      </div>
+      <div style="display:flex; gap:12px; align-items:center; white-space:nowrap;">
+        <div onClick="{{ onVoiceChatOpen }}" style="width:38px; height:38px; border-radius:50%; background:oklch(90% 0.005 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; font-size:17px; cursor:pointer; flex-shrink:0;">🎙️</div>
+        <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" hint-size="150,54"></dc-import>
+        <div style="width:1px; height:20px; background:oklch(80% 0.02 70); margin:0 4px;"></div>
+        <a href="Lister Billing.dc.html" title="Login" style="font-size:16px; text-decoration:none; color:oklch(40% 0.02 60);">👤</a>
+        <a href="Agent Signup.dc.html" title="Sign up Free" style="font-size:13px; font-weight:600; text-decoration:none; color:white; background:oklch(62% 0.19 45); padding:6px 12px; border-radius:100px; white-space:nowrap;">Sign up Free</a>
+        <a href="Admin Login.dc.html" style="font-size:13px; color:oklch(40% 0.02 60); text-decoration:none;">{{ t.nav_admin }}</a>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isMobileNav }}">
+      <div style="display:flex; align-items:center; gap:2px; flex-shrink:0;">
+        <div onClick="{{ onVoiceChatOpen }}" style="width:30px; height:30px; border-radius:50%; background:oklch(90% 0.005 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; flex-shrink:0;">🎙️</div>
+        <a href="Agent Signup.dc.html" title="Login / Sign up" style="width:30px; height:30px; border-radius:50%; background:oklch(90% 0.005 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; font-size:14px; text-decoration:none; flex-shrink:0;">👤</a>
+        <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" compact="{{ true }}" menu-align="right" hint-size="34,30"></dc-import>
+        <div onClick="{{ toggleMenu }}" style="display:flex; flex-direction:column; gap:4px; padding:6px 4px; cursor:pointer; flex-shrink:0;">
+          <div style="width:20px; height:2px; background:oklch(22% 0.02 60);"></div>
+          <div style="width:20px; height:2px; background:oklch(22% 0.02 60);"></div>
+          <div style="width:20px; height:2px; background:oklch(22% 0.02 60);"></div>
+        </div>
+      </div>
+    </sc-if>
   </div>
 
-  <div style="display:flex; flex-wrap:wrap; gap:56px; align-items:flex-start;">
-
-    <!-- ============ OPTION 1A — Full-bleed cinematic ============ -->
-    <section id="1a" style="width:1440px; background:oklch(98% 0.01 80); box-shadow:0 30px 80px -20px rgba(30,20,10,0.25); position:relative;">
-      <div style="position:absolute; top:20px; left:20px; z-index:10; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); font-family:'Work Sans',sans-serif; font-size:13px; font-weight:600; padding:6px 14px; border-radius:100px; letter-spacing:0.04em;">1a — Cinematic full-bleed</div>
-
-      <!-- top nav -->
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:32px; padding:28px 56px; position:relative; z-index:5;">
-        <div style="white-space:nowrap; font-family:'Playfair Display',serif; font-size:24px; letter-spacing:0.02em; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
-        <div style="display:flex; gap:36px; align-items:center; font-size:15px; color:oklch(30% 0.02 60); white-space:nowrap;">
-          <div>Buy</div><div>Rent</div><div>Sell / List</div><div>About</div><div>Contact</div>
-        </div>
-        <div style="display:flex; gap:10px; align-items:center; white-space:nowrap;">
-          <div title="Thai" style="width:26px; height:18px; border-radius:2px; background:linear-gradient(180deg,#A51931 20%,#F4F5F8 20% 35%,#2D2A4A 35% 65%,#F4F5F8 65% 80%,#A51931 80%);"></div>
-          <div title="English" style="width:26px; height:18px; border-radius:2px; background:repeating-linear-gradient(180deg,#B22234 0 8%, #fff 8% 16%); position:relative; overflow:hidden;"><div style="position:absolute; top:0; left:0; width:12px; height:10px; background:#3C3B6E;"></div></div>
-          <div title="Russian" style="width:26px; height:18px; border-radius:2px; background:linear-gradient(180deg,#fff 0 33%,#0039A6 33% 66%,#D52B1E 66% 100%);"></div>
-          <div title="Chinese" style="width:26px; height:18px; border-radius:2px; background:#DE2910;"></div>
-          <div style="width:1px; height:20px; background:oklch(80% 0.02 70); margin:0 6px;"></div>
-          <div style="font-size:13px; color:oklch(30% 0.02 60);">Admin</div>
-        </div>
+  <sc-if value="{{ mobileMenuOpen }}">
+    <div style="position:fixed; inset:0; background:oklch(98% 0.01 80); z-index:50; padding:22px clamp(20px,6vw,56px); display:flex; flex-direction:column; gap:28px; overflow-y:auto;">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
+        <div onClick="{{ toggleMenu }}" style="font-size:26px; line-height:1; color:oklch(30% 0.02 60); cursor:pointer; padding:6px;">&times;</div>
       </div>
-
-      <!-- hero image -->
-      <div class="stripe-bg" style="height:620px; position:relative; display:flex; align-items:flex-end;">
-        <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(30,20,10,0.05) 0%, rgba(30,20,10,0.65) 100%);"></div>
-        <div style="position:absolute; top:16px; right:16px; font-family:monospace; font-size:11px; color:oklch(95% 0.01 80 / 0.8); background:rgba(0,0,0,0.3); padding:4px 8px; border-radius:4px;">[photo: Hua Hin pool villa at dusk, sea horizon]</div>
-
-        <div style="position:relative; z-index:2; padding:0 56px 64px; color:oklch(98% 0.01 80); max-width:760px;">
-          <div style="font-family:'Work Sans',sans-serif; font-size:13px; letter-spacing:0.2em; text-transform:uppercase; opacity:0.85; margin-bottom:18px;">Hua Hin · Pranburi · Cha-am</div>
-          <div style="font-family:'Playfair Display',serif; font-weight:500; font-size:64px; line-height:1.08; margin-bottom:20px;">Coastal living,<br>quietly luxurious.</div>
-          <div style="font-size:17px; line-height:1.6; max-width:520px; opacity:0.9; font-weight:300;">Curated pool villas, beachfront homes and land along Thailand's royal coast — for buyers, tenants and owners who expect more.</div>
-        </div>
+      <div style="display:flex; flex-direction:column; gap:22px; font-size:20px; font-family:'Playfair Display',serif; color:oklch(22% 0.02 60);">
+        <a href="{{ buyHref }}" style="text-decoration:none; color:inherit;">{{ t.nav_buy }}</a>
+        <a href="{{ rentHref }}" style="text-decoration:none; color:inherit;">{{ t.nav_rent }}</a>
+        <a href="Sell.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_sell }}</a>
+        <a href="About.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_about }}</a>
+        <a href="Contact.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_contact }}</a>
+        <a href="Lister Billing.dc.html" style="text-decoration:none; color:oklch(50% 0.02 60); font-size:15px; font-family:'Work Sans',sans-serif;">👤 Login</a>
+        <a href="Agent Signup.dc.html" style="text-decoration:none; color:white; background:oklch(62% 0.19 45); padding:8px 16px; border-radius:100px; font-size:14px; font-weight:600; font-family:'Work Sans',sans-serif;">Sign up Free</a>
+        <a href="Admin Login.dc.html" style="text-decoration:none; color:oklch(50% 0.02 60); font-size:15px; font-family:'Work Sans',sans-serif;">{{ t.nav_admin }}</a>
       </div>
-
-      <!-- search bar overlapping -->
-      <div style="position:relative; z-index:6; margin:0 56px; transform:translateY(-46px);">
-        <div style="background:oklch(99% 0.005 80); border-radius:6px; box-shadow:0 24px 50px -12px rgba(30,20,10,0.3); padding:8px; display:flex; gap:8px;">
-          <div style="display:flex; gap:0; flex:1;">
-            <div style="flex:1; padding:16px 20px; border-right:1px solid oklch(90% 0.01 70);">
-              <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:oklch(50% 0.02 60); margin-bottom:4px;">I want to</div>
-              <div style="font-size:15px; color:oklch(20% 0.02 60); font-weight:500;">Buy ▾</div>
-            </div>
-            <div style="flex:1.3; padding:16px 20px; border-right:1px solid oklch(90% 0.01 70);">
-              <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:oklch(50% 0.02 60); margin-bottom:4px;">Location</div>
-              <div style="font-size:15px; color:oklch(20% 0.02 60); font-weight:500;">Hua Hin, all zones ▾</div>
-            </div>
-            <div style="flex:1; padding:16px 20px; border-right:1px solid oklch(90% 0.01 70);">
-              <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:oklch(50% 0.02 60); margin-bottom:4px;">Type</div>
-              <div style="font-size:15px; color:oklch(20% 0.02 60); font-weight:500;">Pool Villa ▾</div>
-            </div>
-            <div style="flex:1; padding:16px 20px;">
-              <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:oklch(50% 0.02 60); margin-bottom:4px;">Budget</div>
-              <div style="font-size:15px; color:oklch(20% 0.02 60); font-weight:500;">Any price ▾</div>
-            </div>
-          </div>
-          <div style="background:oklch(40% 0.13 25); color:oklch(98% 0.01 80); padding:0 34px; border-radius:4px; display:flex; align-items:center; font-size:15px; font-weight:500; letter-spacing:0.02em; white-space:nowrap;">Search Properties</div>
-        </div>
+      <div style="margin-top:auto; padding-top:20px; border-top:1px solid oklch(90% 0.01 70);">
+        <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" full-width="{{ true }}" hint-size="100%,60"></dc-import>
       </div>
+    </div>
+  </sc-if>
 
-      <!-- CTA row -->
-      <div style="display:flex; gap:16px; justify-content:center; padding:8px 56px 64px;">
-        <div style="border:1px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:12px 26px; border-radius:100px; font-size:14px; letter-spacing:0.02em;">Find Your Home</div>
-        <div style="border:1px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:12px 26px; border-radius:100px; font-size:14px; letter-spacing:0.02em;">Rent Property</div>
-        <div style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:12px 26px; border-radius:100px; font-size:14px; letter-spacing:0.02em;">List Your Property</div>
-        <div style="border:1px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:12px 26px; border-radius:100px; font-size:14px; letter-spacing:0.02em;">Contact an Agent</div>
-      </div>
-    </section>
+  <!-- ============ HERO ============ -->
+  <div style="{{ heroStyle }}">
+    <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(30,20,10,0.08) 0%, rgba(30,20,10,0.68) 100%);"></div>
+    <sc-if value="{{ heroNoPhoto }}">
+      <div style="position:absolute; top:14px; right:14px; font-family:monospace; font-size:11px; color:oklch(95% 0.01 80 / 0.85); background:rgba(0,0,0,0.32); padding:4px 8px; border-radius:4px;">[photo placeholder]</div>
+    </sc-if>
 
-    <!-- ============ OPTION 1B — Editorial split ============ -->
-    <section id="1b" style="width:1440px; background:oklch(98% 0.01 80); box-shadow:0 30px 80px -20px rgba(30,20,10,0.25); position:relative;">
-      <div style="position:absolute; top:20px; left:20px; z-index:10; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); font-family:'Work Sans',sans-serif; font-size:13px; font-weight:600; padding:6px 14px; border-radius:100px; letter-spacing:0.04em;">1b — Editorial split</div>
-
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:32px; padding:28px 56px; border-bottom:1px solid oklch(90% 0.01 70);">
-        <div style="white-space:nowrap; font-family:'Playfair Display',serif; font-size:24px; letter-spacing:0.02em; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(42% 0.12 25);">.</span>properties</div>
-        <div style="display:flex; gap:36px; align-items:center; font-size:15px; color:oklch(30% 0.02 60); white-space:nowrap;">
-          <div>Buy</div><div>Rent</div><div>Sell / List</div><div>About</div><div>Contact</div>
-        </div>
-        <div style="display:flex; gap:10px; align-items:center; white-space:nowrap;">
-          <div title="Thai" style="width:26px; height:18px; border-radius:2px; background:linear-gradient(180deg,#A51931 20%,#F4F5F8 20% 35%,#2D2A4A 35% 65%,#F4F5F8 65% 80%,#A51931 80%);"></div>
-          <div title="English" style="width:26px; height:18px; border-radius:2px; background:repeating-linear-gradient(180deg,#B22234 0 8%, #fff 8% 16%); position:relative; overflow:hidden;"><div style="position:absolute; top:0; left:0; width:12px; height:10px; background:#3C3B6E;"></div></div>
-          <div title="Russian" style="width:26px; height:18px; border-radius:2px; background:linear-gradient(180deg,#fff 0 33%,#0039A6 33% 66%,#D52B1E 66% 100%);"></div>
-          <div title="Chinese" style="width:26px; height:18px; border-radius:2px; background:#DE2910;"></div>
-          <div style="width:1px; height:20px; background:oklch(80% 0.02 70); margin:0 6px;"></div>
-          <div style="font-size:13px; color:oklch(30% 0.02 60);">Admin</div>
-        </div>
-      </div>
-
-      <div style="display:flex; min-height:640px;">
-        <!-- left content -->
-        <div style="flex:1; padding:72px 56px; display:flex; flex-direction:column; justify-content:center;">
-          <div style="font-family:'Work Sans',sans-serif; font-size:13px; letter-spacing:0.2em; text-transform:uppercase; color:oklch(42% 0.12 25); margin-bottom:20px;">Hua Hin · Pranburi · Cha-am, Thailand</div>
-          <div style="font-family:'Playfair Display',serif; font-weight:500; font-size:56px; line-height:1.12; color:oklch(20% 0.02 60); margin-bottom:22px;">Property along the<br>royal coast, done right.</div>
-          <div style="font-size:16px; line-height:1.7; color:oklch(35% 0.02 60); max-width:460px; font-weight:300; margin-bottom:40px;">From beachfront pool villas to quiet Pranburi land plots — buy, rent, or list your property with a team who knows every soi.</div>
-
-          <div style="border:1px solid oklch(88% 0.01 70); border-radius:6px; overflow:hidden;">
-            <div style="display:flex; border-bottom:1px solid oklch(88% 0.01 70);">
-              <div style="padding:14px 22px; font-size:14px; font-weight:600; color:oklch(20% 0.02 60); border-bottom:2px solid oklch(42% 0.12 25);">Buy</div>
-              <div style="padding:14px 22px; font-size:14px; color:oklch(50% 0.02 60);">Rent</div>
-              <div style="padding:14px 22px; font-size:14px; color:oklch(50% 0.02 60);">Sell / List</div>
-            </div>
-            <div style="padding:20px 22px; display:flex; gap:14px; flex-wrap:wrap;">
-              <div style="flex:1; min-width:140px;">
-                <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">Location</div>
-                <div style="font-size:14px; color:oklch(20% 0.02 60); border:1px solid oklch(88% 0.01 70); border-radius:4px; padding:10px 12px;">Hua Hin ▾</div>
-              </div>
-              <div style="flex:1; min-width:140px;">
-                <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">Property Type</div>
-                <div style="font-size:14px; color:oklch(20% 0.02 60); border:1px solid oklch(88% 0.01 70); border-radius:4px; padding:10px 12px;">Pool Villa ▾</div>
-              </div>
-              <div style="flex:1; min-width:140px;">
-                <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">Bedrooms</div>
-                <div style="font-size:14px; color:oklch(20% 0.02 60); border:1px solid oklch(88% 0.01 70); border-radius:4px; padding:10px 12px;">Any ▾</div>
-              </div>
-            </div>
-            <div style="padding:0 22px 20px;">
-              <div style="background:oklch(42% 0.12 25); color:oklch(98% 0.01 80); text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:500; letter-spacing:0.02em;">Search 120+ Properties</div>
-            </div>
-          </div>
-
-          <div style="display:flex; gap:28px; margin-top:36px;">
-            <div>
-              <div style="font-family:'Playfair Display',serif; font-size:26px; color:oklch(20% 0.02 60);">120+</div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60);">Active listings</div>
-            </div>
-            <div>
-              <div style="font-family:'Playfair Display',serif; font-size:26px; color:oklch(20% 0.02 60);">3</div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60);">Coastal areas served</div>
-            </div>
-            <div>
-              <div style="font-family:'Playfair Display',serif; font-size:26px; color:oklch(20% 0.02 60);">4</div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60);">Languages supported</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- right image grid -->
-        <div style="flex:1; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:6px; padding:6px 6px 6px 0;">
-          <div class="stripe-bg" style="grid-row:1/3; position:relative;">
-            <div style="position:absolute; bottom:12px; left:12px; font-family:monospace; font-size:11px; color:oklch(20% 0.02 60 / 0.7); background:rgba(255,255,255,0.6); padding:4px 8px; border-radius:4px;">[photo: pool villa, Hua Hin]</div>
-          </div>
-          <div class="stripe-bg" style="position:relative;">
-            <div style="position:absolute; bottom:10px; left:10px; font-family:monospace; font-size:10px; color:oklch(20% 0.02 60 / 0.7); background:rgba(255,255,255,0.6); padding:3px 6px; border-radius:4px;">[photo: Hua Hin train station]</div>
-          </div>
-          <div class="stripe-bg" style="position:relative;">
-            <div style="position:absolute; bottom:10px; left:10px; font-family:monospace; font-size:10px; color:oklch(20% 0.02 60 / 0.7); background:rgba(255,255,255,0.6); padding:3px 6px; border-radius:4px;">[photo: Cha-am beach at sunrise]</div>
-          </div>
-        </div>
-      </div>
-
-      <div style="display:flex; gap:16px; justify-content:center; padding:32px 56px; border-top:1px solid oklch(90% 0.01 70);">
-        <div style="border:1px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:12px 26px; border-radius:100px; font-size:14px;">Find Your Home</div>
-        <div style="border:1px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:12px 26px; border-radius:100px; font-size:14px;">Rent Property</div>
-        <div style="background:oklch(20% 0.02 60); color:oklch(97% 0.01 80); padding:12px 26px; border-radius:100px; font-size:14px;">List Your Property</div>
-        <div style="border:1px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:12px 26px; border-radius:100px; font-size:14px;">Contact an Agent</div>
-      </div>
-    </section>
-
+    <div style="position:relative; z-index:2; padding:{{ heroTextPadding }}; color:oklch(98% 0.01 80); max-width:760px;">
+      <div style="font-size:13px; letter-spacing:0.2em; text-transform:uppercase; opacity:0.88; margin-bottom:16px;">{{ t.hero_kicker }}</div>
+      <div style="font-family:'Playfair Display',serif; font-weight:500; font-size:clamp(34px,6vw,64px); line-height:1.1; margin-bottom:18px;">{{ t.hero_title_1 }}<br>{{ t.hero_title_2 }}</div>
+      <div style="font-size:clamp(14px,1.6vw,17px); line-height:1.6; max-width:520px; opacity:0.92; font-weight:300;">{{ t.hero_sub }}</div>
+    </div>
   </div>
+
+  <!-- ============ SEARCH BOX ============ -->
+  <div style="position:relative; z-index:6; margin:0 clamp(16px,4vw,56px); transform:{{ searchBoxTransform }};">
+    <div style="background:oklch(99% 0.005 80); border-radius:6px; box-shadow:0 24px 50px -12px rgba(30,20,10,0.3); padding:10px; display:flex; flex-direction:column; gap:8px;">
+      <input value="{{ keyword }}" onChange="{{ onKeywordChange }}" placeholder="{{ t.keyword_placeholder }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(88% 0.01 70); border-radius:4px; padding:12px 16px; font-size:14px; font-family:inherit; color:oklch(25% 0.02 60);" />
+      <div style="display:flex; flex-wrap:wrap; gap:8px;">
+      <div style="display:flex; flex-wrap:wrap; flex:1; min-width:260px;">
+        <div style="position:relative; flex:1; min-width:130px; padding:14px 34px 14px 18px; border-right:1px solid oklch(90% 0.01 70); cursor:pointer;" style-hover="background:oklch(97% 0.01 75);">
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:oklch(50% 0.02 60); margin-bottom:4px;">{{ t.want_label }}</div>
+          <select value="{{ wantValue }}" onChange="{{ onWantChange }}" style="position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;">
+            <option value="sale">{{ t.buy }}</option>
+            <option value="rent">{{ t.rent }}</option>
+          </select>
+          <div style="font-size:15px; color:oklch(20% 0.02 60); font-weight:500; pointer-events:none;">{{ wantLabel }}</div>
+          <div style="position:absolute; right:12px; top:50%; margin-top:-2px; width:8px; height:8px; border-right:2px solid oklch(45% 0.02 60); border-bottom:2px solid oklch(45% 0.02 60); transform:rotate(45deg); pointer-events:none;"></div>
+        </div>
+        <div style="position:relative; flex:1.3; min-width:150px; padding:14px 34px 14px 18px; border-right:1px solid oklch(90% 0.01 70); cursor:pointer;" style-hover="background:oklch(97% 0.01 75);">
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:oklch(50% 0.02 60); margin-bottom:4px;">{{ t.location_label }}</div>
+          <select value="{{ areaValue }}" onChange="{{ onAreaChange }}" style="position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;">
+            <option value="">{{ t.all_zones }}</option>
+            <sc-for list="{{ areas }}" as="a" hint-placeholder-count="3">
+              <option value="{{ a.id }}">{{ a.label }}</option>
+            </sc-for>
+          </select>
+          <div style="font-size:15px; color:oklch(20% 0.02 60); font-weight:500; pointer-events:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ areaLabel }}</div>
+          <div style="position:absolute; right:12px; top:50%; margin-top:-2px; width:8px; height:8px; border-right:2px solid oklch(45% 0.02 60); border-bottom:2px solid oklch(45% 0.02 60); transform:rotate(45deg); pointer-events:none;"></div>
+        </div>
+        <div style="position:relative; flex:1; min-width:130px; padding:14px 34px 14px 18px; border-right:1px solid oklch(90% 0.01 70); cursor:pointer;" style-hover="background:oklch(97% 0.01 75);">
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:oklch(50% 0.02 60); margin-bottom:4px;">{{ t.type_label }}</div>
+          <select value="{{ typeValue }}" onChange="{{ onTypeChange }}" style="position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;">
+            <option value="">{{ t.any_type }}</option>
+            <sc-for list="{{ types }}" as="ty" hint-placeholder-count="5">
+              <option value="{{ ty.id }}">{{ ty.label }}</option>
+            </sc-for>
+          </select>
+          <div style="font-size:15px; color:oklch(20% 0.02 60); font-weight:500; pointer-events:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ typeLabel }}</div>
+          <div style="position:absolute; right:12px; top:50%; margin-top:-2px; width:8px; height:8px; border-right:2px solid oklch(45% 0.02 60); border-bottom:2px solid oklch(45% 0.02 60); transform:rotate(45deg); pointer-events:none;"></div>
+        </div>
+        <div style="position:relative; flex:1; min-width:130px; padding:14px 34px 14px 18px; cursor:pointer;" style-hover="background:oklch(97% 0.01 75);">
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:oklch(50% 0.02 60); margin-bottom:4px;">{{ t.budget_label }}</div>
+          <select value="{{ priceValue }}" onChange="{{ onPriceChange }}" style="position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;">
+            <option value="">{{ t.any_price }}</option>
+            <option value="5000000">฿5,000,000</option>
+            <option value="10000000">฿10,000,000</option>
+            <option value="20000000">฿20,000,000</option>
+            <option value="50000000">฿50,000,000</option>
+            <option value="100000">฿100,000 (rent)</option>
+          </select>
+          <div style="font-size:15px; color:oklch(20% 0.02 60); font-weight:500; pointer-events:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ priceLabel }}</div>
+          <div style="position:absolute; right:12px; top:50%; margin-top:-2px; width:8px; height:8px; border-right:2px solid oklch(45% 0.02 60); border-bottom:2px solid oklch(45% 0.02 60); transform:rotate(45deg); pointer-events:none;"></div>
+        </div>
+      </div>
+      <a href="{{ searchHref }}" style="background:oklch(40% 0.13 25); color:oklch(98% 0.01 80); padding:0 30px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:500; letter-spacing:0.02em; white-space:nowrap; text-decoration:none; min-height:48px; flex:1; min-width:180px;">{{ t.search_cta }}</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ CTA ROW ============ -->
+  <div style="display:flex; gap:{{ ctaGap }}; justify-content:center; padding:16px clamp(20px,4vw,56px) 0; max-width:640px; margin:0 auto;">
+    <a href="{{ buyHref }}" style="flex:1; text-align:center; border:1.5px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:8px 2px; border-radius:8px; font-size:{{ ctaFontSize }}; text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.cta_find }}</a>
+    <a href="{{ rentHref }}" style="flex:1; text-align:center; border:1.5px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:8px 2px; border-radius:8px; font-size:{{ ctaFontSize }}; text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.cta_rent }}</a>
+    <a href="Sell.dc.html" style="flex:1; text-align:center; background:oklch(40% 0.13 25); border:1.5px solid oklch(40% 0.13 25); color:white; padding:8px 2px; border-radius:8px; font-size:{{ ctaFontSize }}; text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.cta_list }}</a>
+    <a href="Contact.dc.html" style="flex:1; text-align:center; border:1.5px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:8px 2px; border-radius:8px; font-size:{{ ctaFontSize }}; text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.cta_contact }}</a>
+    <a href="Agent Signup.dc.html" style="flex:1; text-align:center; background:oklch(62% 0.19 45); color:white; padding:8px 2px; border-radius:8px; font-size:{{ ctaFontSize }}; text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600;">สมัครฟรี</a>
+  </div>
+
+  <!-- ============ FEATURED PROPERTIES ============ -->
+  <div style="padding:clamp(32px,5vw,72px) clamp(20px,4vw,56px);">
+    <div style="text-align:center; margin-bottom:40px;">
+      <div style="font-family:'Playfair Display',serif; font-size:clamp(26px,3.4vw,38px); color:oklch(20% 0.02 60); margin-bottom:8px;">{{ t.featured_title }}</div>
+      <div style="font-size:15px; color:oklch(48% 0.02 60);">{{ t.featured_sub }}</div>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px;">
+      <sc-for list="{{ featured }}" as="p" hint-placeholder-count="8">
+        <dc-import name="PropertyCard" href="{{ p.href }}" status-color="{{ p.statusColor }}" status-label="{{ p.statusLabel }}" is-featured="{{ p.isFeatured }}" is-vip="{{ p.isVip }}" cover-photo-label="{{ p.coverPhotoLabel }}" cover-photo-bg="{{ p.coverPhotoBg }}" no-photo="{{ p.noPhoto }}" property-id="{{ p.propertyId }}" zone="{{ p.zone }}" area-label="{{ p.areaLabel }}" title="{{ p.title }}" type-label="{{ p.typeLabel }}" has-bedrooms="{{ p.hasBedrooms }}" bedrooms="{{ p.bedrooms }}" has-bathrooms="{{ p.hasBathrooms }}" bathrooms="{{ p.bathrooms }}" has-living-area="{{ p.hasLivingArea }}" living-area="{{ p.livingArea }}" sqm-label="{{ p.sqmLabel }}" price-label="{{ p.priceLabel }}" view-details-label="{{ p.viewDetailsLabel }}" hint-size="100%,380px"></dc-import>
+      </sc-for>
+    </div>
+    <sc-if value="{{ showFeaturedPagination }}">
+      <div style="text-align:center; font-size:13px; color:oklch(50% 0.02 60); margin-top:28px;">{{ totalFeaturedCount }} รายการ</div>
+      <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-top:10px; flex-wrap:wrap;">
+        <div onClick="{{ onFeaturedPrevPage }}" style="width:36px; height:36px; border-radius:50%; border:1px solid oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; color:oklch(30% 0.02 60);">‹</div>
+        <sc-for list="{{ featuredPageNumbers }}" as="pg" hint-placeholder-count="3">
+          <div onClick="{{ pg.onClick }}" style="width:36px; height:36px; border-radius:50%; background:{{ pg.bg }}; color:{{ pg.color }}; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; border:1px solid oklch(85% 0.01 70);">{{ pg.num }}</div>
+        </sc-for>
+        <div onClick="{{ onFeaturedNextPage }}" style="width:36px; height:36px; border-radius:50%; border:1px solid oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; color:oklch(30% 0.02 60);">›</div>
+      </div>
+    </sc-if>
+  </div>
+
+  <!-- ============ AREAS ============ -->
+  <div style="padding:clamp(32px,5vw,72px) clamp(20px,4vw,56px); background:oklch(96% 0.015 75);">
+    <div style="text-align:center; margin-bottom:40px;">
+      <div style="font-family:'Playfair Display',serif; font-size:clamp(26px,3.4vw,38px); color:oklch(20% 0.02 60);">{{ t.areas_title }}</div>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px;">
+      <sc-for list="{{ areaCards }}" as="ac" hint-placeholder-count="3">
+        <a href="{{ ac.href }}" style="text-decoration:none; display:flex; flex-direction:column; border-radius:6px; overflow:hidden; background:oklch(99% 0.005 80);">
+          <div style="{{ ac.photoStyle }}">
+            <sc-if value="{{ ac.noPhoto }}">
+              <div style="position:absolute; bottom:10px; left:10px; font-family:monospace; font-size:11px; color:oklch(20% 0.02 60 / 0.75); background:rgba(255,255,255,0.65); padding:4px 8px; border-radius:4px;">[{{ ac.photoLabel }}]</div>
+            </sc-if>
+          </div>
+          <div style="padding:20px;">
+            <div style="font-family:'Playfair Display',serif; font-size:21px; color:oklch(20% 0.02 60); margin-bottom:8px;">{{ ac.label }}</div>
+            <div style="font-size:14px; line-height:1.6; color:oklch(45% 0.02 60);">{{ ac.desc }}</div>
+          </div>
+        </a>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- ============ ABOUT TEASER ============ -->
+  <div style="padding:clamp(48px,7vw,88px) clamp(20px,4vw,56px); max-width:760px; margin:0 auto; text-align:center;">
+    <div style="font-family:'Playfair Display',serif; font-size:clamp(24px,3vw,32px); color:oklch(20% 0.02 60); margin-bottom:18px;">{{ t.about_title }}</div>
+    <div style="font-size:15px; line-height:1.75; color:oklch(38% 0.02 60); margin-bottom:24px;">{{ t.about_body }}</div>
+    <a href="About.dc.html" style="font-size:14px; font-weight:600; color:oklch(42% 0.12 25); text-decoration:none;">{{ t.nav_about }} →</a>
+  </div>
+
+  <!-- ============ FOOTER ============ -->
+  <div style="border-top:1px solid oklch(90% 0.01 70); padding:32px clamp(20px,4vw,56px); display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between;">
+    <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
+    <div style="font-size:13px; color:oklch(50% 0.02 60);">© 2026 huahin.properties. {{ t.footer_rights }}</div>
+  </div>
+
 </div>
 
+<sc-if value="{{ showChrome }}"><dc-import name="ContactRail" hint-size="0,0"></dc-import></sc-if>
+
 </x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  goToPage(p) {
+    this.setState({ page: p });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  state = {
+    lang: "en",
+    page: 1,
+    isMobile: (typeof window !== "undefined" && window.innerWidth < 900),
+    mobileMenuOpen: false,
+    showGate: false, gatePassword: "", gateError: "",
+    wantValue: "sale",
+    keyword: "",
+    areaValue: "",
+    typeValue: "",
+    priceValue: "",
+    siteContent: {},
+    data: null,
+    banners: [],
+    bannerPage: 0,
+  };
+
+  async componentDidMount() {
+    const fb0 = await import("./firebase-client.js");
+    this._fb = fb0;
+    if (!fb0.hasSiteBypass() && !fb0.isAdminAuthed()) {
+      try {
+        const on = await fb0.fetchMaintenanceMode();
+        if (on) this.setState({ showGate: true });
+      } catch (e) { console.warn("Failed to check maintenance mode:", e); }
+    }
+    const mod = await import("./data.js");
+    this._mod = mod;
+    this.setState({ lang: mod.getLang(), data: mod });
+    const effProps = await mod.getEffectiveProperties(mod);
+    this.setState({ effProps });
+    try {
+      const allBanners = await fb0.fetchCollection("banners");
+      this.setState({ banners: allBanners });
+    } catch (e) { console.warn("banners fetch failed:", e); }
+    try {
+      const fb = await import("./firebase-client.js");
+      const siteContent = await fb.fetchSiteContent();
+      this.setState({ siteContent });
+    } catch (e) {
+      console.warn("Failed to load site content:", e);
+    }
+    this._onResize = () => this.setState({ isMobile: window.innerWidth < 900 });
+    this._onResize();
+    window.addEventListener("resize", this._onResize);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this._onResize);
+  }
+
+  selectLang(l) {
+    this._mod.setLang(l);
+    this.setState({ lang: l, mobileMenuOpen: false });
+  }
+
+  async submitGate() {
+    try {
+      // Uses the SAME Firebase Authentication credential as Admin Login.
+      // Always the fixed admin account — a prior attempt to look up the
+      // email dynamically from Site Content picked up a corrupted/stale
+      // value and broke sign-in, so this stays hardcoded and simple.
+      const email = "doothailand@gmail.com";
+      const typedPassword = (this._gateInputEl && this._gateInputEl.value) || this.state.gatePassword;
+      await this._fb.adminSignIn(email, typedPassword);
+      this._fb.setSiteBypass();
+      this.setState({ showGate: false, gateError: "" });
+    } catch (e) {
+      this.setState({ gateError: "รหัสผ่านไม่ถูกต้อง" });
+    }
+  }
+
+  renderVals() {
+    const gateVals = {
+      showGate: this.state.showGate,
+      showChrome: !this.state.showGate,
+      gatePassword: this.state.gatePassword,
+      gateInputRef: (el) => { this._gateInputEl = el; },
+      onGatePassword: (e) => { this.setState({ gatePassword: e.target.value, gateError: "" }); },
+      onGateSubmit: () => this.submitGate(),
+      gateError: this.state.gateError,
+    };
+    const mod = this.state.data;
+    if (!mod) return { t: {}, featured: [], areas: [], areaCards: [], langOptions: [], isDesktopNav: true, isMobileNav: false, ...gateVals };
+
+    const lang = this.state.lang;
+    const t = mod.I18N[lang];
+    const langValue = lang;
+    const onLangChange = (code) => this.selectLang(code);
+    const langOptions = mod.LANGS.map((l) => ({ code: l, label: mod.LANG_LABELS[l] }));
+
+    const areaLabelOf = (id) => mod.AREAS.find((a) => a.id === id).label[lang];
+    const typeLabelOf = (id) => mod.TYPES.find((ty) => ty.id === id).label[lang];
+    const statusColorOf = (s) => ({ sale: "oklch(40% 0.13 25)", rent: "oklch(45% 0.09 230)", sold: "oklch(45% 0.02 60)", reserved: "oklch(62% 0.16 85)" }[s]);
+
+    const cardProps = (p) => ({
+      href: `Property Details.dc.html?id=${p.id}`,
+      statusColor: statusColorOf(p.status),
+      statusLabel: mod.STATUS[p.status][lang],
+      isFeatured: !!(p.featuredUntil && p.featuredUntil > Date.now()),
+      isVip: !!(p.vipTier && p.vipUntil > Date.now()),
+      coverPhotoLabel: (p.photos[0] && p.photos[0].label) || p.photos[0] || "photo",
+      coverPhotoBg: (p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
+      noPhoto: !(p.photos[0] && p.photos[0].url),
+      zone: p.zone,
+      propertyId: p.id,
+      areaLabel: areaLabelOf(p.area),
+      title: p.title[lang],
+      typeLabel: typeLabelOf(p.type),
+      hasBedrooms: !!p.bedrooms,
+      bedrooms: p.bedrooms,
+      hasBathrooms: !!p.bathrooms,
+      bathrooms: p.bathrooms,
+      hasLivingArea: !!p.livingArea,
+      livingArea: p.livingArea,
+      sqmLabel: t.sqm,
+      priceLabel: mod.formatPrice(p.price, p.currency, lang) + (p.status === "rent" ? t.per_month : ""),
+      viewDetailsLabel: t.view_details,
+    });
+
+    const featuredIds = ["HH-101", "PB-201", "CA-301", "HH-104", "PB-202", "CA-304"];
+    const propsList = this.state.effProps || mod.PROPERTIES;
+    const now = Date.now();
+
+    // Banner properties (bought via Site Content's banner CRUD, BLUEPRINT §11
+    // item 4) always occupy the first slots of this same grid — rendered as
+    // ordinary PropertyCards (no "Sponsored" badge) so a paid placement looks
+    // identical to any other listing. They only take the front seats once;
+    // everything else fills in after them and pagination continues normally
+    // (e.g. 3 banners + 5 regular = page 1, page 2 starts at the 9th listing).
+    const homeBanners = (this.state.banners || []).filter((b) => b.page === "home" && b.position === "top" && b.active !== false && (!b.expiresAt || b.expiresAt > now));
+    const bannerPropIds = homeBanners.map((b) => {
+      const m = (b.link || "").match(/id=([^&]+)/);
+      return m ? decodeURIComponent(m[1]) : (b.propertyCode || "");
+    }).filter(Boolean);
+    const bannerProps = bannerPropIds.map((id) => propsList.find((p) => p.id === id)).filter(Boolean);
+
+    const remaining = propsList.filter((p) => !bannerPropIds.includes(p.id));
+    // Paid "Featured Listing boost" (BLUEPRINT.md §11 item 5) takes priority
+    // over the curated fallback list — boosted listings always show first.
+    const boosted = remaining.filter((p) => p.featuredUntil && p.featuredUntil > now).sort((a, b) => b.featuredUntil - a.featuredUntil);
+    const fallback = featuredIds.map((id) => remaining.find((p) => p.id === id)).filter(Boolean).filter((p) => !boosted.some((b) => b.id === p.id));
+    const rest = remaining.filter((p) => !boosted.some((b) => b.id === p.id) && !fallback.some((f) => f.id === p.id));
+    const allOrdered = [...bannerProps, ...boosted, ...fallback, ...rest];
+    const perPage = 8;
+    const totalFeaturedPages = Math.max(1, Math.ceil(allOrdered.length / perPage));
+    const featuredPage = Math.min(this.state.page, totalFeaturedPages);
+    const featured = allOrdered.slice((featuredPage - 1) * perPage, featuredPage * perPage).map(cardProps);
+
+    const areaDescKey = { "hua-hin": "area_hua_hin_desc", pranburi: "area_pranburi_desc", "cha-am": "area_cha_am_desc" };
+    const areaPhoto = { "hua-hin": "photo: Hua Hin train station & beach", pranburi: "photo: Pranburi beachfront villa", "cha-am": "photo: Cha-am beach promenade" };
+    const sc = this.state.siteContent || {};
+    const areaCards = mod.AREAS.map((a) => {
+      const content = sc["area-" + a.id] || {};
+      return {
+        href: `Search Results.dc.html?area=${a.id}`,
+        label: a.label[lang],
+        desc: content.desc || t[areaDescKey[a.id]],
+        photoLabel: areaPhoto[a.id],
+        noPhoto: !content.photoUrl,
+        photoStyle: {
+          aspectRatio: "16/10", position: "relative",
+          background: content.photoUrl ? `url('${content.photoUrl}') center/cover` : "repeating-linear-gradient(135deg, oklch(86% 0.02 75) 0px, oklch(86% 0.02 75) 2px, oklch(91% 0.015 75) 2px, oklch(91% 0.015 75) 22px)",
+        },
+      };
+    });
+
+    return {
+      t,
+      lang,
+      isDesktopNav: !this.state.isMobile,
+      isMobileNav: this.state.isMobile,
+      mobileMenuOpen: this.state.isMobile && this.state.mobileMenuOpen,
+      toggleMenu: () => this.setState((s) => ({ mobileMenuOpen: !s.mobileMenuOpen })),
+      onVoiceChatOpen: () => window.dispatchEvent(new CustomEvent("hh-open-voice-chat")),
+      logoStyle: {
+        whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: this.state.isMobile ? "6px" : "9px",
+        fontFamily: "'Playfair Display',serif", fontSize: this.state.isMobile ? "16px" : "clamp(19px,2.4vw,24px)",
+        letterSpacing: "0.02em", color: "oklch(22% 0.02 60)", textDecoration: "none", flexShrink: 1, minWidth: 0, overflow: "hidden",
+      },
+      langValue, onLangChange, langOptions,
+      areas: mod.AREAS.map((a) => ({ id: a.id, label: a.label[lang] })),
+      areaLabel: this.state.areaValue ? areaLabelOf(this.state.areaValue) : t.all_zones,
+      types: mod.TYPES.map((ty) => ({ id: ty.id, label: ty.label[lang] })),
+      wantValue: this.state.wantValue,
+      onWantChange: (e) => this.setState({ wantValue: e.target.value }),
+      wantLabel: this.state.wantValue === "rent" ? t.rent : t.buy,
+      areaValue: this.state.areaValue,
+      onAreaChange: (e) => this.setState({ areaValue: e.target.value }),
+      typeValue: this.state.typeValue,
+      onTypeChange: (e) => this.setState({ typeValue: e.target.value }),
+      typeLabel: this.state.typeValue ? typeLabelOf(this.state.typeValue) : t.any_type,
+      priceValue: this.state.priceValue,
+      onPriceChange: (e) => this.setState({ priceValue: e.target.value }),
+      priceLabel: (() => {
+        const opts = { "5000000": "฿5,000,000", "10000000": "฿10,000,000", "20000000": "฿20,000,000", "50000000": "฿50,000,000", "100000": "฿100,000 (rent)" };
+        return this.state.priceValue ? opts[this.state.priceValue] : t.any_price;
+      })(),
+      keyword: this.state.keyword,
+      onKeywordChange: (e) => this.setState({ keyword: e.target.value }),
+      searchHref: `Search Results.dc.html?status=${this.state.wantValue}${this.state.areaValue ? "&area=" + this.state.areaValue : ""}${this.state.typeValue ? "&type=" + this.state.typeValue : ""}${this.state.priceValue ? "&priceMax=" + this.state.priceValue : ""}${this.state.keyword.trim() ? "&q=" + encodeURIComponent(this.state.keyword.trim()) : ""}`,
+      buyHref: "Search Results.dc.html?status=sale",
+      rentHref: "Search Results.dc.html?status=rent",
+      featured,
+      totalFeaturedCount: allOrdered.length,
+      showFeaturedPagination: totalFeaturedPages > 1,
+      featuredPageNumbers: Array.from({ length: totalFeaturedPages }, (_, i) => {
+        const num = i + 1;
+        const isActive = num === featuredPage;
+        return { num, isActive, bg: isActive ? "oklch(22% 0.02 60)" : "transparent", color: isActive ? "oklch(98% 0.01 80)" : "oklch(30% 0.02 60)", onClick: () => this.goToPage(num) };
+      }),
+      onFeaturedPrevPage: () => this.goToPage(Math.max(1, featuredPage - 1)),
+      onFeaturedNextPage: () => this.goToPage(Math.min(totalFeaturedPages, featuredPage + 1)),
+      areaCards,
+      heroStyle: {
+        position: "relative", height: "clamp(480px,70vh,680px)", display: "flex",
+        alignItems: this.state.isMobile ? "flex-start" : "flex-end",
+        background: (sc.hero && sc.hero.photoUrl) ? `url('${sc.hero.photoUrl}') center/cover` : "repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(92% 0.015 75) 2px, oklch(92% 0.015 75) 22px)",
+      },
+      heroNoPhoto: !(sc.hero && sc.hero.photoUrl),
+      heroTextPadding: this.state.isMobile ? "clamp(24px,6vw,40px) clamp(16px,4vw,56px) 0" : "0 clamp(20px,4vw,56px) clamp(40px,7vw,64px)",
+      searchBoxTransform: this.state.isMobile ? "none" : "translateY(clamp(-24px,-3vw,-46px))",
+      ctaGap: this.state.isMobile ? "6px" : "12px",
+      ctaFontSize: this.state.isMobile ? "12px" : "14px",
+      hasTopBanner: (() => {
+        const now = Date.now();
+        const active = (this.state.banners || []).filter((b) => b.page === "home" && b.position === "top" && b.active !== false && b.imageUrl && (!b.expiresAt || b.expiresAt > now));
+        return active.length > 0;
+      })(),
+      // Shows every active banner in this slot as a small tile in a
+      // responsive grid (4-5 across on desktop, 2 on narrow phones via
+      // auto-fit) instead of picking one at random to show full-width —
+      // makes a paid banner look like a premium placement, not a lone ad.
+      topBanners: (() => {
+        const now = Date.now();
+        const active = (this.state.banners || []).filter((b) => b.page === "home" && b.position === "top" && b.active !== false && b.imageUrl && (!b.expiresAt || b.expiresAt > now));
+        const propsList = this.state.effProps || (mod ? mod.PROPERTIES : []) || [];
+        const list = active.map((b) => {
+          const prop = propsList.find((p) => b.link && b.link.includes(`id=${p.id}`));
+          return {
+            imageUrl: b.imageUrl, link: b.link || "#",
+            code: prop ? prop.id : (b.propertyCode || ""),
+            title: prop ? (prop.title[lang] || prop.title.en || b.propertyTitle || "") : (b.propertyTitle || ""),
+            statusLabel: prop ? (mod.STATUS[prop.status][lang] || mod.STATUS[prop.status].en) : "",
+            priceLabel: prop ? `฿${prop.price.toLocaleString()}` : "",
+          };
+        });
+        this._topBannersCache = list;
+        return list;
+      })(),
+      // Mobile shows 2 tiles at a time with arrows that loop back to the
+      // start; desktop's auto-fit grid naturally shows more (4-5) so the
+      // arrows are hidden there since everything already fits on one row.
+      showBannerArrows: this.state.isMobile && (this._topBannersCache || []).length > 2,
+      visibleBanners: (() => {
+        const all = this._topBannersCache || [];
+        if (!this.state.isMobile || all.length <= 2) return all;
+        const start = this.state.bannerPage % all.length;
+        return [all[start], all[(start + 1) % all.length]];
+      })(),
+      onBannerPrev: () => this.setState((s) => {
+        const len = (this._topBannersCache || []).length || 1;
+        return { bannerPage: (s.bannerPage - 1 + len) % len };
+      }),
+      onBannerNext: () => this.setState((s) => {
+        const len = (this._topBannersCache || []).length || 1;
+        return { bannerPage: (s.bannerPage + 1) % len };
+      }),
+      ...gateVals,
+    };
+  }
+}
+
+</script>
 </body>
 </html>

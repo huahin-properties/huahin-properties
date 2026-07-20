@@ -1,6 +1,6 @@
 # AI Session Pack v2.1 — huahin.properties
 
-Generated: 17/07/2569 (v2.1.0, build 2026.07.17.02)
+Generated: 18/07/2569 (v2.2.0, build 2026.07.18.01)
 
 This file is a static snapshot for uploading into a new ChatGPT/Claude session as Project Context. For the live, always-current version, use the "🧠 AI Session Pack" button in CEO Dashboard → Command Center.
 

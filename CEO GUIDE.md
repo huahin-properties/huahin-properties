@@ -1,160 +1,95 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
+# CEO GUIDE.md
 
-<helmet>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <title>CEO Guide — huahin.properties</title>
-  <style>
-    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
-    h2 { font-family: 'Playfair Display', serif; }
-    a { color: oklch(45% 0.13 25); }
-    a:hover { color: oklch(35% 0.13 25); }
-  </style>
-</helmet>
+## 1. เริ่มต้นใช้งานโครงการ
 
-<div style="min-height:100vh; padding:clamp(20px,4vw,56px); box-sizing:border-box;">
-  <div style="max-width:860px; margin:0 auto; background:white; border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:clamp(24px,4vw,48px); box-shadow:0 20px 50px -30px rgba(30,20,10,0.25);">
+เอกสารนี้ใช้ทุกครั้งที่ต้องการเปิดห้อง ChatGPT ใหม่เพื่อทำงานต่อในโครงการ huahin.properties ไม่ว่าจะเป็นการทำงานต่อจากวันก่อน หรือเริ่มงานใหม่ในหัวข้อใดก็ตาม ใช้กรณีที่ห้องแชตเดิมเต็ม ต้องการเปิดห้องใหม่ หรือสลับไปให้ ChatGPT/Claude คนละตัวทำงานต่อ
 
-    <div style="display:flex; align-items:center; gap:12px; margin-bottom:6px; flex-wrap:wrap;">
-      <div style="width:38px; height:38px; border-radius:10px; background:oklch(35% 0.09 25); display:flex; align-items:center; justify-content:center; color:white; font-size:19px;">📘</div>
-      <div style="font-family:'Playfair Display',serif; font-size:23px; font-weight:700; color:oklch(20% 0.02 60);">คู่มือ CEO — CEO Guide</div>
-    </div>
-    <div style="font-size:13px; color:oklch(55% 0.02 60); margin:0 0 20px;">คู่มือการทำงานประจำวันสำหรับ CEO — ไม่ใช่เอกสารเทคนิค เปิดหน้านี้ทีละขั้นแล้วทำตามได้เลย</div>
+ไม่ต้องใช้เอกสารนี้หากยังทำงานต่อในห้องแชตเดิมที่ AI เข้าใจโครงการอยู่แล้ว
 
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
-      <a href="./Mission%20Control.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:7px 14px; border-radius:100px;">← กลับ Mission Control</a>
-      <a href="./Blueprint.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:7px 14px; border-radius:100px;">← กลับ Blueprint</a>
-    </div>
+## 2. ก่อนเริ่มงาน
 
-    <div style="display:inline-flex; flex-direction:column; gap:2px; font-size:11.5px; color:oklch(45% 0.02 60); border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:8px 12px; margin-bottom:24px;">
-      <div>PHS Version: <strong>1 (FINAL)</strong> &nbsp;·&nbsp; Release Date: <strong>20 July 2026</strong></div>
-      <div>Final ZIP: <code>huahin-properties-PHS-Version-1-FINAL-GitHub-Upload</code></div>
-    </div>
+ก่อนเปิดห้องใหม่ ให้ตรวจสอบก่อนเสมอ:
 
-    <div style="background:oklch(96% 0.04 150); border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:16px 18px; margin-bottom:24px;">
-      <div style="font-size:12px; font-weight:600; letter-spacing:0.08em; color:oklch(35% 0.08 150); margin-bottom:10px;">QUICK ACTIONS</div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a href="https://chatgpt.com/" target="_blank" rel="noopener" style="font-size:13px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:9px 16px; border-radius:100px; font-weight:600;">🚀 เปิด ChatGPT ห้องใหม่</a>
-        <a href="./HANDOVER%20PROMPT.md" target="_blank" rel="noopener" style="font-size:13px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:9px 16px; border-radius:100px; font-weight:600;">📋 เปิด HANDOVER PROMPT</a>
-        <a href="./PHS%20Document%20Center.dc.html" style="font-size:13px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:9px 16px; border-radius:100px; font-weight:600;">📂 เปิดศูนย์รวมเอกสาร PHS</a>
-        <a href="./Complete%20Snapshot.dc.html" style="font-size:13px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:9px 16px; border-radius:100px; font-weight:600;">📸 Complete Snapshot</a>
-      </div>
-      <div style="font-size:11.5px; color:oklch(45% 0.05 150); margin-top:8px;">เปิดหน้านี้เพื่อดู เปิด หรือดาวน์โหลดเอกสารทั้งหมดที่ต้องใช้ โดยไม่ต้องค้นหาจากห้องแชทเก่า — ปุ่ม "เปิด ChatGPT ห้องใหม่" พาไปหน้า ChatGPT ยังต้องแนบไฟล์และวาง Handover Prompt เองตามหัวข้อ 4-5 ด้านล่าง</div>
-    </div>
+□ เปิด Mission Control ดูก่อน
+□ ตรวจสอบ Current Phase ว่าตรงกับความเป็นจริงหรือไม่
+□ ตรวจสอบสถานะล่าสุด (Current Status) ว่าอัปเดตหรือยัง
+□ เตรียมไฟล์ที่ต้องใช้ให้ครบ (ดูหัวข้อ 3)
 
-    <div style="height:1px; background:oklch(90% 0.01 70); margin:20px 0;"></div>
+## 3. เปิด ChatGPT ห้องใหม่
 
-    <h2 style="font-size:19px; color:oklch(20% 0.02 60); margin:0 0 10px;">1. เริ่มต้นใช้งานโครงการ</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
-      <p>เอกสารนี้ใช้ทุกครั้งที่ต้องการเปิดห้อง ChatGPT ใหม่เพื่อทำงานต่อในโครงการ huahin.properties ไม่ว่าจะเป็นการทำงานต่อจากวันก่อน หรือเริ่มงานใหม่ในหัวข้อใดก็ตาม ใช้กรณีที่ห้องแชตเดิมเต็ม ต้องการเปิดห้องใหม่ หรือสลับไปให้ ChatGPT/Claude คนละตัวทำงานต่อ</p>
-      <p>ไม่ต้องใช้เอกสารนี้หากยังทำงานต่อในห้องแชตเดิมที่ AI เข้าใจโครงการอยู่แล้ว</p>
-    </div>
+ทำตามลำดับนี้:
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">2. ก่อนเริ่มงาน</h2>
-    <div style="font-size:14px; line-height:1.9; color:oklch(28% 0.02 60);">
-      <div>☐ เปิด Mission Control ดูก่อน</div>
-      <div>☐ ตรวจสอบ Current Phase ว่าตรงกับความเป็นจริงหรือไม่</div>
-      <div>☐ ตรวจสอบสถานะล่าสุด (Current Status) ว่าอัปเดตหรือยัง</div>
-      <div>☐ เตรียมไฟล์ที่ต้องใช้ให้ครบ (ดูหัวข้อ 4)</div>
-    </div>
+1. เปิดห้องสนทนาใหม่ใน ChatGPT
+2. แนบไฟล์ทั้ง 4 ไฟล์นี้ให้ครบ (ขาดไฟล์ใดไม่ได้):
+   - `START HERE.md`
+   - `Mission Control.dc.html`
+   - `BLUEPRINT.md`
+   - `HANDOVER PROMPT.md`
+3. ตรวจสอบว่าทุกไฟล์เป็นเวอร์ชันล่าสุด (ดาวน์โหลดใหม่จากโปรเจกต์หากไม่แน่ใจ)
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">3. เปิด ChatGPT ห้องใหม่</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
-      <p>เปิดห้องสนทนาใหม่ใน ChatGPT (ห้องว่าง ไม่มีประวัติเก่า) ก่อนแนบไฟล์และวางข้อความใดๆ</p>
-    </div>
+Checklist:
+□ แนบครบ 4 ไฟล์
+□ ทุกไฟล์เป็นเวอร์ชันล่าสุด
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">4. แนบไฟล์ที่จำเป็น</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
-      <p>แนบไฟล์ทั้ง 4 ไฟล์นี้ให้ครบ (ขาดไฟล์ใดไม่ได้) และตรวจสอบว่าเป็นเวอร์ชันล่าสุดก่อนแนบทุกครั้ง:</p>
-      <ul style="margin:0; padding-left:20px;">
-        <li><code>START HERE.md</code></li>
-        <li><code>Mission Control.dc.html</code></li>
-        <li><code>BLUEPRINT.md</code></li>
-        <li><code>HANDOVER PROMPT.md</code></li>
-      </ul>
-      <div style="margin-top:10px;">☐ แนบครบ 4 ไฟล์ &nbsp;&nbsp; ☐ ทุกไฟล์เป็นเวอร์ชันล่าสุด</div>
-    </div>
+## 4. คัดลอก HANDOVER PROMPT
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">5. คัดลอก HANDOVER PROMPT</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
-      <p>เปิดไฟล์ <code>HANDOVER PROMPT.md</code> แล้วคัดลอกเนื้อหาทั้งหมดในไฟล์ วางเป็นข้อความแรกในห้องแชตใหม่ที่เพิ่งแนบไฟล์ครบแล้ว (ต่อจากหัวข้อ 4) — <strong>แนบไฟล์และวางข้อความนี้เป็นข้อความเดียวกัน</strong> (แนบไฟล์ 4 ไฟล์ + วางข้อความ แล้วกดส่งเพียงครั้งเดียว) จากนั้นกดส่ง</p>
-    </div>
+เปิดไฟล์ `HANDOVER PROMPT.md` แล้วคัดลอกเนื้อหาทั้งหมดในไฟล์ วางเป็นข้อความแรกในห้องแชตใหม่ที่เพิ่งแนบไฟล์ครบแล้ว — **แนบไฟล์และวางข้อความนี้เป็นข้อความเดียวกัน** (แนบไฟล์ 4 ไฟล์ + วางข้อความ HANDOVER PROMPT แล้วกดส่งเพียงครั้งเดียว ไม่ใช่ส่งสองข้อความแยกกัน)
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">6. ตรวจสอบความเข้าใจของ AI</h2>
-    <div style="font-size:14px; line-height:1.9; color:oklch(28% 0.02 60);">
-      <p>หลัง AI ตอบกลับข้อความแรก ให้ตรวจสอบ:</p>
-      <div>☐ AI เข้าใจโครงการถูกต้อง (สรุปตรงกับความเป็นจริง)</div>
-      <div>☐ AI รู้ Current Phase ถูกต้อง ตรงกับที่อยู่ใน Mission Control</div>
-      <div>☐ AI ไม่ถามข้อมูลที่มีอยู่แล้วในไฟล์ที่แนบไป</div>
-      <div>☐ AI รอคำสั่งจาก CEO แทนที่จะเริ่มทำงานเอง</div>
-      <p style="margin-top:10px;">หากข้อใดไม่ผ่าน อย่าเพิ่งอธิบายเอง — ให้บอก AI ตรงๆ ว่าให้กลับไปอ่านไฟล์ไหนใหม่ (ดูหัวข้อ 12 Troubleshooting)</p>
-    </div>
+## 5. ตรวจสอบ AI
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">7. เริ่มทำงาน</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
-      <p>เมื่อ AI ผ่านการตรวจสอบในหัวข้อ 6 ครบทุกข้อแล้ว CEO สามารถให้คำสั่งงานได้ทันที บอกสิ่งที่ต้องการให้ทำอย่างชัดเจน แล้วรอให้ AI วิเคราะห์และรายงานกลับตาม Workflow ปกติ (รับ Prompt → วิเคราะห์ → ดำเนินการ → รายงาน → รอตรวจสอบ)</p>
-    </div>
+หลัง AI ตอบกลับข้อความแรก ให้ตรวจสอบว่า:
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">8. จบการทำงานของวัน</h2>
-    <div style="font-size:14px; line-height:1.9; color:oklch(28% 0.02 60);">
-      <div>☐ Mission Control อัปเดตสถานะล่าสุดแล้วหรือยัง</div>
-      <div>☐ Blueprint มีส่วนที่ต้องอัปเดตค้างอยู่หรือไม่</div>
-      <div>☐ Documentation อื่นๆ ที่เกี่ยวข้องอัปเดตครบหรือยัง</div>
-      <div>☐ ได้รับรายงานผลงานที่ทำเสร็จของวันนี้ครบถ้วนแล้ว</div>
-    </div>
+□ AI เข้าใจโครงการถูกต้อง (สรุปตรงกับความเป็นจริง)
+□ AI รู้ Current Phase ถูกต้อง ตรงกับที่อยู่ใน Mission Control
+□ AI ไม่ถามข้อมูลที่มีอยู่แล้วในไฟล์ที่แนบไป
+□ AI รอคำสั่งจาก CEO แทนที่จะเริ่มทำงานเอง
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">9. Release / GitHub</h2>
-    <div style="font-size:14px; line-height:1.9; color:oklch(28% 0.02 60);">
-      <p><strong>ก่อน Upload:</strong></p>
-      <div>☐ ตรวจสอบไฟล์ทั้งหมดใน <code>export-for-github/</code> เป็นเวอร์ชันล่าสุด</div>
-      <div>☐ ใช้ <code>RELEASE CHECKLIST.md</code> ตรวจสอบให้ครบทุกข้อ</div>
-      <p style="margin-top:10px;"><strong>หลัง Upload:</strong></p>
-      <div>☐ เปิดไฟล์บน GitHub เพื่อยืนยันว่าเนื้อหาตรงกับที่อัปโหลด</div>
-      <div>☐ ตรวจสอบว่าไม่มีไฟล์เก่าตกค้างในที่เก็บ</div>
-    </div>
+หากข้อใดไม่ผ่าน อย่าเพิ่งอธิบายเอง ให้บอก AI ตรงๆ ว่าให้กลับไปอ่านไฟล์ไหนใหม่
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">10. ปิดโครงการ</h2>
-    <div style="font-size:14px; line-height:1.9; color:oklch(28% 0.02 60);">
-      <div>☐ Deliverables ทั้งหมดผ่านการตรวจสอบจาก Product Owner แล้ว</div>
-      <div>☐ CEO อนุมัติแล้วอย่างเป็นทางการ</div>
-      <div>☐ สร้างเอกสารบันทึกปิดโครงการ (เช่น <code>PROJECT COMPLETION.md</code>) แล้ว</div>
-      <div>☐ Mission Control บันทึกสถานะ Completed แล้ว</div>
-    </div>
+## 6. เริ่มทำงาน
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">11. สรุปขั้นตอนทั้งหมด (One Page Workflow)</h2>
-    <div style="font-size:14px; line-height:2; color:oklch(28% 0.02 60); background:oklch(96% 0.04 150); border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:16px 18px;">
-      <div>1. เปิด Mission Control ตรวจสอบสถานะก่อน</div>
-      <div>2. เปิดห้อง ChatGPT ใหม่ + แนบ 4 ไฟล์ (START HERE, Mission Control, Blueprint, Handover Prompt)</div>
-      <div>3. คัดลอกวางเนื้อหา HANDOVER PROMPT.md ในข้อความเดียวกับที่แนบไฟล์ แล้วกดส่งครั้งเดียว</div>
-      <div>4. ตรวจสอบ AI ผ่านเกณฑ์ 4 ข้อในหัวข้อ 6</div>
-      <div>5. สั่งงานตามที่ต้องการ</div>
-      <div>6. จบวัน: อัปเดต Mission Control/Blueprint/Documentation ให้ตรงปัจจุบัน</div>
-      <div>7. ก่อน Upload: ใช้ RELEASE CHECKLIST.md ตรวจครบทุกข้อ</div>
-      <div>8. Upload ขึ้น GitHub แล้วตรวจสอบไฟล์ที่อัปโหลดจริง</div>
-      <div>9. ปิดโครงการ/เฟส: ตรวจสอบอนุมัติครบ + บันทึกเอกสารปิดงาน</div>
-    </div>
+เมื่อ AI ผ่านการตรวจสอบในหัวข้อ 5 ครบทุกข้อแล้ว CEO สามารถให้คำสั่งงานได้ทันที บอกสิ่งที่ต้องการให้ทำอย่างชัดเจน แล้วรอให้ AI วิเคราะห์และรายงานกลับตาม Workflow ปกติ (รับ Prompt → วิเคราะห์ → ดำเนินการ → รายงาน → รอตรวจสอบ)
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">12. Troubleshooting</h2>
-    <div style="font-size:14px; line-height:1.85; color:oklch(28% 0.02 60);">
-      <p><strong>AI ถามข้อมูลที่ไฟล์ตอบได้อยู่แล้ว</strong><br/>→ อาจแนบไฟล์ไม่ครบ หรือ AI ไม่ได้อ่านจริง ตรวจสอบว่าแนบครบ 4 ไฟล์หรือไม่ ถ้าครบแล้ว บอก AI ตรงๆ ว่า "เรื่องนี้มีคำตอบอยู่ในไฟล์ [ชื่อไฟล์] แล้ว กลับไปอ่านใหม่ก่อน"</p>
-      <p><strong>AI ไม่สนใจ Mission Control (บอก Phase/สถานะผิด)</strong><br/>→ ตรวจสอบก่อนว่า Mission Control เองอัปเดตล่าสุดหรือยัง ถ้า Mission Control เก่า ให้แก้ที่ต้นตอก่อน ถ้า Mission Control ล่าสุดแล้วแต่ AI ยังตอบผิด ให้สั่งให้กลับไปอ่าน Mission Control ใหม่อีกครั้ง</p>
-      <p><strong>AI เริ่มลงมือทำงานทันทีโดยไม่รอคำสั่ง</strong><br/>→ บอกตรงๆ ว่า "รอก่อน ยืนยันความเข้าใจตามกติกา Handover Prompt ก่อน ยังไม่ต้องเริ่มทำงาน"</p>
-      <p><strong>ตรวจพบว่าแนบไฟล์ไม่ครบ</strong><br/>→ AI ควรหยุดและบอกชื่อไฟล์ที่หายไปตามกติกาใน HANDOVER PROMPT.md ถ้า AI ไม่ทำเช่นนั้น ให้แนบไฟล์ที่ขาดแล้วย้ำกติกานี้อีกครั้ง</p>
-    </div>
+## 7. จบการทำงานของวัน
 
-    <div style="margin-top:32px; font-size:12px; color:oklch(55% 0.02 60); text-align:center;">อ้างอิงจาก CEO GUIDE.md — หน้านี้อัปเดตพร้อมกันทุกครั้งที่เนื้อหาคู่มือเปลี่ยน</div>
+ก่อนเลิกงานในแต่ละวัน ให้ตรวจสอบ:
 
-  </div>
-</div>
+□ Mission Control อัปเดตสถานะล่าสุดแล้วหรือยัง
+□ Blueprint มีส่วนที่ต้องอัปเดตค้างอยู่หรือไม่
+□ Documentation อื่นๆ ที่เกี่ยวข้องอัปเดตครบหรือยัง
+□ ได้รับรายงานผลงานที่ทำเสร็จของวันนี้ครบถ้วนแล้ว
 
-</x-dc>
-</body>
-</html>
+## 8. Release / GitHub
+
+ก่อน Upload:
+□ ตรวจสอบไฟล์ทั้งหมดใน `export-for-github/` เป็นเวอร์ชันล่าสุด
+□ ใช้ `RELEASE CHECKLIST.md` ตรวจสอบให้ครบทุกข้อ
+
+หลัง Upload:
+□ เปิดไฟล์บน GitHub เพื่อยืนยันว่าเนื้อหาตรงกับที่อัปโหลด
+□ ตรวจสอบว่าไม่มีไฟล์เก่าตกค้างในที่เก็บ
+
+## 9. ปิดโครงการ
+
+ก่อนประกาศว่าโครงการ/เฟสใดเสร็จสมบูรณ์ ให้ตรวจสอบ:
+
+□ Deliverables ทั้งหมดผ่านการตรวจสอบจาก Product Owner แล้ว
+□ CEO อนุมัติแล้วอย่างเป็นทางการ
+□ สร้างเอกสารบันทึกปิดโครงการ (เช่น `PROJECT COMPLETION.md`) แล้ว
+□ Mission Control บันทึกสถานะ Completed แล้ว
+
+## 10. สรุปขั้นตอนทั้งหมด (One Page Workflow)
+
+1. เปิด Mission Control ตรวจสอบสถานะก่อน
+2. เปิดห้อง ChatGPT ใหม่ + แนบ 4 ไฟล์ (START HERE, Mission Control, Blueprint, Handover Prompt)
+3. คัดลอกวางเนื้อหา HANDOVER PROMPT.md เป็นข้อความแรก
+4. ตรวจสอบ AI ผ่านเกณฑ์ 4 ข้อในหัวข้อ 5
+5. สั่งงานตามที่ต้องการ
+6. จบวัน: อัปเดต Mission Control/Blueprint/Documentation ให้ตรงปัจจุบัน
+7. ก่อน Upload: ใช้ RELEASE CHECKLIST.md ตรวจครบทุกข้อ
+8. Upload ขึ้น GitHub แล้วตรวจสอบไฟล์ที่อัปโหลดจริง
+9. ปิดโครงการ/เฟส: ตรวจสอบอนุมัติครบ + บันทึกเอกสารปิดงาน
+
+---
+
+**ตำแหน่งที่แนะนำ**: ควรวาง CEO GUIDE ไว้ใน Mission Control (ลิงก์/แท็บเข้าถึงได้จากหน้าแรก) เพราะ Mission Control เป็นจุดที่ CEO เปิดดูเป็นจุดแรกอยู่แล้วทุกครั้งก่อนเริ่มงาน (ตามหัวข้อ 2) การวางไว้ที่เดียวกันทำให้ CEO ไม่ต้องจำตำแหน่งไฟล์แยกต่างหาก

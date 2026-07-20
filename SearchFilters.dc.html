@@ -7,476 +7,108 @@
 </head>
 <body>
 <x-dc>
-<helmet>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <title>Search Properties — huahin.properties</title>
-  <meta name="description" content="Search pool villas, houses, condos and land for sale and rent in Hua Hin, Pranburi and Cha-am.">
-  <style>
-    body { margin: 0; background: oklch(98% 0.01 80); font-family: 'Work Sans', sans-serif; }
-    a { color: oklch(42% 0.12 25); }
-    a:hover { color: oklch(32% 0.13 25); }
-  </style>
-</helmet>
-
-<sc-if value="{{ showGate }}">
-  <div style="position:fixed; inset:0; background:oklch(96% 0.015 75); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
-    <img src="logo.png" alt="huahin.properties logo" style="height:56px; width:56px; object-fit:contain; border-radius:50%; margin-bottom:20px;" />
-    <div style="font-family:'Playfair Display',serif; font-size:26px; color:oklch(20% 0.02 60); margin-bottom:10px;">กำลังปรับปรุงเว็บไซต์</div>
-    <div style="font-size:14px; color:oklch(50% 0.02 60); max-width:360px; margin-bottom:26px; line-height:1.6;">เรากำลังปรับปรุงเว็บไซต์อยู่ ขออภัยในความไม่สะดวก จะกลับมาเปิดให้บริการเร็วๆ นี้</div>
-    <div style="width:100%; max-width:300px; display:flex; flex-direction:column; gap:10px;">
-      <input type="text" value="{{ gatePassword }}" onChange="{{ onGatePassword }}" placeholder="รหัสผ่านแอดมิน" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit; text-align:center;" />
-      <div onClick="{{ onGateSubmit }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:12px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">เข้าดูตัวอย่าง</div>
-      <sc-if value="{{ gateError }}"><div style="font-size:13px; color:oklch(50% 0.18 30);">{{ gateError }}</div></sc-if>
-    </div>
-  </div>
-</sc-if>
-
-<div style="max-width:1600px; margin:0 auto; background:oklch(98% 0.01 80); min-height:100vh;">
-
-  <!-- ============ HEADER ============ -->
-  <div style="display:flex; align-items:center; justify-content:space-between; gap:24px; padding:22px clamp(20px,4vw,56px); border-bottom:1px solid oklch(90% 0.01 70);">
-    <a href="Home.dc.html" style="white-space:nowrap; display:flex; align-items:center; gap:9px; font-family:'Playfair Display',serif; font-size:clamp(19px,2.4vw,24px); letter-spacing:0.02em; color:oklch(22% 0.02 60); text-decoration:none;"><img src="logo.png" alt="huahin.properties logo" style="height:36px; width:36px; object-fit:contain; border-radius:50%; flex-shrink:0;" />huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</a>
-    <sc-if value="{{ isDesktopNav }}" hint-placeholder-val="{{ true }}">
-      <div style="display:flex; gap:32px; align-items:center; font-size:15px; color:oklch(30% 0.02 60); white-space:nowrap;">
-        <a href="Search Results.dc.html?status=sale" style="text-decoration:none; color:inherit;">{{ t.nav_buy }}</a>
-        <a href="Search Results.dc.html?status=rent" style="text-decoration:none; color:inherit;">{{ t.nav_rent }}</a>
-        <a href="Sell.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_sell }}</a>
-        <a href="About.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_about }}</a>
-        <a href="Contact.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_contact }}</a>
-      </div>
-      <div style="display:flex; gap:12px; align-items:flex-end; white-space:nowrap;">
-        <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" hint-size="150,54"></dc-import>
-        <div style="width:1px; height:20px; background:oklch(80% 0.02 70); margin:0 4px 8px;"></div>
-        <a href="Admin Login.dc.html" style="font-size:13px; color:oklch(40% 0.02 60); text-decoration:none; padding-bottom:8px;">{{ t.nav_admin }}</a>
-      </div>
-    </sc-if>
-    <sc-if value="{{ isMobileNav }}">
-      <div style="display:flex; align-items:center; gap:6px;">
-        <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" compact="{{ true }}" menu-align="right" hint-size="40,32"></dc-import>
-        <div onClick="{{ toggleMenu }}" style="display:flex; flex-direction:column; gap:5px; padding:8px; cursor:pointer;">
-          <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
-          <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
-          <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
-        </div>
-      </div>
-    </sc-if>
+<div style="display:flex; flex-direction:column; gap:20px; font-family:'Work Sans',sans-serif;">
+  <div style="display:flex; align-items:center; justify-content:space-between;">
+    <div style="font-size:15px; font-weight:600; color:oklch(20% 0.02 60);">{{ f.t.filters }}</div>
+    <div onClick="{{ f.onClear }}" style="font-size:13px; color:oklch(42% 0.12 25); cursor:pointer;">{{ f.t.clear_filters }}</div>
   </div>
 
-  <sc-if value="{{ mobileMenuOpen }}">
-    <div style="position:fixed; inset:0; background:oklch(98% 0.01 80); z-index:60; padding:22px clamp(20px,6vw,56px); display:flex; flex-direction:column; gap:28px; overflow-y:auto;">
-      <div style="display:flex; align-items:center; justify-content:space-between;">
-        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
-        <div onClick="{{ toggleMenu }}" style="font-size:26px; line-height:1; color:oklch(30% 0.02 60); cursor:pointer; padding:6px;">&times;</div>
-      </div>
-      <div style="display:flex; flex-direction:column; gap:22px; font-size:20px; font-family:'Playfair Display',serif; color:oklch(22% 0.02 60);">
-        <a href="Search Results.dc.html?status=sale" style="text-decoration:none; color:inherit;">{{ t.nav_buy }}</a>
-        <a href="Search Results.dc.html?status=rent" style="text-decoration:none; color:inherit;">{{ t.nav_rent }}</a>
-        <a href="Sell.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_sell }}</a>
-        <a href="About.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_about }}</a>
-        <a href="Contact.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_contact }}</a>
-        <a href="Admin Login.dc.html" style="text-decoration:none; color:oklch(50% 0.02 60); font-size:15px; font-family:'Work Sans',sans-serif;">{{ t.nav_admin }}</a>
-      </div>
-      <div style="margin-top:auto; padding-top:20px; border-top:1px solid oklch(90% 0.01 70);">
-        <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" full-width="{{ true }}" hint-size="100%,60"></dc-import>
-      </div>
-    </div>
-  </sc-if>
-
-  <!-- ============ BANNER SLOT (top) ============ -->
-  <sc-if value="{{ hasTopBanner }}">
-    <a href="{{ topBanner.link }}" style="display:block; width:100%; height:clamp(64px,10vw,140px); overflow:hidden;">
-      <img src="{{ topBanner.imageUrl }}" alt="banner" style="width:100%; height:100%; display:block; object-fit:cover;" />
-    </a>
-  </sc-if>
-
-  <!-- ============ PAGE HEADING ============ -->
-  <div style="padding:clamp(24px,4vw,40px) clamp(20px,4vw,56px) 0;">
-    <div style="font-family:'Playfair Display',serif; font-size:clamp(24px,3vw,32px); color:oklch(20% 0.02 60); margin-bottom:6px;">{{ heading }}</div>
-    <div style="font-size:14px; color:oklch(50% 0.02 60);">{{ resultCount }} {{ t.listings_count }}</div>
+  <div>
+    <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">{{ f.t.keyword_label }}</div>
+    <input value="{{ f.keyword }}" onChange="{{ f.onKeyword }}" placeholder="{{ f.t.keyword_placeholder }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; color:oklch(25% 0.02 60); background:oklch(99% 0.005 80); font-family:inherit;" />
   </div>
 
-  <!-- ============ TOOLBAR ============ -->
-  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:20px clamp(20px,4vw,56px);">
-    <sc-if value="{{ isMobileNav }}">
-      <div onClick="{{ toggleFilters }}" style="display:flex; align-items:center; gap:8px; border:1px solid oklch(75% 0.02 60); border-radius:100px; padding:10px 18px; font-size:14px; color:oklch(25% 0.02 60); cursor:pointer;">
-        <span>⚙</span><span>{{ t.filters }}</span>
-      </div>
-    </sc-if>
-    <sc-if value="{{ isDesktopNav }}" hint-placeholder-val="{{ true }}">
-      <div style="width:1px;"></div>
-    </sc-if>
-    <div style="display:flex; align-items:center; gap:14px;">
-      <select value="{{ sort }}" onChange="{{ onSortChange }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 14px; font-size:14px; color:oklch(25% 0.02 60); background:oklch(99% 0.005 80); font-family:inherit;">
-        <option value="newest">{{ t.sort_newest }}</option>
-        <option value="price_asc">{{ t.sort_price_asc }}</option>
-        <option value="price_desc">{{ t.sort_price_desc }}</option>
+  <div>
+    <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">{{ f.t.status_label }}</div>
+    <select value="{{ f.status }}" onChange="{{ f.onStatus }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; color:oklch(25% 0.02 60); background:oklch(99% 0.005 80); font-family:inherit;">
+      <option value="">{{ f.t.any }}</option>
+      <option value="sale">{{ f.t.buy }}</option>
+      <option value="rent">{{ f.t.rent }}</option>
+    </select>
+  </div>
+
+  <div>
+    <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">{{ f.t.location_label }}</div>
+    <select value="{{ f.area }}" onChange="{{ f.onArea }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; color:oklch(25% 0.02 60); background:oklch(99% 0.005 80); font-family:inherit;">
+      <option value="">{{ f.t.all_zones }}</option>
+      <sc-for list="{{ f.areas }}" as="a" hint-placeholder-count="3">
+        <option value="{{ a.id }}">{{ a.label }}</option>
+      </sc-for>
+    </select>
+  </div>
+
+  <div>
+    <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">{{ f.t.type_label }}</div>
+    <select value="{{ f.type }}" onChange="{{ f.onType }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; color:oklch(25% 0.02 60); background:oklch(99% 0.005 80); font-family:inherit;">
+      <option value="">{{ f.t.any_type }}</option>
+      <sc-for list="{{ f.types }}" as="ty" hint-placeholder-count="5">
+        <option value="{{ ty.id }}">{{ ty.label }}</option>
+      </sc-for>
+    </select>
+  </div>
+
+  <div style="display:flex; gap:12px;">
+    <div style="flex:1;">
+      <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">{{ f.t.bedrooms_label }}</div>
+      <select value="{{ f.bedroomsMin }}" onChange="{{ f.onBedrooms }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; color:oklch(25% 0.02 60); background:oklch(99% 0.005 80); font-family:inherit;">
+        <option value="">{{ f.t.any }}</option>
+        <option value="1">1+</option>
+        <option value="2">2+</option>
+        <option value="3">3+</option>
+        <option value="4">4+</option>
+        <option value="5">5+</option>
       </select>
-      <div style="display:flex; border:1px solid oklch(85% 0.01 70); border-radius:4px; overflow:hidden;">
-        <div onClick="{{ setViewGrid }}" style="padding:9px 16px; font-size:14px; cursor:pointer; background:{{ gridActiveBg }}; color:{{ gridActiveColor }};">{{ t.view_grid }}</div>
-        <div onClick="{{ setViewList }}" style="padding:9px 16px; font-size:14px; cursor:pointer; background:{{ listActiveBg }}; color:{{ listActiveColor }};">{{ t.view_list }}</div>
-      </div>
+    </div>
+    <div style="flex:1;">
+      <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">{{ f.t.bathrooms_label }}</div>
+      <select value="{{ f.bathroomsMin }}" onChange="{{ f.onBathrooms }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; color:oklch(25% 0.02 60); background:oklch(99% 0.005 80); font-family:inherit;">
+        <option value="">{{ f.t.any }}</option>
+        <option value="1">1+</option>
+        <option value="2">2+</option>
+        <option value="3">3+</option>
+        <option value="4">4+</option>
+      </select>
     </div>
   </div>
 
-  <div style="display:flex; align-items:flex-start; gap:32px; padding:0 clamp(20px,4vw,56px) 80px;">
+  <div>
+    <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">{{ f.t.budget_label }}</div>
+    <select value="{{ f.priceMax }}" onChange="{{ f.onPriceMax }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; color:oklch(25% 0.02 60); background:oklch(99% 0.005 80); font-family:inherit;">
+      <option value="">{{ f.t.any_price }}</option>
+      <option value="5000000">฿5,000,000</option>
+      <option value="10000000">฿10,000,000</option>
+      <option value="20000000">฿20,000,000</option>
+      <option value="50000000">฿50,000,000</option>
+      <option value="100000">฿100,000 (rent)</option>
+    </select>
+  </div>
 
-    <!-- ============ DESKTOP FILTER SIDEBAR ============ -->
-    <sc-if value="{{ isDesktopNav }}" hint-placeholder-val="{{ true }}">
-      <div style="width:260px; flex-shrink:0; display:flex; flex-direction:column; gap:22px; background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:6px; padding:22px;">
-        <dc-import name="SearchFilters" f="{{ filterVals }}" hint-size="100%,auto"></dc-import>
-      </div>
-    </sc-if>
-
-    <!-- ============ MOBILE FILTER SHEET ============ -->
-    <sc-if value="{{ filtersOpen }}">
-      <div style="position:fixed; inset:0; background:rgba(20,15,10,0.4); z-index:70; display:flex; align-items:flex-end;">
-        <div style="background:oklch(99% 0.005 80); width:100%; max-height:88vh; overflow-y:auto; border-radius:16px 16px 0 0; padding:22px 20px 32px;">
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
-            <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60);">{{ t.filters }}</div>
-            <div onClick="{{ toggleFilters }}" style="font-size:24px; color:oklch(30% 0.02 60); cursor:pointer; padding:4px 8px;">&times;</div>
-          </div>
-          <dc-import name="SearchFilters" f="{{ filterVals }}" hint-size="100%,auto"></dc-import>
-          <div onClick="{{ toggleFilters }}" style="margin-top:20px; background:oklch(40% 0.13 25); color:oklch(98% 0.01 80); text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:500;">{{ t.apply_filters }}</div>
-        </div>
-      </div>
-    </sc-if>
-
-    <!-- ============ RESULTS ============ -->
-    <div style="flex:1; min-width:0;">
-      <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
-        <sc-if value="{{ isGrid }}" hint-placeholder-val="{{ true }}">
-          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:22px;">
-            <sc-for list="{{ results }}" as="p" hint-placeholder-count="6">
-              <dc-import name="PropertyCard" href="{{ p.href }}" status-color="{{ p.statusColor }}" status-label="{{ p.statusLabel }}" is-featured="{{ p.isFeatured }}" is-vip="{{ p.isVip }}" cover-photo-label="{{ p.coverPhotoLabel }}" cover-photo-bg="{{ p.coverPhotoBg }}" no-photo="{{ p.noPhoto }}" property-id="{{ p.propertyId }}" zone="{{ p.zone }}" area-label="{{ p.areaLabel }}" title="{{ p.title }}" type-label="{{ p.typeLabel }}" has-bedrooms="{{ p.hasBedrooms }}" bedrooms="{{ p.bedrooms }}" has-bathrooms="{{ p.hasBathrooms }}" bathrooms="{{ p.bathrooms }}" has-living-area="{{ p.hasLivingArea }}" living-area="{{ p.livingArea }}" sqm-label="{{ p.sqmLabel }}" price-label="{{ p.priceLabel }}" view-details-label="{{ p.viewDetailsLabel }}" hint-size="100%,380px"></dc-import>
-            </sc-for>
-          </div>
-        </sc-if>
-        <sc-if value="{{ isList }}">
-          <div style="display:flex; flex-direction:column; gap:18px;">
-            <sc-for list="{{ results }}" as="p" hint-placeholder-count="6">
-              <a href="{{ p.href }}" style="display:flex; gap:20px; text-decoration:none; background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:6px; overflow:hidden; flex-wrap:wrap;">
-                <div style="width:240px; flex-shrink:0; min-height:160px; position:relative; background-image:repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(93% 0.015 75) 2px, oklch(93% 0.015 75) 22px);">
-                  <div style="position:absolute; top:10px; left:10px; background:{{ p.statusColor }}; color:oklch(99% 0.005 80); font-size:11px; font-weight:600; padding:4px 10px; border-radius:100px;">{{ p.statusLabel }}</div>
-                </div>
-                <div style="flex:1; min-width:220px; padding:18px 20px; display:flex; flex-direction:column; gap:6px;">
-                  <div style="font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:oklch(42% 0.12 25);">{{ p.zone }} · {{ p.areaLabel }}</div>
-                  <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60);">{{ p.title }}</div>
-                  <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ p.typeLabel }}</div>
-                  <div style="display:flex; gap:14px; font-size:13px; color:oklch(40% 0.02 60); flex-wrap:wrap;">
-                    <sc-if value="{{ p.hasBedrooms }}"><span style="white-space:nowrap;">{{ p.bedrooms }} bd</span></sc-if>
-                    <sc-if value="{{ p.hasBathrooms }}"><span style="white-space:nowrap;">{{ p.bathrooms }} ba</span></sc-if>
-                    <sc-if value="{{ p.hasLivingArea }}"><span style="white-space:nowrap;">{{ p.livingArea }} {{ p.sqmLabel }}</span></sc-if>
-                  </div>
-                  <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60); margin-top:auto; padding-top:8px;">{{ p.priceLabel }}</div>
-                </div>
-              </a>
-            </sc-for>
-          </div>
-        </sc-if>
-      </sc-if>
-      <sc-if value="{{ noResults }}">
-        <div style="padding:80px 20px; text-align:center; color:oklch(50% 0.02 60); font-size:15px;">{{ t.no_results }}</div>
-      </sc-if>
-
-      <sc-if value="{{ showPagination }}">
-        <div style="text-align:center; font-size:13px; color:oklch(50% 0.02 60); margin-top:28px;">{{ totalResultsCount }} รายการ</div>
-        <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-top:10px; flex-wrap:wrap;">
-          <div onClick="{{ onPrevPage }}" style="width:36px; height:36px; border-radius:50%; border:1px solid oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; color:oklch(30% 0.02 60);">‹</div>
-          <sc-for list="{{ pageNumbers }}" as="pg" hint-placeholder-count="3">
-            <div onClick="{{ pg.onClick }}" style="width:36px; height:36px; border-radius:50%; background:{{ pg.bg }}; color:{{ pg.color }}; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; border:1px solid oklch(85% 0.01 70);">{{ pg.num }}</div>
-          </sc-for>
-          <div onClick="{{ onNextPage }}" style="width:36px; height:36px; border-radius:50%; border:1px solid oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:14px; color:oklch(30% 0.02 60);">›</div>
-        </div>
-      </sc-if>
+  <div>
+    <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:10px;">{{ f.t.features_label }}</div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <sc-for list="{{ f.features }}" as="ft" hint-placeholder-count="6">
+        <label style="display:flex; align-items:center; gap:10px; font-size:14px; color:oklch(30% 0.02 60); cursor:pointer;">
+          <input type="checkbox" checked="{{ ft.checked }}" onChange="{{ ft.onToggle }}" style="width:16px; height:16px; accent-color:oklch(40% 0.13 25);" />
+          {{ ft.label }}
+        </label>
+      </sc-for>
     </div>
   </div>
-
-  <!-- ============ FOOTER ============ -->
-  <div style="border-top:1px solid oklch(90% 0.01 70); padding:32px clamp(20px,4vw,56px); display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between;">
-    <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
-    <div style="font-size:13px; color:oklch(50% 0.02 60);">© 2026 huahin.properties. {{ t.footer_rights }}</div>
-  </div>
-
 </div>
 
-<sc-if value="{{ showChrome }}"><dc-import name="ContactRail" hint-size="0,0"></dc-import></sc-if>
-
 </x-dc>
-<script type="text/x-dc" data-dc-script>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 280, &quot;height&quot;: 600}, &quot;f&quot;: {&quot;editor&quot;: null, &quot;default&quot;: {}, &quot;tsType&quot;: &quot;object&quot;}}">
 class Component extends DCLogic {
-  state = {
-    lang: "en",
-    page: 1,
-    isMobile: (typeof window !== "undefined" && window.innerWidth < 900),
-    mobileMenuOpen: false,
-    filtersOpen: false,
-    view: "grid",
-    sort: "newest",
-    data: null,
-    showGate: false, gatePassword: "", gateError: "",
-    filters: { area: "", type: "", status: "", bedroomsMin: "", bathroomsMin: "", priceMax: "", features: [], keyword: "" },
-    banners: [],
-  };
-
-  async componentDidMount() {
-    const fb0 = await import("./firebase-client.js");
-    this._fb = fb0;
-    if (!fb0.hasSiteBypass() && !fb0.isAdminAuthed()) {
-      try {
-        const on = await fb0.fetchMaintenanceMode();
-        if (on) this.setState({ showGate: true });
-      } catch (e) { console.warn("Failed to check maintenance mode:", e); }
-    }
-    const mod = await import("./data.js");
-    this._mod = mod;
-    const params = new URLSearchParams(window.location.search);
-    const filters = { ...this.state.filters };
-    if (params.get("area")) filters.area = params.get("area");
-    if (params.get("type")) filters.type = params.get("type");
-    if (params.get("status")) filters.status = params.get("status");
-    if (params.get("priceMax")) filters.priceMax = params.get("priceMax");
-    if (params.get("q")) filters.keyword = params.get("q");
-    this.setState({ lang: mod.getLang(), data: mod, filters });
-    const effProps = await mod.getEffectiveProperties(mod);
-    this.setState({ effProps });
-    try {
-      const allBanners = await fb0.fetchCollection("banners");
-      this.setState({ banners: allBanners });
-    } catch (e) { console.warn("banners fetch failed:", e); }
-    this._onResize = () => this.setState({ isMobile: window.innerWidth < 900 });
-    this._onResize();
-    window.addEventListener("resize", this._onResize);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener("resize", this._onResize);
-  }
-
-  async submitGate() {
-    try {
-      await this._fb.adminSignIn("doothailand@gmail.com", this.state.gatePassword);
-      this._fb.setSiteBypass();
-      this.setState({ showGate: false, gateError: "" });
-    } catch (e) {
-      this.setState({ gateError: "รหัสผ่านไม่ถูกต้อง" });
-    }
-  }
-
-  selectLang(l) {
-    this._mod.setLang(l);
-    this.setState({ lang: l, mobileMenuOpen: false });
-  }
-
-  setFilter(key, value) {
-    this.setState((s) => ({ filters: { ...s.filters, [key]: value }, page: 1 }));
-  }
-
-  toggleFeature(f) {
-    this.setState((s) => {
-      const has = s.filters.features.includes(f);
-      const features = has ? s.filters.features.filter((x) => x !== f) : [...s.filters.features, f];
-      return { filters: { ...s.filters, features } };
-    });
-  }
-
-  clearFilters() {
-    this.setState({ filters: { area: "", type: "", status: "", bedroomsMin: "", bathroomsMin: "", priceMax: "", features: [], keyword: "" }, page: 1 });
-  }
-
-  goToPage(p) {
-    this.setState({ page: p });
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
   renderVals() {
-    const gateVals = {
-      showGate: this.state.showGate,
-      showChrome: !this.state.showGate,
-      gatePassword: this.state.gatePassword,
-      onGatePassword: (e) => this.setState({ gatePassword: e.target.value, gateError: "" }),
-      onGateSubmit: () => this.submitGate(),
-      gateError: this.state.gateError,
-    };
-    const mod = this.state.data;
-    if (!mod) {
-      return { t: {}, isDesktopNav: true, isMobileNav: false, results: [], hasResults: false, noResults: false, langOptions: [], filterVals: {}, ...gateVals };
-    }
-    const lang = this.state.lang;
-    const t = mod.I18N[lang];
-    const langValue = lang;
-    const onLangChange = (code) => this.selectLang(code);
-    const langOptions = mod.LANGS.map((l) => ({ code: l, label: mod.LANG_LABELS[l] }));
-
-    // Guarded — a self-serve listing can have an area/type value that
-    // doesn't match anything in mod.AREAS/mod.TYPES (empty/legacy/bad data);
-    // .find() returning undefined must degrade to showing the raw id
-    // instead of crashing the whole results page.
-    const areaLabelOf = (id) => { const f = mod.AREAS.find((a) => a.id === id); return f ? f.label[lang] : (id || ""); };
-    const typeLabelOf = (id) => { const f = mod.TYPES.find((ty) => ty.id === id); return f ? f.label[lang] : (id || ""); };
-    const statusColorOf = (s) => ({ sale: "oklch(40% 0.13 25)", rent: "oklch(45% 0.09 230)", sold: "oklch(45% 0.02 60)", reserved: "oklch(62% 0.16 85)" }[s]);
-
-    const f = this.state.filters;
-    const propsList = this.state.effProps || mod.PROPERTIES;
-    let list = propsList.filter((p) => {
-      if (p.status === "rented" || p.status === "sold" || p.status === "reserved") return false;
-      if (f.area && p.area !== f.area) return false;
-      if (f.type && p.type !== f.type) return false;
-      if (f.status && p.status !== f.status) return false;
-      if (f.bedroomsMin && p.bedrooms < Number(f.bedroomsMin)) return false;
-      if (f.bathroomsMin && p.bathrooms < Number(f.bathroomsMin)) return false;
-      if (f.priceMax && p.price > Number(f.priceMax)) return false;
-      if (f.keyword && f.keyword.trim()) {
-        const kw = f.keyword.trim().toLowerCase();
-        // Self-serve listings (Lister Dashboard) have no title/shortDesc at
-        // all — only zone/area/type/description — so a keyword search that
-        // includes the area name (very common, e.g. "หัวหิน ซอย 88") used to
-        // find NOTHING for them even though they were live, since the area
-        // label was never part of the searchable text. Include the area +
-        // type label (Thai/current-lang name) and description explicitly.
-        const descText = p.description && (typeof p.description === "object" ? p.description[lang] : p.description);
-        const areaText = p.area ? mod.AREAS.find((a) => a.id === p.area) : null;
-        const typeText = p.type ? mod.TYPES.find((ty) => ty.id === p.type) : null;
-        const haystack = [
-          p.id, p.zone, p.title && p.title[lang], p.shortDesc && p.shortDesc[lang], descText,
-          areaText && areaText.label[lang], areaText && areaText.label.th, areaText && areaText.label.en,
-          typeText && typeText.label[lang],
-        ].filter(Boolean).join(" ").toLowerCase();
-        // Match each typed word separately (AND) rather than requiring the
-        // whole phrase as one contiguous substring — "หัวหิน ซอย 88" should
-        // match even though "zone" and "area label" don't sit adjacent in
-        // the haystack string above.
-        const words = kw.split(/\s+/).filter(Boolean);
-        if (!words.every((w) => haystack.includes(w))) return false;
-      }
-      if (f.features.length && !f.features.every((feat) => p.features.includes(feat))) return false;
-      return true;
-    });
-
-    if (this.state.sort === "price_asc") list = [...list].sort((a, b) => a.price - b.price);
-    else if (this.state.sort === "price_desc") list = [...list].sort((a, b) => b.price - a.price);
-
-    // Featured boosts (paid via Stripe, see BLUEPRINT §11 item 5) always float
-    // to the top regardless of the chosen sort, most-recently-boosted first.
-    const now0 = Date.now();
-    list = [...list].sort((a, b) => {
-      const af = a.featuredUntil && a.featuredUntil > now0 ? a.featuredUntil : 0;
-      const bf = b.featuredUntil && b.featuredUntil > now0 ? b.featuredUntil : 0;
-      return bf - af;
-    });
-
-    const totalResultsCount = list.length;
-
-    const results = list.map((p) => ({
-      href: `Property Details.dc.html?id=${p.id}`,
-      statusColor: statusColorOf(p.status),
-      statusLabel: mod.STATUS[p.status][lang],
-      isFeatured: !!(p.featuredUntil && p.featuredUntil > now0),
-      isVip: !!(p.vipTier && p.vipUntil > now0),
-      coverPhotoLabel: (p.photos && p.photos[0] && p.photos[0].label) || (p.photos && p.photos[0]) || "photo",
-      coverPhotoBg: (p.photos && p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
-      noPhoto: !(p.photos && p.photos[0] && p.photos[0].url),
-      zone: p.zone,
-      propertyId: p.id,
-      areaLabel: areaLabelOf(p.area),
-      // Self-serve listings (Lister Dashboard) have no `title` field at
-      // all — fall back to zone, then the property code, so a card can
-      // still render instead of crashing the whole results page.
-      title: (p.title && p.title[lang]) || p.zone || p.id,
-      typeLabel: typeLabelOf(p.type),
-      hasBedrooms: !!p.bedrooms,
-      bedrooms: p.bedrooms,
-      hasBathrooms: !!p.bathrooms,
-      bathrooms: p.bathrooms,
-      hasLivingArea: !!p.livingArea,
-      livingArea: p.livingArea,
-      sqmLabel: t.sqm,
-      priceLabel: mod.formatPrice(p.price, p.currency, lang) + (p.status === "rent" ? t.per_month : ""),
-      viewDetailsLabel: t.view_details,
+    const f = this.props.f || {};
+    const selected = f.selectedFeatures || [];
+    const features = (f.features || []).map((ft) => ({
+      id: ft.id,
+      label: ft.label,
+      checked: selected.includes(ft.id),
+      onToggle: () => f.onToggleFeature && f.onToggleFeature(ft.id),
     }));
-
-    const headingParts = [];
-    if (f.status) headingParts.push(t.status_label + ": " + mod.STATUS[f.status][lang]);
-    if (f.area) headingParts.push(areaLabelOf(f.area));
-    const heading = headingParts.length ? headingParts.join(" · ") : t.featured_title;
-
-    const filterVals = {
-      t,
-      areas: mod.AREAS.map((a) => ({ id: a.id, label: a.label[lang] })),
-      types: mod.TYPES.map((ty) => ({ id: ty.id, label: ty.label[lang] })),
-      features: Object.keys(mod.FEATURES).map((k) => ({ id: k, label: mod.FEATURES[k][lang] })),
-      area: f.area, type: f.type, status: f.status, bedroomsMin: f.bedroomsMin, bathroomsMin: f.bathroomsMin, priceMax: f.priceMax, selectedFeatures: f.features,
-      keyword: f.keyword || "",
-      onKeyword: (e) => this.setFilter("keyword", e.target.value),
-      onArea: (e) => this.setFilter("area", e.target.value),
-      onType: (e) => this.setFilter("type", e.target.value),
-      onStatus: (e) => this.setFilter("status", e.target.value),
-      onBedrooms: (e) => this.setFilter("bedroomsMin", e.target.value),
-      onBathrooms: (e) => this.setFilter("bathroomsMin", e.target.value),
-      onPriceMax: (e) => this.setFilter("priceMax", e.target.value),
-      onToggleFeature: (fid) => this.toggleFeature(fid),
-      onClear: () => this.clearFilters(),
-    };
-
-    return {
-      t, lang,
-      isDesktopNav: !this.state.isMobile,
-      isMobileNav: this.state.isMobile,
-      mobileMenuOpen: this.state.isMobile && this.state.mobileMenuOpen,
-      toggleMenu: () => this.setState((s) => ({ mobileMenuOpen: !s.mobileMenuOpen })),
-      filtersOpen: this.state.isMobile && this.state.filtersOpen,
-      toggleFilters: () => this.setState((s) => ({ filtersOpen: !s.filtersOpen })),
-      langValue, onLangChange, langOptions,
-      hasTopBanner: (() => {
-        const now = Date.now();
-        const active = (this.state.banners || []).filter((b) => b.page === "search" && b.position === "top" && b.active !== false && b.imageUrl && (!b.expiresAt || b.expiresAt > now));
-        return active.length > 0;
-      })(),
-      topBanner: (() => {
-        const now = Date.now();
-        const active = (this.state.banners || []).filter((b) => b.page === "search" && b.position === "top" && b.active !== false && b.imageUrl && (!b.expiresAt || b.expiresAt > now));
-        if (!active.length) return { imageUrl: "", link: "#" };
-        const pick = active[Math.floor(Math.random() * active.length)];
-        return { imageUrl: pick.imageUrl, link: pick.link || "#" };
-      })(),
-      heading,
-      resultCount: results.length,
-      sort: this.state.sort,
-      onSortChange: (e) => this.setState({ sort: e.target.value }),
-      isGrid: this.state.view === "grid",
-      isList: this.state.view === "list",
-      setViewGrid: () => this.setState({ view: "grid" }),
-      setViewList: () => this.setState({ view: "list" }),
-      gridActiveBg: this.state.view === "grid" ? "oklch(22% 0.02 60)" : "transparent",
-      gridActiveColor: this.state.view === "grid" ? "oklch(98% 0.01 80)" : "oklch(30% 0.02 60)",
-      listActiveBg: this.state.view === "list" ? "oklch(22% 0.02 60)" : "transparent",
-      listActiveColor: this.state.view === "list" ? "oklch(98% 0.01 80)" : "oklch(30% 0.02 60)",
-      results: (() => {
-        const perPage = 10;
-        const totalPages = Math.max(1, Math.ceil(results.length / perPage));
-        const page = Math.min(this.state.page, totalPages);
-        return results.slice((page - 1) * perPage, page * perPage);
-      })(),
-      hasResults: results.length > 0,
-      noResults: results.length === 0,
-      totalResultsCount,
-      totalPages: Math.max(1, Math.ceil(results.length / 10)),
-      currentPage: Math.min(this.state.page, Math.max(1, Math.ceil(results.length / 10))),
-      showPagination: results.length > 10,
-      pageNumbers: Array.from({ length: Math.max(1, Math.ceil(results.length / 10)) }, (_, i) => {
-        const num = i + 1;
-        const isActive = num === Math.min(this.state.page, Math.max(1, Math.ceil(results.length / 10)));
-        return { num, isActive, bg: isActive ? "oklch(22% 0.02 60)" : "transparent", color: isActive ? "oklch(98% 0.01 80)" : "oklch(30% 0.02 60)", onClick: () => this.goToPage(num) };
-      }),
-      onPrevPage: () => this.goToPage(Math.max(1, this.state.page - 1)),
-      onNextPage: () => this.goToPage(Math.min(Math.max(1, Math.ceil(results.length / 10)), this.state.page + 1)),
-      filterVals,
-      ...gateVals,
-    };
+    return { f: { ...f, features } };
   }
 }
 

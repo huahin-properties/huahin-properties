@@ -7,542 +7,319 @@
 </head>
 <body>
 <x-dc>
-<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 84"><rect width="120" height="84" fill="#3a2a22"/><text x="60" y="47" font-size="34" text-anchor="middle" fill="#f2e6d8" font-family="serif">🏠</text></svg></template>
 <helmet>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-  <title>เว็บไซต์ทรัพย์ของฉัน — huahin.properties</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <title>สมัครลงประกาศ — huahin.properties</title>
   <style>
-    body { margin: 0; background: white; font-family: 'Work Sans', sans-serif; }
-    a { text-decoration: none; }
+    body { margin: 0; background: oklch(96% 0.015 75); font-family: 'Work Sans', sans-serif; }
+    a { color: oklch(42% 0.12 25); }
   </style>
 </helmet>
 
-<sc-if value="{{ notFound }}" hint-placeholder-val="{{ false }}">
-  <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; text-align:center; padding:24px;">
-    <div style="font-size:14px; color:oklch(50% 0.02 60);">ไม่พบเว็บไซต์นี้</div>
+<div style="min-height:100vh;">
+  <div style="display:flex; align-items:center; justify-content:space-between; padding:20px clamp(20px,4vw,56px); border-bottom:1px solid oklch(90% 0.01 70);">
+    <a href="Home.dc.html" style="display:flex; align-items:center; gap:9px; font-family:'Playfair Display',serif; font-size:22px; color:oklch(22% 0.02 60); text-decoration:none;"><img src="logo.png" style="height:36px; width:36px; border-radius:50%; object-fit:contain;" />huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</a>
+    <a href="Home.dc.html" style="font-size:13px; color:oklch(45% 0.02 60); text-decoration:none;">← กลับหน้าแรก</a>
   </div>
-</sc-if>
 
-<sc-if value="{{ hasLister }}">
-  <div style="display:flex; align-items:center; justify-content:space-between; padding:16px clamp(20px,4vw,40px); border-bottom:1px solid oklch(93% 0.01 70); background:white; gap:14px; flex-wrap:wrap;">
-    <a href="Home.dc.html" style="display:flex; align-items:center; gap:9px;">
-      <img src="logo.png" alt="huahin.properties" style="height:30px; width:30px; object-fit:contain; border-radius:50%;" />
-      <span style="font-family:'Playfair Display',serif; font-size:15px; color:oklch(20% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</span>
-    </a>
-    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-      <select value="{{ filterType }}" onChange="{{ onFilterType }}" style="{{ filterSelectStyle }}">
-        <sc-for list="{{ typeFilterOptions }}" as="o" hint-placeholder-count="0"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
-      </select>
-      <select value="{{ filterZone }}" onChange="{{ onFilterZone }}" style="{{ filterSelectStyle }}">
-        <sc-for list="{{ zoneFilterOptions }}" as="o" hint-placeholder-count="0"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
-      </select>
-      <select value="{{ filterBeds }}" onChange="{{ onFilterBeds }}" style="{{ filterSelectStyle }}">
-        <sc-for list="{{ bedsFilterOptions }}" as="o" hint-placeholder-count="0"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
-      </select>
-      <select value="{{ filterPrice }}" onChange="{{ onFilterPrice }}" style="{{ filterSelectStyle }}">
-        <sc-for list="{{ priceFilterOptions }}" as="o" hint-placeholder-count="0"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
-      </select>
-      <dc-import name="LanguageSwitcher" lang="{{ lang }}" options="{{ langOptions }}" on-select="{{ onSelectLang }}" compact="{{ true }}" hint-size="70px,36px"></dc-import>
+  <div style="max-width:920px; margin:0 auto; padding:clamp(32px,6vw,64px) clamp(20px,4vw,32px) 80px;">
+
+    <div style="text-align:center; margin-bottom:44px;">
+      <div style="font-family:'Playfair Display',serif; font-size:clamp(28px,4vw,40px); color:oklch(20% 0.02 60); line-height:1.25; margin-bottom:14px;">โพสต์ประกาศฟรีวันนี้<br>พร้อมผู้ช่วย AI ที่ทำงานแทนคุณ</div>
+      <div style="font-size:15px; color:oklch(45% 0.02 60); max-width:560px; margin:0 auto; line-height:1.7;">เจาะกลุ่มผู้ซื้อ/ผู้เช่าในหัวหิน ปราณบุรี ชะอำโดยเฉพาะ — ช่วงเปิดตัวนี้สมัครและโพสต์ได้ฟรี ไม่มีค่าใช้จ่าย</div>
+      <sc-if value="{{ foundingBannerText }}">
+        <div style="display:inline-block; margin-top:16px; background:oklch(95% 0.06 75); border:1px solid oklch(80% 0.1 75); color:oklch(35% 0.1 40); font-size:13px; padding:8px 18px; border-radius:100px;">🎉 {{ foundingBannerText }}</div>
+      </sc-if>
     </div>
-    <div style="font-size:12px; color:oklch(50% 0.02 60);">{{ headerSiteLabel }}</div>
-  </div>
-  <div style="{{ coverStyle }}"></div>
-  <div style="max-width:1100px; margin:0 auto; padding:0 clamp(20px,4vw,40px) 50px;">
-    <div style="display:flex; align-items:flex-end; gap:18px; margin-top:-52px; padding-bottom:18px; flex-wrap:wrap;">
-      <div style="{{ avatarStyle }}">
-        <sc-if value="{{ noAvatarPhoto }}"><span>{{ initial }}</span></sc-if>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-bottom:48px;">
+      <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:22px 20px;">
+        <div style="font-size:26px; margin-bottom:10px;">🌐</div>
+        <div style="font-family:'Playfair Display',serif; font-size:16px; color:oklch(20% 0.02 60); margin-bottom:6px;">AI ร่างประกาศ 8 ภาษา</div>
+        <div style="font-size:13px; color:oklch(50% 0.02 60); line-height:1.6;">ถ่ายรูป พูดบอกข้อมูล ระบบร่างคำบรรยายให้ครบทุกภาษาอัตโนมัติ</div>
       </div>
-      <div style="padding-bottom:6px; flex:1; min-width:180px;">
-        <div style="font-family:'Playfair Display',serif; font-size:clamp(24px,3.4vw,32px); color:oklch(18% 0.02 60); display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-          {{ displayName }}
-          <sc-if value="{{ isVerifiedVip }}"><span style="{{ vipBadgeStyle }}">{{ vipBadgeLabel }}</span></sc-if>
-        </div>
-        <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ propCountLabel }}</div>
-      </div>      <div style="display:flex; gap:10px; padding-bottom:10px; flex-wrap:wrap; align-items:center;">
-        <sc-for list="{{ socialIcons }}" as="s" hint-placeholder-count="0">
-          <a href="{{ s.url }}" target="_blank" style="{{ s.style }}">{{ s.iconChar }}</a>
-        </sc-for>
-        <sc-if value="{{ hasPhone }}"><a href="{{ telHref }}" style="{{ contactBtnStyle }}">📞 ติดต่อ</a></sc-if>
-        <div onClick="{{ onOpenShare }}" style="background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:10px 18px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">🔗 แชร์</div>
+      <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:22px 20px;">
+        <div style="font-size:26px; margin-bottom:10px;">💬</div>
+        <div style="font-family:'Playfair Display',serif; font-size:16px; color:oklch(20% 0.02 60); margin-bottom:6px;">ผู้ช่วย AI ตอบลูกค้า 24 ชม.</div>
+        <div style="font-size:13px; color:oklch(50% 0.02 60); line-height:1.6;">ลูกค้าถามได้ทุกเวลา ทุกภาษา ไม่ต้องรอคุณว่าง</div>
+      </div>
+      <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:22px 20px;">
+        <div style="font-size:26px; margin-bottom:10px;">🎯</div>
+        <div style="font-family:'Playfair Display',serif; font-size:16px; color:oklch(20% 0.02 60); margin-bottom:6px;">กรองลูกค้าสนใจจริงให้อัตโนมัติ</div>
+        <div style="font-size:13px; color:oklch(50% 0.02 60); line-height:1.6;">ระบบติดตามความสนใจ ส่ง lead ที่พร้อมซื้อ/เช่าจริงมาให้คุณ</div>
       </div>
     </div>
 
-    <sc-if value="{{ hasBio }}">
-      <div style="font-size:14px; color:oklch(35% 0.02 60); line-height:1.7; max-width:640px; margin-bottom:28px; white-space:pre-wrap;">{{ bioText }}</div>
-    </sc-if>
-
-    <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60); margin-bottom:14px;">{{ allPropertiesLabel }} ({{ propCount }})</div>
-    <sc-if value="{{ hasNoProps }}">
-      <div style="background:oklch(97% 0.01 80); border-radius:8px; padding:32px 20px; text-align:center; font-size:13px; color:oklch(50% 0.02 60);">{{ noPropertiesLabel }}</div>
-    </sc-if>
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:24px;">
-      <sc-for list="{{ properties }}" as="p" hint-placeholder-count="0">
-        <div onClick="{{ p.onOpen }}" style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:10px; overflow:hidden; cursor:pointer; transition:box-shadow 0.15s;">
-          <div style="{{ p.coverStyle }}">
-            <div style="position:absolute; top:12px; left:12px; background:{{ p.statusColor }}; color:white; font-size:12px; font-weight:600; padding:5px 12px; border-radius:100px;">{{ p.statusLabel }}</div>
-          </div>
-          <div style="padding:18px 20px 20px;">
-            <div style="font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:oklch(42% 0.12 25);">{{ p.zone }} · {{ p.areaLabel }}</div>
-            <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60); margin:4px 0;">{{ p.title }}</div>
-            <div style="display:flex; gap:14px; font-size:13px; color:oklch(45% 0.02 60); margin-bottom:8px;">
-              <sc-if value="{{ p.hasBedrooms }}"><span>🛏️ {{ p.bedrooms }}</span></sc-if>
-              <sc-if value="{{ p.hasBathrooms }}"><span>🛁 {{ p.bathrooms }}</span></sc-if>
-              <sc-if value="{{ p.hasLivingArea }}"><span>📐 {{ p.livingArea }} {{ p.sqmLabel }}</span></sc-if>
-            </div>
-            <div style="font-size:18px; font-weight:700; color:oklch(25% 0.02 60);">{{ p.priceLabel }}</div>
-          </div>
-        </div>
-      </sc-for>
+    <div style="display:flex; gap:0; margin-bottom:20px; border-bottom:1px solid oklch(88% 0.01 70);">
+      <div onClick="{{ onTabSignup }}" style="padding:10px 20px; font-size:14px; font-weight:600; cursor:pointer; border-bottom:2px solid {{ signupTabColor }}; color:{{ signupTabColor }};">Sign up Free</div>
+      <div onClick="{{ onTabLogin }}" style="padding:10px 20px; font-size:14px; font-weight:600; cursor:pointer; border-bottom:2px solid {{ loginTabColor }}; color:{{ loginTabColor }};">Login</div>
     </div>
 
-    <sc-if value="{{ showPropertyModal }}">
-      <div style="position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:700; display:flex; align-items:center; justify-content:center; padding:20px;" onClick="{{ onCloseModal }}">
-        <div style="background:white; border-radius:12px; max-width:760px; width:100%; max-height:90vh; overflow-y:auto;" onClick="{{ stopProp }}">
-          <div style="{{ modalPhotoStyle }}">
-            <sc-if value="{{ modalHasMultiplePhotos }}">
-              <div onClick="{{ onModalPrevPhoto }}" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px;">‹</div>
-              <div onClick="{{ onModalNextPhoto }}" style="position:absolute; right:12px; top:50%; transform:translateY(-50%); width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px;">›</div>
-              <div style="position:absolute; bottom:12px; right:12px; background:rgba(0,0,0,0.6); color:white; font-size:12px; padding:4px 10px; border-radius:100px;">{{ modalPhotoCounter }}</div>
-            </sc-if>
-            <div onClick="{{ onCloseModal }}" style="position:absolute; top:12px; right:12px; width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px;">✕</div>
+    <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:20px clamp(24px,4vw,36px); margin-bottom:16px;">
+      <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:12px;">เข้าสู่ระบบ/สมัครแบบเร็ว — ไม่ต้องพิมพ์อีเมล/รหัสผ่าน</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
+        <div onClick="{{ onGoogleSignIn }}" style="display:flex; align-items:center; gap:8px; background:white; border:1px solid oklch(85% 0.01 70); padding:10px 18px; border-radius:6px; font-size:13px; cursor:pointer;">🔵 เข้าสู่ระบบด้วย Google</div>
+        <div onClick="{{ onFacebookSignIn }}" style="display:flex; align-items:center; gap:8px; background:oklch(35% 0.1 250); color:white; padding:10px 18px; border-radius:6px; font-size:13px; cursor:pointer;">📘 เข้าสู่ระบบด้วย Facebook</div>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
+        <div style="flex:1; min-width:180px;">
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">หรือใช้เบอร์โทร (OTP ผ่าน SMS)</div>
+          <input value="{{ phoneOtp }}" onChange="{{ onPhoneOtp }}" placeholder="+66812345678" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:13px; font-family:inherit;" />
+        </div>
+        <sc-if value="{{ showOtpCodeInput }}">
+          <div style="flex:1; min-width:120px;">
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รหัส OTP</div>
+            <input value="{{ otpCode }}" onChange="{{ onOtpCode }}" placeholder="123456" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:13px; font-family:inherit;" />
           </div>
-          <div style="padding:22px 26px 26px;">
-            <div style="font-size:12px; letter-spacing:0.06em; text-transform:uppercase; color:oklch(42% 0.12 25); margin-bottom:4px;">{{ modalZoneLine }}</div>
-            <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:8px;">{{ modalTitle }}</div>
-            <div style="display:flex; gap:18px; font-size:14px; color:oklch(40% 0.02 60); margin-bottom:12px; flex-wrap:wrap;">
-              <sc-if value="{{ modalHasBedrooms }}"><span>🛏️ {{ modalBedrooms }} {{ tBedrooms }}</span></sc-if>
-              <sc-if value="{{ modalHasBathrooms }}"><span>🛁 {{ modalBathrooms }} {{ tBathrooms }}</span></sc-if>
-              <sc-if value="{{ modalHasLivingArea }}"><span>📐 {{ modalLivingArea }} {{ tSqm }}</span></sc-if>
-            </div>
-            <div style="font-size:22px; font-weight:700; color:oklch(25% 0.02 60); margin-bottom:16px;">{{ modalPriceLabel }}</div>
-            <sc-if value="{{ modalHasDescription }}">
-              <div style="font-size:14px; color:oklch(35% 0.02 60); line-height:1.7; margin-bottom:18px; white-space:pre-wrap;">{{ modalDescription }}</div>
-            </sc-if>
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-              <sc-if value="{{ hasPhone }}"><a href="{{ telHref }}" style="{{ contactBtnStyle }}">📞 {{ tContact }}</a></sc-if>
-              <div onClick="{{ onOpenChatFromModal }}" style="background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:10px 18px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">💬 แชทสอบถาม</div>
-            </div>
+        </sc-if>
+        <div onClick="{{ onOtpAction }}" style="background:oklch(22% 0.02 60); color:white; padding:10px 18px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">{{ otpActionLabel }}</div>
+      </div>
+      <div id="hh-recaptcha"></div>
+      <sc-if value="{{ socialError }}"><div style="font-size:12.5px; color:oklch(50% 0.18 30); margin-top:10px;">{{ socialError }}</div></sc-if>
+    </div>
+    <div style="text-align:center; font-size:12px; color:oklch(60% 0.02 60); margin-bottom:16px;">— หรือใช้อีเมล/รหัสผ่านแบบเดิมด้านล่าง —</div>
+
+    <sc-if value="{{ showLoginForm }}">
+      <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:clamp(24px,4vw,36px); margin-bottom:20px;">
+        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); margin-bottom:14px;">เข้าสู่ระบบ</div>
+        <div style="display:grid; gap:12px; max-width:360px; margin-bottom:14px;">
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">อีเมล</div>
+            <input type="email" value="{{ loginEmail }}" onChange="{{ onLoginEmail }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รหัสผ่าน</div>
+            <input type="text" value="{{ loginPassword }}" onChange="{{ onLoginPassword }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;" />
           </div>
         </div>
+        <div onClick="{{ onLoginSubmit }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:600; cursor:pointer; max-width:360px;">{{ loginSubmitLabel }}</div>
+        <sc-if value="{{ loginError }}"><div style="font-size:13px; color:oklch(50% 0.18 30); margin-top:10px;">{{ loginError }}</div></sc-if>
       </div>
     </sc-if>
 
-    <div style="margin-top:60px; padding-top:20px; border-top:1px solid oklch(92% 0.01 70); text-align:center;">
-      <a href="Home.dc.html" style="font-size:12px; color:oklch(55% 0.02 60);">🏠 ขับเคลื่อนโดย <span style="color:oklch(40% 0.13 25); font-weight:600;">huahin.properties</span></a>
-    </div>
-  </div>
+    <sc-if value="{{ submitted }}">
+      <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:40px 24px; text-align:center;">
+        <div style="font-size:34px; margin-bottom:12px;">✅</div>
+        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); margin-bottom:8px;">สมัครสำเร็จ — ใช้งานได้ทันที</div>
+        <div style="font-size:14px; color:oklch(50% 0.02 60); max-width:420px; margin:0 auto; line-height:1.7;">เราส่งอีเมลยืนยันตัวตนไปที่กล่องจดหมายของคุณแล้ว — กดลิงก์ในอีเมลเพื่อยืนยัน จากนี้เราจะส่งข่าวสาร/สิทธิประโยชน์ใหม่ๆ ให้คุณทางอีเมลนี้ด้วย</div>
+        <a href="Lister Dashboard.dc.html" style="display:inline-block; margin-top:18px; font-size:13px; color:oklch(42% 0.12 25);">ไปที่หน้าทำงานของฉัน →</a>
+      </div>
+    </sc-if>
 
-  <!-- ============ CHAT WIDGET ============ -->
-  <sc-if value="{{ chatOpen }}">
-    <div style="position:fixed; bottom:0; right:0; width:min(360px,100vw); height:min(520px,80vh); background:white; box-shadow:0 -4px 30px rgba(0,0,0,0.18); border-radius:12px 12px 0 0; display:flex; flex-direction:column; z-index:500; margin:0 16px;">
-      <div style="{{ chatHeaderStyle }}">
-        <div style="font-size:13.5px; font-weight:600;">💬 {{ displayName }}</div>
-        <div onClick="{{ onToggleChat }}" style="cursor:pointer; font-size:16px;">─</div>
+    <sc-if value="{{ showSignupForm }}" hint-placeholder-val="{{ true }}">
+      <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:clamp(24px,4vw,36px);">
+        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); margin-bottom:6px;">สมัครใช้งานฟรี</div>
+        <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:20px;">ทดลองใช้งานฟรี โพสต์ประกาศได้ทันที — AI ช่วยร่างประกาศ 8 ภาษาให้อัตโนมัติ</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-bottom:14px;">
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ชื่อ-นามสกุล / ชื่อบริษัท</div>
+            <input value="{{ name }}" onChange="{{ onName }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">เบอร์โทร/LINE</div>
+            <input value="{{ phone }}" onChange="{{ onPhone }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">อีเมล</div>
+            <input type="email" value="{{ email }}" onChange="{{ onEmail }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ตั้งรหัสผ่าน</div>
+            <input type="text" value="{{ password }}" onChange="{{ onPassword }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;" />
+          </div>
+        </div>
+        <div onClick="{{ onSubmit }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:600; cursor:pointer;">{{ submitLabel }}</div>
+        <sc-if value="{{ error }}"><div style="font-size:13px; color:oklch(50% 0.18 30); text-align:center; margin-top:10px;">{{ error }}</div></sc-if>
+        <div style="font-size:12px; color:oklch(55% 0.02 60); text-align:center; margin-top:14px; line-height:1.6;">{{ foundingFinePrint }}</div>
       </div>
-      <div style="flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:10px;" id="apChatLog">
-        <sc-for list="{{ chatMessages }}" as="m" hint-placeholder-count="0">
-          <div style="{{ m.bubbleStyle }}">{{ m.text }}</div>
-          <sc-for list="{{ m.cards }}" as="c" hint-placeholder-count="0">
-            <div onClick="{{ c.onClick }}" style="{{ c.cardStyle }}">
-              <div style="{{ c.thumbStyle }}"></div>
-              <div style="flex:1; min-width:0;">
-                <div style="font-size:12px; font-weight:600; color:oklch(25% 0.02 60); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ c.title }}</div>
-                <div style="font-size:11px; color:oklch(50% 0.02 60);">{{ c.code }} · {{ c.priceLabel }}</div>
-              </div>
-            </div>
-          </sc-for>
-        </sc-for>
-        <sc-if value="{{ chatThinking }}"><div style="font-size:12px; color:oklch(55% 0.02 60);">กำลังพิมพ์…</div></sc-if>
-      </div>
-      <div style="display:flex; gap:8px; padding:10px; border-top:1px solid oklch(92% 0.01 70);">
-        <input value="{{ chatInput }}" onChange="{{ onChatInput }}" onKeyDown="{{ onChatKeyDown }}" placeholder="พิมพ์ข้อความ…" style="flex:1; border:1px solid oklch(85% 0.01 70); border-radius:100px; padding:9px 14px; font-size:13px; font-family:inherit;" />
-        <div onClick="{{ onSendChat }}" style="{{ sendBtnStyle }}">ส่ง</div>
-      </div>
-    </div>
-  </sc-if>
-  <sc-if value="{{ chatClosed }}">
-    <div onClick="{{ onToggleChat }}" style="{{ chatBubbleStyle }}">💬</div>
-  </sc-if>
-</sc-if>
+    </sc-if>
 
-<sc-if value="{{ showShare }}">
-  <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:600;" onClick="{{ onCloseShare }}">
-    <div style="background:white; border-radius:10px; padding:24px; width:min(360px,90vw);" onClick="{{ stopProp }}">
-      <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:6px;">แชร์เว็บไซต์ของ {{ displayName }}</div>
-      <div style="font-size:12px; color:oklch(50% 0.02 60); word-break:break-all; margin-bottom:16px;">{{ shareUrl }}</div>
-      <div style="display:flex; flex-direction:column; gap:10px;">
-        <a href="{{ shareFbUrl }}" target="_blank" style="display:block; text-align:center; background:oklch(35% 0.1 250); color:white; padding:11px; border-radius:6px; font-size:13px;">แชร์ไป Facebook</a>
-        <a href="{{ shareLineUrl }}" target="_blank" style="display:block; text-align:center; background:oklch(55% 0.15 145); color:white; padding:11px; border-radius:6px; font-size:13px;">แชร์ไป LINE</a>
-        <div onClick="{{ onCopyShareLink }}" style="text-align:center; background:oklch(93% 0.01 70); color:oklch(30% 0.02 60); padding:11px; border-radius:6px; font-size:13px; cursor:pointer;">📋 {{ shareCopyLabel }}</div>
-      </div>
-      <div onClick="{{ onCloseShare }}" style="text-align:center; margin-top:16px; font-size:12px; color:oklch(50% 0.02 60); cursor:pointer;">ปิด</div>
-    </div>
   </div>
-</sc-if>
+</div>
 
 </x-dc>
 <script type="text/x-dc" data-dc-script>
-const CLOUD_FUNCTION_URL = "https://claudecomplete-3j4ldf4pja-as.a.run.app";
-
-const LANG_NAMES = { en: "English", th: "Thai", ru: "Russian", zh: "Chinese", de: "German", no: "Norwegian", fr: "French", it: "Italian" };
-const LANG_OPTIONS = [
-  { code: "th", label: "ไทย" }, { code: "en", label: "English" }, { code: "ru", label: "Русский" }, { code: "zh", label: "中文" },
-  { code: "de", label: "Deutsch" }, { code: "no", label: "Norsk" }, { code: "fr", label: "Français" }, { code: "it", label: "Italiano" },
-];
-const UI_I18N = {
-  th: { allTypes: "ทุกประเภท", villa: "พูลวิลล่า", house: "บ้านเดี่ยว", condo: "คอนโด", land: "ที่ดิน", commercial: "อาคารพาณิชย์",
-    allZones: "ทุกโซน", allBeds: "ห้องนอนทั้งหมด", bed1: "1+ ห้องนอน", bed2: "2+ ห้องนอน", bed3: "3+ ห้องนอน", bed4: "4+ ห้องนอน",
-    allPrices: "ทุกช่วงราคา", under5: "ต่ำกว่า 5 ล้าน", p5to10: "5-10 ล้าน", p10to20: "10-20 ล้าน", over20: "มากกว่า 20 ล้าน",
-    bedrooms: "ห้องนอน", bathrooms: "ห้องน้ำ", sqm: "ตร.ม.", contact: "ติดต่อสอบถาม", chatBtn: "แชทสอบถาม", close: "ปิด",
-    allProperties: "ทรัพย์ทั้งหมด", noProperties: "ยังไม่มีทรัพย์ที่โพสต์", perMonth: "/เดือน", personalSite: "เว็บไซต์ส่วนตัวของ",
-    forSale: "ประกาศขาย", forRent: "ประกาศเช่า", greeting: "สวัสดีค่ะ/ครับ สนใจทรัพย์ของ{name}สอบถามได้เลยค่ะ/ครับ" },
-  en: { allTypes: "All types", villa: "Pool Villa", house: "House", condo: "Condo", land: "Land", commercial: "Commercial",
-    allZones: "All zones", allBeds: "All bedrooms", bed1: "1+ bed", bed2: "2+ beds", bed3: "3+ beds", bed4: "4+ beds",
-    allPrices: "All prices", under5: "Under ฿5M", p5to10: "฿5-10M", p10to20: "฿10-20M", over20: "Over ฿20M",
-    bedrooms: "Bedrooms", bathrooms: "Bathrooms", sqm: "sqm", contact: "Contact", chatBtn: "Chat", close: "Close",
-    allProperties: "All Properties", noProperties: "No properties posted yet", perMonth: "/mo", personalSite: "Personal site of",
-    forSale: "For Sale", forRent: "For Rent", greeting: "Hi! Interested in {name}'s properties? Feel free to ask." },
-  ru: { allTypes: "Все типы", villa: "Вилла с бассейном", house: "Дом", condo: "Кондо", land: "Земля", commercial: "Коммерческая",
-    allZones: "Все районы", allBeds: "Все спальни", bed1: "1+ спальня", bed2: "2+ спальни", bed3: "3+ спальни", bed4: "4+ спальни",
-    allPrices: "Все цены", under5: "До 5 млн", p5to10: "5-10 млн", p10to20: "10-20 млн", over20: "Более 20 млн",
-    bedrooms: "Спальни", bathrooms: "Ванные", sqm: "кв.м", contact: "Связаться", chatBtn: "Чат", close: "Закрыть",
-    allProperties: "Все объекты", noProperties: "Пока нет объектов", perMonth: "/мес", personalSite: "Личный сайт",
-    forSale: "Продажа", forRent: "Аренда", greeting: "Здравствуйте! Интересуют объекты {name}? Спрашивайте!" },
-  zh: { allTypes: "所有类型", villa: "泳池别墅", house: "独栋别墅", condo: "公寓", land: "土地", commercial: "商业地产",
-    allZones: "所有区域", allBeds: "全部卧室", bed1: "1+卧室", bed2: "2+卧室", bed3: "3+卧室", bed4: "4+卧室",
-    allPrices: "全部价格", under5: "低于500万", p5to10: "500-1000万", p10to20: "1000-2000万", over20: "2000万以上",
-    bedrooms: "卧室", bathrooms: "浴室", sqm: "平方米", contact: "联系咨询", chatBtn: "聊天咨询", close: "关闭",
-    allProperties: "全部房源", noProperties: "暂无房源", perMonth: "/月", personalSite: "个人网站",
-    forSale: "出售", forRent: "出租", greeting: "您好！对{name}的房源感兴趣吗？欢迎咨询" },
-  de: { allTypes: "Alle Typen", villa: "Pool-Villa", house: "Haus", condo: "Eigentumswohnung", land: "Grundstück", commercial: "Gewerbe",
-    allZones: "Alle Zonen", allBeds: "Alle Schlafzimmer", bed1: "1+ Schlafzimmer", bed2: "2+ Schlafzimmer", bed3: "3+ Schlafzimmer", bed4: "4+ Schlafzimmer",
-    allPrices: "Alle Preise", under5: "Unter ฿5M", p5to10: "฿5-10M", p10to20: "฿10-20M", over20: "Über ฿20M",
-    bedrooms: "Schlafzimmer", bathrooms: "Badezimmer", sqm: "qm", contact: "Kontakt", chatBtn: "Chat", close: "Schließen",
-    allProperties: "Alle Immobilien", noProperties: "Noch keine Immobilien", perMonth: "/Monat", personalSite: "Persönliche Seite von",
-    forSale: "Zu verkaufen", forRent: "Zu vermieten", greeting: "Hallo! Interessiert an {name}s Immobilien? Fragen Sie gerne!" },
-  no: { allTypes: "Alle typer", villa: "Bassengvilla", house: "Hus", condo: "Leilighet", land: "Tomt", commercial: "Næringseiendom",
-    allZones: "Alle soner", allBeds: "Alle soverom", bed1: "1+ soverom", bed2: "2+ soverom", bed3: "3+ soverom", bed4: "4+ soverom",
-    allPrices: "Alle priser", under5: "Under ฿5M", p5to10: "฿5-10M", p10to20: "฿10-20M", over20: "Over ฿20M",
-    bedrooms: "Soverom", bathrooms: "Bad", sqm: "kvm", contact: "Kontakt", chatBtn: "Chat", close: "Lukk",
-    allProperties: "Alle eiendommer", noProperties: "Ingen eiendommer ennå", perMonth: "/mnd", personalSite: "Personlig side til",
-    forSale: "Til salgs", forRent: "Til leie", greeting: "Hei! Interessert i {name}s eiendommer? Spør i vei!" },
-  fr: { allTypes: "Tous types", villa: "Villa avec piscine", house: "Maison", condo: "Condo", land: "Terrain", commercial: "Commercial",
-    allZones: "Toutes zones", allBeds: "Toutes chambres", bed1: "1+ chambre", bed2: "2+ chambres", bed3: "3+ chambres", bed4: "4+ chambres",
-    allPrices: "Tous prix", under5: "Moins de ฿5M", p5to10: "฿5-10M", p10to20: "฿10-20M", over20: "Plus de ฿20M",
-    bedrooms: "Chambres", bathrooms: "Salles de bain", sqm: "m²", contact: "Contact", chatBtn: "Chat", close: "Fermer",
-    allProperties: "Tous les biens", noProperties: "Aucun bien pour le moment", perMonth: "/mois", personalSite: "Site personnel de",
-    forSale: "À vendre", forRent: "À louer", greeting: "Bonjour ! Intéressé par les biens de {name} ? N'hésitez pas à demander !" },
-  it: { allTypes: "Tutti i tipi", villa: "Villa con piscina", house: "Casa", condo: "Condominio", land: "Terreno", commercial: "Commerciale",
-    allZones: "Tutte le zone", allBeds: "Tutte le camere", bed1: "1+ camera", bed2: "2+ camere", bed3: "3+ camere", bed4: "4+ camere",
-    allPrices: "Tutti i prezzi", under5: "Sotto ฿5M", p5to10: "฿5-10M", p10to20: "฿10-20M", over20: "Oltre ฿20M",
-    bedrooms: "Camere", bathrooms: "Bagni", sqm: "mq", contact: "Contatto", chatBtn: "Chat", close: "Chiudi",
-    allProperties: "Tutti gli immobili", noProperties: "Nessun immobile ancora", perMonth: "/mese", personalSite: "Sito personale di",
-    forSale: "In vendita", forRent: "In affitto", greeting: "Ciao! Interessato agli immobili di {name}? Chiedi pure!" },
-};
-const AREA_LABELS_BY_LANG = {
-  th: { "hua-hin": "หัวหิน", "pranburi": "ปราณบุรี", "cha-am": "ชะอำ" },
-  en: { "hua-hin": "Hua Hin", "pranburi": "Pranburi", "cha-am": "Cha-am" },
-  ru: { "hua-hin": "Хуахин", "pranburi": "Пранбури", "cha-am": "Чаам" },
-  zh: { "hua-hin": "华欣", "pranburi": "巴蜀差", "cha-am": "差安" },
-  de: { "hua-hin": "Hua Hin", "pranburi": "Pranburi", "cha-am": "Cha-am" },
-  no: { "hua-hin": "Hua Hin", "pranburi": "Pranburi", "cha-am": "Cha-am" },
-  fr: { "hua-hin": "Hua Hin", "pranburi": "Pranburi", "cha-am": "Cha-am" },
-  it: { "hua-hin": "Hua Hin", "pranburi": "Pranburi", "cha-am": "Cha-am" },
+const SIGNUP_I18N = {
+  en: { pickPackage: "Choose your package (required before signing up)", free: "① Free", tier2: "② Level 2", tier3: "③ Level 3", perMonth: "/month", requirePkg: "Please choose a package before signing up" },
+  th: { pickPackage: "เลือกแพ็กเกจ (จำเป็นต้องเลือกก่อนสมัคร)", free: "① ฟรี", tier2: "② ระดับ 2", tier3: "③ ระดับ 3", perMonth: "/เดือน", requirePkg: "กรุณาเลือกแพ็กเกจก่อนสมัคร" },
+  ru: { pickPackage: "Выберите пакет (обязательно перед регистрацией)", free: "① Бесплатно", tier2: "② Уровень 2", tier3: "③ Уровень 3", perMonth: "/мес", requirePkg: "Пожалуйста, выберите пакет" },
+  zh: { pickPackage: "选择套餐（注册前必选）", free: "① 免费", tier2: "② 二级", tier3: "③ 三级", perMonth: "/月", requirePkg: "请先选择套餐" },
+  de: { pickPackage: "Paket wählen (vor Anmeldung erforderlich)", free: "① Kostenlos", tier2: "② Stufe 2", tier3: "③ Stufe 3", perMonth: "/Monat", requirePkg: "Bitte wählen Sie ein Paket" },
+  no: { pickPackage: "Velg pakke (påkrevd før registrering)", free: "① Gratis", tier2: "② Nivå 2", tier3: "③ Nivå 3", perMonth: "/mnd", requirePkg: "Velg en pakke" },
+  fr: { pickPackage: "Choisissez votre forfait (requis avant l'inscription)", free: "① Gratuit", tier2: "② Niveau 2", tier3: "③ Niveau 3", perMonth: "/mois", requirePkg: "Veuillez choisir un forfait" },
+  it: { pickPackage: "Scegli il pacchetto (obbligatorio prima dell'iscrizione)", free: "① Gratuito", tier2: "② Livello 2", tier3: "③ Livello 3", perMonth: "/mese", requirePkg: "Seleziona un pacchetto" },
 };
 
 class Component extends DCLogic {
-  state = {
-    loaded: false, lister: null, properties: [], showShare: false, shareCopyLabel: "คัดลอกลิงก์",
-    chatOpen: false, chatInput: "", chatMessages: [], chatThinking: false,
-    showPropertyModal: false, modalProperty: null, modalPhotoIndex: 0,
-    lang: "th", filterType: "", filterZone: "", filterBeds: "", filterPrice: "",
-  };
+  state = { tab: "signup", name: "", phone: "", email: "", password: "", submitted: false, submitting: false, error: "", loginEmail: "", loginPassword: "", loginBusy: false, loginError: "", packageChoice: null, lang: "th", foundingLimit: 0, foundingCount: 0, foundingNote: "", phoneOtp: "", otpCode: "", otpSent: false, socialBusy: false, socialError: "" };
 
   async componentDidMount() {
-    const fb = await import("./firebase-client.js");
-    this._fb = fb;
-    const mod = await import("./data.js");
-    this._mod = mod;
-    const params = new URLSearchParams(window.location.search);
-    this._listerId = params.get("id") || "";
-    if (!this._listerId) { this.setState({ loaded: true, lister: null }); return; }
     try {
-      const lister = await fb.fetchListerById(this._listerId);
-      let properties = [];
-      if (lister) {
-        const all = await fb.fetchWhere("properties", "listerId", this._listerId);
-        const allPhotos = await fb.fetchAllPhotos();
-        const photosById = {};
-        allPhotos.forEach((ph) => { photosById[ph.id] = ph.dataUrl; });
-        properties = all.filter((p) => !p.isDraft).map((p) => {
-          const cover = photosById[`${p.id}-0`];
-          const gallery = allPhotos.filter((ph) => ph.propertyId === p.id).sort((a, b) => (a.index || 0) - (b.index || 0)).map((ph) => ph.dataUrl);
-          return { ...p, coverUrl: cover || "", gallery: gallery.length ? gallery : (cover ? [cover] : []) };
+      const mod = await import("./data.js");
+      this.setState({ lang: mod.getLang() });
+    } catch (e) {}
+    try {
+      const fb = await import("./firebase-client.js");
+      const [settings, count] = await Promise.all([fb.fetchFoundingAgentSettings(), fb.countFoundingAgents()]);
+      this.setState({ foundingLimit: settings.limit || 0, foundingNote: settings.note || "", foundingCount: count });
+    } catch (e) {}
+  }
+
+  async completeSocialSignIn(uid, fb) {
+    try {
+      const doc = await fb.fetchMyListerDoc();
+      if (!doc) {
+        const isFounding = this.state.foundingLimit > 0 && this.state.foundingCount < this.state.foundingLimit;
+        // No default tier — membership v2 (BLUEPRINT.md §2.3): new accounts
+        // start with NO tier at all so the Lister Dashboard's "start free
+        // trial" offer shows immediately. Do not default to "basic" here
+        // (that was the old permanent-free-tier model, replaced by trial).
+        await fb.setDoc("listers", uid, {
+          name: "", role: "lister", phone: "", email: "",
+          status: "approved", createdAt: Date.now(), foundingAgent: isFounding,
         });
       }
-      this.setState({ loaded: true, lister, properties });
+      window.location.href = "Lister Dashboard.dc.html";
     } catch (e) {
-      console.warn("Failed to load agent profile:", e);
-      this.setState({ loaded: true, lister: null });
+      this.setState({ socialBusy: false, socialError: "เกิดข้อผิดพลาด ลองใหม่อีกครั้ง" });
     }
   }
 
-  onSelectLang(code) {
-    this.setState({ lang: code });
-  }
-
-  filteredProperties() {
-    const { filterType, filterZone, filterBeds, filterPrice } = this.state;
-    return this.state.properties.filter((p) => {
-      if (filterType && p.type !== filterType) return false;
-      if (filterZone && p.zone !== filterZone) return false;
-      if (filterBeds && !(Number(p.bedrooms) >= Number(filterBeds))) return false;
-      if (filterPrice) {
-        const price = Number(p.price) || 0;
-        if (filterPrice === "under5" && !(price < 5000000)) return false;
-        if (filterPrice === "p5to10" && !(price >= 5000000 && price < 10000000)) return false;
-        if (filterPrice === "p10to20" && !(price >= 10000000 && price < 20000000)) return false;
-        if (filterPrice === "over20" && !(price >= 20000000)) return false;
-      }
-      return true;
-    });
-  }
-
-  toggleChat() {
-    this.setState((s) => {
-      const open = !s.chatOpen;
-      if (open && s.chatMessages.length === 0) {
-        const name = (this.state.lister && (this.state.lister.displayName || this.state.lister.name)) || "เรา";
-        const t = UI_I18N[s.lang] || UI_I18N.th;
-        return { chatOpen: open, chatMessages: [{ role: "assistant", text: t.greeting.replace("{name}", name), bubbleStyle: this.bubbleStyle(false) }] };
-      }
-      return { chatOpen: open };
-    });
-  }
-
-  openPropertyModal(p) {
-    this.setState({ showPropertyModal: true, modalProperty: p, modalPhotoIndex: 0 });
-  }
-
-  closePropertyModal() {
-    this.setState({ showPropertyModal: false, modalProperty: null });
-  }
-
-  modalPrevPhoto() {
-    this.setState((s) => {
-      const len = (s.modalProperty && s.modalProperty.gallery && s.modalProperty.gallery.length) || 1;
-      return { modalPhotoIndex: (s.modalPhotoIndex - 1 + len) % len };
-    });
-  }
-
-  modalNextPhoto() {
-    this.setState((s) => {
-      const len = (s.modalProperty && s.modalProperty.gallery && s.modalProperty.gallery.length) || 1;
-      return { modalPhotoIndex: (s.modalPhotoIndex + 1) % len };
-    });
-  }
-
-  bubbleStyle(isUser) {
-    return {
-      alignSelf: isUser ? "flex-end" : "flex-start", maxWidth: "80%",
-      background: isUser ? "oklch(22% 0.02 60)" : "oklch(95% 0.01 80)",
-      color: isUser ? "white" : "oklch(25% 0.02 60)",
-      padding: "9px 13px", borderRadius: "12px", fontSize: "13px", lineHeight: "1.5",
-    };
-  }
-
-  // Turns any property code mentioned in an AI reply into a clickable card
-  // that opens our own in-page modal — never a link to the main site, so the
-  // customer always stays inside this agent's own branded page.
-  _extractPropertyCards(text) {
-    if (!text) return [];
-    const t = UI_I18N[this.state.lang] || UI_I18N.th;
-    const codes = [...new Set((text.match(/[A-Z]{2,3}-\d+/g) || []))];
-    return codes.map((code) => this.state.properties.find((p) => p.id === code)).filter(Boolean).map((p) => {
-      return {
-        id: p.id,
-        cardStyle: { display: "flex", gap: "10px", alignItems: "center", background: "white", border: "1px solid oklch(88% 0.01 70)", borderRadius: "10px", padding: "8px", cursor: "pointer", maxWidth: "260px" },
-        thumbStyle: { width: "56px", height: "56px", borderRadius: "6px", flexShrink: 0, background: p.coverUrl ? `url('${p.coverUrl}') center/cover` : "oklch(90% 0.01 70)" },
-        title: `${t[p.type] || p.type || ""} ${p.zone || ""}`.trim(),
-        priceLabel: "฿" + (Number(p.price) || 0).toLocaleString() + (p.status === "rent" ? t.perMonth : ""),
-        code: p.id,
-        onClick: () => this.openPropertyModal(p),
-      };
-    });
-  }
-
-  async sendChat() {
-    const text = this.state.chatInput.trim();
-    if (!text || this.state.chatThinking) return;
-    const userMsg = { role: "user", text, bubbleStyle: this.bubbleStyle(true) };
-    const history = [...this.state.chatMessages, userMsg];
-    this.setState({ chatMessages: history, chatInput: "", chatThinking: true });
+  async googleSignIn() {
+    if (this.state.socialBusy) return;
+    this.setState({ socialBusy: true, socialError: "" });
     try {
-      const lister = this.state.lister || {};
-      const personaText = (lister.aiPersonaText && lister.aiPersonaText.trim()) ||
-        `You are a helpful assistant answering on behalf of ${lister.displayName || lister.name || "the lister"}. Contact: phone/LINE ${lister.phone || "n/a"}, email ${lister.email || "n/a"}.`;
-      const langKey = this.state.lang;
-      const descFor = (d) => (d && typeof d === "object") ? (d[langKey] || d.en || d.th || "") : (d || "");
-      const propsSummary = this.state.properties.map((p) => ({
-        code: p.id, type: p.type, zone: p.zone, area: p.area, status: p.status, price: p.price,
-        bedrooms: p.bedrooms, bathrooms: p.bathrooms, livingArea: p.livingArea, description: descFor(p.description),
-      }));
-      const system = `${personaText}\n\nIMPORTANT: Reply in ${LANG_NAMES[this.state.lang] || "Thai"} by default (the customer has this page set to that language) — but if the customer actually types in a DIFFERENT language, switch and reply in THEIR language instead, exactly like a real bilingual agent would.\n\nYou ONLY know about and may discuss these specific properties (JSON below) — never mention or invent any other property, and never mention huahin.properties' other listers/agents or site-wide data:\n${JSON.stringify(propsSummary)}\n\nAnswer in the customer's language. Be warm and helpful.\n\nREPLY LENGTH: ALWAYS keep replies SHORT — 2-3 sentences maximum, no exceptions. Never list full specs, features, or descriptions in your text — the interface shows a clickable property card automatically whenever you mention a property code, so the customer can open it themselves for full details. Your job is just to guide the conversation and say which property code(s) fit, not describe them in depth. When a property matches what the customer is asking, just say so briefly and state its exact code (e.g. HH-109) — never invent a code. If nothing matches yet, ask one short clarifying question. If asked for contact info, give the phone/email above exactly as provided — never invent a different one.`;
-      const messages = history.slice(history.findIndex((m) => m.role === "user")).map((m) => ({ role: m.role, content: m.text }));
-      let reply;
-      if (window.claude && window.claude.complete) {
-        reply = await window.claude.complete({ system, messages, model: "claude-haiku-4-5", max_tokens: 220 });
-      } else {
-        const res = await fetch(CLOUD_FUNCTION_URL, {
-          method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ system, messages }),
-        });
-        const data = await res.json();
-        reply = data.completion || data.reply || data.text || "ขออภัย ระบบไม่สามารถตอบได้ในขณะนี้";
-      }
-      this.setState((s) => ({ chatMessages: [...s.chatMessages, { role: "assistant", text: reply, bubbleStyle: this.bubbleStyle(false), cards: this._extractPropertyCards(reply) }], chatThinking: false }));
-      try {
-        await this._fb.setDoc("listerLeads", "ll-" + Date.now() + "-" + Math.random().toString(36).slice(2, 6), {
-          listerId: this._listerId, lastMessage: text, reply, createdAt: Date.now(),
-        });
-      } catch (e) {}
+      const fb = await import("./firebase-client.js");
+      const uid = await fb.signInWithGoogle();
+      await this.completeSocialSignIn(uid, fb);
     } catch (e) {
-      this.setState((s) => ({ chatMessages: [...s.chatMessages, { role: "assistant", text: "ขออภัย เกิดข้อผิดพลาด ลองใหม่อีกครั้งค่ะ/ครับ", bubbleStyle: this.bubbleStyle(false) }], chatThinking: false }));
+      this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย Google ไม่สำเร็จ ลองใหม่อีกครั้ง" });
+    }
+  }
+
+  async facebookSignIn() {
+    if (this.state.socialBusy) return;
+    this.setState({ socialBusy: true, socialError: "" });
+    try {
+      const fb = await import("./firebase-client.js");
+      const uid = await fb.signInWithFacebook();
+      await this.completeSocialSignIn(uid, fb);
+    } catch (e) {
+      this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย Facebook ไม่สำเร็จ (อาจยังไม่เปิดใช้งาน — แจ้งแอดมิน)" });
+    }
+  }
+
+  async otpAction() {
+    if (this.state.socialBusy) return;
+    const fb = await import("./firebase-client.js");
+    if (!this.state.otpSent) {
+      if (!this.state.phoneOtp.trim()) { this.setState({ socialError: "กรอกเบอร์โทรแบบมี + รหัสประเทศ เช่น +66812345678" }); return; }
+      this.setState({ socialBusy: true, socialError: "" });
+      try {
+        await fb.startPhoneSignIn(this.state.phoneOtp.trim(), "hh-recaptcha");
+        this.setState({ otpSent: true, socialBusy: false });
+      } catch (e) {
+        this.setState({ socialBusy: false, socialError: "ส่ง OTP ไม่สำเร็จ ตรวจรูปแบบเบอร์โทรอีกครั้ง" });
+      }
+    } else {
+      if (!this.state.otpCode.trim()) { this.setState({ socialError: "กรอกรหัส OTP ที่ได้รับทาง SMS" }); return; }
+      this.setState({ socialBusy: true, socialError: "" });
+      try {
+        const uid = await fb.confirmPhoneSignIn(this.state.otpCode.trim());
+        await this.completeSocialSignIn(uid, fb);
+      } catch (e) {
+        this.setState({ socialBusy: false, socialError: "รหัส OTP ไม่ถูกต้อง ลองใหม่อีกครั้ง" });
+      }
+    }
+  }
+
+  async loginSubmit() {
+    if (this.state.loginBusy) return;
+    if (!this.state.loginEmail.trim() || !this.state.loginPassword) {
+      this.setState({ loginError: "กรอกอีเมลและรหัสผ่าน" });
+      return;
+    }
+    this.setState({ loginBusy: true, loginError: "" });
+    try {
+      const fb = await import("./firebase-client.js");
+      await fb.adminSignIn(this.state.loginEmail.trim(), this.state.loginPassword);
+      window.location.href = "Lister Dashboard.dc.html";
+    } catch (e) {
+      this.setState({ loginBusy: false, loginError: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
+    }
+  }
+
+  async submit() {
+    if (this.state.submitting) return;
+    const { name, phone, email, password } = this.state;
+    if (!name.trim() || !phone.trim() || !email.trim() || password.length < 6) {
+      this.setState({ error: "กรอกให้ครบทุกช่อง (รหัสผ่านอย่างน้อย 6 ตัวอักษร)" });
+      return;
+    }
+    this.setState({ submitting: true, error: "" });
+    try {
+      const fb = await import("./firebase-client.js");
+      const uid = await fb.createListerAccount(email, password);
+      const isFounding = this.state.foundingLimit > 0 && this.state.foundingCount < this.state.foundingLimit;
+      await fb.setDoc("listers", uid, {
+        name, role: "lister", phone, email,
+        // Auto-approved immediately (no admin queue). No default tier —
+        // membership v2 (BLUEPRINT.md §2.3) replaced the old permanent-free
+        // tier with a one-time 30-day trial; leaving tier unset here is
+        // what makes the Lister Dashboard's "start free trial" banner show
+        // up right after signup instead of silently landing on "basic".
+        status: "approved", createdAt: Date.now(),
+        foundingAgent: isFounding,
+      });
+      this.setState({ submitted: true, submitting: false });
+      setTimeout(() => { window.location.href = "Lister Dashboard.dc.html"; }, 1400);
+    } catch (e) {
+      const msg = (e && e.code === "auth/email-already-in-use")
+        ? "อีเมลนี้เคยสมัครไว้แล้ว"
+        : "สมัครไม่สำเร็จ ลองใหม่อีกครั้ง";
+      this.setState({ error: msg, submitting: false });
     }
   }
 
   renderVals() {
-    const mod = this._mod;
-    const lister = this.state.lister;
-    if (!this.state.loaded) return { notFound: false, hasLister: false };
-    if (!lister) return { notFound: true, hasLister: false };
-    const tier = lister.tier || "basic";
-    const canCustomCover = tier === "pro" || tier === "agency" || tier === "level3" || tier === "level4";
-    const canCustomTheme = tier === "level4";
-    const brandColor = "oklch(40% 0.13 25)";
-    const theme = (canCustomTheme && lister.themeColor) ? lister.themeColor : brandColor;
-    const displayName = lister.displayName || lister.name || "เจ้าของทรัพย์";
-    const areaLabels = AREA_LABELS_BY_LANG[this.state.lang] || AREA_LABELS_BY_LANG.th;
-    const t = UI_I18N[this.state.lang] || UI_I18N.th;
-    const typeLabels = { villa: t.villa, house: t.house, condo: t.condo, land: t.land, commercial: t.commercial };
-    const statusMap = {
-      sale: { label: t.forSale, color: brandColor }, rent: { label: t.forRent, color: "oklch(40% 0.1 250)" },
-    };
-    const properties = this.filteredProperties().map((p) => {
-      const st = statusMap[p.status] || statusMap.sale;
-      return {
-        statusColor: st.color, statusLabel: st.label,
-        coverStyle: {
-          position: "relative", aspectRatio: "16/10", width: "100%",
-          background: p.coverUrl ? `url('${p.coverUrl}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
-        },
-        propertyId: p.id, zone: p.zone || "-", areaLabel: areaLabels[p.area] || p.area || "-",
-        title: `${typeLabels[p.type] || p.type} — ${p.zone || ""}`, typeLabel: typeLabels[p.type] || p.type || "-",
-        hasBedrooms: !!p.bedrooms, bedrooms: p.bedrooms, hasBathrooms: !!p.bathrooms, bathrooms: p.bathrooms,
-        hasLivingArea: !!p.livingArea, livingArea: p.livingArea, sqmLabel: t.sqm,
-        priceLabel: "฿" + (Number(p.price) || 0).toLocaleString() + (p.status === "rent" ? t.perMonth : ""),
-        onOpen: () => this.openPropertyModal(p),
-      };
-    });
-    const shareUrl = `${window.location.origin}/Agent Profile.dc.html?id=${this._listerId}`;
-    const mp = this.state.modalProperty;
-    const mpGallery = (mp && mp.gallery && mp.gallery.length) ? mp.gallery : [mp && mp.coverUrl].filter(Boolean);
-    const mpStatus = mp ? (statusMap[mp.status] || statusMap.sale) : null;
     return {
-      notFound: false, hasLister: true,
-      coverStyle: {
-        height: "220px", width: "100%",
-        background: (canCustomCover && lister.coverPhotoUrl) ? `url('${lister.coverPhotoUrl}') center/cover` : `linear-gradient(135deg, ${theme}, oklch(65% 0.08 60))`,
-      },
-      avatarStyle: {
-        width: "96px", height: "96px", borderRadius: "50%", border: "4px solid white",
-        background: lister.profilePhotoUrl ? `url('${lister.profilePhotoUrl}') center/cover oklch(90% 0.01 70)` : theme,
-        display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "34px", fontFamily: "'Playfair Display',serif", flexShrink: 0,
-      },
-      noAvatarPhoto: !lister.profilePhotoUrl, initial: displayName.slice(0, 1).toUpperCase(),
-      isVerifiedVip: !!lister.vipTier,
-      vipBadgeLabel: { silver: "🥈 Verified VIP", gold: "🥇 Verified VIP", diamond: "💎 Verified VIP" }[lister.vipTier] || "",
-      vipBadgeStyle: { fontSize: "12px", fontWeight: "700", padding: "4px 12px", borderRadius: "100px", background: "oklch(30% 0.02 60)", color: "oklch(85% 0.13 95)" },
-      displayName, propCountLabel: `${properties.length} ${this.state.lang === "th" ? "รายการทรัพย์" : t.allProperties}`,
-      hasBio: !!(lister.bioText && (typeof lister.bioText === "object" ? (lister.bioText[this.state.lang] || lister.bioText.en || lister.bioText.th) : lister.bioText.trim())),
-      bioText: (lister.bioText && typeof lister.bioText === "object") ? (lister.bioText[this.state.lang] || lister.bioText.en || lister.bioText.th || "") : (lister.bioText || ""),
-      socialIcons: [
-        { key: "facebook", iconChar: "f", bg: "oklch(45% 0.15 260)", font: "Georgia,serif", url: (lister.socialLinks && lister.socialLinks.facebook) || "" },
-        { key: "tiktok", iconChar: "♪", bg: "oklch(20% 0.01 60)", font: "inherit", url: (lister.socialLinks && lister.socialLinks.tiktok) || "" },
-        { key: "youtube", iconChar: "▶", bg: "oklch(55% 0.22 25)", font: "inherit", url: (lister.socialLinks && lister.socialLinks.youtube) || "" },
-        { key: "instagram", iconChar: "◎", bg: "linear-gradient(135deg, oklch(70% 0.18 30), oklch(55% 0.2 340))", font: "inherit", url: (lister.socialLinks && lister.socialLinks.instagram) || "" },
-      ].filter((s) => s.url).map((s) => ({ ...s, style: { width: "38px", height: "38px", borderRadius: "50%", background: s.bg, color: "white", border: "1px solid oklch(85% 0.01 70)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", fontFamily: s.font } })),
-      hasPhone: !!lister.phone, telHref: `tel:${lister.phone}`,
-      contactBtnStyle: { background: theme, color: "white", padding: "10px 18px", borderRadius: "100px", fontSize: "13px", fontWeight: "600" },
-      propCount: properties.length, hasNoProps: properties.length === 0, properties,
-      showShare: this.state.showShare, shareUrl,
-      shareFbUrl: "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(shareUrl),
-      shareLineUrl: "https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(shareUrl),
-      onOpenShare: () => this.setState({ showShare: true }),
-      onCloseShare: () => this.setState({ showShare: false }),
-      stopProp: (e) => e.stopPropagation(),
-      showPropertyModal: this.state.showPropertyModal,
-      onCloseModal: () => this.closePropertyModal(),
-      onModalPrevPhoto: (e) => { e.stopPropagation(); this.modalPrevPhoto(); },
-      onModalNextPhoto: (e) => { e.stopPropagation(); this.modalNextPhoto(); },
-      modalHasMultiplePhotos: mpGallery.length > 1,
-      modalPhotoCounter: mpGallery.length ? `${this.state.modalPhotoIndex + 1}/${mpGallery.length}` : "",
-      modalPhotoStyle: { position: "relative", width: "100%", aspectRatio: "16/10", borderRadius: "12px 12px 0 0", background: mpGallery[this.state.modalPhotoIndex] ? `url('${mpGallery[this.state.modalPhotoIndex]}') center/cover` : "oklch(93% 0.01 70)" },
-      modalZoneLine: mp ? `${mp.zone || "-"} · ${areaLabels[mp.area] || mp.area || "-"}` : "",
-      modalTitle: mp ? `${typeLabels[mp.type] || mp.type} — ${mp.zone || ""}` : "",
-      modalHasBedrooms: !!(mp && mp.bedrooms), modalBedrooms: mp && mp.bedrooms,
-      modalHasBathrooms: !!(mp && mp.bathrooms), modalBathrooms: mp && mp.bathrooms,
-      modalHasLivingArea: !!(mp && mp.livingArea), modalLivingArea: mp && mp.livingArea,
-      modalPriceLabel: mp ? "฿" + (Number(mp.price) || 0).toLocaleString() + (mp.status === "rent" ? t.perMonth : "") : "",
-      modalHasDescription: !!(mp && mp.description && (typeof mp.description === "object" ? (mp.description[this.state.lang] || mp.description.en || mp.description.th) : mp.description.trim())),
-      modalDescription: mp ? ((typeof mp.description === "object") ? (mp.description[this.state.lang] || mp.description.en || mp.description.th || "") : (mp.description || "")) : "",
-      allPropertiesLabel: t.allProperties, noPropertiesLabel: t.noProperties,
-      tBedrooms: t.bedrooms, tBathrooms: t.bathrooms, tSqm: t.sqm, tContact: t.contact,
-      lang: this.state.lang, langOptions: LANG_OPTIONS, onSelectLang: (code) => this.onSelectLang(code),
-      headerSiteLabel: `${t.personalSite} ${displayName}`,
-      filterSelectStyle: { border: "1px solid oklch(85% 0.01 70)", borderRadius: "100px", padding: "8px 12px", fontSize: "12.5px", fontFamily: "inherit", background: "white", color: "oklch(30% 0.02 60)", cursor: "pointer" },
-      filterType: this.state.filterType, onFilterType: (e) => this.setState({ filterType: e.target.value }),
-      filterZone: this.state.filterZone, onFilterZone: (e) => this.setState({ filterZone: e.target.value }),
-      filterBeds: this.state.filterBeds, onFilterBeds: (e) => this.setState({ filterBeds: e.target.value }),
-      filterPrice: this.state.filterPrice, onFilterPrice: (e) => this.setState({ filterPrice: e.target.value }),
-      typeFilterOptions: [
-        { value: "", label: t.allTypes }, { value: "villa", label: t.villa }, { value: "house", label: t.house },
-        { value: "condo", label: t.condo }, { value: "land", label: t.land }, { value: "commercial", label: t.commercial },
-      ],
-      zoneFilterOptions: [{ value: "", label: t.allZones }, ...[...new Set(this.state.properties.map((p) => p.zone).filter(Boolean))].map((z) => ({ value: z, label: z }))],
-      bedsFilterOptions: [
-        { value: "", label: t.allBeds }, { value: "1", label: t.bed1 }, { value: "2", label: t.bed2 }, { value: "3", label: t.bed3 }, { value: "4", label: t.bed4 },
-      ],
-      priceFilterOptions: [
-        { value: "", label: t.allPrices }, { value: "under5", label: t.under5 }, { value: "p5to10", label: t.p5to10 },
-        { value: "p10to20", label: t.p10to20 }, { value: "over20", label: t.over20 },
-      ],
-      onOpenChatFromModal: () => {
-        this.setState((s) => {
-          const t2 = UI_I18N[s.lang] || UI_I18N.th;
-          const name = (s.lister && (s.lister.displayName || s.lister.name)) || "เรา";
-          const chatMessages = s.chatMessages.length ? s.chatMessages : [{ role: "assistant", text: t2.greeting.replace("{name}", name), bubbleStyle: this.bubbleStyle(false) }];
-          return { showPropertyModal: false, chatOpen: true, chatMessages };
-        });
-      },
-      shareCopyLabel: this.state.shareCopyLabel,
-      onCopyShareLink: () => {
-        if (navigator.clipboard) navigator.clipboard.writeText(shareUrl).catch(() => {});
-        this.setState({ shareCopyLabel: "คัดลอกแล้ว ✓" });
-        setTimeout(() => this.setState({ shareCopyLabel: "คัดลอกลิงก์" }), 2000);
-      },
-      chatOpen: this.state.chatOpen, chatClosed: !this.state.chatOpen,
-      chatHeaderStyle: { background: theme, color: "white", padding: "12px 16px", borderRadius: "12px 12px 0 0", display: "flex", alignItems: "center", justifyContent: "space-between" },
-      chatBubbleStyle: { position: "fixed", bottom: "20px", right: "20px", width: "56px", height: "56px", borderRadius: "50%", background: theme, color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "24px", cursor: "pointer", boxShadow: "0 4px 16px rgba(0,0,0,0.25)", zIndex: 500 },
-      onToggleChat: () => this.toggleChat(),
-      chatMessages: this.state.chatMessages, chatThinking: this.state.chatThinking,
-      chatInput: this.state.chatInput, onChatInput: (e) => this.setState({ chatInput: e.target.value }),
-      onChatKeyDown: (e) => { if (e.key === "Enter") this.sendChat(); },
-      onSendChat: () => this.sendChat(),
-      sendBtnStyle: { background: theme, color: "white", padding: "9px 16px", borderRadius: "100px", fontSize: "13px", fontWeight: "600", cursor: "pointer" },
+      name: this.state.name, onName: (e) => this.setState({ name: e.target.value }),
+      phone: this.state.phone, onPhone: (e) => this.setState({ phone: e.target.value }),
+      email: this.state.email, onEmail: (e) => this.setState({ email: e.target.value }),
+      password: this.state.password, onPassword: (e) => this.setState({ password: e.target.value }),
+      submitted: this.state.submitted,
+      showSignupForm: this.state.tab === "signup" && !this.state.submitted,
+      showLoginForm: this.state.tab === "login",
+      onTabSignup: () => this.setState({ tab: "signup" }),
+      onTabLogin: () => this.setState({ tab: "login" }),
+      signupTabColor: this.state.tab === "signup" ? "oklch(40% 0.13 25)" : "oklch(70% 0.01 70)",
+      loginTabColor: this.state.tab === "login" ? "oklch(40% 0.13 25)" : "oklch(70% 0.01 70)",
+      loginEmail: this.state.loginEmail, onLoginEmail: (e) => this.setState({ loginEmail: e.target.value }),
+      loginPassword: this.state.loginPassword, onLoginPassword: (e) => this.setState({ loginPassword: e.target.value }),
+      loginSubmitLabel: this.state.loginBusy ? "กำลังเข้าสู่ระบบ…" : "เข้าสู่ระบบ",
+      onLoginSubmit: () => this.loginSubmit(),
+      loginError: this.state.loginError,
+      submitLabel: this.state.submitting ? "กำลังส่ง…" : "สมัครเลย",
+      error: this.state.error,
+      onSubmit: () => this.submit(),
+      onGoogleSignIn: () => this.googleSignIn(),
+      onFacebookSignIn: () => this.facebookSignIn(),
+      phoneOtp: this.state.phoneOtp, onPhoneOtp: (e) => this.setState({ phoneOtp: e.target.value }),
+      otpCode: this.state.otpCode, onOtpCode: (e) => this.setState({ otpCode: e.target.value }),
+      showOtpCodeInput: this.state.otpSent,
+      otpActionLabel: this.state.socialBusy ? "กำลังดำเนินการ…" : (this.state.otpSent ? "ยืนยันรหัส" : "ส่งรหัส OTP"),
+      onOtpAction: () => this.otpAction(),
+      socialError: this.state.socialError,
+      foundingBannerText: (this.state.foundingLimit > 0)
+        ? (this.state.foundingCount < this.state.foundingLimit
+          ? `Founding Agents — เหลืออีก ${this.state.foundingLimit - this.state.foundingCount} จาก ${this.state.foundingLimit} ที่ สมัครฟรีช่วงเปิดตัว`
+          : "")
+        : "",
+      foundingFinePrint: this.state.foundingNote || "ช่วงนี้ฟรีชั่วคราวสำหรับผู้สมัครกลุ่มแรก — จะแจ้งล่วงหน้าก่อนเริ่มเก็บค่าบริการในอนาคต",
     };
   }
 }

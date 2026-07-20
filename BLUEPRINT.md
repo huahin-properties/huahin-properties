@@ -1,286 +1,1048 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
+# huahin.properties — แผนธุรกิจ + สถาปัตยกรรมระบบ (Blueprint)
 
-<helmet>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <title>Blueprint — huahin.properties</title>
-  <style>
-    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
-    h2 { font-family: 'Playfair Display', serif; }
-  </style>
-</helmet>
+เอกสารมีชีวิต — อัปเดตทุกครั้งที่มีการตัดสินใจ/เปลี่ยนแผนใหม่ อ่านคู่กับ CLAUDE.md
+(สถานะทางเทคนิคปัจจุบันของเว็บ) เอกสารนี้คือ "ทำไม/ลำดับ/เป้าหมาย" ส่วน CLAUDE.md คือ "ตอนนี้มีอะไรอยู่แล้ว"
 
-<div style="min-height:100vh; padding:clamp(20px,4vw,56px); box-sizing:border-box;">
-  <div style="max-width:900px; margin:0 auto; background:white; border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:clamp(24px,4vw,48px); box-shadow:0 20px 50px -30px rgba(30,20,10,0.25);">
+ทุกครั้งที่ทำงานแต่ละขั้นตอนเสร็จ จะอธิบายว่าสิ่งที่สร้างคืออะไร ทำงานอย่างไร มีเงื่อนไขอะไรที่ต้องรู้
+ก่อนไปขั้นถัดไปเสมอ
 
-    <div style="display:flex; align-items:center; gap:12px; margin-bottom:4px;">
-      <div style="width:38px; height:38px; border-radius:10px; background:oklch(35% 0.09 25); display:flex; align-items:center; justify-content:center; color:white; font-size:19px;">🏠</div>
-      <div style="font-family:'Playfair Display',serif; font-size:23px; font-weight:700; color:oklch(20% 0.02 60);">huahin . properties — Blueprint</div>
-    </div>
-    <div style="font-size:13px; color:oklch(55% 0.02 60); margin:8px 0 6px;">แผนธุรกิจ + สถาปัตยกรรมระบบ — เอกสารมีชีวิต อัปเดตทุกครั้งที่ตัดสินใจ/เปลี่ยนแผนใหม่ (อัปเดตล่าสุด: 16 ก.ค. 2026)</div>
-    <div style="margin-bottom:14px;"><a href="./CEO%20Guide.dc.html" style="display:inline-flex; align-items:center; gap:7px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:8px 16px; border-radius:100px; font-size:13px; font-weight:600;">📘 คู่มือ CEO <span style="opacity:0.75; font-weight:400;">— CEO Guide</span></a></div>
-    <div style="display:flex; gap:16px; font-size:12px; color:oklch(50% 0.02 60); margin-bottom:24px; flex-wrap:wrap;">
-      <div style="display:flex; align-items:center; gap:5px;"><span style="width:9px; height:9px; border-radius:50%; background:oklch(45% 0.13 150); display:inline-block;"></span> เสร็จแล้ว</div>
-      <div style="display:flex; align-items:center; gap:5px;"><span style="width:9px; height:9px; border-radius:50%; background:oklch(55% 0.15 75); display:inline-block;"></span> ทำต่อจากนี้ / ทำไปแล้วบางส่วน</div>
-      <div style="display:flex; align-items:center; gap:5px;"><span style="width:9px; height:9px; border-radius:50%; background:oklch(80% 0.01 70); display:inline-block;"></span> ยังไม่เริ่ม</div>
-    </div>
+---
 
-    <div style="height:1px; background:oklch(90% 0.01 70); margin:20px 0;"></div>
+## 0. สถานะปัจจุบัน — สิ่งที่สร้างเสร็จแล้วก่อนเริ่ม Blueprint นี้
 
-    <h2 style="font-size:19px; color:oklch(20% 0.02 60); margin:0 0 10px;">0. สถานะปัจจุบัน — สิ่งที่สร้างเสร็จแล้วก่อนเริ่ม Blueprint นี้</h2>
-    <div style="background:oklch(96% 0.04 150); border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:16px 18px; color:oklch(25% 0.06 150); font-size:14px; line-height:1.75;">
-      <p style="margin:0 0 10px;"><strong>หน้าเว็บที่สร้างเสร็จแล้ว:</strong> Home, Search Results, Property Details, Sell, About, Contact, Admin Login, Admin Dashboard, Owners, Property Map, AI Quick Add, Site Content, Agent Signup, Agent Approvals, Agent Profile (สาธารณะ), Lister Dashboard, Lister Billing, Team, Staff Signup, Advertise, AI Concierge — พร้อม shared components: PropertyCard, SearchFilters, LanguageSwitcher, ContactRail</p>
-      <p style="margin:0 0 6px;"><strong>ฟีเจอร์ที่ใช้งานได้แล้วจริง:</strong></p>
-      <ul style="margin:0; padding-left:20px;">
-        <li>ระบบ 8 ภาษาเต็มรูปแบบ ทุกหน้า+ฟอร์ม+แชท+แอดมิน</li>
-        <li>แชทบอท AI (Claude API ผ่าน Cloud Function) ตอบลูกค้าอัตโนมัติ + สร้างปุ่มลิงก์อัตโนมัติ</li>
-        <li>AI Quick Add, Favorites+Intent Scoring, Admin Dashboard สถิติครบ, Maintenance Gate</li>
-        <li>ระบบ self-serve เต็มรูปแบบสำหรับผู้ลงประกาศ (สมัคร/โพสต์/แก้ไข/ลบ/แชร์เว็บส่วนตัว)</li>
-        <li>Stripe subscription + Featured boost + แบนเนอร์ภายนอก + VIP ทั้งสองฝั่ง — ครบวงจร</li>
-      </ul>
-    </div>
+เอกสารนี้ครอบคลุมตั้งแต่จุดเริ่มต้นโปรเจกต์จนถึงแผนอนาคตทั้งหมดในที่เดียว หมวดนี้คือ "สร้างเสร็จแล้ว" ส่วนหมวด 11
+(ลำดับการสร้างจริง) คือ**สิ่งที่ยังไม่ได้ทำ นับจากนี้เป็นต้นไป** — รายละเอียดทางเทคนิคเต็มดูที่ CLAUDE.md
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">1. รูปแบบธุรกิจ &amp; ทีมงาน</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
-      <ul style="margin:0; padding-left:20px;">
-        <li><strong>นิติบุคคล</strong>: ทำในนามบุคคลธรรมดา/อิสระได้ก่อน ค่อยพิจารณาเปิดบริษัทเมื่อรายได้/ทีมโตพอ</li>
-        <li><strong>ทีมงาน</strong>: ขยายจาก 1 คน → 2-3 คนสูงสุด สิทธิ์ 2 ระดับ Owner/Staff</li>
-        <li><strong>Remote core + Local hands</strong>: Owner ดูแลจากที่ไหนก็ได้ Staff พื้นที่ถ่ายรูป+ป้อนข้อมูล</li>
-      </ul>
-    </div>
+**หน้าเว็บที่สร้างเสร็จแล้ว (Design Components ทั้งหมด)**: Home, Search Results, Property Details, Sell,
+About, Contact, Admin Login, Admin Dashboard, Owners (ไดเรกทอรีรวมเจ้าของ/ผู้เช่า/ผู้ซื้อ), Property Map
+(Google Maps ปักหมุด), AI Quick Add (ร่างประกาศ 8 ภาษาด้วยเสียง/รูป/AI), Site Content (ตั้งค่า AI persona/
+restrictions/Facebook post footer) — พร้อม shared components: PropertyCard, SearchFilters, LanguageSwitcher,
+ContactRail (แถบข้าง + แชทบอท)
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">2. รายได้ 3 ทาง (+ ทาง 4 VIP)</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
-      <p><strong>2.0 ขอบเขตพื้นที่ให้บริการ</strong>: เฉพาะหัวหิน/ชะอำ/ปราณบุรี — ตรวจพิกัดก่อนอนุญาตโพสต์ (ยังทำผ่านการตรวจแบบ manual ในขั้น AI Quick Add เท่านั้น)</p>
-      <p><strong>ทาง 1 — ค่าคอมมิชชัน</strong>: favorite → intent score → threshold → บอท AI เปิดบทสนทนาเจาะจง → lead แท็ก "hot"</p>
-      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin:10px 0;">
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ <strong>ทาง 1 เสร็จสมบูรณ์</strong> — favorites.js, intent scoring, auto-bot, lead ใน Admin Dashboard</div>
-      </div>
-      <p><strong>2.1 "ให้ทีมช่วยขาย" (Assisted Sale)</strong> — แทนที่ Agent VIP pool เดิม: ไม่มีสถานะ Agent แยกจากผู้ลงประกาศทั่วไปแล้ว ใครก็โพสต์ได้อิสระ บ้านซ้ำ/แข่งราคาเป็นเรื่องปกติของตลาด</p>
-      <div style="background:oklch(95% 0.15 75); border:1px solid oklch(80% 0.15 75); border-radius:7px; padding:11px 14px; margin:10px 0;">
-        <div style="font-size:13.5px; color:oklch(35% 0.1 40);">◐ <strong>ทำไปแล้วบางส่วน</strong> — checkbox+% commission หลังบันทึกทรัพย์ ✓, ป้าย nudge ในการ์ด ✓ — ยังไม่มี: workflow tracker (รับเรื่อง→ปิดการขาย), แบนเนอร์/อีเมลแจ้งเตือนเชิงรุก</div>
-      </div>
-      <p><strong>ทาง 2 — ค่าสมัครสมาชิกโพสต์เอง</strong>: บันไดสมาชิก 5 ระดับ (ฟรี/②/③/VIP เงิน/VIP ทอง — เพชรรอเปิด), Rollout Level สวิตช์เดียวคุมการเปิดเผยแต่ละระดับ</p>
-      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin:10px 0; display:flex; flex-direction:column; gap:6px;">
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ Stripe subscription ครบวงจร (Checkout, webhook, payments ledger, Customer Portal)</div>
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ self-serve dashboard เต็มรูปแบบ (Lister Dashboard) — โพสต์/แก้ไข/ลบทรัพย์ทั้งใบ/แชร์เว็บส่วนตัว</div>
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ โปรไฟล์ Agent สาธารณะ (Agent Profile.dc.html) พร้อมแชทบอทของตัวเอง</div>
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ Founding Agents อย่างเป็นทางการ — จำกัดจำนวน + ข้อความเงื่อนไขตั้งได้จาก Site Content</div>
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ ล็อกอินง่าย — Google / Facebook / เบอร์โทร OTP / อีเมล+รหัสผ่าน (ต้องเปิดสวิตช์ผู้ให้บริการที่ Firebase Console ก่อนใช้จริง)</div>
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ จำกัดจำนวนโพสต์ตามแพ็กเกจ (tierLimit ผูกกับปุ่ม "+ เพิ่มทรัพย์ใหม่")</div>
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ <strong>16 ก.ค. 2026 (รอบ 3):</strong> หน้าเว็บสมาชิกไม่พาลูกค้าหลุดไปเว็บหลักอีกต่อไป — คลิกดูทรัพย์เปิดเป็นป็อปอัพในหน้าเดียวกัน เลื่อนดูรูปได้ครบทุกรูป, เพิ่มตัวเลือกภาษา 8 ภาษา (มีผลกับ UI+ป็อปอัพ+แชท AI ทั้งหมด), เพิ่มตัวกรอง 4 ช่อง (ประเภท/โซน/ห้องนอน/ราคา), AI ในแชทตอบสั้นลงเป็นค่าเริ่มต้นและโชว์การ์ดทรัพย์ให้คลิกดูเองแทนการพิมพ์รายละเอียดยาว, คำอธิบายทรัพย์+bio ที่สมาชิกกรอกเองแปล 8 ภาษาอัตโนมัติทันทีตอนกด "บันทึก" (เหมือนกลไก AI Quick Add)</div>
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ <strong>16 ก.ค. 2026 (รอบ 4):</strong> ลดความเสี่ยงต้นทุน AI ตอนทรัพย์เยอะขึ้น — แชทหน้าเว็บหลัก (ContactRail) เดิมส่งรายชื่อทรัพย์ทั้งหมดให้ AI อ่านทุกข้อความ ตอนนี้กรองตามคำถามลูกค้า (โซน/ประเภท/งบ/ห้องนอน) จำกัดสูงสุด 30 รายการต่อข้อความแทนไม่จำกัด ถ้าไม่มีเงื่อนไขชัดเจนสุ่มตัวอย่างกระจายแทนส่งทั้งหมด — ทรัพย์ที่ลูกค้ากำลังดูอยู่ยังส่งเสมอ</div>
-      </div>
-      <div style="background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px; margin:10px 0;">
-        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">○ ยังไม่ทำ: ทรัพย์ที่แอดมินเพิ่ม/แก้ไขให้เจ้าของบ้านโดยตรง (นอก AI Quick Add) ยังไม่มีระบบแปลอัตโนมัติ</div>
-      </div>
-      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin:10px 0;">
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ <strong>16 ก.ค. 2026 (รอบ 2):</strong> ปรับผังหน้าตั้งค่าเว็บไซต์ให้ดูเป็นสตูดิโอเดียวกัน (รูปโปรไฟล์/ภาพปก/สีธีม+ตัวอย่างสดขนาดใหญ่อยู่โซนเดียวกัน), สีธีมที่เลือกโชว์เป็นแผ่นตัวอย่าง, ข้อความตัวอย่างยาวสมจริงในช่องแนะนำตัว/บุคลิก AI, ไอคอนโซเชียลเปลี่ยนเป็นตราสีแบรนด์จริงแทน emoji, แก้บั๊ก Firestore rules ที่ทำให้บันทึกรูปโปรไฟล์ไม่สำเร็จ, เปลี่ยนโครงสร้างแพ็กเกจเป็น 3 ระดับจริง (เริ่มต้น/มืออาชีพ/พรีเมียม 590/1,190/2,290฿ — 5/12/25 หลัง) ตัดคอลัมน์ Contact us ออก</div>
-      </div>
-      <div style="background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px; margin:10px 0;">
-        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">○ ยังไม่ได้ทำ: Facebook post AI ร่างสำนวนจริงในข้อความโพสต์ (ตอนนี้เป็นเทมเพลตประกอบข้อมูล), TikTok caption generator, pay-per-listing</div>
-      </div>
-      <p><strong>ทาง 3 — โฆษณา/แบนเนอร์</strong>: slot ปรับได้, สุ่มหมุนเวียน, ราคาตามหน้า×ตำแหน่ง, ขายให้ลูกค้าภายนอกจริงผ่าน Stripe</p>
-      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin:10px 0;">
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ เสร็จสมบูรณ์ — Advertise.dc.html + ตัวกรอง "ทั้งหมด/ของเว็บเอง/รอชำระเงิน/จ่ายแล้ว" ใน Site Content, Featured boost, badge Featured/VIP บนการ์ดสาธารณะ</div>
-      </div>
-      <p><strong>ทาง 4 — แพ็กเกจ VIP (เจ้าของบ้าน + Agent)</strong>: เดิมเป็นเฟสอนาคต ตอนนี้เปิดใช้งานแกนหลักแล้ว</p>
-      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin:10px 0; display:flex; flex-direction:column; gap:6px;">
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ ปุ่ม VIP เงิน/ทอง/เพชร ต่อทรัพย์ในหน้า Admin (ฝั่งเจ้าของบ้าน) ผ่าน Stripe one-time</div>
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ Agent VIP subscription ในหน้า Lister Billing (ฝั่ง Agent) พร้อม teaser ล่อใจ (จำนวนบ้าน/Agent ในพูลที่ยังเข้าไม่ถึง)</div>
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ ระบบลงทะเบียนผู้ซื้อ + รหัส Agent เฉพาะตัว (ป้องกันข้อพิพาท Procuring Cause) — คุ้มครอง 60 วัน</div>
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ Badge "VIP" บนการ์ดสาธารณะ + "Verified VIP" บนโปรไฟล์ Agent</div>
-      </div>
-      <div style="background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px; margin:10px 0;">
-        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">○ ยังไม่ได้ทำ: หน้าจัดการข้อพิพาทสำหรับแอดมิน (audit trail), Buyer Registration ยังไม่ผูกกับ UI ฝั่งสาธารณะ (ตอนนี้อยู่ที่ Lister Dashboard ของ Agent เท่านั้น)</div>
-      </div>
-    </div>
+**ฟีเจอร์ที่ใช้งานได้แล้วจริง**:
+- ระบบ 8 ภาษาเต็มรูปแบบ (ไทย/อังกฤษ/รัสเซีย/จีน/เยอรมัน/นอร์เวย์/ฝรั่งเศส/อิตาลี) ทุกหน้า+ฟอร์ม+แชท+แอดมิน
+- แชทบอท AI (ผ่าน Claude API ผ่าน Cloud Function) ตอบลูกค้าอัตโนมัติ ตรวจจับรหัสประกาศ/คำว่า "ติดต่อ" แล้วสร้าง
+  ปุ่มลิงก์ให้อัตโนมัติ
+- AI Quick Add: ถ่ายรูปหลายรูป, พูดบอกข้อมูล (voice dictation), พิกัด Google Maps, ร่างประกาศ+คำนวณระยะทาง
+  ไปจุดสำคัญ+โพสต์ Facebook อัตโนมัติ
+- Admin Dashboard: นับสถิติ (ทั้งหมด/ขาย/เช่า/ขายแล้ว/จอง/ใหม่/ให้เช่าแล้ว) + tracker สัญญาเช่าใกล้หมดอายุ
+- โหมดปิดปรับปรุงเว็บไซต์ (Maintenance Gate) เปิด/ปิดได้จาก Admin ให้เจ้าของดูงานระหว่างพัฒนาได้โดยคนอื่นไม่เห็น
+- ระบบรหัสผ่านแอดมิน (เปลี่ยนได้เอง)
+- `data.js` มีข้อมูลตัวอย่าง 9+ รายการครอบคลุมหัวหิน/ปราณบุรี/ชะอำ (ขาย/เช่า/ที่ดิน)
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">3. การสร้างตัวตนแบรนด์ (AI-powered)</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
-      <p>Landing Page Agent (Agent Signup.dc.html) ✓, เมนูตัวเลือกด่วนในแชทบอท ✓ — ป้าย "Powered by AI" และ signature ท้าย Facebook post ยังไม่ยืนยันสถานะล่าสุด</p>
-    </div>
+**สิ่งที่ยังไม่ได้ต่อจริง (รอในแผน)**: LINE Official Account webhook สำหรับแจ้งเตือน (Stripe และ Storage
+ต่อเสร็จแล้ว — ดูหมวด 11). Firestore Security Rules ปิดล็อกแบบ role-based แล้ว ไม่ใช่เปิดชั่วคราวอีกต่อไป
+(ดูหมวด 5 ข้อ 1)
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">4-6. การเงิน / ความปลอดภัย / SEO</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
-      <p><strong>การเงิน</strong>: Stripe ledger + webhook + auto-hide เมื่อจ่ายไม่ผ่าน — เสร็จสมบูรณ์</p>
-      <p><strong>ความปลอดภัย</strong>: Firestore/Storage rules role-based ✓ deploy แล้ว — App Check, rate limiting, reCAPTCHA v3, backup อัตโนมัติ ยังไม่ได้ทำ</p>
-      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin:10px 0;">
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ ตรวจสอบแล้ว (16 ก.ค. 2026): ใช้ role-based + deny-by-default จริงแล้ว ไม่ใช่ rules เปิดโล่งชั่วคราวอีกต่อไป</div>
-      </div>
-      <p><strong>SEO</strong>: URL ถาวร + Open Graph + JSON-LD ที่ Property Details ✓, sitemap.xml + robots.txt (หน้า static หลัก) ✓ — ยังไม่ได้ทำ: sitemap รายทรัพย์แต่ละหลัง (ต้อง prerendering) — ยื่น Search Console สำเร็จแล้ว (16 ก.ค. 2026)</p>
-    </div>
+**งานถัดจากนี้เริ่มที่หมวด 11 ข้อ 1 เป็นต้นไป** (ย้ายรูปภาพไป Storage) — ทุกอย่างก่อนหน้านั้นถือว่าเสร็จแล้ว
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">7-10. แดชบอร์ดสถานะระบบ / แจ้งเตือน / วงจรชีวิตประกาศ / แบนเนอร์</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
-      <p>แดชบอร์ดสถานะระบบ (3 หมวด) ✓, วงจรชีวิตประกาศ+ลบรูปอัตโนมัติ (ขั้นพื้นฐาน, client-side sweep) ✓, ระบบจัดการแบนเนอร์ Admin CRUD ✓</p>
-      <div style="background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px; margin:10px 0;">
-        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">○ ยังไม่ได้ทำ: LINE Official Account แจ้งเตือน (ไม่เร่งด่วน), สรุปประจำวัน/รายเดือน/รายปี, Staging (Preview Channels)</div>
-      </div>
-    </div>
+---
 
-    <div style="height:1px; background:oklch(90% 0.01 70); margin:28px 0;"></div>
+## 1. รูปแบบธุรกิจ & ทีมงาน
 
-    <h2 style="font-size:19px; color:oklch(20% 0.02 60); margin:0 0 6px;">11. ลำดับการสร้างจริง — สถานะปัจจุบัน</h2>
-    <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">ชุด A และ B เสร็จสมบูรณ์ทั้งหมดแล้ว รวมทาง 4 (VIP) — เหลือแค่งานที่ตั้งใจเลื่อนไว้ไม่เร่งด่วน</div>
+- **นิติบุคคล**: ทำในนามบุคคลธรรมดา/อิสระได้ ไม่ต้องเปิดบริษัทตอนนี้ Stripe รับเงินให้บุคคลธรรมดาได้ปกติ
+  พอวันที่รายได้/ทีมโตพอ ค่อยพิจารณาเปิดบริษัท — ตอนนั้นแค่เปลี่ยนบัญชีผู้รับเงินใน Stripe ไม่กระทบระบบเว็บ
+  (รายละเอียดภาษี/นิติกรรมจริงควรปรึกษานักบัญชีเมื่อถึงเวลา)
+- **ทีมงาน**: ขยายจาก 1 คน → 2-3 คนสูงสุด ไม่ใช่โครงสร้างบริษัท
+  - สิทธิ์ 2 ระดับพอ: **Owner** (เห็น/แก้ทุกอย่าง+การเงิน) / **Staff** (จัดการประกาศ/lead/แชท แตะการเงิน-ตั้งค่าไซต์ไม่ได้)
+  - Firebase Auth รองรับหลายบัญชีอยู่แล้ว แค่เพิ่ม field role + เช็คใน Security Rules
+- **โมเดลการทำงาน — Remote core + Local hands**: ระบบ cloud-native ทั้งหมด จัดการได้จากทุกที่ในประเทศ
+  งานที่ต้องมีคนพื้นที่หัวหินจริง: ถ่ายรูป/สำรวจทรัพย์สิน, พาลูกค้าดูบ้าน, ตรวจเอกสารกับเจ้าของตัวจริง
+  → Owner ดูแลเว็บ/การเงิน/โฆษณา/สมาชิกจากที่ไหนก็ได้, Staff พื้นที่ 1-2 คนถ่ายรูป+ป้อนข้อมูลผ่าน AI Quick Add หน้างาน
 
-    <div style="display:flex; flex-direction:column; gap:7px;">
-      <div style="display:flex; align-items:center; gap:10px; background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px;">
-        <div style="width:20px; height:20px; border-radius:50%; background:oklch(45% 0.13 150); color:white; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;">✓</div>
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">ชุด A (ทาง 1 ครบ, แบนเนอร์ครบ, Agent Signup+Approvals+Profile+Dashboard ครบ, วงจรชีวิตประกาศพื้นฐาน)</div>
-      </div>
-      <div style="display:flex; align-items:center; gap:10px; background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px;">
-        <div style="width:20px; height:20px; border-radius:50%; background:oklch(45% 0.13 150); color:white; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;">✓</div>
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">ชุด B ข้อ 1-6 (Security Rules, Storage, role Owner/Staff, Stripe, Featured, แบนเนอร์ภายนอก)</div>
-      </div>
-      <div style="display:flex; align-items:center; gap:10px; background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px;">
-        <div style="width:20px; height:20px; border-radius:50%; background:oklch(45% 0.13 150); color:white; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;">✓</div>
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">ชุด B ข้อ 7 — ทาง 4 VIP (แกนหลัก) — เสร็จแล้ว รวม Buyer Registration + Agent Code + Badge + Teaser</div>
-      </div>
-      <div style="display:flex; align-items:center; gap:10px; background:oklch(95% 0.15 75); border:1px solid oklch(80% 0.15 75); border-radius:7px; padding:11px 14px;">
-        <div style="width:20px; height:20px; border-radius:50%; background:oklch(55% 0.15 75); color:white; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;">◐</div>
-        <div style="font-size:13.5px; color:oklch(35% 0.1 40);">งานเก็บตก: Assisted Sale workflow tracker, ตัวกรองแบนเนอร์ (ทำแล้ว) แต่หน้า Admin ยังไม่มีมุมมองแยกชัด, หน้าจัดการข้อพิพาท VIP</div>
-      </div>
-      <div style="display:flex; align-items:center; gap:10px; background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px;">
-        <div style="width:20px; height:20px; border-radius:50%; background:oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">○</div>
-        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">LINE Official Account แจ้งเตือน (ไม่เร่งด่วน ทำเมื่อไหร่ก็ได้)</div>
-      </div>
-    </div>
+## 2. รายได้ 3 ทาง
 
-    <div style="font-size:13px; color:oklch(50% 0.02 60); margin-top:16px; line-height:1.7;">งานหลักของ Blueprint ฉบับนี้เสร็จสมบูรณ์แล้ว — ที่เหลือเป็นงานเก็บตก/เสริมที่ไม่บล็อกการใช้งานจริง และ LINE แจ้งเตือนซึ่งตั้งใจเลื่อนไว้ไม่เร่งด่วน</div>
+### 2.0 ขอบเขตพื้นที่ให้บริการ (Service Area Validation) — บังคับใช้ทุกช่องทางที่มีการโพสต์ทรัพย์สิน
 
-    <div style="height:1px; background:oklch(90% 0.01 70); margin:28px 0;"></div>
+เว็บนี้ให้บริการเฉพาะ **3 อำเภอ: หัวหิน, ชะอำ, ปราณบุรี** เท่านั้น ต้องมีระบบตรวจสอบตำแหน่งที่ตั้งก่อนอนุญาตให้
+โพสต์ประกาศทุกครั้ง (ทั้งตอนแอดมินใช้ AI Quick Add เอง และตอน Agent/เจ้าของบ้านโพสต์เองในอนาคตผ่าน self-serve)
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:0 0 10px;">12. แผนเปิดตัว (Go-to-Market)</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
-      <p><strong>หลักการรวม</strong>: ทุกกลุ่มใช้ฟรีก่อนเสมอ แล้วค่อยเปิดจ่ายทีละชั้นเมื่อเห็นผลจริง</p>
-      <ol style="margin:0; padding-left:20px;">
-        <li>ปิดเงียบ (Soft launch) 2-4 สัปดาห์</li>
-        <li>เปิดวงในพื้นที่ + Founding Agents ฟรี</li>
-        <li>SEO/Google Business คู่ขนาน</li>
-        <li>เปิดเก็บเงินทาง 2</li>
-        <li>เปิดทาง 3 (โฆษณาลูกค้าภายนอก)</li>
-        <li>เปิดทาง 4 (VIP ทั้งสองฝั่ง) — <strong style="color:oklch(35% 0.1 150);">พร้อมใช้งานแล้วตั้งแต่ตอนนี้</strong></li>
-      </ol>
-    </div>
+**วิธีตรวจสอบ**: ใช้พิกัด Google Maps (lat/lng) ที่กรอกไว้แล้วในขั้นตอนโพสต์ประกาศตรวจสอบกับขอบเขตพื้นที่ทั้ง 3
+อำเภอ (reverse geocoding หรือเทียบกับขอบเขต GPS ที่กำหนดไว้ล่วงหน้า) — ถ้าพิกัดอยู่นอกขอบเขตทั้ง 3 อำเภอ ระบบ
+**ปฏิเสธการโพสต์ทันทีพร้อมข้อความแจ้งเหตุผลชัดเจน** (เช่น "ขออภัย เว็บนี้รับประกาศเฉพาะพื้นที่หัวหิน/ชะอำ/
+ปราณบุรีเท่านั้น") ก่อนที่ข้อมูลจะถูกบันทึกเข้า Firestore
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">14. หน้า AI Concierge (Conversational Landing Page)</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
-      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ สร้างเสร็จแล้ว — AI Concierge.dc.html (ยังไม่ได้อัปโหลดขึ้นเว็บจริง รอตัดสินใจ)</div>
-      </div>
-      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ บทสนทนาต่อเนื่องข้ามหน้า (localStorage คีย์เดียว)</div>
-      </div>
-      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ ปุ่มย่อ/ขยายกล่องแชท ("─" ไม่ใช่ "×")</div>
-      </div>
-      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ แชทรู้บริบทหน้าที่กำลังดูอยู่ (ส่งรหัสทรัพย์ของหน้าปัจจุบันเข้าบริบท AI เสมอ)</div>
-      </div>
-      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ เลื่อนอัตโนมัติ + ปุ่มล้างประวัติแชทมีข้อความกำกับ (ContactRail + AI Concierge)</div>
-      </div>
-      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ ไอคอน Favorite เป็นดาว + ป้ายกำกับ 8 ภาษา</div>
-      </div>
-      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ ปุ่ม "My Favorites" ลอยแบบตะกร้าสินค้า มุมล่างซ้ายทุกหน้า</div>
-      </div>
-      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ ลิงก์บ้านในแชทเป็นการ์ด (รูปปก 72×72px คงที่ + ราคา/ห้องนอน/ทำเล)</div>
-      </div>
-      <div style="background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px;">
-        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">○ ยังไม่ได้ทำ: ปุ่มแชร์ครบรูปแบบ (Web Share API), เก็บสถิติ ref code ต่อลิงก์</div>
-      </div>
-    </div>
+**เหตุผล**: รักษาความน่าเชื่อถือของเว็บในฐานะผู้เชี่ยวชาญเฉพาะพื้นที่ (ตามจุดขายที่วางไว้ในหมวด 3) และป้องกัน
+ข้อมูลขยะ/ประกาศนอกพื้นที่ปะปนที่จะทำให้ผู้ใช้สับสนหรือเสีย SEO ของการเป็นเว็บเฉพาะทาง
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">15-17. UX หน้า Home / กฎป้องกันการสวมประกาศ / มอบหมายงาน</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
-      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ แบนเนอร์รูปแบบใหม่ (PropertyCard ปกติ ไม่มีป้าย Sponsored), CTA ย้ายใต้ช่องค้นหา, Hero มือถือชิดบน-ซ้าย</div>
-      </div>
-      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ กฎป้องกันการ "สวมประกาศ" — ล็อกฟิลด์ตัวตนหลัก (รูปปก/ราคา/ที่อยู่/ชื่อ/รหัส) เมื่อสถานะเป็น "sold"</div>
-      </div>
-      <div style="background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px;">
-        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">○ ระบบมอบหมายงานตามแผนก/โซน — เตรียมแนวคิดไว้ล่วงหน้าเท่านั้น ยังไม่สร้าง UI จริง (รอทีมโตถึง 3+ คน)</div>
-      </div>
-    </div>
+### 2.1 ระบบ "ให้ทีมช่วยขาย" (Assisted Sale) — แทนที่ Agent VIP Pool เดิม (ใหม่ล่าสุด กรกฎาคม 2026)
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">13. หมายเหตุค่าใช้จ่าย</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
-      <p>Firebase อยู่ใน free tier ได้นานในสเกลนี้ ค่าใช้จ่ายเพิ่มตามการใช้งานจริงคือ Claude API (ต่อข้อความ) และ Stripe (~3-4% ต่อธุรกรรม) — ไม่มีค่า license ก้อนใหญ่ผูกพันรายเดือน</p>
-    </div>
+**ที่มา**: เดิมกังวลว่าเจ้าของบ้านโพสต์เองปะทะกับ Agent ที่หยิบบ้านเดียวกันไปโพสต์ซ้ำเพื่อหาค่าคอม — ตัดสินใจ
+**ไม่แก้ด้วยการห้าม/จัดสรรสิทธิ์** (ซับซ้อน ต้องเป็นกรรมการตัดสินข้อพิพาท) แต่เปิดกว้างแทน: ใครก็โพสต์บ้านของ
+ตัวเองได้อิสระ ไม่มีสถานะ "Agent" แยกจากผู้ลงประกาศทั่วไป ("lister" คนเดียวกันหมด) บ้านซ้ำ/แข่งราคากันเองถือ
+เป็นเรื่องปกติของตลาด แพลตฟอร์มไม่เข้าไปยุ่ง — ดูหมวด 2 ทาง 2 (ตัดตัวเลือก Agent/เจ้าของบ้านออกจากหน้าสมัคร
+แล้ว ✅) และทาง 4 เดิม (deprecated ✅ ดูด้านล่าง)
 
-    <div style="background:oklch(95% 0.15 45); border:1px solid oklch(75% 0.18 45); border-radius:8px; padding:16px 18px; margin-top:28px;">
-      <div style="font-size:13.5px; color:oklch(35% 0.15 30); line-height:1.7;">⚠️ <strong>index.html ที่ root ซ้ำกับ Home.dc.html</strong> — GitHub repo มีไฟล์ index.html แยกต่างหากที่ root ซึ่งเป็นไฟล์ที่เว็บโหลดจริงตอนเข้า huahin.properties/ (ไม่ใช่ Home.dc.html โดยตรง) ไม่ sync กันอัตโนมัติ ทุกครั้งที่แก้ Home.dc.html ต้องอัปเดต index.html คู่กันเสมอ ไม่งั้นหน้าแรกจริงจะไม่ตรงกับที่แก้ไว้ (พบปัญหานี้ตอนยืนยัน Google Search Console 16 ก.ค. 2026)</div>
-    </div>
+**กลไกรายได้ใหม่แทนที่**: ทุกครั้งที่มีคนลงรายละเอียดทรัพย์ (หน้า Sell.dc.html ตอนนี้ — และควรขยายไปหน้า
+self-serve listing form เมื่อสร้างเสร็จ) มีช่องถามเพิ่ม เป็น**ข้อความส่วนตัวระหว่างผู้ลงประกาศกับทีมงานเท่านั้น**:
+- Checkbox: "นอกจากลงประกาศในเว็บเราแล้ว ต้องการให้ทีมงานช่วยขาย/ปล่อยเช่าผ่านช่องทางอื่นเพิ่มเติมด้วยหรือไม่?"
+- ถ้าติ๊กใช่ → เลือก % ค่าคอมที่ยินดีให้จาก dropdown สำเร็จรูป (**1% / 2% / 5% / 10% / 15%** — ไม่ให้พิมพ์อิสระ
+  กันกรอกมั่ว)
+- **ทั้งช่อง checkbox และ % นี้เป็นความลับทางธุรกิจ** — เก็บใน Firestore (field `assistedSale`/`commissionPct`
+  ต่อ lead/ประกาศ) อ่านได้เฉพาะ Admin เท่านั้น ผู้ลงประกาศคนอื่นและผู้ใช้ทั่วไปไม่เห็นเด็ดขาด แม้แต่ผู้ลงประกาศ
+  เจ้าของ field นี้เองก็ไม่เห็น % ของคนอื่น — เพราะแต่ละคนอาจให้ % ต่างกัน (เช่นเจ้าของบ้านให้ 5% แต่คนที่เอาบ้าน
+  มาขายต่อยินดีสละแค่ 1.5% จากส่วนต่างที่ตัวเองได้มา) แพลตฟอร์มเป็นฝ่ายเดียวที่รู้ตัวเลขทั้งหมดและตัดสินใจว่าจะ
+  ขายเอง/ส่งต่อทีมใน สังกัดช่วยขาย
+- **สถานะตอนนี้ (อัปเดต — ย้ายจุดถามไปหลังบันทึกแล้ว)**: ✅ ตอนกรอกทรัพย์ครั้งแรก **ไม่มี**ช่องนี้ในฟอร์มแล้ว
+(กันฟอร์มดูรกตอนกรอกข้อมูลหลัก) — ช่องถาม "ให้ทีมช่วยขายไหม" + เลือก % จะโผล่ **หลังกดบันทึกทรัพย์สำเร็จ** เป็น
+หน้าถัดไปทันที (Lister Dashboard.dc.html หน้า "บันทึกสำเร็จ") พร้อมกันนั้นมีปุ่ม "ข้ามไปก่อน" ให้ข้ามได้ ไม่บังคับ
 
-    <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:8px; padding:16px 18px; margin-top:16px;">
-      <div style="font-size:13.5px; color:oklch(25% 0.05 150); line-height:1.7;">✓ <strong>กล่องรหัสผ่านปิดปรับปรุงเว็บไซต์ — แก้บั๊กแล้ว (16 ก.ค. 2026)</strong> — เคยเข้าไม่ได้เพราะ (1) โค้ดพยายามดึงอีเมลแอดมินแบบไดนามิกจาก Site Content แล้วได้ค่าผิดเพี้ยนมา ตอนนี้ตัดออกใช้อีเมล doothailand@gmail.com ตายตัวเหมือน Admin Login และ (2) ปุ่ม "Save Login Details" เดิมไม่ได้เปลี่ยนรหัสผ่าน Firebase Auth จริง แค่บันทึกเก็บโชว์ ตอนนี้เปลี่ยนรหัสผ่านจริงแล้ว — ถ้าลืมรหัสผ่านแอดมิน ไปที่ Firebase Console → Authentication → Users → Reset password ได้โดยตรง</div>
-    </div>
+**ถ้าข้ามตอนแรก — ชวนซ้ำภายหลังแบบไม่รบกวน (persistent nudge)**: ✅ สร้างแล้วขั้นพื้นฐาน — การ์ดทรัพย์ในหน้ารายการ
+ของ Lister Dashboard จะโชว์ป้ายเล็ก "💡 ยังไม่ขาย? ลองให้ทีมช่วยขายดูไหม" อัตโนมัติเมื่อทรัพย์นั้นยังไม่เปิดใช้
+Assisted Sale และค้างอยู่ในสถานะขาย/เช่านานเกิน 30 วัน (คลิกที่การ์ดเข้าไปแก้ไข/เปิดใช้ได้เลย) — ยังไม่ได้ทำ:
+แบนเนอร์เด่น/แจ้งเตือนอีเมลเมื่อถึงเกณฑ์ (ตอนนี้เป็นแค่ป้ายเล็กในการ์ด ไม่ใช่การแจ้งเตือนเชิงรุก)
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">18. Project Governance &amp; AI Collaboration</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
-      <div style="background:oklch(93% 0.05 250); border:1px solid oklch(78% 0.1 250); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
-        <div style="font-size:13.5px; color:oklch(28% 0.06 250);"><strong>Project Governance System</strong> — Project Control Center (แท็บใน CEO Dashboard) เป็นระบบปฏิบัติการ/กำกับดูแลถาวรของโครงการ huahin.properties — Current Version 2.2.0 · Build 2026.07.18.01 · Status: STABLE FOUNDATION</div>
-      </div>
-      <div style="background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
-        <div style="font-size:13.5px;"><strong>Single Source of Truth</strong> — CEO Dashboard + Project Control Center คือแหล่งข้อมูลจริงหลักสำหรับ: Project rules, Development reviews, Business decisions, UX/UI decisions, Marketing/SEO, Bugs/risks/security, AI prompt library, Roadmap, Decision log, AI collaboration guidance, Technical architecture, Coding rules, Project terminology, Permanent project decisions</div>
-      </div>
-      <div style="background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
-        <div style="font-size:13.5px;"><strong>Team Responsibilities</strong> — CEO: final decision authority, budget/Production Write/Deployment approval, business direction. ChatGPT: strategy, business, marketing, SEO, UX, QA, risk review, project governance, Project Control management. Development AI (Claude/Cod): implementation, coding, testing, technical documentation, development reports.</div>
-      </div>
-      <div style="background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
-        <div style="font-size:13.5px;"><strong>AI Session Continuity</strong> — AI Session Pack v2.2 คือชุดข้อมูลทางการสำหรับเริ่ม Session ใหม่ของ ChatGPT/Claude/Development AI ต้องตรวจ: Project Header, AI Session Metadata, สถานะปัจจุบัน, งานค้าง, ความเสี่ยงที่รู้, การตัดสินใจถาวร, System Architecture, Tech Stack, Critical Files, Coding Rules</div>
-      </div>
-      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);"><strong>Operational Rules</strong> — ห้าม Production Write โดยไม่มี CEO อนุมัติชัดเจน · ห้าม Deploy โดยไม่มี CEO อนุมัติชัดเจน · การตัดสินใจสำคัญต้องบันทึกใน Project Control · งานที่เสร็จต้องมีรายงาน · ห้ามปิดบังผลทดสอบที่ไม่ผ่าน · โครงสร้าง Project Control ล็อกหลัง v2.2 จนกว่า CEO จะอนุมัติการเปลี่ยนโครงสร้างใหม่</div>
-      </div>
-      <div style="background:oklch(93% 0.05 150); border:1px solid oklch(78% 0.1 150); border-radius:7px; padding:11px 14px;">
-        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ <strong>Completed Milestone — Project Control Center v2.2 Foundation</strong> (2026-07-18): Governance system completed, AI Session Pack completed, Technical context completed, Coding rules completed, Permanent decisions documented, Blueprint synchronized — Ready to resume product development</div>
-      </div>
+**Workflow ติดตามหลังยอมรับ**: เมื่อผู้ลงประกาศติ๊กยอมรับ (หน้า "บันทึกสำเร็จ" หรือภายหลังจากป้ายเตือน) ระบบบันทึก
+opt-in + % ลง Firestore ทันที ✅ — แต่สถานะ step-by-step ("รับเรื่องแล้ว" → "กำลังหาลูกค้า" → ... → "ปิดการขาย")
+**ยังไม่ได้ออกแบบรายละเอียดสุดท้าย/ยังไม่ได้สร้าง** Admin ติดตามเองนอกระบบชั่วคราวจนกว่าจะออกแบบหน้า workflow
+tracker จริง
 
-      <h3 style="font-size:15.5px; color:oklch(20% 0.02 60); margin:22px 0 8px;">Project Review Standard</h3>
-      <div style="font-size:13.5px; line-height:1.75;">
-        <p><strong>A. Purpose</strong> — วิธีร่วมกันของ CEO / ChatGPT (Product Owner) / Cod (Lead Developer) เพื่อตัดสินว่างานหนึ่งเสร็จสมบูรณ์ ปลอดภัย อยู่ในขอบเขต milestone ปัจจุบันหรือยังไม่หรือไม่ เพื่อให้การตัดสินใจสอดคล้องกัน ป้องกัน scope creep และรักษาความต่อเนื่องข้าม AI session</p>
-        <p><strong>B. สถานะการตรวจ 4 ระดับ</strong>:<br/>
-        🟢 <strong>PASS</strong> — งานเสร็จตามเป้าหมายที่ตกลงกันไว้ อยู่ในขอบเขต ไม่มี regression/ความเสี่ยงด้านความปลอดภัย/ข้อมูล — ไม่ได้หมายความว่าระบบสมบูรณ์แบบ 100%<br/>
-        🟡 <strong>PASS WITH OBSERVATIONS</strong> — เสร็จตาม milestone แล้ว แต่มีข้อสังเกตที่ไม่ block ถูกจดเป็น Technical Debt/Future Improvement ชัดเจนแล้ว<br/>
-        🟠 <strong>HOLD</strong> — ดูหน้าถูกต้อง แต่เครื่องยืนยันที่จำเป็นยังไม่ครบ (เช่น ยังยืนยัน Deploy จริงไม่ได้) — ไม่ใช่การล้มเหลว ต้องระบุชัดเจนว่าขาดหลักฐาน/การตรวจสอบอะไรอีกจึงจะปิดงานได้<br/>
-        🔴 <strong>NOT PASS</strong> — งานไม่เสร็จ/มี regression/เสี่ยงด้านความปลอดภัยหรือข้อมูล/ขัดกับมติที่อนุมัติไว้ — ต้องระบุสาเหตุ+หลักฐาน+ผลกระทบ+วิธีแก้ไขเสมอ</p>
-        <p><strong>C. Launch Blocker</strong>: Critical = block เสมอ 路 High = block เว้นแต่ CEO รับความเสี่ยงเป็นลายลักษณ์อักษร 路 Medium = ไม่ auto-block ต้อง escalate ตามความสำคัญ · Low/Future Improvement/Technical Debt/Nice-to-have = ไม่ block โดยค่าเริ่มต้น</p>
-        <p><strong>D. Scope Discipline</strong> — “ทำ milestone ปัจจุบันให้เสร็จก่อน บันทึกงานอนาคตแยกต่างหาก” — มีเฉพาะ Critical เท่านั้นที่ขัด milestone อัตโนมัติได้ สิ่งที่ดีกว่าที่เจอระหว่างทาง ต้องบันทึกไว้เพื่อ CEO อนุมัติก่อน ห้ามลงมือทำเองเงียบๆ</p>
-        <p><strong>E. ChatGPT Review Responsibility</strong> — Mandatory: ความสมบูรณ์ตามเป้าหมาย, scope, ความปลอดภัย/ข้อมูล, regression, open issues 路 Recommended: เป้าหมายธุรกิจ, UX, documentation, launch impact 路 Optional: ความสวยงาม/dev-experience/performance — ไม่ block PASS</p>
-        <p><strong>F. CEO Authority</strong> — CEO มีอำนาจสูงสุดเหนือ Production Deploy/Write, การอนุมัติเปิดตัว, งบ/ทิศทางธุรกิจ, การยอมรับ High risk, การเปลี่ยน scope/feature/roadmap, เรื่องกฎหมาย/ความเป็นส่วนตัว — Cod/ChatGPT ห้ามอนุมัติสิ่งเหล่านี้แทน CEO โดยเด็ดขาด</p>
-        <p><strong>G. Standard Review Output</strong>: [สถานะ] → Task/Module → Reason → Evidence Reviewed → Scope Alignment → Security/Data/Regression Impact → Remaining Issues → Future Improvements/Technical Debt → Launch Impact → Product Owner Recommendation → CEO Decision Required</p>
-        <p><strong>H. Effective Use</strong> — มีผลทันทีหลัง CEO ตรวจรับเอกสารนี้ ใช้กับทุกงานรีวิว technical/QA/UX/business/documentation/security/Production-readiness จากนี้เป็นต้นไป</p>
-      </div>
-    </div>
+### 2.2 หน้าทำงานผู้ลงประกาศ (Lister Dashboard) — ใหม่ (กรกฎาคม 2026)
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">19. งานถัดไป / Next Action</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
-      <div style="background:oklch(93% 0.06 75); border:1px solid oklch(78% 0.12 75); border-radius:7px; padding:11px 14px;">
-        <div style="font-size:13.5px; color:oklch(30% 0.06 75);"><strong>ถัดไป: Deploy firestore.rules</strong><br/>ตามด้วย: 2. QA Cleanup (Production Write) · 3. Storage Verification (HH-70724) · 4. Demo Listing 28 รายการ (กำหนด isDemo/Badge) · 5. HH-111 เติม Zone · 6. Public Launch Preparation</div>
-      </div>
-    </div>
+**ไฟล์**: `Lister Dashboard.dc.html` — แทนที่ "ยังไม่ได้ทำ: หน้า self-serve dashboard" เดิมในหมวด 11 ชุด A ข้อ 5
 
-    <div style="background:oklch(97% 0.01 70); border:1px solid oklch(88% 0.01 70); border-radius:7px; padding:11px 14px; margin-top:16px; font-size:12.5px; color:oklch(45% 0.02 60);">2026-07-18 — QA Sprint Completion v2.3.0: Listing Approvals Responsive+Functional Test PASS, Firestore Index Review Production Ready, AI Quick Add POI Verification conditional PASS, Demo Listing audit (28 found, not 22 — pending CEO confirmation), HH-70724 Firestore-side clean. Production Readiness: 85%. No Production Write. No Deploy.</div>
+**Flow**: สมัคร/ล็อกอินจาก `Agent Signup.dc.html` แล้วพาเข้าหน้านี้ทันที (ทั้งสมัครใหม่ครั้งแรกและล็อกอินครั้ง
+ถัดไปในวันหลัง — เป็นหน้าแรกเสมอ ไม่ใช่หน้า Billing) หน้านี้คือ "ที่ทำงาน" ส่วนตัวของแต่ละผู้ลงประกาศ:
+- แถบบนสุดโชว์แพ็กเกจปัจจุบัน + ปุ่ม "📦 ดู/อัปเกรดแพ็กเกจ" ลิงก์ไป `Lister Billing.dc.html`
+- **รายการทรัพย์ของตัวเอง** ดึงจาก Firestore `properties` ที่ `listerId` ตรงกับบัญชีตัวเอง (query
+  `fetchWhere("properties","listerId",uid)`) — มีกี่หลังก็โชว์เป็นการ์ดกี่ใบ คลิกการ์ดเพื่อแก้ไข
+- ปุ่ม "+ เพิ่มทรัพย์ใหม่" เปิดฟอร์มกรอก: ประเภท/โซน/ชื่อทำเล/สถานะ/ราคา/ห้องนอน-น้ำ/พื้นที่/ที่ดิน/รายละเอียด
+  **+ อัปโหลดรูปสูงสุด 10 รูป** (native file input หลายไฟล์ ต่อคิว, ลบรูปเดิม/รูปใหม่ได้ก่อนบันทึก, พรีวิวรูป
+  จริงเป็น `<img>` แล้ว ✅ ก่อนหน้านี้พรีวิวไม่ขึ้นเพราะใช้ CSS background-image กับ hole ที่ยังไม่ resolve —
+  แก้เป็น `<img src>` ห่อด้วย `sc-if hint-placeholder-val="{{ false }}"` กันโชว์ path ดิบๆ ตอนโหลด) — รูปเก็บ
+  ผ่าน Firebase Storage เหมือนระบบ AI Quick Add เดิม (`fileToDataUrl` + `savePhoto`, เขียน field `photos`
+  บนตัวทรัพย์ด้วยเพื่อให้หน้าสาธารณะ (`getEffectiveProperties`) ดึงรูปไปแสดงถูกต้อง)
+- **ปุ่มบันทึก = "บันทึกแบบร่าง" เสมอ** ✅ (ไม่ใช่ "บันทึกทรัพย์นี้" แบบเดิม) — ทุกครั้งที่กดบันทึก ทรัพย์จะมี
+  `isDraft: true` และ**ไม่ขึ้นเว็บสาธารณะ** (หน้า Home/Search Results/Property Details กรอง `isDraft` ออก
+  ที่ `getEffectiveProperties` ใน `data.js` แล้ว ✅) บันทึกเสร็จกลับไปหน้ารายการทรัพย์ของตัวเองทันที (ไม่ใช่
+  เด้งไปหน้าอื่นแบบดราฟต์ก่อนหน้านี้)
+- **การ์ดทรัพย์ในหน้ารายการ** ✅ ออกแบบใหม่ทั้งหมด: แถวบนเป็นรูปปก (จริงถ้ามี ไอคอน 🏠 ถ้ายังไม่มีรูป) + ป้าย
+  สถานะ + ป้าย "📝 ร่าง" ถ้ายังไม่โพสต์ ตามด้วยรายละเอียดย่อ แล้วปิดท้ายด้วย**แถบ 4 ปุ่มไอคอน**:
+  1. ✏️ **แก้ไข** — เปิดฟอร์มแก้ไขทรัพย์นี้
+  2. 📤/✅ **โพสต์** — สลับสถานะ `isDraft` ทีละครั้ง (ร่าง → โพสต์ขึ้นเว็บจริง, กดซ้ำ = ถอดกลับเป็นร่าง)
+     ปุ่มเปลี่ยนเป็น "โพสต์แล้ว ✅" สีเขียวเมื่อขึ้นเว็บอยู่
+  3. 🤖 **ข้อความโพสต์ AI** — เปิดหน้าร่างข้อความโพสต์ (เนื้อหาตามหมวด 2.1) เฉพาะทรัพย์ใบนั้น พร้อมช่อง
+     Assisted Sale ในหน้าเดียวกัน (ไม่ผูกกับ "หลังบันทึกครั้งแรก" แบบเดิมอีกแล้ว — เปิดดู/แก้ไขได้ทุกเมื่อ)
+  4. 🔗 **แชร์** — เปิด popup แชร์ลิงก์หน้าทรัพย์สาธารณะ (`Property Details.dc.html?id=...`) มีปุ่มแชร์ไป
+     Facebook/LINE โดยตรง + คัดลอกลิงก์
+- **แก้ Firestore Security Rules** ✅ — เดิม collection `properties`/`propertyPhotos` เขียนได้เฉพาะ Admin
+  เท่านั้น (เป็นสาเหตุที่บันทึกจากหน้านี้ไม่สำเร็จตอนทดสอบ) แก้แล้วให้ผู้ลงประกาศที่ล็อกอินเขียน/แก้/ลบได้
+  เฉพาะทรัพย์ที่ `listerId` เป็นของตัวเองเท่านั้น (คนอื่นแก้ทรัพย์กันไม่ได้) — **⚠️ ต้อง deploy
+  `firestore.rules` ใหม่ผ่าน Codespace ก่อนฟีเจอร์นี้จะใช้งานได้จริงบนเว็บจริง** (คำสั่ง
+  `firebase deploy --only firestore:rules`) — **✅ deploy สำเร็จแล้วจริง (16 ก.ค. 2026)**
+- **แก้ Storage Security Rules** ✅ (รอบ 2 — บั๊กที่พบตอนทดสอบจริง) — Firestore rules อนุญาตแล้ว แต่**ไฟล์รูป
+  จริงยังอัปโหลดไม่ได้** เพราะ `storage.rules` (กฎคนละชุดที่คุม Firebase Storage) ยังอนุญาตแค่ Admin ทำให้
+  รูปถูกปฏิเสธเงียบๆ ไม่มี error โชว์ แล้วเว็บสาธารณะเห็นการ์ดเป็นป้าย "[photo]" (ดีไซน์เดิมที่ตั้งใจโชว์เมื่อไม่
+  มีรูปจริง ไม่ใช่บั๊กของป้ายเอง) — แก้แล้วให้ผู้ลงประกาศที่ล็อกอินอัปโหลดรูปได้ (path `propertyPhotos/`)
+  **⚠️ ต้อง deploy `storage.rules` ผ่าน Codespace เพิ่ม** (คำสั่ง `firebase deploy --only storage`)
+- **แก้บั๊กหน้า Property Details พังทั้งหน้า (`Cannot read properties of undefined reading 'map'`)** ✅ —
+  ทรัพย์ที่แอดมินสร้างผ่าน AI Quick Add มีช่อง `features` (คุณสมบัติเด่น) ติดมาด้วยเสมอ แต่ทรัพย์ที่สร้างจาก
+  Lister Dashboard ไม่มีช่องนี้ ทำให้โค้ดที่ทำ `.map()` บนช่องนี้พังทั้งหน้า — แก้ที่ `data.js` ให้
+  `getEffectiveProperties` เติมค่า default (`features: []`, `distanceBeach/distanceTown: 0`) ให้ทุกทรัพย์ที่ขาด
+  ช่องเหล่านี้ไปเสมอ (จุดเดียว ครอบคลุมทุกหน้าที่ดึงข้อมูลทรัพย์)
+- **เพดานรูปตามระดับแพ็กเกจ** ✅ — เปลี่ยนจากเพดานคงที่ 10 รูป เป็นตามระดับ: **ฟรี 10 / ระดับ 2: 15 /
+  ระดับ 3: 20 รูป** (`photoLimit()` อ่านจาก `lister.tier`)
+- **โควตา "เจนข้อความโพสต์ด้วย AI" ต่อรายการทรัพย์ ตามระดับแพ็กเกจ** ✅ — **ฟรี 1 ครั้ง / ระดับ 2: 5 ครั้ง /
+  ระดับ 3: 10 ครั้ง ต่อทรัพย์ 1 รายการ** (ไม่รีเซ็ตรายเดือน ผูกกับตัวรายการทรัพย์ตลอดไป ไม่ใช่รวมทั้งบัญชี) —
+  นับเฉพาะตอนกด "เจน"/"เจนใหม่" เท่านั้น (คัดลอกไปโพสต์กี่ครั้งไม่จำกัด ไม่กินโควตา) เก็บที่ field `aiGenCount`
+  บนตัวทรัพย์ — ครั้งแรกเปิดหน้าต้องกดปุ่ม "🤖 เจนข้อความโพสต์ด้วย AI" ก่อนถึงจะเห็นข้อความ ครั้งต่อไปกด "🔄 เจนใหม่
+  (เหลือ X ครั้ง)" ได้จนกว่าจะครบโควตา — ครบแล้วปุ่มหายไป โชว์ข้อความเตือนสีส้ม "⚠️ ใช้โควตาครบแล้ว" +
+  ลิงก์อัปเกรดแพ็กเกจแทนทันที (ใช้ตรรกะเดียวกันทุกระดับ ไม่ต้องแก้โค้ดต่อระดับ) — ข้อความโพสต์เองยังเป็น
+  เทมเพลตประกอบข้อมูล (ไม่ใช่ Claude จริง) แต่คำอธิบายบนหน้าจอโน้มใจว่า "ร่างด้วย AI พร้อมคีย์เวิร์ด SEO"
+  เป็นจุดขายของการอัปเกรด
+- **ร่างข้อความโพสต์ (ปุ่ม 🤖)**: ระบบประกอบข้อความจากข้อมูลทรัพย์ (ประเภท/ราคา/ห้อง/พื้นที่/รายละเอียด/รหัส
+  ทรัพย์ + ลิงก์หน้าทรัพย์) ต่อท้ายด้วย**บล็อกช่องทางติดต่อ + แฮชแท็กมาตรฐานของเว็บ** (ดึงจาก Site Content →
+  Facebook post footer เดิมที่มีอยู่แล้ว ซึ่งมีทั้งเบอร์ติดต่อ/LINE/เว็บไซต์/แฮชแท็กรวม `#HuaHinProperty` ฯลฯ)
+  มีปุ่ม "คัดลอกข้อความ" กดแล้วก็อปไปวางที่ Facebook/LINE ได้เลย
+  - **ข้อจำกัดที่ต้องรู้**: ตอนนี้เป็น**การประกอบข้อความจากเทมเพลตอัตโนมัติ** ไม่ใช่ Claude ช่วยร่างสำนวนแบบ
+    AI Quick Add (ซึ่งต้องผ่าน Cloud Function ยิง Claude API จริง) — ถ้าต้องการให้สำนวนเป็นธรรมชาติ/ครบ 8
+    ภาษาแบบ AI Quick Add ต้องต่อยอดเชื่อม Cloud Function เดียวกันเข้ามาทีหลัง (งานถัดไปที่ยังไม่ได้ทำ)
 
-    <div style="margin-top:32px; font-size:12px; color:oklch(55% 0.02 60); text-align:center;">อ่านคู่กับ CLAUDE.md — หน้านี้คืออีกวิธีดู BLUEPRINT.md แบบมีสี อัปเดตพร้อมกันทุกครั้งที่มีการเปลี่ยนแผน</div>
+**ยังไม่ได้ทำ**: จำกัดจำนวนโพสต์ตามแพ็กเกจ (มีอยู่แล้ว ✅ ผ่าน `tierLimit()` ตอนสร้างทรัพย์ใหม่ — ตรวจสอบซ้ำแล้ว
+กรกฎาคม 2026), แจ้งเตือนอีเมลเชิงรุกสำหรับ nudge (ตอนนี้แค่ป้ายในการ์ด),
+สำนวน AI จริงในข้อความโพสต์ (ตอนนี้เป็นเทมเพลตประกอบข้อมูล ไม่ใช่ Claude ช่วยเขียน)
 
-  </div>
-</div>
+### 2.3 ระบบสมาชิก/แพ็กเกจ v2 — ทดลองฟรี 30 วัน + อนุมัติประกาศ + หมดอายุอัตโนมัติ (โมเดลปัจจุบันจริง กรกฎาคม 2026 รอบ 5)
 
-</x-dc>
-</body>
-</html>
+**สถานะ**: ✅ สร้างโครงหลักเสร็จแล้ว (firebase-client.js, Lister Dashboard, Lister Billing, Listing Approvals.dc.html
+ใหม่, firestore.rules) — **ยังไม่ deploy จริง** ต้อง `firebase deploy --only firestore:rules` ก่อนใช้งานได้จริง
+บนเว็บจริง และยังไม่มี Cloud Scheduler (ทุก sweep เป็น client-side เหมือนระบบ archival เดิม)
+
+**บันไดสมาชิก 5 ระดับ (แทนที่บันได Free/Pro/Level3/Level4 เดิม)**:
+
+| ระดับ | ชื่อ | ราคา/เดือน | โควตาประกาศ | ตัวเร่งการมองเห็น |
+|---|---|---|---|---|
+| ทดลอง | 🎁 ทดลองใช้ฟรี (30 วัน ครั้งเดียว) | ฟรี | 5 | เทียบเท่าระดับ 3 ทุกอย่าง (แนะนำทุกรายการ+หน้าแรก) |
+| 1 | ระดับ 1 | 590 บาท | 5 | ไม่มี |
+| 2 | ระดับ 2 | 1,190 บาท | 12 | เลือกติดป้าย "แนะนำ" ได้ 3 รายการ |
+| 3 | ระดับ 3 | 2,290 บาท | 25 | แนะนำทุกรายการ + หน้าแรก (Featured) |
+| 4-5 | เตรียมไว้ในอนาคต | ยังไม่กำหนด | ยังไม่กำหนด | ใช้โครง VIP เงิน/ทอง/เพชรเดิมที่มีอยู่แล้วเป็นฐาน (ปลดผ่าน Rollout Level) |
+
+ฟีเจอร์พื้นฐาน (จำนวนรูป/AI gen ต่อรายการ) ยังคงต่างกันตามระดับเดิม (10-20 รูป, 1-10 ครั้งเจน AI) **ยกเว้นช่วง
+ทดลองฟรีที่ได้ค่าดีที่สุดทุกอย่าง** (20 รูป, 10 ครั้งเจน) เพื่อให้ "ใช้ฟีเจอร์ได้ครบทุกอย่าง" ตามที่ตกลงไว้ —
+มีแค่ **จำนวนประกาศ** เท่านั้นที่ถูกจำกัดช่วงทดลอง ไม่ใช่ฟีเจอร์
+
+**Trial**: ใช้ได้ครั้งเดียวต่อบัญชี (`trialUsed` เป็น flag ถาวร กดเริ่มใหม่ไม่ได้อีกแม้ trial จะหมดอายุ/อัปเกรดไปแล้ว)
+ไม่ต่ออายุอัตโนมัติ — มี grace period 3 วันหลังหมดอายุก่อนตัวเร่งมองเห็นจะหายจริง กับแบนเนอร์นับถอยหลัง 7 วันก่อน
+หมดอายุที่ Lister Dashboard สรุปยอดวิวรวมทุกประกาศ + ข้อความชวนอัปเกรดชัดเจนว่า "ป้ายแนะนำ/หน้าแรกเป็นสิทธิ์ของ
+ระดับ 3 เท่านั้น"
+
+**วงจรชีวิตประกาศใหม่ (`properties.listingStatus`)**: `pending` (รออนุมัติ, ไม่ขึ้นเว็บ) → `live` (อนุมัติแล้ว,
+นับถอยหลัง 30 วันจาก `publishedAt`) → `expired` (หมดอายุอัตโนมัติ, ซ่อนจากเว็บสาธารณะแต่ข้อมูล+รูปปกยังอยู่) —
+เจ้าของกด "ต่ออายุ" ได้เองทันทีไม่ต้องรออนุมัติซ้ำ (`renewListing()` รีเซ็ตนาฬิกา 30 วันทันที) หรือ `rejected`
+(แอดมินปฏิเสธ พร้อมเหตุผล, เจ้าของแก้ไขแล้วส่งใหม่ได้) — เดิมมีแค่ `isDraft` (ร่าง/โพสต์แล้ว) ตอนนี้ปรับเป็น 4
+สถานะเต็ม ยังคง `isDraft` ไว้เพื่อความเข้ากันได้กับข้อมูลเก่า (ประกาศเก่าก่อนหน้านี้ที่ไม่มี `listingStatus` เลย
+ถือเป็น "live" อัตโนมัติ ไม่ถูกซ่อนหายไปจากเว็บ — กันข้อมูลเก่าพัง)
+
+**คิวอนุมัติแอดมิน**: หน้าใหม่ `Listing Approvals.dc.html` (ลิงก์จาก Admin Dashboard) — กรองตามสถานะ, กด
+อนุมัติ/ปฏิเสธ (พร้อมกรอกเหตุผล) ต่อรายการ พร้อม**แจ้งเตือนข้อมูลซ้ำที่ส่อว่าสมัครทดลองซ้ำ**ที่ด้านบนสุด (จับคู่
+เบอร์โทรที่ตรงกันระหว่างบัญชีที่เคยใช้ trial แล้วกับบัญชีอื่น — heuristic เท่านั้น แอดมินตัดสินใจเองสุดท้าย)
+
+**นับวิวต่อประกาศ**: `properties.viewCount` เพิ่มทุกครั้งที่มีคนเปิดหน้า Property Details (ผ่าน rule พิเศษที่
+อนุญาตเฉพาะ field นี้ให้ visitor ที่ไม่ได้ login แก้ได้ กัน exploit ไม่ให้แก้ field อื่น) — เจ้าของเห็นตัวเลขนี้
+ที่การ์ดทรัพย์ในหน้า Lister Dashboard ของตัวเอง
+
+**ลบรูปหลังหมดอายุเกิน 3 เดือน**: sweep เดียวกับที่ทำ archival เดิม (client-side, ทำงานตอนแอดมิน**หรือ**เจ้าของ
+เปิดหน้าแดชบอร์ดของตัวเอง) ลบเฉพาะไฟล์รูปที่ไม่ใช่รูปปก (index 0) ออกจาก Storage เมื่อ `expiredAt` ผ่านมาเกิน 90
+วันโดยไม่ต่ออายุ — เก็บรูปปก + ข้อความ/ราคา/รายละเอียดทั้งหมดไว้ตลอดไป
+
+**ยังไม่ได้ทำ (ทำต่อได้)**: Cloud Scheduler ฝั่งเซิร์ฟเวอร์แทน client-side sweep (ตอนนี้ทำงานเฉพาะตอนมีคนเปิดหน้า
+แดชบอร์ดจริง — ข้อจำกัดเดียวกับ archival sweep เดิม), อีเมล/LINE แจ้งเตือนอัตโนมัติ 7 วัน/วันหมดอายุ trial (ตอนนี้
+เป็นแบนเนอร์ในหน้าแดชบอร์ดเท่านั้น ต้องเปิดเข้าดูเองถึงจะเห็น), หน้า Admin ดูสรุปสถิติ trial-to-paid conversion
+
+### ทาง 1 — ค่าคอมมิชชันซื้อขาย/เช่า (ทำอยู่แล้ว)
+ผู้ใช้กด favorite → ระบบให้คะแนนความสนใจ (intent score) เงียบๆ เบื้องหลัง (กด favorite/กดซ้ำ/ดูนาน) →
+ถึง threshold → บอท AI เปิดบทสนทนาเองเจาะจงตามบ้านที่สนใจ → เก็บ requirement ก่อนขอ contact ปิดท้าย →
+บันทึกเป็น lead พร้อมแท็ก "hot" ใน Admin Dashboard — โฟกัสเฉพาะคนสัญญาณแรงจริง ไม่ต้องไล่ตามทุกคน
+
+### ทาง 2 — ค่าสมัครสมาชิกโพสต์เอง (เจ้าของบ้าน/Agent, Stripe subscription)
+
+**คุณค่าที่ขาย Agent** (ทำไมต้องเลือกเว็บนี้): เจาะกลุ่มหัวหิน/ชะอำ/ปราณบุรีโดยเฉพาะ, AI ช่วยร่างประกาศ 8
+ภาษาอัตโนมัติ (ประหยัดเวลาแปลเอง), ผู้ช่วย AI ตอบลูกค้า 24 ชม. ทุกภาษา, ระบบ lead กรองลูกค้าจริงจังอัตโนมัติ
+
+**⚠️ แทนที่แล้ว (กรกฎาคม 2026 รอบ 5) — ดูหัวข้อ "2.3 ระบบสมาชิก/แพ็กเกจ v2" ด้านล่างสำหรับโมเดลปัจจุบันจริง**:
+ข้อความเดิมด้านล่างนี้ (สมัครฟรีใช้งานได้ทันทีไม่มีอนุมัติ, ไม่มีตัวเลือกแพ็กเกจตอนสมัคร) **ไม่ใช่โมเดลที่ใช้งาน
+จริงอีกต่อไป** — เก็บไว้อ่านเพื่อประวัติการตัดสินใจเท่านั้น. สรุปสั้นๆ ว่าเปลี่ยนอะไรบ้าง: (1) ไม่มีแพ็กเกจฟรีถาวร
+อีกแล้ว แทนที่ด้วย "ทดลองใช้ฟรี 30 วัน ครั้งเดียวต่อคน" (2) ประกาศทุกรายการต้องผ่านการอนุมัติแอดมินก่อนขึ้นเว็บ
+จริง (Listing Approvals.dc.html) — ไม่ใช่ auto-publish ทันทีอีกต่อไป (3) ประกาศมีอายุ 30 วัน หมดแล้วซ่อนอัตโนมัติ
+แต่ต่ออายุเองได้ทันทีไม่ต้องรออนุมัติซ้ำ
+
+**สมัครฟรี = ใช้งานได้ทันที ไม่มีการอนุมัติด้วยมือ**: สมัครแล้วกดยืนยันอีเมล (หรือ Facebook ในอนาคต) ก็เข้าใช้งาน
+ได้เลยทันที ไม่ต้องรอแอดมิน — การยืนยันอีเมลคือ "ความรัดกุม" แทนที่การอนุมัติด้วยมือ (Firebase sendEmailVerification)
+ทุกคนที่สมัครถูกเก็บเข้าระบบทันทีเป็นฐานรายชื่อสำหรับส่งข่าวสาร/อัปเดต/สิทธิประโยชน์ใหม่ผ่านอีเมลที่กรอกไว้ —
+Agent Approvals.dc.html เปลี่ยนบทบาทจาก "คิวอนุมัติ" เป็นแค่หน้าดูรายชื่อ/ระงับบัญชีที่ประพฤติไม่เหมาะสมแทน
+(หมายเหตุ: นี่คือการอนุมัติ**บัญชีสมาชิก** ยังคงเป็นแบบอัตโนมัติเหมือนเดิม — ที่เปลี่ยนคือการอนุมัติ**ประกาศ
+แต่ละรายการ** ต้องผ่านแอดมินก่อน ดู 2.3 ด้านล่าง)
+
+**หน้าสมัครไม่มีตัวเลือกแพ็กเกจ (เปลี่ยนจากดราฟต์ก่อนหน้า)**: กรอกข้อมูลแล้วกดสมัครฟรีได้เลยทันที ไม่ต้องเลือก
+แพ็กเกจใดๆ ก่อน — สมัครเสร็จพาไปหน้า Lister Billing ทันที ที่นั่นแสดงตารางราคา (ทดลองฟรี/①/②/③) ให้เห็นครบ
+พร้อมกันในหน้าเดียว — คอลัมน์ทดลองฟรีเสนอเริ่มทดลองใช้ 30 วันครั้งเดียว ส่วนคอลัมน์ ①②③ กดอัปเกรด/ตัดบัตรได้ทันที
+
+**ปุ่ม "สมัครฟรี" ใช้สีส้ม/แดงสด (oklch 62% 0.19 45) แยกจากปุ่มอื่นบนเว็บ**: เพื่อดึงสายตาและจูงใจให้คลิก
+มากกว่าใช้สีดำ/เข้มแบบปุ่มอื่นทั่วไป — ปรับทั้งจุดที่ปุ่มนี้ปรากฏ: แถบ CTA กลางหน้า Home, ไอคอนมือถือในแถบบน,
+และเมนูจอคอมพิวเตอร์
+
+**Agent ทดลองถามแชทบอทเกี่ยวกับบ้านของตัวเองได้ทันทีหลังลงประกาศ** (ใช้ระบบที่มีอยู่แล้ว ไม่ต้องสร้างเพิ่ม):
+แชทบอท AI ดึงข้อมูลจาก Firestore จริงเท่านั้น ไม่แต่งเอง และรู้บริบทหน้าที่กำลังเปิดดูอยู่ (ผูกรหัสทรัพย์อัตโนมัติ)
+— Agent เข้าหน้าประกาศของตัวเองแล้วลองถามได้เลยไม่ว่าจะเป็นสมาชิกระดับไหน ใช้เป็นจุดขายตอนชวน Agent สมัคร
+("ลองถาม AI เกี่ยวกับบ้านคุณดูได้เลยตอนนี้ ไม่ต้องรอ")
+
+**บันไดสมาชิก 5 ระดับ (โครงสร้างราคาสุดท้าย — แทนที่ระบบ Basic/Pro/Agency + VIP แยกกันแบบเดิม)**:
+รวมสิ่งที่เคยแยกเป็น 2 ระบบ (แพ็กเกจโพสต์ + VIP pool) ให้เป็นบันไดขั้นเดียวต่อเนื่อง เข้าใจง่ายกว่าสำหรับ Agent
+ระดับสูงกว่าได้สิทธิ์ทุกอย่างจากระดับล่างกว่าด้วย — **เปิดใช้งานจริงตอนนี้แค่ระดับ 1-3 เท่านั้น** (ระดับ 4-5 VIP
+เก็บไว้วางแผนทีหลังเมื่อมีฐาน Agent/เจ้าของบ้านมากพอ ไม่เปิดพร้อมกันทั้งหมดตั้งแต่แรก):
+
+| ระดับ | ชื่อ | ราคา/เดือน | ปลดล็อกเมื่อ (จำนวนสมาชิกสะสม) | สิทธิ์ที่ได้ |
+|---|---|---|---|---|
+| 1 | ฟรี | 0 | เปิดใช้งานได้เลยตั้งแต่วันแรก ✅ | โพสต์ได้ 1 หลัง + AI ร่างประกาศ 8 ภาษา |
+| 2 | ระดับ 2 | 590 บาท | เปิดใช้งานได้เลยตั้งแต่วันแรก ✅ | โพสต์ได้ 5 หลัง + Featured 1 รายการ |
+| 3 | ระดับ 3 | 990-1,190 บาท (ยังไม่ได้ตั้งราคาสุดท้าย) | เปิดใช้งานได้เลยตั้งแต่วันแรก ✅ | โพสต์ได้ 15 หลัง + Featured หลายรายการ |
+| 4 | VIP เงิน+ทอง 🥈🥇 | 1,290 / 2,590 บาท | *วางแผนทีหลัง* — เมื่อมี Agent ระดับ 3 สะสมพอ | เข้าพูล VIP ค่าคอม 3%/5% |
+| 5 | VIP เพชร 💎 | 4,990 บาท (หรือเสนอราคาเฉพาะราย) | *วางแผนทีหลัง* — เมื่อฐาน VIP ทองสะสมพอ | พูลระดับสูงสุด + สิทธิพิเศษเพิ่มทีหลัง |
+
+**เหตุผลที่ระดับ 3 ไม่ใช่ "ไม่จำกัด"**: ตั้งเพดานจริง (15 หลัง) แทนคำว่า "ไม่จำกัด" เพื่อไม่ให้ระดับ VIP (4-5)
+ในอนาคตไม่มีอะไรเหลือเสนอเรื่องจำนวนโพสต์ — เผื่อพื้นที่ให้ VIP ขยับขึ้นได้ทั้งจำนวนโพสต์และสิทธิ์เข้าพูล
+
+**บริบทขนาดตลาด** (อ้างอิงเมื่อคุยกับนักลงทุน/พาร์ทเนอร์): ประชากรแฝงในหัวหินคนเดียวมีประมาณ 100,000 คน รวม
+ชะอำ+ปราณบุรีน่าจะ 150,000-200,000 คน — แต่นี่คือเพดานบนของตลาดผู้ซื้อ/ผู้เช่า ไม่ใช่เกณฑ์ปลดระดับ (คนซื้อขาย
+บ้านจริงต่อปีเป็นสัดส่วนน้อยมากของประชากรทั้งหมด) เกณฑ์ปลดระดับข้างต้นจึงอิงจาก**จำนวนสมาชิกที่วัดได้จริงในระบบ
+เอง** ไม่ใช่ประชากรทั้งเมือง — ตลาด Agent ทั้งหมดในพื้นที่ (จากพอร์ทัลอสังหาฯ ที่มีอยู่) มีประมาณ 100-150 ราย จึง
+ประเมินว่าจะมี Agent จ่ายเงินสูงสุดในระบบราว 30-40 คนเมื่อตลาดอิ่มตัวเต็มที่ (~25-30% ของตลาด Agent ทั้งหมด)
+
+**สวิตช์ Rollout Level ที่ Site Content** ควบคุมว่าระดับไหนโผล่ให้เห็นแล้ว (1=ฟรีเท่านั้น, 2=เปิด Premium,
+3=เปิด VIP เงิน+ทอง, 4=เปิดครบ 5 ระดับรวมเพชร) — ปลดทีละระดับได้โดยไม่ต้องแก้โค้ด ดูจำนวนสมาชิกแต่ละระดับใน
+Admin Dashboard เทียบกับเกณฑ์ตารางข้างบนเพื่อตัดสินใจว่าพร้อมปลดระดับถัดไปหรือยัง
+
+เสริมด้วย **จ่ายต่อประกาศ (pay-per-listing)** สำหรับ Agent รายเล็กไม่อยากผูกรายเดือน (ยังไม่ได้สร้างจริง)
+
+**โปรไฟล์ Agent สาธารณะ**: หน้า `/agent/ชื่อ-agent` รวมประกาศทั้งหมดของเขา — จูงใจ Agent เพิ่ม (ได้หน้าโชว์ผลงานฟรี)
+
+**ระยะฟรีทดลอง "Founding Agents"** (ช่วงเปิดตัว — สำคัญมาก): ระหว่างที่เจ้าของเว็บยังพัฒนาเว็บอยู่และยังออกไป
+ถ่ายรูปเองไม่ได้ ให้ Agent/เจ้าของบ้านโพสต์ฟรีก่อนได้เลย แก้ปัญหา "ไก่กับไข่" (ไม่มีของ=ไม่มีคนดู, ไม่มีคนดู=ไม่มี
+คนอยากจ่าย) ได้เนื้อหาเต็มเว็บโดยไม่ต้องลงพื้นที่เอง เงื่อนไขที่ต้องประกาศชัดล่วงหน้าตั้งแต่วันสมัคร:
+- บอก Agent ตรงๆ ว่า "ช่วงนี้ฟรีชั่วคราว จะเริ่มเก็บค่าบริการในอนาคต" กันรู้สึกโดนหลอกตอนเปลี่ยนผ่าน
+- ตั้งเงื่อนไขเปลี่ยนผ่านล่วงหน้า (วันที่ หรือ milestone เช่น "ฟรีถึงเว็บมี lead เข้าถึงระดับหนึ่ง")
+- จำกัดจำนวนฟรีรุ่นแรก (เช่นสูงสุด N ราย) กันดูแลไม่ไหว + สร้างความรู้สึก "ของมีจำกัด"
+
+**Flow**: สมัครบัญชี → เลือกแพ็กเกจ (หรือฟรีช่วง Founding) → จ่ายผ่าน Stripe Checkout (ถ้ามี) → แอดมิน approve
+ครั้งแรก (กันสแปม) → โพสต์เองในโควตาผ่าน self-serve dashboard → จัดการ/ต่ออายุเองผ่าน Stripe Customer Portal
+
+**Facebook post ที่ AI ร่างให้ + ลิงก์ backlink กลับเว็บ (จุดต่างจากที่เจ้าของเว็บเคยทำเอง)**: เหมือนระบบ Facebook
+post generator ที่มีอยู่แล้วใน AI Quick Add (คำบรรยาย + hashtag + contact block) แต่เพิ่มลิงก์กลับไปหน้าประกาศ
+เฉพาะของทรัพย์สินนั้นบนเว็บเราเอง (เช่น "ดูรายละเอียดเพิ่มเติม 👉 huahin.properties/property/hh-109") ต่อท้าย
+ทุกโพสต์อัตโนมัติ — ผลลัพธ์สองต่อ: (1) คนเห็นโฆษณาใน Facebook คลิกเข้าเว็บเราโดยตรง เพิ่ม traffic จริง ไม่ใช่
+แค่เห็นข้อความเฉยๆ (2) ทุกลิงก์ที่ถูกแชร์ต่อคือ backlink เข้าเว็บ ช่วย SEO สะสมไปเรื่อยๆ ตามจำนวนประกาศที่เพิ่มขึ้น
+(ยิ่ง Agent โพสต์เยอะ ยิ่งเกิดลิงก์กลับเว็บเยอะขึ้นเอง) — ต้องมี URL ต่อประกาศแบบถาวรก่อน (ดูหมวด 6 ข้อ 1)
+ถึงจะใส่ลิงก์นี้ได้ถูกต้อง
+
+**TikTok caption ที่ AI ร่างให้เช่นกัน (ข้อจำกัดของแพลตฟอร์มต้องออกแบบให้ตรงความจริง)**: TikTok ไม่รองรับลิงก์
+คลิกได้ในแคปชั่นทั่วไป (กลายเป็นข้อความธรรมดา ยกเว้นบัญชีธุรกิจที่มีสิทธิ์ "ลิงก์ในไบโอ" หรือใช้โฆษณาเสียเงิน)
+ดีไซน์จึงต่างจาก Facebook: AI ร่างแคปชั่นวิดีโอสั้นกระชับดึงดูด + hashtag ที่เหมาะกับ TikTok + ใส่ **รหัสประกาศ**
+ชัดเจนในแคปชั่น/วิดีโอ (เช่น "รหัส HH-109 พิมพ์ค้นในเว็บ huahin.properties") กระตุ้นให้คนพิมพ์ค้นหาเอง และตั้ง
+ลิงก์เว็บไซต์ไว้ถาวรใน **bio ของบัญชี TikTok ธุรกิจ** (ทำครั้งเดียว ใช้ได้ทุกโพสต์) เป็นจุดที่ backlink เกิดขึ้นจริง
+
+**ข้อมูลติดต่อเติมอัตโนมัติ**: ตอนเจ้าของบ้าน/Agent สมัครบัญชีครั้งแรก กรอกเบอร์โทร/LINE/ช่องทางติดต่อไว้ในโปรไฟล์
+ครั้งเดียว ทุกครั้งที่สร้างประกาศใหม่ผ่าน AI Quick Add ระบบดึงข้อมูลนี้มาใส่ใน contact block ของโพสต์ Facebook/
+แคปชั่น TikTok ให้อัตโนมัติทันที ไม่ต้องพิมพ์ซ้ำทุกครั้ง — แต่ยังแก้ไขเป็นรายประกาศได้เสมอ (เช่น ประกาศนี้อยากให้
+ติดต่อเบอร์อื่น หรือใส่ชื่อทีมขายคนละคน) ไม่ใช่ล็อกตายตัว
+
+**ลิงก์ประกาศเฉพาะของทุกหลัง พร้อมปุ่ม Copy Link ที่เห็นชัด**: ทุกประกาศที่ลูกค้านำมาลง (ไม่ว่าเจ้าของบ้านหรือ
+Agent) ต้องมี URL เฉพาะของตัวเอง (ผูกกับ URL ถาวรต่อประกาศในหมวด 6) แสดงพร้อมปุ่ม "คัดลอกลิงก์" ที่เห็นชัดเจนใน
+หน้า self-serve dashboard ของเขา พร้อมคำอธิบายสั้นๆ กำกับไว้ (เช่น "คัดลอกลิงก์นี้ไปแชร์ต่อ/โปรโมทเองได้เลย") เพื่อ
+จูงใจให้เขานำไปโพสต์เพิ่มเติมด้วยตัวเอง (กลุ่ม Facebook อื่น, LINE, แชทส่วนตัว) นอกเหนือจากโพสต์ Facebook/TikTok
+ที่ AI สร้างให้อัตโนมัติ — ทุกครั้งที่แชร์ต่อคือ traffic และ backlink กลับเว็บเราเพิ่มขึ้นโดยไม่มีต้นทุนเพิ่ม
+เป็นผลประโยชน์ทางอ้อมที่สำคัญของการให้ลูกค้าเป็นคน "กระจาย" ลิงก์เองด้วย
+
+**วิธีเข้าสู่ระบบสำหรับ Agent/เจ้าของบ้าน — ล็อกอินง่าย ไม่ต้องพิมพ์อีเมล/รหัสผ่านเอง**: ใช้ Firebase Authentication
+เดียวกับที่เพิ่งตั้งค่าให้บัญชีแอดมิน (รองรับอยู่แล้วในตัว แค่เปิดผู้ให้บริการเพิ่มในคอนโซล ไม่ต้องสร้างระบบใหม่)
+เปิดให้เลือกได้หลายช่องทาง:
+- **Sign in with Google** — คลิกเดียว ใช้บัญชี Gmail ที่ล็อกอินอยู่แล้ว
+- **Sign in with Facebook** — คลิกเดียว ใช้บัญชี Facebook (ต้องลงทะเบียน Facebook App ID/Secret ก่อน)
+- **เบอร์โทร (OTP ผ่าน SMS)** — เหมาะกับผู้ใช้ไทยที่ไม่มี/ไม่อยากใช้อีเมล
+- **อีเมล+รหัสผ่าน** — ทางเลือกดั้งเดิมสำหรับคนที่ถนัดแบบนี้
+ผู้ใช้เลือกช่องทางที่สะดวกที่สุดตอนสมัคร ระบบผูกบัญชีเดียวกันไม่ว่าจะเข้าทางไหนในครั้งถัดไป — ลดขั้นตอนสมัคร
+ให้เหลือน้อยที่สุด (โดยเฉพาะ Agent ที่ไม่อยากพิมพ์ฟอร์มยาวๆ) ทำได้เมื่อถึงขั้นตอนสร้างหน้าสมัครสมาชิกจริง (หมวด 11
+ชุด A ข้อ 8)
+
+### ทาง 3 — โฆษณา/แบนเนอร์
+
+**เติมเนื้อหาเองช่วงแรก**: ระหว่างยังไม่มีผู้ลงโฆษณาจริง เจ้าของเว็บใส่แบนเนอร์โปรโมทบ้านที่ตัวเองมีอยู่ในมือก่อน
+กันหน้าเว็บดูว่างเปล่า — ต้องมีระบบหลังบ้านให้ถอด/นำเข้าแบนเนอร์ได้ครบถ้วนง่ายๆ เพื่อสลับเป็นของลูกค้าจริงภายหลัง
+โดยไม่ต้องแก้โค้ด
+
+**โครงสร้าง Slot**:
+- จำนวน slot ต่อตำแหน่งปรับได้ (1, 2, 3, …) ไม่ fix ตายตัว — เพิ่ม/ลดได้จากหน้า Admin
+- ถ้าผู้ลงโฆษณามากกว่าจำนวน slot ที่โชว์พร้อมกัน → **สุ่มหมุนเวียน (random)** ทุกครั้งที่โหลดหน้า แฟร์กับทุกคนที่จ่ายเท่ากัน
+- คลิกแบนเนอร์ → เข้า**หน้าโฆษณาย่อยในเว็บเราเอง** (เช่น `/promo/ชื่อธุรกิจ`) ที่ผู้ลงโฆษณาใส่รายละเอียดเพิ่มเองได้
+  (รูป, คำอธิบาย, ช่องทางติดต่อ) — ไม่เด้งออกนอกเว็บ ผู้ใช้ไม่หลุดจาก flow
+
+**ราคาตามหน้า × ตำแหน่ง × ขนาด** (ตารางที่แอดมินตั้ง/ปรับเองได้ ไม่ต้องแก้โค้ด):
+- แบนเนอร์หลัก บนสุด Home — แพงสุด
+- แบนเนอร์รอง ขนาดกลาง (กลางหน้า/ข้าง listing) — ถูกกว่าตามขนาด/ตำแหน่ง
+- ไม่จำกัดแค่ Home — ทุกหน้า (Search Results, Property Details, Sell, About, Contact) มี slot ของตัวเอง
+  ราคาต่างกันตามปริมาณคนเข้าดูจริงของหน้านั้น (เช่น Search Results คนตั้งใจหาบ้าน = ราคาสูงกว่า About)
+
+**Featured Listing boost**: เจ้าของ/Agent จ่ายเพิ่มดันประกาศขึ้นอันดับแรกชั่วคราว (7/30 วัน) ผ่าน field
+`featuredUntil` — ต้นทุนสร้างต่ำเพราะต่อยอดจากระบบเดียวกับ subscription
+
+**ลูกค้าของทาง 3**: Agent ในทาง 2 (ซื้อ Featured/แบนเนอร์เสริม) และธุรกิจนอกวงการ (ร้านอาหาร/สปา/ผู้รับเหมา) —
+เปิดขายกลุ่มหลังเมื่อมีตัวเลข traffic จริงพอโชว์ได้เท่านั้น
+
+### ทาง 4 — ⚠️ เลิกใช้แล้ว (Deprecated) — Agent VIP / Curated High-Commission Pool
+
+**เปลี่ยนทิศทางแล้ว (กรกฎาคม 2026)**: กลไกทั้งหมดด้านล่างนี้ (จับคู่ Agent ภายนอกกับบ้านในพูล VIP, Buyer
+Registration/Procuring Cause, รหัส Agent เฉพาะตัว) **ถูกแทนที่ด้วยระบบ "ให้ทีมช่วยขาย" (Assisted Sale) ในหมวด
+2.1 ด้านล่าง** เหตุผล: เว็บนี้ไม่มีสถานะ "Agent" แยกจากผู้ลงประกาศทั่วไปอีกต่อไป (ดูหมวด 2 ทาง 2 ที่ปรับแล้ว) —
+ใครก็ลงประกาศได้แบบเดียวกันหมด ("lister") ไม่มีระบบจับคู่/สิทธิ์ตัวแทนที่แพลตฟอร์มต้องเป็นกรรมการตัดสิน บ้าน
+ซ้ำกันในระบบถือเป็นเรื่องปกติของตลาด ปล่อยให้แข่งขันกันเอง แพลตฟอร์มไม่เข้าไปยุ่ง — ส่วนรายได้จากการ "ช่วยขาย"
+เปลี่ยนมาเป็นข้อตกลงส่วนตัวระหว่างผู้ลงประกาศแต่ละรายกับทีมงานโดยตรงแทน (หมวด 2.1)
+
+**เก็บข้อความเดิมไว้ด้านล่างเพื่อบันทึกประวัติการตัดสินใจเท่านั้น ไม่ใช้งานแล้ว**:
+
+**หมายเหตุ**: ทาง 4 (รวมถึงรายละเอียดกลไกทั้งหมดด้านล่างนี้ — VIP tiers, Buyer Registration, Agent Code) คือ
+ประวัติการตัดสินใจที่ถูกยกเลิกแล้วตามหมวด 2.1 ด้านบน ไม่มีการนำกลับมาใช้งานจริง — เนื้อหาที่เคยปรากฏใน
+หมวด 11 ชุด B ข้อ 7 ว่าฟีเจอร์นี้ "เสร็จสมบูรณ์แล้ว" ถูกถอนออกแล้วเพื่อไม่ให้ขัดแย้งกับสถานะ Deprecated นี้:
+
+**โมเดลสุดท้ายที่ตกลงกัน (ผ่านการทบทวนหลายรอบ) — รายได้ของแพลตฟอร์มมาจาก 2 ฝั่งที่เก็บได้แน่นอน 100% ทั้งคู่
+(ฝั่งซ้าย = เจ้าของบ้าน, ฝั่งขวา = Agent) ไม่มีส่วนไหนพึ่งพาความไม่แน่นอน/ต้องรอผลขาย/ต้องพึ่งกฎหมายบังคับใคร:**
+
+**ฝั่งซ้าย — แพ็กเกจ VIP สำหรับเจ้าของบ้าน (แบบมีระดับ ตัดบัตรทันที ไม่ใช่ค่าเปิดใช้งานก้อนเดียวแบบเดิม)**
+เจ้าของบ้านมี 2 ทางเลือกตอนลงประกาศ:
+- **โพสต์ฟรีแบบปกติ** — เหมือนที่ทำอยู่ตอนนี้ (รวมถึงช่วง Founding Agents ในทาง 2) ขึ้นเว็บตามปกติ ไม่มี Agent
+  VIP ไล่ติดต่อเป็นพิเศษ ขายตามจังหวะธรรมชาติ
+- **อัปเกรดเป็นแพ็กเกจ VIP** — จ่ายทันทีผ่าน Stripe (one-time หรือรายเดือนตามระยะเวลาที่ต้องการเร่งขาย) เพื่อให้
+  บ้านหลังนั้น**เข้าพูลที่ Agent VIP มองเห็นและติดต่อเข้ามาช่วยขายมากขึ้น** — ยิ่งจ่ายแพ็กเกจสูง ยิ่งเข้าถึง Agent
+  VIP ระดับสูงกว่า (จำนวนเยอะกว่า/คุณภาพดีกว่า) ตัวอย่างระดับที่ล้อกับฝั่ง Agent:
+  - **แพ็กเกจเงิน** — เข้าถึง Agent VIP ระดับเงินขึ้นไป (จำนวน Agent ที่เห็นประกาศน้อยกว่า)
+  - **แพ็กเกจทอง** — เข้าถึง Agent VIP ระดับเงิน+ทอง (จำนวน Agent ที่เห็น/ติดต่อมากขึ้น)
+  - **แพ็กเกจเพชร** — เข้าถึง Agent VIP ทุกระดับ + อาจได้สิทธิ์เสริม (เช่น ขึ้น Featured ในหน้า Home ด้วย)
+  ราคาแต่ละแพ็กเกจแอดมินตั้ง/ปรับเองได้ ไม่ผูกตายตัวในโค้ด (เหมือนระดับ Agent VIP)
+
+**ฝั่งขวา — ค่าสมาชิก VIP จาก Agent** — รายได้ประจำผ่าน Stripe subscription (ต่อยอดจากหมวด 4) เก็บตามรอบไม่ว่าดีล
+จะปิดได้หรือไม่ ควบคุมได้ 100% โดยแพลตฟอร์ม
+
+**สรุปภาพรวม 2 ฝั่งที่มีรายได้พร้อมกัน**: เจ้าของบ้านจ่ายแพ็กเกจ VIP เพื่อ "ซื้อความเร็วในการขาย" (มี Agent มาช่วย
+มากขึ้น) ส่วน Agent จ่ายค่าสมาชิก VIP เพื่อ "ซื้อสิทธิ์เข้าถึงบ้านคุณภาพดี" — สองฝั่งพบกันตรงกลางในพูลที่ระดับ
+ตรงกัน (เช่น เจ้าของบ้านแพ็กเกจทอง ↔ Agent VIP ทองขึ้นไป) แพลตฟอร์มได้รายได้จากทั้งสองทางพร้อมกันโดยไม่ต้องรอ
+ผลขายหรือเก็บส่วนแบ่งค่าคอมจากใครเลย
+
+**สิ่งที่ตัดออกจากดราฟต์ก่อนหน้า (บันทึกไว้เพื่อไม่ให้กลับไปคิดซ้ำ)**: เคยพิจารณาโมเดล "แพลตฟอร์มเก็บค่าคอมเต็ม
+แล้วแบ่งให้ Agent" และโมเดล "ส่วนต่างค่าคอมที่ผูกกับสัญญาเจ้าของบ้าน จ่ายตอนขายสำเร็จ" ทั้งสองแบบถูกตัดออกเพราะ
+พึ่งพาการรู้ว่าขายสำเร็จหรือยัง (ซึ่งแพลตฟอร์มไม่ได้อยู่ในธุรกรรมตอนโอนกรรมสิทธิ์แล้ว) และไม่มีกลไกกฎหมายไทยที่
+บังคับให้เจ้าของบ้านต้องจ่ายผ่านบุคคลที่สามที่แพลตฟอร์มกำหนดได้จริง (กรมที่ดินไม่บังคับสัญญาเอกชน) — จึงเปลี่ยนมา
+ใช้โมเดลที่เก็บเงินล่วงหน้า/เก็บประจำแทน ตัดความเสี่ยงเรื่องการทวงเงินออกทั้งหมด
+
+**ค่าคอมระหว่าง Agent กับเจ้าของบ้าน — ไม่เกี่ยวกับแพลตฟอร์มเลย**: เมื่อเจ้าของบ้านจ่ายค่าเปิดใช้งานแล้ว บ้านหลังนั้น
+เข้าพูล VIP ให้ Agent เห็น จากนั้น Agent ติดต่อเจ้าของบ้านตรง ตกลงค่าคอม (3%, 5%, หรือเท่าไหร่ก็ตาม) กันเอง จ่ายกัน
+เอง แพลตฟอร์มไม่รับ ไม่แบ่ง ไม่ยุ่งเกี่ยวกับเงินก้อนนี้แต่อย่างใด
+
+**แพลตฟอร์มมีสิทธิ์ขายเองได้ด้วย (เหมือนเป็น "Agent" อีกคนหนึ่งในระบบตัวเอง) — 3 ทางเลือกต่อบ้านหนึ่งหลัง**
+เนื่องจากไม่ได้รับส่วนแบ่งจากค่าคอมของ Agent ภายนอกแล้ว แพลตฟอร์มจึงมีสิทธิ์นำบ้านในพูล VIP มาขายเองคู่ขนานได้เต็มที่
+โดยมีทางเลือกต่อบ้านหนึ่งหลัง (เลือกได้อิสระ ไม่ต้องเหมือนกันทุกหลัง):
+1. **ปล่อยให้ Agent ภายนอก (VIP) ขาย** — แพลตฟอร์มไม่ได้ค่าคอมเลย ได้แค่ค่าสมาชิก VIP ที่ Agent จ่ายไว้แล้ว
+2. **แพลตฟอร์มขายเอง 100%** (เช่น ผ่านเว็บหลัก/ระบบ lead ในทาง 1 โดยไม่ผ่าน Agent คนไหนเลย) — ได้ค่าคอมเต็ม %
+   ตามที่ตกลงกับเจ้าของบ้าน (เช่น 5% เต็ม)
+3. **ใช้ Agent ในสังกัดของแพลตฟอร์มเอง (In-house Agent/Staff — คนละกลุ่มกับ Agent VIP ภายนอก)** มาช่วยขาย
+   แล้วแบ่งค่าคอมกันภายใน เช่น รวม 5% แบ่งให้ Agent ในสังกัด 3% แพลตฟอร์มเก็บ 2% ("Channel") — นี่คือค่าคอม
+   ปกติของทีมขายในบริษัท ไม่ใช่การเก็บส่วนแบ่งจาก Agent ภายนอกแบบที่ตัดออกไปแล้วข้างต้น
+
+ไม่ขัดแย้งทางผลประโยชน์กับ Agent VIP ภายนอก เพราะไม่ได้แย่งเปอร์เซ็นต์จากเขา เป็นเพียงผู้ขายอีกรายในสนามเดียวกัน
+ใช้กติกา Buyer Registration เดียวกันทุกประการ (ใครลงทะเบียนผู้ซื้อก่อนได้สิทธิ์ก่อน แม้เป็นแพลตฟอร์ม/Agent ใน
+สังกัดเองก็ตาม)
+
+**ระดับ VIP แบบขยายได้ (Tiered)** — ไม่ผูกจำนวนระดับตายตัวในโค้ด แอดมินเพิ่ม/แก้ไขเองได้ (ชื่อระดับ, ราคา, %
+ค่าคอมของพูลที่เข้าถึงได้) ตัวอย่างเริ่มต้น:
+- **VIP เงิน (Silver)** — ค่าสมาชิกต่ำสุด เข้าถึงพูลบ้านค่าคอม 3%
+- **VIP ทอง (Gold)** — เข้าถึงพูล 3% + 5%
+- **VIP เพชร (Diamond)** — เผื่อไว้อนาคต เข้าถึงพูลระดับสูงสุด/สิทธิพิเศษที่จะกำหนดทีหลัง
+ระดับสูงกว่าเห็นทุกอย่างที่ระดับต่ำกว่าเห็น (สะสมสิทธิ์ขึ้นไปเรื่อยๆ) — เป็น**ชั้นเสริมที่ซ้อนทับ**แพ็กเกจโพสต์
+ปกติ (Basic/Pro/Agency ในทาง 2) ไม่ใช่แทนที่ Agent หนึ่งคนมีสถานะ 2 มิติพร้อมกันได้ (เช่น "Pro + VIP ทอง")
+
+**ตัวอย่างล่อใจให้ Agent อยากอัปเกรด (Locked Preview / Teaser)**: Agent ระดับต่ำกว่าเห็น**จำนวนรายการและระดับ
+ค่าคอม**ของพูลที่ตัวเองยังเข้าไม่ถึง (เช่น "🔒 มีบ้าน 5% ให้เลือก 8 รายการ — อัปเกรดเป็น VIP ทองเพื่อดูรายละเอียด")
+แต่ไม่เปิดเผยที่อยู่/เจ้าของ/รายละเอียดจริงจนกว่าจะจ่ายอัปเกรด — เป็นกลไกการตลาดมาตรฐาน (paywall preview) กระตุ้น
+ให้อยากจ่ายเพิ่มด้วยของจริงที่มองเห็นแต่แตะต้องไม่ได้
+
+**ตัวเลข "สต๊อก" ที่โชว์ให้ทั้งสองฝั่งเห็น เพื่อกระตุ้นให้อยากจ่าย (Mutual Social Proof)**
+- **ฝั่ง Agent เห็น**: สรุปจำนวนบ้านในพูลแยกตามระดับค่าคอม เช่น "มีบ้าน 3% อยู่ 12 หลัง / บ้าน 5% อยู่ 8 หลัง"
+  แบบอัปเดตสด แต่**ไม่รู้ทำเล/ที่อยู่/รายละเอียดใดๆ** จนกว่าจะสมัคร VIP ระดับที่เข้าถึงได้ — ตัวเลขนี้มีหน้าที่
+  จูงใจให้อยากสมัครเท่านั้น ไม่ใช่ให้ข้อมูลจริง
+- **ฝั่งเจ้าของบ้านเห็น**: สรุปจำนวน Agent ที่อยู่ในระบบ แยกตามระดับ (เช่น "มี Agent พร้อมช่วยขาย 34 คน — VIP
+  ทอง 9 คน, VIP เพชร 3 คน") เพื่อให้เห็นว่าอัปเกรดแพ็กเกจ VIP แล้วจะมีคนช่วยขายจริงจำนวนเท่าไหร่ ไม่ใช่แค่คำ
+  โฆษณาลอยๆ
+- ตัวเลขทั้งสองฝั่งดึงจากข้อมูลจริงในระบบ (นับจากพูล VIP ที่มีอยู่จริง/จำนวน Agent ที่ active จริง) อัปเดตอัตโนมัติ
+  ไม่ใช่ตัวเลขหลอกที่ต้องแก้มือ — ให้ความน่าเชื่อถือมากกว่าคำโฆษณา
+
+**สัญญาการซื้อขายจริง — ระหว่าง Agent กับเจ้าของบ้านโดยตรง เป็นสัญญา 2 ฉบับที่เชื่อมกัน**
+- ครั้งแรกที่ Agent พาผู้ซื้อไปดูบ้าน → เจ้าของบ้านเซ็นสัญญาที่ระบุชื่อ+รหัส Agent ชัดเจน (Agent โหลดจากระบบ
+  หลัง "จองสิทธิ์" บ้านหลังนั้น) — สัญญานี้เป็น**ใบอนุญาตขายระยะยาว** ไม่ใช่ผูกกับผู้ซื้อรายใดรายหนึ่ง
+- ครั้งที่ 2 เป็นต้นไป Agent คนเดิมพาผู้ซื้อรายใหม่มาดูบ้านเดิม **ไม่ต้องเซ็นซ้ำ** เพราะสิทธิ์ขายยังมีผลอยู่ แค่
+  ลงทะเบียนผู้ซื้อรายใหม่ในระบบเพื่อเก็บประวัติ
+- เจ้าของบ้านอยู่ที่อื่นได้ — เซ็นเอกสารออนไลน์/ส่งไปรษณีย์กันเองได้ ความรัดกุมเป็นเรื่องของ Agent กับเจ้าของบ้าน
+  ตกลงกันเอง แพลตฟอร์มไม่รับผิดชอบในความสัมพันธ์นี้แล้วหลังจากส่งมอบเอกสารและข้อมูลติดต่อครบถ้วน (ไม่ปิดบังข้อมูล
+  เจ้าของบ้านจาก Agent เด็ดขาด)
+
+**กติกาป้องกันข้อพิพาทระหว่าง Agent ด้วยกัน — มาตรฐานวงการ "Procuring Cause + Buyer Registration"**
+1. Agent (หรือแพลตฟอร์มเอง) ต้อง**ลงทะเบียนผู้ซื้อในระบบก่อนพาไปดูบ้านเสมอ** (ชื่อ-เบอร์-อีเมล) ผูกกับระบบ lead
+   ที่มีอยู่แล้ว
+2. เกิด **ช่วงเวลาคุ้มครองสิทธิ์ (Protection Period)** อัตโนมัติหลังลงทะเบียน (ตั้งค่าได้ เช่น 60 วัน) — ถ้าผู้ซื้อ
+   รายนั้นซื้อภายในช่วงนี้ไม่ว่าผ่านช่องทางไหน Agent/ผู้ขายที่ลงทะเบียนก่อนยังได้รับการยอมรับว่าเป็นผู้พาลูกค้ามา
+3. ระบบ**ตรวจจับซ้ำอัตโนมัติ**จากเบอร์โทร/อีเมลที่ตรงกัน แจ้งเตือนทันทีถ้ามีคนอื่นพยายามลงทะเบียนผู้ซื้อคนเดียวกัน
+   — ให้สิทธิ์กับคนที่ timestamp มาก่อนเสมอ
+4. Agent ทุกคน**และเจ้าของทรัพย์สินทุกราย**ต้อง**กดยอมรับกติกานี้เป็นข้อตกลงร่วมกันชุดเดียวกัน**ตั้งแต่สมัคร/
+   ฝากขายแบบ VIP (digital agreement ฉบับเดียวที่ทั้งสองฝ่ายรับรู้ตรงกัน บันทึกไว้เป็นหลักฐาน)
+5. เคสข้อพิพาทที่ระบบตัดสินไม่ชัด ให้ Admin เป็นคนกลางชี้ขาดจากหลักฐานประกอบ (audit trail) — การตัดสินสุดท้าย
+   ควรมีคนจริงชี้ขาดในเคสก้ำกึ่ง
+
+**รหัส Agent เฉพาะตัว (Agent Code) — ป้องกันเอกสารถูกสวมสิทธิ์**
+- ทุก Agent ที่ผ่าน approve ได้รหัสเฉพาะตัวอัตโนมัติ (เช่น `HHP-A0231`) ผูกกับบัญชีตลอดไป พิมพ์ลงบนตัวเอกสารสัญญา
+  จริงให้เห็นชัด (ไม่ใช่แค่ข้อมูลหลังบ้าน) — แม้เอกสารหลุดไปถึงมือคนอื่นก็ยังเห็นชัดว่าเป็นของ Agent รหัสไหน
+- ต้อง login เป็น Agent ที่ "จองสิทธิ์" บ้านหลังนั้นไว้แล้วเท่านั้นถึงจะโหลดเอกสารได้ (ชั้นป้องกันที่ 1)
+- เอกสารที่เซ็นแล้วส่งกลับเข้าระบบ ถูกตรวจสอบรหัส Agent ตรงกับผู้จองสิทธิ์จริงก่อนยืนยันอย่างเป็นทางการ (ชั้น
+  ป้องกันที่ 2) — ถ้าไม่ตรง ระบบปฏิเสธและแจ้งเตือนแอดมินทันที
+- รหัสเดียวกันใช้ต่อท้ายลิงก์ประกาศทั่วไปได้ด้วย (เช่น `.../property/hh-109?ref=HHP-A0231`) ผูกกับระบบ lead
+  อัตโนมัติเดิม
+
+**กฎการมองเห็นข้อมูล (Visibility) — % ค่าคอมเป็นความลับทางธุรกิจ ส่วนเบอร์ติดต่อเจ้าของบ้านแสดงตามปกติ**
+- บ้านในพูล VIP **แสดงบนหน้าเว็บสาธารณะพร้อมเบอร์โทร/ช่องทางติดต่อของเจ้าของบ้านแสดงตามปกติ เหมือนประกาศทั่วไป**
+  (ไม่ซ่อนเบอร์ — ทดลองแนวคิดซ่อนเบอร์ไปแล้วพบว่าเจ้าของบ้านไม่โอเค จึงตัดออก) Agent ที่คุยกับเจ้าของบ้าน
+  ยังเป็น**ทางเลือกเสริม**ให้เจ้าของบ้านมีช่องทางขายมากขึ้น ไม่ใช่ทางเดียวที่ผู้ซื้อติดต่อได้
+- ผู้สนใจติดต่อได้ทั้ง 2 ทาง: โทร/ทักเจ้าของบ้านตรงจากเบอร์ที่แสดงในประกาศ **หรือ** ทักผ่านระบบแชท/ฟอร์มของเว็บ
+- ทุกครั้งที่มีคนทักเข้ามาสนใจบ้านหลังที่อยู่ในพูล VIP ผ่านระบบแชท/ฟอร์มของเว็บ ระบบ**ดึงเป็น lead เข้ามาให้แพลตฟอร์ม/Agent ที่เกี่ยวข้อง
+  นำไปเสนอขายต่อได้ทันที** — นี่คือกลไกที่ทำให้แพลตฟอร์มเห็นความสนใจจริงก่อนใคร แล้วค่อยส่งต่อให้ Agent VIP หรือ
+  นำไปขายเองก็ได้ (ตามสิทธิ์ที่ระบุไว้ข้างต้น) ไม่ต้องรอ Agent ไปหาลูกค้าเองอย่างเดียว
+- % ค่าคอม/รายละเอียดสัญญา VIP ยังคงเป็นความลับทางธุรกิจเหมือนเดิม (ไม่แสดงต่อสาธารณะ)
+- Agent ระดับต่ำกว่า: เห็นแค่ teaser (จำนวน+ระดับค่าคอม) ของพูลที่ตัวเองยังเข้าไม่ถึง ไม่เห็นรายละเอียดจริง
+- Agent VIP ที่ login: เห็นเฉพาะพูล+รายละเอียดของระดับตัวเอง ไม่เห็นของ Agent คนอื่น
+- Admin (เจ้าของเว็บ): เห็นครบทุกตัวเลข — ผูกกับ Firestore Security Rules แบบ role-based ที่มีอยู่แล้ว (หมวด 5)
+
+**รายชื่อ Agent แยกตามระดับ เพื่อบริหารทีมง่าย** — เพิ่มส่วนในหน้า Admin (ต่อยอดแนวทาง `Owners.dc.html` ที่เป็น
+ไดเรกทอรีอยู่แล้ว) List Agent ทั้งหมด กรองดูตามระดับ VIP (ไม่มี/เงิน/ทอง/เพชร) คู่กับแพ็กเกจโพสต์ปกติของแต่ละคน
+นับจำนวนต่อระดับได้ทันที ไม่ต้องนับมือ เห็นภาพรวมกำลังคน/บริหารทีมได้ง่ายขึ้น
+
+## 3. การสร้างตัวตนแบรนด์ (AI-powered) — ให้ Agent/ผู้ใช้เห็นคุณค่าเว็บ
+
+- **หน้า Landing Page สำหรับ Agent/เจ้าของบ้าน** แยกเฉพาะ ก่อนถึงหน้าสมัคร อธิบายจุดต่างจริง: AI ช่วยเขียน
+  ประกาศ 8 ภาษา, ผู้ช่วย AI ตอบลูกค้า 24 ชม., ระบบกรอง lead อัตโนมัติ — ใส่ตัวเลขที่พิสูจน์ได้จริงเท่านั้น
+- ให้ Agent ทดลองคุยกับแชทบอทฝั่งลูกค้าได้ก่อนสมัคร (โน้มน้าวด้วยของจริง ดีกว่าคำโฆษณา)
+- Signature เล็กๆ ท้าย Facebook post ที่ AI generate ("จัดทำโดยระบบ AI ของ huahin.properties") — สร้างการจดจำ
+  แบรนด์ทุกครั้งที่มีคนแชร์ต่อ
+- ป้าย "Powered by AI" เล็กๆ บนหน้าเว็บสาธารณะ (footer/ใกล้ช่องแชท) — ให้ทั้งลูกค้าและ Agent อื่นเห็นความทันสมัย
+
+### 3.1 เมนูตัวเลือกด่วนในแชทบอท (Quick-Reply Menu) — โชว์บริการทั้งหมดตั้งแต่แชทแรก
+
+เมื่อลูกค้าเปิดแชทขึ้นมาครั้งแรก หลังข้อความทักทาย ให้ระบบส่ง**เมนูปุ่มตัวเลือกด่วน**ตามมาทันที ให้ลูกค้าคลิกเข้า
+บริการที่ต้องการได้เลยโดยไม่ต้องพิมพ์อธิบายเอง — ทำให้เห็นภาพรวมว่าเว็บมีบริการอะไรให้ใช้บ้างตั้งแต่แรกที่เปิดแชท
+ตัวอย่างตัวเลือก (ปรับ/เพิ่มลดได้ผ่าน Site Content โดยไม่ต้องแก้โค้ด):
+- 🏠 ฝากขายบ้าน/ที่ดิน
+- 🔑 ฝากให้เช่า
+- 👤 สมัครเป็น Agent (โพสต์ฟรีช่วงนี้)
+- 🔍 กำลังหาบ้าน/คอนโด
+- 💬 คำถามอื่นๆ (พิมพ์คุยกับบอทตามปกติ)
+
+แต่ละปุ่มพาไปสู่ flow ที่ถูกต้องทันที (เช่น กด "ฝากขายบ้าน" → เปิดฟอร์ม Sell.dc.html หรือให้บอทเริ่มถามข้อมูล
+เบื้องต้นในแชทเลย) — ลดขั้นตอนให้ผู้ใช้ที่ไม่รู้ว่าจะเริ่มพิมพ์อะไรดี เห็นชัดเจนว่ามีบริการอะไรให้เลือกใช้บ้าง
+ตั้งแต่วินาทีแรกที่เปิดแชท ถ้าลูกค้าไม่กดปุ่มไหนเลยและพิมพ์คำถามเอง บอทก็ยังตอบตามปกติได้เหมือนเดิม (เมนูนี้เป็น
+ทางลัด ไม่ใช่การบังคับ)
+
+## 4. ระบบการเงิน — ให้ Stripe ทำงานหนักแทนเรา
+
+- **Ledger**: ทุก webhook ตัดเงินสำเร็จ → บันทึก Firestore collection `payments` ผูก `listerId`/`advertiserId` +
+  invoice ID → ตรวจสอบย้อนหลังได้เป็นระเบียบ
+- **แจ้งเตือนก่อนหมดอายุ**: Stripe Billing "upcoming invoice" ส่งอีเมลลูกค้าอัตโนมัติเอง
+- **ตัดอัตโนมัติ + หยุดอัตโนมัติถ้าจ่ายไม่ผ่าน**: webhook แจ้ง `past_due`/`canceled` → ซ่อนประกาศ/แบนเนอร์จาก
+  หน้าเว็บสาธารณะทันที (ไม่ลบข้อมูล) → จ่ายสำเร็จอีกครั้ง → `active` → กลับมาโชว์ทันทีไม่ต้องกรอกใหม่
+- ต้องสร้างจริงแค่: 1 หน้า self-serve (Stripe Customer Portal สำเร็จรูป) + 1 Cloud Function รับ webhook
+  (ตรวจ signature ทุกครั้ง)
+
+## 5. ความปลอดภัย & ป้องกันสแปม/แฮก
+
+1. **Firestore Security Rules แบบ role-based** — ✅ ตรวจสอบแล้ว (16 ก.ค. 2026): ใช้ role-based + deny-by-default (`match /{document=**} { allow read, write: if false; }`) จริงแล้ว ไม่ใช่ rules เปิดโล่งชั่วคราวอีกต่อไป
+2. **Firebase App Check** — กันบอทยิง request ตรงเข้า DB (ฟรี)
+3. **Rate limiting ที่ Cloud Functions** — จำกัดฟอร์ม/แชท/webhook ต่อ IP
+4. **reCAPTCHA v3 แบบเงียบ** — ติดฟอร์ม inquiry/สมัครสมาชิก
+5. **Stripe webhook signature verification** — ตรวจทุกครั้งก่อนเชื่อ
+6. **สำรองข้อมูลอัตโนมัติ** — Firestore scheduled export → Storage
+7. **บัญชีแอดมิน** — รหัสผ่านแข็งแรง + พิจารณา 2FA
+8. **หมายเหตุออกแบบ (ตั้งใจ ไม่ใช่บั๊ก)**: ฟิลด์อีเมล/รหัสผ่านหน้า Admin Login แสดงเป็นตัวหนังสือชัดเจน ไม่ซ่อน
+   เป็นจุดแบบเว็บทั่วไป — เจ้าของเว็บต้องการเห็นสิ่งที่พิมพ์ชัดเจนกันพิมพ์ผิด
+
+## 6. SEO (ความสำคัญสูงสุด)
+
+1. URL ถาวรต่อประกาศ (เช่น `/property/hh-109-pool-villa-hua-hin`)
+2. Meta title/description เฉพาะหน้า + Open Graph
+3. Structured data (schema.org RealEstateListing) เป็น JSON-LD ต่อประกาศ
+4. Sitemap.xml อัตโนมัติ + ยื่น Google Search Console — ✅ **ทำแล้วและยื่นสำเร็จ (16 ก.ค. 2026)**: `sitemap.xml` + `robots.txt` ที่ root ครอบคลุมหน้า static หลัก (Home, Search Results, Sell, About, Contact, Agent Signup, Advertise) ยืนยันความเป็นเจ้าของเว็บผ่าน HTML tag แล้ว + ส่ง Sitemap เข้า Search Console สำเร็จ — **ยังไม่ครอบคลุม URL รายทรัพย์แต่ละหลัง** เพราะเป็นไฟล์ static ที่เขียนมือ ไม่ได้ query Firestore สด (ต้องมี build step/Cloud Function ถึงจะทำได้ — ยังไม่ได้สร้าง)
+5. Prerendering/dynamic rendering สำหรับ crawler — วางแผนคู่กับ URL ต่อประกาศ (รื้อทีหลังยากกว่า)
+6. ความเร็วโหลดหน้า (Core Web Vitals) — resize/compress รูปอัตโนมัติตอนย้ายไป Storage
+7. ชื่อไฟล์รูป/alt text SEO-friendly ให้ครบทุกจุด
+8. Google Business Profile + Search Console ตั้งแต่ soft launch
+
+## 7. แดชบอร์ด "สถานะระบบ & สิ่งที่ต้องทำ" (Admin Dashboard, บนสุด)
+
+การ์ดแจ้งเตือนสีตามความเร่งด่วน (แดง=ด่วนมาก, เหลือง=ต้องวางแผน, เขียว=ปกติ) แบ่ง 3 หมวด:
+- **A. เช็คอัตโนมัติ**: โควตา Firestore/Storage ใกล้เต็ม, subscription ใกล้หมดอายุ/ตัดเงินไม่ผ่าน, สัญญาเช่า
+  ใกล้หมดอายุ, lead ใหม่ที่ยังไม่ถูกติดต่อเกิน X วัน
+- **B. ปฏิทินความปลอดภัย/ป้องกันล่วงหน้า**: Firestore rules หมดอายุ 8 ส.ค. 2026, checklist deploy
+  `functions/index.js`, รีวิว API key ทุก ~6 เดือน, รีวิว rules ทุกครั้งที่เพิ่ม collection ใหม่
+- **C. บริการภายนอกที่แอดมินกรอกเอง**: โดเมน/บริการอื่นที่เว็บไซต์รู้เองไม่ได้ — กรอกชื่อบริการ+วันหมดอายุ+
+  ค่าใช้จ่าย+ลิงก์ต่ออายุ ระบบเตือนล่วงหน้า 30/14/3/1 วัน
+
+## 8. การแจ้งเตือน & กระบวนการอัปเดตเว็บอย่างปลอดภัย (อ่านซ้ำได้ทุกครั้งที่ต้องใช้)
+
+### 8.1 แจ้งเตือนผ่าน LINE Official Account (ทำภายหลัง เมื่อถึงจุดที่จำเป็น — ไม่เร่งด่วนตอนนี้)
+
+หลักการ: แจ้งเฉพาะเรื่องที่พลาดแล้วเสียหายจริง ไม่ใช่ทุกกิจกรรมเล็กๆ **ใช้ LINE Official Account เดียวกันตัวเดียว
+สำหรับทั้งแจ้งเตือนด่วนและสรุปประจำวัน** ไม่ต้องแยกหลายบัญชี — แยกด้วยประเภทข้อความ/ช่วงเวลาส่งแทน
+
+**ต้องแจ้ง LINE ทันที (สำคัญมาก พลาดไม่ได้)**
+- มีการชำระเงินสำเร็จ/ล้มเหลว (subscription, โฆษณา)
+- Lead ที่ระบบให้คะแนนว่า "สนใจจริง" (hot lead) ส่งข้อความเข้ามาขอติดต่อ/นัดดูบ้าน
+- ฟอร์มติดต่อ/สอบถามงานจากหน้า Contact ถูกส่งเข้ามา
+- Agent สมัครใหม่รอ approve
+- สัญญาเช่าใกล้หมดอายุถึงกำหนดวันที่ตั้งไว้ (1-2 วันก่อนหมดอายุ)
+- ปัญหาระบบ (เช่น webhook ล้มเหลว, security rules ใกล้หมดอายุ)
+
+**ไม่ต้องแจ้ง LINE (ดูในเว็บพอ)** — กด favorite, เข้าดูหน้าเว็บ, กิจกรรมเบาๆ ที่ไม่ต้องรีบตอบสนอง สะสมอยู่ใน
+แดชบอร์ด "สถานะระบบ" (หมวด 7) ดูภาพรวมทีหลังได้
+
+**สรุปงานประจำวันตอนเช้า (เพิ่มเติมจากแจ้งเตือนด่วน — เก็บไว้เป็นคิวถัดไป ยังไม่ได้ทำ)**: Cloud Function ทำงาน
+ตามเวลา (Scheduled Function) รันทุกเช้า สรุปข้อมูลของวันก่อนหน้า (lead ใหม่ที่ต้องติดต่อ, สัญญาใกล้หมดอายุ,
+สถานะการจ่ายเงิน Agent) ให้ Claude ช่วยเรียบเรียงเป็นภาษาพูดสั้นๆ แล้วส่งเข้า LINE Official Account เดียวกันกับ
+ที่ใช้แจ้งเตือนด่วน — ต่อยอดได้ถึงขั้นตอบกลับข้อความใน LINE นั้นแล้วส่งเข้า Claude เป็นผู้ช่วยส่วนตัวคุยปรึกษาได้เลย
+
+**หน้า Monthly/Yearly Report Dashboard (เก็บไว้เป็นคิวถัดไป ยังไม่ได้ทำ)**: เก็บสแนปช็อตสถิติทุกสิ้นเดือนลง
+Firestore collection ใหม่ (เช่น `monthlyStats`) — จำนวน lead ทั้งหมด/hot lead, Agent สมัครใหม่, ยอดสมาชิกที่
+จ่ายเงิน (จาก payments ledger), ประกาศใหม่/ขายแล้ว/หมดสัญญา, แบนเนอร์ที่ active หน้าเดียวดูย้อนหลังได้ทั้ง
+**รายเดือน** (เลือกเดือนจาก dropdown เทียบเดือนก่อนหน้าเป็น %) **และรายปี** (สรุปรวม 12 เดือน เทียบปีก่อนหน้า)
+พร้อมกราฟแนวโน้มระยะยาว ใช้ประชุมวางแผนทิศทางร่วมกัน — ส่งสรุปเข้า LINE ทุกสิ้นเดือน/สิ้นปีด้วย (ต่อยอดจาก 8.1)
+
+**วิธีทำงานจริง**: Cloud Function ที่มีอยู่แล้ว (proxy Claude API) เพิ่มการยิงข้อความไปยัง LINE Messaging API
+(Push Message) ทุกครั้งที่เหตุการณ์ระดับ "ต้องแจ้ง" เกิดขึ้น ผูกกับ LINE Official Account ที่เปิดไว้ — ข้อความสั้น
+กระชับ พร้อมลิงก์กลับมาดูรายละเอียดที่หน้า Admin Dashboard ทันที
+
+### 8.2 กระบวนการอัปเดตเว็บอย่างปลอดภัย — Staging (จุด B) ก่อนขึ้นจริง (จุด A)
+
+คอนเซปต์: **จุด A (Production)** = เว็บไซต์จริงที่ลูกค้าเห็นตอนนี้ ต้องนิ่งเสมอ ห้ามพังจากการทดลอง
+**จุด B (Staging)** = สำเนาเว็บเดียวกันทุกอย่าง แต่อยู่คนละที่อยู่ (URL คนละอัน) ใช้ทดลองฟีเจอร์ใหม่/แก้บั๊กก่อน
+เมื่อทดสอบจุด B จนมั่นใจแล้ว → "เลื่อนขึ้น (promote)" จุด B ให้กลายเป็นจุด A ใหม่ → จุด A เดิมเก็บเป็นประวัติ
+ไว้ย้อนกลับได้ถ้าจำเป็น
+
+**เครื่องมือที่ใช้**: Firebase Hosting **Preview Channels** — ฟีเจอร์ฟรีของ Firebase ที่สร้าง "ลิงก์ทดลอง" แยกจาก
+เว็บจริง (เช่น `huahin-properties--staging.web.app`) ใช้โค้ดชุดเดียวกัน แต่ deploy แยกกัน เปิดดูลิงก์ทดลองได้เต็ม
+รูปแบบเหมือนเว็บจริงทุกอย่าง (คลิก/กรอกฟอร์ม/ทดสอบจริง) โดยคนอื่นไม่เห็น (ไม่ใช่ลิงก์สาธารณะที่ค้นเจอ) — ทำผ่าน
+Codespace เดียวกับที่ deploy Cloud Function อยู่แล้ว ไม่ต้องมีเครื่องมือใหม่ ไม่มีค่าใช้จ่ายเพิ่ม
+
+**ขั้นตอนที่จะใช้ทุกครั้งที่มีการอัปเดต**:
+1. ส่งไฟล์ที่แก้ไขให้ + สั่ง deploy ขึ้น "ลิงก์ทดลอง" ก่อนเสมอ (ไม่ใช่เว็บจริง)
+2. เปิดลิงก์ทดลองดูบนมือถือ/คอม ทดสอบว่าใช้งานได้จริงตามที่ต้องการ
+3. ถ้าโอเค → สั่ง "เลื่อนขึ้นเป็นเว็บจริง" (คำสั่งเดียว ไม่ต้องอัปโหลดซ้ำ)
+4. ถ้าไม่โอเค → แก้ต่อในลิงก์ทดลอง เว็บจริงไม่ถูกแตะเลยระหว่างนั้น
+
+ผลลัพธ์: เว็บจริงไม่มีวัน "พังกลางอากาศ" จากการอัปเดต เพราะทุกอย่างผ่านการทดสอบในลิงก์แยกก่อนเสมอ
+
+### 8.3 รายการบริการภายนอกที่เว็บเชื่อมต่อ (Integration Registry) — อ่านตรงนี้เพื่อรู้ว่าเว็บพึ่งพาอะไรอยู่บ้าง
+
+ตารางนี้คือ "แผนที่การเชื่อมต่อ" ทั้งหมดของเว็บ ใช้เป็นจุดอ้างอิงเดียวว่าตอนนี้ระบบพึ่งพาบริการภายนอกอะไรบ้าง
+เพื่ออะไร และถ้าวันหนึ่งบริการไหนมีปัญหา/ต้องเปลี่ยน จะรู้ทันทีว่ากระทบส่วนไหนของเว็บ — อัปเดตทุกครั้งที่เพิ่ม/
+เปลี่ยนการเชื่อมต่อใหม่:
+
+- **Firebase (Google)** — โครงกระดูกหลักของระบบทั้งหมด
+  - Firestore: ฐานข้อมูลหลัก (ประกาศ, owners, leads, site content ฯลฯ)
+  - Authentication: บัญชีแอดมิน/Owner/Staff
+  - Hosting: เว็บไซต์สาธารณะ + preview channels (ช่องทางทดลองก่อนขึ้นจริง)
+  - Cloud Functions: ตัวกลางเรียก Claude API และ (ในอนาคต) Stripe/LINE webhook
+  - Storage: เก็บรูปภาพ (แผนย้ายจาก Firestore มาที่นี่ — หมวด 11 ข้อ 1)
+- **Anthropic (Claude API)** — สมองของแชทบอทลูกค้า + ตัวช่วยร่างประกาศ/โพสต์ Facebook-TikTok ใน AI Quick Add
+  เรียกผ่าน Cloud Function เท่านั้น (API key เก็บเป็น secret ฝั่งเซิร์ฟเวอร์ ไม่อยู่ในโค้ดฝั่งผู้ใช้)
+- **Stripe** *(ยังไม่ได้ต่อ — อยู่ในแผนหมวด 4)* — ระบบตัดเงิน/ใบแจ้งหนี้/แจ้งเตือนหมดอายุสำหรับ Agent/โฆษณา
+- **LINE Official Account** *(ยังไม่ได้ต่อ — อยู่ในแผนหมวด 8.1)* — ช่องทางแจ้งเตือนเหตุการณ์สำคัญเข้ามือถือ
+- **Google Maps JavaScript API** — ใช้ใน Property Map (ปักหมุดโซนพื้นที่) และพิกัดที่กรอกใน AI Quick Add
+- **ผู้ให้บริการโดเมน** (เช่น GoDaddy หรือที่ใช้จดโดเมนจริง) — ควบคุมชื่อเว็บ ต้องต่ออายุเอง (ติดตามในหมวด 7C)
+- **GitHub** — ที่เก็บโค้ดที่อัปโหลดไฟล์ขึ้นเวลามีอัปเดต (ไม่ใช่ระบบที่เว็บเรียกใช้งาน runtime แต่เป็นช่องทาง deploy)
+
+ทุกครั้งที่มีการเพิ่มบริการภายนอกใหม่ (เช่น เปิด Stripe หรือ LINE จริง) จะเพิ่มเข้ารายการนี้ทันที ไม่ต้องไปขุดหาว่า
+เว็บเชื่อมกับอะไรบ้างจากที่ไหน — เอกสารนี้ที่เดียวครบ
+
+## 9. วงจรชีวิตประกาศ & การลบข้อมูล/รูปภาพอัตโนมัติ
+
+ปัญหาที่ต้องแก้: เมื่อมีลูกค้าเยอะขึ้น เจ้าของเว็บจำไม่ได้ว่าใครหมดสัญญา/เลิกใช้แล้ว รูปภาพเก่าที่ไม่ได้ใช้
+สะสมกินพื้นที่ Storage โดยไม่มีประโยชน์ — ระบบต้องทำงานอัตโนมัติทั้งหมด ไม่ใช่ให้แอดมินไล่จำ/ไล่ลบเอง
+
+**หลักการ**: นับถอยหลังอัตโนมัติจากวันที่มีอยู่แล้วในระบบ (วันหมดอายุสัญญาเช่า, วันที่ยกเลิก subscription,
+วันที่แอดมินปิดประกาศว่า "ขายแล้ว") → แจ้งเตือนลูกค้าโดยตรงเป็นชั้นๆ (อีเมล/LINE ถ้าผูกไว้) → ลบอัตโนมัติเมื่อ
+ถึงกำหนดถ้าไม่มีการตอบกลับ — แอดมินไม่ต้องตัดสินใจทีละเคส เห็นแค่สรุปภาพรวม
+
+**ขั้นตอน**:
+1. ปิดประกาศ/หมดสัญญา → เปลี่ยนสถานะ (ไม่ลบทันที) → ประกาศหายจากหน้าเว็บสาธารณะทันที ข้อมูล+รูปยังอยู่
+2. **แจ้งเตือนลูกค้าอัตโนมัติเป็นชั้น**: 30 วันก่อนถึงกำหนด ("ประกาศของคุณจะถูกเก็บถาวร-ลบรูป คงข้อความ ในอีก
+   30 วัน หากต้องการต่ออายุ/เก็บรูปไว้ กดที่นี่") → เตือนซ้ำ 7 วันก่อน → ถึงกำหนดดำเนินการอัตโนมัติ
+3. **ลูกค้ากดปุ่มเดียวเพื่อ "ขอเก็บไว้ต่อ"** — ระบบเลื่อนกำหนดออกไปอัตโนมัติ ไม่ต้องแอดมินจัดการรายคน
+4. เมื่อถึงกำหนดจริง: **ลบเฉพาะไฟล์รูปภาพจาก Storage** (ส่วนที่กินพื้นที่มากสุด) แต่ **คงข้อมูลข้อความไว้ใน
+   Firestore** (ราคา, รายละเอียด, เจ้าของ) เผื่ออ้างอิง/ทำประวัติย้อนหลัง — ไม่ลบทิ้งทั้งหมดแบบกู้คืนไม่ได้
+5. แอดมินเห็นแค่สรุปในแดชบอร์ด "สถานะระบบ" (หมวด 7) เช่น "มี 5 ประกาศถูกเก็บถาวรอัตโนมัติสัปดาห์นี้" —
+   เป็นข้อมูลรับทราบ ไม่ใช่งานที่ต้องลงมือทำ
+
+## 10. ระบบจัดการแบนเนอร์ (Admin Backend)
+
+- CRUD เต็มรูปแบบ: เพิ่ม/แก้/ลบ/ปิดชั่วคราวแบนเนอร์ได้เอง ไม่ต้องแก้โค้ด
+- ตั้งค่าต่อแบนเนอร์: รูป, ลิงก์หน้าโฆษณาในเว็บ, ตำแหน่ง+หน้าไหน, วันเริ่ม-หมดอายุ, สถานะ (ของเจ้าของเว็บเอง /
+  ของลูกค้าจ่ายเงิน)
+- ใช้ตอนเปิดตัว: เจ้าของเว็บใส่บ้านของตัวเองเป็นแบนเนอร์กันหน้าว่างก่อน → พอมีลูกค้าจริงมาซื้อ slot ก็ถอด
+  ของตัวเองออก/ลดสัดส่วนลงได้ทันทีจากหน้านี้
+
+## 11. ลำดับการสร้างจริง (แบ่งเป็น 2 ชุดตามที่ต้องพึ่งอะไรจากคุณหรือไม่)
+
+**ชุด A — เขียนโค้ดต่อเนื่องได้เลยทันที ไม่ต้องรอคุณเตรียมอะไรเพิ่ม** (ใช้ของที่มีอยู่แล้วในโปรเจกต์ทั้งหมด:
+Firebase project เดิม, Claude API ที่ต่อไว้แล้ว) — ทำรวดเดียวจนจบชุดนี้ก่อน ไม่ต้องหยุดรอระหว่างทาง:
+
+1. ~~SEO-ready property URLs + meta/structured data~~ ✅ **เสร็จแล้ว** (Open Graph + JSON-LD ที่ Property Details)
+2. ~~แดชบอร์ด "สถานะระบบ & สิ่งที่ต้องทำ" (3 หมวด)~~ ✅ **เสร็จแล้ว** (อยู่ใน Admin Dashboard)
+3. ~~**Favorites + Intent Scoring + Auto-bot ติดตาม lead**~~ ✅ **เสร็จแล้ว** (favorites.js + heart บน PropertyCard +
+   คะแนนความสนใจ + บอทเปิดเองเมื่อคะแนนถึงเกณฑ์ + บันทึก lead ใน Firestore + แดชบอร์ดเห็น hot lead) ← *ทาง 1 สมบูรณ์*
+4. ~~ระบบจัดการแบนเนอร์ (Admin CRUD) + slot แบบสุ่มหมุนเวียน + หน้าโฆษณาในเว็บ~~ ✅ **เสร็จแล้ว (ปรับปรุงเพิ่ม)แล้ว (ขั้นพื้นฐาน)** —
+   CRUD ใน Site Content + slot บนสุด Home พร้อมสุ่มหมุนเวียน (หน้า/ตำแหน่งอื่นและหน้าโฆษณาย่อยในเว็บยังไม่ได้ทำ
+   เพิ่มทีหลังได้เมื่อต้องการ)
+   - **ปรับเพิ่มล่าสุด**: แสดงผลจริงเป็น**กริดแบนเนอร์ขนาดเล็กหลายช่อง** (ไม่ใช่แถบเดียวเต็มความกว้าง) ป้าย
+     "Sponsored" คั่นชัดเจนจาก Hero, แต่ละช่องโชว์ชื่อ+สถานะ+ราคาทับมุมล่าง, จอคอมเห็นหลายช่องพร้อมกัน มือถือ
+     เห็นทีละ 2 ช่องมีลูกศรเลื่อนวนลูป — แก้บั๊กกฎ Firestore ที่บล็อกแอดมินสร้างแบนเนอร์ active=true ไม่ได้ด้วย
+   - ~~เปลี่ยนวิธีเพิ่มแบนเนอร์จาก "กรอกลิงก์รูป + ลิงก์ปลายทางเอง" เป็น "กรอกแค่
+     รหัสทรัพย์"~~ ✅ **เสร็จแล้ว** — พิมพ์แค่รหัสทรัพย์ (เช่น CA-301) ระบบดึงรูปปก+ชื่อ+ลิงก์ไปหน้าทรัพย์นั้น
+     มาสร้างแบนเนอร์ให้อัตโนมัติ แจ้ง error ถ้าไม่พบรหัส
+   - **ยังไม่ได้ทำ**: แดชบอร์ดติดตามผู้ลงโฆษณา (รายชื่อทรัพย์ที่กำลังขึ้นแบนเนอร์ + วันเริ่ม/ครบกำหนด)
+5. ~~หน้าสมัครสมาชิก Agent/เจ้าของบ้าน + Landing Page มาร์เก็ตติ้ง (AI-powered) + ระยะฟรี "Founding Agents"~~ ✅
+   **เสร็จแล้ว (ขั้นพื้นฐาน)** — `Agent Signup.dc.html`: Landing pitch (จุดขาย AI 8 ภาษา/ผู้ช่วย 24 ชม./กรอง
+   lead) + ฟอร์มสมัครฟรี (สร้างบัญชี Firebase Auth + บันทึกสถานะ "pending" รออนุมัติ)
+   - ~~หน้า Admin อนุมัติ/ปฏิเสธผู้สมัคร~~ ✅ **เสร็จแล้ว** — `Agent Approvals.dc.html`: กรองดูตามสถานะ
+     (ทั้งหมด/รออนุมัติ/อนุมัติแล้ว/ปฏิเสธ) **+ กรองแยกตามประเภท (ดูรวม/เฉพาะเจ้าของบ้าน/เฉพาะ Agent พร้อมนับ
+     จำนวนแต่ละกลุ่ม)**, กดอนุมัติ/ปฏิเสธ/คืนสถานะได้ทันที, ลิงก์เข้าถึงจาก Admin Dashboard
+   - **ยังไม่ได้ทำ (ต้องกลับมาทำต่อ)**: หน้าโปรไฟล์ Agent สาธารณะ (`/agent/ชื่อ-agent`), self-serve dashboard
+     ให้ Agent โพสต์ประกาศเอง, ระยะฟรี "Founding Agents" อย่างเป็นทางการ (จำกัดจำนวน/ประกาศเงื่อนไขเปลี่ยนผ่าน),
+     ล็อกอินผ่าน Google/Facebook/เบอร์โทร OTP (ตอนนี้มีแค่อีเมล+รหัสผ่าน)
+6. ~~วงจรชีวิตประกาศ & ลบข้อมูล/รูปภาพอัตโนมัติ (หมวด 9)~~ ✅ **เสร็จแล้ว (ขั้นพื้นฐาน)** — เมื่อแอดมินตั้งสถานะ
+   ทรัพย์เป็น "sold" ระบบตั้งกำหนดลบรูปอัตโนมัติล่วงหน้า 30 วัน (`archiveScheduledAt`) ทุกครั้งที่เปิด Admin
+   Dashboard จะสแกนหาประกาศที่ถึงกำหนดแล้วลบเฉพาะไฟล์รูปจาก Storage (คงข้อมูลราคา/รายละเอียดไว้ใน Firestore
+   ตลอดไป) พร้อมสรุปจำนวนที่ถูกเก็บถาวรให้เห็นในแดชบอร์ด
+   - **ข้อจำกัดที่ต้องรู้**: การสแกนทำงานแบบ **client-side ทุกครั้งที่แอดมินเปิดแดชบอร์ด** ไม่ใช่ cron งานฝั่ง
+     เซิร์ฟเวอร์ที่รันตามเวลาแน่นอน (ต้องมี Cloud Functions Scheduled Function ถึงจะทำแบบนั้นได้ — ยังไม่ได้ตั้ง)
+     หมายความว่าถ้าไม่มีใครเปิดแดชบอร์ดเลยเกิน 30 วัน การลบจะล่าช้าไปจนกว่าจะมีคนเข้าใช้อีกครั้ง
+   - **ยังไม่ได้ทำ**: การแจ้งเตือนลูกค้าอัตโนมัติล่วงหน้า 30/7 วัน (ต้องมีอีเมล/LINE เชื่อมต่อก่อน — อยู่ในหมวด
+     8.1), ปุ่มให้ลูกค้ากด "ขอเก็บไว้ต่อ" เอง, ปุ่มยกเลิกกำหนดลบ (cancel archival) ในหน้า Admin
+
+*(ย้ายออกจากชุด A ไปชุด B ตอนแรก: ย้ายรูปไป Storage, ล็อก Security Rules, ระบบ role Owner/Staff — เพราะทั้งหมด
+ต้องมี Firebase Authentication จริงหรือ Blaze plan ก่อน — ระหว่างทางพบว่า Blaze เปิดอยู่แล้ว จึงทำ 2 ข้อแรกของ
+ชุด B ไปก่อนล่วงหน้า ไม่ใช่การข้ามขั้นตอน แค่สลับคิวตามความพร้อมจริง)*
+
+**ชุด B — ต้องให้คุณเตรียม/สมัครบัญชีภายนอกก่อน ถึงจะเขียนโค้ดผูกกับมันได้** (จะบอกล่วงหน้าตอนใกล้ถึงคิว
+ว่าต้องเตรียมอะไรบ้าง แล้วเขียนรวดเดียวให้เสร็จทั้งชุดเมื่อได้ข้อมูลครบ):
+
+1. ~~**ล็อก Firestore Security Rules (role-based) + App Check + rate limiting**~~ ✅ **เสร็จแล้ว** — เปิด Firebase
+   Authentication + สร้างบัญชีแอดมินจริง + rewire Admin Login + deploy `firestore.rules`/`storage.rules` แล้ว
+   (App Check + rate limiting ยังไม่ได้ทำ เป็นงานเสริมทำทีหลังได้)
+2. ~~**ย้ายรูปภาพ Firestore data-URL → Firebase Storage**~~ ✅ **เสร็จแล้ว** — Blaze plan เปิดอยู่แล้ว ย้ายรูปเก่า
+   + โค้ดอัปโหลดใหม่ทั้งหมดผ่าน Storage เรียบร้อย
+3. ~~ระบบ role Owner/Staff~~ ✅ **เสร็จแล้ว** — `adminUsers`/`staffInvites` collections + Firestore rules
+   แยกสิทธิ์ Owner (Site Content, External Services, Team) จาก Staff, หน้า `Team.dc.html` (Owner เชิญ Staff ด้วย
+   อีเมล) + `Staff Signup.dc.html` (Staff สมัครเองด้วยอีเมลที่ถูกเชิญเท่านั้น) — ผูกกับ Firebase Authentication
+   เดิม ไม่ต้องสร้างระบบบัญชีแยก
+4. ~~**Stripe subscription + webhook + payments ledger**~~ ✅ **เสร็จสมบูรณ์ทั้งระบบ — พร้อมทดสอบจริง** —
+   Cloud Functions ใหม่ 3 ตัว (`createCheckoutSession`, `createPortalSession`, `stripeWebhook`) จัดการ subscription
+   เต็มวงจร: เปิด Stripe Checkout → webhook ยืนยันลายเซ็นก่อนอัปเดตสถานะ → บันทึกทุกการจ่ายเงินสำเร็จลง collection
+   `payments` (เขียนได้เฉพาะผ่าน Admin SDK เท่านั้น กันข้อมูลปลอม) → หน้า `Lister Billing.dc.html` ให้ Agent/
+   เจ้าของบ้านเลือกอัปเกรด Pro/Agency หรือกดจัดการ/ยกเลิกผ่าน Stripe Customer Portal เอง
+   - **สิ่งที่ต้องทำก่อนใช้งานได้จริง**:
+     1. ✅ สร้าง Product ใน Stripe Dashboard (โหมด Test) แล้ว — "Pro — huahin.properties" (฿590/เดือน),
+        "Agency — huahin.properties" (฿1,490/เดือน)
+     2. ✅ วาง Price ID ลงในหน้า Site Content แล้ว
+     3. ✅ ตั้งค่า secret `STRIPE_SECRET_KEY` และ `STRIPE_WEBHOOK_SECRET` ผ่าน Codespace แล้ว
+     4. ✅ Deploy 3 ฟังก์ชัน (`createCheckoutSession`, `createPortalSession`, `stripeWebhook`) สำเร็จ + สร้าง
+        Webhook endpoint ใน Stripe Dashboard ผูกกับ 4 event ที่ต้องการแล้ว
+   - **ระบบพร้อมทดสอบจริงได้แล้ว**: เข้าหน้า Lister Billing กดอัปเกรด Pro/Agency ทดสอบด้วยบัตรทดสอบของ Stripe
+     (เช่น 4242 4242 4242 4242) ดูว่า checkout ทำงาน + webhook อัปเดตสถานะ + payments ledger บันทึกถูกต้อง
+   - **ยังไม่ได้ทำ**: หน้า self-serve dashboard เต็มรูปแบบให้ Agent โพสต์ประกาศเอง (Lister Billing เป็นแค่หน้า
+     จัดการสมาชิก ไม่ใช่หน้าโพสต์ประกาศ), Featured Listing boost ยังไม่เชื่อมกับ tier
+5. ~~Featured Listing boost~~ ✅ **เสร็จแล้ว** — เจ้าของ/Agent จ่ายเพิ่มดันประกาศขึ้นก่อนใครชั่วคราว (7/30 วัน)
+   ผ่าน Stripe Checkout one-time payment (ใช้ dynamic price_data ไม่ต้องสร้าง Stripe Product ล่วงหน้า) แอดมิน
+   ตั้งราคาที่ Site Content → "🌟 ราคาดัน Featured Listing" กดปุ่ม "🌟 7 วัน"/"🌟 30 วัน" ที่แต่ละประกาศในหน้า
+   Admin Dashboard เพื่อเริ่มขาย เมื่อจ่ายสำเร็จ webhook ตั้ง `featuredUntil` ให้อัตโนมัติ หน้า Home จัดลำดับ
+   ประกาศที่ boost อยู่ให้ขึ้นก่อนเสมอในโซน Featured Properties — **badge "🌟 Featured" บนการ์ดฝั่งสาธารณะ +
+   จัดลำดับ Featured ในหน้า Search Results ด้วย** ✅ เสร็จแล้วเช่นกัน
+   - **ยังไม่ได้ทำ**: ให้ Agent/เจ้าของบ้านกดซื้อเองจากหน้า Lister Billing (ตอนนี้แอดมินกดให้เท่านั้น)
+6. ~~เปิดขายแบนเนอร์ให้ลูกค้าภายนอกจริง~~ ✅ **เสร็จแล้ว** — หน้าสาธารณะ `Advertise.dc.html` ให้ธุรกิจภายนอก
+   เลือกตำแหน่ง (บนสุด/กลางหน้า/แถบข้าง) + อัปโหลดลิงก์แบนเนอร์+ลิงก์ปลายทาง+อีเมล → จ่ายผ่าน Stripe Checkout
+   one-time (dynamic pricing, ราคาต่อตำแหน่งตั้งที่ Site Content → "📢 ราคาแบนเนอร์") → webhook เปิดใช้งาน
+   แบนเนอร์อัตโนมัติ แสดงผล 30 วันแล้วหมดอายุเอง (`expiresAt`) — Firestore rules อนุญาตให้คนทั่วไปสร้างแบนเนอร์
+   ของตัวเองแบบ "รอชำระเงิน" ได้ (แก้ไข/อนุมัติยังเป็นสิทธิ์แอดมินเท่านั้น) — **การกรองหมดอายุตอนนี้ทำงานที่
+   หน้า Home + Search Results + Property Details ครบทั้ง 3 หน้าแล้ว** ✅
+   - **ยังไม่ได้ทำ**: หน้า Admin ยังไม่มีตัวกรองดู "แบนเนอร์รอชำระเงิน vs จ่ายแล้ว" แยกจากกัน
+7. ⚠️ **ทาง 4 — แพ็กเกจ VIP (ยกเลิกแล้ว, ดูหมวด 2.1)** — โค้ด/UI ที่เคยสร้างไว้ (ปุ่ม VIP, Agent Code, Buyer
+   Registration, teaser, badge) เป็นประวัติการพัฒนาเดิมก่อนมติยกเลิก ไม่ใช่ทิศทางปัจจุบัน — Assisted Sale
+   (หมวด 2.1) คือกลไกที่ใช้งานจริงแทนที่แล้ว
+   - **16 ก.ค. 2026 (รอบ 3) เพิ่มเติม**: หน้าเว็บสมาชิกไม่พาลูกค้าหลุดไปเว็บหลักอีกต่อไป — คลิกดูทรัพย์เปิดเป็น
+     ป็อปอัพในหน้าเดียวกัน เลื่อนดูรูปได้ครบทุกรูป, เพิ่มตัวเลือกภาษา 8 ภาษา (มีผลกับ UI+ป็อปอัพ+แชท AI), เพิ่ม
+     ตัวกรอง 4 ช่อง (ประเภท/โซน/ห้องนอน/ราคา), AI ในแชทตอบสั้นลงเป็นค่าเริ่มต้นและโชว์การ์ดทรัพย์ให้คลิกดูเอง
+     แทนพิมพ์รายละเอียดยาว, คำอธิบายทรัพย์+bio ที่สมาชิกกรอกเองแปล 8 ภาษาอัตโนมัติทันทีตอนกด "บันทึก" (เหมือน
+     กลไก AI Quick Add) — **ยังไม่ทำ**: ทรัพย์ที่แอดมินเพิ่ม/แก้ไขให้เจ้าของบ้านโดยตรง (นอก AI Quick Add) ยังไม่
+     มีระบบแปลอัตโนมัติ
+   - **16 ก.ค. 2026 (รอบ 4) — ลดความเสี่ยงต้นทุน AI ตอนทรัพย์เยอะขึ้น**: แชทหน้าเว็บหลัก (ContactRail) เดิมส่ง
+รายชื่อทรัพย์ **ทั้งหมด** ให้ AI อ่านทุกข้อความ — ที่ทรัพย์หลักร้อยรายการขึ้นไปจะทำให้ต้นทุนต่อข้อความสูงขึ้น
+เรื่อยๆ ไม่มีเพดาน ตอนนี้แก้แล้ว: กรองทรัพย์ตามคำถามลูกค้า (โซน/ประเภท/งบประมาณ/จำนวนห้องนอนที่พิมพ์มา) และ
+จำกัดสูงสุด 30 รายการต่อข้อความ (เดิมไม่จำกัด) ถ้าไม่มีเงื่อนไขชัดเจนจะสุ่มตัวอย่างทรัพย์กระจายทั่วแคตตาล็อก
+แทนการส่งทั้งหมด — ทรัพย์ที่ลูกค้ากำลังดูอยู่ (ถ้ามี) ยังคงถูกส่งเสมอ ไม่ตกหล่น
+8. ~~Pagination (10 รายการ/หน้า) + ตัวเลขจำนวนรวม~~ ✅ **เสร็จแล้ว** — ทั้งหน้า Home (กริดทรัพย์แนะนำ) และ
+   Search Results แบ่งหน้าอัตโนมัติ 10 รายการ/หน้า (เดิม 8 ปรับตามคำขอ) พร้อมโชว์ตัวเลขรวมทั้งหมด (เช่น
+   "59 รายการ") เหนือแถบเลขหน้า/ลูกศร ‹›
+
+*(LINE Official Account แจ้งเตือน ในหมวด 8.1 ก็อยู่ในชุด B เช่นกัน แต่ยังไม่เร่งด่วนตามที่ตกลงไว้ก่อนหน้า — ทำ
+เมื่อไหร่ก็ได้ระหว่างหรือหลังชุด B)*
+
+**ประเมินเวลาที่เหลือ (อัปเดตล่าสุด — งานส่วนใหญ่ของชุด A และ B เสร็จแล้ว)**: งานที่เหลือจริงตอนนี้มี 2 ก้อน —
+(1) **งานเก็บตกเล็กๆ** จากข้อ 4-6 ที่ทำไปแล้วบางส่วน (badge Featured บนการ์ด, จัดเรียง Featured ที่ Search
+Results, กรองวันหมดอายุแบนเนอร์ที่หน้าอื่นนอกจาก Home, ตัวกรองแบนเนอร์รอชำระ/จ่ายแล้วในหน้า Admin, หน้า
+self-serve dashboard ให้ Agent โพสต์ประกาศเอง) รวมกันประมาณ **2-4 วันทำงาน** เพราะแต่ละจุดเล็กและใช้ระบบ
+Stripe/Firestore ที่วางไว้แล้ว (2) **ทาง 4 — แพ็กเกจ Agent VIP** (ข้อ 7) เป็นงานก้อนใหญ่สุดที่เหลือ ต้องสร้างทั้ง
+ระดับเงิน/ทอง/เพชรสองฝั่ง (เจ้าของบ้าน+Agent) กติกา Buyer Registration/Agent Code และหน้าจัดการที่เกี่ยวข้อง
+ประมาณ **1-1.5 สัปดาห์ปฏิทิน** ทำงานร่วมกันต่อเนื่อง — รวมทั้งหมดที่เหลือประมาณ **1.5-2 สัปดาห์ปฏิทิน** จนกว่า
+บลูพริ้นท์ทั้งฉบับจะเสร็จสมบูรณ์ 100% (ไม่นับเวลาที่ต้องอัปโหลดไฟล์/deploy เอง) — ตัวเลขนี้เป็นการประมาณคร่าวๆ
+อาจขยับได้ตามจำนวนรอบแก้ไข/ทดสอบจริงที่เกิดขึ้น
+
+## 12. แผนเปิดตัว (Go-to-Market)
+
+**หลักการรวมที่ใช้กับผู้ใช้ทุกกลุ่ม (ผู้ซื้อทั่วไป / เจ้าของบ้าน / Agent) — "ฟรีก่อนเพื่อดึงคนเข้าระบบ แล้วค่อย
+เปิดจ่ายทีหลังเมื่อเห็นคุณค่าแล้ว"**: ทั้ง 3 กลุ่มเริ่มต้นด้วยการใช้งานฟรีเสมอ ไม่มีใครโดนขอเงินตั้งแต่วันแรกที่
+เข้ามารู้จักเว็บ — รายได้ค่อยเปิดทีละชั้นหลังจากผู้ใช้กลุ่มนั้นเห็นผลจริงแล้วเท่านั้น:
+- **ผู้ซื้อ/ผู้เช่าทั่วไป**: ใช้ฟรีตลอดไป ไม่มีแผนเก็บเงินจากฝั่งนี้เลย (รายได้มาจากอีก 2 กลุ่ม ไม่ใช่ผู้ใช้ปลายทาง)
+  แต่ต้อง**ให้ความสำคัญกับการเก็บข้อมูลความสนใจของกลุ่มนี้อย่างเป็นระบบเสมอ** (ระบบ favorites + intent scoring +
+  lead ในทาง 1) เพราะเป็นฐานข้อมูลที่ใช้แจ้งเตือน/ติดตามงานในอนาคตได้ต่อเนื่อง แม้ตัวผู้ใช้จะไม่เสียเงินเลยก็ตาม
+  — ข้อมูลนี้คือสินทรัพย์สำคัญที่สุดของธุรกิจในระยะยาว ไม่ใช่แค่รายได้ตรงจากค่าธรรมเนียม
+- **เจ้าของบ้าน (ครอบคลุมทั้งฝั่งขาย และฝั่งปล่อยเช่า — ใช้หลักการและโครงสร้างเดียวกันทั้งหมด)**: โพสต์ฟรีปกติได้
+  ตั้งแต่วันแรก (ทาง 2) → เห็นผล (มี Agent ติดต่อ/มีคนสนใจ) แล้วค่อยเสนออัปเกรดเป็นแพ็กเกจ VIP (ทาง 4) เพื่อเร่ง
+  การขาย**หรือเร่งการปล่อยเช่า**เมื่อพร้อมจ่าย — ไม่ต้องแยกระบบ/แยกแพ็กเกจต่างหากสำหรับฝั่งเช่า ใช้ระดับเงิน/
+  ทอง/เพชรชุดเดียวกัน เพียงแต่ประเภทประกาศ (ขาย/เช่า) เป็น field แยกในข้อมูลเท่านั้น
+- **Agent**: สมัครและโพสต์ฟรีช่วง "Founding Agents" (ทาง 2) → เห็นผล (ได้ lead จริง, ได้ปิดการขาย) แล้วค่อยเปิด
+  เก็บค่าสมัครสมาชิกปกติ + เสนออัปเกรดเป็น VIP (ทาง 4) เมื่อเครือข่าย Agent และพูลบ้านมีมากพอ
+
+ลำดับขั้นเปิดตัวที่ตรงกับหลักการนี้:
+
+1. **ปิดเงียบ (Soft launch)** 2-4 สัปดาห์ — เติมประกาศ 50+ รายการ ทดสอบทุก flow เอง
+2. **เปิดวงในพื้นที่ + เปิดรับ "Founding Agents" ฟรี** — โพสต์กลุ่ม Facebook หัวหิน/ชะอำ/ปราณบุรี ชวน Agent
+   มาโพสต์ฟรีช่วงแรก (จำกัดจำนวน, แจ้งเงื่อนไขเปลี่ยนผ่านชัดเจน) เก็บ feedback จริง — ผู้ซื้อทั่วไปใช้ฟรีตั้งแต่ต้น
+3. **SEO/Google Business** — ทำคู่ขนานตั้งแต่ขั้น 2
+4. **เปิดเก็บเงินทาง 2** (ค่าสมัครสมาชิก Agent ปกติ) — เมื่อ traffic/lead เข้าสม่ำเสมอ + Founding Agents ครบ
+   เงื่อนไขที่ตกลงไว้
+5. **เปิดทาง 3 (โฆษณาให้ลูกค้าภายนอกจริง)** — เมื่อมีตัวเลข traffic พอโชว์ได้จริง
+6. **เปิดทาง 4 (แพ็กเกจ VIP ทั้งฝั่งเจ้าของบ้านและฝั่ง Agent)** — เมื่อฐาน Agent และพูลประกาศมั่นคงแล้ว เสนอ
+   อัปเกรดให้ทั้งสองฝั่งที่เห็นผลจริงจากการใช้ฟรีมาก่อนหน้านี้แล้ว
+
+## 13. หมายเหตุค่าใช้จ่าย
+Firebase (Firestore/Functions/Storage) อยู่ใน free tier ได้นานในสเกลนี้ ค่าใช้จ่ายเพิ่มตามการใช้งานจริงคือ
+Claude API (ต่อข้อความ) และ Stripe (~3-4% ต่อธุรกรรม) — ไม่มีค่า license ก้อนใหญ่ผูกพันรายเดือน
+
+## 14. หน้า AI Concierge (Conversational Landing Page) — ใหม่ล่าสุด
+
+**แนวคิด**: หน้าแยกจาก Home ที่เปิดมาเจอแค่กล่องคุยกับ AI เต็มจอ + ไอคอนเล็ก 3 อัน (ซื้อ/เช่า/ฝากขาย) ไม่มีบ้าน
+โชว์เลย ใช้ส่งให้ Agent ในกลุ่ม LINE ทดลอง/ทำการตลาดได้ทันที โดยไม่ต้องเปลี่ยนหน้าแรกจริงของเว็บ
+
+**สถานะ**: ✅ **สร้างเสร็จแล้ว** — ไฟล์ `AI Concierge.dc.html` ใช้ persona/ข้อมูลบ้านชุดเดียวกับแชทบอทหลัก
+(ContactRail) มีปุ่ม "ดูเว็บไซต์แบบเต็ม" + ลิงก์ "ดูประกาศทั้งหมดด้วยตัวเอง" ให้คนที่ไม่อยากคุยข้ามเข้า Home ได้
+ทันที — **ยังไม่ได้อัปโหลดขึ้นเว็บจริง** รอการตัดสินใจว่าจะใช้ส่งการตลาดหรือไม่
+
+**บทสนทนาต่อเนื่องข้ามหน้า (เสร็จแล้ว)**: ไม่ว่าลูกค้าจะเริ่มคุยจากหน้า AI Concierge หรือจากปุ่ม "💬 แชทกับเรา"
+มุมล่างซ้ายของหน้าไหนก็ตาม (Home, Search Results, Property Details ฯลฯ) บทสนทนาจะถูกบันทึกร่วมกันผ่าน
+localStorage คีย์เดียว (`hh_chat_history`) — คลิกดูบ้านแล้วเข้าไปหน้ารายละเอียด หรือย้อนกลับ/ไปหน้าอื่น กล่องแชท
+จะเปิดขึ้นเองพร้อมประวัติเดิมทันที ไม่เริ่มทักทายใหม่ ไม่หลุดขาดช่วง
+
+**ปุ่มย่อ/ขยายกล่องแชท (เสร็จแล้ว)**: เดิมมุมขวาบนของกล่องแชทเป็นเครื่องหมาย "×" ที่ทำให้เข้าใจผิดว่ากดแล้ว
+จะปิด/ออกจากแชท — เปลี่ยนเป็นสัญลักษณ์ย่อ "─" แล้ว กดแล้วกล่องแชทจะย่อเหลือแถบเล็กมุมล่างขวา (ไม่ใช่ปิดหาย)
+คลิกแถบเล็กนั้นอีกครั้งเพื่อขยายกลับมาคุยต่อได้ทันที ไม่เสียประวัติการคุย
+
+**ยังไม่ได้ทำ (ถ้าตัดสินใจใช้จริง)**: ปุ่มแชร์ครบรูปแบบ (Web Share API + คัดลอกลิงก์) ตามที่คุยไว้ต่างหาก,
+วัด/เก็บสถิติว่า Agent คนไหนแชร์ลิงก์นี้ไปแล้วมีคนกดเข้าเท่าไหร่ (ต้องมี ref code ต่อท้ายลิงก์)
+
+**แชทรู้บริบทหน้าที่กำลังดูอยู่ (เสร็จแล้ว)**: เดิม AI ไม่รู้ว่าลูกค้ากำลังเปิดดูหน้ารายละเอียดบ้านหลังไหนอยู่
+ถ้าลูกค้าถามกำกวมไม่ระบุรหัส (เช่น "ราคาเท่าไหร่", "ให้เช่าเดือนละเท่าไหร่") AI จะตอบไม่ตรงบ้านที่ลูกค้ากำลังดู —
+แก้แล้วโดยส่งรหัสทรัพย์ของหน้าปัจจุบันเข้าไปในบริบทของ AI เสมอ ทำให้ตอบอ้างอิงบ้านหลังที่กำลังดูอยู่ได้ทันที
+เว้นแต่ลูกค้าถามถึงหลังอื่นชัดเจน — เหมือนคุยกับพนักงานที่รู้ว่าลูกค้ากำลังดูอะไรอยู่ตรงหน้า
+
+**ปรับปรุงกล่องแชทเพิ่มเติม (เสร็จแล้ว)**: (1) เลื่อนไปข้อความล่าสุดอัตโนมัติเสมอเมื่อเปิด/คืนค่าประวัติแชท
+ไม่ต้องเลื่อนหาเอง (2) เพิ่มไอคอนถังขยะเล็กๆ มุมบนของกล่องแชทสำหรับ "ล้างประวัติแชท เริ่มใหม่" ลบทั้ง
+localStorage และประวัติที่เห็น
+
+**ไอคอน Favorite เปลี่ยนจากหัวใจเป็นดาว (เสร็จแล้ว)**: จากไอคอนหัวใจ (❤️/🤍) ที่อาจสื่อความหมายไม่ชัดเจนสำหรับ
+บางคน เปลี่ยนเป็นดาว (⭐/☆) ตามธรรมเนียมที่คนคุ้นเคยกว่า และเมื่อบันทึกแล้วจะมีข้อความเล็ก "Favorite" (แปลตาม
+ภาษาที่ใช้ ครบ 8 ภาษา) ต่อท้ายดาว ให้เห็นชัดว่าถูกบันทึกไว้แล้ว โดยเฉพาะบนมือถือที่เห็นแค่ไอคอนอาจไม่ชัด
+
+**ปุ่ม "My Favorites" ลอยตลอด แบบตะกร้าสินค้า (เสร็จแล้ว)**: เพิ่มปุ่มลอยมุมล่างซ้ายทุกหน้า (คู่กับปุ่มแชท
+มุมขวา) แสดงจำนวนรายการโปรดที่บันทึกไว้แบบเรียลไทม์ (อัปเดตทันทีที่กดดาวจากหน้าไหนก็ตาม) คลิกแล้วเปิดรายการ
+popup แสดงรูปปก/ชื่อ/ราคา พร้อมลิงก์เข้าดูรายละเอียดและปุ่มลบออกจากรายการโปรดได้ในที่เดียว — เข้าถึงง่ายแบบ
+ตะกร้าสินค้าของแอปช้อปปิ้งตามที่ขอ
+
+**ลิงก์บ้านในแชทเป็นการ์ดพร้อมรูปปกและรายละเอียดย่อ (เสร็จแล้ว)**: เมื่อ AI แนะนำบ้านในแชท ปุ่ม "ดูรายละเอียด"
+ไม่ใช่แค่ตัวหนังสือลอยๆ อีกต่อไป — เปลี่ยนเป็นการ์ดมีกล่องรูปปกสี่เหลี่ยมจัตุรัสขนาดตายตัว 72×72px (แก้บั๊กเดิม
+ที่ aspect-ratio+stretch ไม่แสดงผลในบางเบราว์เซอร์) + ราคา + จำนวนห้องนอน/ทำเลย่อ การ์ดกว้างเต็มพื้นที่บับเบิล
+แชท (ไม่ใช่ความกว้างตายตัว) ข้อความไม่ตัดด้วย ellipsis อีกต่อไป — แก้ปัญหาตัวหนังสือแสดงผลไม่ครบบนมือถือ กล่อง
+รูปปกแสดงเสมอ (รูปจริงถ้ามี ไม่งั้นใช้ลวดลายพื้นหลังเดียวกับการ์ดบ้านทั่วเว็บ)
+
+**ปุ่มล้างประวัติแชทมีข้อความกำกับครบทั้ง 2 จุด (เสร็จแล้ว)**: ทั้งกล่องแชท (ContactRail) และหน้า AI Concierge
+มีไอคอนถังขยะ + คำว่า "ล้าง" กำกับชัดเจนอยู่ด้านขวาของแถบหัวข้อ ไม่ใช่แค่ไอคอนลอยๆ
+
+## 15. ปรับปรุง UX หน้า Home (รอบมือถือ + แบนเนอร์แบบใหม่)
+
+- **แบนเนอร์เลิกเป็นแถบ/การ์ดแยก** — ทรัพย์ที่ซื้อแบนเนอร์แสดงผลเป็น PropertyCard ปกติทุกประการ (ไม่มีป้าย
+  "Sponsored") ลอยขึ้นอันดับแรกสุดของกริดทรัพย์แนะนำเดียวเสมอ ตามด้วย Featured boost แล้วทรัพย์ทั่วไป — ลำดับ
+  หน้าใหม่: Hero → ช่องค้นหา → ปุ่ม CTA (4 ปุ่ม) → กริดทรัพย์เดียว (pagination 10/หน้า + ตัวเลขจำนวนรวม)
+- **ปุ่ม CTA (ค้นหาบ้าน/เช่า/ฝากขาย/ติดต่อ)** — ย้ายลงมาอยู่ใต้ช่องค้นหา (ไม่ซ้อนบนรูป Hero กันบัง/ล้นข้อความ
+  หัวเรื่อง) แถวเดียวกึ่งกลาง มีระยะขอบซ้าย-ขวา ขอบมนพอประมาณ (ไม่กลมจัด) ตัวหนังสือชิดขอบปุ่มให้เห็นชัดขึ้น
+- **ข้อความ Hero บนมือถือ** — ขยับขึ้นชิดบน-ซ้ายแทนกึ่งกลางล่าง (จอคอมไม่เปลี่ยน)
+- **โลโก้หัวเว็บบนมือถือ** — ย่อขนาดเฉพาะจอมือถือกันล้นขอบจอ
+- **คำว่า "ตัวกรอง"** — เปลี่ยนเป็น "ตัวกรองรายละเอียดเพิ่มเติม" ทุกภาษาที่มีคำนี้ (สื่อความหมายชัดเจนกว่าว่า
+  กรองอะไรเพิ่มได้)
+
+## 16. กฎป้องกันการ "สวมประกาศ" (Listing Swap Fraud Prevention)
+
+**ปัญหา**: เมื่อบ้าน/คอนโดหลังหนึ่งขายได้แล้ว บางเจ้าของ/Agent อาจพยายามนำบ้านหลังใหม่มา "สวม" ในประกาศเดิม
+(แก้รูป/ราคา/ที่อยู่ทับของเดิม) แทนที่จะสร้างประกาศใหม่ — ทำให้ SEO เสีย (URL/ประวัติเดิมผูกกับบ้านหลังเก่า),
+ลูกค้าที่เคย favorite/เคยดูเห็นข้อมูลผิด, ประวัติ lead ปนกันระหว่างบ้านสองหลัง
+
+**หลักการ — ล็อกเฉพาะฟิลด์ที่เป็น "ตัวตนของทรัพย์" ไม่ใช่ล็อกทั้งประกาศ**: เมื่อสถานะเปลี่ยนเป็น "sold"
+เจ้าของ/Agent ยังแก้ไขรายละเอียดย่อยได้ตามปกติ (เช่น คำบรรยาย, จุดเด่นเพิ่มเติม) เพื่อไม่ให้รู้สึกว่าถูกล็อกทุก
+อย่าง — แต่ **ฟิลด์ที่เป็นตัวตนหลักของทรัพย์ (รูปหน้าปก, ราคา, ที่อยู่/โซน, ชื่อประกาศ, รหัสทรัพย์) ถูกล็อกถาวร
+แก้ไม่ได้อีก** เพราะเป็นฟิลด์เดียวกับที่ใช้ตรวจจับว่ามีการ "สวม" เกิดขึ้นหรือไม่ — ถ้ามีบ้านหลังใหม่ต้องสร้าง
+ประกาศ/รหัสใหม่เสมอ ไม่ใช่แก้ของเดิม
+
+## 17. ระบบมอบหมายงานตามแผนก/โซน (Task Delegation) — เตรียมไว้ล่วงหน้า ยังไม่เปิดใช้งาน
+
+**ปัญหาที่คาดการณ์ไว้**: ตอนนี้เจ้าของเว็บรับหน้าที่ทุกอย่างเอง แต่เมื่อทีมโตขึ้น (เช่น มีคนดูแลฝ่ายเช่าแยก, ฝ่าย
+ถ่ายรูป, ฝ่ายเก็บข้อมูลบ้าน, ฝ่ายลงประกาศ) เจ้าของเว็บไม่ควรต้องเป็นคนแจกงานเองทีละชิ้นตลอดไป — งานหนักเกินไป
+เมื่อทีมขยาย
+
+**แนวทางที่เตรียมไว้ (โครงสร้างข้อมูลเท่านั้น ยังไม่ทำ UI มอบหมายงานจริง)**:
+- ต่อยอดจากระบบ role Owner/Staff ที่มีอยู่แล้ว (หมวด 11 ชุด B ข้อ 3) — เพิ่มมิติ **"แผนก" (department)** ให้ Staff
+  แต่ละคน เช่น `rental` (ฝ่ายเช่า), `photography` (ฝ่ายถ่ายรูป), `data-entry` (ฝ่ายเก็บข้อมูล/ลงประกาศ) และ
+  **"โซนพื้นที่รับผิดชอบ"** (หัวหิน/ปราณบุรี/ชะอำ) ผูกกับบัญชี Staff แต่ละคน
+- งานใหม่ที่เข้ามา (เช่น lead ฝากเช่าใหม่, ทรัพย์รอถ่ายรูป) จะ**ผูกอัตโนมัติกับแผนก/โซนที่เกี่ยวข้อง** แทนที่จะ
+  เข้าคิวกลางที่ Owner ต้องมาแจกเอง — Staff แต่ละคนเห็นแค่งานในแผนก/โซนของตัวเองเมื่อ login
+- **ยังไม่สร้างจริง**: หน้า UI มอบหมายงาน, การแจ้งเตือนงานใหม่เข้าคิวแผนก, สร้างตอนที่ทีมเริ่มมีจริง 3+ คนและ
+  แยกหน้าที่ชัดเจนแล้วเท่านั้น (ไม่มีประโยชน์ตอนทีมเล็ก) — โครงสร้าง field ใน `adminUsers` ควรออกแบบให้รองรับ
+  ไว้ตั้งแต่ตอนสร้างระบบ role Owner/Staff เพื่อไม่ต้องรื้อโครงสร้างข้อมูลทีหลัง
+
+## ⚠️ index.html ที่ root ซ้ำกับ Home.dc.html
+
+GitHub repo มีไฟล์ `index.html` แยกต่างหากอยู่ที่ root ซึ่งเป็นสิ่งที่เว็บโหลดจริงตอนเข้า
+`https://huahin.properties/` (ไม่ใช่ Home.dc.html โดยตรง) — ไฟล์นี้เป็นสำเนา ไม่ sync
+อัตโนมัติกับ Home.dc.html ทุกครั้งที่แก้ไข Home.dc.html **ต้องคัดลอกเนื้อหาไปทับ
+index.html ด้วยเสมอ** แล้วส่งทั้งคู่ให้อัปโหลด ไม่งั้นหน้าแรกจริงของเว็บจะไม่ตรงกับ
+Home.dc.html ที่แก้ไว้ (เจอปัญหานี้ตอนยืนยัน Google Search Console เมื่อ 16 ก.ค. 2026)
+
+## ⚠️ กล่องรหัสผ่านปิดปรับปรุงเว็บไซต์ (Maintenance Gate) — แก้บั๊กแล้ว (16 ก.ค. 2026)
+
+หน้าแรก (Home.dc.html/index.html) มีกล่องกรอกรหัสผ่านตอนเปิดโหมด "ปิดปรับปรุงเว็บไซต์"
+(คุมเปิด/ปิดจากหน้า Site Content) — ใช้ Firebase Auth บัญชีเดียวกับ Admin Login
+(`doothailand@gmail.com`) ไม่ใช่รหัสลับแยกต่างหาก
+
+**ประวัติบั๊กที่แก้ไปแล้ว**:
+1. เคยพยายามดึงอีเมลแอดมิน "แบบไดนามิก" จากหน้า Site Content (`fetchAdminCredentials()`)
+   เพื่อกันไม่ให้ค้างถ้าเปลี่ยนอีเมลแอดมินทีหลัง — แต่ดันได้ค่าที่ผิดเพี้ยน/ไม่คาดคิดกลับมา
+   (พบว่า email กลายเป็นสตริงตัวเลขที่ไม่เกี่ยวข้องเลย) ทำให้ **เข้าเว็บไม่ได้ไม่ว่าจะพิมพ์
+   รหัสผ่านถูกหรือไม่ก็ตาม** เพราะอีเมลที่ใช้คู่กับรหัสผ่านผิดตั้งแต่ต้น
+   **แก้แล้ว**: ตัดการดึงจากฐานข้อมูลออก ใช้อีเมล `doothailand@gmail.com` ตายตัวเสมอ
+   เหมือน Admin Login
+2. ปุ่ม "Save Login Details" ในหน้า Site Content เดิมบันทึกรหัสผ่านลง Firestore
+   เก็บไว้โชว์เฉยๆ **ไม่ได้เปลี่ยนรหัสผ่านจริงของระบบ Firebase Auth เลย** ทำให้เข้าใจผิดว่า
+   รหัสผ่านไม่ตรงกัน — **แก้แล้ว**: ปุ่มนี้ตอนนี้เรียก `updateAdminPassword()` เปลี่ยนรหัสผ่าน
+   Firebase Auth จริงด้วย (ต้องล็อกอินสดๆ ก่อนถึงจะเปลี่ยนได้ ไม่งั้น Firebase จะฟ้อง
+   `auth/requires-recent-login`)
+3. **ถ้าลืมรหัสผ่านแอดมินจริงๆ**: ไปที่ Firebase Console → Authentication → Users →
+   หา `doothailand@gmail.com` → เมนู ⋮ → Reset password → ระบบจะส่งอีเมลลิงก์ตั้งรหัส
+   ใหม่ไปที่กล่องอีเมลนั้นโดยตรง วิธีนี้ชัวร์ที่สุดเพราะแก้ที่ต้นตอ Firebase Auth ตรงๆ
+
+## 18. CEO Project Dashboard — แหล่งสถานะโครงการที่มีชีวิต (17 ก.ค. 2569)
+
+`CEO Dashboard.dc.html` (ลิงก์จาก Admin Dashboard → 📊 CEO Dashboard) คือแหล่งสถานะ
+**ปัจจุบันจริง** ของโครงการ — เก็บ Overall Progress, สถานะแต่ละ Phase/Module,
+งานกำลังทำ/ถัดไป/เพิ่งเสร็จ, ความเสี่ยง, Decisions Log และประวัติการพัฒนา
+เป็นข้อมูล structured ใน Firestore (`siteContent/projectDashboard`, admin-only
+read+write) ไม่ใช่ hardcode — แก้ไขได้จากหน้านั้นโดยตรง ไม่ต้องแก้โค้ด
+**BLUEPRINT.md ฉบับนี้ยังคงเป็นแผน/เหตุผลเชิงลึก ส่วน CEO Dashboard คือ "ตอนนี้อยู่ตรงไหน
+แล้ว" — อย่าคัดลอกสถานะกลับมาเขียนซ้ำที่นี่ เดี๋ยวข้อมูลสองที่ไม่ตรงกัน.**
+
+## 19. CEO Demo Login Reference (อัปเดต 18 ก.ค. 2569)
+
+> **หมายเหตุความปลอดภัย**: รหัสผ่านจริงถูกย้ายออกจากไฟล์นี้แล้ว — Blueprint นี้อยู่ใน
+> Git repository ซึ่งอาจเป็น public repo, จึงเก็บเฉพาะชื่อบัญชี/หน้า Login/อีเมล/ข้อมูล
+> แพ็กเกจไว้ที่นี่เท่านั้น. **รหัสผ่านทั้งหมดอยู่แยกใน `CEO-LOGIN-SHEET.md` (ไฟล์ส่วนตัว
+> ห้ามอัปโหลดขึ้น GitHub เด็ดขาด)**. หมายเหตุ: Website Password Gate ที่ CEO ใช้เข้าดู
+> เว็บระหว่างพัฒนา เป็นคนละชั้นความปลอดภัยกับไฟล์เอกสารใน repository นี้ — ป้องกันคนละ
+> จุดกัน ไม่ทดแทนกัน.
+
+ลำดับบัญชีด้านล่างตรงกับลำดับการทดสอบจริงของ CEO (Admin ก่อน แล้วไล่จาก Trial ไปแพ็กเกจสูงสุด) — **ห้ามสลับลำดับนี้**
+
+| # | Account | Purpose | Login Page | Email | Password | Display Package | Tier ID | Listing Quota | Verification | Notes |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | Administrator | บัญชีแอดมินจริง ควบคุมทั้งระบบ | `Admin Login.dc.html` | `doothailand@gmail.com` | See CEO Login Sheet (Private) | — | Admin | ไม่จำกัด | ยืนยันแล้วว่ามีบัญชีจริง | รหัสผ่านจริงเก็บใน CEO Login Sheet เท่านั้น — เปลี่ยนรหัสผ่านได้ที่ Site Content → Admin Account Recovery |
+| 2 | Free Trial | บัญชีสาธิตแพ็กเกจทดลองใช้ฟรี | `Agent Signup.dc.html` → แท็บ "เข้าสู่ระบบ" | `demo.trial.pkgux001@demo.huahin.properties` | See CEO Login Sheet (Private) | Free Trial | trial | 5 | ล็อกอินสำเร็จ 18 ก.ค. 2569 | 3 ประกาศสาธิต (PKGUX-TRIAL-1/2/3), สถานะ pending |
+| 3 | Package 1 (Pro) | บัญชีสาธิตแพ็กเกจเริ่มต้น | `Agent Signup.dc.html` → แท็บ "เข้าสู่ระบบ" | `demo.pro.pkgux001@demo.huahin.properties` | See CEO Login Sheet (Private) | Package 1 | pro | 5 | ล็อกอินสำเร็จ 18 ก.ค. 2569 | 3 ประกาศสาธิต (PKGUX-PRO-1/2/3) |
+| 4 | Package 2 (Level 3) | บัญชีสาธิตแพ็กเกจกลาง | `Agent Signup.dc.html` → แท็บ "เข้าสู่ระบบ" | `demo.level3.pkgux001@demo.huahin.properties` | See CEO Login Sheet (Private) | Package 2 | level3 | 12 | ล็อกอินสำเร็จ 18 ก.ค. 2569 | 3 ประกาศสาธิต (PKGUX-LEVEL3-1/2/3) |
+| 5 | Package 3 (Level 4) | บัญชีสาธิตแพ็กเกจสูงสุด | `Agent Signup.dc.html` → แท็บ "เข้าสู่ระบบ" | `demo.level4.pkgux001@demo.huahin.properties` | See CEO Login Sheet (Private) | Package 3 | level4 | 25 | ล็อกอินสำเร็จ 18 ก.ค. 2569 | 3 ประกาศสาธิต (PKGUX-LEVEL4-1/2/3) |
+
+UID/tier/quota ตรงตามตาราง, แต่ละบัญชีเห็นเฉพาะประกาศของตัวเอง (query กรองด้วย
+`listerId` ถูกต้อง). บัญชี demo ผูก `testBatchId: "PKG-UX-001"` — ลบเป็นชุดได้ด้วย
+`scripts/cleanup-test-batch.js` (มี dry-run ก่อนลบจริงเสมอ) เมื่อไม่ต้องใช้แล้ว.
+
+---
+
+## 20. CEO Acceptance Testing Checklist (อัปเดต 18 ก.ค. 2569)
+
+ใช้ก่อนเปิด Production Launch — ทำเครื่องหมาย ☑ ระหว่างทดสอบจริงด้วยบัญชีในหมวด 19
+ผลลัพธ์ทั้งหมดด้านล่างยังว่างไว้ให้ CEO กรอกเอง
+
+### A. การเข้าถึงเว็บไซต์ (Website Access)
+☐ Password Gate (หน้าจอกันคนนอกก่อนเข้าเว็บช่วงพัฒนา) · ☐ เว็บเปิดได้ · ☐ หน้า Home ·
+☐ เมนู/นำทาง
+
+### B. รายการทดสอบร่วม (ทุกแพ็กเกจ)
+☐ Login · ☐ Logout · ☐ Dashboard · ☐ Profile · ☐ ข้อมูลแพ็กเกจ · ☐ โควตาประกาศ ·
+☐ เพิ่มประกาศ · ☐ แก้ไขประกาศ · ☐ ลบ/เก็บถาวรประกาศ · ☐ อัปโหลดรูป · ☐ แกลเลอรีรูป ·
+☐ แผนที่ · ☐ AI Quick Add · ☐ AI Chat (Implemented) · ☐ สร้างเนื้อหา 8 ภาษา ·
+☐ สลับภาษาที่บันทึกไว้ · ☐ ค้นหา · ☐ หน้ารายละเอียดทรัพย์ · ☐ ปุ่มติดต่อ ·
+☐ ข้อจำกัดของแพ็กเกจ · ☐ ปุ่มอัปเกรด · ☐ การแจ้งเตือน (Not implemented — ข้ามได้) ·
+☐ มือถือ · ☐ Tablet · ☐ Desktop · ☐ ข้อความ Error · ☐ สถานะ Loading
+
+### C. ทดสอบเฉพาะแพ็กเกจ
+
+**Trial** — Tier ที่คาด: trial | โควตาที่คาด: 5 | Dashboard ที่คาด: แบนเนอร์นับถอยหลัง
+trial + สรุปยอดวิว | ฟีเจอร์ที่ควรล็อก: ตัวเร่งการมองเห็นหลังหมด trial | เส้นทางอัปเกรด
+ที่คาด: ไปแพ็กเกจ 1 | พฤติกรรม AI ที่คาด: ใช้งานได้เต็มเหมือนแพ็กเกจจ่ายเงิน |
+**CEO Notes**: _____________________
+
+**Package 1 (Pro)** — Tier: pro | โควตา: 5 | Dashboard: จำนวนประกาศที่ใช้ไป/เหลือ |
+ฟีเจอร์ที่ควรล็อก: ป้าย "แนะนำ", ตำแหน่งหน้าแรก | เส้นทางอัปเกรด: ไปแพ็กเกจ 2 |
+AI: ใช้งานได้เต็ม | **CEO Notes**: _____________________
+
+**Package 2 (Level 3)** — Tier: level3 | โควตา: 12 | Dashboard: ตัวนับป้ายแนะนำที่ใช้
+ไป (x/3) | ฟีเจอร์ที่ควรล็อก: ป้ายแนะนำเกิน 3 รายการ, ตำแหน่งหน้าแรก | เส้นทางอัปเกรด:
+ไปแพ็กเกจ 3 | AI: ใช้งานได้เต็ม | **CEO Notes**: _____________________
+
+**Package 3 (Level 4)** — Tier: level4 | โควตา: 25 | Dashboard: ป้าย "Featured" ยืนยัน
+สถานะ | ฟีเจอร์ที่ควรล็อก: ไม่มี (สิทธิ์สูงสุด) | เส้นทางอัปเกรด: ไม่มี (แพ็กเกจสูงสุด
+ปัจจุบัน) | AI: ใช้งานได้เต็ม | **CEO Notes**: _____________________
+
+### F. รายการทดสอบ Administrator
+☐ Login · ☐ Dashboard · ☐ อนุมัติประกาศ · ☐ ประกาศรออนุมัติ · ☐ Approve · ☐ Reject ·
+☐ จัดการผู้ใช้ · ☐ จัดการแพ็กเกจ · ☐ ตรวจสอบการแปลภาษา · ☐ ตรวจสอบครบ 8 ภาษา ·
+☐ มองเห็นบัญชีสาธิต · ☐ Logout
+
+รายการต่อไปนี้ยังไม่ได้พัฒนาในระบบจริง — **Deferred**, ห้ามทดสอบว่าเป็นฟีเจอร์ที่ใช้ได้:
+Audit Log, สถานะระบบ AI (AI Status), การแจ้งเตือนแบบ real-time สำหรับ Admin
+
+### G. ตารางผลการทดสอบ CEO (ว่างไว้ให้ CEO กรอก)
+
+| Test ID | Account/Package | Feature | Expected | Actual | Status | Priority | Assigned To | Evidence | Notes | Date Tested |
+|---|---|---|---|---|---|---|---|---|---|---|
+| | | | | | Not Tested | | | | | |
+| | | | | | Not Tested | | | | | |
+| | | | | | Not Tested | | | | | |
+| | | | | | Not Tested | | | | | |
+| | | | | | Not Tested | | | | | |
+
+Status ที่ใช้ได้: `Not Tested` / `PASS` / `PASS WITH OBSERVATIONS` / `FAIL` / `BLOCKED` / `NOT APPLICABLE`
+Priority ที่ใช้ได้: `Critical` / `High` / `Medium` / `Low` / `Future`
+
+---
+
+## 21. Phase Status
+
+**Phase**: Package Demo & Documentation
+
+**Implementation Status**: Complete
+**Documentation Status**: Complete
+**CEO Acceptance Status**: Not Tested
+**Next Activity**: CEO Acceptance Testing
+
+**Deliverables**:
+☑ Demo Accounts
+☑ Package Verification
+☑ Dashboard Isolation
+☑ Translation Pipeline
+☑ Demo Listings
+☑ Cleanup Scripts
+☑ CEO Login Reference
+☑ CEO Login Sheet (Private)
+☑ CEO Acceptance Checklist
+☑ Blueprint Updated
+
+**Remaining Work**: CEO Manual Testing, UX Review, Bug Reports, Bug Fixes, Regression Testing, Production Readiness Decision
+
+---
+
+## 22. Documentation Security Policy
+
+1. Passwords are never stored inside Blueprint.
+2. API Keys are never stored inside Blueprint.
+3. `CEO-LOGIN-SHEET.md` is a private operational document.
+4. Only `BLUEPRINT.md` and `export-for-github/BLUEPRINT.md` are intended for GitHub.
+5. `CEO-LOGIN-SHEET.md` must never be committed or uploaded into the GitHub repository.
+
+## 23. PHS Release Principle
+
+Each PHS release is a complete current-state package. The latest approved release is sufficient for opening a new AI conversation; previous releases are retained only as historical reference.

@@ -1,23 +1,45 @@
-# huahin.properties — เพิ่มโหมดปิดปรับปรุงเว็บไซต์ (Maintenance Mode)
+# RELEASE CHECKLIST — huahin.properties
 
-## อัปเดตล่าสุด
-เพิ่มระบบ "โหมดปิดปรับปรุงเว็บไซต์" — ใช้ตอนกำลังแก้ไข/พัฒนาเว็บอยู่ ไม่อยากให้คนทั่วไปเห็นงานที่ยังไม่เสร็จ
+Use this checklist immediately before every GitHub upload. Reusable for every future release — do not hard-code version-specific content into it.
 
-**วิธีใช้งาน (ไม่ต้องแก้โค้ด แก้ผ่านหน้าเว็บได้เลย):**
-1. เข้าสู่ระบบแอดมิน → ไปที่หน้า **Site Content**
-2. ด้านบนสุดจะเห็นกล่อง "🚧 โหมดปิดปรับปรุงเว็บไซต์" พร้อมปุ่มเปิด/ปิด
-3. กดปุ่ม **"เปิดโหมดนี้"** — ทุกหน้าสาธารณะ (หน้าแรก, ค้นหา, รายละเอียดทรัพย์, ขาย, เกี่ยวกับเรา, ติดต่อ) จะแสดงหน้า "กำลังปรับปรุงเว็บไซต์" แทนเนื้อหาจริงให้คนทั่วไปเห็น ทันทีไม่ต้องอัปโหลดใหม่
-4. สถานะจะแสดงเป็นตัวหนังสือ **สีแดง** "🔴 ปิดกั้นอยู่ — เห็นเฉพาะคุณเท่านั้น" เพื่อคอยเตือนตลอดว่าเว็บกำลังถูกซ่อนจากคนอื่นอยู่ ถ้ากด "ปิดโหมดนี้" สถานะจะเปลี่ยนเป็นตัวหนังสือ **สีเขียว** "🟢 เปิดให้ทุกคนดูได้แล้ว"
-5. ตัวคุณเองยังเข้าดูเว็บจริงได้ตามปกติทุกหน้า ไม่ต้องผ่านหน้ากั้นเลย เพราะระบบจำไว้ว่าคุณคือแอดมิน (ผ่านการล็อกอินแอดมิน)
-6. ถ้ามีคนอื่น (เช่น ทีมงาน) ต้องการดูตัวอย่างระหว่างปิดปรับปรุง — พิมพ์ **รหัสผ่านแอดมินเดิม** (ตัวเดียวกับที่ใช้เข้าสู่ระบบแอดมิน) ที่หน้ากั้นนั้นได้เลย ไม่ต้องจำรหัสใหม่ กดครั้งเดียวเบราว์เซอร์จะจำไว้ให้ไม่ต้องใส่ซ้ำ
+## 1. Documentation Checklist
+- ☐ `BLUEPRINT.md` — up to date, no unresolved conflicts
+- ☐ `Mission Control.dc.html` — Current Phase/Status reflect reality
+- ☐ `START HERE.md` — still accurate (role, read order, source-of-truth rule)
+- ☐ `HANDOVER PROMPT.md` — still matches current file set and rules
+- ☐ `HANDOVER TEST PROCEDURE.md` — still matches current Handover Prompt behavior
+- ☐ `OPERATION MANUAL.md` — still matches current PHS files/behavior
 
-**ข้อควรรู้:** นี่คือการ "บังหน้าจอ" กันคนทั่วไปเข้าใจผิดว่าเว็บพังหรือยังไม่พร้อม ไม่ใช่ระบบรักษาความปลอดภัยระดับสูง เหมาะสำหรับช่วงพัฒนา/ทดสอบ ไม่ใช่การป้องกันข้อมูลลับ
+## 2. Export Checklist
+Verify `export-for-github/` contains the latest version of every file above:
+- ☐ `export-for-github/BLUEPRINT.md`
+- ☐ `export-for-github/Mission Control.dc.html`
+- ☐ `export-for-github/START HERE.md`
+- ☐ `export-for-github/HANDOVER PROMPT.md`
+- ☐ `export-for-github/HANDOVER TEST PROCEDURE.md`
+- ☐ `export-for-github/OPERATION MANUAL.md`
+- ☐ Any other changed application files for this release are also present in `export-for-github/`
 
-## สิ่งที่แก้ในรอบก่อนหน้า
-- เมนูแอดมินล้นจอบนมือถือ (Admin Dashboard, Owners, Property Map, Site Content, AI Quick Add)
-- ช่องรหัสผ่านหน้า Admin Login ตอนนี้แสดงตัวอักษรที่พิมพ์ให้เห็นชัดเจน
+## 3. Git Repository Checklist
+- ☐ Repository contains the latest version of every required file (compare against export folder)
+- ☐ No obsolete/superseded files remain in the repository (e.g. old drafts, deprecated scripts)
+- ☐ File names match exactly (case, spacing) between export folder and repository
 
-## ยังไม่ได้แก้ (ค้างจากรอบก่อน)
-- ล็อก Firestore security rules ก่อนวันที่ 8 ส.ค. 2026 (ตอนนี้ยังเป็น rules แบบเปิดชั่วคราว)
-- ตรวจสอบ AI Quick Add ว่าคำนวณระยะทาง/สถานที่ใกล้เคียงจากพิกัดได้ครบ 10+ จุด ทั้ง EN/TH จริงหรือไม่
-- ตรวจว่าอัปโหลดรูปหลายรูปพร้อมกันใช้ได้ทุกจุดในแอดมิน
+## 4. Release Readiness
+- ☐ Documentation complete
+- ☐ Export complete
+- ☐ Repository ready
+- ☐ Product Owner Approved
+- ☐ CEO Approved
+
+## 5. GitHub Upload
+1. Commit changes (via GitHub web UI: Add file → Upload files, per this project's manual workflow)
+2. Push to GitHub (commit directly through the web UI upload)
+3. Verify uploaded files — open each changed file on GitHub and confirm content matches the exported version
+4. Confirm repository is up to date — no pending changes left un-uploaded
+
+## 6. Completion Record
+- **Version**: _____
+- **Release Date**: _____
+- **Released By**: _____
+- **Notes**: _____

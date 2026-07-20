@@ -1,223 +1,87 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
+# PROJECT COMPLETION — Project Handover System (PHS)
 
-<helmet>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <title>PHS Document Center — huahin.properties</title>
-  <style>
-    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
-    h2 { font-family: 'Playfair Display', serif; }
-    a { color: oklch(45% 0.13 25); }
-    a:hover { color: oklch(35% 0.13 25); }
-  </style>
-</helmet>
+## 1. Project Information
+- **Project Name**: Project Handover System (PHS)
+- **Version**: 1.0
+- **Status**: Completed, Approved, Released, Archived
+- **Completion Date**: 20 July 2026
 
-<div style="min-height:100vh; padding:clamp(20px,4vw,56px); box-sizing:border-box;">
-  <div style="max-width:900px; margin:0 auto; background:white; border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:clamp(24px,4vw,48px); box-shadow:0 20px 50px -30px rgba(30,20,10,0.25);">
+## 2. Final Deliverables
+- `BLUEPRINT.md`
+- `Mission Control.dc.html`
+- `START HERE.md`
+- `HANDOVER PROMPT.md`
+- `HANDOVER TEST PROCEDURE.md`
+- `OPERATION MANUAL.md`
+- `RELEASE CHECKLIST.md`
 
-    <div style="display:flex; align-items:center; gap:12px; margin-bottom:6px; flex-wrap:wrap;">
-      <div style="width:38px; height:38px; border-radius:10px; background:oklch(35% 0.09 25); display:flex; align-items:center; justify-content:center; color:white; font-size:19px;">📂</div>
-      <div style="font-family:'Playfair Display',serif; font-size:23px; font-weight:700; color:oklch(20% 0.02 60);">ศูนย์รวมเอกสาร PHS</div>
-    </div>
-    <div style="font-size:13px; color:oklch(55% 0.02 60); margin:0 0 16px;">PHS Document Center</div>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60); margin-bottom:20px;">หน้านี้คือที่รวมเอกสารทั้งหมดที่จำเป็นสำหรับเปิดห้อง ChatGPT ใหม่และทำงานต่อในโครงการ — เปิดหรือดาวน์โหลดไฟล์ได้ที่นี่โดยไม่ต้องค้นหาจากห้องแชทเก่า</div>
+## 3. Product Owner Approval
+Every deliverable listed above has passed Product Owner review across Steps 1–8 and the Final Deliverable, including the Step 6 Improvement Review and Step 7 Completion Review.
 
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:28px;">
-      <a href="./CEO%20Guide.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:7px 14px; border-radius:100px;">← กลับ CEO Guide</a>
-      <a href="./Mission%20Control.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:7px 14px; border-radius:100px;">← กลับ Mission Control</a>
-      <a href="./Blueprint.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:7px 14px; border-radius:100px;">← กลับ Blueprint</a>
-      <a href="./Complete%20Snapshot.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">📸 Complete Snapshot</a>
-    </div>
+## 4. CEO Approval
+- **Approved by**: _____
+- **Date**: _____
+- **Signature/Confirmation**: _____
 
-    <div style="background:oklch(96% 0.04 150); border:1px solid oklch(85% 0.08 150); border-radius:10px; padding:20px 22px; margin-bottom:28px;">
-      <h2 style="font-size:18px; margin:0 0 2px; color:oklch(20% 0.06 150);">วิธีเปิด ChatGPT ห้องใหม่และส่งต่อโครงการ</h2>
-      <div style="font-size:12.5px; color:oklch(40% 0.06 150); margin-bottom:16px;">ทำตามลำดับนี้ตั้งแต่ข้อ 1 ถึงข้อสุดท้าย</div>
+## 5. Release Summary
+PHS Version 1 gives the CEO a repeatable, reliable way to start a brand-new ChatGPT conversation and have it correctly understand huahin.properties — its purpose, current phase, the AI's own role, and the project's rules — without re-explaining the project each time. It separates current state (Mission Control) from historical/business reasoning (Blueprint), provides a single reusable trigger prompt (Handover Prompt), a measurable way to verify the handover works (Test Procedure), a practical usage guide for the CEO (Operation Manual), and a pre-upload safety check (Release Checklist).
 
-      <div style="display:flex; flex-direction:column; gap:14px; font-size:14px; line-height:1.8; color:oklch(25% 0.04 150);">
+## 6. Lessons Learned
+- Separate **current state** from **reasoning/history** — conflating them causes documents to contradict each other over time.
+- Keep the entry-point document (`START HERE.md`) intentionally thin — its job is navigation, not content, so it never needs updating as the project evolves.
+- A reusable trigger prompt only stays reusable if it never hard-codes a Sprint, Phase, or status — those belong in Mission Control, not the prompt.
+- A handover system is only as trustworthy as its weakest-maintained document — Mission Control must be updated at the moment of each real decision, not in a batch later.
+- Design review as measurable PASS/FAIL criteria, not a vague "check if it feels right" — this is what makes the Test Procedure repeatable.
 
-        <div>
-          <div style="font-weight:700;">1. เปิด ChatGPT ห้องใหม่</div>
-          <div>กดปุ่มด้านล่างเพื่อเปิดห้องสนทนาว่าง ยังไม่ต้องพิมพ์หรือส่งข้อความใดๆ ก่อน</div>
-          <div style="margin-top:8px;"><a href="https://chatgpt.com/" target="_blank" rel="noopener" style="font-size:13px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:8px 16px; border-radius:100px; font-weight:600;">🚀 เปิด ChatGPT ห้องใหม่</a></div>
-        </div>
+## 7. Future Improvements
+- **Blueprint Table of Contents** — deferred until Blueprint grows large enough that linear reading becomes impractical for a new AI.
+- **Execute the Handover Test in practice** — the procedure is designed but has not yet been run against a real new conversation; recommend running it once before relying on PHS at full confidence.
+- Any other enhancement identified after this point must be scoped as a new version, not folded into v1.
 
-        <div>
-          <div style="font-weight:700;">2. ดาวน์โหลดไฟล์ที่ต้องแนบ</div>
-          <div>ไฟล์ทั้ง 3 นี้คือชุดข้อมูลหลักที่ AI ต้องอ่านก่อนเริ่มทำงาน — ดาวน์โหลดให้ครบก่อนไปขั้นตอนถัดไป</div>
-          <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
-            <a href="./START%20HERE.md" download style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:7px 14px; border-radius:100px; font-weight:600;">📥 ดาวน์โหลด START HERE</a>
-            <a href="./Mission%20Control.dc.html" download style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:7px 14px; border-radius:100px; font-weight:600;">📥 ดาวน์โหลด Mission Control</a>
-            <a href="./BLUEPRINT.md" download style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:7px 14px; border-radius:100px; font-weight:600;">📥 ดาวน์โหลด BLUEPRINT</a>
-          </div>
-        </div>
+## 7A. Lessons Learned (Version 1)
 
-        <div>
-          <div style="font-weight:700;">3. แนบไฟล์ลงใน ChatGPT</div>
-          <div>กลับไปยังห้อง ChatGPT ใหม่ → กดปุ่มเครื่องหมายบวกหรือแนบไฟล์ → เลือกไฟล์ทั้ง 3 ไฟล์ → รอจนไฟล์แนบครบก่อนดำเนินการต่อ</div>
-          <div style="margin-top:6px;">
-            <div>☐ START HERE.md แนบแล้ว</div>
-            <div>☐ Mission Control.dc.html แนบแล้ว</div>
-            <div>☐ BLUEPRINT.md แนบแล้ว</div>
-          </div>
-        </div>
+Recorded only from verified observations of the first real-world Handover Test:
 
-        <div>
-          <div style="font-weight:700;">4. เปิด HANDOVER PROMPT</div>
-          <div>เปิดไฟล์แล้วคัดลอกข้อความทั้งหมดตั้งแต่บรรทัดแรกจนถึงบรรทัดสุดท้าย</div>
-          <div style="margin-top:8px;"><a href="./HANDOVER%20PROMPT.md" target="_blank" rel="noopener" style="font-size:13px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:8px 16px; border-radius:100px; font-weight:600;">📋 เปิด HANDOVER PROMPT</a></div>
-        </div>
+- The wording "first message" caused confusion. Clarified: the CEO must first attach all required files, then paste the HANDOVER PROMPT, then press Send once — attachment and prompt happen in the same single message, not two separate steps.
+- The three project files and the HANDOVER PROMPT are submitted together in a single ChatGPT message.
+- The previous folder-link (`export-for-github/`) caused a 404 issue on GitHub Pages. Replaced with the `PHS Document Center.dc.html` workflow, which links to individual files instead of a browsable directory.
+- The PHS Document Center successfully solved document navigation.
+- CEO Guide should prioritize Thai instructions while keeping filenames and technical names in English.
+- Every future PHS release must include a Real-world Validation before Project Closure.
 
-        <div>
-          <div style="font-weight:700;">5. วาง Prompt ใน ChatGPT</div>
-          <div>วางข้อความ HANDOVER PROMPT ในข้อความเดียวกับที่แนบไฟล์ทั้ง 3 ไว้ (ไม่ใช่ส่งแยกเป็นสองข้อความ) → ตรวจสอบว่าไฟล์ทั้ง 3 ยังแสดงอยู่ → กดส่งครั้งเดียว</div>
-        </div>
+## Release Information
 
-        <div>
-          <div style="font-weight:700;">6. รอ AI อ่านและสรุป</div>
-          <div>AI ควรอ่าน START HERE ก่อน → อ่าน Mission Control เพื่อดูสถานะปัจจุบัน → อ่าน BLUEPRINT เพื่อเข้าใจโครงการ → สรุปความเข้าใจ → ระบุ Current Phase → รอคำสั่งจาก CEO</div>
-        </div>
+- **Project Name**: huahin.properties
+- **Version**: PHS Version 1
+- **Release Date**: 20 July 2026
+- **Final ZIP Filename**: `huahin-properties-PHS-Version-1-FINAL-GitHub-Upload`
+- **GitHub Upload Package**: `export-for-github/`
+- **Production Status**: Production Verified · GitHub Updated · Release Confirmed
+- **Completion Summary**: PHS Version 1 documents (START HERE, Mission Control, Blueprint, Handover Prompt, Handover Test Procedure, Operation Manual, CEO Guide, PHS Document Center, Release Checklist) passed the real-world Handover Test, Step 10.1 Lessons Learned, and Step 10.2 Documentation Audit. Final export package generated in Step 10.3, awaiting CEO's GitHub upload and live-site confirmation before official closure.
 
-        <div>
-          <div style="font-weight:700;">7. ตรวจสอบว่า AI ผ่านหรือไม่</div>
-          <div style="margin-top:6px;">
-            <div>☐ AI เข้าใจโครงการถูกต้อง</div>
-            <div>☐ AI ระบุ Current Phase ตรงกับ Mission Control</div>
-            <div>☐ AI ไม่ถามข้อมูลที่มีอยู่ในไฟล์แล้ว</div>
-            <div>☐ AI ไม่เริ่มทำงานเอง</div>
-            <div>☐ AI รอคำสั่งจาก CEO</div>
-          </div>
-        </div>
+## Closure Record
 
-        <div style="background:oklch(93% 0.1 150); border:1px solid oklch(78% 0.14 150); border-radius:7px; padding:10px 14px;">
-          <div style="font-weight:700; color:oklch(28% 0.1 150);">8. หากผ่าน</div>
-          <div style="color:oklch(28% 0.1 150);">เริ่มสั่งงานในห้องใหม่ได้ทันที</div>
-        </div>
+**Project**: huahin.properties — Project Handover System
+**Release**: PHS Version 1
+**Final Status**: RELEASED AND CLOSED
+**Closure Date**: 20 July 2026
 
-        <div style="background:oklch(93% 0.1 60); border:1px solid oklch(75% 0.14 60); border-radius:7px; padding:10px 14px;">
-          <div style="font-weight:700; color:oklch(32% 0.1 40);">9. หากไม่ผ่าน</div>
-          <div style="color:oklch(32% 0.1 40);">อย่าเริ่มทำงานต่อ → ตรวจสอบว่าแนบไฟล์ครบหรือไม่ → ตรวจสอบว่าใช้ไฟล์เวอร์ชันล่าสุดหรือไม่ → ส่ง HANDOVER PROMPT ใหม่อีกครั้ง → หากยังไม่ผ่าน ให้กลับไปตรวจ Mission Control และ BLUEPRINT</div>
-        </div>
+**Verification**:
+- Product Owner Review: PASS
+- CEO GitHub Upload: PASS
+- Production Verification: PASS
+- Firebase Deployment Required: NO
+- Complete Snapshot: PASS
+- Handover Test: PASS
 
-        <div style="font-size:12px; color:oklch(45% 0.02 60); border-top:1px solid oklch(85% 0.05 150); padding-top:12px;">ระบบเว็บไซต์สามารถเปิดและดาวน์โหลดไฟล์ให้ได้ แต่ไม่สามารถแนบไฟล์หรือวาง Prompt ลงใน ChatGPT แทน CEO ได้ เนื่องจากข้อจำกัดด้านความปลอดภัยของ Browser ดังนั้น CEO ต้องทำขั้นตอนแนบไฟล์และวางข้อความด้วยตนเอง</div>
+**Approved Roles**:
+- CEO: Approved
+- Product Owner: Approved
+- Lead Developer: Completed
 
-      </div>
-    </div>
+**Closure Statement**: PHS Version 1 is the complete current-state handover package for huahin.properties. It may now be used to open a new ChatGPT conversation and continue the project without re-explaining previous work.
 
-    <div style="display:flex; flex-direction:column; gap:12px;">
+## 8. Archive Statement
+Project Handover System Version 1 is hereby declared **officially completed and archived**. All seven deliverables are final as of the Completion Date above.
 
-      <div style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:16px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-        <div>
-          <div style="font-weight:600; font-size:14.5px; color:oklch(20% 0.02 60);">START HERE.md</div>
-          <div style="font-size:13px; color:oklch(45% 0.02 60); margin-top:2px;">จุดเริ่มต้นและลำดับการอ่านสำหรับ AI</div>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <a href="./START%20HERE.md" target="_blank" rel="noopener" style="font-size:12.5px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">เปิดเอกสาร</a>
-          <a href="./START%20HERE.md" download style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px; font-weight:600;">ดาวน์โหลดไฟล์</a>
-        </div>
-      </div>
-
-      <div style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:16px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-        <div>
-          <div style="font-weight:600; font-size:14.5px; color:oklch(20% 0.02 60);">Mission Control.dc.html</div>
-          <div style="font-size:13px; color:oklch(45% 0.02 60); margin-top:2px;">สถานะปัจจุบันของโครงการและสิ่งที่กำลังดำเนินการ</div>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <a href="./Mission%20Control.dc.html" target="_blank" rel="noopener" style="font-size:12.5px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">เปิดเอกสาร</a>
-        </div>
-      </div>
-
-      <div style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:16px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-        <div>
-          <div style="font-weight:600; font-size:14.5px; color:oklch(20% 0.02 60);">BLUEPRINT.md</div>
-          <div style="font-size:13px; color:oklch(45% 0.02 60); margin-top:2px;">ฐานความรู้ เหตุผลทางธุรกิจ ระบบ และประวัติโครงการ</div>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <a href="./BLUEPRINT.md" target="_blank" rel="noopener" style="font-size:12.5px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">เปิดเอกสาร</a>
-          <a href="./BLUEPRINT.md" download style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px; font-weight:600;">ดาวน์โหลดไฟล์</a>
-        </div>
-      </div>
-
-      <div style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:16px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-        <div>
-          <div style="font-weight:600; font-size:14.5px; color:oklch(20% 0.02 60);">HANDOVER PROMPT.md</div>
-          <div style="font-size:13px; color:oklch(45% 0.02 60); margin-top:2px;">ข้อความมาตรฐานสำหรับคัดลอกไปวางใน ChatGPT ห้องใหม่</div>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <a href="./HANDOVER%20PROMPT.md" target="_blank" rel="noopener" style="font-size:12.5px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">เปิดเอกสาร</a>
-          <a href="./HANDOVER%20PROMPT.md" download style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px; font-weight:600;">ดาวน์โหลดไฟล์</a>
-        </div>
-      </div>
-
-      <div style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:16px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-        <div>
-          <div style="font-weight:600; font-size:14.5px; color:oklch(20% 0.02 60);">HANDOVER TEST PROCEDURE.md</div>
-          <div style="font-size:13px; color:oklch(45% 0.02 60); margin-top:2px;">ขั้นตอนตรวจว่า AI ห้องใหม่เข้าใจโครงการถูกต้องหรือไม่</div>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <a href="./HANDOVER%20TEST%20PROCEDURE.md" target="_blank" rel="noopener" style="font-size:12.5px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">เปิดเอกสาร</a>
-          <a href="./HANDOVER%20TEST%20PROCEDURE.md" download style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px; font-weight:600;">ดาวน์โหลดไฟล์</a>
-        </div>
-      </div>
-
-      <div style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:16px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-        <div>
-          <div style="font-weight:600; font-size:14.5px; color:oklch(20% 0.02 60);">OPERATION MANUAL.md</div>
-          <div style="font-size:13px; color:oklch(45% 0.02 60); margin-top:2px;">คู่มือการใช้งานระบบ PHS</div>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <a href="./OPERATION%20MANUAL.md" target="_blank" rel="noopener" style="font-size:12.5px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">เปิดเอกสาร</a>
-          <a href="./OPERATION%20MANUAL.md" download style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px; font-weight:600;">ดาวน์โหลดไฟล์</a>
-        </div>
-      </div>
-
-      <div style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:16px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-        <div>
-          <div style="font-weight:600; font-size:14.5px; color:oklch(20% 0.02 60);">CEO GUIDE.md</div>
-          <div style="font-size:13px; color:oklch(45% 0.02 60); margin-top:2px;">คู่มือการทำงานประจำวันของ CEO</div>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <a href="./CEO%20GUIDE.md" target="_blank" rel="noopener" style="font-size:12.5px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">เปิดเอกสาร</a>
-          <a href="./CEO%20GUIDE.md" download style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px; font-weight:600;">ดาวน์โหลดไฟล์</a>
-        </div>
-      </div>
-
-      <div style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:16px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-        <div>
-          <div style="font-weight:600; font-size:14.5px; color:oklch(20% 0.02 60);">RELEASE CHECKLIST.md</div>
-          <div style="font-size:13px; color:oklch(45% 0.02 60); margin-top:2px;">รายการตรวจสอบก่อนอัปโหลดและ Release</div>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <a href="./RELEASE%20CHECKLIST.md" target="_blank" rel="noopener" style="font-size:12.5px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">เปิดเอกสาร</a>
-          <a href="./RELEASE%20CHECKLIST.md" download style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px; font-weight:600;">ดาวน์โหลดไฟล์</a>
-        </div>
-      </div>
-
-      <div style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:16px 18px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-        <div>
-          <div style="font-weight:600; font-size:14.5px; color:oklch(20% 0.02 60);">PROJECT COMPLETION.md</div>
-          <div style="font-size:13px; color:oklch(45% 0.02 60); margin-top:2px;">บันทึกการปิดโครงการและสถานะของ Version 1</div>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <a href="./PROJECT%20COMPLETION.md" target="_blank" rel="noopener" style="font-size:12.5px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">เปิดเอกสาร</a>
-          <a href="./PROJECT%20COMPLETION.md" download style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px; font-weight:600;">ดาวน์โหลดไฟล์</a>
-        </div>
-      </div>
-
-    </div>
-
-    <div style="margin-top:32px; font-size:12px; color:oklch(55% 0.02 60); text-align:center;">ไฟล์ทั้งหมดอยู่ในโฟลเดอร์เดียวกับหน้านี้ — ปุ่ม "เปิดเอกสาร" ใช้ path สัมพัทธ์ ทำงานได้ทั้งใน Preview และหลังอัปโหลด GitHub Pages</div>
-
-  </div>
-</div>
-
-</x-dc>
-</body>
-</html>
+Any future enhancement, correction, or expansion to this system must be developed as **Version 1.1**, **Version 2.0**, or later — the Version 1 deliverables listed in Section 2 must not be modified once archived.

@@ -1,59 +1,286 @@
-# AI Session Pack v2.1 — huahin.properties
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
 
-Generated: 18/07/2569 (v2.2.0, build 2026.07.18.01)
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Blueprint — huahin.properties</title>
+  <style>
+    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    h2 { font-family: 'Playfair Display', serif; }
+  </style>
+</helmet>
 
-This file is a static snapshot for uploading into a new ChatGPT/Claude session as Project Context. For the live, always-current version, use the "🧠 AI Session Pack" button in CEO Dashboard → Command Center.
+<div style="min-height:100vh; padding:clamp(20px,4vw,56px); box-sizing:border-box;">
+  <div style="max-width:900px; margin:0 auto; background:white; border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:clamp(24px,4vw,48px); box-shadow:0 20px 50px -30px rgba(30,20,10,0.25);">
 
-## PROJECT ROLES
-See `Project-Control-Governance-v2.1.md` — 3 departments: Executive & Product Ownership (CEO), Strategy/Business/Marketing & Project Governance Office (ChatGPT), Software Engineering & Implementation (Development AI).
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:4px;">
+      <div style="width:38px; height:38px; border-radius:10px; background:oklch(35% 0.09 25); display:flex; align-items:center; justify-content:center; color:white; font-size:19px;">🏠</div>
+      <div style="font-family:'Playfair Display',serif; font-size:23px; font-weight:700; color:oklch(20% 0.02 60);">huahin . properties — Blueprint</div>
+    </div>
+    <div style="font-size:13px; color:oklch(55% 0.02 60); margin:8px 0 6px;">แผนธุรกิจ + สถาปัตยกรรมระบบ — เอกสารมีชีวิต อัปเดตทุกครั้งที่ตัดสินใจ/เปลี่ยนแผนใหม่ (อัปเดตล่าสุด: 16 ก.ค. 2026)</div>
+    <div style="margin-bottom:14px;"><a href="./CEO%20Guide.dc.html" style="display:inline-flex; align-items:center; gap:7px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:8px 16px; border-radius:100px; font-size:13px; font-weight:600;">📘 คู่มือ CEO <span style="opacity:0.75; font-weight:400;">— CEO Guide</span></a></div>
+    <div style="display:flex; gap:16px; font-size:12px; color:oklch(50% 0.02 60); margin-bottom:24px; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:5px;"><span style="width:9px; height:9px; border-radius:50%; background:oklch(45% 0.13 150); display:inline-block;"></span> เสร็จแล้ว</div>
+      <div style="display:flex; align-items:center; gap:5px;"><span style="width:9px; height:9px; border-radius:50%; background:oklch(55% 0.15 75); display:inline-block;"></span> ทำต่อจากนี้ / ทำไปแล้วบางส่วน</div>
+      <div style="display:flex; align-items:center; gap:5px;"><span style="width:9px; height:9px; border-radius:50%; background:oklch(80% 0.01 70); display:inline-block;"></span> ยังไม่เริ่ม</div>
+    </div>
 
-## CURRENT PROJECT PHASE
-Foundation — Status: ACTIVE
+    <div style="height:1px; background:oklch(90% 0.01 70); margin:20px 0;"></div>
 
-## CURRENT SPRINT / CURRENT PRIORITY / CURRENT TASKS
-Listing Approvals Responsive Testing (Pending — resumes after containment items below are cleared)
+    <h2 style="font-size:19px; color:oklch(20% 0.02 60); margin:0 0 10px;">0. สถานะปัจจุบัน — สิ่งที่สร้างเสร็จแล้วก่อนเริ่ม Blueprint นี้</h2>
+    <div style="background:oklch(96% 0.04 150); border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:16px 18px; color:oklch(25% 0.06 150); font-size:14px; line-height:1.75;">
+      <p style="margin:0 0 10px;"><strong>หน้าเว็บที่สร้างเสร็จแล้ว:</strong> Home, Search Results, Property Details, Sell, About, Contact, Admin Login, Admin Dashboard, Owners, Property Map, AI Quick Add, Site Content, Agent Signup, Agent Approvals, Agent Profile (สาธารณะ), Lister Dashboard, Lister Billing, Team, Staff Signup, Advertise, AI Concierge — พร้อม shared components: PropertyCard, SearchFilters, LanguageSwitcher, ContactRail</p>
+      <p style="margin:0 0 6px;"><strong>ฟีเจอร์ที่ใช้งานได้แล้วจริง:</strong></p>
+      <ul style="margin:0; padding-left:20px;">
+        <li>ระบบ 8 ภาษาเต็มรูปแบบ ทุกหน้า+ฟอร์ม+แชท+แอดมิน</li>
+        <li>แชทบอท AI (Claude API ผ่าน Cloud Function) ตอบลูกค้าอัตโนมัติ + สร้างปุ่มลิงก์อัตโนมัติ</li>
+        <li>AI Quick Add, Favorites+Intent Scoring, Admin Dashboard สถิติครบ, Maintenance Gate</li>
+        <li>ระบบ self-serve เต็มรูปแบบสำหรับผู้ลงประกาศ (สมัคร/โพสต์/แก้ไข/ลบ/แชร์เว็บส่วนตัว)</li>
+        <li>Stripe subscription + Featured boost + แบนเนอร์ภายนอก + VIP ทั้งสองฝั่ง — ครบวงจร</li>
+      </ul>
+    </div>
 
-## OPEN ITEMS
-1. Listing Approvals Responsive Testing — Pending
-2. Firestore Index Review
-3. AI Quick Add POI verification
-4. QA test documents/accounts cleanup
-5. Confirm Demo Listings (22 รายการ) codes
-6. HH-70724 Storage orphan files verification
-7. HH-58538 — awaiting direct Production Write approval to delete
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">1. รูปแบบธุรกิจ &amp; ทีมงาน</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <ul style="margin:0; padding-left:20px;">
+        <li><strong>นิติบุคคล</strong>: ทำในนามบุคคลธรรมดา/อิสระได้ก่อน ค่อยพิจารณาเปิดบริษัทเมื่อรายได้/ทีมโตพอ</li>
+        <li><strong>ทีมงาน</strong>: ขยายจาก 1 คน → 2-3 คนสูงสุด สิทธิ์ 2 ระดับ Owner/Staff</li>
+        <li><strong>Remote core + Local hands</strong>: Owner ดูแลจากที่ไหนก็ได้ Staff พื้นที่ถ่ายรูป+ป้อนข้อมูล</li>
+      </ul>
+    </div>
 
-## BLOCKED ITEMS
-None currently blocking — all open items are pending CEO input/approval or scheduled testing.
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">2. รายได้ 3 ทาง (+ ทาง 4 VIP)</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <p><strong>2.0 ขอบเขตพื้นที่ให้บริการ</strong>: เฉพาะหัวหิน/ชะอำ/ปราณบุรี — ตรวจพิกัดก่อนอนุญาตโพสต์ (ยังทำผ่านการตรวจแบบ manual ในขั้น AI Quick Add เท่านั้น)</p>
+      <p><strong>ทาง 1 — ค่าคอมมิชชัน</strong>: favorite → intent score → threshold → บอท AI เปิดบทสนทนาเจาะจง → lead แท็ก "hot"</p>
+      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin:10px 0;">
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ <strong>ทาง 1 เสร็จสมบูรณ์</strong> — favorites.js, intent scoring, auto-bot, lead ใน Admin Dashboard</div>
+      </div>
+      <p><strong>2.1 "ให้ทีมช่วยขาย" (Assisted Sale)</strong> — แทนที่ Agent VIP pool เดิม: ไม่มีสถานะ Agent แยกจากผู้ลงประกาศทั่วไปแล้ว ใครก็โพสต์ได้อิสระ บ้านซ้ำ/แข่งราคาเป็นเรื่องปกติของตลาด</p>
+      <div style="background:oklch(95% 0.15 75); border:1px solid oklch(80% 0.15 75); border-radius:7px; padding:11px 14px; margin:10px 0;">
+        <div style="font-size:13.5px; color:oklch(35% 0.1 40);">◐ <strong>ทำไปแล้วบางส่วน</strong> — checkbox+% commission หลังบันทึกทรัพย์ ✓, ป้าย nudge ในการ์ด ✓ — ยังไม่มี: workflow tracker (รับเรื่อง→ปิดการขาย), แบนเนอร์/อีเมลแจ้งเตือนเชิงรุก</div>
+      </div>
+      <p><strong>ทาง 2 — ค่าสมัครสมาชิกโพสต์เอง</strong>: บันไดสมาชิก 5 ระดับ (ฟรี/②/③/VIP เงิน/VIP ทอง — เพชรรอเปิด), Rollout Level สวิตช์เดียวคุมการเปิดเผยแต่ละระดับ</p>
+      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin:10px 0; display:flex; flex-direction:column; gap:6px;">
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ Stripe subscription ครบวงจร (Checkout, webhook, payments ledger, Customer Portal)</div>
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ self-serve dashboard เต็มรูปแบบ (Lister Dashboard) — โพสต์/แก้ไข/ลบทรัพย์ทั้งใบ/แชร์เว็บส่วนตัว</div>
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ โปรไฟล์ Agent สาธารณะ (Agent Profile.dc.html) พร้อมแชทบอทของตัวเอง</div>
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ Founding Agents อย่างเป็นทางการ — จำกัดจำนวน + ข้อความเงื่อนไขตั้งได้จาก Site Content</div>
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ ล็อกอินง่าย — Google / Facebook / เบอร์โทร OTP / อีเมล+รหัสผ่าน (ต้องเปิดสวิตช์ผู้ให้บริการที่ Firebase Console ก่อนใช้จริง)</div>
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ จำกัดจำนวนโพสต์ตามแพ็กเกจ (tierLimit ผูกกับปุ่ม "+ เพิ่มทรัพย์ใหม่")</div>
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ <strong>16 ก.ค. 2026 (รอบ 3):</strong> หน้าเว็บสมาชิกไม่พาลูกค้าหลุดไปเว็บหลักอีกต่อไป — คลิกดูทรัพย์เปิดเป็นป็อปอัพในหน้าเดียวกัน เลื่อนดูรูปได้ครบทุกรูป, เพิ่มตัวเลือกภาษา 8 ภาษา (มีผลกับ UI+ป็อปอัพ+แชท AI ทั้งหมด), เพิ่มตัวกรอง 4 ช่อง (ประเภท/โซน/ห้องนอน/ราคา), AI ในแชทตอบสั้นลงเป็นค่าเริ่มต้นและโชว์การ์ดทรัพย์ให้คลิกดูเองแทนการพิมพ์รายละเอียดยาว, คำอธิบายทรัพย์+bio ที่สมาชิกกรอกเองแปล 8 ภาษาอัตโนมัติทันทีตอนกด "บันทึก" (เหมือนกลไก AI Quick Add)</div>
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ <strong>16 ก.ค. 2026 (รอบ 4):</strong> ลดความเสี่ยงต้นทุน AI ตอนทรัพย์เยอะขึ้น — แชทหน้าเว็บหลัก (ContactRail) เดิมส่งรายชื่อทรัพย์ทั้งหมดให้ AI อ่านทุกข้อความ ตอนนี้กรองตามคำถามลูกค้า (โซน/ประเภท/งบ/ห้องนอน) จำกัดสูงสุด 30 รายการต่อข้อความแทนไม่จำกัด ถ้าไม่มีเงื่อนไขชัดเจนสุ่มตัวอย่างกระจายแทนส่งทั้งหมด — ทรัพย์ที่ลูกค้ากำลังดูอยู่ยังส่งเสมอ</div>
+      </div>
+      <div style="background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px; margin:10px 0;">
+        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">○ ยังไม่ทำ: ทรัพย์ที่แอดมินเพิ่ม/แก้ไขให้เจ้าของบ้านโดยตรง (นอก AI Quick Add) ยังไม่มีระบบแปลอัตโนมัติ</div>
+      </div>
+      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin:10px 0;">
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ <strong>16 ก.ค. 2026 (รอบ 2):</strong> ปรับผังหน้าตั้งค่าเว็บไซต์ให้ดูเป็นสตูดิโอเดียวกัน (รูปโปรไฟล์/ภาพปก/สีธีม+ตัวอย่างสดขนาดใหญ่อยู่โซนเดียวกัน), สีธีมที่เลือกโชว์เป็นแผ่นตัวอย่าง, ข้อความตัวอย่างยาวสมจริงในช่องแนะนำตัว/บุคลิก AI, ไอคอนโซเชียลเปลี่ยนเป็นตราสีแบรนด์จริงแทน emoji, แก้บั๊ก Firestore rules ที่ทำให้บันทึกรูปโปรไฟล์ไม่สำเร็จ, เปลี่ยนโครงสร้างแพ็กเกจเป็น 3 ระดับจริง (เริ่มต้น/มืออาชีพ/พรีเมียม 590/1,190/2,290฿ — 5/12/25 หลัง) ตัดคอลัมน์ Contact us ออก</div>
+      </div>
+      <div style="background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px; margin:10px 0;">
+        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">○ ยังไม่ได้ทำ: Facebook post AI ร่างสำนวนจริงในข้อความโพสต์ (ตอนนี้เป็นเทมเพลตประกอบข้อมูล), TikTok caption generator, pay-per-listing</div>
+      </div>
+      <p><strong>ทาง 3 — โฆษณา/แบนเนอร์</strong>: slot ปรับได้, สุ่มหมุนเวียน, ราคาตามหน้า×ตำแหน่ง, ขายให้ลูกค้าภายนอกจริงผ่าน Stripe</p>
+      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin:10px 0;">
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ เสร็จสมบูรณ์ — Advertise.dc.html + ตัวกรอง "ทั้งหมด/ของเว็บเอง/รอชำระเงิน/จ่ายแล้ว" ใน Site Content, Featured boost, badge Featured/VIP บนการ์ดสาธารณะ</div>
+      </div>
+      <p><strong>ทาง 4 — แพ็กเกจ VIP (เจ้าของบ้าน + Agent)</strong>: เดิมเป็นเฟสอนาคต ตอนนี้เปิดใช้งานแกนหลักแล้ว</p>
+      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin:10px 0; display:flex; flex-direction:column; gap:6px;">
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ ปุ่ม VIP เงิน/ทอง/เพชร ต่อทรัพย์ในหน้า Admin (ฝั่งเจ้าของบ้าน) ผ่าน Stripe one-time</div>
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ Agent VIP subscription ในหน้า Lister Billing (ฝั่ง Agent) พร้อม teaser ล่อใจ (จำนวนบ้าน/Agent ในพูลที่ยังเข้าไม่ถึง)</div>
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ ระบบลงทะเบียนผู้ซื้อ + รหัส Agent เฉพาะตัว (ป้องกันข้อพิพาท Procuring Cause) — คุ้มครอง 60 วัน</div>
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ Badge "VIP" บนการ์ดสาธารณะ + "Verified VIP" บนโปรไฟล์ Agent</div>
+      </div>
+      <div style="background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px; margin:10px 0;">
+        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">○ ยังไม่ได้ทำ: หน้าจัดการข้อพิพาทสำหรับแอดมิน (audit trail), Buyer Registration ยังไม่ผูกกับ UI ฝั่งสาธารณะ (ตอนนี้อยู่ที่ Lister Dashboard ของ Agent เท่านั้น)</div>
+      </div>
+    </div>
 
-## CRITICAL BUGS & RISKS
-- P0 (fixed): global `setDoc()` used `.set()` without merge — silently wiped property documents on every partial update (approve/reject/expiry/archival sweeps). Fixed with `merge:true` + `createDoc/updateDocFields/replaceDoc` naming.
-- HH-58538: real production listing corrupted by the above bug before the fix — only 8 photos survive, all other fields unrecoverable. Decision: delete. Awaiting explicit Production Write approval.
-- Firestore temporary open rules expire 2026-08-08 — must be locked down before then.
-- Storage orphan files possible for HH-70724 (Firestore side already cleaned).
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">3. การสร้างตัวตนแบรนด์ (AI-powered)</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <p>Landing Page Agent (Agent Signup.dc.html) ✓, เมนูตัวเลือกด่วนในแชทบอท ✓ — ป้าย "Powered by AI" และ signature ท้าย Facebook post ยังไม่ยืนยันสถานะล่าสุด</p>
+    </div>
 
-## IMPORTANT DECISIONS
-- HH-58538 is QA/Test-equivalent data (unrecoverable) — approved to delete (property document, propertyPhotos, Storage files) once Production Write is explicitly approved.
-- Demo/sample listings (22) — kept for now, flagged Demo/Internal Only pending CEO confirmation of exact codes.
-- ChatGPT role restructured under "Strategy, Business, Marketing & Project Governance Office" — analysis/planning/advisory only, no budget/Production Write/Deploy authority (CEO retains final approval on all of those).
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">4-6. การเงิน / ความปลอดภัย / SEO</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <p><strong>การเงิน</strong>: Stripe ledger + webhook + auto-hide เมื่อจ่ายไม่ผ่าน — เสร็จสมบูรณ์</p>
+      <p><strong>ความปลอดภัย</strong>: Firestore/Storage rules role-based ✓ deploy แล้ว — App Check, rate limiting, reCAPTCHA v3, backup อัตโนมัติ ยังไม่ได้ทำ</p>
+      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin:10px 0;">
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ ตรวจสอบแล้ว (16 ก.ค. 2026): ใช้ role-based + deny-by-default จริงแล้ว ไม่ใช่ rules เปิดโล่งชั่วคราวอีกต่อไป</div>
+      </div>
+      <p><strong>SEO</strong>: URL ถาวร + Open Graph + JSON-LD ที่ Property Details ✓, sitemap.xml + robots.txt (หน้า static หลัก) ✓ — ยังไม่ได้ทำ: sitemap รายทรัพย์แต่ละหลัง (ต้อง prerendering) — ยื่น Search Console สำเร็จแล้ว (16 ก.ค. 2026)</p>
+    </div>
 
-## PRODUCTION STATUS
-No pending Production Write executed without approval. HH-58538 delete is queued, awaiting explicit CEO Production Write approval.
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">7-10. แดชบอร์ดสถานะระบบ / แจ้งเตือน / วงจรชีวิตประกาศ / แบนเนอร์</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <p>แดชบอร์ดสถานะระบบ (3 หมวด) ✓, วงจรชีวิตประกาศ+ลบรูปอัตโนมัติ (ขั้นพื้นฐาน, client-side sweep) ✓, ระบบจัดการแบนเนอร์ Admin CRUD ✓</p>
+      <div style="background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px; margin:10px 0;">
+        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">○ ยังไม่ได้ทำ: LINE Official Account แจ้งเตือน (ไม่เร่งด่วน), สรุปประจำวัน/รายเดือน/รายปี, Staging (Preview Channels)</div>
+      </div>
+    </div>
 
-## DEPLOY STATUS
-Review and test latest `firestore.rules` — Deployment pending explicit CEO approval. No deploy performed this session.
+    <div style="height:1px; background:oklch(90% 0.01 70); margin:28px 0;"></div>
 
-## NEXT STEPS
-1. Resume Listing Approvals Responsive Testing
-2. CEO decision + approval to execute HH-58538 deletion (Production Write)
-3. Confirm 22 demo listing codes
-4. Manual Firebase Console cleanup of QA test accounts/docs
-5. Firestore Index Review + AI Quick Add POI verification
+    <h2 style="font-size:19px; color:oklch(20% 0.02 60); margin:0 0 6px;">11. ลำดับการสร้างจริง — สถานะปัจจุบัน</h2>
+    <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">ชุด A และ B เสร็จสมบูรณ์ทั้งหมดแล้ว รวมทาง 4 (VIP) — เหลือแค่งานที่ตั้งใจเลื่อนไว้ไม่เร่งด่วน</div>
 
-## FULL PROJECT CONTROL MODULES
-Use the "📋 Copy All Modules" button in CEO Dashboard → Project Control for the complete, always-current text of Modules 00–08 and 99 (too long to duplicate statically here without risking staleness).
+    <div style="display:flex; flex-direction:column; gap:7px;">
+      <div style="display:flex; align-items:center; gap:10px; background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:oklch(45% 0.13 150); color:white; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;">✓</div>
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">ชุด A (ทาง 1 ครบ, แบนเนอร์ครบ, Agent Signup+Approvals+Profile+Dashboard ครบ, วงจรชีวิตประกาศพื้นฐาน)</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:oklch(45% 0.13 150); color:white; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;">✓</div>
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">ชุด B ข้อ 1-6 (Security Rules, Storage, role Owner/Staff, Stripe, Featured, แบนเนอร์ภายนอก)</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:oklch(45% 0.13 150); color:white; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;">✓</div>
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">ชุด B ข้อ 7 — ทาง 4 VIP (แกนหลัก) — เสร็จแล้ว รวม Buyer Registration + Agent Code + Badge + Teaser</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; background:oklch(95% 0.15 75); border:1px solid oklch(80% 0.15 75); border-radius:7px; padding:11px 14px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:oklch(55% 0.15 75); color:white; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0;">◐</div>
+        <div style="font-size:13.5px; color:oklch(35% 0.1 40);">งานเก็บตก: Assisted Sale workflow tracker, ตัวกรองแบนเนอร์ (ทำแล้ว) แต่หน้า Admin ยังไม่มีมุมมองแยกชัด, หน้าจัดการข้อพิพาท VIP</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px; background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px;">
+        <div style="width:20px; height:20px; border-radius:50%; background:oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0;">○</div>
+        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">LINE Official Account แจ้งเตือน (ไม่เร่งด่วน ทำเมื่อไหร่ก็ได้)</div>
+      </div>
+    </div>
 
-## FULL COMMAND CENTER
-Use the "📋 คัดลอกทั้งหมด · Copy All" button in CEO Dashboard → Command Center for the complete, always-current summary (health, completion %, milestones, current work, next actions, risks, decisions, development history).
+    <div style="font-size:13px; color:oklch(50% 0.02 60); margin-top:16px; line-height:1.7;">งานหลักของ Blueprint ฉบับนี้เสร็จสมบูรณ์แล้ว — ที่เหลือเป็นงานเก็บตก/เสริมที่ไม่บล็อกการใช้งานจริง และ LINE แจ้งเตือนซึ่งตั้งใจเลื่อนไว้ไม่เร่งด่วน</div>
 
----
-END OF AI SESSION PACK
+    <div style="height:1px; background:oklch(90% 0.01 70); margin:28px 0;"></div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:0 0 10px;">12. แผนเปิดตัว (Go-to-Market)</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <p><strong>หลักการรวม</strong>: ทุกกลุ่มใช้ฟรีก่อนเสมอ แล้วค่อยเปิดจ่ายทีละชั้นเมื่อเห็นผลจริง</p>
+      <ol style="margin:0; padding-left:20px;">
+        <li>ปิดเงียบ (Soft launch) 2-4 สัปดาห์</li>
+        <li>เปิดวงในพื้นที่ + Founding Agents ฟรี</li>
+        <li>SEO/Google Business คู่ขนาน</li>
+        <li>เปิดเก็บเงินทาง 2</li>
+        <li>เปิดทาง 3 (โฆษณาลูกค้าภายนอก)</li>
+        <li>เปิดทาง 4 (VIP ทั้งสองฝั่ง) — <strong style="color:oklch(35% 0.1 150);">พร้อมใช้งานแล้วตั้งแต่ตอนนี้</strong></li>
+      </ol>
+    </div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">14. หน้า AI Concierge (Conversational Landing Page)</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ สร้างเสร็จแล้ว — AI Concierge.dc.html (ยังไม่ได้อัปโหลดขึ้นเว็บจริง รอตัดสินใจ)</div>
+      </div>
+      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ บทสนทนาต่อเนื่องข้ามหน้า (localStorage คีย์เดียว)</div>
+      </div>
+      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ ปุ่มย่อ/ขยายกล่องแชท ("─" ไม่ใช่ "×")</div>
+      </div>
+      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ แชทรู้บริบทหน้าที่กำลังดูอยู่ (ส่งรหัสทรัพย์ของหน้าปัจจุบันเข้าบริบท AI เสมอ)</div>
+      </div>
+      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ เลื่อนอัตโนมัติ + ปุ่มล้างประวัติแชทมีข้อความกำกับ (ContactRail + AI Concierge)</div>
+      </div>
+      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ ไอคอน Favorite เป็นดาว + ป้ายกำกับ 8 ภาษา</div>
+      </div>
+      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ ปุ่ม "My Favorites" ลอยแบบตะกร้าสินค้า มุมล่างซ้ายทุกหน้า</div>
+      </div>
+      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ ลิงก์บ้านในแชทเป็นการ์ด (รูปปก 72×72px คงที่ + ราคา/ห้องนอน/ทำเล)</div>
+      </div>
+      <div style="background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px;">
+        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">○ ยังไม่ได้ทำ: ปุ่มแชร์ครบรูปแบบ (Web Share API), เก็บสถิติ ref code ต่อลิงก์</div>
+      </div>
+    </div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">15-17. UX หน้า Home / กฎป้องกันการสวมประกาศ / มอบหมายงาน</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ แบนเนอร์รูปแบบใหม่ (PropertyCard ปกติ ไม่มีป้าย Sponsored), CTA ย้ายใต้ช่องค้นหา, Hero มือถือชิดบน-ซ้าย</div>
+      </div>
+      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ กฎป้องกันการ "สวมประกาศ" — ล็อกฟิลด์ตัวตนหลัก (รูปปก/ราคา/ที่อยู่/ชื่อ/รหัส) เมื่อสถานะเป็น "sold"</div>
+      </div>
+      <div style="background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px;">
+        <div style="font-size:13.5px; color:oklch(35% 0.02 60);">○ ระบบมอบหมายงานตามแผนก/โซน — เตรียมแนวคิดไว้ล่วงหน้าเท่านั้น ยังไม่สร้าง UI จริง (รอทีมโตถึง 3+ คน)</div>
+      </div>
+    </div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">13. หมายเหตุค่าใช้จ่าย</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <p>Firebase อยู่ใน free tier ได้นานในสเกลนี้ ค่าใช้จ่ายเพิ่มตามการใช้งานจริงคือ Claude API (ต่อข้อความ) และ Stripe (~3-4% ต่อธุรกรรม) — ไม่มีค่า license ก้อนใหญ่ผูกพันรายเดือน</p>
+    </div>
+
+    <div style="background:oklch(95% 0.15 45); border:1px solid oklch(75% 0.18 45); border-radius:8px; padding:16px 18px; margin-top:28px;">
+      <div style="font-size:13.5px; color:oklch(35% 0.15 30); line-height:1.7;">⚠️ <strong>index.html ที่ root ซ้ำกับ Home.dc.html</strong> — GitHub repo มีไฟล์ index.html แยกต่างหากที่ root ซึ่งเป็นไฟล์ที่เว็บโหลดจริงตอนเข้า huahin.properties/ (ไม่ใช่ Home.dc.html โดยตรง) ไม่ sync กันอัตโนมัติ ทุกครั้งที่แก้ Home.dc.html ต้องอัปเดต index.html คู่กันเสมอ ไม่งั้นหน้าแรกจริงจะไม่ตรงกับที่แก้ไว้ (พบปัญหานี้ตอนยืนยัน Google Search Console 16 ก.ค. 2026)</div>
+    </div>
+
+    <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:8px; padding:16px 18px; margin-top:16px;">
+      <div style="font-size:13.5px; color:oklch(25% 0.05 150); line-height:1.7;">✓ <strong>กล่องรหัสผ่านปิดปรับปรุงเว็บไซต์ — แก้บั๊กแล้ว (16 ก.ค. 2026)</strong> — เคยเข้าไม่ได้เพราะ (1) โค้ดพยายามดึงอีเมลแอดมินแบบไดนามิกจาก Site Content แล้วได้ค่าผิดเพี้ยนมา ตอนนี้ตัดออกใช้อีเมล doothailand@gmail.com ตายตัวเหมือน Admin Login และ (2) ปุ่ม "Save Login Details" เดิมไม่ได้เปลี่ยนรหัสผ่าน Firebase Auth จริง แค่บันทึกเก็บโชว์ ตอนนี้เปลี่ยนรหัสผ่านจริงแล้ว — ถ้าลืมรหัสผ่านแอดมิน ไปที่ Firebase Console → Authentication → Users → Reset password ได้โดยตรง</div>
+    </div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">18. Project Governance &amp; AI Collaboration</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <div style="background:oklch(93% 0.05 250); border:1px solid oklch(78% 0.1 250); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
+        <div style="font-size:13.5px; color:oklch(28% 0.06 250);"><strong>Project Governance System</strong> — Project Control Center (แท็บใน CEO Dashboard) เป็นระบบปฏิบัติการ/กำกับดูแลถาวรของโครงการ huahin.properties — Current Version 2.2.0 · Build 2026.07.18.01 · Status: STABLE FOUNDATION</div>
+      </div>
+      <div style="background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
+        <div style="font-size:13.5px;"><strong>Single Source of Truth</strong> — CEO Dashboard + Project Control Center คือแหล่งข้อมูลจริงหลักสำหรับ: Project rules, Development reviews, Business decisions, UX/UI decisions, Marketing/SEO, Bugs/risks/security, AI prompt library, Roadmap, Decision log, AI collaboration guidance, Technical architecture, Coding rules, Project terminology, Permanent project decisions</div>
+      </div>
+      <div style="background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
+        <div style="font-size:13.5px;"><strong>Team Responsibilities</strong> — CEO: final decision authority, budget/Production Write/Deployment approval, business direction. ChatGPT: strategy, business, marketing, SEO, UX, QA, risk review, project governance, Project Control management. Development AI (Claude/Cod): implementation, coding, testing, technical documentation, development reports.</div>
+      </div>
+      <div style="background:oklch(97% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
+        <div style="font-size:13.5px;"><strong>AI Session Continuity</strong> — AI Session Pack v2.2 คือชุดข้อมูลทางการสำหรับเริ่ม Session ใหม่ของ ChatGPT/Claude/Development AI ต้องตรวจ: Project Header, AI Session Metadata, สถานะปัจจุบัน, งานค้าง, ความเสี่ยงที่รู้, การตัดสินใจถาวร, System Architecture, Tech Stack, Critical Files, Coding Rules</div>
+      </div>
+      <div style="background:oklch(95% 0.05 150); border:1px solid oklch(82% 0.1 150); border-radius:7px; padding:11px 14px; margin-bottom:8px;">
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);"><strong>Operational Rules</strong> — ห้าม Production Write โดยไม่มี CEO อนุมัติชัดเจน · ห้าม Deploy โดยไม่มี CEO อนุมัติชัดเจน · การตัดสินใจสำคัญต้องบันทึกใน Project Control · งานที่เสร็จต้องมีรายงาน · ห้ามปิดบังผลทดสอบที่ไม่ผ่าน · โครงสร้าง Project Control ล็อกหลัง v2.2 จนกว่า CEO จะอนุมัติการเปลี่ยนโครงสร้างใหม่</div>
+      </div>
+      <div style="background:oklch(93% 0.05 150); border:1px solid oklch(78% 0.1 150); border-radius:7px; padding:11px 14px;">
+        <div style="font-size:13.5px; color:oklch(25% 0.05 150);">✓ <strong>Completed Milestone — Project Control Center v2.2 Foundation</strong> (2026-07-18): Governance system completed, AI Session Pack completed, Technical context completed, Coding rules completed, Permanent decisions documented, Blueprint synchronized — Ready to resume product development</div>
+      </div>
+
+      <h3 style="font-size:15.5px; color:oklch(20% 0.02 60); margin:22px 0 8px;">Project Review Standard</h3>
+      <div style="font-size:13.5px; line-height:1.75;">
+        <p><strong>A. Purpose</strong> — วิธีร่วมกันของ CEO / ChatGPT (Product Owner) / Cod (Lead Developer) เพื่อตัดสินว่างานหนึ่งเสร็จสมบูรณ์ ปลอดภัย อยู่ในขอบเขต milestone ปัจจุบันหรือยังไม่หรือไม่ เพื่อให้การตัดสินใจสอดคล้องกัน ป้องกัน scope creep และรักษาความต่อเนื่องข้าม AI session</p>
+        <p><strong>B. สถานะการตรวจ 4 ระดับ</strong>:<br/>
+        🟢 <strong>PASS</strong> — งานเสร็จตามเป้าหมายที่ตกลงกันไว้ อยู่ในขอบเขต ไม่มี regression/ความเสี่ยงด้านความปลอดภัย/ข้อมูล — ไม่ได้หมายความว่าระบบสมบูรณ์แบบ 100%<br/>
+        🟡 <strong>PASS WITH OBSERVATIONS</strong> — เสร็จตาม milestone แล้ว แต่มีข้อสังเกตที่ไม่ block ถูกจดเป็น Technical Debt/Future Improvement ชัดเจนแล้ว<br/>
+        🟠 <strong>HOLD</strong> — ดูหน้าถูกต้อง แต่เครื่องยืนยันที่จำเป็นยังไม่ครบ (เช่น ยังยืนยัน Deploy จริงไม่ได้) — ไม่ใช่การล้มเหลว ต้องระบุชัดเจนว่าขาดหลักฐาน/การตรวจสอบอะไรอีกจึงจะปิดงานได้<br/>
+        🔴 <strong>NOT PASS</strong> — งานไม่เสร็จ/มี regression/เสี่ยงด้านความปลอดภัยหรือข้อมูล/ขัดกับมติที่อนุมัติไว้ — ต้องระบุสาเหตุ+หลักฐาน+ผลกระทบ+วิธีแก้ไขเสมอ</p>
+        <p><strong>C. Launch Blocker</strong>: Critical = block เสมอ 路 High = block เว้นแต่ CEO รับความเสี่ยงเป็นลายลักษณ์อักษร 路 Medium = ไม่ auto-block ต้อง escalate ตามความสำคัญ · Low/Future Improvement/Technical Debt/Nice-to-have = ไม่ block โดยค่าเริ่มต้น</p>
+        <p><strong>D. Scope Discipline</strong> — “ทำ milestone ปัจจุบันให้เสร็จก่อน บันทึกงานอนาคตแยกต่างหาก” — มีเฉพาะ Critical เท่านั้นที่ขัด milestone อัตโนมัติได้ สิ่งที่ดีกว่าที่เจอระหว่างทาง ต้องบันทึกไว้เพื่อ CEO อนุมัติก่อน ห้ามลงมือทำเองเงียบๆ</p>
+        <p><strong>E. ChatGPT Review Responsibility</strong> — Mandatory: ความสมบูรณ์ตามเป้าหมาย, scope, ความปลอดภัย/ข้อมูล, regression, open issues 路 Recommended: เป้าหมายธุรกิจ, UX, documentation, launch impact 路 Optional: ความสวยงาม/dev-experience/performance — ไม่ block PASS</p>
+        <p><strong>F. CEO Authority</strong> — CEO มีอำนาจสูงสุดเหนือ Production Deploy/Write, การอนุมัติเปิดตัว, งบ/ทิศทางธุรกิจ, การยอมรับ High risk, การเปลี่ยน scope/feature/roadmap, เรื่องกฎหมาย/ความเป็นส่วนตัว — Cod/ChatGPT ห้ามอนุมัติสิ่งเหล่านี้แทน CEO โดยเด็ดขาด</p>
+        <p><strong>G. Standard Review Output</strong>: [สถานะ] → Task/Module → Reason → Evidence Reviewed → Scope Alignment → Security/Data/Regression Impact → Remaining Issues → Future Improvements/Technical Debt → Launch Impact → Product Owner Recommendation → CEO Decision Required</p>
+        <p><strong>H. Effective Use</strong> — มีผลทันทีหลัง CEO ตรวจรับเอกสารนี้ ใช้กับทุกงานรีวิว technical/QA/UX/business/documentation/security/Production-readiness จากนี้เป็นต้นไป</p>
+      </div>
+    </div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">19. งานถัดไป / Next Action</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">
+      <div style="background:oklch(93% 0.06 75); border:1px solid oklch(78% 0.12 75); border-radius:7px; padding:11px 14px;">
+        <div style="font-size:13.5px; color:oklch(30% 0.06 75);"><strong>ถัดไป: Deploy firestore.rules</strong><br/>ตามด้วย: 2. QA Cleanup (Production Write) · 3. Storage Verification (HH-70724) · 4. Demo Listing 28 รายการ (กำหนด isDemo/Badge) · 5. HH-111 เติม Zone · 6. Public Launch Preparation</div>
+      </div>
+    </div>
+
+    <div style="background:oklch(97% 0.01 70); border:1px solid oklch(88% 0.01 70); border-radius:7px; padding:11px 14px; margin-top:16px; font-size:12.5px; color:oklch(45% 0.02 60);">2026-07-18 — QA Sprint Completion v2.3.0: Listing Approvals Responsive+Functional Test PASS, Firestore Index Review Production Ready, AI Quick Add POI Verification conditional PASS, Demo Listing audit (28 found, not 22 — pending CEO confirmation), HH-70724 Firestore-side clean. Production Readiness: 85%. No Production Write. No Deploy.</div>
+
+    <div style="margin-top:32px; font-size:12px; color:oklch(55% 0.02 60); text-align:center;">อ่านคู่กับ CLAUDE.md — หน้านี้คืออีกวิธีดู BLUEPRINT.md แบบมีสี อัปเดตพร้อมกันทุกครั้งที่มีการเปลี่ยนแผน</div>
+
+  </div>
+</div>
+
+</x-dc>
+</body>
+</html>

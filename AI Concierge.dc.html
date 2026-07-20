@@ -9,317 +9,261 @@
 <x-dc>
 <helmet>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <title>สมัครลงประกาศ — huahin.properties</title>
+  <title>huahin.properties — คุยกับผู้ช่วย AI</title>
   <style>
-    body { margin: 0; background: oklch(96% 0.015 75); font-family: 'Work Sans', sans-serif; }
-    a { color: oklch(42% 0.12 25); }
+    body { margin: 0; font-family: 'Work Sans', sans-serif; }
+    @keyframes dotPulse { 0%,80%,100%{opacity:.25} 40%{opacity:1} }
   </style>
 </helmet>
 
-<div style="min-height:100vh;">
-  <div style="display:flex; align-items:center; justify-content:space-between; padding:20px clamp(20px,4vw,56px); border-bottom:1px solid oklch(90% 0.01 70);">
-    <a href="Home.dc.html" style="display:flex; align-items:center; gap:9px; font-family:'Playfair Display',serif; font-size:22px; color:oklch(22% 0.02 60); text-decoration:none;"><img src="logo.png" style="height:36px; width:36px; border-radius:50%; object-fit:contain;" />huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</a>
-    <a href="Home.dc.html" style="font-size:13px; color:oklch(45% 0.02 60); text-decoration:none;">← กลับหน้าแรก</a>
+<div style="min-height:100vh; background:oklch(96% 0.015 75); display:flex; flex-direction:column;">
+
+  <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px; flex-wrap:wrap; gap:10px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <img src="logo.png" style="height:34px; width:34px; border-radius:50%; object-fit:contain;" />
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(25% 0.03 40);">huahin . properties</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div onClick="{{ onClearChat }}" title="ล้างประวัติแชท เริ่มใหม่" style="cursor:pointer; padding:6px 10px 6px 6px; border-radius:8px; display:flex; align-items:center; gap:5px; color:oklch(45% 0.02 60);">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 7H20M9 7V4.5C9 4 9.4 3.5 10 3.5H14C14.6 3.5 15 4 15 4.5V7M18 7L17.3 19C17.25 19.8 16.6 20.5 15.8 20.5H8.2C7.4 20.5 6.75 19.8 6.7 19L6 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="font-size:12px;">ล้าง</span>
+      </div>
+      <a href="Home.dc.html" style="font-size:13px; color:oklch(45% 0.02 60); text-decoration:none; border:1px solid oklch(80% 0.02 60); padding:8px 16px; border-radius:100px;">ดูเว็บไซต์แบบเต็ม →</a>
+    </div>
   </div>
 
-  <div style="max-width:920px; margin:0 auto; padding:clamp(32px,6vw,64px) clamp(20px,4vw,32px) 80px;">
-
-    <div style="text-align:center; margin-bottom:44px;">
-      <div style="font-family:'Playfair Display',serif; font-size:clamp(28px,4vw,40px); color:oklch(20% 0.02 60); line-height:1.25; margin-bottom:14px;">โพสต์ประกาศฟรีวันนี้<br>พร้อมผู้ช่วย AI ที่ทำงานแทนคุณ</div>
-      <div style="font-size:15px; color:oklch(45% 0.02 60); max-width:560px; margin:0 auto; line-height:1.7;">เจาะกลุ่มผู้ซื้อ/ผู้เช่าในหัวหิน ปราณบุรี ชะอำโดยเฉพาะ — ช่วงเปิดตัวนี้สมัครและโพสต์ได้ฟรี ไม่มีค่าใช้จ่าย</div>
-      <sc-if value="{{ foundingBannerText }}">
-        <div style="display:inline-block; margin-top:16px; background:oklch(95% 0.06 75); border:1px solid oklch(80% 0.1 75); color:oklch(35% 0.1 40); font-size:13px; padding:8px 18px; border-radius:100px;">🎉 {{ foundingBannerText }}</div>
-      </sc-if>
-    </div>
-
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; margin-bottom:48px;">
-      <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:22px 20px;">
-        <div style="font-size:26px; margin-bottom:10px;">🌐</div>
-        <div style="font-family:'Playfair Display',serif; font-size:16px; color:oklch(20% 0.02 60); margin-bottom:6px;">AI ร่างประกาศ 8 ภาษา</div>
-        <div style="font-size:13px; color:oklch(50% 0.02 60); line-height:1.6;">ถ่ายรูป พูดบอกข้อมูล ระบบร่างคำบรรยายให้ครบทุกภาษาอัตโนมัติ</div>
-      </div>
-      <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:22px 20px;">
-        <div style="font-size:26px; margin-bottom:10px;">💬</div>
-        <div style="font-family:'Playfair Display',serif; font-size:16px; color:oklch(20% 0.02 60); margin-bottom:6px;">ผู้ช่วย AI ตอบลูกค้า 24 ชม.</div>
-        <div style="font-size:13px; color:oklch(50% 0.02 60); line-height:1.6;">ลูกค้าถามได้ทุกเวลา ทุกภาษา ไม่ต้องรอคุณว่าง</div>
-      </div>
-      <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:22px 20px;">
-        <div style="font-size:26px; margin-bottom:10px;">🎯</div>
-        <div style="font-family:'Playfair Display',serif; font-size:16px; color:oklch(20% 0.02 60); margin-bottom:6px;">กรองลูกค้าสนใจจริงให้อัตโนมัติ</div>
-        <div style="font-size:13px; color:oklch(50% 0.02 60); line-height:1.6;">ระบบติดตามความสนใจ ส่ง lead ที่พร้อมซื้อ/เช่าจริงมาให้คุณ</div>
-      </div>
-    </div>
-
-    <div style="display:flex; gap:0; margin-bottom:20px; border-bottom:1px solid oklch(88% 0.01 70);">
-      <div onClick="{{ onTabSignup }}" style="padding:10px 20px; font-size:14px; font-weight:600; cursor:pointer; border-bottom:2px solid {{ signupTabColor }}; color:{{ signupTabColor }};">Sign up Free</div>
-      <div onClick="{{ onTabLogin }}" style="padding:10px 20px; font-size:14px; font-weight:600; cursor:pointer; border-bottom:2px solid {{ loginTabColor }}; color:{{ loginTabColor }};">Login</div>
-    </div>
-
-    <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:20px clamp(24px,4vw,36px); margin-bottom:16px;">
-      <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:12px;">เข้าสู่ระบบ/สมัครแบบเร็ว — ไม่ต้องพิมพ์อีเมล/รหัสผ่าน</div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
-        <div onClick="{{ onGoogleSignIn }}" style="display:flex; align-items:center; gap:8px; background:white; border:1px solid oklch(85% 0.01 70); padding:10px 18px; border-radius:6px; font-size:13px; cursor:pointer;">🔵 เข้าสู่ระบบด้วย Google</div>
-        <div onClick="{{ onFacebookSignIn }}" style="display:flex; align-items:center; gap:8px; background:oklch(35% 0.1 250); color:white; padding:10px 18px; border-radius:6px; font-size:13px; cursor:pointer;">📘 เข้าสู่ระบบด้วย Facebook</div>
-      </div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
-        <div style="flex:1; min-width:180px;">
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">หรือใช้เบอร์โทร (OTP ผ่าน SMS)</div>
-          <input value="{{ phoneOtp }}" onChange="{{ onPhoneOtp }}" placeholder="+66812345678" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:13px; font-family:inherit;" />
+  <sc-if value="{{ showQuickIcons }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex; justify-content:center; gap:10px; padding:0 20px 14px; flex-wrap:wrap;">
+      <sc-for list="{{ quickChips }}" as="qc" hint-placeholder-count="3">
+        <div onClick="{{ qc.onClick }}" style="display:flex; align-items:center; gap:6px; background:white; border:1px solid oklch(88% 0.01 70); border-radius:100px; padding:8px 16px; font-size:13px; color:oklch(30% 0.02 60); cursor:pointer;">
+          <span>{{ qc.icon }}</span><span>{{ qc.label }}</span>
         </div>
-        <sc-if value="{{ showOtpCodeInput }}">
-          <div style="flex:1; min-width:120px;">
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รหัส OTP</div>
-            <input value="{{ otpCode }}" onChange="{{ onOtpCode }}" placeholder="123456" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:13px; font-family:inherit;" />
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 16px 16px;">
+    <div style="width:100%; max-width:560px; display:flex; flex-direction:column; height:min(560px, 62vh);">
+
+      <div ref="{{ scrollRef }}" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding:6px 4px 14px;">
+        <sc-if value="{{ showIntro }}" hint-placeholder-val="{{ true }}">
+          <div style="text-align:center; padding:28px 10px 10px;">
+            <div style="font-size:34px; margin-bottom:10px;">💬</div>
+            <div style="font-family:'Playfair Display',serif; font-size:21px; color:oklch(25% 0.03 40); margin-bottom:6px;">คุยกับผู้ช่วย AI ของเราได้เลย</div>
+            <div style="font-size:14px; color:oklch(50% 0.02 60);">หาบ้าน หาที่เช่า หรือฝากขาย — พิมพ์หรือพูดได้ทันที ทุกภาษา ตลอด 24 ชม.</div>
           </div>
         </sc-if>
-        <div onClick="{{ onOtpAction }}" style="background:oklch(22% 0.02 60); color:white; padding:10px 18px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">{{ otpActionLabel }}</div>
+        <sc-for list="{{ chatMessages }}" as="m" hint-placeholder-count="0">
+          <div style="{{ m.bubbleWrapStyle }}">
+            <div style="{{ m.bubbleStyle }}">{{ m.text }}</div>
+            <sc-if value="{{ m.hasLinks }}">
+              <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
+                <sc-for list="{{ m.links }}" as="lk" hint-placeholder-count="0">
+                  <sc-if value="{{ lk.thumbBg }}">
+                    <div onClick="{{ lk.onClick }}" style="display:flex; align-items:center; gap:0; background:oklch(35% 0.09 25); color:white; border-radius:12px; cursor:pointer; width:100%; min-height:72px; overflow:hidden;">
+                      <div style="width:72px; height:72px; background:{{ lk.thumbBg }}; flex-shrink:0;"></div>
+                      <div style="min-width:0; flex:1; padding:8px 10px;">
+                        <div style="font-size:12.5px; font-weight:600;">{{ lk.label }}</div>
+                        <sc-if value="{{ lk.priceLabel }}"><div style="font-size:12px; color:oklch(90% 0.02 70);">{{ lk.priceLabel }}</div></sc-if>
+                        <sc-if value="{{ lk.specsLabel }}"><div style="font-size:11px; color:oklch(78% 0.02 70);">{{ lk.specsLabel }}</div></sc-if>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ lk.noThumb }}">
+                    <div onClick="{{ lk.onClick }}" style="background:oklch(35% 0.09 25); color:white; font-size:13px; padding:9px 16px; border-radius:100px; cursor:pointer; white-space:nowrap;">{{ lk.label }}</div>
+                  </sc-if>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+        <sc-if value="{{ chatLoading }}">
+          <div style="align-self:flex-start; background:oklch(93% 0.01 75); padding:10px 16px; border-radius:14px 14px 14px 2px; display:flex; gap:4px;">
+            <span style="width:6px; height:6px; border-radius:50%; background:oklch(50% 0.02 60); animation:dotPulse 1.2s infinite;"></span>
+            <span style="width:6px; height:6px; border-radius:50%; background:oklch(50% 0.02 60); animation:dotPulse 1.2s infinite .2s;"></span>
+            <span style="width:6px; height:6px; border-radius:50%; background:oklch(50% 0.02 60); animation:dotPulse 1.2s infinite .4s;"></span>
+          </div>
+        </sc-if>
       </div>
-      <div id="hh-recaptcha"></div>
-      <sc-if value="{{ socialError }}"><div style="font-size:12.5px; color:oklch(50% 0.18 30); margin-top:10px;">{{ socialError }}</div></sc-if>
+
+      <div style="display:flex; gap:8px; background:white; border:1px solid oklch(88% 0.01 70); border-radius:100px; padding:6px 6px 6px 18px; box-shadow:0 8px 24px -14px rgba(0,0,0,0.15);">
+        <input value="{{ chatInput }}" onChange="{{ onChatInput }}" onKeyDown="{{ onChatKeyDown }}" placeholder="{{ placeholder }}" style="flex:1; border:none; outline:none; font-size:15px; font-family:inherit; background:transparent;" />
+        <div onClick="{{ onSend }}" style="width:40px; height:40px; border-radius:50%; background:oklch(35% 0.09 25); color:white; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;">➤</div>
+      </div>
+      <div style="text-align:center; margin-top:10px;">
+        <a href="Home.dc.html" style="font-size:12px; color:oklch(55% 0.02 60);">หรือดูประกาศทั้งหมดด้วยตัวเอง →</a>
+      </div>
     </div>
-    <div style="text-align:center; font-size:12px; color:oklch(60% 0.02 60); margin-bottom:16px;">— หรือใช้อีเมล/รหัสผ่านแบบเดิมด้านล่าง —</div>
-
-    <sc-if value="{{ showLoginForm }}">
-      <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:clamp(24px,4vw,36px); margin-bottom:20px;">
-        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); margin-bottom:14px;">เข้าสู่ระบบ</div>
-        <div style="display:grid; gap:12px; max-width:360px; margin-bottom:14px;">
-          <div>
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">อีเมล</div>
-            <input type="email" value="{{ loginEmail }}" onChange="{{ onLoginEmail }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;" />
-          </div>
-          <div>
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รหัสผ่าน</div>
-            <input type="text" value="{{ loginPassword }}" onChange="{{ onLoginPassword }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;" />
-          </div>
-        </div>
-        <div onClick="{{ onLoginSubmit }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:600; cursor:pointer; max-width:360px;">{{ loginSubmitLabel }}</div>
-        <sc-if value="{{ loginError }}"><div style="font-size:13px; color:oklch(50% 0.18 30); margin-top:10px;">{{ loginError }}</div></sc-if>
-      </div>
-    </sc-if>
-
-    <sc-if value="{{ submitted }}">
-      <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:40px 24px; text-align:center;">
-        <div style="font-size:34px; margin-bottom:12px;">✅</div>
-        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); margin-bottom:8px;">สมัครสำเร็จ — ใช้งานได้ทันที</div>
-        <div style="font-size:14px; color:oklch(50% 0.02 60); max-width:420px; margin:0 auto; line-height:1.7;">เราส่งอีเมลยืนยันตัวตนไปที่กล่องจดหมายของคุณแล้ว — กดลิงก์ในอีเมลเพื่อยืนยัน จากนี้เราจะส่งข่าวสาร/สิทธิประโยชน์ใหม่ๆ ให้คุณทางอีเมลนี้ด้วย</div>
-        <a href="Lister Dashboard.dc.html" style="display:inline-block; margin-top:18px; font-size:13px; color:oklch(42% 0.12 25);">ไปที่หน้าทำงานของฉัน →</a>
-      </div>
-    </sc-if>
-
-    <sc-if value="{{ showSignupForm }}" hint-placeholder-val="{{ true }}">
-      <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:clamp(24px,4vw,36px);">
-        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); margin-bottom:6px;">สมัครใช้งานฟรี</div>
-        <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:20px;">ทดลองใช้งานฟรี โพสต์ประกาศได้ทันที — AI ช่วยร่างประกาศ 8 ภาษาให้อัตโนมัติ</div>
-        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-bottom:14px;">
-          <div>
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ชื่อ-นามสกุล / ชื่อบริษัท</div>
-            <input value="{{ name }}" onChange="{{ onName }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;" />
-          </div>
-          <div>
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">เบอร์โทร/LINE</div>
-            <input value="{{ phone }}" onChange="{{ onPhone }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;" />
-          </div>
-          <div>
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">อีเมล</div>
-            <input type="email" value="{{ email }}" onChange="{{ onEmail }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;" />
-          </div>
-          <div>
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ตั้งรหัสผ่าน</div>
-            <input type="text" value="{{ password }}" onChange="{{ onPassword }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;" />
-          </div>
-        </div>
-        <div onClick="{{ onSubmit }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:600; cursor:pointer;">{{ submitLabel }}</div>
-        <sc-if value="{{ error }}"><div style="font-size:13px; color:oklch(50% 0.18 30); text-align:center; margin-top:10px;">{{ error }}</div></sc-if>
-        <div style="font-size:12px; color:oklch(55% 0.02 60); text-align:center; margin-top:14px; line-height:1.6;">{{ foundingFinePrint }}</div>
-      </div>
-    </sc-if>
-
   </div>
 </div>
 
 </x-dc>
 <script type="text/x-dc" data-dc-script>
-const SIGNUP_I18N = {
-  en: { pickPackage: "Choose your package (required before signing up)", free: "① Free", tier2: "② Level 2", tier3: "③ Level 3", perMonth: "/month", requirePkg: "Please choose a package before signing up" },
-  th: { pickPackage: "เลือกแพ็กเกจ (จำเป็นต้องเลือกก่อนสมัคร)", free: "① ฟรี", tier2: "② ระดับ 2", tier3: "③ ระดับ 3", perMonth: "/เดือน", requirePkg: "กรุณาเลือกแพ็กเกจก่อนสมัคร" },
-  ru: { pickPackage: "Выберите пакет (обязательно перед регистрацией)", free: "① Бесплатно", tier2: "② Уровень 2", tier3: "③ Уровень 3", perMonth: "/мес", requirePkg: "Пожалуйста, выберите пакет" },
-  zh: { pickPackage: "选择套餐（注册前必选）", free: "① 免费", tier2: "② 二级", tier3: "③ 三级", perMonth: "/月", requirePkg: "请先选择套餐" },
-  de: { pickPackage: "Paket wählen (vor Anmeldung erforderlich)", free: "① Kostenlos", tier2: "② Stufe 2", tier3: "③ Stufe 3", perMonth: "/Monat", requirePkg: "Bitte wählen Sie ein Paket" },
-  no: { pickPackage: "Velg pakke (påkrevd før registrering)", free: "① Gratis", tier2: "② Nivå 2", tier3: "③ Nivå 3", perMonth: "/mnd", requirePkg: "Velg en pakke" },
-  fr: { pickPackage: "Choisissez votre forfait (requis avant l'inscription)", free: "① Gratuit", tier2: "② Niveau 2", tier3: "③ Niveau 3", perMonth: "/mois", requirePkg: "Veuillez choisir un forfait" },
-  it: { pickPackage: "Scegli il pacchetto (obbligatorio prima dell'iscrizione)", free: "① Gratuito", tier2: "② Livello 2", tier3: "③ Livello 3", perMonth: "/mese", requirePkg: "Seleziona un pacchetto" },
+const QUICK_PROMPTS = {
+  buy: "ฉันกำลังหาซื้อบ้านหรือคอนโดอยู่ ช่วยแนะนำหน่อยได้ไหม",
+  rent: "ฉันกำลังหาบ้านเช่าอยู่ ช่วยแนะนำหน่อยได้ไหม",
+  sell: "ฉันมีบ้าน/ที่ดินอยากฝากขายหรือฝากเช่า ต้องทำยังไงบ้าง",
 };
 
 class Component extends DCLogic {
-  state = { tab: "signup", name: "", phone: "", email: "", password: "", submitted: false, submitting: false, error: "", loginEmail: "", loginPassword: "", loginBusy: false, loginError: "", packageChoice: null, lang: "th", foundingLimit: 0, foundingCount: 0, foundingNote: "", phoneOtp: "", otpCode: "", otpSent: false, socialBusy: false, socialError: "" };
+  scrollRef = React.createRef();
+  state = { chatMessages: [], chatInput: "", chatLoading: false, lang: "th" };
 
   async componentDidMount() {
     try {
       const mod = await import("./data.js");
+      this._mod = mod;
+      this._properties = await mod.getEffectiveProperties(mod);
       this.setState({ lang: mod.getLang() });
-    } catch (e) {}
+    } catch (e) { console.warn("AI Concierge: data load failed", e); }
     try {
       const fb = await import("./firebase-client.js");
-      const [settings, count] = await Promise.all([fb.fetchFoundingAgentSettings(), fb.countFoundingAgents()]);
-      this.setState({ foundingLimit: settings.limit || 0, foundingNote: settings.note || "", foundingCount: count });
+      this._aiNotes = await fb.fetchAiNotes();
+      this._aiRestrictions = await fb.fetchAiRestrictions();
+      this._aiPersona = await fb.fetchAiPersona();
+    } catch (e) { console.warn("AI Concierge: firebase load failed", e); }
+    this._restoreHistory();
+  }
+
+  // Shared with ContactRail's chat panel — same localStorage key, so a
+  // conversation started here continues seamlessly after navigating into a
+  // property page (and vice versa), surviving back/forward navigation.
+  _persistHistory(messages) {
+    try {
+      localStorage.setItem("hh_chat_history", JSON.stringify(messages.map((m) => ({ role: m.role, text: m.text }))));
     } catch (e) {}
   }
 
-  async completeSocialSignIn(uid, fb) {
+  _buildBubble(role, text) {
+    const isUser = role === "user";
+    const links = isUser ? [] : this._extractLinks(text);
+    return {
+      role, text, links, hasLinks: links.length > 0,
+      bubbleWrapStyle: isUser ? "align-self:flex-end; max-width:85%;" : "align-self:flex-start; max-width:85%;",
+      bubbleStyle: isUser
+        ? "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:10px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5; white-space:pre-wrap;"
+        : "background:white; color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap; box-shadow:0 2px 8px rgba(0,0,0,0.04);",
+    };
+  }
+
+  _restoreHistory() {
     try {
-      const doc = await fb.fetchMyListerDoc();
-      if (!doc) {
-        const isFounding = this.state.foundingLimit > 0 && this.state.foundingCount < this.state.foundingLimit;
-        // No default tier — membership v2 (BLUEPRINT.md §2.3): new accounts
-        // start with NO tier at all so the Lister Dashboard's "start free
-        // trial" offer shows immediately. Do not default to "basic" here
-        // (that was the old permanent-free-tier model, replaced by trial).
-        await fb.setDoc("listers", uid, {
-          name: "", role: "lister", phone: "", email: "",
-          status: "approved", createdAt: Date.now(), foundingAgent: isFounding,
+      const saved = JSON.parse(localStorage.getItem("hh_chat_history") || "null");
+      if (saved && saved.length) {
+        this.setState({ chatMessages: saved.map((m) => this._buildBubble(m.role, m.text)) });
+        setTimeout(() => { if (this.scrollRef.current) this.scrollRef.current.scrollTop = this.scrollRef.current.scrollHeight; }, 80);
+      }
+    } catch (e) {}
+  }
+
+  clearChatHistory() {
+    try { localStorage.removeItem("hh_chat_history"); } catch (e) {}
+    this.setState({ chatMessages: [] });
+  }
+
+  _navigate(href) { window.location.href = href; }
+
+  _extractLinks(text) {
+    if (!text) return [];
+    const props = this._properties || [];
+    const codes = [...new Set((text.match(/\b[A-Z]{2,4}-\d{2,4}\b/g) || []))];
+    const links = [];
+    codes.forEach((code) => {
+      const p = props.find((pr) => pr.id === code);
+      if (p) {
+        const photoUrl = p.photos && p.photos[0] && p.photos[0].url;
+        const thumbBg = photoUrl ? `url(${photoUrl}) center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 10px)";
+        links.push({
+          label: "ดูรายละเอียด " + code,
+          thumbBg,
+          priceLabel: `${(p.price || 0).toLocaleString()} ${p.currency || "THB"}`,
+          specsLabel: `${p.bedrooms || 0} ห้องนอน · ${p.zone || p.area || ""}`,
+          onClick: () => this._navigate("Property Details.dc.html?id=" + encodeURIComponent(code)),
         });
       }
-      window.location.href = "Lister Dashboard.dc.html";
-    } catch (e) {
-      this.setState({ socialBusy: false, socialError: "เกิดข้อผิดพลาด ลองใหม่อีกครั้ง" });
+    });
+    if (/contact us|ติดต่อเรา/i.test(text)) {
+      links.push({ label: "ดูประกาศทั้งหมด", noThumb: true, onClick: () => this._navigate("Search Results.dc.html") });
     }
+    return links;
   }
 
-  async googleSignIn() {
-    if (this.state.socialBusy) return;
-    this.setState({ socialBusy: true, socialError: "" });
+  _buildContext() {
+    const lang = this.state.lang;
+    return (this._properties || []).map((p) => {
+      const title = (p.title && (p.title[lang] || p.title.en)) || p.id;
+      return `${p.id} | ${title} | area:${p.area} zone:${p.zone} type:${p.type} status:${p.status} price:${p.price}${p.currency} beds:${p.bedrooms} baths:${p.bathrooms}`;
+    }).join("\n");
+  }
+
+  quickSend(text) {
+    this.setState({ chatInput: text }, () => this.sendChat());
+  }
+
+  async sendChat() {
+    const text = this.state.chatInput.trim();
+    if (!text || this.state.chatLoading) return;
+    const userMsg = { role: "user", text, links: [], hasLinks: false, bubbleWrapStyle: "align-self:flex-end; max-width:85%;", bubbleStyle: "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:10px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
+    const history = [...this.state.chatMessages, userMsg];
+    this.setState({ chatMessages: history, chatInput: "", chatLoading: true });
+    this._persistHistory(history);
     try {
-      const fb = await import("./firebase-client.js");
-      const uid = await fb.signInWithGoogle();
-      await this.completeSocialSignIn(uid, fb);
-    } catch (e) {
-      this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย Google ไม่สำเร็จ ลองใหม่อีกครั้ง" });
-    }
-  }
+      const personaName = (this._aiPersona && this._aiPersona.name && this._aiPersona.name.trim()) || "Anna";
+      const personaRole = (this._aiPersona && this._aiPersona.role && this._aiPersona.role.trim()) || "the friendly AI assistant for huahin.properties";
+      const notesTxt = (this._aiNotes || []).filter((n) => n.title || n.body).map((n) => `• ${n.title || ""}: ${n.body || ""}`).join("\n");
+      const system = `You are "${personaName}", ${personaRole}, for huahin.properties, a real-estate agency covering Hua Hin, Pranburi and Cha-am, Thailand. This is a first-touch landing conversation — be warm, brief, and quickly figure out if they want to buy, rent, or list a property, then guide them helpfully.
 
-  async facebookSignIn() {
-    if (this.state.socialBusy) return;
-    this.setState({ socialBusy: true, socialError: "" });
-    try {
-      const fb = await import("./firebase-client.js");
-      const uid = await fb.signInWithFacebook();
-      await this.completeSocialSignIn(uid, fb);
-    } catch (e) {
-      this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย Facebook ไม่สำเร็จ (อาจยังไม่เปิดใช้งาน — แจ้งแอดมิน)" });
-    }
-  }
+FACTS: For concrete questions (price, beds, baths, code, availability) use ONLY this listings data — never invent:
+${this._buildContext()}${notesTxt ? `\n\nAGENCY NOTES:\n${notesTxt}` : ""}${this._aiRestrictions ? `\n\nRESTRICTIONS — never discuss, redirect politely instead:\n${this._aiRestrictions}` : ""}
 
-  async otpAction() {
-    if (this.state.socialBusy) return;
-    const fb = await import("./firebase-client.js");
-    if (!this.state.otpSent) {
-      if (!this.state.phoneOtp.trim()) { this.setState({ socialError: "กรอกเบอร์โทรแบบมี + รหัสประเทศ เช่น +66812345678" }); return; }
-      this.setState({ socialBusy: true, socialError: "" });
-      try {
-        await fb.startPhoneSignIn(this.state.phoneOtp.trim(), "hh-recaptcha");
-        this.setState({ otpSent: true, socialBusy: false });
-      } catch (e) {
-        this.setState({ socialBusy: false, socialError: "ส่ง OTP ไม่สำเร็จ ตรวจรูปแบบเบอร์โทรอีกครั้ง" });
+LANGUAGE: reply in the same language the customer just used. Keep replies short (2-4 sentences). Always write property codes plainly (e.g. HH-109) when relevant — never a fake link. When the customer wants to browse everything themselves, naturally say "contact us" is not needed and mention they can view all listings — the interface adds a button automatically.`;
+      const messages = history.map((m) => ({ role: m.role, content: m.text }));
+      let reply;
+      if (window.claude && window.claude.complete) {
+        reply = await window.claude.complete({ system, messages, model: "claude-haiku-4-5", max_tokens: 400 });
+      } else {
+        const res = await fetch("https://claudecomplete-3j4ldf4pja-as.a.run.app", {
+          method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ system, messages }),
+        });
+        const data = await res.json();
+        reply = data.completion || "ขออภัยค่ะ ระบบขัดข้องชั่วคราว ลองใหม่อีกครั้งได้เลยค่ะ";
       }
-    } else {
-      if (!this.state.otpCode.trim()) { this.setState({ socialError: "กรอกรหัส OTP ที่ได้รับทาง SMS" }); return; }
-      this.setState({ socialBusy: true, socialError: "" });
-      try {
-        const uid = await fb.confirmPhoneSignIn(this.state.otpCode.trim());
-        await this.completeSocialSignIn(uid, fb);
-      } catch (e) {
-        this.setState({ socialBusy: false, socialError: "รหัส OTP ไม่ถูกต้อง ลองใหม่อีกครั้ง" });
-      }
-    }
-  }
-
-  async loginSubmit() {
-    if (this.state.loginBusy) return;
-    if (!this.state.loginEmail.trim() || !this.state.loginPassword) {
-      this.setState({ loginError: "กรอกอีเมลและรหัสผ่าน" });
-      return;
-    }
-    this.setState({ loginBusy: true, loginError: "" });
-    try {
-      const fb = await import("./firebase-client.js");
-      await fb.adminSignIn(this.state.loginEmail.trim(), this.state.loginPassword);
-      window.location.href = "Lister Dashboard.dc.html";
+      const links = this._extractLinks(reply);
+      const aiMsg = { role: "assistant", text: reply, links, hasLinks: links.length > 0, bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:white; color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap; box-shadow:0 2px 8px rgba(0,0,0,0.04);" };
+      this.setState({ chatMessages: [...history, aiMsg], chatLoading: false });
+      this._persistHistory([...history, aiMsg]);
     } catch (e) {
-      this.setState({ loginBusy: false, loginError: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
+      const errMsg = { role: "assistant", text: "ขออภัยค่ะ ระบบขัดข้องชั่วคราว ลองใหม่อีกครั้งหรือดูประกาศทั้งหมดด้วยตัวเองก่อนได้ค่ะ", links: [{ label: "ดูประกาศทั้งหมด", onClick: () => this._navigate("Search Results.dc.html") }], hasLinks: true, bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:white; padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px;" };
+      // Don't persist the error bubble itself — it's a transient local
+      // notice, not a real assistant reply. Persisting it would leave stale
+      // "Sorry, something went wrong" text sitting in the shared cross-page
+      // history forever, replayed as fake context on every future visit.
+      this.setState({ chatMessages: [...history, errMsg], chatLoading: false });
     }
-  }
-
-  async submit() {
-    if (this.state.submitting) return;
-    const { name, phone, email, password } = this.state;
-    if (!name.trim() || !phone.trim() || !email.trim() || password.length < 6) {
-      this.setState({ error: "กรอกให้ครบทุกช่อง (รหัสผ่านอย่างน้อย 6 ตัวอักษร)" });
-      return;
-    }
-    this.setState({ submitting: true, error: "" });
-    try {
-      const fb = await import("./firebase-client.js");
-      const uid = await fb.createListerAccount(email, password);
-      const isFounding = this.state.foundingLimit > 0 && this.state.foundingCount < this.state.foundingLimit;
-      await fb.setDoc("listers", uid, {
-        name, role: "lister", phone, email,
-        // Auto-approved immediately (no admin queue). No default tier —
-        // membership v2 (BLUEPRINT.md §2.3) replaced the old permanent-free
-        // tier with a one-time 30-day trial; leaving tier unset here is
-        // what makes the Lister Dashboard's "start free trial" banner show
-        // up right after signup instead of silently landing on "basic".
-        status: "approved", createdAt: Date.now(),
-        foundingAgent: isFounding,
-      });
-      this.setState({ submitted: true, submitting: false });
-      setTimeout(() => { window.location.href = "Lister Dashboard.dc.html"; }, 1400);
-    } catch (e) {
-      const msg = (e && e.code === "auth/email-already-in-use")
-        ? "อีเมลนี้เคยสมัครไว้แล้ว"
-        : "สมัครไม่สำเร็จ ลองใหม่อีกครั้ง";
-      this.setState({ error: msg, submitting: false });
-    }
+    setTimeout(() => { if (this.scrollRef.current) this.scrollRef.current.scrollTop = this.scrollRef.current.scrollHeight; }, 60);
   }
 
   renderVals() {
     return {
-      name: this.state.name, onName: (e) => this.setState({ name: e.target.value }),
-      phone: this.state.phone, onPhone: (e) => this.setState({ phone: e.target.value }),
-      email: this.state.email, onEmail: (e) => this.setState({ email: e.target.value }),
-      password: this.state.password, onPassword: (e) => this.setState({ password: e.target.value }),
-      submitted: this.state.submitted,
-      showSignupForm: this.state.tab === "signup" && !this.state.submitted,
-      showLoginForm: this.state.tab === "login",
-      onTabSignup: () => this.setState({ tab: "signup" }),
-      onTabLogin: () => this.setState({ tab: "login" }),
-      signupTabColor: this.state.tab === "signup" ? "oklch(40% 0.13 25)" : "oklch(70% 0.01 70)",
-      loginTabColor: this.state.tab === "login" ? "oklch(40% 0.13 25)" : "oklch(70% 0.01 70)",
-      loginEmail: this.state.loginEmail, onLoginEmail: (e) => this.setState({ loginEmail: e.target.value }),
-      loginPassword: this.state.loginPassword, onLoginPassword: (e) => this.setState({ loginPassword: e.target.value }),
-      loginSubmitLabel: this.state.loginBusy ? "กำลังเข้าสู่ระบบ…" : "เข้าสู่ระบบ",
-      onLoginSubmit: () => this.loginSubmit(),
-      loginError: this.state.loginError,
-      submitLabel: this.state.submitting ? "กำลังส่ง…" : "สมัครเลย",
-      error: this.state.error,
-      onSubmit: () => this.submit(),
-      onGoogleSignIn: () => this.googleSignIn(),
-      onFacebookSignIn: () => this.facebookSignIn(),
-      phoneOtp: this.state.phoneOtp, onPhoneOtp: (e) => this.setState({ phoneOtp: e.target.value }),
-      otpCode: this.state.otpCode, onOtpCode: (e) => this.setState({ otpCode: e.target.value }),
-      showOtpCodeInput: this.state.otpSent,
-      otpActionLabel: this.state.socialBusy ? "กำลังดำเนินการ…" : (this.state.otpSent ? "ยืนยันรหัส" : "ส่งรหัส OTP"),
-      onOtpAction: () => this.otpAction(),
-      socialError: this.state.socialError,
-      foundingBannerText: (this.state.foundingLimit > 0)
-        ? (this.state.foundingCount < this.state.foundingLimit
-          ? `Founding Agents — เหลืออีก ${this.state.foundingLimit - this.state.foundingCount} จาก ${this.state.foundingLimit} ที่ สมัครฟรีช่วงเปิดตัว`
-          : "")
-        : "",
-      foundingFinePrint: this.state.foundingNote || "ช่วงนี้ฟรีชั่วคราวสำหรับผู้สมัครกลุ่มแรก — จะแจ้งล่วงหน้าก่อนเริ่มเก็บค่าบริการในอนาคต",
+      scrollRef: this.scrollRef,
+      showIntro: this.state.chatMessages.length === 0,
+      showQuickIcons: this.state.chatMessages.length === 0,
+      quickChips: [
+        { icon: "🏠", label: "ซื้อบ้าน/คอนโด", onClick: () => this.quickSend(QUICK_PROMPTS.buy) },
+        { icon: "🔑", label: "หาเช่า", onClick: () => this.quickSend(QUICK_PROMPTS.rent) },
+        { icon: "📋", label: "ฝากขาย/ฝากเช่า", onClick: () => this.quickSend(QUICK_PROMPTS.sell) },
+      ],
+      chatMessages: this.state.chatMessages,
+      chatLoading: this.state.chatLoading,
+      chatInput: this.state.chatInput,
+      onChatInput: (e) => this.setState({ chatInput: e.target.value }),
+      onChatKeyDown: (e) => { if (e.key === "Enter") this.sendChat(); },
+      onSend: () => this.sendChat(),
+      onClearChat: () => this.clearChatHistory(),
+      placeholder: "พิมพ์คำถามของคุณที่นี่…",
     };
   }
 }
