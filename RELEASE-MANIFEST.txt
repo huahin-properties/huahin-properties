@@ -1,0 +1,24 @@
+RELEASE MANIFEST
+
+Project: huahin.properties
+PHS Version: 1
+Release status: Complete Snapshot Final
+Release date: 20 July 2026
+Total file count: 65 files + 2 folders (functions/, scripts/)
+
+Key PHS files included:
+- BLUEPRINT.md
+- Blueprint.dc.html
+- Mission Control.dc.html
+- START HERE.md
+- HANDOVER PROMPT.md
+- HANDOVER TEST PROCEDURE.md
+- OPERATION MANUAL.md
+- CEO GUIDE.md
+- CEO Guide.dc.html
+- PHS Document Center.dc.html
+- Complete Snapshot.dc.html
+- RELEASE CHECKLIST.md
+- PROJECT COMPLETION.md
+
+Confirmation: contents match export-for-github/ exactly (file-for-file, latest project versions, no archived/intermediate copies).
