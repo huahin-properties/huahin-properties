@@ -10,959 +10,277 @@
 <helmet>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <title>List Your Property — huahin.properties</title>
+  <meta name="description" content="List your property for sale or rent in Hua Hin, Pranburi or Cha-am with huahin.properties.">
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <title>Site Content — huahin.properties Admin</title>
   <style>
-    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    body { margin: 0; background: oklch(98% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    a { color: oklch(42% 0.12 25); }
+    a:hover { color: oklch(32% 0.13 25); }
   </style>
 </helmet>
 
-<div style="max-width:900px; margin:0 auto; min-height:100vh;">
+<sc-if value="{{ showGate }}">
+  <div style="position:fixed; inset:0; background:oklch(96% 0.015 75); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
+    <img src="logo.png" alt="huahin.properties logo" style="height:56px; width:56px; object-fit:contain; border-radius:50%; margin-bottom:20px;" />
+    <div style="font-family:'Playfair Display',serif; font-size:26px; color:oklch(20% 0.02 60); margin-bottom:10px;">กำลังปรับปรุงเว็บไซต์</div>
+    <div style="font-size:14px; color:oklch(50% 0.02 60); max-width:360px; margin-bottom:26px; line-height:1.6;">เรากำลังปรับปรุงเว็บไซต์อยู่ ขออภัยในความไม่สะดวก จะกลับมาเปิดให้บริการเร็วๆ นี้</div>
+    <div style="width:100%; max-width:300px; display:flex; flex-direction:column; gap:10px;">
+      <input type="text" value="{{ gatePassword }}" onChange="{{ onGatePassword }}" placeholder="รหัสผ่านแอดมิน" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit; text-align:center;" />
+      <div onClick="{{ onGateSubmit }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:12px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">เข้าดูตัวอย่าง</div>
+      <sc-if value="{{ gateError }}"><div style="font-size:13px; color:oklch(50% 0.18 30);">{{ gateError }}</div></sc-if>
+    </div>
+  </div>
+</sc-if>
 
-  <!-- HEADER -->
-  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px 16px; flex-wrap:wrap; padding:16px 24px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80);">
-    <a href="Admin Dashboard.dc.html" style="text-decoration:none; color:inherit; font-family:'Playfair Display',serif; font-size:19px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; min-width:0;">huahin<span style="color:oklch(75% 0.13 85);">.</span>properties <span style="font-size:12px; color:oklch(75% 0.01 70); border-left:1px solid oklch(45% 0.01 60); padding-left:14px; white-space:nowrap;">Site Content</span></a>
-    <a href="Admin Dashboard.dc.html" style="font-size:13px; color:oklch(85% 0.01 70); text-decoration:none; white-space:nowrap;">{{ t.admin_back_to_dashboard }}</a>
+<div style="max-width:1600px; margin:0 auto; background:oklch(98% 0.01 80); min-height:100vh;">
+
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:24px; padding:22px clamp(20px,4vw,56px); border-bottom:1px solid oklch(90% 0.01 70);">
+    <a href="Home.dc.html" style="white-space:nowrap; display:flex; align-items:center; gap:9px; font-family:'Playfair Display',serif; font-size:clamp(19px,2.4vw,24px); letter-spacing:0.02em; color:oklch(22% 0.02 60); text-decoration:none;"><img src="logo.png" alt="huahin.properties logo" style="height:36px; width:36px; object-fit:contain; border-radius:50%; flex-shrink:0;" />huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</a>
+    <sc-if value="{{ isDesktopNav }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; gap:32px; align-items:center; font-size:15px; color:oklch(30% 0.02 60); white-space:nowrap;">
+        <a href="Search Results.dc.html?status=sale" style="text-decoration:none; color:inherit;">{{ t.nav_buy }}</a>
+        <a href="Search Results.dc.html?status=rent" style="text-decoration:none; color:inherit;">{{ t.nav_rent }}</a>
+        <a href="Sell.dc.html" style="text-decoration:none; color:oklch(42% 0.12 25);">{{ t.nav_sell }}</a>
+        <a href="About.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_about }}</a>
+        <a href="Contact.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_contact }}</a>
+      </div>
+      <div style="display:flex; gap:12px; align-items:flex-end; white-space:nowrap;">
+        <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" hint-size="150,54"></dc-import>
+        <div style="width:1px; height:20px; background:oklch(80% 0.02 70); margin:0 4px 8px;"></div>
+        <a href="Admin Login.dc.html" style="font-size:13px; color:oklch(40% 0.02 60); text-decoration:none; padding-bottom:8px;">{{ t.nav_admin }}</a>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isMobileNav }}">
+      <div style="display:flex; align-items:center; gap:6px;">
+        <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" compact="{{ true }}" menu-align="right" hint-size="40,32"></dc-import>
+        <div onClick="{{ toggleMenu }}" style="display:flex; flex-direction:column; gap:5px; padding:8px; cursor:pointer;">
+          <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
+          <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
+          <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
+        </div>
+      </div>
+    </sc-if>
   </div>
 
-  <div style="padding:28px 24px 64px;">
-    <div style="margin-bottom:24px;">
-      <div style="font-family:'Playfair Display',serif; font-size:26px; color:oklch(20% 0.02 60); margin-bottom:6px;">Site Content</div>
-      <div style="font-size:14px; color:oklch(50% 0.02 60);">Edit the homepage hero photo and each area card's photo and description — no code required.</div>
+  <sc-if value="{{ mobileMenuOpen }}">
+    <div style="position:fixed; inset:0; background:oklch(98% 0.01 80); z-index:60; padding:22px clamp(20px,6vw,56px); display:flex; flex-direction:column; gap:28px; overflow-y:auto;">
+      <div style="display:flex; align-items:center; justify-content:space-between;">
+        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
+        <div onClick="{{ toggleMenu }}" style="font-size:26px; line-height:1; color:oklch(30% 0.02 60); cursor:pointer; padding:6px;">&times;</div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:22px; font-size:20px; font-family:'Playfair Display',serif; color:oklch(22% 0.02 60);">
+        <a href="Search Results.dc.html?status=sale" style="text-decoration:none; color:inherit;">{{ t.nav_buy }}</a>
+        <a href="Search Results.dc.html?status=rent" style="text-decoration:none; color:inherit;">{{ t.nav_rent }}</a>
+        <a href="Sell.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_sell }}</a>
+        <a href="About.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_about }}</a>
+        <a href="Contact.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_contact }}</a>
+        <a href="Admin Login.dc.html" style="text-decoration:none; color:oklch(50% 0.02 60); font-size:15px; font-family:'Work Sans',sans-serif;">{{ t.nav_admin }}</a>
+      </div>
+      <div style="margin-top:auto; padding-top:20px; border-top:1px solid oklch(90% 0.01 70);">
+        <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" full-width="{{ true }}" hint-size="100%,60"></dc-import>
+      </div>
+    </div>
+  </sc-if>
+
+  <div style="max-width:720px; margin:0 auto; padding:clamp(40px,6vw,72px) clamp(20px,4vw,32px) 100px;">
+    <div style="text-align:center; margin-bottom:36px;">
+      <div style="font-family:'Playfair Display',serif; font-size:clamp(28px,4vw,38px); color:oklch(20% 0.02 60); margin-bottom:12px;">{{ t.sell_title }}</div>
+      <div style="font-size:15px; line-height:1.7; color:oklch(45% 0.02 60);">{{ t.sell_sub }}</div>
     </div>
 
-    <sc-if value="{{ saveMsg }}">
-      <div style="background:oklch(94% 0.06 145); color:oklch(35% 0.1 145); border-radius:6px; padding:10px 16px; font-size:14px; margin-bottom:20px;">{{ saveMsg }}</div>
+    <sc-if value="{{ submitted }}">
+      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:40px; text-align:center;">
+        <div style="font-family:'Playfair Display',serif; font-size:22px; color:oklch(20% 0.02 60); margin-bottom:10px;">{{ thanksTitle }}</div>
+        <div style="font-size:14px; color:oklch(45% 0.02 60);">{{ thanksBody }}</div>
+      </div>
     </sc-if>
 
-    <!-- MAINTENANCE MODE -->
-    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-bottom:20px;">
-      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">🚧 โหมดปิดปรับปรุงเว็บไซต์</div>
-      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:16px;">เปิดโหมดนี้ตอนกำลังแก้ไข/พัฒนาเว็บ — คนทั่วไปที่เข้าเว็บจะเห็นหน้า "กำลังปรับปรุง" แทนเนื้อหาจริง ส่วนคุณเข้าดูเว็บจริงได้ตามปกติ (ใช้รหัสผ่านแอดมินเดิมปลดล็อกครั้งเดียว เบราว์เซอร์จะจำไว้ให้)</div>
-      <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
-        <div onClick="{{ onToggleMaintenance }}" style="{{ maintenanceToggleStyle }}">{{ maintenanceToggleLabel }}</div>
-        <div style="font-size:15px; font-weight:700; color:{{ maintenanceStatusColor }};">{{ maintenanceStatusLabel }}</div>
-      </div>
-    </div>
+    <sc-if value="{{ notSubmitted }}" hint-placeholder-val="{{ true }}">
+      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:clamp(24px,4vw,36px); display:flex; flex-direction:column; gap:16px;">
+        <div style="display:flex; gap:12px; border:1px solid oklch(88% 0.01 70); border-radius:4px; overflow:hidden;">
+          <div onClick="{{ setListingSale }}" style="flex:1; text-align:center; padding:12px; font-size:14px; cursor:pointer; background:{{ saleActiveBg }}; color:{{ saleActiveColor }};">{{ t.buy }}</div>
+          <div onClick="{{ setListingRent }}" style="flex:1; text-align:center; padding:12px; font-size:14px; cursor:pointer; background:{{ rentActiveBg }}; color:{{ rentActiveColor }};">{{ t.rent }}</div>
+        </div>
 
-    <!-- HERO -->
-    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-bottom:20px;">
-      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:14px;">Homepage Hero Photo</div>
-      <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;">
-        <label style="{{ heroStyle }}">
-          <input type="file" accept="image/*" onChange="{{ onHeroFile }}" style="position:absolute; inset:0; opacity:0; cursor:pointer;" />
-          <sc-if value="{{ heroUploading }}"><span style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:12px; color:oklch(45% 0.02 60);">Uploading…</span></sc-if>
-        </label>
-        <div style="font-size:13px; color:oklch(50% 0.02 60); flex:1; min-width:200px;">Click the image to upload a new hero photo for the homepage. Saves instantly.</div>
-      </div>
-    </div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px;">
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">{{ t.sell_owner_name }}</div>
+            <input style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">{{ t.sell_owner_phone }}</div>
+            <input style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">{{ t.sell_owner_email }}</div>
+            <input style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">{{ t.sell_owner_line }}</div>
+            <input style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">{{ t.sell_property_type }}</div>
+            <select style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:oklch(99% 0.005 80);">
+              <sc-for list="{{ types }}" as="ty" hint-placeholder-count="5"><option value="{{ ty.id }}">{{ ty.label }}</option></sc-for>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">{{ t.sell_area }}</div>
+            <select style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:oklch(99% 0.005 80);">
+              <sc-for list="{{ areas }}" as="a" hint-placeholder-count="3"><option value="{{ a.id }}">{{ a.label }}</option></sc-for>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">{{ t.sell_price }}</div>
+            <input type="number" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+          </div>
+        </div>
 
-    <!-- AREA CARDS -->
-    <sc-for list="{{ areas }}" as="a" hint-placeholder-count="3">
-      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-bottom:20px;">
-        <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:14px;">{{ a.label }}</div>
-        <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-bottom:16px;">
-          <label style="{{ a.photoStyle }}">
-            <input type="file" accept="image/*" onChange="{{ a.onFile }}" style="position:absolute; inset:0; opacity:0; cursor:pointer;" />
-            <sc-if value="{{ a.uploading }}"><span style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; color:oklch(45% 0.02 60);">Uploading…</span></sc-if>
+        <div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">{{ t.sell_notes }}</div>
+          <textarea rows="4" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
+        </div>
+
+        <div style="background:oklch(97% 0.01 80); border:1px dashed oklch(82% 0.02 60); border-radius:6px; padding:16px 18px; display:flex; flex-direction:column; gap:10px;">
+          <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer;">
+            <input type="checkbox" checked="{{ assistedSale }}" onChange="{{ onAssistedSaleToggle }}" style="margin-top:3px;" />
+            <span style="font-size:13.5px; color:oklch(30% 0.02 60); line-height:1.6;">{{ assistedLabel }}</span>
           </label>
-          <div style="font-size:13px; color:oklch(50% 0.02 60); flex:1; min-width:200px;">Click the image to upload a new photo for this area card.</div>
-        </div>
-        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">Description (shown on homepage — English text used across all languages)</div>
-        <textarea value="{{ a.desc }}" onChange="{{ a.onDescChange }}" rows="2" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit; resize:vertical; margin-bottom:10px;"></textarea>
-        <div onClick="{{ a.onSaveDesc }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">Save Description</div>
-      </div>
-    </sc-for>
-
-    <!-- ADMIN ACCOUNT -->
-    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px;">
-      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">Admin Login Details</div>
-      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:16px;">Change the username and password used to sign in to the Admin panel. Recovery contact is shown here in case you're locked out — it isn't used to send anything automatically.</div>
-      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:12px;">
-        <div>
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">Username</div>
-          <input value="{{ accUsername }}" onChange="{{ onAccUsername }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
-        </div>
-        <div>
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">New Password</div>
-          <input type="text" value="{{ accPassword }}" onChange="{{ onAccPassword }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
-        </div>
-      </div>
-      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:16px;">
-        <div>
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">Recovery Email</div>
-          <input value="{{ accEmail }}" onChange="{{ onAccEmail }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
-        </div>
-        <div>
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">Recovery Phone</div>
-          <input value="{{ accPhone }}" onChange="{{ onAccPhone }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
-        </div>
-      </div>
-      <div onClick="{{ onSaveAccount }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">Save Login Details</div>
-      <sc-if value="{{ accMsg }}">
-        <span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ accMsg }}</span>
-      </sc-if>
-    </div>
-
-    <!-- AI KNOWLEDGE NOTES -->
-    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
-      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">🧠 บันทึกข้อมูลสำหรับ AI แชท</div>
-      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:16px;">เพิ่มบันทึกอะไรก็ได้ (เบอร์ติดต่อล่าสุด, โปรโมชั่น, ประกาศพิเศษ ฯลฯ) — AI ที่ตอบลูกค้าในแชทจะใช้ข้อมูลนี้ประกอบการตอบ ลบบันทึกไหนออก AI ก็จะไม่รู้เรื่องนั้นอีกต่อไป</div>
-
-      <sc-for list="{{ aiNotes }}" as="note" hint-placeholder-count="1">
-        <div style="border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:14px; margin-bottom:12px;">
-          <div style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
-            <input value="{{ note.title }}" onChange="{{ note.onTitleChange }}" placeholder="หัวข้อ เช่น เบอร์ติดต่อล่าสุด" style="flex:1; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 10px; font-size:13px; font-weight:600; font-family:inherit;" />
-            <div onClick="{{ note.onDelete }}" style="cursor:pointer; color:oklch(50% 0.15 30); font-size:12px; padding:6px 10px; border:1px solid oklch(85% 0.1 30); border-radius:100px; white-space:nowrap;">ลบ</div>
-          </div>
-          <textarea value="{{ note.body }}" onChange="{{ note.onBodyChange }}" rows="3" placeholder="พิมพ์หรือวางเนื้อหาที่อยากให้ AI รู้..." style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical; margin-bottom:8px;"></textarea>
-          <div onClick="{{ note.onSave }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:7px 18px; border-radius:100px; font-size:12px; cursor:pointer;">บันทึก</div>
-          <sc-if value="{{ note.msg }}">
-            <span style="margin-left:10px; font-size:12px; color:oklch(40% 0.12 145);">{{ note.msg }}</span>
+          <sc-if value="{{ assistedSale }}">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+              <span style="font-size:12px; color:oklch(50% 0.02 60);">{{ commissionLabel }}</span>
+              <select value="{{ commissionPct }}" onChange="{{ onCommissionPct }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 10px; font-size:13px; font-family:inherit; background:white;">
+                <option value="1">1%</option>
+                <option value="2">2%</option>
+                <option value="5">5%</option>
+                <option value="10">10%</option>
+                <option value="15">15%</option>
+              </select>
+            </div>
           </sc-if>
+          <div style="font-size:11.5px; color:oklch(58% 0.02 60);">{{ privateNote }}</div>
         </div>
-      </sc-for>
 
-      <div onClick="{{ onAddNote }}" style="display:inline-block; border:1px dashed oklch(60% 0.02 60); color:oklch(40% 0.02 60); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">+ เพิ่มบันทึกใหม่</div>
-    </div>
-
-    <!-- BANNERS -->
-    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
-      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">🖼️ แบนเนอร์โฆษณา</div>
-      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:16px;">ใส่แบนเนอร์ของตัวเองก่อนได้เลย (กันหน้าเว็บว่าง) แล้วสลับเป็นของลูกค้าจริงทีหลัง — ถ้ามีมากกว่า 1 อันในหน้า/ตำแหน่งเดียวกัน ระบบจะสุ่มหมุนเวียนให้เอง</div>
-
-      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
-        <sc-for list="{{ bannerFilterTabs }}" as="ft" hint-placeholder-count="4">
-          <div onClick="{{ ft.onClick }}" style="{{ ft.style }}">{{ ft.label }}</div>
-        </sc-for>
+        <div onClick="{{ onSubmit }}" style="background:oklch(40% 0.13 25); color:oklch(98% 0.01 80); text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:500; cursor:pointer; margin-top:8px;">{{ t.sell_submit }}</div>
       </div>
+    </sc-if>
+  </div>
 
-      <sc-if value="{{ hasNoBannerRows }}">
-        <div style="font-size:13px; color:oklch(55% 0.02 60); padding:12px 0;">ไม่มีแบนเนอร์ในหมวดนี้</div>
-      </sc-if>
-
-      <sc-for list="{{ bannerRows }}" as="bn" hint-placeholder-count="1">
-        <div style="border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:14px; margin-bottom:12px; display:flex; flex-direction:column; gap:8px;">
-          <sc-if value="{{ bn.statusBadge }}"><div style="{{ bn.statusBadgeStyle }}">{{ bn.statusBadge }}</div></sc-if>
-          <sc-if value="{{ bn.contactEmail }}"><div style="font-size:12px; color:oklch(50% 0.02 60);">ผู้ลงโฆษณาภายนอก — อีเมลติดต่อ: {{ bn.contactEmail }}</div></sc-if>
-          <input value="{{ bn.propertyCode }}" onChange="{{ bn.onPropertyCode }}" placeholder="รหัสทรัพย์ (เช่น CA-301) — ระบบดึงรูปปก+ลิงก์ให้อัตโนมัติ" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
-          <sc-if value="{{ bn.resolvedLabel }}"><div style="font-size:12px; color:oklch(40% 0.12 145);">{{ bn.resolvedLabel }}</div></sc-if>
-          <sc-if value="{{ bn.resolveError }}"><div style="font-size:12px; color:oklch(50% 0.18 30);">{{ bn.resolveError }}</div></sc-if>
-          <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-            <select value="{{ bn.page }}" onChange="{{ bn.onPage }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 10px; font-size:13px; font-family:inherit;">
-              <option value="home">หน้า Home</option>
-              <option value="search">หน้า Search Results</option>
-              <option value="property">หน้า Property Details</option>
-              <option value="sell">หน้า Sell</option>
-              <option value="about">หน้า About</option>
-              <option value="contact">หน้า Contact</option>
-            </select>
-            <select value="{{ bn.position }}" onChange="{{ bn.onPosition }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 10px; font-size:13px; font-family:inherit;">
-              <option value="top">ตำแหน่งบนสุด (แพงสุด)</option>
-              <option value="mid">ตำแหน่งกลางหน้า</option>
-              <option value="side">แถบข้าง/footer (ถูกสุด)</option>
-            </select>
-            <label style="display:flex; align-items:center; gap:6px; font-size:13px; color:oklch(35% 0.02 60);">
-              <input type="checkbox" checked="{{ bn.active }}" onChange="{{ bn.onActive }}" style="width:15px; height:15px; accent-color:oklch(40% 0.13 25);" /> ใช้งานอยู่
-            </label>
-          </div>
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div onClick="{{ bn.onSave }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:8px 18px; border-radius:100px; font-size:13px; cursor:pointer;">บันทึก</div>
-            <div onClick="{{ bn.onDelete }}" style="font-size:13px; color:oklch(50% 0.18 30); cursor:pointer;">ลบ</div>
-            <sc-if value="{{ bn.msg }}"><div style="font-size:12px; color:oklch(40% 0.12 145);">{{ bn.msg }}</div></sc-if>
-          </div>
-        </div>
-      </sc-for>
-
-      <div onClick="{{ onAddBanner }}" style="display:inline-block; border:1px dashed oklch(60% 0.02 60); color:oklch(40% 0.02 60); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">+ เพิ่มแบนเนอร์ใหม่</div>
-    </div>
-
-    <!-- AI PERSONA -->
-    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
-      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">🎭 ตัวตนของ AI แชท</div>
-      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">ตั้งชื่อและบทบาทของผู้ช่วย AI ที่คุยกับลูกค้า เช่น ชื่อ "แอนนา" บทบาท "ผู้ช่วย AI" หรือจะเปลี่ยนเป็นชื่ออื่นและบทบาทอื่น เช่น "ตัวแทนอสังหาริมทรัพย์อาวุโส" ก็ได้ มีผลกับแชททันที</div>
-      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:12px;">
-        <div>
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">ชื่อ</div>
-          <input value="{{ aiPersonaName }}" onChange="{{ onAiPersonaName }}" placeholder="เช่น แอนนา" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
-        </div>
-        <div>
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">บทบาท / สถานะ</div>
-          <input value="{{ aiPersonaRole }}" onChange="{{ onAiPersonaRole }}" placeholder="เช่น ผู้ช่วย AI ของ huahin.properties" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
-        </div>
-      </div>
-      <div onClick="{{ onSaveAiPersona }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">บันทึกตัวตน</div>
-      <sc-if value="{{ aiPersonaMsg }}">
-        <span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ aiPersonaMsg }}</span>
-      </sc-if>
-    </div>
-
-    <!-- AI RESTRICTED TOPICS -->
-    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
-      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">🚫 คำสั่งห้าม AI เปิดเผย/ตอบ</div>
-      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">พิมพ์สิ่งที่ไม่ต้องการให้ AI เปิดเผยกับลูกค้า เช่น "ห้ามบอกจำนวนทรัพย์ทั้งหมดในเว็บ", "ห้ามบอกค่าคอมมิชชั่น", "ห้ามเปิดเผยชื่อเจ้าของบ้าน" — พิมพ์ทีละบรรทัด AI จะปฏิเสธอย่างสุภาพและแนะนำให้ติดต่อทีมแทนเมื่อลูกค้าถามเรื่องเหล่านี้</div>
-      <textarea value="{{ aiRestrictions }}" onChange="{{ onAiRestrictions }}" rows="8" placeholder="เช่น&#10;ห้ามบอกจำนวนทรัพย์ทั้งหมดที่มีในเว็บ&#10;ห้ามบอกราคาต้นทุนหรือค่าคอมมิชชั่น&#10;ห้ามเปิดเผยชื่อ-เบอร์เจ้าของบ้าน" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px; font-size:13px; font-family:inherit; resize:vertical; line-height:1.7;"></textarea>
-      <div style="font-size:12px; color:oklch(50% 0.02 60); margin-top:8px; margin-bottom:12px;">💡 มีผลกับแชท AI ทันทีในการคุยครั้งถัดไป ไม่ต้องรอ deploy</div>
-      <div onClick="{{ onSaveAiRestrictions }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">บันทึกคำสั่งห้าม</div>
-      <sc-if value="{{ aiRestrictionsMsg }}">
-        <span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ aiRestrictionsMsg }}</span>
-      </sc-if>
-    </div>
-
-    <!-- FACEBOOK POST FOOTER -->
-    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
-      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">📘 ข้อความท้ายโพสต์ Facebook (คงที่)</div>
-      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">ข้อความนี้จะต่อท้ายทุกโพสต์ Facebook ที่สร้างจากเครื่องมือ "เพิ่มทรัพย์ด่วนด้วย AI" โดยอัตโนมัติ แก้ไขที่นี่ครั้งเดียว มีผลกับโพสต์ครั้งต่อไปทั้งหมด</div>
-      <textarea value="{{ fbFooter }}" onChange="{{ onFbFooter }}" rows="14" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px; font-size:13px; font-family:inherit; resize:vertical; line-height:1.7;"></textarea>
-      <div style="font-size:12px; color:oklch(50% 0.02 60); margin-top:8px; margin-bottom:12px;">💡 แนะนำให้ใส่ 10 แฮชแท็กและข้อมูลติดต่อไว้ท้ายสุดของข้อความนี้</div>
-      <div onClick="{{ onSaveFbFooter }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">บันทึกข้อความ</div>
-      <sc-if value="{{ fbFooterMsg }}">
-        <span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ fbFooterMsg }}</span>
-      </sc-if>
-    </div>
-
-    <!-- FOUNDING AGENTS -->
-    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
-      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">🎉 Founding Agents (ช่องฟรีรุ่นแรก)</div>
-      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">จำกัดจำนวนผู้สมัครฟรีรุ่นแรก — เตือน 0 หรือเว้นโลก = ไม่จำกัด (ปีดฟีเจอร์กี้) หน้าสมัครจะเห็นจำนวนที่เหลือสดตลอดเวลา</div>
-      <div style="display:flex; gap:14px; flex-wrap:wrap; max-width:520px; margin-bottom:12px;">
-        <div style="flex:1; min-width:140px;">
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">จำนวนสูงสุด (0 = ไม่จำกัด)</div>
-          <input type="number" value="{{ foundingLimit }}" onChange="{{ onFoundingLimit }}" placeholder="50" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
-        </div>
-      </div>
-      <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ข้อความเงื่อนการเปลี่ยนผ่าน (โชว์ให้ Agent เห็นที่หน้าสมัคร)</div>
-      <textarea value="{{ foundingNote }}" onChange="{{ onFoundingNote }}" rows="3" placeholder="ช่วงนี้ฟรีชั่วคราวสำหรับผู้สมัครกลุ่มแรก จะเริ่มเก็บค่าบริการเมื่อเว็บมี lead เข้าสม่ำเสมอ" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical; line-height:1.6;"></textarea>
-      <div style="margin-top:12px;">
-        <div onClick="{{ onSaveFounding }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">บันทึก</div>
-        <sc-if value="{{ foundingMsg }}">
-          <span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ foundingMsg }}</span>
-        </sc-if>
-        <sc-if value="{{ foundingCountLabel }}">
-          <span style="margin-left:12px; font-size:12px; color:oklch(50% 0.02 60);">{{ foundingCountLabel }}</span>
-        </sc-if>
-      </div>
-    </div>
-
-    <!-- STRIPE PRICE IDS (Owner) -->
-    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
-      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">💳 ราคาสมาชิก Agent/เจ้าของบ้าน (Stripe)</div>
-      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">สร้าง Product + Price ใน Stripe Dashboard ก่อน แล้ววาง Price ID (ขึ้นต้นด้วย price_) ที่นี่ — เปลี่ยนราคาได้เองโดยไม่ต้องแก้โค้ด</div>
-      <div style="display:flex; flex-direction:column; gap:10px; max-width:420px;">
-        <div>
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">② ระดับ 1 (5 หลัง) — Price ID</div>
-          <input value="{{ stripePro }}" onChange="{{ onStripePro }}" placeholder="price_xxxxxxxxxxxx" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
-        </div>
-        <div>
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">③ ระดับ 2 (15 หลัง) — Price ID</div>
-          <input value="{{ stripeLevel3 }}" onChange="{{ onStripeLevel3 }}" placeholder="price_xxxxxxxxxxxx" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
-        </div>
-        <div>
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">④ แพ็กเกจ 3 — พรีเมียม (25 หลัง) — Price ID</div>
-          <input value="{{ stripeLevel4 }}" onChange="{{ onStripeLevel4 }}" placeholder="price_xxxxxxxxxxxx" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
-        </div>
-      </div>
-      <div style="margin-top:12px;">
-        <div onClick="{{ onSaveStripePrices }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">บันทึก</div>
-        <sc-if value="{{ stripeMsg }}">
-          <span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ stripeMsg }}</span>
-        </sc-if>
-      </div>
-    </div>
-
-    <!-- FEATURED LISTING BOOST PRICING -->
-    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
-      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">🌟 ราคาดัน Featured Listing</div>
-      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">ราคาที่เจ้าของ/Agent จ่ายเพื่อดันประกาศขึ้นอันดับแรกชั่วคราว — ตัดบัตรทันทีผ่าน Stripe ไม่ต้องสร้าง Product ล่วงหน้า ปรับราคาได้ตรงนี้เลย</div>
-      <div style="display:flex; gap:16px; flex-wrap:wrap; max-width:420px;">
-        <div style="flex:1; min-width:160px;">
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">7 วัน — ราคา (บาท)</div>
-          <input type="number" value="{{ featured7Price }}" onChange="{{ onFeatured7Price }}" placeholder="990" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
-        </div>
-        <div style="flex:1; min-width:160px;">
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">30 วัน — ราคา (บาท)</div>
-          <input type="number" value="{{ featured30Price }}" onChange="{{ onFeatured30Price }}" placeholder="2990" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
-        </div>
-      </div>
-      <div style="margin-top:12px;">
-        <div onClick="{{ onSaveFeaturedPrices }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">บันทึก</div>
-        <sc-if value="{{ featuredPriceMsg }}">
-          <span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ featuredPriceMsg }}</span>
-        </sc-if>
-      </div>
-    </div>
-
-    <!-- SELF-SERVE BANNER PRICING -->
-    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
-      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">📢 ราคาแบนเนอร์ (ขายเองให้ลูกค้าภายนอก)</div>
-      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">ราคาต่อตำแหน่ง/30 วัน ที่ลูกค้าภายนอกจ่ายเองผ่านหน้า Advertise.dc.html — ตัดบัตรทันที ไม่ต้องสร้าง Stripe Product</div>
-      <div style="display:flex; gap:14px; flex-wrap:wrap; max-width:520px;">
-        <div style="flex:1; min-width:140px;">
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">บนสุด (แพงสุด)</div>
-          <input type="number" value="{{ bannerTopPrice }}" onChange="{{ onBannerTopPrice }}" placeholder="3990" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
-        </div>
-        <div style="flex:1; min-width:140px;">
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">กลางหน้า</div>
-          <input type="number" value="{{ bannerMidPrice }}" onChange="{{ onBannerMidPrice }}" placeholder="1990" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
-        </div>
-        <div style="flex:1; min-width:140px;">
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">แถบข้าง/footer (ถูกสุด)</div>
-          <input type="number" value="{{ bannerSidePrice }}" onChange="{{ onBannerSidePrice }}" placeholder="990" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
-        </div>
-      </div>
-      <div style="margin-top:12px;">
-        <div onClick="{{ onSaveBannerPrices }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">บันทึก</div>
-        <sc-if value="{{ bannerPriceMsg }}">
-          <span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ bannerPriceMsg }}</span>
-        </sc-if>
-      </div>
-    </div>
-
-    <!-- ทาง 4: AGENT VIP PACKAGES -->
-    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
-      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">💎 แพ็กเกจ VIP (ทาง 4)</div>
-      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">ราคาฝั่งเจ้าของบ้าน (จ่ายครั้งเดียว/30 วัน เพื่อเข้าพูล VIP ให้ Agent เห็น) และฝั่ง Agent (สมัครสมาชิกรายเดือน เพื่อเข้าถึงพูล) — ดูรายละเอียดหมวด 2 ทาง 4 ใน BLUEPRINT.md</div>
-
-      <div style="font-size:12px; font-weight:600; color:oklch(40% 0.02 60); margin-bottom:8px;">ฝั่งเจ้าของบ้าน (บาท / 30 วัน)</div>
-      <div style="display:flex; gap:14px; flex-wrap:wrap; max-width:520px; margin-bottom:16px;">
-        <div style="flex:1; min-width:140px;">
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">🥈 แพ็กเกจเงิน</div>
-          <input type="number" value="{{ homeownerVipSilver }}" onChange="{{ onHomeownerVipSilver }}" placeholder="990" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
-        </div>
-        <div style="flex:1; min-width:140px;">
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">🥇 แพ็กเกจทอง</div>
-          <input type="number" value="{{ homeownerVipGold }}" onChange="{{ onHomeownerVipGold }}" placeholder="1990" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
-        </div>
-        <div style="flex:1; min-width:140px;">
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">💎 แพ็กเกจเพชร</div>
-          <input type="number" value="{{ homeownerVipDiamond }}" onChange="{{ onHomeownerVipDiamond }}" placeholder="3990" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
-        </div>
-      </div>
-      <div style="margin-bottom:16px;">
-        <div onClick="{{ onSaveHomeownerVip }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">บันทึก</div>
-        <sc-if value="{{ homeownerVipMsg }}"><span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ homeownerVipMsg }}</span></sc-if>
-      </div>
-
-      <div style="font-size:12px; font-weight:600; color:oklch(40% 0.02 60); margin-bottom:8px;">ฝั่ง Agent (Stripe Price ID — ต้องสร้าง Product/Price ใน Stripe ก่อน เพราะเป็นรายเดือน)</div>
-      <div style="display:flex; gap:14px; flex-wrap:wrap; max-width:640px; margin-bottom:12px;">
-        <div style="flex:1; min-width:180px;">
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">🥈 VIP เงิน — Price ID</div>
-          <input value="{{ agentVipSilver }}" onChange="{{ onAgentVipSilver }}" placeholder="price_..." style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
-        </div>
-        <div style="flex:1; min-width:180px;">
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">🥇 VIP ทอง — Price ID</div>
-          <input value="{{ agentVipGold }}" onChange="{{ onAgentVipGold }}" placeholder="price_..." style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
-        </div>
-        <div style="flex:1; min-width:180px;">
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">💎 VIP เพชร — Price ID</div>
-          <input value="{{ agentVipDiamond }}" onChange="{{ onAgentVipDiamond }}" placeholder="price_..." style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit;" />
-        </div>
-      </div>
-      <div>
-        <div onClick="{{ onSaveAgentVip }}" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 20px; border-radius:100px; font-size:13px; cursor:pointer;">บันทึก</div>
-        <sc-if value="{{ agentVipMsg }}"><span style="margin-left:12px; font-size:13px; color:oklch(40% 0.12 145);">{{ agentVipMsg }}</span></sc-if>
-      </div>
-    </div>
-
-    <!-- ROLLOUT LEVEL SWITCH -->
-    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:20px; margin-top:20px;">
-      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">🚀 ระดับการเปิดตัว (Rollout Level)</div>
-      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:14px;">สวิตช์เดียวคุมว่าเว็บเปิดเผยฟีเจอร์เก็บเงินระดับไหนแล้ว — ปลดทีละระดับตามที่พร้อม ไม่ต้องรอแก้โค้ดทุกครั้ง</div>
-      <div style="display:flex; flex-direction:column; gap:8px;">
-        <sc-for list="{{ rolloutOptions }}" as="r" hint-placeholder-count="4">
-          <div onClick="{{ r.onClick }}" style="padding:10px 16px; border-radius:6px; background:{{ r.bg }}; color:{{ r.color }}; font-size:13px; cursor:pointer; border:1px solid oklch(85% 0.01 70);">{{ r.label }}</div>
-        </sc-for>
-      </div>
-      <sc-if value="{{ rolloutMsg }}"><div style="margin-top:10px; font-size:13px; color:oklch(40% 0.12 145);">{{ rolloutMsg }}</div></sc-if>
-      </div>
-      <div style="margin-top:10px; font-size:12px; color:oklch(55% 0.02 60);">ลิงก์สำหรับลูกค้าภายนอก: <strong>huahin.properties/Advertise.dc.html</strong></div>
-    </div>
-
+  <div style="border-top:1px solid oklch(90% 0.01 70); padding:32px clamp(20px,4vw,56px); display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between;">
+    <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
+    <div style="font-size:13px; color:oklch(50% 0.02 60);">© 2026 huahin.properties. {{ t.footer_rights }}</div>
   </div>
 </div>
+
+<sc-if value="{{ showChrome }}"><dc-import name="ContactRail" hint-size="0,0"></dc-import></sc-if>
 
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = {
-    lang: "en", data: null,
-    heroUrl: "", heroUploading: false,
-    areaContent: {}, uploadingAreaId: null,
-    descDrafts: {},
-    saveMsg: "",
-    accUsername: "", accPassword: "", accEmail: "", accPhone: "", accMsg: "",
-    fbFooter: "", fbFooterMsg: "",
-    stripePrices: { pro: "", agency: "", level3: "" }, stripeMsg: "",
-    featuredPrices: { p7: "", p30: "" }, featuredPriceMsg: "",
-    bannerPrices: { top: "", mid: "", side: "" }, bannerPriceMsg: "",
-    homeownerVipPrices: { silver: "", gold: "", diamond: "" }, homeownerVipMsg: "",
-    agentVipPrices: { silver: "", gold: "", diamond: "" }, agentVipMsg: "",
-    rolloutLevel: 1, rolloutMsg: "",
-    aiNotes: [], noteDrafts: {}, noteMsgs: {},
-    aiRestrictions: "", aiRestrictionsMsg: "",
-    aiPersonaName: "", aiPersonaRole: "", aiPersonaMsg: "",
-    banners: [], bannerDrafts: {}, bannerMsgs: {}, bannerFilter: "all",
-    foundingLimit: "", foundingNote: "", foundingMsg: "", foundingCount: 0,
-    maintenanceOn: false,
-  };
+  state = { lang: "en", isMobile: (typeof window !== "undefined" && window.innerWidth < 900), mobileMenuOpen: false, data: null, listingType: "sale", submitted: false, showGate: false, gatePassword: "", gateError: "", assistedSale: false, commissionPct: "5" };
 
   async componentDidMount() {
+    const fb0 = await import("./firebase-client.js");
+    this._fb = fb0;
+    if (!fb0.hasSiteBypass() && !fb0.isAdminAuthed()) {
+      try {
+        const on = await fb0.fetchMaintenanceMode();
+        if (on) this.setState({ showGate: true });
+      } catch (e) { console.warn("Failed to check maintenance mode:", e); }
+    }
     const mod = await import("./data.js");
-    const fb = await import("./firebase-client.js");
-    await fb.onAdminAuthReady();
-    if (!fb.requireAdminAuth()) return;
     this._mod = mod;
-    this._fb = fb;
-    try {
-      this._properties = await mod.getEffectiveProperties(mod);
-    } catch (e) {
-      this._properties = mod.PROPERTIES || [];
-    }
-    let siteContent = {};
-    try {
-      siteContent = await fb.fetchSiteContent();
-    } catch (e) {
-      console.warn("Failed to load site content:", e);
-    }
-    const descDrafts = {};
-    mod.AREAS.forEach((a) => {
-      descDrafts[a.id] = (siteContent["area-" + a.id] && siteContent["area-" + a.id].desc) || mod.I18N.en[{ "hua-hin": "area_hua_hin_desc", pranburi: "area_pranburi_desc", "cha-am": "area_cha_am_desc" }[a.id]];
-    });
-    let creds = {};
-    try {
-      creds = await fb.fetchAdminCredentials();
-    } catch (e) {
-      console.warn("Failed to load admin credentials:", e);
-    }
-    this.setState({
-      lang: mod.getLang(), data: mod, areaContent: siteContent, descDrafts,
-      accUsername: creds.username || "", accPassword: creds.password || "",
-      accEmail: creds.recoveryEmail || "", accPhone: creds.recoveryPhone || "",
-    });
-
-    let fbFooter = "";
-    try {
-      fbFooter = await fb.fetchFacebookFooter();
-    } catch (e) {
-      console.warn("Failed to load Facebook footer:", e);
-    }
-    this.setState({ fbFooter });
-
-    try {
-      const stripePrices = await fb.fetchStripePrices();
-      this.setState({ stripePrices });
-    } catch (e) {
-      console.warn("Failed to load Stripe price IDs:", e);
-    }
-
-    try {
-      const featuredPrices = await fb.fetchFeaturedPrices();
-      this.setState({ featuredPrices });
-    } catch (e) {
-      console.warn("Failed to load Featured prices:", e);
-    }
-
-    try {
-      const founding = await fb.fetchFoundingAgentSettings();
-      const foundingCount = await fb.countFoundingAgents();
-      this.setState({ foundingLimit: founding.limit || "", foundingNote: founding.note || "", foundingCount });
-    } catch (e) {
-      console.warn("Failed to load founding agent settings:", e);
-    }
-
-    try {
-      const bannerPrices = await fb.fetchBannerPrices();
-      this.setState({ bannerPrices });
-    } catch (e) {
-      console.warn("Failed to load banner prices:", e);
-    }
-
-    try {
-      const [homeownerVipPrices, agentVipPrices, rolloutLevel] = await Promise.all([
-        fb.fetchHomeownerVipPrices(), fb.fetchAgentVipPrices(), fb.fetchRolloutLevel(),
-      ]);
-      this.setState({ homeownerVipPrices, agentVipPrices, rolloutLevel });
-    } catch (e) {
-      console.warn("Failed to load VIP config:", e);
-    }
-
-    try {
-      const aiNotes = await fb.fetchAiNotes();
-      const noteDrafts = {};
-      aiNotes.forEach((n) => { noteDrafts[n.id] = { title: n.title || "", body: n.body || "" }; });
-      this.setState({ aiNotes, noteDrafts });
-    } catch (e) {
-      console.warn("Failed to load AI notes:", e);
-    }
-
-    try {
-      const banners = await fb.fetchCollection("banners");
-      const bannerDrafts = {};
-      banners.forEach((b) => { bannerDrafts[b.id] = { propertyCode: b.propertyCode || "", propertyTitle: b.propertyTitle || "", imageUrl: b.imageUrl || "", link: b.link || "", page: b.page || "home", position: b.position || "top", active: b.active !== false, isOwnerContent: !!b.isOwnerContent, resolveError: "" }; });
-      this.setState({ banners, bannerDrafts });
-    } catch (e) {
-      console.warn("Failed to load banners:", e);
-    }
-
-    try {
-      const aiRestrictions = await fb.fetchAiRestrictions();
-      this.setState({ aiRestrictions });
-    } catch (e) {
-      console.warn("Failed to load AI restrictions:", e);
-    }
-
-    try {
-      const persona = await fb.fetchAiPersona();
-      this.setState({ aiPersonaName: persona.name, aiPersonaRole: persona.role });
-    } catch (e) {
-      console.warn("Failed to load AI persona:", e);
-    }
-
-    try {
-      const maintenanceOn = await fb.fetchMaintenanceMode();
-      this.setState({ maintenanceOn });
-    } catch (e) {
-      console.warn("Failed to load maintenance mode:", e);
-    }
+    this.setState({ lang: mod.getLang(), data: mod });
+    this._onResize = () => this.setState({ isMobile: window.innerWidth < 900 });
+    this._onResize();
+    window.addEventListener("resize", this._onResize);
   }
-
-  async toggleMaintenance() {
-    const next = !this.state.maintenanceOn;
-    this.setState({ maintenanceOn: next });
+  componentWillUnmount() { window.removeEventListener("resize", this._onResize); }
+  selectLang(l) { this._mod.setLang(l); this.setState({ lang: l, mobileMenuOpen: false }); }
+  async submitForm() {
     try {
-      await this._fb.saveMaintenanceMode(next);
-    } catch (e) {
-      console.warn("Failed to save maintenance mode:", e);
-    }
-  }
-
-  async saveAiPersona() {
-    try {
-      await this._fb.saveAiPersona(this.state.aiPersonaName, this.state.aiPersonaRole);
-      this.setState({ aiPersonaMsg: "บันทึกแล้ว" });
-      setTimeout(() => this.setState({ aiPersonaMsg: "" }), 2500);
-    } catch (e) {
-      console.warn("Failed to save AI persona:", e);
-      this.setState({ aiPersonaMsg: "บันทึกไม่สำเร็จ ลองใหม่" });
-    }
-  }
-
-  async saveAiRestrictions() {
-    try {
-      await this._fb.saveAiRestrictions(this.state.aiRestrictions);
-      this.setState({ aiRestrictionsMsg: "บันทึกแล้ว" });
-      setTimeout(() => this.setState({ aiRestrictionsMsg: "" }), 2500);
-    } catch (e) {
-      console.warn("Failed to save AI restrictions:", e);
-      this.setState({ aiRestrictionsMsg: "บันทึกไม่สำเร็จ ลองใหม่" });
-    }
-  }
-
-  addNote() {
-    const id = "note-" + Date.now();
-    this.setState((s) => ({
-      aiNotes: [...s.aiNotes, { id, title: "", body: "" }],
-      noteDrafts: { ...s.noteDrafts, [id]: { title: "", body: "" } },
-    }));
-  }
-
-  updateNoteDraft(id, field, value) {
-    this.setState((s) => ({ noteDrafts: { ...s.noteDrafts, [id]: { ...s.noteDrafts[id], [field]: value } } }));
-  }
-
-  async saveNote(id) {
-    const draft = this.state.noteDrafts[id] || { title: "", body: "" };
-    try {
-      await this._fb.saveAiNote(id, draft.title, draft.body);
-      this.setState((s) => ({
-        aiNotes: s.aiNotes.map((n) => (n.id === id ? { ...n, title: draft.title, body: draft.body } : n)),
-        noteMsgs: { ...s.noteMsgs, [id]: "บันทึกแล้ว" },
-      }));
-      setTimeout(() => this.setState((s) => ({ noteMsgs: { ...s.noteMsgs, [id]: "" } })), 2500);
-    } catch (e) {
-      console.warn("Failed to save AI note:", e);
-      this.setState((s) => ({ noteMsgs: { ...s.noteMsgs, [id]: "บันทึกไม่สำเร็จ" } }));
-    }
-  }
-
-  async deleteNote(id) {
-    this.setState((s) => ({ aiNotes: s.aiNotes.filter((n) => n.id !== id) }));
-    try {
-      await this._fb.deleteAiNote(id);
-    } catch (e) {
-      console.warn("Failed to delete AI note:", e);
-    }
-  }
-
-  addBanner() {
-    const id = "banner-" + Date.now();
-    const blank = { propertyCode: "", imageUrl: "", link: "", page: "home", position: "top", active: true, isOwnerContent: false, resolveError: "" };
-    this.setState((s) => ({
-      banners: [...s.banners, { id, ...blank }],
-      bannerDrafts: { ...s.bannerDrafts, [id]: blank },
-    }));
-  }
-
-  onBannerField(id, field, value) {
-    this.setState((s) => ({ bannerDrafts: { ...s.bannerDrafts, [id]: { ...s.bannerDrafts[id], [field]: value } } }));
-  }
-
-  async saveBanner(id) {
-    const draft = this.state.bannerDrafts[id];
-    const code = (draft.propertyCode || "").trim().toUpperCase();
-    const prop = (this._properties || []).find((p) => p.id === code);
-    if (!prop) {
-      this.setState((s) => ({ bannerDrafts: { ...s.bannerDrafts, [id]: { ...draft, resolveError: "ไม่พบรหัสทรัพย์นี้ในระบบ" } } }));
-      return;
-    }
-    const lang = this.state.lang || "th";
-    const cover = (prop.photos && prop.photos[0] && (prop.photos[0].url || prop.photos[0].imageUrl)) || "";
-    if (!cover) {
-      this.setState((s) => ({ bannerDrafts: { ...s.bannerDrafts, [id]: { ...draft, resolveError: "ทรัพย์นี้ยังไม่มีรูปจริงอัปโหลด (มีแต่รูปตัวอย่าง) กรุณาเลือกทรัพย์ที่มีรูปถ่ายจริงแล้ว" } } }));
-      return;
-    }
-    draft.propertyCode = code;
-    draft.imageUrl = cover;
-    draft.link = `Property Details.dc.html?id=${code}`;
-    draft.resolveError = "";
-    draft.propertyTitle = (prop.title && (prop.title[lang] || prop.title.en)) || code;
-    try {
-      await this._fb.setDoc("banners", id, draft);
-      this.setState((s) => ({
-        banners: s.banners.map((b) => (b.id === id ? { ...b, ...draft } : b)),
-        bannerMsgs: { ...s.bannerMsgs, [id]: "บันทึกแล้ว" },
-      }));
-      setTimeout(() => this.setState((s) => ({ bannerMsgs: { ...s.bannerMsgs, [id]: "" } })), 2000);
-    } catch (e) { console.warn("saveBanner failed:", e); }
-  }
-
-  async deleteBanner(id) {
-    this.setState((s) => ({ banners: s.banners.filter((b) => b.id !== id) }));
-    try { await this._fb.deleteDocById("banners", id); } catch (e) { console.warn("deleteBanner failed:", e); }
-  }
-
-  async saveFbFooter() {
-    try {
-      await this._fb.saveFacebookFooter(this.state.fbFooter);
-      this.setState({ fbFooterMsg: "บันทึกแล้ว" });
-      setTimeout(() => this.setState({ fbFooterMsg: "" }), 2500);
-    } catch (e) {
-      console.warn("Failed to save Facebook footer:", e);
-      this.setState({ fbFooterMsg: "บันทึกไม่สำเร็จ ลองใหม่" });
-    }
-  }
-
-  async saveFeaturedPrices() {
-    try {
-      await this._fb.saveFeaturedPrices(this.state.featuredPrices);
-      this.setState({ featuredPriceMsg: "บันทึกแล้ว" });
-      setTimeout(() => this.setState({ featuredPriceMsg: "" }), 2500);
-    } catch (e) { console.warn("saveFeaturedPrices failed:", e); }
-  }
-
-  async saveFoundingSettings() {
-    try {
-      const limit = Number(this.state.foundingLimit) || 0;
-      await this._fb.saveFoundingAgentSettings({ limit, note: this.state.foundingNote || "" });
-      this.setState({ foundingMsg: "บันทึกแล้ว" });
-      setTimeout(() => this.setState({ foundingMsg: "" }), 2500);
-    } catch (e) { console.warn("saveFoundingSettings failed:", e); }
-  }
-
-  filteredBanners() {
-    const banners = this.state.banners;
-    const f = this.state.bannerFilter;
-    if (f === "own") return banners.filter((b) => b.pendingPayment === undefined);
-    if (f === "pending") return banners.filter((b) => b.pendingPayment === true);
-    if (f === "paid") return banners.filter((b) => b.pendingPayment === false);
-    return banners;
-  }
-
-  async saveBannerPrices() {
-    try {
-      await this._fb.saveBannerPrices(this.state.bannerPrices);
-      this.setState({ bannerPriceMsg: "บันทึกแล้ว" });
-      setTimeout(() => this.setState({ bannerPriceMsg: "" }), 2500);
-    } catch (e) { console.warn("saveBannerPrices failed:", e); }
-  }
-
-  async saveHomeownerVipPrices() {
-    try {
-      await this._fb.saveHomeownerVipPrices(this.state.homeownerVipPrices);
-      this.setState({ homeownerVipMsg: "บันทึกแล้ว" });
-      setTimeout(() => this.setState({ homeownerVipMsg: "" }), 2500);
-    } catch (e) { console.warn("saveHomeownerVipPrices failed:", e); }
-  }
-
-  async saveAgentVipPrices() {
-    try {
-      await this._fb.saveAgentVipPrices(this.state.agentVipPrices);
-      this.setState({ agentVipMsg: "บันทึกแล้ว" });
-      setTimeout(() => this.setState({ agentVipMsg: "" }), 2500);
-    } catch (e) { console.warn("saveAgentVipPrices failed:", e); }
-  }
-
-  async saveRolloutLevel(level) {
-    this.setState({ rolloutLevel: level });
-    try {
-      await this._fb.saveRolloutLevel(level);
-      this.setState({ rolloutMsg: "บันทึกแล้ว" });
-      setTimeout(() => this.setState({ rolloutMsg: "" }), 2500);
-    } catch (e) { console.warn("saveRolloutLevel failed:", e); }
-  }
-
-  async saveStripePrices() {
-    try {
-      await this._fb.saveStripePrices(this.state.stripePrices);
-      this.setState({ stripeMsg: "บันทึกแล้ว" });
-      setTimeout(() => this.setState({ stripeMsg: "" }), 2500);
-    } catch (e) {
-      console.warn("Failed to save Stripe prices:", e);
-      this.setState({ stripeMsg: "บันทึกไม่สำเร็จ ลองใหม่" });
-    }
-  }
-
-  async saveAccount() {
-    try {
-      // Change the REAL Firebase Auth password first (if the admin typed a
-      // new one) — this is the credential adminSignIn actually checks.
-      if (this.state.accPassword && this.state.accPassword.trim()) {
-        await this._fb.updateAdminPassword(this.state.accPassword.trim());
-      }
-      await this._fb.saveAdminCredentials({
-        username: this.state.accUsername,
-        password: this.state.accPassword,
-        recoveryEmail: this.state.accEmail,
-        recoveryPhone: this.state.accPhone,
+      await this._fb.saveLead({
+        source: "sell-form",
+        listingType: this.state.listingType,
+        assistedSale: this.state.assistedSale,
+        commissionPct: this.state.assistedSale ? this.state.commissionPct : null,
       });
-      this.setState({ accMsg: "บันทึกแล้ว — รหัสผ่านนี้ใช้ล็อกอินได้จริงแล้ว" });
-      setTimeout(() => this.setState({ accMsg: "" }), 3500);
-    } catch (e) {
-      console.warn("Failed to save admin credentials:", e);
-      const needsRelogin = e && e.code === "auth/requires-recent-login";
-      this.setState({
-        accMsg: needsRelogin
-          ? "ต้องล็อกเอาต์แล้วล็อกอินใหม่ก่อน ถึงจะเปลี่ยนรหัสผ่านได้ (Firebase กันเรื่องความปลอดภัย)"
-          : "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง",
-      });
-    }
+    } catch (e) { console.warn("Failed to save sell inquiry:", e); }
+    this.setState({ submitted: true });
   }
-
-  flashSaved(msg) {
-    this.setState({ saveMsg: msg });
-    setTimeout(() => this.setState({ saveMsg: "" }), 2500);
-  }
-
-  async uploadHero(file) {
-    if (!file) return;
-    this.setState({ heroUploading: true });
+  async submitGate() {
     try {
-      const dataUrl = await this._fb.fileToDataUrl(file, 1400);
-      await this._fb.saveSiteContentPhoto("hero", dataUrl);
-      this.setState((s) => ({ areaContent: { ...s.areaContent, hero: { ...(s.areaContent.hero || {}), photoUrl: dataUrl } } }));
-      this.flashSaved("Hero photo saved.");
+      await this._fb.adminSignIn("doothailand@gmail.com", this.state.gatePassword);
+      this._fb.setSiteBypass();
+      this.setState({ showGate: false, gateError: "" });
     } catch (e) {
-      console.warn("Hero upload failed:", e);
-    } finally {
-      this.setState({ heroUploading: false });
-    }
-  }
-
-  async uploadAreaPhoto(areaId, file) {
-    if (!file) return;
-    this.setState({ uploadingAreaId: areaId });
-    try {
-      const dataUrl = await this._fb.fileToDataUrl(file, 1200);
-      await this._fb.saveSiteContentPhoto("area-" + areaId, dataUrl);
-      this.setState((s) => ({ areaContent: { ...s.areaContent, ["area-" + areaId]: { ...(s.areaContent["area-" + areaId] || {}), photoUrl: dataUrl } } }));
-      this.flashSaved("Area photo saved.");
-    } catch (e) {
-      console.warn("Area photo upload failed:", e);
-    } finally {
-      this.setState({ uploadingAreaId: null });
-    }
-  }
-
-  async saveAreaDesc(areaId) {
-    const desc = this.state.descDrafts[areaId];
-    try {
-      await this._fb.saveSiteContentText("area-" + areaId, desc);
-      this.flashSaved("Description saved.");
-    } catch (e) {
-      console.warn("Description save failed:", e);
+      this.setState({ gateError: "รหัสผ่านไม่ถูกต้อง" });
     }
   }
 
   renderVals() {
+    const gateVals = {
+      showGate: this.state.showGate,
+      showChrome: !this.state.showGate,
+      gatePassword: this.state.gatePassword,
+      onGatePassword: (e) => this.setState({ gatePassword: e.target.value, gateError: "" }),
+      onGateSubmit: () => this.submitGate(),
+      gateError: this.state.gateError,
+    };
     const mod = this.state.data;
-    if (!mod) return { t: {}, areas: [] };
-    const t = mod.I18N[this.state.lang];
-    const heroUrl = (this.state.areaContent.hero && this.state.areaContent.hero.photoUrl) || "";
-
-    const areas = mod.AREAS.map((a) => {
-      const content = this.state.areaContent["area-" + a.id] || {};
-      return {
-        id: a.id,
-        label: a.label.en,
-        photoStyle: {
-          position: "relative", width: "160px", height: "100px", borderRadius: "6px", overflow: "hidden", cursor: "pointer", flexShrink: 0,
-          background: content.photoUrl ? `url('${content.photoUrl}') center/cover` : "oklch(90% 0.01 70)",
-        },
-        uploading: this.state.uploadingAreaId === a.id,
-        onFile: (e) => this.uploadAreaPhoto(a.id, e.target.files && e.target.files[0]),
-        desc: this.state.descDrafts[a.id] || "",
-        onDescChange: (e) => this.setState((s) => ({ descDrafts: { ...s.descDrafts, [a.id]: e.target.value } })),
-        onSaveDesc: () => this.saveAreaDesc(a.id),
-      };
-    });
-
+    if (!mod) return { t: {}, isDesktopNav: true, isMobileNav: false, langOptions: [], types: [], areas: [], submitted: false, notSubmitted: true, ...gateVals };
+    const lang = this.state.lang;
+    const t = mod.I18N[lang];
+    const langValue = lang;
+    const onLangChange = (code) => this.selectLang(code);
+    const langOptions = mod.LANGS.map((l) => ({ code: l, label: mod.LANG_LABELS[l] }));
+    const thanks = {
+      en: ["Thank you!", "Our team will review your property and get in touch within 24 hours."],
+      th: ["ขอบคุณค่ะ/ครับ!", "ทีมงานจะตรวจสอบทรัพย์ของคุณและติดต่อกลับภายใน 24 ชั่วโมง"],
+      ru: ["Спасибо!", "Наша команда рассмотрит ваш объект и свяжется с вами в течение 24 часов."],
+      zh: ["谢谢！", "我们的团队将审核您的房产信息，并在24小时内与您联系。"],
+    };
+    const assistedText = {
+      en: {
+        label: "In addition to listing it on our site, would you like our team to also help sell/rent it out through other channels? This is a private note between you and us only.",
+        commission: "If yes, commission you're willing to offer us:",
+        note: "🔒 Private — only our team sees this. Never shown to the public or other listers.",
+      },
+      th: {
+        label: "นอกจากลงประกาศในเว็บเราแล้ว ต้องการให้ทีมงานช่วยขาย/ปล่อยเช่าผ่านช่องทางอื่นเพิ่มเติมด้วยหรือไม่? ข้อความนี้เป็นความลับระหว่างคุณกับทีมงานเท่านั้น",
+        commission: "ถ้าต้องการ ค่าคอมมิชชันที่ยินดีให้เรา:",
+        note: "🔒 ส่วนตัว — เห็นเฉพาะทีมงานเราเท่านั้น ไม่แสดงต่อสาธารณะหรือผู้ลงประกาศรายอื่น",
+      },
+    };
+    const at = assistedText[lang] || assistedText.en;
     return {
-      t,
-      saveMsg: this.state.saveMsg,
-      maintenanceOn: this.state.maintenanceOn,
-      onToggleMaintenance: () => this.toggleMaintenance(),
-      maintenanceToggleLabel: this.state.maintenanceOn ? "ปิดโหมดนี้ — เปิดให้ทุกคนดูเว็บได้" : "เปิดโหมดนี้ — ซ่อนเว็บจากทุกคน",
-      maintenanceToggleStyle: {
-        display: "inline-block", padding: "11px 22px", borderRadius: "100px", fontSize: "14px", fontWeight: 500, cursor: "pointer",
-        background: this.state.maintenanceOn ? "oklch(45% 0.18 30)" : "oklch(22% 0.02 60)",
-        color: "oklch(97% 0.01 80)",
-      },
-      maintenanceStatusColor: this.state.maintenanceOn ? "oklch(50% 0.19 25)" : "oklch(45% 0.15 145)",
-      maintenanceStatusLabel: this.state.maintenanceOn ? "🔴 ปิดกั้นอยู่ — เห็นเฉพาะคุณเท่านั้น" : "🟢 เปิดให้ทุกคนดูได้แล้ว",
-      heroStyle: {
-        position: "relative", width: "220px", height: "130px", borderRadius: "6px", overflow: "hidden", cursor: "pointer", flexShrink: 0,
-        background: heroUrl ? `url('${heroUrl}') center/cover` : "oklch(90% 0.01 70)",
-      },
-      heroUploading: this.state.heroUploading,
-      onHeroFile: (e) => this.uploadHero(e.target.files && e.target.files[0]),
-      areas,
-      accUsername: this.state.accUsername, onAccUsername: (e) => this.setState({ accUsername: e.target.value }),
-      accPassword: this.state.accPassword, onAccPassword: (e) => this.setState({ accPassword: e.target.value }),
-      accEmail: this.state.accEmail, onAccEmail: (e) => this.setState({ accEmail: e.target.value }),
-      accPhone: this.state.accPhone, onAccPhone: (e) => this.setState({ accPhone: e.target.value }),
-      accMsg: this.state.accMsg,
-      onSaveAccount: () => this.saveAccount(),
-      fbFooter: this.state.fbFooter, onFbFooter: (e) => this.setState({ fbFooter: e.target.value }),
-      onSaveFbFooter: () => this.saveFbFooter(),
-      fbFooterMsg: this.state.fbFooterMsg,
-      stripePro: this.state.stripePrices.pro || "",
-      onStripePro: (e) => this.setState((s) => ({ stripePrices: { ...s.stripePrices, pro: e.target.value } })),
-      stripeLevel3: this.state.stripePrices.level3 || "",
-      onStripeLevel3: (e) => this.setState((s) => ({ stripePrices: { ...s.stripePrices, level3: e.target.value } })),
-      stripeLevel4: this.state.stripePrices.level4 || "",
-      onStripeLevel4: (e) => this.setState((s) => ({ stripePrices: { ...s.stripePrices, level4: e.target.value } })),
-      onSaveStripePrices: () => this.saveStripePrices(),
-      stripeMsg: this.state.stripeMsg,
-      featured7Price: this.state.featuredPrices.p7 || "",
-      onFeatured7Price: (e) => this.setState((s) => ({ featuredPrices: { ...s.featuredPrices, p7: e.target.value } })),
-      featured30Price: this.state.featuredPrices.p30 || "",
-      onFeatured30Price: (e) => this.setState((s) => ({ featuredPrices: { ...s.featuredPrices, p30: e.target.value } })),
-      onSaveFeaturedPrices: () => this.saveFeaturedPrices(),
-      featuredPriceMsg: this.state.featuredPriceMsg,
-      bannerTopPrice: this.state.bannerPrices.top || "",
-      onBannerTopPrice: (e) => this.setState((s) => ({ bannerPrices: { ...s.bannerPrices, top: e.target.value } })),
-      bannerMidPrice: this.state.bannerPrices.mid || "",
-      onBannerMidPrice: (e) => this.setState((s) => ({ bannerPrices: { ...s.bannerPrices, mid: e.target.value } })),
-      bannerSidePrice: this.state.bannerPrices.side || "",
-      onBannerSidePrice: (e) => this.setState((s) => ({ bannerPrices: { ...s.bannerPrices, side: e.target.value } })),
-      onSaveBannerPrices: () => this.saveBannerPrices(),
-      bannerPriceMsg: this.state.bannerPriceMsg,
-      homeownerVipSilver: this.state.homeownerVipPrices.silver || "",
-      onHomeownerVipSilver: (e) => this.setState((s) => ({ homeownerVipPrices: { ...s.homeownerVipPrices, silver: e.target.value } })),
-      homeownerVipGold: this.state.homeownerVipPrices.gold || "",
-      onHomeownerVipGold: (e) => this.setState((s) => ({ homeownerVipPrices: { ...s.homeownerVipPrices, gold: e.target.value } })),
-      homeownerVipDiamond: this.state.homeownerVipPrices.diamond || "",
-      onHomeownerVipDiamond: (e) => this.setState((s) => ({ homeownerVipPrices: { ...s.homeownerVipPrices, diamond: e.target.value } })),
-      onSaveHomeownerVip: () => this.saveHomeownerVipPrices(),
-      homeownerVipMsg: this.state.homeownerVipMsg,
-      agentVipSilver: this.state.agentVipPrices.silver || "",
-      onAgentVipSilver: (e) => this.setState((s) => ({ agentVipPrices: { ...s.agentVipPrices, silver: e.target.value } })),
-      agentVipGold: this.state.agentVipPrices.gold || "",
-      onAgentVipGold: (e) => this.setState((s) => ({ agentVipPrices: { ...s.agentVipPrices, gold: e.target.value } })),
-      agentVipDiamond: this.state.agentVipPrices.diamond || "",
-      onAgentVipDiamond: (e) => this.setState((s) => ({ agentVipPrices: { ...s.agentVipPrices, diamond: e.target.value } })),
-      onSaveAgentVip: () => this.saveAgentVipPrices(),
-      agentVipMsg: this.state.agentVipMsg,
-      rolloutLevel: this.state.rolloutLevel,
-      rolloutOptions: [1, 2, 3, 4, 5].map((n) => ({
-        n,
-        label: { 1: "① ระดับ 1 — โพสต์ฟรีเท่านั้น (1 หลัง)", 2: "② ระดับ 2 — เปิด 5 หลัง (590/ด.)", 3: "③ ระดับ 3 — เปิด 15 หลัง", 4: "④ ระดับ 4 — เปิด VIP เงิน+ทอง", 5: "⑤ ระดับ 5 — เปิด VIP เพชรด้วย (ครบทุกระดับ)" }[n],
-        active: this.state.rolloutLevel === n,
-        bg: this.state.rolloutLevel === n ? "oklch(22% 0.02 60)" : "transparent",
-        color: this.state.rolloutLevel === n ? "oklch(98% 0.01 80)" : "oklch(30% 0.02 60)",
-        onClick: () => this.saveRolloutLevel(n),
-      })),
-      rolloutMsg: this.state.rolloutMsg,
-      onAddNote: () => this.addNote(),
-      aiPersonaName: this.state.aiPersonaName,
-      onAiPersonaName: (e) => this.setState({ aiPersonaName: e.target.value }),
-      aiPersonaRole: this.state.aiPersonaRole,
-      onAiPersonaRole: (e) => this.setState({ aiPersonaRole: e.target.value }),
-      onSaveAiPersona: () => this.saveAiPersona(),
-      aiPersonaMsg: this.state.aiPersonaMsg,
-      aiRestrictions: this.state.aiRestrictions,
-      onAiRestrictions: (e) => this.setState({ aiRestrictions: e.target.value }),
-      onSaveAiRestrictions: () => this.saveAiRestrictions(),
-      aiRestrictionsMsg: this.state.aiRestrictionsMsg,
-      aiNotes: this.state.aiNotes.map((n) => {
-        const draft = this.state.noteDrafts[n.id] || { title: "", body: "" };
-        return {
-          title: draft.title,
-          body: draft.body,
-          msg: this.state.noteMsgs[n.id] || "",
-          onTitleChange: (e) => this.updateNoteDraft(n.id, "title", e.target.value),
-          onBodyChange: (e) => this.updateNoteDraft(n.id, "body", e.target.value),
-          onSave: () => this.saveNote(n.id),
-          onDelete: () => this.deleteNote(n.id),
-        };
-      }),
-      onAddBanner: () => this.addBanner(),
-      foundingLimit: this.state.foundingLimit, onFoundingLimit: (e) => this.setState({ foundingLimit: e.target.value }),
-      foundingNote: this.state.foundingNote, onFoundingNote: (e) => this.setState({ foundingNote: e.target.value }),
-      onSaveFounding: () => this.saveFoundingSettings(),
-      foundingMsg: this.state.foundingMsg,
-      foundingCountLabel: this.state.foundingLimit ? `\u0e2a\u0e21\u0e31\u0e04\u0e23\u0e40\u0e1b\u0e47\u0e19 Founding Agent \u0e44\u0e1b\u0e41\u0e25\u0e49\u0e27 ${this.state.foundingCount}/${this.state.foundingLimit} \u0e04\u0e19` : "",
-      bannerFilterTabs: [
-        { key: "all", label: "ทั้งหมด" },
-        { key: "own", label: "ของเว็บเอง" },
-        { key: "pending", label: "รอชำระเงิน" },
-        { key: "paid", label: "จ่ายแล้ว (ภายนอก)" },
-      ].map((t) => ({
-        label: t.label,
-        onClick: () => this.setState({ bannerFilter: t.key }),
-        style: {
-          padding: "7px 16px", borderRadius: "100px", fontSize: "12.5px", cursor: "pointer",
-          background: this.state.bannerFilter === t.key ? "oklch(22% 0.02 60)" : "oklch(93% 0.01 70)",
-          color: this.state.bannerFilter === t.key ? "white" : "oklch(35% 0.02 60)",
-        },
-      })),
-      hasNoBannerRows: this.filteredBanners().length === 0,
-      bannerRows: this.filteredBanners().map((b) => {
-        const draft = this.state.bannerDrafts[b.id] || {};
-        const isExternal = b.pendingPayment !== undefined;
-        const badge = !isExternal ? "" : (b.pendingPayment ? "⏳ รอชำระเงิน" : "✓ จ่ายแล้ว (ภายนอก)");
-        return {
-          propertyCode: draft.propertyCode, onPropertyCode: (e) => this.onBannerField(b.id, "propertyCode", e.target.value),
-          resolveError: draft.resolveError || "",
-          resolvedLabel: draft.propertyTitle ? ("✓ ผูกกับ: " + draft.propertyTitle) : "",
-          contactEmail: b.contactEmail || "",
-          statusBadge: badge,
-          statusBadgeStyle: {
-            display: "inline-block", fontSize: "12px", fontWeight: "600", padding: "3px 10px", borderRadius: "100px", width: "fit-content",
-            background: b.pendingPayment ? "oklch(90% 0.08 75)" : "oklch(90% 0.08 145)",
-            color: b.pendingPayment ? "oklch(40% 0.12 60)" : "oklch(35% 0.12 145)",
-          },
-          page: draft.page, onPage: (e) => this.onBannerField(b.id, "page", e.target.value),
-          position: draft.position, onPosition: (e) => this.onBannerField(b.id, "position", e.target.value),
-          active: draft.active, onActive: (e) => this.onBannerField(b.id, "active", e.target.checked),
-          msg: this.state.bannerMsgs[b.id] || "",
-          onSave: () => this.saveBanner(b.id),
-          onDelete: () => this.deleteBanner(b.id),
-        };
-      }),
+      t, lang,
+      isDesktopNav: !this.state.isMobile, isMobileNav: this.state.isMobile,
+      mobileMenuOpen: this.state.isMobile && this.state.mobileMenuOpen,
+      toggleMenu: () => this.setState((s) => ({ mobileMenuOpen: !s.mobileMenuOpen })),
+      langValue, onLangChange, langOptions,
+      types: mod.TYPES.map((ty) => ({ id: ty.id, label: ty.label[lang] })),
+      areas: mod.AREAS.map((a) => ({ id: a.id, label: a.label[lang] })),
+      setListingSale: () => this.setState({ listingType: "sale" }),
+      setListingRent: () => this.setState({ listingType: "rent" }),
+      saleActiveBg: this.state.listingType === "sale" ? "oklch(22% 0.02 60)" : "transparent",
+      saleActiveColor: this.state.listingType === "sale" ? "oklch(98% 0.01 80)" : "oklch(30% 0.02 60)",
+      rentActiveBg: this.state.listingType === "rent" ? "oklch(22% 0.02 60)" : "transparent",
+      rentActiveColor: this.state.listingType === "rent" ? "oklch(98% 0.01 80)" : "oklch(30% 0.02 60)",
+      submitted: this.state.submitted, notSubmitted: !this.state.submitted,
+      thanksTitle: thanks[lang][0], thanksBody: thanks[lang][1],
+      assistedSale: this.state.assistedSale,
+      onAssistedSaleToggle: (e) => this.setState({ assistedSale: e.target.checked }),
+      commissionPct: this.state.commissionPct,
+      onCommissionPct: (e) => this.setState({ commissionPct: e.target.value }),
+      assistedLabel: at.label, commissionLabel: at.commission, privateNote: at.note,
+      onSubmit: () => this.submitForm(),
+      ...gateVals,
     };
   }
 }

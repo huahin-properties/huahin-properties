@@ -12,164 +12,149 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <title>Agent Approvals — huahin.properties Admin</title>
+  <title>ลงโฆษณาแบนเนอร์ — huahin.properties</title>
   <style>
-    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    body { margin: 0; background: oklch(96% 0.015 75); font-family: 'Work Sans', sans-serif; }
     a { color: oklch(42% 0.12 25); }
   </style>
 </helmet>
 
 <div style="min-height:100vh;">
-  <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
-    <a href="Admin Dashboard.dc.html" style="display:flex; align-items:center; gap:9px; text-decoration:none;">
-      <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
-      <span style="font-family:'Playfair Display',serif; font-size:19px; color:white;">huahin . properties</span>
-      <span style="color:oklch(70% 0.02 70); font-size:14px;">| Agent Approvals</span>
-    </a>
-    <a href="Admin Dashboard.dc.html" style="color:oklch(85% 0.02 70); font-size:13px; text-decoration:none;">← กลับแดชบอร์ด</a>
+  <div style="padding:20px clamp(20px,4vw,56px); display:flex; align-items:center; gap:10px;">
+    <img src="logo.png" style="height:34px; width:34px; border-radius:50%; object-fit:contain;" />
+    <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(25% 0.03 40);">huahin . properties</div>
   </div>
 
-  <div style="max-width:1000px; margin:0 auto; padding:clamp(20px,4vw,40px);">
-    <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:6px;">รายชื่อผู้สมัคร Agent / เจ้าของบ้าน</div>
-    <div style="font-size:14px; color:oklch(50% 0.02 60); margin-bottom:24px;">อนุมัติแล้วเขาจะ login เข้าใช้งานได้ทันที — ปฏิเสธจะบล็อกไม่ให้เข้าระบบ</div>
-
-    <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.04em; color:oklch(50% 0.02 60); margin-bottom:8px;">ดูแยกตามประเภท</div>
-    <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
-      <div onClick="{{ onRoleAll }}" style="{{ roleAllStyle }}">ดูรวม ({{ countRoleAll }})</div>
-      <div onClick="{{ onRoleOwner }}" style="{{ roleOwnerStyle }}">👤 เจ้าของบ้าน ({{ countOwner }})</div>
-      <div onClick="{{ onRoleAgent }}" style="{{ roleAgentStyle }}">🧑‍💼 Agent ({{ countAgent }})</div>
+  <div style="max-width:640px; margin:0 auto; padding:0 20px 60px;">
+    <div style="text-align:center; margin-bottom:32px;">
+      <div style="font-family:'Playfair Display',serif; font-size:clamp(26px,4vw,36px); color:oklch(20% 0.02 60); margin-bottom:10px;">ลงโฆษณาแบนเนอร์บนเว็บของเรา</div>
+      <div style="font-size:15px; color:oklch(50% 0.02 60); line-height:1.6;">เข้าถึงกลุ่มเป้าหมายที่กำลังหาบ้าน/คอนโด/ที่ดินในหัวหิน ปราณบุรี ชะอำ — เลือกตำแหน่ง อัปโหลดแบนเนอร์ ชำระเงิน แล้วขึ้นโฆษณาได้ทันที (30 วัน)</div>
     </div>
 
-    <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.04em; color:oklch(50% 0.02 60); margin-bottom:8px;">กรองตามสถานะ</div>
-    <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
-      <div onClick="{{ onFilterAll }}" style="{{ tabAllStyle }}">ทั้งหมด ({{ countAll }})</div>
-      <div onClick="{{ onFilterPending }}" style="{{ tabPendingStyle }}">รออนุมัติ ({{ countPending }})</div>
-      <div onClick="{{ onFilterApproved }}" style="{{ tabApprovedStyle }}">อนุมัติแล้ว ({{ countApproved }})</div>
-      <div onClick="{{ onFilterRejected }}" style="{{ tabRejectedStyle }}">ปฏิเสธ ({{ countRejected }})</div>
-    </div>
+    <sc-if value="{{ done }}">
+      <div style="background:white; border-radius:10px; padding:40px 24px; text-align:center;">
+        <div style="font-size:36px; margin-bottom:12px;">✅</div>
+        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); margin-bottom:8px;">ส่งคำขอเรียบร้อยแล้ว</div>
+        <div style="font-size:14px; color:oklch(50% 0.02 60);">กำลังพาไปหน้าชำระเงิน...</div>
+      </div>
+    </sc-if>
 
-    <div style="display:flex; flex-direction:column; gap:10px;">
-      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="2">
-        <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:18px 20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
-          <div style="width:38px; height:38px; border-radius:50%; background:{{ r.avatarBg }}; color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px; flex-shrink:0;">{{ r.initial }}</div>
-          <div style="flex:1; min-width:200px;">
-            <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60);">{{ r.name }} <span style="font-weight:400; color:oklch(55% 0.02 60); font-size:13px;">({{ r.roleLabel }})</span></div>
-            <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ r.email }} · {{ r.phone }}</div>
-            <div style="font-size:12px; color:oklch(60% 0.02 60); margin-top:2px;">สมัครเมื่อ {{ r.dateLabel }}</div>
-          </div>
-          <div style="font-size:12px; font-weight:600; padding:5px 12px; border-radius:100px; background:{{ r.statusBg }}; color:{{ r.statusColor }}; white-space:nowrap;">{{ r.statusLabel }}</div>
-          <div style="display:flex; gap:8px;">
-            <sc-if value="{{ r.showApprove }}">
-              <div onClick="{{ r.onApprove }}" style="background:oklch(40% 0.13 150); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">✓ อนุมัติ</div>
-            </sc-if>
-            <sc-if value="{{ r.showReject }}">
-              <div onClick="{{ r.onReject }}" style="background:oklch(95% 0.02 30); color:oklch(45% 0.15 30); padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">✕ ปฏิเสธ</div>
-            </sc-if>
-            <sc-if value="{{ r.showReinstate }}">
-              <div onClick="{{ r.onReinstate }}" style="background:oklch(93% 0.02 60); color:oklch(35% 0.02 60); padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">↺ คืนสถานะ</div>
-            </sc-if>
+    <sc-if value="{{ notDone }}" hint-placeholder-val="{{ true }}">
+      <div style="background:white; border-radius:10px; padding:28px; display:flex; flex-direction:column; gap:16px;">
+
+        <div>
+          <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:8px;">เลือกตำแหน่งแบนเนอร์</div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <sc-for list="{{ positionOptions }}" as="po" hint-placeholder-count="3">
+              <div onClick="{{ po.onSelect }}" style="{{ po.style }}">
+                <div>
+                  <div style="font-size:14px; font-weight:600;">{{ po.label }}</div>
+                  <div style="font-size:12px; opacity:0.7;">{{ po.desc }}</div>
+                </div>
+                <div style="font-size:15px; font-weight:700;">{{ po.priceLabel }}</div>
+              </div>
+            </sc-for>
           </div>
         </div>
-      </sc-for>
-      <sc-if value="{{ noRows }}">
-        <div style="text-align:center; padding:40px; color:oklch(55% 0.02 60); font-size:14px;">ไม่มีรายการในหมวดนี้</div>
-      </sc-if>
-    </div>
+
+        <div>
+          <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:6px;">เลือกหน้าที่จะแสดง</div>
+          <select value="{{ page }}" onChange="{{ onPage }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:14px; font-family:inherit;">
+            <option value="home">หน้า Home</option>
+            <option value="search">หน้า Search Results</option>
+            <option value="property">หน้า Property Details</option>
+          </select>
+        </div>
+
+        <div>
+          <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:6px;">ลิงก์รูปแบนเนอร์ (URL)</div>
+          <input value="{{ imageUrl }}" onChange="{{ onImageUrl }}" placeholder="https://..." style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+        </div>
+
+        <div>
+          <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:6px;">ลิงก์ปลายทางเมื่อคลิก</div>
+          <input value="{{ link }}" onChange="{{ onLink }}" placeholder="https://your-business.com" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+        </div>
+
+        <div>
+          <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:6px;">อีเมลติดต่อ (สำหรับใบเสร็จ)</div>
+          <input type="email" value="{{ email }}" onChange="{{ onEmail }}" placeholder="you@business.com" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+        </div>
+
+        <sc-if value="{{ error }}"><div style="font-size:13px; color:oklch(50% 0.18 30); text-align:center;">{{ error }}</div></sc-if>
+
+        <div onClick="{{ onSubmit }}" style="background:oklch(35% 0.09 25); color:white; text-align:center; padding:14px; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer;">{{ submitLabel }}</div>
+        <div style="font-size:11px; color:oklch(55% 0.02 60); text-align:center;">ชำระเงินผ่าน Stripe อย่างปลอดภัย — แบนเนอร์แสดงผล 30 วันนับจากชำระเงินสำเร็จ</div>
+      </div>
+    </sc-if>
   </div>
 </div>
 
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { listers: [], filter: "pending", roleFilter: "all", loaded: false };
+  state = {
+    position: "top", page: "home", imageUrl: "", link: "", email: "",
+    prices: { top: "", mid: "", side: "" },
+    submitting: false, error: "", done: false,
+  };
 
   async componentDidMount() {
     const fb = await import("./firebase-client.js");
     this._fb = fb;
-    await fb.onAdminAuthReady();
-    if (!fb.isAdminAuthed()) { window.location.href = "Admin Login.dc.html"; return; }
     try {
-      const listers = await fb.fetchCollection("listers");
-      this.setState({ listers, loaded: true });
+      const prices = await fb.fetchBannerPrices();
+      this.setState({ prices });
+    } catch (e) { console.warn("Advertise: failed to load prices", e); }
+  }
+
+  async submit() {
+    const { position, page, imageUrl, link, email, prices } = this.state;
+    const amountThb = prices[position];
+    if (!imageUrl.trim() || !link.trim() || !email.trim()) {
+      this.setState({ error: "กรอกข้อมูลให้ครบทุกช่อง" });
+      return;
+    }
+    if (!amountThb) {
+      this.setState({ error: "ยังไม่ได้ตั้งราคาตำแหน่งนี้ กรุณาติดต่อทีมงาน" });
+      return;
+    }
+    this.setState({ submitting: true, error: "" });
+    try {
+      const bannerId = "banner-ext-" + Date.now();
+      await this._fb.setDoc("banners", bannerId, {
+        propertyCode: "", imageUrl, link, page, position,
+        active: false, pendingPayment: true, isOwnerContent: false, contactEmail: email,
+      });
+      this.setState({ done: true });
+      await this._fb.startBannerCheckout(bannerId, position, Number(amountThb), email);
     } catch (e) {
-      console.warn("fetch listers failed:", e);
-      this.setState({ loaded: true });
+      this.setState({ submitting: false, done: false, error: "เกิดข้อผิดพลาด: " + (e && e.message) });
     }
   }
 
-  async setStatus(id, status) {
-    this.setState((s) => ({ listers: s.listers.map((l) => (l.id === id ? { ...l, status } : l)) }));
-    try { await this._fb.updateDocFields("listers", id, { status }); } catch (e) { console.warn("setStatus failed:", e); }
-  }
-
   renderVals() {
-    const everyone = this.state.listers || [];
-    const countOwner = everyone.filter((l) => l.role === "owner").length;
-    const countAgent = everyone.filter((l) => l.role === "agent").length;
-    const countRoleAll = everyone.length;
-
-    const byRole = this.state.roleFilter === "all" ? everyone : everyone.filter((l) => l.role === this.state.roleFilter);
-
-    const countAll = byRole.length;
-    const countPending = byRole.filter((l) => l.status === "pending").length;
-    const countApproved = byRole.filter((l) => l.status === "approved").length;
-    const countRejected = byRole.filter((l) => l.status === "rejected").length;
-
-    const tabBase = "padding:8px 16px; border-radius:100px; font-size:13px; cursor:pointer;";
-    const tabActive = tabBase + "background:oklch(22% 0.02 60); color:white;";
-    const tabInactive = tabBase + "background:white; color:oklch(35% 0.02 60); border:1px solid oklch(88% 0.01 70);";
-
-    const filtered = this.state.filter === "all" ? byRole : byRole.filter((l) => l.status === this.state.filter);
-
-    const roleLabels = { agent: "Agent", owner: "เจ้าของบ้าน" };
-    const statusMap = {
-      pending: { label: "รออนุมัติ", bg: "oklch(95% 0.06 75)", color: "oklch(45% 0.13 75)" },
-      approved: { label: "อนุมัติแล้ว", bg: "oklch(95% 0.05 150)", color: "oklch(35% 0.12 150)" },
-      rejected: { label: "ปฏิเสธ", bg: "oklch(95% 0.03 30)", color: "oklch(45% 0.15 30)" },
-    };
-
-    const rows = filtered
-      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
-      .map((l) => {
-        const st = statusMap[l.status] || statusMap.pending;
-        return {
-          initial: (l.name || "?").trim().charAt(0).toUpperCase(),
-          avatarBg: l.role === "agent" ? "oklch(45% 0.1 250)" : "oklch(45% 0.12 25)",
-          name: l.name || "(ไม่มีชื่อ)",
-          roleLabel: roleLabels[l.role] || l.role,
-          email: l.email || "-",
-          phone: l.phone || "-",
-          dateLabel: l.createdAt ? new Date(l.createdAt).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" }) : "-",
-          statusLabel: st.label, statusBg: st.bg, statusColor: st.color,
-          showApprove: l.status === "pending",
-          showReject: l.status === "pending",
-          showReinstate: l.status === "rejected",
-          onApprove: () => this.setStatus(l.id, "approved"),
-          onReject: () => this.setStatus(l.id, "rejected"),
-          onReinstate: () => this.setStatus(l.id, "pending"),
-        };
-      });
-
+    const prices = this.state.prices;
+    const positions = [
+      { id: "top", label: "บนสุด", desc: "แพงสุด — ทุกคนเห็นก่อน", price: prices.top },
+      { id: "mid", label: "กลางหน้า", desc: "ราคากลาง", price: prices.mid },
+      { id: "side", label: "แถบข้าง/footer", desc: "ถูกสุด", price: prices.side },
+    ];
     return {
-      countRoleAll, countOwner, countAgent,
-      roleAllStyle: this.state.roleFilter === "all" ? tabActive : tabInactive,
-      roleOwnerStyle: this.state.roleFilter === "owner" ? tabActive : tabInactive,
-      roleAgentStyle: this.state.roleFilter === "agent" ? tabActive : tabInactive,
-      onRoleAll: () => this.setState({ roleFilter: "all" }),
-      onRoleOwner: () => this.setState({ roleFilter: "owner" }),
-      onRoleAgent: () => this.setState({ roleFilter: "agent" }),
-      countAll, countPending, countApproved, countRejected,
-      tabAllStyle: this.state.filter === "all" ? tabActive : tabInactive,
-      tabPendingStyle: this.state.filter === "pending" ? tabActive : tabInactive,
-      tabApprovedStyle: this.state.filter === "approved" ? tabActive : tabInactive,
-      tabRejectedStyle: this.state.filter === "rejected" ? tabActive : tabInactive,
-      onFilterAll: () => this.setState({ filter: "all" }),
-      onFilterPending: () => this.setState({ filter: "pending" }),
-      onFilterApproved: () => this.setState({ filter: "approved" }),
-      onFilterRejected: () => this.setState({ filter: "rejected" }),
-      rows,
-      noRows: this.state.loaded && rows.length === 0,
+      done: this.state.done, notDone: !this.state.done,
+      positionOptions: positions.map((p) => ({
+        label: p.label, desc: p.desc,
+        priceLabel: p.price ? `${Number(p.price).toLocaleString()} บาท` : "ยังไม่เปิดขาย",
+        onSelect: () => this.setState({ position: p.id }),
+        style: `display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-radius:8px; cursor:pointer; border:2px solid ${this.state.position === p.id ? "oklch(35% 0.09 25)" : "oklch(90% 0.01 70)"}; background:${this.state.position === p.id ? "oklch(97% 0.03 40)" : "white"};`,
+      })),
+      page: this.state.page, onPage: (e) => this.setState({ page: e.target.value }),
+      imageUrl: this.state.imageUrl, onImageUrl: (e) => this.setState({ imageUrl: e.target.value }),
+      link: this.state.link, onLink: (e) => this.setState({ link: e.target.value }),
+      email: this.state.email, onEmail: (e) => this.setState({ email: e.target.value }),
+      error: this.state.error,
+      onSubmit: () => this.submit(),
+      submitLabel: this.state.submitting ? "กำลังดำเนินการ…" : "ดำเนินการชำระเงิน →",
     };
   }
 }

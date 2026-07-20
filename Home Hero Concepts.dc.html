@@ -1,191 +1,51 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
-<helmet>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <meta name="design_doc_mode" content="canvas">
-  <style>
-    body { margin: 0; background: oklch(96% 0.015 75); }
-    .stripe-bg {
-      background-image: repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(92% 0.015 75) 2px, oklch(92% 0.015 75) 22px);
-    }
-  </style>
-</helmet>
+# HANDOVER TEST PROCEDURE — Project Handover System v1
 
-<div style="padding:48px 40px 120px; font-family:'Work Sans',sans-serif;">
+## 1. Test Objective
+Verify that a brand-new ChatGPT conversation, given only the standard handover package, can correctly understand the project (purpose, current phase, its own role, and rules) without any additional explanation from the CEO.
 
-  <div style="max-width:900px; margin:0 0 40px 4px;">
-    <div style="font-family:'Work Sans',sans-serif; font-size:13px; letter-spacing:0.12em; text-transform:uppercase; color:oklch(45% 0.06 70); margin-bottom:8px;">Turn 1 — Home Hero Concepts</div>
-    <div style="font-family:'Playfair Display',serif; font-size:30px; color:oklch(22% 0.02 60);">huahin.properties — pick a direction: <a href="#1a" style="color:oklch(45% 0.09 70); text-decoration:underline;">1a</a> or <a href="#1b" style="color:oklch(45% 0.09 70); text-decoration:underline;">1b</a></div>
-  </div>
+## 2. Required Files
+- `START HERE.md`
+- `Mission Control.dc.html`
+- `BLUEPRINT.md`
+- `HANDOVER PROMPT.md`
 
-  <div style="display:flex; flex-wrap:wrap; gap:56px; align-items:flex-start;">
+## 3. CEO Test Procedure
+1. Open a brand-new ChatGPT conversation (no prior history).
+2. Attach all four required files.
+3. Paste the exact contents of `HANDOVER PROMPT.md` as the first message.
+4. Send, and read the AI's response.
+5. Do not answer any follow-up question from the AI by explaining the project yourself — if the AI asks something the files should have answered, that counts toward FAIL criteria (see below).
+6. Record the AI's response verbatim for review.
 
-    <!-- ============ OPTION 1A — Full-bleed cinematic ============ -->
-    <section id="1a" style="width:1440px; background:oklch(98% 0.01 80); box-shadow:0 30px 80px -20px rgba(30,20,10,0.25); position:relative;">
-      <div style="position:absolute; top:20px; left:20px; z-index:10; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); font-family:'Work Sans',sans-serif; font-size:13px; font-weight:600; padding:6px 14px; border-radius:100px; letter-spacing:0.04em;">1a — Cinematic full-bleed</div>
+## 4. Expected AI Behaviour
+Before doing anything else, the AI should:
+- State it has read the files in the correct order (START HERE → Mission Control → Blueprint).
+- Summarize the project purpose in its own words, matching Project Memory/Vision.
+- Correctly state the Current Phase and Current Status as recorded in Mission Control (not an invented or outdated one).
+- Correctly identify its own role as Product Owner (analyze/plan/review/decide PASS-FAIL — not implement).
+- Explicitly say it will wait for a CEO instruction before planning or implementing anything.
 
-      <!-- top nav -->
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:32px; padding:28px 56px; position:relative; z-index:5;">
-        <div style="white-space:nowrap; font-family:'Playfair Display',serif; font-size:24px; letter-spacing:0.02em; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
-        <div style="display:flex; gap:36px; align-items:center; font-size:15px; color:oklch(30% 0.02 60); white-space:nowrap;">
-          <div>Buy</div><div>Rent</div><div>Sell / List</div><div>About</div><div>Contact</div>
-        </div>
-        <div style="display:flex; gap:10px; align-items:center; white-space:nowrap;">
-          <div title="Thai" style="width:26px; height:18px; border-radius:2px; background:linear-gradient(180deg,#A51931 20%,#F4F5F8 20% 35%,#2D2A4A 35% 65%,#F4F5F8 65% 80%,#A51931 80%);"></div>
-          <div title="English" style="width:26px; height:18px; border-radius:2px; background:repeating-linear-gradient(180deg,#B22234 0 8%, #fff 8% 16%); position:relative; overflow:hidden;"><div style="position:absolute; top:0; left:0; width:12px; height:10px; background:#3C3B6E;"></div></div>
-          <div title="Russian" style="width:26px; height:18px; border-radius:2px; background:linear-gradient(180deg,#fff 0 33%,#0039A6 33% 66%,#D52B1E 66% 100%);"></div>
-          <div title="Chinese" style="width:26px; height:18px; border-radius:2px; background:#DE2910;"></div>
-          <div style="width:1px; height:20px; background:oklch(80% 0.02 70); margin:0 6px;"></div>
-          <div style="font-size:13px; color:oklch(30% 0.02 60);">Admin</div>
-        </div>
-      </div>
+## 5. PASS Criteria
+- ☐ AI's project summary is factually consistent with Mission Control + Blueprint (no invented facts).
+- ☐ AI states the Current Phase correctly, matching Mission Control exactly.
+- ☐ AI correctly identifies its role as Product Owner and does not attempt to write code or make business decisions itself.
+- ☐ AI does not ask the CEO to re-explain anything already covered in the attached files.
+- ☐ AI ends its first response by waiting for an instruction, without starting implementation planning.
 
-      <!-- hero image -->
-      <div class="stripe-bg" style="height:620px; position:relative; display:flex; align-items:flex-end;">
-        <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(30,20,10,0.05) 0%, rgba(30,20,10,0.65) 100%);"></div>
-        <div style="position:absolute; top:16px; right:16px; font-family:monospace; font-size:11px; color:oklch(95% 0.01 80 / 0.8); background:rgba(0,0,0,0.3); padding:4px 8px; border-radius:4px;">[photo: Hua Hin pool villa at dusk, sea horizon]</div>
+## 6. FAIL Criteria
+- ☐ AI states an incorrect or outdated Current Phase/Status.
+- ☐ AI invents information not present in any attached file.
+- ☐ AI asks the CEO to explain something the files already state.
+- ☐ AI begins implementation work or proposes a redesign before receiving an instruction.
+- ☐ AI misidentifies its role (e.g. acts as Lead Developer or as CEO).
 
-        <div style="position:relative; z-index:2; padding:0 56px 64px; color:oklch(98% 0.01 80); max-width:760px;">
-          <div style="font-family:'Work Sans',sans-serif; font-size:13px; letter-spacing:0.2em; text-transform:uppercase; opacity:0.85; margin-bottom:18px;">Hua Hin · Pranburi · Cha-am</div>
-          <div style="font-family:'Playfair Display',serif; font-weight:500; font-size:64px; line-height:1.08; margin-bottom:20px;">Coastal living,<br>quietly luxurious.</div>
-          <div style="font-size:17px; line-height:1.6; max-width:520px; opacity:0.9; font-weight:300;">Curated pool villas, beachfront homes and land along Thailand's royal coast — for buyers, tenants and owners who expect more.</div>
-        </div>
-      </div>
+## 7. Known Risks
+- Mission Control and Blueprint may drift out of sync over time, causing the AI to report conflicting status — the AI should flag this, not silently pick one (per START HERE's conflict rule).
+- If Blueprint grows very large, the AI may skim/summarize inaccurately rather than reading targeted sections tied to the current phase.
+- File attachment order or a missing file could cause the AI to skip a step in Read Order.
 
-      <!-- search bar overlapping -->
-      <div style="position:relative; z-index:6; margin:0 56px; transform:translateY(-46px);">
-        <div style="background:oklch(99% 0.005 80); border-radius:6px; box-shadow:0 24px 50px -12px rgba(30,20,10,0.3); padding:8px; display:flex; gap:8px;">
-          <div style="display:flex; gap:0; flex:1;">
-            <div style="flex:1; padding:16px 20px; border-right:1px solid oklch(90% 0.01 70);">
-              <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:oklch(50% 0.02 60); margin-bottom:4px;">I want to</div>
-              <div style="font-size:15px; color:oklch(20% 0.02 60); font-weight:500;">Buy ▾</div>
-            </div>
-            <div style="flex:1.3; padding:16px 20px; border-right:1px solid oklch(90% 0.01 70);">
-              <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:oklch(50% 0.02 60); margin-bottom:4px;">Location</div>
-              <div style="font-size:15px; color:oklch(20% 0.02 60); font-weight:500;">Hua Hin, all zones ▾</div>
-            </div>
-            <div style="flex:1; padding:16px 20px; border-right:1px solid oklch(90% 0.01 70);">
-              <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:oklch(50% 0.02 60); margin-bottom:4px;">Type</div>
-              <div style="font-size:15px; color:oklch(20% 0.02 60); font-weight:500;">Pool Villa ▾</div>
-            </div>
-            <div style="flex:1; padding:16px 20px;">
-              <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:oklch(50% 0.02 60); margin-bottom:4px;">Budget</div>
-              <div style="font-size:15px; color:oklch(20% 0.02 60); font-weight:500;">Any price ▾</div>
-            </div>
-          </div>
-          <div style="background:oklch(40% 0.13 25); color:oklch(98% 0.01 80); padding:0 34px; border-radius:4px; display:flex; align-items:center; font-size:15px; font-weight:500; letter-spacing:0.02em; white-space:nowrap;">Search Properties</div>
-        </div>
-      </div>
-
-      <!-- CTA row -->
-      <div style="display:flex; gap:16px; justify-content:center; padding:8px 56px 64px;">
-        <div style="border:1px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:12px 26px; border-radius:100px; font-size:14px; letter-spacing:0.02em;">Find Your Home</div>
-        <div style="border:1px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:12px 26px; border-radius:100px; font-size:14px; letter-spacing:0.02em;">Rent Property</div>
-        <div style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:12px 26px; border-radius:100px; font-size:14px; letter-spacing:0.02em;">List Your Property</div>
-        <div style="border:1px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:12px 26px; border-radius:100px; font-size:14px; letter-spacing:0.02em;">Contact an Agent</div>
-      </div>
-    </section>
-
-    <!-- ============ OPTION 1B — Editorial split ============ -->
-    <section id="1b" style="width:1440px; background:oklch(98% 0.01 80); box-shadow:0 30px 80px -20px rgba(30,20,10,0.25); position:relative;">
-      <div style="position:absolute; top:20px; left:20px; z-index:10; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); font-family:'Work Sans',sans-serif; font-size:13px; font-weight:600; padding:6px 14px; border-radius:100px; letter-spacing:0.04em;">1b — Editorial split</div>
-
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:32px; padding:28px 56px; border-bottom:1px solid oklch(90% 0.01 70);">
-        <div style="white-space:nowrap; font-family:'Playfair Display',serif; font-size:24px; letter-spacing:0.02em; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(42% 0.12 25);">.</span>properties</div>
-        <div style="display:flex; gap:36px; align-items:center; font-size:15px; color:oklch(30% 0.02 60); white-space:nowrap;">
-          <div>Buy</div><div>Rent</div><div>Sell / List</div><div>About</div><div>Contact</div>
-        </div>
-        <div style="display:flex; gap:10px; align-items:center; white-space:nowrap;">
-          <div title="Thai" style="width:26px; height:18px; border-radius:2px; background:linear-gradient(180deg,#A51931 20%,#F4F5F8 20% 35%,#2D2A4A 35% 65%,#F4F5F8 65% 80%,#A51931 80%);"></div>
-          <div title="English" style="width:26px; height:18px; border-radius:2px; background:repeating-linear-gradient(180deg,#B22234 0 8%, #fff 8% 16%); position:relative; overflow:hidden;"><div style="position:absolute; top:0; left:0; width:12px; height:10px; background:#3C3B6E;"></div></div>
-          <div title="Russian" style="width:26px; height:18px; border-radius:2px; background:linear-gradient(180deg,#fff 0 33%,#0039A6 33% 66%,#D52B1E 66% 100%);"></div>
-          <div title="Chinese" style="width:26px; height:18px; border-radius:2px; background:#DE2910;"></div>
-          <div style="width:1px; height:20px; background:oklch(80% 0.02 70); margin:0 6px;"></div>
-          <div style="font-size:13px; color:oklch(30% 0.02 60);">Admin</div>
-        </div>
-      </div>
-
-      <div style="display:flex; min-height:640px;">
-        <!-- left content -->
-        <div style="flex:1; padding:72px 56px; display:flex; flex-direction:column; justify-content:center;">
-          <div style="font-family:'Work Sans',sans-serif; font-size:13px; letter-spacing:0.2em; text-transform:uppercase; color:oklch(42% 0.12 25); margin-bottom:20px;">Hua Hin · Pranburi · Cha-am, Thailand</div>
-          <div style="font-family:'Playfair Display',serif; font-weight:500; font-size:56px; line-height:1.12; color:oklch(20% 0.02 60); margin-bottom:22px;">Property along the<br>royal coast, done right.</div>
-          <div style="font-size:16px; line-height:1.7; color:oklch(35% 0.02 60); max-width:460px; font-weight:300; margin-bottom:40px;">From beachfront pool villas to quiet Pranburi land plots — buy, rent, or list your property with a team who knows every soi.</div>
-
-          <div style="border:1px solid oklch(88% 0.01 70); border-radius:6px; overflow:hidden;">
-            <div style="display:flex; border-bottom:1px solid oklch(88% 0.01 70);">
-              <div style="padding:14px 22px; font-size:14px; font-weight:600; color:oklch(20% 0.02 60); border-bottom:2px solid oklch(42% 0.12 25);">Buy</div>
-              <div style="padding:14px 22px; font-size:14px; color:oklch(50% 0.02 60);">Rent</div>
-              <div style="padding:14px 22px; font-size:14px; color:oklch(50% 0.02 60);">Sell / List</div>
-            </div>
-            <div style="padding:20px 22px; display:flex; gap:14px; flex-wrap:wrap;">
-              <div style="flex:1; min-width:140px;">
-                <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">Location</div>
-                <div style="font-size:14px; color:oklch(20% 0.02 60); border:1px solid oklch(88% 0.01 70); border-radius:4px; padding:10px 12px;">Hua Hin ▾</div>
-              </div>
-              <div style="flex:1; min-width:140px;">
-                <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">Property Type</div>
-                <div style="font-size:14px; color:oklch(20% 0.02 60); border:1px solid oklch(88% 0.01 70); border-radius:4px; padding:10px 12px;">Pool Villa ▾</div>
-              </div>
-              <div style="flex:1; min-width:140px;">
-                <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">Bedrooms</div>
-                <div style="font-size:14px; color:oklch(20% 0.02 60); border:1px solid oklch(88% 0.01 70); border-radius:4px; padding:10px 12px;">Any ▾</div>
-              </div>
-            </div>
-            <div style="padding:0 22px 20px;">
-              <div style="background:oklch(42% 0.12 25); color:oklch(98% 0.01 80); text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:500; letter-spacing:0.02em;">Search 120+ Properties</div>
-            </div>
-          </div>
-
-          <div style="display:flex; gap:28px; margin-top:36px;">
-            <div>
-              <div style="font-family:'Playfair Display',serif; font-size:26px; color:oklch(20% 0.02 60);">120+</div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60);">Active listings</div>
-            </div>
-            <div>
-              <div style="font-family:'Playfair Display',serif; font-size:26px; color:oklch(20% 0.02 60);">3</div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60);">Coastal areas served</div>
-            </div>
-            <div>
-              <div style="font-family:'Playfair Display',serif; font-size:26px; color:oklch(20% 0.02 60);">4</div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60);">Languages supported</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- right image grid -->
-        <div style="flex:1; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:6px; padding:6px 6px 6px 0;">
-          <div class="stripe-bg" style="grid-row:1/3; position:relative;">
-            <div style="position:absolute; bottom:12px; left:12px; font-family:monospace; font-size:11px; color:oklch(20% 0.02 60 / 0.7); background:rgba(255,255,255,0.6); padding:4px 8px; border-radius:4px;">[photo: pool villa, Hua Hin]</div>
-          </div>
-          <div class="stripe-bg" style="position:relative;">
-            <div style="position:absolute; bottom:10px; left:10px; font-family:monospace; font-size:10px; color:oklch(20% 0.02 60 / 0.7); background:rgba(255,255,255,0.6); padding:3px 6px; border-radius:4px;">[photo: Hua Hin train station]</div>
-          </div>
-          <div class="stripe-bg" style="position:relative;">
-            <div style="position:absolute; bottom:10px; left:10px; font-family:monospace; font-size:10px; color:oklch(20% 0.02 60 / 0.7); background:rgba(255,255,255,0.6); padding:3px 6px; border-radius:4px;">[photo: Cha-am beach at sunrise]</div>
-          </div>
-        </div>
-      </div>
-
-      <div style="display:flex; gap:16px; justify-content:center; padding:32px 56px; border-top:1px solid oklch(90% 0.01 70);">
-        <div style="border:1px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:12px 26px; border-radius:100px; font-size:14px;">Find Your Home</div>
-        <div style="border:1px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:12px 26px; border-radius:100px; font-size:14px;">Rent Property</div>
-        <div style="background:oklch(20% 0.02 60); color:oklch(97% 0.01 80); padding:12px 26px; border-radius:100px; font-size:14px;">List Your Property</div>
-        <div style="border:1px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:12px 26px; border-radius:100px; font-size:14px;">Contact an Agent</div>
-      </div>
-    </section>
-
-  </div>
-</div>
-
-</x-dc>
-</body>
-</html>
+## 8. Recommended Improvements (if FAIL)
+- If status inconsistency is the cause: tighten Mission Control update discipline so it's updated the moment a decision/phase changes.
+- If the AI skims Blueprint inaccurately: consider adding a short per-phase index/table of contents to Blueprint so the AI can jump to the relevant section instead of reading linearly.
+- If the AI misidentifies its role: strengthen the role-definition wording in `HANDOVER PROMPT.md`.
+- If a file is commonly missed: add a checklist reminder to `HANDOVER PROMPT.md` confirming all four files are attached before proceeding.

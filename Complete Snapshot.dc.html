@@ -1,91 +1,95 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
+# CEO GUIDE.md
 
-<helmet>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <title>Complete Snapshot — PHS Version 1 — huahin.properties</title>
-  <style>
-    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
-    h2 { font-family: 'Playfair Display', serif; }
-    a { color: oklch(45% 0.13 25); }
-    a:hover { color: oklch(35% 0.13 25); }
-  </style>
-</helmet>
+## 1. เริ่มต้นใช้งานโครงการ
 
-<div style="min-height:100vh; padding:clamp(20px,4vw,56px); box-sizing:border-box;">
-  <div style="max-width:860px; margin:0 auto; background:white; border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:clamp(24px,4vw,48px); box-shadow:0 20px 50px -30px rgba(30,20,10,0.25);">
+เอกสารนี้ใช้ทุกครั้งที่ต้องการเปิดห้อง ChatGPT ใหม่เพื่อทำงานต่อในโครงการ huahin.properties ไม่ว่าจะเป็นการทำงานต่อจากวันก่อน หรือเริ่มงานใหม่ในหัวข้อใดก็ตาม ใช้กรณีที่ห้องแชตเดิมเต็ม ต้องการเปิดห้องใหม่ หรือสลับไปให้ ChatGPT/Claude คนละตัวทำงานต่อ
 
-    <div style="display:flex; align-items:center; gap:12px; margin-bottom:6px; flex-wrap:wrap;">
-      <div style="width:38px; height:38px; border-radius:10px; background:oklch(35% 0.09 25); display:flex; align-items:center; justify-content:center; color:white; font-size:19px;">📸</div>
-      <div style="font-family:'Playfair Display',serif; font-size:23px; font-weight:700; color:oklch(20% 0.02 60);">Complete Snapshot — PHS Version 1</div>
-    </div>
-    <div style="font-size:13px; color:oklch(55% 0.02 60); margin:0 0 16px;">Release Summary — สรุปภาพรวมการปิด Project Handover System เวอร์ชัน 1</div>
+ไม่ต้องใช้เอกสารนี้หากยังทำงานต่อในห้องแชตเดิมที่ AI เข้าใจโครงการอยู่แล้ว
 
-    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
-      <a href="./CEO%20Guide.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:7px 14px; border-radius:100px;">← กลับ CEO Guide</a>
-      <a href="./PHS%20Document%20Center.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:7px 14px; border-radius:100px;">← กลับ ศูนย์รวมเอกสาร PHS</a>
-      <a href="./Mission%20Control.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:7px 14px; border-radius:100px;">← กลับ Mission Control</a>
-      <a href="./Blueprint.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:7px 14px; border-radius:100px;">← กลับ Blueprint</a>
-    </div>
+## 2. ก่อนเริ่มงาน
 
-    <div style="background:oklch(35% 0.09 25); color:white; border-radius:8px; padding:16px 20px; margin-bottom:24px;">
-      <div style="font-size:11px; font-weight:600; letter-spacing:0.1em; opacity:0.85; margin-bottom:4px;">RELEASE BANNER</div>
-      <div style="font-family:'Playfair Display',serif; font-size:20px; margin-bottom:6px;">PHS Version 1 — RELEASED AND CLOSED</div>
-      <div style="font-size:13px; opacity:0.9;">Release Date: 20 July 2026 &nbsp;·&nbsp; Final ZIP: <code style="background:rgba(255,255,255,0.15); padding:1px 6px; border-radius:4px;">huahin-properties-PHS-Version-1-FINAL-GitHub-Upload</code></div>
-    </div>
+ก่อนเปิดห้องใหม่ ให้ตรวจสอบก่อนเสมอ:
 
-    <div style="height:1px; background:oklch(90% 0.01 70); margin:20px 0;"></div>
+□ เปิด Mission Control ดูก่อน
+□ ตรวจสอบ Current Phase ว่าตรงกับความเป็นจริงหรือไม่
+□ ตรวจสอบสถานะล่าสุด (Current Status) ว่าอัปเดตหรือยัง
+□ เตรียมไฟล์ที่ต้องใช้ให้ครบ (ดูหัวข้อ 3)
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:0 0 10px;">Executive Summary</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60); margin-bottom:24px;">Project Handover System (PHS) v1 ช่วยให้ CEO เปิดห้อง ChatGPT ใหม่และให้ AI เข้าใจโครงการ huahin.properties ได้ทันที โดยไม่ต้องอธิบายซ้ำ ผ่านเอกสารมาตรฐาน 4 ไฟล์ (START HERE, Mission Control, Blueprint, Handover Prompt) พร้อม CEO Guide เป็นคู่มือประจำวัน และ PHS Document Center เป็นจุดรวมเอกสารทั้งหมด ระบบผ่านการทดสอบจริง (Real-world Handover Test), บันทึกบทเรียน, ตรวจสอบความสอดคล้องเอกสาร และจัดเตรียมแพ็กเกจส่งมอบสุดท้ายเรียบร้อยแล้ว</div>
+## 3. เปิด ChatGPT ห้องใหม่
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">Complete Snapshot — เอกสารทั้งหมดในระบบ</h2>
-    <div style="font-size:14px; line-height:1.9; color:oklch(28% 0.02 60); margin-bottom:24px;">
-      <div>• <code>START HERE.md</code> — จุดเริ่มต้นและลำดับการอ่าน</div>
-      <div>• <code>Mission Control.dc.html</code> — สถานะปัจจุบันของโครงการ (Source of Truth)</div>
-      <div>• <code>BLUEPRINT.md</code> / <code>Blueprint.dc.html</code> — ฐานความรู้และประวัติโครงการ</div>
-      <div>• <code>HANDOVER PROMPT.md</code> — ข้อความมาตรฐานเปิดห้องใหม่</div>
-      <div>• <code>HANDOVER TEST PROCEDURE.md</code> — ขั้นตอนตรวจสอบการ handover</div>
-      <div>• <code>OPERATION MANUAL.md</code> — คู่มือใช้งานระบบ PHS</div>
-      <div>• <code>CEO GUIDE.md</code> / <code>CEO Guide.dc.html</code> — คู่มือประจำวันของ CEO</div>
-      <div>• <code>PHS Document Center.dc.html</code> — ศูนย์รวมเอกสารทั้งหมด</div>
-      <div>• <code>RELEASE CHECKLIST.md</code> — รายการตรวจก่อนอัปโหลด</div>
-      <div>• <code>PROJECT COMPLETION.md</code> — บันทึกปิดโครงการ</div>
-    </div>
+ทำตามลำดับนี้:
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">Project Completion</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60); margin-bottom:24px;">อ้างอิงจาก <code>PROJECT COMPLETION.md</code> — Version 1, Release Date 20 July 2026, Final ZIP <code>huahin-properties-PHS-Version-1-FINAL-GitHub-Upload</code>, Production Status: รอ CEO ยืนยันการอัปโหลด GitHub</div>
+1. เปิดห้องสนทนาใหม่ใน ChatGPT
+2. แนบไฟล์ทั้ง 4 ไฟล์นี้ให้ครบ (ขาดไฟล์ใดไม่ได้):
+   - `START HERE.md`
+   - `Mission Control.dc.html`
+   - `BLUEPRINT.md`
+   - `HANDOVER PROMPT.md`
+3. ตรวจสอบว่าทุกไฟล์เป็นเวอร์ชันล่าสุด (ดาวน์โหลดใหม่จากโปรเจกต์หากไม่แน่ใจ)
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">Step Status</h2>
-    <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:24px; font-size:14px;">
-      <div>🟢 Step 1–9 — Blueprint, Mission Control, START HERE, Handover Prompt, Test Procedure, Improvement Review, Completion Review, Operation Manual, Release Checklist — เสร็จแล้ว</div>
-      <div>🟢 Step 10.1 — Lessons Learned — เสร็จแล้ว</div>
-      <div>🟢 Step 10.2 — Documentation Final Review — เสร็จแล้ว</div>
-      <div>🟢 Step 10.3 — Final Export Package — เสร็จแล้ว</div>
-      <div>🟢 Step 10.4 — Project Closure (เอกสาร) — เสร็จแล้ว</div>
-      <div>🟢 Step 10.5 — CEO ยืนยันเว็บไซต์จริงบน GitHub — เสร็จแล้ว (PASS)</div>
-      <div>🟢 Step 11 — PHS Version 1 — RELEASED AND CLOSED (20 July 2026)</div>
-    </div>
+Checklist:
+□ แนบครบ 4 ไฟล์
+□ ทุกไฟล์เป็นเวอร์ชันล่าสุด
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">Outstanding</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60); margin-bottom:24px;">ไม่มี — CEO อัปโหลดขึ้น GitHub และยืนยันเว็บไซต์จริงทำงานถูกต้องแล้ว Firebase deployment ตรวจสอบแล้วว่าไม่จำเป็นสำหรับรอบนี้ (ไม่มีการแก้ไข Cloud Functions/Firestore Rules/Storage Rules)</div>
+## 4. คัดลอก HANDOVER PROMPT
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">Next Direction</h2>
-    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">หลัง CEO ยืนยันการอัปโหลดสำเร็จ: ประกาศปิด PHS Version 1 อย่างเป็นทางการ — การปรับปรุงเพิ่มเติมใดๆ หลังจากนี้ต้องพัฒนาเป็น Version 1.1 หรือ Version 2.0 ไม่แก้ไขทับ Version 1 ที่ archived แล้ว (ตามที่ระบุใน <code>PROJECT COMPLETION.md</code> §8)</div>
+เปิดไฟล์ `HANDOVER PROMPT.md` แล้วคัดลอกเนื้อหาทั้งหมดในไฟล์ วางเป็นข้อความแรกในห้องแชตใหม่ที่เพิ่งแนบไฟล์ครบแล้ว — **แนบไฟล์และวางข้อความนี้เป็นข้อความเดียวกัน** (แนบไฟล์ 4 ไฟล์ + วางข้อความ HANDOVER PROMPT แล้วกดส่งเพียงครั้งเดียว ไม่ใช่ส่งสองข้อความแยกกัน)
 
-    <div style="margin-top:32px; font-size:12px; color:oklch(55% 0.02 60); text-align:center;">Release Summary เท่านั้น — ไม่เปลี่ยนโครงสร้าง Mission Control หรือ Blueprint</div>
+## 5. ตรวจสอบ AI
 
-  </div>
-</div>
+หลัง AI ตอบกลับข้อความแรก ให้ตรวจสอบว่า:
 
-</x-dc>
-</body>
-</html>
+□ AI เข้าใจโครงการถูกต้อง (สรุปตรงกับความเป็นจริง)
+□ AI รู้ Current Phase ถูกต้อง ตรงกับที่อยู่ใน Mission Control
+□ AI ไม่ถามข้อมูลที่มีอยู่แล้วในไฟล์ที่แนบไป
+□ AI รอคำสั่งจาก CEO แทนที่จะเริ่มทำงานเอง
+
+หากข้อใดไม่ผ่าน อย่าเพิ่งอธิบายเอง ให้บอก AI ตรงๆ ว่าให้กลับไปอ่านไฟล์ไหนใหม่
+
+## 6. เริ่มทำงาน
+
+เมื่อ AI ผ่านการตรวจสอบในหัวข้อ 5 ครบทุกข้อแล้ว CEO สามารถให้คำสั่งงานได้ทันที บอกสิ่งที่ต้องการให้ทำอย่างชัดเจน แล้วรอให้ AI วิเคราะห์และรายงานกลับตาม Workflow ปกติ (รับ Prompt → วิเคราะห์ → ดำเนินการ → รายงาน → รอตรวจสอบ)
+
+## 7. จบการทำงานของวัน
+
+ก่อนเลิกงานในแต่ละวัน ให้ตรวจสอบ:
+
+□ Mission Control อัปเดตสถานะล่าสุดแล้วหรือยัง
+□ Blueprint มีส่วนที่ต้องอัปเดตค้างอยู่หรือไม่
+□ Documentation อื่นๆ ที่เกี่ยวข้องอัปเดตครบหรือยัง
+□ ได้รับรายงานผลงานที่ทำเสร็จของวันนี้ครบถ้วนแล้ว
+
+## 8. Release / GitHub
+
+ก่อน Upload:
+□ ตรวจสอบไฟล์ทั้งหมดใน `export-for-github/` เป็นเวอร์ชันล่าสุด
+□ ใช้ `RELEASE CHECKLIST.md` ตรวจสอบให้ครบทุกข้อ
+
+หลัง Upload:
+□ เปิดไฟล์บน GitHub เพื่อยืนยันว่าเนื้อหาตรงกับที่อัปโหลด
+□ ตรวจสอบว่าไม่มีไฟล์เก่าตกค้างในที่เก็บ
+
+## 9. ปิดโครงการ
+
+ก่อนประกาศว่าโครงการ/เฟสใดเสร็จสมบูรณ์ ให้ตรวจสอบ:
+
+□ Deliverables ทั้งหมดผ่านการตรวจสอบจาก Product Owner แล้ว
+□ CEO อนุมัติแล้วอย่างเป็นทางการ
+□ สร้างเอกสารบันทึกปิดโครงการ (เช่น `PROJECT COMPLETION.md`) แล้ว
+□ Mission Control บันทึกสถานะ Completed แล้ว
+
+## 10. สรุปขั้นตอนทั้งหมด (One Page Workflow)
+
+1. เปิด Mission Control ตรวจสอบสถานะก่อน
+2. เปิดห้อง ChatGPT ใหม่ + แนบ 4 ไฟล์ (START HERE, Mission Control, Blueprint, Handover Prompt)
+3. คัดลอกวางเนื้อหา HANDOVER PROMPT.md เป็นข้อความแรก
+4. ตรวจสอบ AI ผ่านเกณฑ์ 4 ข้อในหัวข้อ 5
+5. สั่งงานตามที่ต้องการ
+6. จบวัน: อัปเดต Mission Control/Blueprint/Documentation ให้ตรงปัจจุบัน
+7. ก่อน Upload: ใช้ RELEASE CHECKLIST.md ตรวจครบทุกข้อ
+8. Upload ขึ้น GitHub แล้วตรวจสอบไฟล์ที่อัปโหลดจริง
+9. ปิดโครงการ/เฟส: ตรวจสอบอนุมัติครบ + บันทึกเอกสารปิดงาน
+
+---
+
+**ตำแหน่งที่แนะนำ**: ควรวาง CEO GUIDE ไว้ใน Mission Control (ลิงก์/แท็บเข้าถึงได้จากหน้าแรก) เพราะ Mission Control เป็นจุดที่ CEO เปิดดูเป็นจุดแรกอยู่แล้วทุกครั้งก่อนเริ่มงาน (ตามหัวข้อ 2) การวางไว้ที่เดียวกันทำให้ CEO ไม่ต้องจำตำแหน่งไฟล์แยกต่างหาก

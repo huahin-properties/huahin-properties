@@ -1,9 +1,5 @@
 # Project Control Changelog — huahin.properties
 
-## Version 2.2.0 — 18/07/2569
-- Added permanent sections: System Architecture, Tech Stack, Critical Files, Coding Rules, Project Glossary, Permanent Project Decisions
-- No existing module content modified, renamed, or removed
-
 ## Version 2.1.0 — 17/07/2569 (build 2026.07.17.02)
 
 - Project Control Center completed

@@ -7,188 +7,85 @@
 </head>
 <body>
 <x-dc>
+
 <helmet>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <title>Contact Us — huahin.properties</title>
-  <meta name="description" content="Contact huahin.properties for buying, renting or listing property in Hua Hin, Pranburi and Cha-am.">
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Complete Snapshot — PHS Version 1 — huahin.properties</title>
   <style>
-    body { margin: 0; background: oklch(98% 0.01 80); font-family: 'Work Sans', sans-serif; }
-    a { color: oklch(42% 0.12 25); }
-    a:hover { color: oklch(32% 0.13 25); }
+    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    h2 { font-family: 'Playfair Display', serif; }
+    a { color: oklch(45% 0.13 25); }
+    a:hover { color: oklch(35% 0.13 25); }
   </style>
 </helmet>
 
-<sc-if value="{{ showGate }}">
-  <div style="position:fixed; inset:0; background:oklch(96% 0.015 75); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
-    <img src="logo.png" alt="huahin.properties logo" style="height:56px; width:56px; object-fit:contain; border-radius:50%; margin-bottom:20px;" />
-    <div style="font-family:'Playfair Display',serif; font-size:26px; color:oklch(20% 0.02 60); margin-bottom:10px;">กำลังปรับปรุงเว็บไซต์</div>
-    <div style="font-size:14px; color:oklch(50% 0.02 60); max-width:360px; margin-bottom:26px; line-height:1.6;">เรากำลังปรับปรุงเว็บไซต์อยู่ ขออภัยในความไม่สะดวก จะกลับมาเปิดให้บริการเร็วๆ นี้</div>
-    <div style="width:100%; max-width:300px; display:flex; flex-direction:column; gap:10px;">
-      <input type="text" value="{{ gatePassword }}" onChange="{{ onGatePassword }}" placeholder="รหัสผ่านแอดมิน" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit; text-align:center;" />
-      <div onClick="{{ onGateSubmit }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:12px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">เข้าดูตัวอย่าง</div>
-      <sc-if value="{{ gateError }}"><div style="font-size:13px; color:oklch(50% 0.18 30);">{{ gateError }}</div></sc-if>
+<div style="min-height:100vh; padding:clamp(20px,4vw,56px); box-sizing:border-box;">
+  <div style="max-width:860px; margin:0 auto; background:white; border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:clamp(24px,4vw,48px); box-shadow:0 20px 50px -30px rgba(30,20,10,0.25);">
+
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:6px; flex-wrap:wrap;">
+      <div style="width:38px; height:38px; border-radius:10px; background:oklch(35% 0.09 25); display:flex; align-items:center; justify-content:center; color:white; font-size:19px;">📸</div>
+      <div style="font-family:'Playfair Display',serif; font-size:23px; font-weight:700; color:oklch(20% 0.02 60);">Complete Snapshot — PHS Version 1</div>
     </div>
-  </div>
-</sc-if>
+    <div style="font-size:13px; color:oklch(55% 0.02 60); margin:0 0 16px;">Release Summary — สรุปภาพรวมการปิด Project Handover System เวอร์ชัน 1</div>
 
-<div style="max-width:1600px; margin:0 auto; background:oklch(98% 0.01 80); min-height:100vh;">
-
-  <div style="display:flex; align-items:center; justify-content:space-between; gap:24px; padding:22px clamp(20px,4vw,56px); border-bottom:1px solid oklch(90% 0.01 70);">
-    <a href="Home.dc.html" style="white-space:nowrap; display:flex; align-items:center; gap:9px; font-family:'Playfair Display',serif; font-size:clamp(19px,2.4vw,24px); letter-spacing:0.02em; color:oklch(22% 0.02 60); text-decoration:none;"><img src="logo.png" alt="huahin.properties logo" style="height:36px; width:36px; object-fit:contain; border-radius:50%; flex-shrink:0;" />huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</a>
-    <sc-if value="{{ isDesktopNav }}" hint-placeholder-val="{{ true }}">
-      <div style="display:flex; gap:32px; align-items:center; font-size:15px; color:oklch(30% 0.02 60); white-space:nowrap;">
-        <a href="Search Results.dc.html?status=sale" style="text-decoration:none; color:inherit;">{{ t.nav_buy }}</a>
-        <a href="Search Results.dc.html?status=rent" style="text-decoration:none; color:inherit;">{{ t.nav_rent }}</a>
-        <a href="Sell.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_sell }}</a>
-        <a href="About.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_about }}</a>
-        <a href="Contact.dc.html" style="text-decoration:none; color:oklch(42% 0.12 25);">{{ t.nav_contact }}</a>
-      </div>
-      <div style="display:flex; gap:12px; align-items:flex-end; white-space:nowrap;">
-        <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" hint-size="150,54"></dc-import>
-        <div style="width:1px; height:20px; background:oklch(80% 0.02 70); margin:0 4px 8px;"></div>
-        <a href="Admin Login.dc.html" style="font-size:13px; color:oklch(40% 0.02 60); text-decoration:none; padding-bottom:8px;">{{ t.nav_admin }}</a>
-      </div>
-    </sc-if>
-    <sc-if value="{{ isMobileNav }}">
-      <div style="display:flex; align-items:center; gap:6px;">
-        <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" compact="{{ true }}" menu-align="right" hint-size="40,32"></dc-import>
-        <div onClick="{{ toggleMenu }}" style="display:flex; flex-direction:column; gap:5px; padding:8px; cursor:pointer;">
-          <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
-          <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
-          <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
-        </div>
-      </div>
-    </sc-if>
-  </div>
-
-  <sc-if value="{{ mobileMenuOpen }}">
-    <div style="position:fixed; inset:0; background:oklch(98% 0.01 80); z-index:60; padding:22px clamp(20px,6vw,56px); display:flex; flex-direction:column; gap:28px; overflow-y:auto;">
-      <div style="display:flex; align-items:center; justify-content:space-between;">
-        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
-        <div onClick="{{ toggleMenu }}" style="font-size:26px; line-height:1; color:oklch(30% 0.02 60); cursor:pointer; padding:6px;">&times;</div>
-      </div>
-      <div style="display:flex; flex-direction:column; gap:22px; font-size:20px; font-family:'Playfair Display',serif; color:oklch(22% 0.02 60);">
-        <a href="Search Results.dc.html?status=sale" style="text-decoration:none; color:inherit;">{{ t.nav_buy }}</a>
-        <a href="Search Results.dc.html?status=rent" style="text-decoration:none; color:inherit;">{{ t.nav_rent }}</a>
-        <a href="Sell.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_sell }}</a>
-        <a href="About.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_about }}</a>
-        <a href="Contact.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_contact }}</a>
-        <a href="Admin Login.dc.html" style="text-decoration:none; color:oklch(50% 0.02 60); font-size:15px; font-family:'Work Sans',sans-serif;">{{ t.nav_admin }}</a>
-      </div>
-      <div style="margin-top:auto; padding-top:20px; border-top:1px solid oklch(90% 0.01 70);">
-        <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" full-width="{{ true }}" hint-size="100%,60"></dc-import>
-      </div>
-    </div>
-  </sc-if>
-
-  <div style="max-width:1000px; margin:0 auto; padding:clamp(40px,6vw,64px) clamp(20px,4vw,32px) 100px;">
-    <div style="text-align:center; margin-bottom:44px;">
-      <div style="font-family:'Playfair Display',serif; font-size:clamp(28px,4vw,38px); color:oklch(20% 0.02 60); margin-bottom:12px;">{{ t.contact_title }}</div>
-      <div style="font-size:15px; line-height:1.7; color:oklch(45% 0.02 60); max-width:520px; margin:0 auto;">{{ t.contact_sub }}</div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px;">
+      <a href="./CEO%20Guide.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:7px 14px; border-radius:100px;">← กลับ CEO Guide</a>
+      <a href="./PHS%20Document%20Center.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:7px 14px; border-radius:100px;">← กลับ ศูนย์รวมเอกสาร PHS</a>
+      <a href="./Mission%20Control.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:7px 14px; border-radius:100px;">← กลับ Mission Control</a>
+      <a href="./Blueprint.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:7px 14px; border-radius:100px;">← กลับ Blueprint</a>
     </div>
 
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:32px;">
-      <!-- direct contact -->
-      <div style="display:flex; flex-direction:column; gap:12px;">
-        <a href="tel:+6632000000" style="display:flex; align-items:center; gap:12px; background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:6px; padding:16px 18px; text-decoration:none; color:oklch(25% 0.02 60); font-size:14px;">📞 <span>+66 32 000 000 — {{ t.call }}</span></a>
-        <a href="https://wa.me/6632000000" target="_blank" style="display:flex; align-items:center; gap:12px; background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:6px; padding:16px 18px; text-decoration:none; color:oklch(25% 0.02 60); font-size:14px;">💬 <span>{{ t.whatsapp }}</span></a>
-        <a href="https://line.me/ti/p/huahinproperties" target="_blank" style="display:flex; align-items:center; gap:12px; background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:6px; padding:16px 18px; text-decoration:none; color:oklch(25% 0.02 60); font-size:14px;">✆ <span>Line: @huahinproperties</span></a>
-        <a href="mailto:hello@huahin.properties" style="display:flex; align-items:center; gap:12px; background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:6px; padding:16px 18px; text-decoration:none; color:oklch(25% 0.02 60); font-size:14px;">✉ <span>hello@huahin.properties</span></a>
-        <div style="aspect-ratio:16/10; border-radius:6px; background:oklch(93% 0.015 75); display:flex; align-items:center; justify-content:center; font-family:monospace; font-size:13px; color:oklch(45% 0.02 60); margin-top:6px;">[Google Map embed — Hua Hin office]</div>
-      </div>
-
-      <!-- form -->
-      <div style="background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:6px; padding:24px; display:flex; flex-direction:column; gap:12px;">
-        <sc-if value="{{ submitted }}">
-          <div style="font-size:14px; color:oklch(45% 0.1 150); padding:20px 0; text-align:center;">{{ thanksMsg }}</div>
-        </sc-if>
-        <sc-if value="{{ notSubmitted }}" hint-placeholder-val="{{ true }}">
-          <input placeholder="{{ t.name_label }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
-          <input placeholder="{{ t.email_label }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
-          <input placeholder="{{ t.phone_label }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
-          <textarea placeholder="{{ t.message_label }}" rows="4" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
-          <div onClick="{{ onSubmit }}" style="background:oklch(40% 0.13 25); color:oklch(98% 0.01 80); text-align:center; padding:13px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">{{ t.send }}</div>
-        </sc-if>
-      </div>
+    <div style="background:oklch(35% 0.09 25); color:white; border-radius:8px; padding:16px 20px; margin-bottom:24px;">
+      <div style="font-size:11px; font-weight:600; letter-spacing:0.1em; opacity:0.85; margin-bottom:4px;">RELEASE BANNER</div>
+      <div style="font-family:'Playfair Display',serif; font-size:20px; margin-bottom:6px;">PHS Version 1 — RELEASED AND CLOSED</div>
+      <div style="font-size:13px; opacity:0.9;">Release Date: 20 July 2026 &nbsp;·&nbsp; Final ZIP: <code style="background:rgba(255,255,255,0.15); padding:1px 6px; border-radius:4px;">huahin-properties-PHS-Version-1-FINAL-GitHub-Upload</code></div>
     </div>
-  </div>
 
-  <div style="border-top:1px solid oklch(90% 0.01 70); padding:32px clamp(20px,4vw,56px); display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between;">
-    <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
-    <div style="font-size:13px; color:oklch(50% 0.02 60);">© 2026 huahin.properties. {{ t.footer_rights }}</div>
+    <div style="height:1px; background:oklch(90% 0.01 70); margin:20px 0;"></div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:0 0 10px;">Executive Summary</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60); margin-bottom:24px;">Project Handover System (PHS) v1 ช่วยให้ CEO เปิดห้อง ChatGPT ใหม่และให้ AI เข้าใจโครงการ huahin.properties ได้ทันที โดยไม่ต้องอธิบายซ้ำ ผ่านเอกสารมาตรฐาน 4 ไฟล์ (START HERE, Mission Control, Blueprint, Handover Prompt) พร้อม CEO Guide เป็นคู่มือประจำวัน และ PHS Document Center เป็นจุดรวมเอกสารทั้งหมด ระบบผ่านการทดสอบจริง (Real-world Handover Test), บันทึกบทเรียน, ตรวจสอบความสอดคล้องเอกสาร และจัดเตรียมแพ็กเกจส่งมอบสุดท้ายเรียบร้อยแล้ว</div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">Complete Snapshot — เอกสารทั้งหมดในระบบ</h2>
+    <div style="font-size:14px; line-height:1.9; color:oklch(28% 0.02 60); margin-bottom:24px;">
+      <div>• <code>START HERE.md</code> — จุดเริ่มต้นและลำดับการอ่าน</div>
+      <div>• <code>Mission Control.dc.html</code> — สถานะปัจจุบันของโครงการ (Source of Truth)</div>
+      <div>• <code>BLUEPRINT.md</code> / <code>Blueprint.dc.html</code> — ฐานความรู้และประวัติโครงการ</div>
+      <div>• <code>HANDOVER PROMPT.md</code> — ข้อความมาตรฐานเปิดห้องใหม่</div>
+      <div>• <code>HANDOVER TEST PROCEDURE.md</code> — ขั้นตอนตรวจสอบการ handover</div>
+      <div>• <code>OPERATION MANUAL.md</code> — คู่มือใช้งานระบบ PHS</div>
+      <div>• <code>CEO GUIDE.md</code> / <code>CEO Guide.dc.html</code> — คู่มือประจำวันของ CEO</div>
+      <div>• <code>PHS Document Center.dc.html</code> — ศูนย์รวมเอกสารทั้งหมด</div>
+      <div>• <code>RELEASE CHECKLIST.md</code> — รายการตรวจก่อนอัปโหลด</div>
+      <div>• <code>PROJECT COMPLETION.md</code> — บันทึกปิดโครงการ</div>
+    </div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">Project Completion</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60); margin-bottom:24px;">อ้างอิงจาก <code>PROJECT COMPLETION.md</code> — Version 1, Release Date 20 July 2026, Final ZIP <code>huahin-properties-PHS-V1-CLOSED-FINAL-2026-07-20</code>, Production Status: Production Verified · GitHub Updated · Release Confirmed</div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">Step Status</h2>
+    <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:24px; font-size:14px;">
+      <div>🟢 Step 1–9 — Blueprint, Mission Control, START HERE, Handover Prompt, Test Procedure, Improvement Review, Completion Review, Operation Manual, Release Checklist — เสร็จแล้ว</div>
+      <div>🟢 Step 10.1 — Lessons Learned — เสร็จแล้ว</div>
+      <div>🟢 Step 10.2 — Documentation Final Review — เสร็จแล้ว</div>
+      <div>🟢 Step 10.3 — Final Export Package — เสร็จแล้ว</div>
+      <div>🟢 Step 10.4 — Project Closure (เอกสาร) — เสร็จแล้ว</div>
+      <div>🟢 Step 10.5 — CEO ยืนยันเว็บไซต์จริงบน GitHub — เสร็จแล้ว (PASS)</div>
+      <div>🟢 Step 11 — PHS Version 1 — RELEASED AND CLOSED (20 July 2026)</div>
+    </div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">Outstanding</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60); margin-bottom:24px;">ไม่มี — CEO อัปโหลดขึ้น GitHub และยืนยันเว็บไซต์จริงทำงานถูกต้องแล้ว Firebase deployment ตรวจสอบแล้วว่าไม่จำเป็นสำหรับรอบนี้ (ไม่มีการแก้ไข Cloud Functions/Firestore Rules/Storage Rules)</div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">Next Direction</h2>
+    <div style="font-size:14px; line-height:1.8; color:oklch(28% 0.02 60);">หลัง CEO ยืนยันการอัปโหลดสำเร็จ: ประกาศปิด PHS Version 1 อย่างเป็นทางการ — การปรับปรุงเพิ่มเติมใดๆ หลังจากนี้ต้องพัฒนาเป็น Version 1.1 หรือ Version 2.0 ไม่แก้ไขทับ Version 1 ที่ archived แล้ว (ตามที่ระบุใน <code>PROJECT COMPLETION.md</code> §8)</div>
+
+    <div style="margin-top:32px; font-size:12px; color:oklch(55% 0.02 60); text-align:center;">Release Summary เท่านั้น — ไม่เปลี่ยนโครงสร้าง Mission Control หรือ Blueprint</div>
+
   </div>
 </div>
 
-<sc-if value="{{ showChrome }}"><dc-import name="ContactRail" hint-size="0,0"></dc-import></sc-if>
-
 </x-dc>
-<script type="text/x-dc" data-dc-script>
-class Component extends DCLogic {
-  state = { lang: "en", isMobile: (typeof window !== "undefined" && window.innerWidth < 900), mobileMenuOpen: false, data: null, submitted: false, showGate: false, gatePassword: "", gateError: "" };
-
-  async componentDidMount() {
-    const fb0 = await import("./firebase-client.js");
-    this._fb = fb0;
-    if (!fb0.hasSiteBypass() && !fb0.isAdminAuthed()) {
-      try {
-        const on = await fb0.fetchMaintenanceMode();
-        if (on) this.setState({ showGate: true });
-      } catch (e) { console.warn("Failed to check maintenance mode:", e); }
-    }
-    const mod = await import("./data.js");
-    this._mod = mod;
-    this.setState({ lang: mod.getLang(), data: mod });
-    this._onResize = () => this.setState({ isMobile: window.innerWidth < 900 });
-    this._onResize();
-    window.addEventListener("resize", this._onResize);
-  }
-  componentWillUnmount() { window.removeEventListener("resize", this._onResize); }
-  selectLang(l) { this._mod.setLang(l); this.setState({ lang: l, mobileMenuOpen: false }); }
-  async submitGate() {
-    try {
-      await this._fb.adminSignIn("doothailand@gmail.com", this.state.gatePassword);
-      this._fb.setSiteBypass();
-      this.setState({ showGate: false, gateError: "" });
-    } catch (e) {
-      this.setState({ gateError: "รหัสผ่านไม่ถูกต้อง" });
-    }
-  }
-
-  renderVals() {
-    const gateVals = {
-      showGate: this.state.showGate,
-      showChrome: !this.state.showGate,
-      gatePassword: this.state.gatePassword,
-      onGatePassword: (e) => this.setState({ gatePassword: e.target.value, gateError: "" }),
-      onGateSubmit: () => this.submitGate(),
-      gateError: this.state.gateError,
-    };
-    const mod = this.state.data;
-    if (!mod) return { t: {}, isDesktopNav: true, isMobileNav: false, langOptions: [], submitted: false, notSubmitted: true, ...gateVals };
-    const lang = this.state.lang;
-    const t = mod.I18N[lang];
-    const langValue = lang;
-    const onLangChange = (code) => this.selectLang(code);
-    const langOptions = mod.LANGS.map((l) => ({ code: l, label: mod.LANG_LABELS[l] }));
-    const thanksMsg = { en: "Thank you — we'll be in touch shortly.", th: "ขอบคุณค่ะ/ครับ เราจะติดต่อกลับโดยเร็ว", ru: "Спасибо — мы скоро свяжемся с вами.", zh: "谢谢，我们会尽快与您联系。" }[lang];
-    return {
-      t, lang,
-      isDesktopNav: !this.state.isMobile, isMobileNav: this.state.isMobile,
-      mobileMenuOpen: this.state.isMobile && this.state.mobileMenuOpen,
-      toggleMenu: () => this.setState((s) => ({ mobileMenuOpen: !s.mobileMenuOpen })),
-      langValue, onLangChange, langOptions,
-      submitted: this.state.submitted, notSubmitted: !this.state.submitted,
-      thanksMsg, onSubmit: () => this.setState({ submitted: true }),
-      ...gateVals,
-    };
-  }
-}
-
-</script>
 </body>
 </html>

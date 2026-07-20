@@ -9,152 +9,82 @@
 <x-dc>
 <helmet>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <title>ลงโฆษณาแบนเนอร์ — huahin.properties</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <title>Admin Login — huahin.properties</title>
   <style>
     body { margin: 0; background: oklch(96% 0.015 75); font-family: 'Work Sans', sans-serif; }
     a { color: oklch(42% 0.12 25); }
+    a:hover { color: oklch(32% 0.13 25); }
   </style>
 </helmet>
 
-<div style="min-height:100vh;">
-  <div style="padding:20px clamp(20px,4vw,56px); display:flex; align-items:center; gap:10px;">
-    <img src="logo.png" style="height:34px; width:34px; border-radius:50%; object-fit:contain;" />
-    <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(25% 0.03 40);">huahin . properties</div>
-  </div>
+<div style="min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px;">
+  <a href="Home.dc.html" style="display:flex; align-items:center; gap:10px; font-family:'Playfair Display',serif; font-size:26px; letter-spacing:0.02em; color:oklch(22% 0.02 60); text-decoration:none; margin-bottom:32px;"><img src="logo.png" alt="huahin.properties logo" style="height:44px; width:44px; object-fit:contain; border-radius:50%; flex-shrink:0;" />huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</a>
 
-  <div style="max-width:640px; margin:0 auto; padding:0 20px 60px;">
-    <div style="text-align:center; margin-bottom:32px;">
-      <div style="font-family:'Playfair Display',serif; font-size:clamp(26px,4vw,36px); color:oklch(20% 0.02 60); margin-bottom:10px;">ลงโฆษณาแบนเนอร์บนเว็บของเรา</div>
-      <div style="font-size:15px; color:oklch(50% 0.02 60); line-height:1.6;">เข้าถึงกลุ่มเป้าหมายที่กำลังหาบ้าน/คอนโด/ที่ดินในหัวหิน ปราณบุรี ชะอำ — เลือกตำแหน่ง อัปโหลดแบนเนอร์ ชำระเงิน แล้วขึ้นโฆษณาได้ทันที (30 วัน)</div>
+  <div style="width:100%; max-width:400px; background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:36px 32px; box-shadow:0 24px 50px -20px rgba(30,20,10,0.2);">
+    <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:6px; text-align:center;">{{ t.admin_login_title }}</div>
+    <div style="font-size:13px; color:oklch(50% 0.02 60); text-align:center; margin-bottom:26px;">Property management &amp; internal tools</div>
+
+    <div style="display:flex; flex-direction:column; gap:14px;">
+      <div>
+        <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">Email</div>
+        <input value="{{ username }}" onChange="{{ onUsername }}" type="email" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit;" />
+      </div>
+      <div>
+        <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:oklch(50% 0.02 60); margin-bottom:6px;">{{ t.admin_password }}</div>
+        <input type="text" autoCapitalize="off" autoCorrect="off" spellCheck="{{ false }}" value="{{ password }}" onChange="{{ onPassword }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit;" />
+      </div>
+      <div onClick="{{ onSubmit }}" style="margin-top:8px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); text-align:center; padding:13px; border-radius:4px; font-size:15px; font-weight:500; cursor:pointer;">{{ t.admin_login_cta }}</div>
+      <sc-if value="{{ error }}">
+        <div style="font-size:13px; color:oklch(50% 0.18 30); text-align:center; margin-top:6px;">{{ error }}</div>
+      </sc-if>
     </div>
-
-    <sc-if value="{{ done }}">
-      <div style="background:white; border-radius:10px; padding:40px 24px; text-align:center;">
-        <div style="font-size:36px; margin-bottom:12px;">✅</div>
-        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); margin-bottom:8px;">ส่งคำขอเรียบร้อยแล้ว</div>
-        <div style="font-size:14px; color:oklch(50% 0.02 60);">กำลังพาไปหน้าชำระเงิน...</div>
-      </div>
-    </sc-if>
-
-    <sc-if value="{{ notDone }}" hint-placeholder-val="{{ true }}">
-      <div style="background:white; border-radius:10px; padding:28px; display:flex; flex-direction:column; gap:16px;">
-
-        <div>
-          <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:8px;">เลือกตำแหน่งแบนเนอร์</div>
-          <div style="display:flex; flex-direction:column; gap:8px;">
-            <sc-for list="{{ positionOptions }}" as="po" hint-placeholder-count="3">
-              <div onClick="{{ po.onSelect }}" style="{{ po.style }}">
-                <div>
-                  <div style="font-size:14px; font-weight:600;">{{ po.label }}</div>
-                  <div style="font-size:12px; opacity:0.7;">{{ po.desc }}</div>
-                </div>
-                <div style="font-size:15px; font-weight:700;">{{ po.priceLabel }}</div>
-              </div>
-            </sc-for>
-          </div>
-        </div>
-
-        <div>
-          <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:6px;">เลือกหน้าที่จะแสดง</div>
-          <select value="{{ page }}" onChange="{{ onPage }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:14px; font-family:inherit;">
-            <option value="home">หน้า Home</option>
-            <option value="search">หน้า Search Results</option>
-            <option value="property">หน้า Property Details</option>
-          </select>
-        </div>
-
-        <div>
-          <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:6px;">ลิงก์รูปแบนเนอร์ (URL)</div>
-          <input value="{{ imageUrl }}" onChange="{{ onImageUrl }}" placeholder="https://..." style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:14px; font-family:inherit;" />
-        </div>
-
-        <div>
-          <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:6px;">ลิงก์ปลายทางเมื่อคลิก</div>
-          <input value="{{ link }}" onChange="{{ onLink }}" placeholder="https://your-business.com" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:14px; font-family:inherit;" />
-        </div>
-
-        <div>
-          <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:6px;">อีเมลติดต่อ (สำหรับใบเสร็จ)</div>
-          <input type="email" value="{{ email }}" onChange="{{ onEmail }}" placeholder="you@business.com" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:14px; font-family:inherit;" />
-        </div>
-
-        <sc-if value="{{ error }}"><div style="font-size:13px; color:oklch(50% 0.18 30); text-align:center;">{{ error }}</div></sc-if>
-
-        <div onClick="{{ onSubmit }}" style="background:oklch(35% 0.09 25); color:white; text-align:center; padding:14px; border-radius:8px; font-size:15px; font-weight:600; cursor:pointer;">{{ submitLabel }}</div>
-        <div style="font-size:11px; color:oklch(55% 0.02 60); text-align:center;">ชำระเงินผ่าน Stripe อย่างปลอดภัย — แบนเนอร์แสดงผล 30 วันนับจากชำระเงินสำเร็จ</div>
-      </div>
-    </sc-if>
   </div>
+
+  <a href="Home.dc.html" style="font-size:13px; color:oklch(50% 0.02 60); margin-top:24px; text-decoration:none;">← Back to site</a>
 </div>
 
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = {
-    position: "top", page: "home", imageUrl: "", link: "", email: "",
-    prices: { top: "", mid: "", side: "" },
-    submitting: false, error: "", done: false,
-  };
+  state = { lang: "en", data: null, username: "", password: "", error: "" };
 
   async componentDidMount() {
-    const fb = await import("./firebase-client.js");
-    this._fb = fb;
-    try {
-      const prices = await fb.fetchBannerPrices();
-      this.setState({ prices });
-    } catch (e) { console.warn("Advertise: failed to load prices", e); }
+    const mod = await import("./data.js");
+    this._mod = mod;
+    this.setState({ lang: mod.getLang(), data: mod });
   }
 
   async submit() {
-    const { position, page, imageUrl, link, email, prices } = this.state;
-    const amountThb = prices[position];
-    if (!imageUrl.trim() || !link.trim() || !email.trim()) {
-      this.setState({ error: "กรอกข้อมูลให้ครบทุกช่อง" });
+    if (!this.state.username || !this.state.password) {
+      this.setState({ error: "Enter your email and password." });
       return;
     }
-    if (!amountThb) {
-      this.setState({ error: "ยังไม่ได้ตั้งราคาตำแหน่งนี้ กรุณาติดต่อทีมงาน" });
-      return;
-    }
-    this.setState({ submitting: true, error: "" });
+    this.setState({ error: "" });
+    const fb = await import("./firebase-client.js");
     try {
-      const bannerId = "banner-ext-" + Date.now();
-      await this._fb.setDoc("banners", bannerId, {
-        propertyCode: "", imageUrl, link, page, position,
-        active: false, pendingPayment: true, isOwnerContent: false, contactEmail: email,
-      });
-      this.setState({ done: true });
-      await this._fb.startBannerCheckout(bannerId, position, Number(amountThb), email);
+      await fb.adminSignIn(this.state.username, this.state.password);
+      window.location.href = "Admin Dashboard.dc.html";
     } catch (e) {
-      this.setState({ submitting: false, done: false, error: "เกิดข้อผิดพลาด: " + (e && e.message) });
+      this.setState({ error: "Incorrect email or password." });
     }
   }
 
   renderVals() {
-    const prices = this.state.prices;
-    const positions = [
-      { id: "top", label: "บนสุด", desc: "แพงสุด — ทุกคนเห็นก่อน", price: prices.top },
-      { id: "mid", label: "กลางหน้า", desc: "ราคากลาง", price: prices.mid },
-      { id: "side", label: "แถบข้าง/footer", desc: "ถูกสุด", price: prices.side },
-    ];
+    const mod = this.state.data;
+    const t = mod ? mod.I18N[this.state.lang] : {};
     return {
-      done: this.state.done, notDone: !this.state.done,
-      positionOptions: positions.map((p) => ({
-        label: p.label, desc: p.desc,
-        priceLabel: p.price ? `${Number(p.price).toLocaleString()} บาท` : "ยังไม่เปิดขาย",
-        onSelect: () => this.setState({ position: p.id }),
-        style: `display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-radius:8px; cursor:pointer; border:2px solid ${this.state.position === p.id ? "oklch(35% 0.09 25)" : "oklch(90% 0.01 70)"}; background:${this.state.position === p.id ? "oklch(97% 0.03 40)" : "white"};`,
-      })),
-      page: this.state.page, onPage: (e) => this.setState({ page: e.target.value }),
-      imageUrl: this.state.imageUrl, onImageUrl: (e) => this.setState({ imageUrl: e.target.value }),
-      link: this.state.link, onLink: (e) => this.setState({ link: e.target.value }),
-      email: this.state.email, onEmail: (e) => this.setState({ email: e.target.value }),
+      t,
+      username: this.state.username,
+      onUsername: (e) => this.setState({ username: e.target.value, error: "" }),
+      password: this.state.password,
+      onPassword: (e) => this.setState({ password: e.target.value, error: "" }),
       error: this.state.error,
       onSubmit: () => this.submit(),
-      submitLabel: this.state.submitting ? "กำลังดำเนินการ…" : "ดำเนินการชำระเงิน →",
     };
   }
 }

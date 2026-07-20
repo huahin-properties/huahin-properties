@@ -1,26 +1,205 @@
-# HANDOVER PROMPT — huahin.properties
+rules_version = '2';
 
-I've attached three files: `START HERE.md`, `Mission Control.dc.html`, and `BLUEPRINT.md`.
+// huahin.properties — Firestore Security Rules
+//
+// Replaces the temporary wide-open rules (which expire 2026-08-08). Locked
+// down now that real Firebase Authentication is in place for the admin
+// account. Public visitors can read the data the site needs to render but
+// cannot write anything directly — all writes go through the signed-in
+// admin, exactly like before.
+//
+// ADMIN_UID below is the single admin account's Firebase Auth User UID
+// (Firebase Console → Authentication → Users). If a second Staff account
+// is added later (see BLUEPRINT.md §1 Owner/Staff roles), extend the
+// isAdmin() function to check a list of UIDs or a Firestore-stored role
+// instead of one hardcoded value.
+service cloud.firestore {
+  match /databases/{database}/documents {
 
-You are the Product Owner / Project Coordinator for this project. Before doing anything else:
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.uid == "n7TZKSBscPXE1kRU8WzYpsqJh2g2" ||
+        exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid))
+      );
+    }
 
-1. Read `START HERE.md` first for orientation.
-2. Read `Mission Control.dc.html` to understand the current phase, current status, decisions, and working principles — this is the current state of the project.
-3. Read `BLUEPRINT.md` as the primary knowledge base for business reasoning and technical architecture — read the sections relevant to what's currently active in Mission Control, not the whole document indiscriminately.
+    // Owner-only: financial/settings collections (Site Content, external
+    // service costs, team management) — Staff can use the rest of the admin
+    // tools but not these. The original hardcoded UID is always Owner.
+    function isOwner() {
+      return request.auth != null && (
+        request.auth.uid == "n7TZKSBscPXE1kRU8WzYpsqJh2g2" ||
+        (exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.role == "owner")
+      );
+    }
 
-If any of the three files is missing, stop immediately and tell me exactly which file is missing before continuing.
+    // Public, read-only data the site renders for every visitor.
+    // Public read. Admin can write anything. A signed-in lister may create/
+    // edit/delete ONLY their own property (listerId must match their own
+    // Auth UID both before and after the write) — self-serve listing (see
+    // BLUEPRINT.md "Lister Dashboard").
+    match /properties/{id} {
+      allow read: if true;
+      // Listing lifecycle v2 (trial/expiry/approval — BLUEPRINT.md §2 ทาง 2
+      // rewritten กรกฎาคม 2026): a lister may create/edit their own listing
+      // freely EXCEPT they can never write listingStatus == "live" directly
+      // — that transition is admin-only (approveListing Cloud-side call),
+      // UNLESS the listing is already "expired" AND they currently hold an
+      // ACTIVE PAID package (self-renew without re-approval — trial does
+      // NOT count, per the P1 fix "Membership Renewal Logic": a free trial
+      // must never grant free-forever renewal). Enforced HERE at the rules
+      // level (not just hidden in the UI) so it can't be bypassed by
+      // calling firebase-client.js's renewListing() directly from the
+      // browser console/devtools or any other client — Firestore itself
+      // refuses the write regardless of what code asked for it.
+      function listerHasActivePaidPackage() {
+        return request.auth != null &&
+          exists(/databases/$(database)/documents/listers/$(request.auth.uid)) &&
+          get(/databases/$(database)/documents/listers/$(request.auth.uid)).data.subscriptionStatus == "active" &&
+          get(/databases/$(database)/documents/listers/$(request.auth.uid)).data.tier in ["pro", "agency", "level3", "level4"];
+      }
+      function listerListingStatusOk() {
+        return request.resource.data.listingStatus == resource.data.listingStatus
+          || request.resource.data.listingStatus == "pending"
+          || (request.resource.data.listingStatus == "live" && resource.data.listingStatus == "expired" && listerHasActivePaidPackage());
+      }
+      allow create: if isAdmin() || (request.auth != null && request.resource.data.listerId == request.auth.uid && request.resource.data.listingStatus != "live");
+      allow update: if isAdmin() || (request.auth != null && resource.data.listerId == request.auth.uid && request.resource.data.listerId == request.auth.uid && listerListingStatusOk())
+        // Public view-count increment (Property Details page, any visitor,
+        // no auth) — restricted to ONLY the viewCount field changing so
+        // this can't be abused to alter price/status/etc.
+        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']);
+      allow delete: if isAdmin() || (request.auth != null && resource.data.listerId == request.auth.uid);
+    }
+    // Public read. Admin can write anything. A signed-in lister may write a
+    // photo doc for a property they own (checked via the linked property's
+    // listerId) — needed for self-serve photo upload in Lister Dashboard.
+    match /propertyPhotos/{id} {
+      allow read: if true;
+      // create/update carry the new doc as request.resource; a delete has
+      // no request.resource at all (there's no incoming data), so the old
+      // single "allow write" rule read request.resource.data.propertyId on
+      // EVERY operation including delete — that threw and silently denied
+      // every non-admin photo delete, which is exactly what made this rule
+      // impossible to test as a plain lister (found auditing Admin
+      // Dashboard's delete-cleanup fix). Delete must check resource (the
+      // doc being removed) instead.
+      allow create, update: if isAdmin() || (request.auth != null &&
+        exists(/databases/$(database)/documents/properties/$(request.resource.data.propertyId)) &&
+        get(/databases/$(database)/documents/properties/$(request.resource.data.propertyId)).data.listerId == request.auth.uid);
+      allow delete: if isAdmin() || (request.auth != null &&
+        exists(/databases/$(database)/documents/properties/$(resource.data.propertyId)) &&
+        get(/databases/$(database)/documents/properties/$(resource.data.propertyId)).data.listerId == request.auth.uid);
+    }
+    // CEO Project Dashboard doc is internal-only (risks/decisions not meant
+    // for public eyes) — carved out of the otherwise-public siteContent
+    // rule below. Firestore evaluates ALL matching rules and allows the
+    // request if ANY grants it, so the general rule must explicitly
+    // exclude this id or it would still be publicly readable.
+    match /siteContent/projectDashboard { allow read, write: if isAdmin(); }
+    // Pre-migration safety backup of the dashboard doc — same sensitivity
+    // as projectDashboard itself (risks/decisions), so it gets the same
+    // admin-only lockdown instead of falling through to the public rule.
+    match /siteContent/projectDashboard_backup_v1 { allow read, write: if isAdmin(); }
+    match /siteContent/{id} { allow read: if id != "projectDashboard" && id != "projectDashboard_backup_v1"; allow write: if isOwner() && id != "projectDashboard" && id != "projectDashboard_backup_v1"; }
+    match /profilePhotos/{id} { allow read: if true; allow write: if isAdmin() || request.auth != null; }
+    match /aiNotes/{id} { allow read: if true; allow write: if isOwner(); }
+    match /banners/{id} {
+      allow read: if true;
+      // Public self-serve (Advertise.dc.html): anyone can create their OWN
+      // pending banner doc (unpaid, active:false) — the Stripe webhook is
+      // the only thing that ever flips it to active:true. Admin can create
+      // (and activate) its own banners directly (e.g. house-inventory
+      // banners added in Site Content) regardless of the active value.
+      allow create: if isAdmin() || request.resource.data.active == false;
+      allow update, delete: if isAdmin();
+    }
+    match /externalServices/{id} { allow read, write: if isOwner(); }
 
-If Mission Control and Blueprint conflict, Mission Control is the current source of truth — notify me of the conflict, do not silently choose one.
+    // Buyer Registration (BLUEPRINT.md §2 ทาง 4 — "Procuring Cause" dispute
+    // prevention for VIP agents). A signed-in lister can create a
+    // registration under their own listerId, and read/list registrations
+    // (needed client-side to detect a duplicate buyer before creating one —
+    // the actual buyer contact details are only meant to be seen by admin
+    // and the registering agent themselves in the UI layer, but Firestore
+    // rules alone can't hide fields within a doc, so treat this collection
+    // as agent-visible, not fully private).
+    match /buyerRegistrations/{id} {
+      allow read: if request.auth != null || isAdmin();
+      allow create: if request.auth != null && request.resource.data.listerId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
 
-Then:
+    // Team management — Owner-only. Staff invites are keyed by lowercase
+    // email until the invited person signs up (then moved to adminUsers/{uid}).
+    match /adminUsers/{uid} {
+      allow read: if isAdmin();
+      allow write: if isOwner();
+      // Allow a newly-signed-up staff member to create ONLY their own doc,
+      // ONLY as role "staff", ONLY if an owner-issued invite for their email
+      // still exists — closes the loop of Staff Signup without needing an
+      // Owner to be online to click anything at that moment.
+      allow create: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.role == "staff"
+        && exists(/databases/$(database)/documents/staffInvites/$(request.auth.token.email));
+    }
+    match /staffInvites/{email} {
+      allow get: if true;
+      allow list: if isOwner();
+      allow write: if isOwner();
+    }
 
-- Summarize your understanding of the project in a few sentences.
-- State clearly what you understand the current phase to be.
-- Confirm you understand your role: analyze, plan, set workflow, review quality and completeness, and decide PASS/FAIL on work — you do not implement code yourself.
+    // Leads captured from the public contact form / auto-bot engagement —
+    // anyone can create one (that's the point of a lead form), but only the
+    // admin can read/list them (contains a visitor's personal contact info).
+    match /leads/{id} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
 
-Rules:
-- Do not redesign the project.
-- Do not make assumptions beyond what the attached documents state.
-- Do not begin planning implementation work until I give you an instruction.
+    // Payments ledger (BLUEPRINT.md §4) — written ONLY by the stripeWebhook
+    // Cloud Function via the Admin SDK, which bypasses these rules entirely.
+    // No client (not even the lister themselves) can create/edit a payment
+    // record directly — that would let someone fake a "paid" entry.
+    match /payments/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
 
-Wait for my instruction after your summary.
+    // Self-serve accounts (Agent/owner) — Admin can see/approve, the account
+    // owner can see/edit only their own status, and the public can read
+    // (needed for the public Agent Profile page — anyone visiting a
+    // lister's shared personal site must be able to look up their name/
+    // photo/contact info without being signed in).
+    match /listers/{uid} {
+      allow read: if true;
+      allow write: if isAdmin() || (request.auth != null && request.auth.uid == uid);
+    }
+
+    // Owner/tenant contact records — not meant for public browsing, but the
+    // site currently reads them client-side (Owners directory, property
+    // owner lookups) without a public-facing display of sensitive fields.
+    // Kept admin-write / open-read for now; revisit if a public page ever
+    // needs to filter/display owner data directly.
+    match /owners/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /tenants/{id} { allow read: if true; allow write: if isAdmin(); }
+
+    // Admin credentials doc (legacy fallback login) and site settings —
+    // never publicly readable; the values include a legacy plaintext
+    // password fallback.
+    match /settings/{id} { allow read, write: if isAdmin(); }
+
+    // Per-lister chat leads captured on their own Agent Profile page (scoped
+    // AI chat widget) — anyone can create one (that's the point), only the
+    // owning lister or admin can read them back.
+    match /listerLeads/{id} {
+      allow create: if true;
+      allow read: if isAdmin() || (request.auth != null && resource.data.listerId == request.auth.uid);
+      allow update, delete: if isAdmin();
+    }
+
+    // Default deny for anything not explicitly listed above.
+    match /{document=**} { allow read, write: if false; }
+  }
+}

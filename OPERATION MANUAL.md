@@ -1,62 +1,655 @@
-# OPERATION MANUAL — Project Handover System (PHS) Version 1
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
 
-## 1. Purpose
-PHS lets the CEO start a brand-new ChatGPT conversation and have it understand huahin.properties correctly — role, current phase, rules — without re-explaining the project from scratch every time.
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <title>Mission Control — Project Memory — huahin.properties</title>
+  <style>
+    body { margin: 0; background: oklch(96% 0.012 75); font-family: 'Work Sans', sans-serif; }
+    a { color: oklch(35% 0.09 25); }
+    a:hover { color: oklch(28% 0.1 25); }
+    textarea, input { font-family: inherit; }
+  </style>
+</helmet>
 
-## 2. When Should PHS Be Used?
-Every time you open a new ChatGPT conversation to continue work on huahin.properties (not needed inside an existing, already-oriented conversation).
+<sc-if value="{{ !authChecked }}" hint-placeholder-val="{{ true }}">
+  <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; color:oklch(45% 0.02 60); font-size:14px;">กำลังตรวจสอบสิทธิ์…</div>
+</sc-if>
 
-## 3. Required Files
-- `START HERE.md`
-- `Mission Control.dc.html`
-- `BLUEPRINT.md`
-- `HANDOVER PROMPT.md`
+<sc-if value="{{ authChecked }}">
+<sc-if value="{{ !isAdmin }}">
+  <div style="min-height:100vh; display:flex; align-items:center; justify-content:center;">
+    <div style="background:white; border-radius:8px; padding:24px; text-align:center;">
+      <div style="font-size:14px; color:oklch(35% 0.02 60); margin-bottom:14px;">หน้านี้สำหรับ Admin เท่านั้น</div>
+      <a href="Admin Login.dc.html" style="display:inline-block; background:oklch(22% 0.02 60); color:white; padding:10px 24px; border-radius:6px; text-decoration:none; font-size:14px;">ไปหน้าเข้าสู่ระบบ Admin</a>
+    </div>
+  </div>
+</sc-if>
 
-## 4. Preparation Checklist
-Before opening a new conversation, verify:
-- ☐ You have the latest version of all 4 files (re-download from the project if unsure)
-- ☐ `Mission Control.dc.html` reflects the actual current phase/status (check it hasn't gone stale)
-- ☐ You have the exact text of `HANDOVER PROMPT.md` ready to paste
+<sc-if value="{{ isAdmin }}">
+<div style="min-height:100vh; padding:clamp(24px,5vw,64px) clamp(16px,4vw,48px); box-sizing:border-box;">
+  <div style="max-width:760px; margin:0 auto;">
 
-## 5. Step-by-Step Instructions
-1. Open a new ChatGPT conversation.
-2. Attach all 4 required files.
-3. Paste the full contents of `HANDOVER PROMPT.md` as your first message.
-4. Send, and read the AI's response.
-5. Verify the AI's summary matches what you expect (see §6).
-6. If correct, give your instruction and begin work.
-7. If incorrect, do not just re-explain — see §7 Troubleshooting first.
+    <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:8px;">
+      <div>
+        <div style="font-size:11px; font-weight:600; letter-spacing:0.14em; color:oklch(50% 0.1 25); margin-bottom:6px;">MISSION CONTROL</div>
+        <div style="font-family:'Playfair Display',serif; font-size:clamp(26px,4vw,36px); color:oklch(20% 0.02 60); line-height:1.15;">Project Memory</div>
+      </div>
+      <a href="./CEO%20Guide.dc.html" style="display:inline-flex; align-items:center; gap:7px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:9px 18px; border-radius:100px; font-size:13px; font-weight:600; white-space:nowrap;">📘 เปิดคู่มือ CEO</a>
+      <a href="Admin Dashboard.dc.html" style="font-size:13px; text-decoration:none; white-space:nowrap; margin-top:8px;">← กลับ Admin Dashboard</a>
+    </div>
+    <div style="font-size:14px; color:oklch(42% 0.02 60); line-height:1.75; max-width:60ch; margin-bottom:8px;">Project Memory คือความทรงจำของบริษัท huahin.properties — ไม่ใช่ Dashboard ไม่ใช่เอกสาร แต่คือที่ที่ CEO, ChatGPT, Claude และ AI รุ่นต่อไป อ่านแล้วเข้าใจโครงการทั้งหมดได้ทันที เสมือนอยู่กับโครงการมาตั้งแต่วันแรก โดยไม่ต้องมีใครมาอธิบาย</div>
+    <div style="font-size:11.5px; color:oklch(55% 0.1 25); font-weight:600; letter-spacing:0.03em; margin-bottom:36px;">PROJECT HEADQUARTERS — แหล่งความจริงเดียวของทั้งโครงการ</div>
 
-## 6. Expected AI Behaviour
-When PHS is working correctly, the AI will, before anything else:
-- Confirm it read the files in order (START HERE → Mission Control → Blueprint)
-- Summarize the project correctly in its own words
-- State the Current Phase exactly as it appears in Mission Control
-- Identify itself as Product Owner (analyze/plan/review — not implement)
-- Wait for your instruction instead of starting work
+    <sc-if value="{{ !loaded }}" hint-placeholder-val="{{ true }}">
+      <div style="text-align:center; padding:60px 0; color:oklch(50% 0.02 60); font-size:14px;">กำลังโหลด…</div>
+    </sc-if>
 
-## 7. Troubleshooting
-**AI asks questions already answered by the documents**
-→ A file may be missing or wasn't actually read. Confirm all 4 files were attached; if so, tell the AI directly: "This is answered in [file] — re-read it before continuing."
+    <sc-if value="{{ loaded }}">
+    <div style="display:flex; flex-direction:column; gap:40px;">
 
-**AI ignores Mission Control (states an outdated phase/status)**
-→ Check Mission Control itself is current — if stale, that's the real problem (update it first). If Mission Control is current but AI ignored it, tell the AI to re-read Mission Control specifically.
+      <!-- PROJECT MEMORY -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(22% 0.03 40); margin-bottom:4px;">Project Memory</div>
+        <div style="width:36px; height:2px; background:oklch(45% 0.13 25); margin-bottom:16px;"></div>
+        <div style="background:white; border-radius:10px; padding:22px 24px; display:flex; flex-direction:column; gap:14px;">
+          <div>
+            <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">ทำไม CEO จึงเริ่มโครงการนี้ — ปัญหาที่ต้องการแก้</div>
+            <textarea value="{{ problemText }}" onChange="{{ onProblemChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:9px 11px; font-size:13.5px; min-height:50px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+          </div>
+          <div>
+            <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">Vision — แนวคิดสำคัญของโครงการ</div>
+            <textarea value="{{ visionText }}" onChange="{{ onVisionChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:9px 11px; font-size:13.5px; min-height:50px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+          </div>
+          <div>
+            <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">Business Goal</div>
+            <textarea value="{{ businessGoal }}" onChange="{{ onBusinessGoalChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:9px 11px; font-size:13.5px; min-height:50px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+          </div>
+          <div>
+            <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">Project Philosophy — หลักคิดที่ยึดถือเสมอ</div>
+            <textarea value="{{ philosophy }}" onChange="{{ onPhilosophyChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:9px 11px; font-size:13.5px; min-height:50px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px;">
+            <div>
+              <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">เป้าหมายระยะสั้น</div>
+              <textarea value="{{ goalsShort }}" onChange="{{ onGoalsShortChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:9px 11px; font-size:13px; min-height:44px; resize:vertical;"></textarea>
+            </div>
+            <div>
+              <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">เป้าหมายระยะกลาง</div>
+              <textarea value="{{ goalsMid }}" onChange="{{ onGoalsMidChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:9px 11px; font-size:13px; min-height:44px; resize:vertical;"></textarea>
+            </div>
+            <div>
+              <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">เป้าหมายระยะยาว</div>
+              <textarea value="{{ goalsLong }}" onChange="{{ onGoalsLongChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:9px 11px; font-size:13px; min-height:44px; resize:vertical;"></textarea>
+            </div>
+          </div>
+          <div style="border-top:1px solid oklch(94% 0.01 70); padding-top:14px;">
+            <div onClick="{{ onToggleRoles }}" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+              <div style="font-size:11.5px; color:oklch(50% 0.02 60);">แนวคิดการทำงาน, โครงสร้างทีม AI &amp; ทิศทาง Architecture</div>
+              <div style="font-size:12.5px; color:oklch(50% 0.02 60);">{{ rolesToggleLabel }}</div>
+            </div>
+            <sc-if value="{{ rolesOpen }}">
+              <div style="margin-top:10px; display:flex; flex-direction:column; gap:10px;">
+                <div>
+                  <div style="font-size:11px; color:oklch(55% 0.02 60); margin-bottom:3px;">Working Principles — Mindset / Workflow</div>
+                  <textarea value="{{ workingPrinciples }}" onChange="{{ onWorkingPrinciplesChange }}" placeholder="Mindset / Workflow…" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:9px 11px; font-size:13.5px; min-height:56px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+                </div>
+                <div>
+                  <div style="font-size:11px; color:oklch(55% 0.02 60); margin-bottom:3px;">AI Team Structure — ใครทำหน้าที่อะไร</div>
+                  <textarea value="{{ aiTeamStructure }}" onChange="{{ onAiTeamStructureChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:9px 11px; font-size:13.5px; min-height:56px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+                </div>
+                <div>
+                  <div style="font-size:11px; color:oklch(55% 0.02 60); margin-bottom:3px;">Architecture Direction — ทิศทางเทคนิคที่ยึดถือ</div>
+                  <textarea value="{{ architectureDirection }}" onChange="{{ onArchitectureDirectionChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:9px 11px; font-size:13.5px; min-height:56px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+                </div>
+                <div style="font-size:13px; color:oklch(45% 0.02 60); line-height:1.7;"><b style="color:oklch(30% 0.02 60);">CEO</b> — อ่านสถานะล่าสุด ตัดสินใจเรื่องสำคัญ ติ๊ก Checklist เมื่องานเสร็จจริง</div>
+                <div style="font-size:13px; color:oklch(45% 0.02 60); line-height:1.7;"><b style="color:oklch(30% 0.02 60);">ChatGPT (Product Owner)</b> — โฟกัสเฉพาะ Current Task ห้ามออกนอก Sprint ห้ามสร้างระบบใหม่เอง</div>
+                <div style="font-size:13px; color:oklch(45% 0.02 60); line-height:1.7;"><b style="color:oklch(30% 0.02 60);">Claude (Developer)</b> — อ่าน Current Task → ทำ → รายงานผล → อัปเดต Project Memory ทุกครั้ง</div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </div>
 
-**AI starts implementation immediately**
-→ Remind it directly: "Wait — confirm your understanding first per the Handover Prompt rules, do not implement yet."
+      <!-- PROJECT EVOLUTION -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(22% 0.03 40); margin-bottom:4px;">Project Evolution</div>
+        <div style="width:36px; height:2px; background:oklch(45% 0.13 25); margin-bottom:6px;"></div>
+        <div style="font-size:12.5px; color:oklch(52% 0.02 60); margin-bottom:16px;">โครงการพัฒนามาอย่างไร มีการเปลี่ยนแนวคิดอะไร และเพราะเหตุผลอะไร — ล่าสุดอยู่บนสุด</div>
+        <div style="background:white; border-radius:10px; padding:22px 24px;">
+          <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:14px;">
+            <sc-for list="{{ evolutionItems }}" as="item" hint-placeholder-count="0">
+              <div style="display:flex; gap:10px; padding:8px 0; border-bottom:1px solid oklch(95% 0.01 70);">
+                <div style="font-size:12px; color:oklch(55% 0.02 60); white-space:nowrap; flex-shrink:0;">{{ item.date }}</div>
+                <div style="flex:1;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="{{ item.typeBadgeStyle }}">{{ item.typeLabel }}</div>
+                    <div style="font-size:13.5px; font-weight:600; color:oklch(25% 0.02 60);">{{ item.title }}</div>
+                  </div>
+                  <div style="font-size:12.5px; color:oklch(45% 0.02 60); margin-top:2px;">เหตุผล: {{ item.reason }}</div>
+                  <sc-if value="{{ item.result }}"><div style="font-size:12.5px; color:oklch(40% 0.1 150); margin-top:2px;">ผลที่เกิดขึ้น: {{ item.result }}</div></sc-if>
+                </div>
+                <div onClick="{{ item.onRemove }}" style="font-size:12px; color:oklch(70% 0.02 60); cursor:pointer; flex-shrink:0;">✕</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <sc-for list="{{ evoTypeOptions }}" as="opt" hint-placeholder-count="0">
+                <div onClick="{{ opt.onSelect }}" style="{{ opt.style }}">{{ opt.label }}</div>
+              </sc-for>
+            </div>
+            <input value="{{ newEvoTitle }}" onChange="{{ onNewEvoTitleChange }}" placeholder="หัวข้อการเปลี่ยนแปลง/ตัดสินใจ — เปลี่ยนอะไร…" style="border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
+            <div style="display:flex; gap:8px;">
+              <input value="{{ newEvoReason }}" onChange="{{ onNewEvoReasonChange }}" placeholder="ทำไมจึงเปลี่ยน…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
+              <input value="{{ newEvoResult }}" onChange="{{ onNewEvoResultChange }}" placeholder="ผลที่เกิดขึ้น (ถ้ามี)…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
+              <div onClick="{{ onAddEvo }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ บันทึก</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-**Missing file detected**
-→ The AI should stop and name the missing file per the rule in `HANDOVER PROMPT.md`. If it doesn't, attach the missing file and restate the rule.
+      <!-- CURRENT SYSTEM -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(22% 0.03 40); margin-bottom:4px;">Current System</div>
+        <div style="width:36px; height:2px; background:oklch(45% 0.13 25); margin-bottom:16px;"></div>
+        <div style="background:white; border-radius:10px; padding:22px 24px;">
+          <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+            <sc-for list="{{ systemItems }}" as="item" hint-placeholder-count="0">
+              <div style="display:flex; align-items:center; gap:10px; padding:6px 0;">
+                <div style="{{ item.badgeStyle }}">{{ item.badgeLabel }}</div>
+                <div style="flex:1; font-size:13.5px; color:oklch(30% 0.02 60);">{{ item.text }}</div>
+                <div onClick="{{ item.onToggleActive }}" style="font-size:12px; color:oklch(45% 0.1 250); cursor:pointer; white-space:nowrap;">สลับสถานะ</div>
+                <div onClick="{{ item.onRemove }}" style="font-size:12px; color:oklch(70% 0.02 60); cursor:pointer;">✕</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input value="{{ newSystemText }}" onChange="{{ onNewSystemTextChange }}" placeholder="เพิ่มระบบ (เริ่มต้นเป็น 'ใช้งานอยู่')…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
+            <div onClick="{{ onAddSystem }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่ม</div>
+          </div>
+        </div>
+      </div>
 
-## 8. Best Practices
-- Update `Mission Control.dc.html` immediately after any real decision or phase change — it is the only file that should ever go stale, and PHS depends on it being current.
-- Don't hand-edit `BLUEPRINT.md` or `Mission Control.dc.html` outside the normal Product Owner → Lead Developer workflow — keeps both documents trustworthy as source of truth.
-- Re-run the Handover Test (`HANDOVER TEST PROCEDURE.md`) occasionally, especially after changing any PHS file, to confirm the system still works end-to-end.
+      <!-- CURRENT STATUS -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(22% 0.03 40); margin-bottom:4px;">Current Status</div>
+        <div style="width:36px; height:2px; background:oklch(45% 0.13 25); margin-bottom:16px;"></div>
+        <div style="background:white; border-radius:10px; padding:22px 24px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+            <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60);">Progress Checklist</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60);">{{ progressDoneCount }}/{{ progressTotalCount }}</div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+            <sc-for list="{{ progressItems }}" as="item" hint-placeholder-count="3">
+              <div style="display:flex; align-items:center; gap:10px; padding:6px 0;">
+                <input type="checkbox" checked="{{ item.done }}" onChange="{{ item.onToggle }}" style="width:17px; height:17px; cursor:pointer; flex-shrink:0;" />
+                <div style="{{ item.textStyle }}">{{ item.text }}</div>
+                <div onClick="{{ item.onRemove }}" style="margin-left:auto; font-size:12px; color:oklch(70% 0.02 60); cursor:pointer; flex-shrink:0;">✕</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input value="{{ newProgressText }}" onChange="{{ onNewProgressTextChange }}" placeholder="เพิ่มงานใน Checklist…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
+            <div onClick="{{ onAddProgress }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่ม</div>
+          </div>
+        </div>
+      </div>
 
-## 9. PHS Core Principles
-- Keep the system simple.
-- Keep responsibilities separated.
-- Mission Control is the current state.
-- Blueprint is the knowledge base.
-- AI must not assume.
-- AI must not skip the read order.
+      <!-- CURRENT SPRINT -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(22% 0.03 40); margin-bottom:4px;">Current Sprint</div>
+        <div style="width:36px; height:2px; background:oklch(45% 0.13 25); margin-bottom:16px;"></div>
+        <div style="background:white; border-radius:10px; padding:22px 24px;">
+          <textarea value="{{ currentTask }}" onChange="{{ onCurrentTaskChange }}" placeholder="Sprint ที่กำลังดำเนินการอยู่…" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:10px 12px; font-size:14px; min-height:50px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+        </div>
+      </div>
+
+      <!-- CURRENT TASK -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(22% 0.03 40); margin-bottom:4px;">Current Task</div>
+        <div style="width:36px; height:2px; background:oklch(45% 0.13 25); margin-bottom:16px;"></div>
+        <div style="background:white; border-radius:10px; padding:22px 24px;">
+          <textarea value="{{ today }}" onChange="{{ onTodayChange }}" placeholder="วันนี้ต้องทำอะไร…" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:10px 12px; font-size:14px; min-height:50px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+        </div>
+      </div>
+
+      <!-- NEXT TASK -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(22% 0.03 40); margin-bottom:4px;">Next Task</div>
+        <div style="width:36px; height:2px; background:oklch(45% 0.13 25); margin-bottom:16px;"></div>
+        <div style="background:white; border-radius:10px; padding:22px 24px; margin-bottom:12px;">
+          <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+            <sc-for list="{{ nextItems }}" as="item" hint-placeholder-count="2">
+              <div style="display:flex; align-items:center; gap:10px; padding:6px 0; font-size:14px; color:oklch(30% 0.02 60);">
+                <div style="width:6px; height:6px; border-radius:50%; background:oklch(55% 0.1 250); flex-shrink:0;"></div>
+                <div style="flex:1;">{{ item.text }}</div>
+                <div onClick="{{ item.onRemove }}" style="font-size:12px; color:oklch(70% 0.02 60); cursor:pointer; flex-shrink:0;">✕</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input value="{{ newNextText }}" onChange="{{ onNewNextTextChange }}" placeholder="เพิ่มงานถัดไป…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
+            <div onClick="{{ onAddNext }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่ม</div>
+          </div>
+        </div>
+
+        <div style="background:white; border-radius:10px; padding:22px 24px; margin-bottom:12px;">
+          <div style="font-size:13px; font-weight:600; color:oklch(48% 0.15 30); margin-bottom:10px;">Blockers — ปัญหาที่ติดอยู่</div>
+          <sc-if value="{{ hasNoBlockers }}"><div style="font-size:13.5px; color:oklch(55% 0.02 60); margin-bottom:10px;">ไม่มีปัญหาติดอยู่ตอนนี้</div></sc-if>
+          <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+            <sc-for list="{{ blockerItems }}" as="item" hint-placeholder-count="0">
+              <div style="display:flex; align-items:center; gap:10px; padding:8px 10px; background:oklch(97% 0.05 30); border-radius:6px; font-size:14px; color:oklch(35% 0.1 30);">
+                <div style="flex:1;">{{ item.text }}</div>
+                <div onClick="{{ item.onRemove }}" style="font-size:12px; color:oklch(55% 0.1 30); cursor:pointer; flex-shrink:0;">✕</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input value="{{ newBlockerText }}" onChange="{{ onNewBlockerTextChange }}" placeholder="เพิ่มปัญหาที่ติดอยู่…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
+            <div onClick="{{ onAddBlocker }}" style="background:oklch(40% 0.13 25); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่ม</div>
+          </div>
+        </div>
+
+        <div style="background:white; border-radius:10px; padding:22px 24px; margin-bottom:12px;">
+          <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:10px;">Latest Decisions (ล่าสุด 10 ข้อ)</div>
+          <sc-if value="{{ hasNoDecisions }}"><div style="font-size:13.5px; color:oklch(55% 0.02 60); margin-bottom:10px;">ยังไม่มีมติที่บันทึกไว้</div></sc-if>
+          <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:10px;">
+            <sc-for list="{{ decisionItems }}" as="item" hint-placeholder-count="0">
+              <div style="display:flex; gap:10px; padding:8px 0; border-bottom:1px solid oklch(95% 0.01 70); font-size:13.5px;">
+                <div style="color:oklch(55% 0.02 60); white-space:nowrap;">{{ item.date }}</div>
+                <div style="flex:1; color:oklch(30% 0.02 60);">{{ item.text }}</div>
+                <div onClick="{{ item.onRemove }}" style="font-size:12px; color:oklch(70% 0.02 60); cursor:pointer; flex-shrink:0;">✕</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input value="{{ newDecisionText }}" onChange="{{ onNewDecisionTextChange }}" placeholder="บันทึกมติใหม่…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
+            <div onClick="{{ onAddDecision }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ บันทึก</div>
+          </div>
+        </div>
+
+        <div style="background:white; border-radius:10px; padding:22px 24px;">
+          <div style="font-size:13px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:8px;">Working Context — ตอนนี้อยู่ช่วงไหน ต้องเริ่มต่อจากตรงไหน</div>
+          <textarea value="{{ workingContext }}" onChange="{{ onWorkingContextChange }}" placeholder="อธิบายให้ผู้รับช่วงเข้าใจสถานการณ์ปัจจุบัน…" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13.5px; min-height:70px; resize:vertical; color:oklch(25% 0.02 60);"></textarea>
+        </div>
+      </div>
+
+      <!-- COMPANY STORY ENGINE (formerly "Generate Context") -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(22% 0.03 40); margin-bottom:4px;">Company Story Engine</div>
+        <div style="width:36px; height:2px; background:oklch(45% 0.13 25); margin-bottom:6px;"></div>
+        <div style="font-size:12.5px; color:oklch(52% 0.02 60); margin-bottom:16px;">เล่าเรื่องราวของบริษัทจาก Project Memory ชุดเดียวกัน เสมือนคนในบริษัทเล่าให้พนักงานใหม่ฟัง — ต่างกันเฉพาะบทบาทของผู้รับ พร้อม Copy วางในห้องแชตใหม่</div>
+        <div style="background:oklch(22% 0.02 60); border-radius:10px; padding:22px 24px;">
+          <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+            <div onClick="{{ onGenChatGPT }}" style="background:oklch(97% 0.02 250); color:oklch(30% 0.1 250); padding:10px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">ChatGPT Story</div>
+            <div onClick="{{ onGenClaude }}" style="background:oklch(97% 0.05 60); color:oklch(35% 0.1 40); padding:10px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">Claude Story</div>
+            <div onClick="{{ onGenCEO }}" style="background:oklch(97% 0.01 70); color:oklch(30% 0.02 60); padding:10px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">CEO Story</div>
+          </div>
+          <sc-if value="{{ showHandoffBox }}">
+            <textarea readonly="{{ true }}" value="{{ handoffText }}" style="width:100%; box-sizing:border-box; border:none; border-radius:6px; padding:12px; font-size:12.5px; min-height:280px; font-family:monospace; color:oklch(25% 0.02 60); margin-bottom:8px;"></textarea>
+            <div onClick="{{ onCopyHandoff }}" style="display:inline-block; background:white; color:oklch(30% 0.02 60); padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">{{ copyLabel }}</div>
+          </sc-if>
+        </div>
+      </div>
+
+      <div style="font-size:11px; color:oklch(60% 0.02 60); text-align:center; padding:8px 0 24px;">อัปเดตล่าสุด: {{ updatedAtLabel }}</div>
+    </div>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    authChecked: false, isAdmin: false, loaded: false,
+    problemText: "", visionText: "", businessGoal: "", philosophy: "", goalsShort: "", goalsMid: "", goalsLong: "",
+    workingPrinciples: "", aiTeamStructure: "", architectureDirection: "", workingContext: "",
+    evolution: [], newEvoTitle: "", newEvoReason: "", newEvoResult: "", newEvoType: "decision",
+    systems: [], newSystemText: "",
+    today: "", currentTask: "",
+    progress: [], nextTasks: [], blockers: [], decisions: [],
+    newProgressText: "", newNextText: "", newBlockerText: "", newDecisionText: "",
+    rolesOpen: false, showHandoffBox: false, handoffText: "", copyLabel: "📋 Copy",
+    updatedAt: null,
+  };
+
+  async componentDidMount() {
+    const fb = await import("./firebase-client.js");
+    this._fb = fb;
+    const user = await fb.onAdminAuthReady().catch(() => null);
+    const isAdmin = !!user && fb.isAdminAuthed();
+    this.setState({ authChecked: true, isAdmin });
+    if (!isAdmin) return;
+    try {
+      const doc = await fb.fetchDocById("siteContent", "missionControl");
+      if (doc) {
+        this.setState({
+          loaded: true,
+          problemText: doc.problemText || "", visionText: doc.visionText || "", businessGoal: doc.businessGoal || "",
+          philosophy: doc.philosophy || "", goalsShort: doc.goalsShort || "", goalsMid: doc.goalsMid || "", goalsLong: doc.goalsLong || "",
+          workingPrinciples: doc.workingPrinciples || "", aiTeamStructure: doc.aiTeamStructure || "", architectureDirection: doc.architectureDirection || "",
+          workingContext: doc.workingContext || "", missionControlVersion: doc.missionControlVersion || "",
+          evolution: doc.evolution || [], systems: doc.systems || [],
+          today: doc.today || "", currentTask: doc.currentTask || "",
+          progress: doc.progress || [], nextTasks: doc.nextTasks || [], blockers: doc.blockers || [],
+          decisions: (doc.decisions || []).slice(0, 10),
+          updatedAt: doc.updatedAt || null,
+        });
+      } else {
+        const seed = this.seedData();
+        await fb.updateDocFields("siteContent", "missionControl", seed);
+        this.setState({ loaded: true, ...seed });
+      }
+    } catch (e) {
+      this.setState({ loaded: true });
+    }
+  }
+
+  seedData() {
+    const today = this.todayStr();
+    return {
+      problemText: "ตลาดอสังหาฯ หัวหิน/ปราณบุรี/ชะอำ ขาดเว็บลงประกาศที่เป็นของเอเจนซีเอง ควบคุมคุณภาพและข้อมูลได้เต็มที่ พร้อมระบบสมาชิกที่โตไปกับเจ้าของทรัพย์",
+      visionText: "เว็บลงประกาศ + CMS ที่เจ้าของ (ไม่ใช่โปรแกรมเมอร์) ดูแลต่อเองได้ในระยะยาว ผ่านทีม AI (ChatGPT เป็น Product Owner, Claude เป็น Developer)",
+      businessGoal: "รายได้ 3 ทาง: ค่าคอมจาก Lead/Favorites Intent Scoring, ค่าสมาชิกระบบแพ็กเกจ, โฆษณา/แบนเนอร์",
+      philosophy: "Staging ก่อนขึ้นจริงเสมอ: แก้ไขที่ลิงก์ทดลอง (Preview Channel) → ทดสอบ → เลื่อนขึ้นเป็นเว็บจริงเมื่อมั่นใจ | ระบบต้องทำงานอัตโนมัติทั้งหมด ไม่ใช่ให้แอดมินไล่จำ/ไล่ลบเอง",
+      goalsShort: "ปิด Current Phase: Package Demo & Documentation — รอ CEO Manual Testing, UX Review, Bug Reports/Fixes, Regression Testing, Production Readiness Decision",
+      goalsMid: "เปิดเก็บเงินทาง 2 เต็มรูปแบบ, เปิดทาง 3 (โฆษณาลูกค้าภายนอกจริง) เมื่อมีตัวเลข traffic พอ, เชื่อม LINE Official Account แจ้งเตือน",
+      goalsLong: "ระบบมอบหมายงานตามแผนก/โซน (Task Delegation) เมื่อมี Staff 3+ คน, Prerendering/dynamic rendering สำหรับ crawler ผูกกับ URL ต่อประกาศ",
+      workingPrinciples: "Staging ก่อนขึ้นจริงเสมอ (Preview Channel → ทดสอบ → เลื่อนขึ้นเว็บจริง) | ระบบต้องทำงานอัตโนมัติทั้งหมด ไม่ใช่ให้แอดมินไล่จำ/ไล่ลบเอง",
+      aiTeamStructure: "CEO: ผู้ตัดสินใจสูงสุด อนุมัติ/ไม่อนุมัติแต่ละขั้นตอน ดำเนินการบนระบบจริง (Deploy, Firebase Console, GitHub, Domain, DNS, Stripe, LINE OA) | ChatGPT: Product Owner/Project Coordinator วิเคราะห์-ตรวจคุณภาพงาน กำหนด Workflow ตัดสิน PASS/FAIL สร้าง Prompt ขั้นถัดไป | Claude: Lead Developer พัฒนาโค้ด/ระบบ/เอกสารตาม Prompt ที่ได้รับ รายงานผล ไม่ข้ามขั้นตอน ไม่เปลี่ยนทิศทางเอง ไม่เพิ่มฟีเจอร์นอกขอบเขต",
+      architectureDirection: "Design Component (.dc.html) ต่อหน้า, Firebase เต็มระบบ (Firestore, Authentication, Hosting + Preview Channels, Cloud Functions, Storage) | Firestore Security Rules: role-based + deny-by-default (ตรวจสอบแล้ว 16 ก.ค. 2026) | Deploy ผ่านอัปโหลดไฟล์ GitHub ด้วยมือ | Technology Stack: Anthropic Claude API (ผ่าน Cloud Function เท่านั้น), Google Maps JavaScript API, ผู้ให้บริการโดเมน — Stripe และ LINE Official Account ยังไม่ได้ต่อ",
+      workingContext: "Current Phase: Package Demo & Documentation — Implementation: Complete, Documentation: Complete, CEO Acceptance: Not Tested, Next Activity: CEO Acceptance Testing | เสร็จแล้ว: Demo Accounts, Package Verification, Dashboard Isolation, Translation Pipeline, Demo Listings, Cleanup Scripts, CEO Login Reference, CEO Login Sheet (Private), CEO Acceptance Checklist, Blueprint Updated | เหลือ: CEO Manual Testing, UX Review, Bug Reports, Bug Fixes, Regression Testing, Production Readiness Decision | Open Blocker: index.html ที่ root ไม่ sync อัตโนมัติกับ Home.dc.html — ทุกครั้งที่แก้ Home.dc.html ต้องคัดลอกเนื้อหาไปทับ index.html ด้วยเสมอ",
+      evolution: [
+        { id: "e1", date: today, type: "decision", title: "Mission Control Version 1 (FINAL) อนุมัติแล้ว", reason: "ผ่านการตรวจ Knowledge Extraction → Conflict Resolution → Blueprint-Only Verification → QA → CEO Review ครบทุกขั้นตอน", result: "Mission Control เป็น Single Source of Truth อย่างเป็นทางการของโครงการ" },
+        { id: "e2", date: today, type: "decision", title: "เลิกใช้ Agent VIP Pool (ทาง 4)", reason: "ไม่ต้องการให้แพลตฟอร์มเป็นกรรมการตัดสินสิทธิ์ Agent", result: "แทนที่ด้วยระบบ Assisted Sale (ข้อตกลง %ค่าคอมส่วนตัวระหว่างผู้ลงประกาศกับทีมงาน)" },
+        { id: "e3", date: today, type: "decision", title: "เลิกใช้แพ็กเกจฟรีถาวร", reason: "ผลักดันให้ผู้ใช้ตัดสินใจจ่ายเงินเร็วขึ้น", result: "เปลี่ยนเป็น Trial 30 วันครั้งเดียว + แพ็กเกจ 1/2/3 (590/1,190/2,290 บาท)" },
+        { id: "e4", date: today, type: "decision", title: "ล็อกฟิลด์ตัวตนทรัพย์หลัง sold", reason: "ป้องกันการสวมประกาศ (Listing Swap Fraud)", result: "รูปปก/ราคา/ที่อยู่/ชื่อ/รหัสทรัพย์แก้ไม่ได้อีกหลังสถานะ sold" },
+      ],
+      missionControlVersion: "Version 1 (FINAL) — อนุมัติจาก CEO และผ่านการตรวจจาก Product Owner เรียบร้อยแล้ว | Phase \"Mission Control Version 1\" ปิดแล้ว — สถานะ Completed | Mission Control Version 1 (FINAL) และ BLUEPRINT.md เป็น Source of Truth หลักสำหรับ Workflow ถัดไป | Phase closed. | PHS Version 1 (Project Handover System) — RELEASED AND CLOSED (20 July 2026). Next operational action: start a new ChatGPT conversation using the approved handover workflow (START HERE.md → Mission Control.dc.html → BLUEPRINT.md → HANDOVER PROMPT.md).",
+      systems: [
+        { id: "s1", text: "Membership v2 — Trial/Package1(5)/Package2(12)/Package3(25), Approval Queue, 30-day Expiry", active: true },
+        { id: "s2", text: "AI Chatbot (ContactRail) ผ่าน Firebase Function proxy", active: true },
+        { id: "s3", text: "AI Quick Add — ร่างประกาศจากรูป/เสียง", active: true },
+        { id: "s4", text: "แพ็กเกจถาวรฟรี (permanent free tier) แบบเดิม", active: false },
+      ],
+      today: "รอ CEO ทดสอบซ้ำ CAT-012 (โควตาแพ็กเกจ) บน Production หลังอัปโหลดไฟล์ล่าสุด",
+      currentTask: "Sprint 01 — CEO Acceptance Testing (CODE FREEZE / Support Mode) — รอผลทดสอบหรือ Bug ใหม่จาก CEO",
+      progress: [
+        { id: "p1", text: "Membership v2 (Trial/Package1/2/3, Approval Queue, Expiry)", done: true },
+        { id: "p2", text: "CEO Acceptance Testing รอบแรกเริ่มแล้ว", done: true },
+        { id: "p3", text: "CAT-012 โควตาแพ็กเกจผิด — แก้แล้ว รอ CEO ยืนยันซ้ำ", done: false },
+      ],
+      nextTasks: [{ id: "n1", text: "รอผล CEO Acceptance Testing รอบถัดไป" }],
+      blockers: [],
+      decisions: [
+        { id: "d1", date: today, text: "Mission Control ยกระดับเป็น Project Memory ตามแนวทางสุดท้ายของ CEO" },
+        { id: "d2", date: today, text: "Sprint 01 เข้าสถานะ CODE FREEZE จนกว่า CEO Acceptance จะผ่าน" },
+      ],
+      updatedAt: Date.now(),
+    };
+  }
+
+  todayStr() {
+    const d = new Date();
+    return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear() + 543}`;
+  }
+
+  async persist(fields) {
+    this.setState({ updatedAt: Date.now(), ...fields });
+    try {
+      await this._fb.updateDocFields("siteContent", "missionControl", { ...fields, updatedAt: Date.now() });
+    } catch (e) { /* best-effort — UI already reflects the change locally */ }
+  }
+
+  uid() { return Math.random().toString(36).slice(2, 9); }
+
+  evoTypeMeta(type) {
+    return {
+      architecture: "🏗️ Architecture", feature: "✨ Feature", bug: "🐛 Bug",
+      decision: "📜 Decision", workflow: "🔄 Workflow", sprint: "🏁 Sprint", completed: "✅ Completed", other: "• Other",
+    }[type] || "• Other";
+  }
+
+  // ============================================================
+  // UNIFIED CONTEXT PRINCIPLE (CEO Final Architecture directive)
+  // ------------------------------------------------------------
+  // There is exactly ONE Project Memory (this Firestore doc,
+  // siteContent/missionControl). ChatGPT, Claude and the CEO must
+  // never read a different Timeline, a different Decision log, or a
+  // different Current Status — that would let each audience drift
+  // into its own version of "what's true." generateFor(audience)
+  // below is the ONLY place that turns memory into text, and it
+  // always reads the exact same `this.state` for all three
+  // audiences. The only thing that changes per audience is FRAMING
+  // (which parts are foregrounded) and the closing "your role" line
+  // — never the underlying facts. If you add a new memory field,
+  // make every audience able to see it; never fork a field that only
+  // one audience gets.
+  //
+  // Context text itself is NEVER persisted — every click on
+  // ChatGPT/Claude/CEO Story re-derives fresh narrative prose from
+  // whatever is currently in state, so it can never go stale or
+  // contradict what's on-screen.
+  // ============================================================
+
+  // ============================================================
+  // FUTURE READY — automation hook points (NOT implemented in this
+  // version, intentionally — CEO asked to prepare structure/comments
+  // only). When this is built, wire it in at exactly these points:
+  //   1. onCurrentTaskChange / when currentTask text changes to a new
+  //      sprint name → offer to auto-draft an evolution entry
+  //      (type:"sprint") pre-filled with old vs new sprint text.
+  //   2. Any Progress Checklist item toggled done:true → offer to
+  //      auto-draft an evolution entry (type:"completed").
+  //   3. onAddDecision → offer to auto-mirror the same text into a
+  //      linked evolution entry (type:"decision") instead of the
+  //      admin re-typing it twice.
+  // Each hook would just pre-fill newEvoTitle/newEvoReason and open
+  // the Project Evolution add-form — never auto-save without a human
+  // confirming, to keep Project Memory intentional, not noisy.
+  // ============================================================
+  suggestEvolutionEntry(trigger, context) {
+    // Not called anywhere yet — placeholder for the future automation
+    // described above. Left unimplemented on purpose this version.
+  }
+
+  // Turns Project Memory into a first-person company narrative — written
+  // as one person telling a new hire the whole story, not a headings dump.
+  // See UNIFIED CONTEXT PRINCIPLE above: same facts for every audience.
+  generateFor(audience) {
+    const s = this.state;
+    const doneCount = s.progress.filter((p) => p.done).length;
+    const activeSystems = s.systems.filter((sy) => sy.active);
+    const deprecatedSystems = s.systems.filter((sy) => !sy.active);
+    const evoSorted = s.evolution; // already newest-first
+    const evoOldestFirst = [...s.evolution].reverse(); // tell the story in the order it happened
+
+    const audienceLabel = audience === "chatgpt" ? "ChatGPT" : audience === "claude" ? "Claude" : "CEO";
+    const openingLine = {
+      chatgpt: "คุณกำลังจะรับช่วงเป็น Product Owner ของโครงการนี้ต่อ นี่คือเรื่องราวทั้งหมดตั้งแต่วันแรก เล่าให้ฟังเหมือนเพื่อนร่วมงานที่อยู่มาตั้งแต่ต้น:",
+      claude: "คุณกำลังจะรับช่วงเป็น Lead Developer ของโครงการนี้ต่อ นี่คือเรื่องราวทั้งหมดตั้งแต่วันแรก เล่าให้ฟังเหมือนเพื่อนร่วมงานที่อยู่มาตั้งแต่ต้น:",
+      ceo: "นี่คือสรุปเรื่องราวโครงการของคุณเอง สำหรับทบทวนก่อนตัดสินใจ:",
+    }[audience];
+    const roleLine = {
+      chatgpt: "ตอนนี้คุณคือ Product Owner ของโครงการนี้ — ควบคุม Sprint, โฟกัสเฉพาะ Current Task, ห้ามออกนอก Sprint, ห้ามสร้างระบบใหม่เอง, ช่วย CEO ตัดสินใจเชิงธุรกิจ",
+      claude: "ตอนนี้คุณคือ Lead Developer ของโครงการนี้ — อ่าน Current Task แล้วลงมือทำจริง รายงานผลจริงเสมอ ห้ามเดา ห้ามอ้างว่าเสร็จโดยไม่มีหลักฐาน อัปเดต Project Memory ทุกครั้งที่งานเสร็จ",
+      ceo: "นี่คือสิ่งที่รอการตัดสินใจและติดตามของคุณตอนนี้",
+    }[audience];
+
+    const evoStory = evoOldestFirst.length
+      ? evoOldestFirst.map((e) => {
+          let line = `ต่อมา (${e.date}) ${this.evoTypeMeta(e.type)} — ${e.title} เพราะ${e.reason}`;
+          if (e.result) line += ` ผลที่ตามมาคือ ${e.result}`;
+          return line;
+        }).join(" ")
+      : "ยังไม่มีการบันทึกวิวัฒนาการของโครงการ";
+
+    const paragraphs = [
+      `=== เรื่องราวของ huahin.properties — สำหรับ ${audienceLabel} ===`,
+      `สร้างเมื่อ: ${this.todayStr()}`,
+      "",
+      openingLine,
+      "",
+      `huahin.properties เกิดขึ้นเพราะ ${s.problemText || "(ยังไม่มีบันทึกปัญหาตั้งต้น)"} จากปัญหานี้ CEO จึงตัดสินใจสร้างเว็บลงประกาศขาย/เช่าอสังหาริมทรัพย์ของตัวเองขึ้นมา แทนที่จะพึ่งแพลตฟอร์มอื่น`,
+      "",
+      `แนวคิดที่ยึดถือมาตั้งแต่ต้นคือ ${s.visionText || "(ไม่มี)"} โดยมีเป้าหมายทางธุรกิจว่า ${s.businessGoal || "(ไม่มี)"}${s.philosophy ? ` และหลักคิดที่ยึดถือเสมอในการตัดสินใจทุกเรื่องคือ ${s.philosophy}` : ""}`,
+      "",
+      `ระหว่างทาง โครงการไม่ได้หยุดนิ่ง — ${evoStory}`,
+      "",
+      `ทีมงานที่ดูแลโครงการนี้ทำงานร่วมกันแบบนี้: ${s.aiTeamStructure || s.workingPrinciples || "(ไม่มี)"}${s.architectureDirection ? ` ในเชิงเทคนิค ทิศทางที่ยึดถือคือ ${s.architectureDirection}` : ""}`,
+      "",
+      `วันนี้ระบบที่ใช้งานจริงอยู่มีทั้งหมด: ${activeSystems.length ? activeSystems.map((sy) => sy.text).join(", ") : "(ไม่มี)"}${deprecatedSystems.length ? ` ส่วนระบบที่เลิกใช้ไปแล้วและห้ามนำกลับมาใช้คือ: ${deprecatedSystems.map((sy) => sy.text).join(", ")}` : ""}`,
+      "",
+      `ตอนนี้โครงการอยู่ในช่วง "${s.currentTask || "(ไม่มี)"}" และงานที่กำลังทำอยู่ตรงหน้าคือ "${s.today || "(ไม่มี)"}" ความคืบหน้าตอนนี้คือ ${doneCount}/${s.progress.length} รายการในเช็คลิสต์เสร็จแล้ว (${s.progress.map((p) => `${p.done ? "✓" : "○"} ${p.text}`).join(", ") || "-"})`,
+      "",
+      `${s.workingContext || "(ไม่มีบันทึกสถานการณ์ปัจจุบัน)"}`,
+      "",
+      s.blockers.length ? `ตอนนี้มีปัญหาที่ยังติดอยู่คือ: ${s.blockers.map((b) => b.text).join(", ")}` : "ตอนนี้ไม่มีปัญหาที่ติดอยู่",
+      "",
+      `สิ่งที่ต้องทำต่อจากนี้คือ: ${s.nextTasks.length ? s.nextTasks.map((n) => n.text).join(", ") : "(ไม่มี)"}`,
+      "",
+      s.decisions.length ? `มติล่าสุดที่ CEO ตัดสินใจไว้ (ใหม่สุดก่อน): ${s.decisions.map((d) => `[${d.date}] ${d.text}`).join(" / ")}` : "",
+      "",
+      roleLine,
+      "",
+      "บริบทระบบ (สำหรับอ้างอิงทางเทคนิค): Firebase project huahin-properties-5f1b5, ทุกหน้าเป็น Design Component (.dc.html), เจ้าของ deploy เองผ่านอัปโหลดไฟล์ GitHub ทีละไฟล์ (ไม่ใช้ git command), Firestore + Firebase Auth + Cloud Function (Claude API proxy).",
+      "",
+      "อ่านทั้งหมดข้างต้นแล้วเริ่มทำงานต่อได้ทันที เสมือนคุณอยู่กับโครงการนี้มาตั้งแต่วันแรก",
+    ];
+    return paragraphs.filter((p) => p !== "").join("\n\n").replace(/\n\n(===|สร้างเมื่อ)/, "\n$1");
+  }
+
+  renderVals() {
+    const s = this.state;
+    const progressItems = s.progress.map((item) => ({
+      ...item,
+      textStyle: item.done ? "font-size:14px; color:oklch(60% 0.02 60); text-decoration:line-through; flex:1;" : "font-size:14px; color:oklch(30% 0.02 60); flex:1;",
+      onToggle: () => this.persist({ progress: s.progress.map((p) => p.id === item.id ? { ...p, done: !p.done } : p) }),
+      onRemove: () => this.persist({ progress: s.progress.filter((p) => p.id !== item.id) }),
+    }));
+    const nextItems = s.nextTasks.map((item) => ({ ...item, onRemove: () => this.persist({ nextTasks: s.nextTasks.filter((n) => n.id !== item.id) }) }));
+    const blockerItems = s.blockers.map((item) => ({ ...item, onRemove: () => this.persist({ blockers: s.blockers.filter((b) => b.id !== item.id) }) }));
+    const decisionItems = s.decisions.map((item) => ({ ...item, onRemove: () => this.persist({ decisions: s.decisions.filter((d) => d.id !== item.id) }) }));
+    const evolutionItems = s.evolution.map((item) => ({
+      ...item,
+      typeLabel: this.evoTypeMeta(item.type),
+      typeBadgeStyle: "font-size:10.5px; font-weight:600; padding:2px 8px; border-radius:100px; background:oklch(95% 0.02 250); color:oklch(40% 0.1 250); white-space:nowrap;",
+      result: item.result || "",
+      onRemove: () => this.persist({ evolution: s.evolution.filter((e) => e.id !== item.id) }),
+    }));
+    const evoTypeOptions = ["decision", "architecture", "feature", "bug", "workflow", "sprint", "completed"].map((t) => ({
+      value: t, label: this.evoTypeMeta(t),
+      style: `font-size:11px; padding:5px 11px; border-radius:100px; cursor:pointer; white-space:nowrap; ${s.newEvoType === t ? "background:oklch(22% 0.02 60); color:white;" : "background:oklch(95% 0.01 70); color:oklch(45% 0.02 60);"}`,
+      onSelect: () => this.setState({ newEvoType: t }),
+    }));
+    const systemItems = s.systems.map((item) => ({
+      ...item,
+      badgeLabel: item.active ? "ใช้งานอยู่" : "เลิกใช้แล้ว",
+      badgeStyle: item.active
+        ? "font-size:11px; font-weight:600; padding:3px 9px; border-radius:100px; background:oklch(94% 0.06 150); color:oklch(35% 0.1 150); white-space:nowrap; flex-shrink:0;"
+        : "font-size:11px; font-weight:600; padding:3px 9px; border-radius:100px; background:oklch(93% 0.01 70); color:oklch(55% 0.02 60); white-space:nowrap; flex-shrink:0;",
+      onToggleActive: () => this.persist({ systems: s.systems.map((sy) => sy.id === item.id ? { ...sy, active: !sy.active } : sy) }),
+      onRemove: () => this.persist({ systems: s.systems.filter((sy) => sy.id !== item.id) }),
+    }));
+
+    const doneCount = s.progress.filter((p) => p.done).length;
+
+    return {
+      authChecked: s.authChecked, isAdmin: s.isAdmin, loaded: s.loaded,
+      problemText: s.problemText, onProblemChange: (e) => this.persist({ problemText: e.target.value }),
+      visionText: s.visionText, onVisionChange: (e) => this.persist({ visionText: e.target.value }),
+      businessGoal: s.businessGoal, onBusinessGoalChange: (e) => this.persist({ businessGoal: e.target.value }),
+      philosophy: s.philosophy, onPhilosophyChange: (e) => this.persist({ philosophy: e.target.value }),
+      goalsShort: s.goalsShort, onGoalsShortChange: (e) => this.persist({ goalsShort: e.target.value }),
+      goalsMid: s.goalsMid, onGoalsMidChange: (e) => this.persist({ goalsMid: e.target.value }),
+      goalsLong: s.goalsLong, onGoalsLongChange: (e) => this.persist({ goalsLong: e.target.value }),
+      workingPrinciples: s.workingPrinciples, onWorkingPrinciplesChange: (e) => this.persist({ workingPrinciples: e.target.value }),
+      aiTeamStructure: s.aiTeamStructure, onAiTeamStructureChange: (e) => this.persist({ aiTeamStructure: e.target.value }),
+      architectureDirection: s.architectureDirection, onArchitectureDirectionChange: (e) => this.persist({ architectureDirection: e.target.value }),
+      workingContext: s.workingContext, onWorkingContextChange: (e) => this.persist({ workingContext: e.target.value }),
+      rolesOpen: s.rolesOpen, rolesToggleLabel: s.rolesOpen ? "ย่อ ▲" : "ขยาย ▼", onToggleRoles: () => this.setState({ rolesOpen: !s.rolesOpen }),
+
+      evolutionItems, evoTypeOptions, newEvoTitle: s.newEvoTitle, onNewEvoTitleChange: (e) => this.setState({ newEvoTitle: e.target.value }),
+      newEvoReason: s.newEvoReason, onNewEvoReasonChange: (e) => this.setState({ newEvoReason: e.target.value }),
+      newEvoResult: s.newEvoResult, onNewEvoResultChange: (e) => this.setState({ newEvoResult: e.target.value }),
+      onAddEvo: () => {
+        const t = s.newEvoTitle.trim();
+        if (!t) return;
+        this.persist({ evolution: [{ id: this.uid(), date: this.todayStr(), type: s.newEvoType, title: t, reason: s.newEvoReason.trim() || "-", result: s.newEvoResult.trim() || "" }, ...s.evolution] });
+        this.setState({ newEvoTitle: "", newEvoReason: "", newEvoResult: "" });
+      },
+
+      systemItems, newSystemText: s.newSystemText, onNewSystemTextChange: (e) => this.setState({ newSystemText: e.target.value }),
+      onAddSystem: () => {
+        const t = s.newSystemText.trim();
+        if (!t) return;
+        this.persist({ systems: [...s.systems, { id: this.uid(), text: t, active: true }] });
+        this.setState({ newSystemText: "" });
+      },
+
+      today: s.today, onTodayChange: (e) => this.persist({ today: e.target.value }),
+      currentTask: s.currentTask, onCurrentTaskChange: (e) => this.persist({ currentTask: e.target.value }),
+      progressItems, progressDoneCount: doneCount, progressTotalCount: s.progress.length,
+      newProgressText: s.newProgressText, onNewProgressTextChange: (e) => this.setState({ newProgressText: e.target.value }),
+      onAddProgress: () => {
+        const t = s.newProgressText.trim();
+        if (!t) return;
+        this.persist({ progress: [...s.progress, { id: this.uid(), text: t, done: false }] });
+        this.setState({ newProgressText: "" });
+      },
+      nextItems, newNextText: s.newNextText, onNewNextTextChange: (e) => this.setState({ newNextText: e.target.value }),
+      onAddNext: () => {
+        const t = s.newNextText.trim();
+        if (!t) return;
+        this.persist({ nextTasks: [...s.nextTasks, { id: this.uid(), text: t }] });
+        this.setState({ newNextText: "" });
+      },
+      blockerItems, hasNoBlockers: s.blockers.length === 0, newBlockerText: s.newBlockerText,
+      onNewBlockerTextChange: (e) => this.setState({ newBlockerText: e.target.value }),
+      onAddBlocker: () => {
+        const t = s.newBlockerText.trim();
+        if (!t) return;
+        this.persist({ blockers: [...s.blockers, { id: this.uid(), text: t }] });
+        this.setState({ newBlockerText: "" });
+      },
+      decisionItems, hasNoDecisions: s.decisions.length === 0, newDecisionText: s.newDecisionText,
+      onNewDecisionTextChange: (e) => this.setState({ newDecisionText: e.target.value }),
+      onAddDecision: () => {
+        const t = s.newDecisionText.trim();
+        if (!t) return;
+        this.persist({ decisions: [{ id: this.uid(), date: this.todayStr(), text: t }, ...s.decisions].slice(0, 10) });
+        this.setState({ newDecisionText: "" });
+      },
+
+      showHandoffBox: s.showHandoffBox, handoffText: s.handoffText, copyLabel: s.copyLabel,
+      onGenChatGPT: () => this.setState({ showHandoffBox: true, handoffText: this.generateFor("chatgpt"), copyLabel: "📋 Copy" }),
+      onGenClaude: () => this.setState({ showHandoffBox: true, handoffText: this.generateFor("claude"), copyLabel: "📋 Copy" }),
+      onGenCEO: () => this.setState({ showHandoffBox: true, handoffText: this.generateFor("ceo"), copyLabel: "📋 Copy" }),
+      onCopyHandoff: () => {
+        navigator.clipboard.writeText(s.handoffText).then(() => {
+          this.setState({ copyLabel: "✓ Copied" });
+          setTimeout(() => this.setState({ copyLabel: "📋 Copy" }), 1800);
+        }).catch(() => {});
+      },
+      updatedAtLabel: s.updatedAt ? new Date(s.updatedAt).toLocaleString("th-TH") : "-",
+    };
+  }
+}
+</script>
+</body>
+</html>
