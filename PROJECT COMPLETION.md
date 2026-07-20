@@ -38,6 +38,27 @@ PHS Version 1 gives the CEO a repeatable, reliable way to start a brand-new Chat
 - **Execute the Handover Test in practice** — the procedure is designed but has not yet been run against a real new conversation; recommend running it once before relying on PHS at full confidence.
 - Any other enhancement identified after this point must be scoped as a new version, not folded into v1.
 
+## 7A. Lessons Learned (Version 1)
+
+Recorded only from verified observations of the first real-world Handover Test:
+
+- The wording "first message" caused confusion. Clarified: the CEO must first attach all required files, then paste the HANDOVER PROMPT, then press Send once — attachment and prompt happen in the same single message, not two separate steps.
+- The three project files and the HANDOVER PROMPT are submitted together in a single ChatGPT message.
+- The previous folder-link (`export-for-github/`) caused a 404 issue on GitHub Pages. Replaced with the `PHS Document Center.dc.html` workflow, which links to individual files instead of a browsable directory.
+- The PHS Document Center successfully solved document navigation.
+- CEO Guide should prioritize Thai instructions while keeping filenames and technical names in English.
+- Every future PHS release must include a Real-world Validation before Project Closure.
+
+## Release Information
+
+- **Project Name**: huahin.properties
+- **Version**: PHS Version 1
+- **Release Date**: 20 July 2026
+- **Final ZIP Filename**: `huahin-properties-PHS-Version-1-FINAL-GitHub-Upload`
+- **GitHub Upload Package**: `export-for-github/`
+- **Production Status**: Pending CEO GitHub upload verification
+- **Completion Summary**: PHS Version 1 documents (START HERE, Mission Control, Blueprint, Handover Prompt, Handover Test Procedure, Operation Manual, CEO Guide, PHS Document Center, Release Checklist) passed the real-world Handover Test, Step 10.1 Lessons Learned, and Step 10.2 Documentation Audit. Final export package generated in Step 10.3, awaiting CEO's GitHub upload and live-site confirmation before official closure.
+
 ## 8. Archive Statement
 Project Handover System Version 1 is hereby declared **officially completed and archived**. All seven deliverables are final as of the Completion Date above.
 
