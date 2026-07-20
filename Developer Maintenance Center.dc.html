@@ -240,6 +240,38 @@
           </div>
         </sc-if>
 
+        <!-- TAB: CLEANUP PREVIEW -->
+        <sc-if value="{{ tabCleanupPreview }}" hint-placeholder-val="{{ false }}">
+          <div style="background:oklch(93% 0.1 75); border:1px solid oklch(78% 0.13 75); border-radius:8px; padding:10px 14px; margin-bottom:18px; font-size:12.5px; color:oklch(32% 0.1 50);">
+            🧹 <strong>Cleanup Preview — Simulation Only.</strong> This scan reads data to detect candidates; it never deletes or modifies anything. Cleanup Execution remains disabled in this phase.
+          </div>
+          <div style="background:white; border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:12px 16px; margin-bottom:18px; font-size:13px; color:oklch(30% 0.02 60);">{{ cleanupSummaryText }}</div>
+          <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+              <tr style="text-align:left; color:oklch(50% 0.02 60); border-bottom:1px solid oklch(88% 0.01 70);">
+                <th style="padding:6px 8px;">Candidate Type</th><th style="padding:6px 8px;">Detection Rule</th><th style="padding:6px 8px;">Collection</th><th style="padding:6px 8px;">Count</th><th style="padding:6px 8px;">Risk</th><th style="padding:6px 8px;">Status</th><th style="padding:6px 8px;">Required Verification</th><th style="padding:6px 8px;">Execution Eligibility</th>
+              </tr>
+              <sc-for list="{{ cleanupRows }}" as="c" hint-placeholder-count="3">
+                <tr style="border-bottom:1px solid oklch(93% 0.01 70);">
+                  <td style="padding:6px 8px;">{{ c.item }}</td>
+                  <td style="padding:6px 8px; color:oklch(50% 0.02 60);">{{ c.reason }}</td>
+                  <td style="padding:6px 8px;">{{ c.collection }}</td>
+                  <td style="padding:6px 8px;">{{ c.estimatedCount }}</td>
+                  <td style="padding:6px 8px; color:{{ c.riskColor }}; font-weight:600;">{{ c.risk }}</td>
+                  <td style="padding:6px 8px; color:{{ c.verdictColor }}; font-weight:600;">{{ c.verdict }}</td>
+                  <td style="padding:6px 8px; color:oklch(45% 0.02 60); font-size:11.5px;">{{ c.verification }}</td>
+                  <td style="padding:6px 8px; font-weight:600; color:oklch(45% 0.13 25);">{{ c.eligibility }}</td>
+                </tr>
+              </sc-for>
+            </table>
+          </div>
+          <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+            <div onClick="{{ onRunCleanupScan }}" style="background:oklch(30% 0.05 250); color:white; padding:10px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">🔍 Run Cleanup Preview Scan</div>
+            <div style="background:oklch(90% 0.02 60); color:oklch(50% 0.02 60); padding:10px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:not-allowed;">🧹 Execute Cleanup — Disabled (SAFE MODE)</div>
+          </div>
+          <div style="margin-top:10px; font-size:11.5px; color:oklch(50% 0.02 60);">Scan reads: properties, propertyPhotos, listers, profilePhotos — read-only, no data modified. Scan may consume Firestore document reads.</div>
+        </sc-if>
+
         <!-- TAB: DISABLED PLACEHOLDER -->
         <sc-if value="{{ tabDisabled }}" hint-placeholder-val="{{ false }}">
           <div style="background:white; border:1px dashed oklch(80% 0.02 60); border-radius:8px; padding:40px; text-align:center; color:oklch(55% 0.02 60); font-size:14px;">
@@ -255,6 +287,14 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 const STORAGE_FOLDERS = ["propertyPhotos", "profilePhotos"];
+
+const SAMPLE_CLEANUP_CANDIDATES = [
+  { item: "PB-207 (broken owner link)", reason: "listerId is missing or does not match any existing lister document", collection: "properties", estimatedCount: 1, risk: "High", verdict: "Blocked", eligibility: "Blocked", verification: "Investigate/reassign ownership — never delete based on this signal alone" },
+  { item: "propertyPhotos orphan (3 docs)", reason: "propertyId does not match any existing property document", collection: "propertyPhotos", estimatedCount: 3, risk: "Medium", verdict: "Needs Manual Review", eligibility: "Manual Approval Required", verification: "Confirm parent Property truly does not exist and photo is unreferenced elsewhere" },
+  { item: "Expired listing past 90-day grace (photo review only)", reason: "listingStatus=expired, expiresAt older than 90 days; property record is not cleanup material", collection: "properties", estimatedCount: 2, risk: "Low", verdict: "Needs Manual Review", eligibility: "Not Eligible in This Phase", verification: "Photo-only cleanup, in a future execution phase, per existing expiry rules" },
+  { item: "Possible Duplicate (1 group)", reason: "Same title + price + zone appears more than once — not a confirmed duplicate", collection: "properties", estimatedCount: 1, risk: "Low", verdict: "Needs Manual Review", eligibility: "Manual Approval Required", verification: "Manually confirm records are true duplicates before any action" },
+  { item: "Unused Profile Photos (2 docs)", reason: "Document ID / ownerUid does not match any existing lister", collection: "profilePhotos", estimatedCount: 2, risk: "Low", verdict: "Needs Manual Review", eligibility: "Manual Approval Required", verification: "Verify no remaining references before any future cleanup" },
+];
 
 const DEPENDENCIES = [
   { name: "Firebase SDK", key: "sdkLoaded" },
@@ -330,6 +370,7 @@ class Component extends DCLogic {
     runtime: null, authError: "",
     storageResults: [], storageLoading: false,
     auditLog: [], scanStage: "", scanDurationMs: null,
+    cleanupCandidates: [], cleanupLoading: false, cleanupScanned: null, cleanupNotStarted: true, cleanupDurationMs: null,
   };
 
   logAudit(text, level) {
@@ -354,6 +395,7 @@ class Component extends DCLogic {
           { folder: "propertyPhotos/", fileCount: 96, subfolderCount: 0, accessStatus: "ok" },
           { folder: "profilePhotos/", fileCount: 12, subfolderCount: 0, accessStatus: "ok" },
         ],
+        cleanupCandidates: SAMPLE_CLEANUP_CANDIDATES, cleanupScanned: { properties: 28, photos: 96, listers: 12, profilePhotos: 12 }, cleanupNotStarted: false, cleanupDurationMs: 340,
       });
       this.logAudit("Page opened (Design Preview Mode)", "info");
       return;
@@ -373,6 +415,8 @@ class Component extends DCLogic {
       if (!isAdmin) { this.setState({ authPhase: "denied" }); return; }
       this.setState({ authPhase: "granted" });
       await this.refreshAll();
+      // Cleanup scan no longer runs automatically on page open — Task 5
+      // requires an explicit Admin click to control Firestore read cost.
     } catch (e) {
       this.setState({ authPhase: "error", authError: String(e && e.message || e) });
     }
@@ -410,13 +454,110 @@ class Component extends DCLogic {
     if (this.state.authPhase === "preview") return;
     this.logAudit("Refresh executed", "info");
     this.refreshAll();
+    // Cleanup Preview scan is intentionally excluded from Refresh Data —
+    // it has its own manual "Run Cleanup Preview Scan" button (Task 5).
+  }
+
+  // Cleanup Preview Scanner — read-only cross-collection check. Reads full
+  // documents (not just counts) via fetchCollection() to detect broken
+  // relationships. Never writes, never deletes — Step 8 is preview-only.
+  async scanCleanupCandidates() {
+    if (this.state.authPhase === "preview") return;
+    if (this.state.cleanupLoading) return; // prevent duplicate concurrent scans
+    const scanStart = Date.now();
+    this.logAudit("Cleanup Preview scan started (properties, propertyPhotos, listers, profilePhotos)", "info");
+    const fb = this._fb;
+    if (!fb) return;
+    this.setState({ cleanupLoading: true });
+    try {
+      const [properties, photos, listers, profilePhotos] = await Promise.all([
+        fb.fetchCollection("properties").catch(() => null),
+        fb.fetchCollection("propertyPhotos").catch(() => null),
+        fb.fetchCollection("listers").catch(() => null),
+        fb.fetchCollection("profilePhotos").catch(() => null),
+      ]);
+      if (!properties || !photos || !listers) {
+        this.logAudit("Cleanup scan incomplete — one or more collections unreadable (isolated per-collection, other results unaffected)", "warn");
+        this.setState({ cleanupLoading: false, cleanupNotStarted: false, cleanupCandidates: [], cleanupScanned: null, cleanupDurationMs: Date.now() - scanStart });
+        return;
+      }
+      const listerIds = new Set(listers.map((l) => l.id));
+      const propertyIds = new Set(properties.map((p) => p.id));
+      const now = Date.now();
+      const ninetyDaysMs = 90 * 86400000;
+      const candidates = [];
+
+      const orphanProperties = properties.filter((p) => p.listerId && !listerIds.has(p.listerId));
+      if (orphanProperties.length) candidates.push({
+        item: `Orphan Properties (${orphanProperties.length} docs)`, reason: "listerId does not match any existing lister document",
+        collection: "properties", estimatedCount: orphanProperties.length, risk: "Medium", verdict: "Needs Manual Review",
+      });
+
+      const missingLister = properties.filter((p) => !p.listerId);
+      if (missingLister.length) candidates.push({
+        item: `Properties Missing Lister Link (${missingLister.length} docs)`, reason: "No listerId field present on the property document",
+        collection: "properties", estimatedCount: missingLister.length, risk: "Medium", verdict: "Needs Manual Review",
+      });
+
+      const orphanPhotos = photos.filter((ph) => ph.propertyId && !propertyIds.has(ph.propertyId));
+      if (orphanPhotos.length) candidates.push({
+        item: `Orphan Property Photos (${orphanPhotos.length} docs)`, reason: "propertyId does not match any existing property document",
+        collection: "propertyPhotos", estimatedCount: orphanPhotos.length, risk: "Low", verdict: "Safe to Cleanup",
+      });
+
+      const expiredOld = properties.filter((p) => p.listingStatus === "expired" && p.expiresAt && (now - p.expiresAt) > ninetyDaysMs);
+      // The expired Property record itself is never cleanup material — only
+      // its associated photos may become eligible in a future execution
+      // phase, and only per the existing photosDeletedAt/expiry rules.
+      if (expiredOld.length) candidates.push({
+        item: `Expired Listings Past 90-Day Grace (${expiredOld.length} docs — photo review only)`,
+        reason: "listingStatus=expired and expiresAt older than 90 days; property record itself is not cleanup material — only associated photos may be reviewed per photosDeletedAt rules",
+        collection: "properties", estimatedCount: expiredOld.length, risk: "Low", verdict: "Needs Manual Review",
+        eligibility: "Not Eligible in This Phase", verification: "Photo-only cleanup, in a future execution phase, per existing expiry rules",
+      });
+
+      if (profilePhotos) {
+        const ownerUids = new Set([...listers.map((l) => l.id)]);
+        const unusedProfilePhotos = profilePhotos.filter((pp) => pp.id && !ownerUids.has(pp.id) && !ownerUids.has(pp.ownerUid));
+        if (unusedProfilePhotos.length) candidates.push({
+          item: `Unused Profile Photos (${unusedProfilePhotos.length} docs)`, reason: "Document ID / ownerUid does not match any existing lister",
+          collection: "profilePhotos", estimatedCount: unusedProfilePhotos.length, risk: "Low", verdict: "Needs Manual Review",
+          eligibility: "Manual Approval Required", verification: "Verify no remaining references before any future cleanup",
+        });
+      }
+
+      // Duplicate detection: same title + price + zone appearing more than once.
+      const seen = new Map();
+      properties.forEach((p) => {
+        const key = `${p.title || ""}|${p.price || ""}|${p.zone || ""}`;
+        if (!key.trim().replace(/\|/g, "")) return;
+        seen.set(key, (seen.get(key) || 0) + 1);
+      });
+      const dupCount = [...seen.values()].filter((c) => c > 1).length;
+      if (dupCount) candidates.push({
+        item: `Possible Duplicate (${dupCount} group(s))`, reason: "Same title + price + zone appears more than once — not a confirmed duplicate",
+        collection: "properties", estimatedCount: dupCount, risk: "Low", verdict: "Needs Manual Review",
+        eligibility: "Manual Approval Required", verification: "Manually confirm records are true duplicates before any action",
+      });
+
+      const durationMs = Date.now() - scanStart;
+      this.logAudit(`Cleanup Preview scan completed — ${candidates.length} candidate group(s) found in ${durationMs}ms`, "info");
+      this.setState({
+        cleanupLoading: false, cleanupNotStarted: false, cleanupDurationMs: durationMs, cleanupCandidates: candidates,
+        cleanupScanned: { properties: properties.length, photos: photos.length, listers: listers.length, profilePhotos: profilePhotos ? profilePhotos.length : null },
+      });
+      this.logAudit(`Cleanup scan completed — ${candidates.length} candidate group(s) found`, candidates.length ? "warn" : "info");
+    } catch (e) {
+      this.setState({ cleanupLoading: false });
+      this.logAudit(`Cleanup scan error: ${String(e && e.message || e)}`, "error");
+    }
   }
 
   setTab(tab) { this.setState({ activeTab: tab }); }
 
   renderVals() {
     const s = this.state;
-    const activeDisabled = ["cleanupPreview", "cleanupExec", "verification", "golden", "export", "docs"];
+    const activeDisabled = ["cleanupExec", "verification", "golden", "export", "docs"];
     const sidebarDef = [
       { key: "overview", label: "📊 System Overview" },
       { key: "auth", label: "👤 Authentication Inventory" },
@@ -424,7 +565,7 @@ class Component extends DCLogic {
       { key: "storage", label: "📦 Storage Inventory" },
       { key: "dependency", label: "🔗 Dependency Checker" },
       { key: "auditLog", label: "📜 Audit Log" },
-      { key: "cleanupPreview", label: "🧹 Cleanup Preview", disabled: true },
+      { key: "cleanupPreview", label: "🧹 Cleanup Preview" },
       { key: "cleanupExec", label: "⚙️ Cleanup Execution", disabled: true },
       { key: "verification", label: "✅ Verification", disabled: true },
       { key: "golden", label: "🌱 Golden Dataset Generator", disabled: true },
@@ -471,6 +612,16 @@ class Component extends DCLogic {
     const isPreview = s.authPhase === "preview";
     const sdk = s.sdkStatus || { sdkLoaded: false, authOk: false, firestoreOk: false, storageOk: false };
     const depStatus = (ok) => isPreview ? "Unknown" : (ok === true ? "OK" : (ok === false ? "Missing" : "Unknown"));
+    const verdictColor = (v) => v === "Blocked" ? "oklch(45% 0.13 25)" : (v === "Needs Manual Review" ? "oklch(50% 0.1 75)" : (v === "Unknown" ? "oklch(55% 0.02 60)" : "oklch(50% 0.1 75)"));
+    const riskColor = (r) => r === "High" ? "oklch(45% 0.13 25)" : (r === "Medium" ? "oklch(50% 0.1 75)" : "oklch(40% 0.1 150)");
+    const cleanupRows = s.cleanupCandidates.map((c) => ({ ...c, verdictColor: verdictColor(c.verdict), riskColor: riskColor(c.risk), eligibility: c.eligibility || "Manual Approval Required", verification: c.verification || "Manual review required" }));
+    const cleanupTotalCandidates = s.cleanupCandidates.reduce((sum, c) => sum + c.estimatedCount, 0);
+    const cleanupSummaryText = isPreview
+      ? "Items Scanned: 148 (sample) · Candidate Groups Found: 5 · Potential Cleanup Candidates: 9 · Warnings: 0"
+      : (s.cleanupNotStarted ? "Not yet scanned — click \"Run Cleanup Preview Scan\""
+      : s.cleanupLoading ? "Scan in progress..." : (s.cleanupScanned
+          ? `Documents Inspected: ${s.cleanupScanned.properties + s.cleanupScanned.photos + s.cleanupScanned.listers + (s.cleanupScanned.profilePhotos || 0)} · Candidate Groups Found: ${s.cleanupCandidates.length} · Potential Cleanup Candidates: ${cleanupTotalCandidates} · Duration: ${s.cleanupDurationMs != null ? s.cleanupDurationMs + "ms" : "—"}`
+          : "Not yet scanned — click \"Run Cleanup Preview Scan\""));
     const dependencyRows = [
       { name: "Firebase SDK", status: depStatus(sdk.sdkLoaded) },
       { name: "Firestore", status: depStatus(sdk.firestoreOk) },
@@ -555,6 +706,8 @@ class Component extends DCLogic {
       isPreview,
       previewBannerText: "DESIGN PREVIEW — SAMPLE DATA ONLY — NO FIREBASE OPERATIONS",
       diagnosticRows,
+      cleanupRows, cleanupSummaryText,
+      onRunCleanupScan: () => this.scanCleanupCandidates(),
       sidebarItems,
       activeTabTitle: titles[s.activeTab] || "System Overview",
       lastRefreshLabel: s.lastRefresh ? new Date(s.lastRefresh).toLocaleString() : "Never",
@@ -564,6 +717,7 @@ class Component extends DCLogic {
       tabFirestore: s.activeTab === "firestore",
       tabStorage: s.activeTab === "storage",
       tabDependency: s.activeTab === "dependency",
+      tabCleanupPreview: s.activeTab === "cleanupPreview",
       tabAuditLog: s.activeTab === "auditLog",
       tabDisabled: activeDisabled.includes(s.activeTab),
       scanStage: s.scanStage,
