@@ -1046,3 +1046,19 @@ Priority ที่ใช้ได้: `Critical` / `High` / `Medium` / `Low` / `
 ## 23. PHS Release Principle
 
 Each PHS release is a complete current-state package. The latest approved release is sufficient for opening a new AI conversation; previous releases are retained only as historical reference.
+
+---
+
+## 24. Developer Maintenance Center (DMC) — Progress Log
+
+`Developer Maintenance Center.dc.html` — internal Admin-only diagnostics/cleanup tool. Built step-by-step under Product Owner review; each step ships in SAFE MODE (read-only) until explicitly approved for the next phase.
+
+- 🟢 **Step 6 — System Overview, Authentication/Firestore/Storage Inventory, Dependency Checker, Audit Log** — Passed
+- 🟢 **Step 7 — Admin Gate hardening + SAFE MODE lock** — Passed
+- 🟢 **Step 8 — Cleanup Preview (read-only scanner)** — Passed
+- 🟢 **Step 9 — Cleanup Execution Engine (Preparation Phase)** — **Passed (Product Owner Final Approval, 20 ก.ค. 2569)**
+  - Execution Queue, Confirmation Dialog, Dry Run reporting (0 writes/0 deletions always), Rollback Readiness panel, permanent "REAL EXECUTION LOCKED" gate, expanded Execution Log — all verified against live DOM state, not just static review.
+  - **Bug found and fixed during verification**: `this.uid is not a function` (undefined method called in `logExecution`/`scanCleanupCandidates`) — fixed to match the existing `logAudit` ID pattern; re-verified clean (no console errors beyond the pre-existing benign Firebase warning).
+  - No `addDoc`/`setDoc`/`updateDoc`/`deleteDoc`/`writeBatch`/`runTransaction`/`uploadBytes`/`deleteObject` exists anywhere in the file — confirmed by direct source search, not inference.
+  - Real deletion remains locked pending: backup/export/snapshot verification, a rollback engine, and a separate Product Owner-approved execution phase.
+  - See `RELEASE-NOTES-Step9.md` for full detail.

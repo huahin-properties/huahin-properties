@@ -261,6 +261,7 @@
                   <td style="padding:6px 8px; color:{{ c.verdictColor }}; font-weight:600;">{{ c.verdict }}</td>
                   <td style="padding:6px 8px; color:oklch(45% 0.02 60); font-size:11.5px;">{{ c.verification }}</td>
                   <td style="padding:6px 8px; font-weight:600; color:oklch(45% 0.13 25);">{{ c.eligibility }}</td>
+                  <td style="padding:6px 8px;"><div onClick="{{ c.onQueue }}" style="display:inline-block; background:oklch(94% 0.02 250); color:oklch(35% 0.1 250); padding:4px 10px; border-radius:100px; font-size:11px; font-weight:600; cursor:pointer;">+ Queue</div></td>
                 </tr>
               </sc-for>
             </table>
@@ -270,6 +271,106 @@
             <div style="background:oklch(90% 0.02 60); color:oklch(50% 0.02 60); padding:10px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:not-allowed;">🧹 Execute Cleanup — Disabled (SAFE MODE)</div>
           </div>
           <div style="margin-top:10px; font-size:11.5px; color:oklch(50% 0.02 60);">Scan reads: properties, propertyPhotos, listers, profilePhotos — read-only, no data modified. Scan may consume Firestore document reads.</div>
+        </sc-if>
+
+        <!-- TAB: CLEANUP EXECUTION (Preparation Phase — no delete/write exists) -->
+        <sc-if value="{{ tabCleanupExec }}" hint-placeholder-val="{{ false }}">
+          <div style="background:oklch(93% 0.1 25); border:1px solid oklch(80% 0.13 25); border-radius:8px; padding:10px 14px; margin-bottom:18px; font-size:12.5px; color:oklch(32% 0.13 25);">
+            ⚙️ <strong>Cleanup Execution — Preparation Phase.</strong> This is a queue and dry-run workspace. No delete, batch write, or update capability exists anywhere in this build — "Confirm" only records a Dry Run entry to the Execution Log.
+          </div>
+
+          <h3 style="font-size:14px; color:oklch(25% 0.02 60); margin-bottom:8px;">Execution Queue ({{ executionQueue.length }})</h3>
+          <sc-if value="{{ hasExecutionQueue }}" hint-placeholder-val="{{ false }}">
+            <div style="overflow-x:auto; margin-bottom:20px;">
+              <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+                <tr style="text-align:left; color:oklch(50% 0.02 60); border-bottom:1px solid oklch(88% 0.01 70);">
+                  <th style="padding:6px 8px;">Item</th><th style="padding:6px 8px;">Collection</th><th style="padding:6px 8px;">Count</th><th style="padding:6px 8px;">Eligibility</th><th style="padding:6px 8px;">Status</th><th style="padding:6px 8px;">IDs</th><th style="padding:6px 8px;">Dry Run</th><th style="padding:6px 8px;">Action</th>
+                </tr>
+                <sc-for list="{{ executionQueueRows }}" as="q" hint-placeholder-count="0">
+                  <tr style="border-bottom:1px solid oklch(93% 0.01 70);">
+                    <td style="padding:6px 8px; font-weight:600;">{{ q.item }}</td>
+                    <td style="padding:6px 8px; font-family:monospace; font-size:11.5px;">{{ q.collection }}</td>
+                    <td style="padding:6px 8px;">{{ q.estimatedCount }}</td>
+                    <td style="padding:6px 8px; font-weight:600; color:oklch(45% 0.13 25);">{{ q.eligibility }}</td>
+                    <td style="padding:6px 8px; font-weight:600; color:oklch(40% 0.02 60);">{{ q.prepStatus }}</td>
+                    <td style="padding:6px 8px; font-size:11px; color:oklch(50% 0.02 60);">{{ q.docIdsNote }}</td>
+                    <td style="padding:6px 8px; font-size:11px; color:oklch(50% 0.02 60);">{{ q.dryRunText }}</td>
+                    <td style="padding:6px 8px; display:flex; gap:6px; flex-wrap:wrap;">
+                      <div onClick="{{ q.onDryRun }}" style="background:oklch(30% 0.05 250); color:white; padding:4px 12px; border-radius:100px; font-size:11px; font-weight:600; cursor:pointer;">Dry Run</div>
+                      <div onClick="{{ q.onOpenConfirm }}" style="background:oklch(40% 0.1 150); color:white; padding:4px 12px; border-radius:100px; font-size:11px; font-weight:600; cursor:pointer;">Confirm</div>
+                      <div onClick="{{ q.onRemove }}" style="background:oklch(93% 0.01 70); color:oklch(45% 0.02 60); padding:4px 12px; border-radius:100px; font-size:11px; font-weight:600; cursor:pointer;">Remove</div>
+                    </td>
+                  </tr>
+                </sc-for>
+              </table>
+            </div>
+          </sc-if>
+          <div style="font-size:12.5px; color:oklch(55% 0.02 60); margin-bottom:20px;">Add candidates from the Cleanup Preview tab using "+ Queue".</div>
+
+          <h3 style="font-size:14px; color:oklch(25% 0.02 60); margin-bottom:8px;">Rollback Readiness</h3>
+          <div style="background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:14px 16px; margin-bottom:20px; font-size:12.5px; color:oklch(35% 0.02 60); line-height:1.8;">
+            <div>Backup available: <strong>Unknown / Not Verified</strong></div>
+            <div>Export available: <strong>Unknown / Not Verified</strong></div>
+            <div>Original document snapshot available: <strong>No</strong></div>
+            <div>Reassignment plan available: <strong>No</strong></div>
+            <div>Rollback eligibility: <strong style="color:oklch(45% 0.13 25);">Not Ready</strong></div>
+            <div style="margin-top:8px; color:oklch(50% 0.02 60);">Real cleanup execution must remain blocked until backup, export, snapshot, and rollback requirements are verified.</div>
+          </div>
+
+          <h3 style="font-size:14px; color:oklch(25% 0.02 60); margin-bottom:8px;">Real Execution Status</h3>
+          <div onClick="{{ onAttemptBlocked }}" style="background:oklch(93% 0.1 25); border:2px solid oklch(60% 0.15 25); border-radius:8px; padding:16px; margin-bottom:20px; cursor:not-allowed;">
+            <div style="font-size:15px; font-weight:700; color:oklch(40% 0.15 25); margin-bottom:8px;">🔒 REAL EXECUTION LOCKED</div>
+            <div style="font-size:12px; color:oklch(35% 0.13 25); line-height:1.7;">
+              • Step 9 is preparation only<br/>
+              • CEO confirmation does not authorize deletion<br/>
+              • Backup not verified<br/>
+              • Rollback not ready<br/>
+              • Product Owner approval required<br/>
+              • Step 9 Production Live Test not completed
+            </div>
+          </div>
+
+          <h3 style="font-size:14px; color:oklch(25% 0.02 60); margin-bottom:8px;">Execution Log</h3>
+          <div style="background:white; border:1px solid oklch(88% 0.01 70); border-radius:8px; max-height:300px; overflow-y:auto;">
+            <sc-for list="{{ executionLogRows }}" as="e" hint-placeholder-count="0">
+              <div style="padding:8px 14px; border-bottom:1px solid oklch(95% 0.01 70); font-size:12px; display:flex; gap:10px;">
+                <span style="color:oklch(55% 0.02 60); flex-shrink:0;">{{ e.time }}</span>
+                <span style="color:{{ e.color }};">{{ e.message }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <!-- CONFIRMATION DIALOG (simulation only, no write capability) -->
+        <sc-if value="{{ showConfirmDialog }}" hint-placeholder-val="{{ false }}">
+          <div style="position:fixed; inset:0; background:rgba(20,15,10,0.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:20px;">
+            <div style="background:white; border-radius:10px; padding:24px; max-width:480px; width:100%; box-shadow:0 20px 50px -20px rgba(0,0,0,0.4);">
+              <div style="font-size:16px; font-weight:700; color:oklch(25% 0.02 60); margin-bottom:14px;">Preparation Confirmation</div>
+              <div style="font-size:12.5px; color:oklch(35% 0.02 60); line-height:1.8; margin-bottom:14px;">
+                <div><strong>Candidate Type:</strong> {{ confirmCandidate.item }}</div>
+                <div><strong>Affected Collection:</strong> {{ confirmCandidate.collection }}</div>
+                <div><strong>Candidate Count:</strong> {{ confirmCandidate.estimatedCount }}</div>
+                <div><strong>Risk Level:</strong> {{ confirmCandidate.risk }}</div>
+                <div><strong>Execution Eligibility:</strong> {{ confirmCandidate.eligibility }}</div>
+                <div><strong>Required Verification:</strong> {{ confirmCandidate.verification }}</div>
+                <div><strong>Document IDs:</strong> {{ confirmCandidate.docIdsNote }}</div>
+              </div>
+              <div style="background:oklch(93% 0.1 25); border:1px solid oklch(78% 0.13 25); border-radius:6px; padding:10px 12px; font-size:11.5px; color:oklch(32% 0.1 25); margin-bottom:14px;">⚠️ No real execution is available in this phase. This dialog cannot delete or modify any data.</div>
+              <label style="display:flex; gap:8px; align-items:flex-start; font-size:12.5px; color:oklch(30% 0.02 60); margin-bottom:16px; cursor:pointer;">
+                <input type="checkbox" checked="{{ confirmChecked }}" onChange="{{ onToggleConfirmChecked }}" style="margin-top:2px;" />
+                <span>I understand this is a simulation only and no data will be changed.</span>
+              </label>
+              <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <div onClick="{{ onCloseConfirm }}" style="padding:8px 16px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer; color:oklch(45% 0.02 60);">Cancel</div>
+                <sc-if value="{{ confirmDisabled }}" hint-placeholder-val="{{ true }}">
+                  <div style="background:oklch(90% 0.02 60); color:oklch(60% 0.02 60); padding:8px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:not-allowed;">Record Preparation Confirmation</div>
+                </sc-if>
+                <sc-if value="{{ confirmEnabled }}" hint-placeholder-val="{{ false }}">
+                  <div onClick="{{ onConfirmPreparation }}" style="background:oklch(40% 0.1 150); color:white; padding:8px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">Record Preparation Confirmation</div>
+                </sc-if>
+              </div>
+            </div>
+          </div>
         </sc-if>
 
         <!-- TAB: DISABLED PLACEHOLDER -->
@@ -289,7 +390,7 @@
 const STORAGE_FOLDERS = ["propertyPhotos", "profilePhotos"];
 
 const SAMPLE_CLEANUP_CANDIDATES = [
-  { item: "PB-207 (broken owner link)", reason: "listerId is missing or does not match any existing lister document", collection: "properties", estimatedCount: 1, risk: "High", verdict: "Blocked", eligibility: "Blocked", verification: "Investigate/reassign ownership — never delete based on this signal alone" },
+  { item: "PB-207 (broken owner link)", reason: "listerId is missing or does not match any existing lister document", collection: "properties", estimatedCount: 1, risk: "High", verdict: "Blocked", eligibility: "Blocked", verification: "Investigate/reassign ownership — never delete based on this signal alone", docIds: ["PB-207"] },
   { item: "propertyPhotos orphan (3 docs)", reason: "propertyId does not match any existing property document", collection: "propertyPhotos", estimatedCount: 3, risk: "Medium", verdict: "Needs Manual Review", eligibility: "Manual Approval Required", verification: "Confirm parent Property truly does not exist and photo is unreferenced elsewhere" },
   { item: "Expired listing past 90-day grace (photo review only)", reason: "listingStatus=expired, expiresAt older than 90 days; property record is not cleanup material", collection: "properties", estimatedCount: 2, risk: "Low", verdict: "Needs Manual Review", eligibility: "Not Eligible in This Phase", verification: "Photo-only cleanup, in a future execution phase, per existing expiry rules" },
   { item: "Possible Duplicate (1 group)", reason: "Same title + price + zone appears more than once — not a confirmed duplicate", collection: "properties", estimatedCount: 1, risk: "Low", verdict: "Needs Manual Review", eligibility: "Manual Approval Required", verification: "Manually confirm records are true duplicates before any action" },
@@ -371,6 +472,7 @@ class Component extends DCLogic {
     storageResults: [], storageLoading: false,
     auditLog: [], scanStage: "", scanDurationMs: null,
     cleanupCandidates: [], cleanupLoading: false, cleanupScanned: null, cleanupNotStarted: true, cleanupDurationMs: null,
+    executionQueue: [], executionConfirmId: null, executionLog: [], confirmChecked: false,
   };
 
   logAudit(text, level) {
@@ -461,6 +563,72 @@ class Component extends DCLogic {
   // Cleanup Preview Scanner — read-only cross-collection check. Reads full
   // documents (not just counts) via fetchCollection() to detect broken
   // relationships. Never writes, never deletes — Step 8 is preview-only.
+  // Step 9 — Cleanup Execution Engine (PREPARATION ONLY). No delete, no
+  // write, no batch operation exists anywhere in this class. Queueing a
+  // candidate only stages it for a future execution phase that does not
+  // exist yet; "Confirm" below only logs the confirmation intent to the
+  // in-memory Execution Log — it performs zero Firestore writes.
+  queueForExecution(candidate) {
+    if (this.state.executionQueue.some((q) => q.item === candidate.item)) return;
+    const hasIds = Array.isArray(candidate.docIds);
+    const queued = { ...candidate, prepStatus: "Not Reviewed", docIdsAvailable: hasIds, dryRunReport: null };
+    this.setState({ executionQueue: [...this.state.executionQueue, queued] });
+    this.logExecution(`Item queued: ${candidate.item} (${candidate.eligibility})`, "queued");
+  }
+  removeFromQueue(item) {
+    this.setState({ executionQueue: this.state.executionQueue.filter((q) => q.item !== item) });
+    this.logExecution(`Item removed: ${item}`, "info");
+  }
+  openConfirm(item) {
+    this.setState({ executionConfirmId: item, confirmChecked: false });
+    this.logExecution(`Confirmation dialog opened: ${item}`, "info");
+  }
+  closeConfirm() { this.setState({ executionConfirmId: null, confirmChecked: false }); }
+  toggleConfirmChecked() { this.setState({ confirmChecked: !this.state.confirmChecked }); }
+
+  // Dry Run — produces a read-only report only. No create/update/delete/
+  // upload/batch/transaction API is called anywhere in this method.
+  runDryRun(candidate) {
+    this.logExecution(`Dry Run started: ${candidate.item}`, "info");
+    const start = Date.now();
+    const idsAvailable = Array.isArray(candidate.docIds) ? candidate.docIds.length : 0;
+    const idsUnavailable = Array.isArray(candidate.docIds) ? 0 : (candidate.estimatedCount || 0);
+    const report = {
+      queueItem: candidate.item,
+      idsAvailableCount: idsAvailable,
+      idsUnavailableCount: idsUnavailable,
+      manualVerificationCount: candidate.eligibility === "Manual Approval Required" ? (candidate.estimatedCount || 0) : 0,
+      blockedCount: candidate.eligibility === "Blocked" ? (candidate.estimatedCount || 0) : 0,
+      estimatedOperations: candidate.estimatedCount || 0,
+      actualOperationsPerformed: 0,
+      firestoreWritesPerformed: 0,
+      storageDeletionsPerformed: 0,
+      durationMs: Date.now() - start,
+      timestamp: new Date().toISOString(),
+    };
+    const executionQueue = this.state.executionQueue.map((q) => q.item === candidate.item
+      ? { ...q, prepStatus: "Dry Run Completed", dryRunReport: report } : q);
+    this.setState({ executionQueue });
+    this.logExecution(`Dry Run completed: ${candidate.item} — 0 writes, 0 deletions performed`, "dryrun");
+  }
+
+  // Recording a "Preparation Confirmation" is an in-memory acknowledgement
+  // only. It does not call any Firebase API and does NOT authorize deletion.
+  confirmPreparation(candidate) {
+    if (!this.state.confirmChecked) return;
+    const executionQueue = this.state.executionQueue.map((q) => q.item === candidate.item
+      ? { ...q, prepStatus: candidate.eligibility === "Blocked" ? "Blocked" : "CEO Confirmation Recorded" } : q);
+    this.setState({ executionQueue, executionConfirmId: null, confirmChecked: false });
+    this.logExecution(`Preparation Confirmation Recorded: ${candidate.item} — this does not authorize deletion`, "confirm");
+  }
+  attemptBlockedExecution() {
+    this.logExecution("Blocked action attempted: real execution is locked in this phase", "warn");
+  }
+  logExecution(message, kind) {
+    const entry = { id: Math.random().toString(36).slice(2), time: new Date().toLocaleTimeString(), message, kind };
+    this.setState({ executionLog: [entry, ...this.state.executionLog].slice(0, 100) });
+  }
+
   async scanCleanupCandidates() {
     if (this.state.authPhase === "preview") return;
     if (this.state.cleanupLoading) return; // prevent duplicate concurrent scans
@@ -491,18 +659,21 @@ class Component extends DCLogic {
       if (orphanProperties.length) candidates.push({
         item: `Orphan Properties (${orphanProperties.length} docs)`, reason: "listerId does not match any existing lister document",
         collection: "properties", estimatedCount: orphanProperties.length, risk: "Medium", verdict: "Needs Manual Review",
+        docIds: orphanProperties.map((p) => p.id),
       });
 
       const missingLister = properties.filter((p) => !p.listerId);
       if (missingLister.length) candidates.push({
         item: `Properties Missing Lister Link (${missingLister.length} docs)`, reason: "No listerId field present on the property document",
         collection: "properties", estimatedCount: missingLister.length, risk: "Medium", verdict: "Needs Manual Review",
+        docIds: missingLister.map((p) => p.id),
       });
 
       const orphanPhotos = photos.filter((ph) => ph.propertyId && !propertyIds.has(ph.propertyId));
       if (orphanPhotos.length) candidates.push({
         item: `Orphan Property Photos (${orphanPhotos.length} docs)`, reason: "propertyId does not match any existing property document",
-        collection: "propertyPhotos", estimatedCount: orphanPhotos.length, risk: "Low", verdict: "Safe to Cleanup",
+        collection: "propertyPhotos", estimatedCount: orphanPhotos.length, risk: "Low", verdict: "Needs Manual Review",
+        docIds: orphanPhotos.map((p) => p.id),
       });
 
       const expiredOld = properties.filter((p) => p.listingStatus === "expired" && p.expiresAt && (now - p.expiresAt) > ninetyDaysMs);
@@ -512,6 +683,7 @@ class Component extends DCLogic {
       if (expiredOld.length) candidates.push({
         item: `Expired Listings Past 90-Day Grace (${expiredOld.length} docs — photo review only)`,
         reason: "listingStatus=expired and expiresAt older than 90 days; property record itself is not cleanup material — only associated photos may be reviewed per photosDeletedAt rules",
+        docIds: expiredOld.map((p) => p.id),
         collection: "properties", estimatedCount: expiredOld.length, risk: "Low", verdict: "Needs Manual Review",
         eligibility: "Not Eligible in This Phase", verification: "Photo-only cleanup, in a future execution phase, per existing expiry rules",
       });
@@ -522,6 +694,7 @@ class Component extends DCLogic {
         if (unusedProfilePhotos.length) candidates.push({
           item: `Unused Profile Photos (${unusedProfilePhotos.length} docs)`, reason: "Document ID / ownerUid does not match any existing lister",
           collection: "profilePhotos", estimatedCount: unusedProfilePhotos.length, risk: "Low", verdict: "Needs Manual Review",
+          docIds: unusedProfilePhotos.map((p) => p.id),
           eligibility: "Manual Approval Required", verification: "Verify no remaining references before any future cleanup",
         });
       }
@@ -537,11 +710,15 @@ class Component extends DCLogic {
       if (dupCount) candidates.push({
         item: `Possible Duplicate (${dupCount} group(s))`, reason: "Same title + price + zone appears more than once — not a confirmed duplicate",
         collection: "properties", estimatedCount: dupCount, risk: "Low", verdict: "Needs Manual Review",
+        docIds: null, // grouped signal, not individual record IDs — flagged below
         eligibility: "Manual Approval Required", verification: "Manually confirm records are true duplicates before any action",
       });
 
       const durationMs = Date.now() - scanStart;
       this.logAudit(`Cleanup Preview scan completed — ${candidates.length} candidate group(s) found in ${durationMs}ms`, "info");
+      const scanSessionId = Math.random().toString(36).slice(2);
+      const scanTimestamp = new Date().toISOString();
+      candidates.forEach((c) => { c.scanSessionId = scanSessionId; c.scanTimestamp = scanTimestamp; });
       this.setState({
         cleanupLoading: false, cleanupNotStarted: false, cleanupDurationMs: durationMs, cleanupCandidates: candidates,
         cleanupScanned: { properties: properties.length, photos: photos.length, listers: listers.length, profilePhotos: profilePhotos ? profilePhotos.length : null },
@@ -557,7 +734,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const s = this.state;
-    const activeDisabled = ["cleanupExec", "verification", "golden", "export", "docs"];
+    const activeDisabled = ["verification", "golden", "export", "docs"];
     const sidebarDef = [
       { key: "overview", label: "📊 System Overview" },
       { key: "auth", label: "👤 Authentication Inventory" },
@@ -566,7 +743,7 @@ class Component extends DCLogic {
       { key: "dependency", label: "🔗 Dependency Checker" },
       { key: "auditLog", label: "📜 Audit Log" },
       { key: "cleanupPreview", label: "🧹 Cleanup Preview" },
-      { key: "cleanupExec", label: "⚙️ Cleanup Execution", disabled: true },
+      { key: "cleanupExec", label: "⚙️ Cleanup Execution" },
       { key: "verification", label: "✅ Verification", disabled: true },
       { key: "golden", label: "🌱 Golden Dataset Generator", disabled: true },
       { key: "export", label: "📤 Export Center", disabled: true },
@@ -614,7 +791,16 @@ class Component extends DCLogic {
     const depStatus = (ok) => isPreview ? "Unknown" : (ok === true ? "OK" : (ok === false ? "Missing" : "Unknown"));
     const verdictColor = (v) => v === "Blocked" ? "oklch(45% 0.13 25)" : (v === "Needs Manual Review" ? "oklch(50% 0.1 75)" : (v === "Unknown" ? "oklch(55% 0.02 60)" : "oklch(50% 0.1 75)"));
     const riskColor = (r) => r === "High" ? "oklch(45% 0.13 25)" : (r === "Medium" ? "oklch(50% 0.1 75)" : "oklch(40% 0.1 150)");
-    const cleanupRows = s.cleanupCandidates.map((c) => ({ ...c, verdictColor: verdictColor(c.verdict), riskColor: riskColor(c.risk), eligibility: c.eligibility || "Manual Approval Required", verification: c.verification || "Manual review required" }));
+    const cleanupRows = s.cleanupCandidates.map((c) => ({ ...c, verdictColor: verdictColor(c.verdict), riskColor: riskColor(c.risk), eligibility: c.eligibility || "Manual Approval Required", verification: c.verification || "Manual review required", onQueue: () => this.queueForExecution(c) }));
+    const executionQueueRows = s.executionQueue.map((q) => ({
+      ...q, onDryRun: () => this.runDryRun(q), onRemove: () => this.removeFromQueue(q.item), onOpenConfirm: () => this.openConfirm(q.item),
+      docIdsNote: q.docIdsAvailable ? `${q.docIds.length} document ID(s) available` : "Document-level identifiers not available — execution blocked.",
+      dryRunText: q.dryRunReport
+        ? `IDs available: ${q.dryRunReport.idsAvailableCount} · IDs unavailable: ${q.dryRunReport.idsUnavailableCount} · Manual verification: ${q.dryRunReport.manualVerificationCount} · Blocked: ${q.dryRunReport.blockedCount} · Est. ops: ${q.dryRunReport.estimatedOperations} · Actual ops performed: 0 · Firestore writes: 0 · Storage deletions: 0 · ${q.dryRunReport.durationMs}ms`
+        : "Not yet run",
+    }));
+    const executionLogRows = s.executionLog.map((e) => ({ ...e, color: e.kind === "dryrun" ? "oklch(45% 0.13 25)" : e.kind === "queued" ? "oklch(30% 0.1 250)" : (e.kind === "warn" ? "oklch(50% 0.13 40)" : (e.kind === "confirm" ? "oklch(40% 0.1 150)" : "oklch(40% 0.02 60)")) }));
+    const confirmCandidate = s.executionConfirmId ? s.executionQueue.find((q) => q.item === s.executionConfirmId) : null;
     const cleanupTotalCandidates = s.cleanupCandidates.reduce((sum, c) => sum + c.estimatedCount, 0);
     const cleanupSummaryText = isPreview
       ? "Items Scanned: 148 (sample) · Candidate Groups Found: 5 · Potential Cleanup Candidates: 9 · Warnings: 0"
@@ -708,6 +894,21 @@ class Component extends DCLogic {
       diagnosticRows,
       cleanupRows, cleanupSummaryText,
       onRunCleanupScan: () => this.scanCleanupCandidates(),
+      tabCleanupExec: s.activeTab === "cleanupExec",
+      executionQueue: s.executionQueue, hasExecutionQueue: s.executionQueue.length > 0,
+      executionQueueRows, executionLogRows,
+      showConfirmDialog: !!confirmCandidate,
+      confirmCandidate: confirmCandidate ? {
+        ...confirmCandidate,
+        docIdsNote: confirmCandidate.docIdsAvailable ? `${confirmCandidate.docIds.length} document ID(s) available` : "Document-level identifiers not available — execution blocked.",
+      } : {},
+      confirmChecked: s.confirmChecked,
+      confirmDisabled: !s.confirmChecked,
+      confirmEnabled: !!s.confirmChecked,
+      onToggleConfirmChecked: () => this.toggleConfirmChecked(),
+      onCloseConfirm: () => this.closeConfirm(),
+      onConfirmPreparation: () => confirmCandidate && this.confirmPreparation(confirmCandidate),
+      onAttemptBlocked: () => this.attemptBlockedExecution(),
       sidebarItems,
       activeTabTitle: titles[s.activeTab] || "System Overview",
       lastRefreshLabel: s.lastRefresh ? new Date(s.lastRefresh).toLocaleString() : "Never",
