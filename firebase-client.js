@@ -47,6 +47,46 @@ export async function fetchCollection(name) {
   return snap.docs.map((d) => ({ ...d.data(), id: d.id }));
 }
 
+// ── Developer Maintenance Center (DMC) — read-only helpers ──────────────
+// Added for DMC Phase 1 (System Overview / Firestore Inventory). These are
+// intentionally READ-ONLY: no create/update/delete. Client SDK cannot list
+// Firebase Authentication users directly (that requires the Admin SDK on a
+// server) — getCurrentAuthUser() only ever returns the signed-in caller's
+// own identity, never a full user list. Firestore document counts use
+// getCountFromServer() where the loaded SDK version supports it, falling
+// back to a plain .get() + length count (still read-only either way) so
+// this keeps working even on an older compat SDK build.
+export function getCurrentAuthUser() {
+  const a = authApp();
+  const u = a && a.currentUser;
+  return u ? { uid: u.uid, email: u.email || null } : null;
+}
+
+export function getSdkStatus() {
+  const hasFirebase = typeof window !== "undefined" && !!window.firebase;
+  let authOk = false, firestoreOk = false, storageOk = false;
+  try { authOk = !!(hasFirebase && authApp()); } catch (e) {}
+  try { firestoreOk = !!(hasFirebase && db()); } catch (e) {}
+  try { storageOk = !!(hasFirebase && storageRef()); } catch (e) {}
+  return { sdkLoaded: hasFirebase, authOk, firestoreOk, storageOk };
+}
+
+export async function fetchCollectionCount(name) {
+  try {
+    const ref = db().collection(name);
+    if (typeof ref.count === "function") {
+      // Firestore compat SDK count() aggregation, when available.
+      const agg = await ref.count().get();
+      return { collection: name, count: agg.data().count, accessStatus: "ok" };
+    }
+    const snap = await ref.get();
+    return { collection: name, count: snap.size, accessStatus: "ok" };
+  } catch (e) {
+    const denied = e && (e.code === "permission-denied" || /permission/i.test(e.message || ""));
+    return { collection: name, count: null, accessStatus: denied ? "permission-denied" : "error", error: String(e && e.message || e) };
+  }
+}
+
 // merge:true is critical here — WITHOUT it, .set() fully REPLACES the
 // document, so every partial-patch caller in this file (approveListing,
 // rejectListing, scheduleArchival, cancelArchival, the archival/expiry/

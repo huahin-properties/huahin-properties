@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <title>Developer Maintenance Center — huahin.properties</title>
+  <style>
+    body { margin: 0; background: oklch(96% 0.012 75); font-family: 'Work Sans', sans-serif; }
+    h2, h3 { font-family: 'Playfair Display', serif; }
+    a { color: oklch(45% 0.13 25); }
+  </style>
+</helmet>
+
+<sc-if value="{{ isLoadingAuth }}" hint-placeholder-val="{{ true }}">
+  <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; font-family:'Work Sans',sans-serif; color:oklch(50% 0.02 60);">
+    <div style="text-align:center;">
+      <div style="font-size:24px; margin-bottom:8px;">⏳</div>
+      <div>{{ authPhase }}...</div>
+    </div>
+  </div>
+</sc-if>
+<sc-if value="{{ isNotSignedIn }}" hint-placeholder-val="{{ false }}">
+  <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; font-family:'Work Sans',sans-serif;">
+    <div style="text-align:center; max-width:360px; padding:30px;">
+      <div style="font-size:32px; margin-bottom:10px;">🔑</div>
+      <div style="font-size:16px; color:oklch(25% 0.02 60); margin-bottom:6px;">ต้อง Login ก่อน</div>
+      <div style="font-size:13px; color:oklch(50% 0.02 60);">คุณยังไม่ได้เข้าสู่ระบบ — ต้อง Login ด้วยบัญชี Admin</div>
+      <a href="./Admin%20Login.dc.html" style="display:inline-block; margin-top:16px; background:oklch(35% 0.09 25); color:white; padding:9px 20px; border-radius:100px; text-decoration:none; font-size:13px;">ไปหน้า Admin Login</a>
+    </div>
+  </div>
+</sc-if>
+<sc-if value="{{ isAuthError }}" hint-placeholder-val="{{ false }}">
+  <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; font-family:'Work Sans',sans-serif;">
+    <div style="text-align:center; max-width:360px; padding:30px;">
+      <div style="font-size:32px; margin-bottom:10px;">⚠️</div>
+      <div style="font-size:16px; color:oklch(25% 0.02 60); margin-bottom:6px;">Authentication Error</div>
+      <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ authErrorText }}</div>
+    </div>
+  </div>
+</sc-if>
+<sc-if value="{{ isDenied }}" hint-placeholder-val="{{ false }}">
+  <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; font-family:'Work Sans',sans-serif;">
+    <div style="text-align:center; max-width:360px; padding:30px;">
+      <div style="font-size:32px; margin-bottom:10px;">🔒</div>
+      <div style="font-size:16px; color:oklch(25% 0.02 60); margin-bottom:6px;">Admin access required</div>
+      <div style="font-size:13px; color:oklch(50% 0.02 60);">คุณ Login แล้ว แต่ไม่มีสิทธิ์ Admin — ต้องเป็น Admin เท่านั้น</div>
+    </div>
+  </div>
+</sc-if>
+<sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}">
+    <div style="min-height:100vh; display:flex; flex-direction:column;">
+      <sc-if value="{{ isPreview }}" hint-placeholder-val="{{ false }}">
+        <div style="background:oklch(55% 0.16 40); color:white; text-align:center; padding:8px; font-size:12.5px; font-weight:600; letter-spacing:0.02em;">⚠️ {{ previewBannerText }}</div>
+      </sc-if>
+    <div style="min-height:100vh; display:flex; flex:1;">
+
+      <!-- SIDEBAR -->
+      <div style="width:230px; flex-shrink:0; background:oklch(20% 0.02 60); color:white; padding:22px 16px; box-sizing:border-box;">
+        <div style="font-size:11px; font-weight:600; letter-spacing:0.12em; opacity:0.7; margin-bottom:4px;">DMC</div>
+        <div style="font-family:'Playfair Display',serif; font-size:17px; margin-bottom:20px;">Developer<br/>Maintenance Center</div>
+        <sc-for list="{{ sidebarItems }}" as="item" hint-placeholder-count="12">
+          <div onClick="{{ item.onClick }}" style="{{ item.style }}">
+            <div>{{ item.label }}</div>
+            <sc-if value="{{ item.badge }}"><div style="font-size:10px; opacity:0.6; margin-top:2px;">{{ item.badge }}</div></sc-if>
+          </div>
+        </sc-for>
+        <div style="margin-top:24px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.15); font-size:11px; opacity:0.7;">
+          🔒 SAFE MODE — Read-only Phase
+        </div>
+        <a href="./Admin%20Dashboard.dc.html" style="display:block; margin-top:14px; font-size:12px; color:rgba(255,255,255,0.8); text-decoration:none;">← กลับ Admin Dashboard</a>
+      </div>
+
+      <!-- MAIN CONTENT -->
+      <div style="flex:1; padding:clamp(20px,3vw,40px); box-sizing:border-box; max-width:960px;">
+
+        <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:20px;">
+          <div>
+            <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60);">{{ activeTabTitle }}</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-top:2px;">Last Refresh: {{ lastRefreshLabel }}</div>
+          </div>
+          <div onClick="{{ onRefresh }}" style="cursor:pointer; background:oklch(35% 0.09 25); color:white; padding:9px 18px; border-radius:100px; font-size:13px; font-weight:600;">🔄 Refresh Data</div>
+        </div>
+
+        <div style="background:oklch(93% 0.1 75); border:1px solid oklch(78% 0.13 75); border-radius:8px; padding:10px 14px; margin-bottom:20px; font-size:12.5px; color:oklch(32% 0.1 50);">
+          🔒 <strong>SAFE MODE</strong> — Read-only Phase. Delete/Cleanup/Reset/Generate modules are disabled in this phase and cannot be enabled from this page.
+        </div>
+
+        <!-- TAB: SYSTEM OVERVIEW -->
+        <sc-if value="{{ tabOverview }}" hint-placeholder-val="{{ false }}">
+
+          <h3 style="font-size:16px; color:oklch(25% 0.02 60); margin:0 0 10px;">System Status</h3>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-bottom:26px;">
+            <sc-for list="{{ statusCards }}" as="c" hint-placeholder-count="8">
+              <div style="background:white; border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:12px 14px;">
+                <div style="font-size:11px; color:oklch(55% 0.02 60);">{{ c.label }}</div>
+                <div style="font-size:14px; font-weight:600; color:{{ c.color }}; margin-top:3px;">{{ c.value }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <h3 style="font-size:16px; color:oklch(25% 0.02 60); margin:0 0 10px;">Project Version</h3>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-bottom:26px;">
+            <sc-for list="{{ versionCards }}" as="v" hint-placeholder-count="6">
+              <div style="background:white; border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:12px 14px;">
+                <div style="font-size:11px; color:oklch(55% 0.02 60);">{{ v.label }}</div>
+                <div style="font-size:13px; font-weight:600; color:oklch(25% 0.02 60); margin-top:3px;">{{ v.value }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <h3 style="font-size:16px; color:oklch(25% 0.02 60); margin:0 0 10px;">System Diagnostic Panel</h3>
+          <div style="background:oklch(20% 0.02 60); color:white; border-radius:8px; padding:14px 16px; margin-bottom:26px; font-size:12.5px;">
+            <sc-for list="{{ diagnosticRows }}" as="d" hint-placeholder-count="9">
+              <div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.08);">
+                <span style="opacity:0.7;">{{ d.label }}</span><span style="font-weight:600;">{{ d.value }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <h3 style="font-size:16px; color:oklch(25% 0.02 60); margin:0 0 10px;">Overview</h3>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px;">
+            <div style="background:white; border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:14px 16px;">
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">Authentication</div>
+              <div style="font-size:13px; color:oklch(30% 0.02 60);">{{ authOverviewText }}</div>
+            </div>
+            <div style="background:white; border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:14px 16px;">
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">Firestore</div>
+              <div style="font-size:13px; color:oklch(30% 0.02 60);">{{ firestoreOverviewText }}</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- TAB: AUTHENTICATION INVENTORY -->
+        <sc-if value="{{ tabAuth }}" hint-placeholder-val="{{ false }}">
+          <div style="background:oklch(95% 0.02 250); border:1px solid oklch(85% 0.05 250); border-radius:8px; padding:12px 16px; margin-bottom:18px; font-size:12.5px; color:oklch(30% 0.08 250); line-height:1.6;">
+            ℹ️ Authentication account inventory requires Firebase Admin SDK or a protected server endpoint for complete results. The Client SDK used here can only see the currently signed-in user, not a full user list.
+          </div>
+
+          <h3 style="font-size:16px; color:oklch(25% 0.02 60); margin:0 0 10px;">A. Firebase Authentication (Client SDK — current session only)</h3>
+          <div style="background:white; border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:14px 16px; margin-bottom:22px; font-size:13.5px; color:oklch(28% 0.02 60);">
+            <div>UID: {{ currentUid }}</div>
+            <div>Email: {{ currentEmail }}</div>
+            <div>Role: {{ currentRole }}</div>
+            <div>Protected: {{ currentProtected }}</div>
+            <div>Sign-in Status: {{ signInStatusText }}</div>
+          </div>
+
+          <h3 style="font-size:16px; color:oklch(25% 0.02 60); margin:0 0 10px;">B. Firestore listers / adminUsers documents (readable via Client SDK)</h3>
+          <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+              <tr style="text-align:left; color:oklch(50% 0.02 60); border-bottom:1px solid oklch(88% 0.01 70);">
+                <th style="padding:6px 8px;">Collection</th><th style="padding:6px 8px;">Document Count</th><th style="padding:6px 8px;">Access Status</th>
+              </tr>
+              <sc-for list="{{ authRelatedRows }}" as="r" hint-placeholder-count="2">
+                <tr style="border-bottom:1px solid oklch(93% 0.01 70);">
+                  <td style="padding:6px 8px;">{{ r.collection }}</td>
+                  <td style="padding:6px 8px;">{{ r.countLabel }}</td>
+                  <td style="padding:6px 8px; color:{{ r.statusColor }};">{{ r.accessStatus }}</td>
+                </tr>
+              </sc-for>
+            </table>
+          </div>
+        </sc-if>
+
+        <!-- TAB: FIRESTORE INVENTORY -->
+        <sc-if value="{{ tabFirestore }}" hint-placeholder-val="{{ false }}">
+          <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+              <tr style="text-align:left; color:oklch(50% 0.02 60); border-bottom:1px solid oklch(88% 0.01 70);">
+                <th style="padding:6px 8px;">Collection</th><th style="padding:6px 8px;">Document Count</th><th style="padding:6px 8px;">Access Status</th><th style="padding:6px 8px;">Category</th><th style="padding:6px 8px;">Notes</th>
+              </tr>
+              <sc-for list="{{ firestoreRows }}" as="r" hint-placeholder-count="17">
+                <tr style="border-bottom:1px solid oklch(93% 0.01 70);">
+                  <td style="padding:6px 8px;">{{ r.collection }}</td>
+                  <td style="padding:6px 8px;">{{ r.countLabel }}</td>
+                  <td style="padding:6px 8px; color:{{ r.statusColor }};">{{ r.accessStatus }}</td>
+                  <td style="padding:6px 8px;">{{ r.category }}</td>
+                  <td style="padding:6px 8px; color:oklch(50% 0.02 60);">{{ r.notes }}</td>
+                </tr>
+              </sc-for>
+            </table>
+          </div>
+          <div style="margin-top:14px; font-size:12.5px; color:oklch(45% 0.02 60);">Total documents (successful reads only): <strong>{{ firestoreTotalLabel }}</strong></div>
+        </sc-if>
+
+        <!-- TAB: DISABLED PLACEHOLDER -->
+        <sc-if value="{{ tabDisabled }}" hint-placeholder-val="{{ false }}">
+          <div style="background:white; border:1px dashed oklch(80% 0.02 60); border-radius:8px; padding:40px; text-align:center; color:oklch(55% 0.02 60); font-size:14px;">
+            🚧 {{ activeTabTitle }} — Coming in next phase
+          </div>
+        </sc-if>
+
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const FIRESTORE_COLLECTIONS = [
+  { name: "adminUsers", category: "System" },
+  { name: "listers", category: "User" },
+  { name: "properties", category: "Property" },
+  { name: "propertyPhotos", category: "Property" },
+  { name: "payments", category: "Payment" },
+  { name: "owners", category: "User" },
+  { name: "tenants", category: "User" },
+  { name: "leads", category: "Marketing" },
+  { name: "listerLeads", category: "Marketing" },
+  { name: "buyerRegistrations", category: "Marketing" },
+  { name: "banners", category: "Marketing" },
+  { name: "staffInvites", category: "System" },
+  { name: "siteContent", category: "Content" },
+  { name: "profilePhotos", category: "Content" },
+  { name: "aiNotes", category: "Content" },
+  { name: "externalServices", category: "System" },
+  { name: "settings", category: "System" },
+];
+
+// Runtime Mode detection — evidence-based, not a URL-parameter switch.
+// Production is served from huahin.properties (or a Firebase Hosting
+// domain ending in web.app/firebaseapp.com — the real deploy targets per
+// BLUEPRINT §8.3). Anything else (this design tool's own preview host)
+// has no real Firebase project wired to it, so it is safe and correct to
+// treat as Design Preview — there is no live Admin session possible there
+// regardless, and no code path here ever skips the real Admin Gate on the
+// production hostnames.
+function detectRuntimeMode() {
+  let hostname = "unknown";
+  try { hostname = (window.location && window.location.hostname) || "unknown"; } catch (e) {}
+  const isProd = hostname === "huahin.properties" || hostname.endsWith(".huahin.properties")
+    || hostname.endsWith(".web.app") || hostname.endsWith(".firebaseapp.com")
+    || hostname === "localhost" || hostname === "127.0.0.1";
+  return { hostname, mode: isProd ? "live" : "preview" };
+}
+
+const SAMPLE_FIRESTORE_ROWS = [
+  { collection: "adminUsers", count: 1, accessStatus: "ok", category: "System", notes: "" },
+  { collection: "listers", count: 12, accessStatus: "ok", category: "User", notes: "" },
+  { collection: "properties", count: 28, accessStatus: "ok", category: "Property", notes: "" },
+  { collection: "propertyPhotos", count: 96, accessStatus: "ok", category: "Property", notes: "" },
+  { collection: "payments", count: 4, accessStatus: "ok", category: "Payment", notes: "" },
+  { collection: "owners", count: 9, accessStatus: "ok", category: "User", notes: "" },
+  { collection: "tenants", count: 2, accessStatus: "ok", category: "User", notes: "" },
+  { collection: "leads", count: 5, accessStatus: "ok", category: "Marketing", notes: "" },
+  { collection: "listerLeads", count: 3, accessStatus: "ok", category: "Marketing", notes: "" },
+  { collection: "buyerRegistrations", count: 0, accessStatus: "ok", category: "Marketing", notes: "" },
+  { collection: "banners", count: 2, accessStatus: "ok", category: "Marketing", notes: "" },
+  { collection: "staffInvites", count: 0, accessStatus: "ok", category: "System", notes: "" },
+  { collection: "siteContent", count: 6, accessStatus: "ok", category: "Content", notes: "" },
+  { collection: "profilePhotos", count: 12, accessStatus: "ok", category: "Content", notes: "" },
+  { collection: "aiNotes", count: 3, accessStatus: "ok", category: "Content", notes: "" },
+  { collection: "externalServices", count: 1, accessStatus: "ok", category: "System", notes: "" },
+  { collection: "settings", count: 1, accessStatus: "ok", category: "System", notes: "" },
+];
+
+class Component extends DCLogic {
+  state = {
+    // authPhase: "loadingFirebase" | "checkingAuth" | "checkingAdmin" | "granted" | "denied" | "notSignedIn" | "error" | "preview"
+    authPhase: "loadingFirebase",
+    activeTab: "overview",
+    lastRefresh: null, sdkStatus: null, currentUser: null,
+    firestoreResults: [], firestoreLoading: false,
+    runtime: null, authError: "",
+  };
+
+  async componentDidMount() {
+    const runtime = detectRuntimeMode();
+    this.setState({ runtime });
+
+    if (runtime.mode === "preview") {
+      // DESIGN PREVIEW MODE — sample data only, no Firebase reads/writes.
+      this.setState({
+        authPhase: "preview",
+        sdkStatus: { sdkLoaded: false, authOk: false, firestoreOk: false, storageOk: false },
+        currentUser: null,
+        firestoreResults: SAMPLE_FIRESTORE_ROWS,
+        firestoreLoading: false,
+        lastRefresh: Date.now(),
+      });
+      return;
+    }
+
+    // LIVE MODE — real Admin Gate, same workflow as Admin Dashboard:
+    // Firebase init → onAdminAuthReady() (auth resolved) → isAdminAuthed().
+    this.setState({ authPhase: "checkingAuth" });
+    try {
+      const fb = await import("./firebase-client.js");
+      this._fb = fb;
+      const authedUser = await fb.onAdminAuthReady().catch(() => null);
+      if (!authedUser) { this.setState({ authPhase: "notSignedIn" }); return; }
+      this.setState({ authPhase: "checkingAdmin" });
+      const isAdmin = fb.isAdminAuthed();
+      if (!isAdmin) { this.setState({ authPhase: "denied" }); return; }
+      this.setState({ authPhase: "granted" });
+      await this.refreshAll();
+    } catch (e) {
+      this.setState({ authPhase: "error", authError: String(e && e.message || e) });
+    }
+  }
+
+  async refreshAll() {
+    if (this.state.runtime && this.state.runtime.mode === "preview") return; // never re-fetch in preview
+    const fb = this._fb;
+    const sdkStatus = fb.getSdkStatus();
+    const currentUser = fb.getCurrentAuthUser();
+    this.setState({ sdkStatus, currentUser, firestoreLoading: true });
+    const results = [];
+    for (const c of FIRESTORE_COLLECTIONS) {
+      const r = await fb.fetchCollectionCount(c.name).catch((e) => ({ collection: c.name, count: null, accessStatus: "error", error: String(e) }));
+      results.push({ ...r, category: c.category });
+    }
+    this.setState({ firestoreResults: results, firestoreLoading: false, lastRefresh: Date.now() });
+  }
+
+  onRefresh() {
+    if (this.state.authPhase === "preview") return;
+    this.refreshAll();
+  }
+
+  setTab(tab) { this.setState({ activeTab: tab }); }
+
+  renderVals() {
+    const s = this.state;
+    const activeDisabled = ["storage", "dependency", "cleanupPreview", "cleanupExec", "verification", "golden", "export", "auditLog", "docs"];
+    const sidebarDef = [
+      { key: "overview", label: "📊 System Overview" },
+      { key: "auth", label: "👤 Authentication Inventory" },
+      { key: "firestore", label: "🗄️ Firestore Inventory" },
+      { key: "storage", label: "📦 Storage Inventory", disabled: true },
+      { key: "dependency", label: "🔗 Dependency Checker", disabled: true },
+      { key: "cleanupPreview", label: "🧹 Cleanup Preview", disabled: true },
+      { key: "cleanupExec", label: "⚙️ Cleanup Execution", disabled: true },
+      { key: "verification", label: "✅ Verification", disabled: true },
+      { key: "golden", label: "🌱 Golden Dataset Generator", disabled: true },
+      { key: "export", label: "📤 Export Center", disabled: true },
+      { key: "auditLog", label: "📜 Audit Log", disabled: true },
+      { key: "docs", label: "📖 Documentation", disabled: true },
+    ];
+    const sidebarItems = sidebarDef.map((it) => ({
+      label: it.label,
+      badge: it.disabled ? "Coming in next phase" : "",
+      onClick: it.disabled ? () => {} : () => this.setTab(it.key),
+      style: `padding:9px 10px; border-radius:6px; margin-bottom:2px; font-size:13px; cursor:${it.disabled ? "default" : "pointer"}; opacity:${it.disabled ? "0.4" : "1"}; background:${s.activeTab === it.key ? "rgba(255,255,255,0.12)" : "transparent"};`,
+    }));
+
+    const titles = {
+      overview: "System Overview", auth: "Authentication Inventory", firestore: "Firestore Inventory",
+      storage: "Storage Inventory", dependency: "Dependency Checker", cleanupPreview: "Cleanup Preview",
+      cleanupExec: "Cleanup Execution", verification: "Verification", golden: "Golden Dataset Generator",
+      export: "Export Center", auditLog: "Audit Log", docs: "Documentation",
+    };
+
+    let hostname = "Unknown", environment = "Unknown";
+    try {
+      hostname = window.location.hostname || "Unknown";
+      if (hostname === "localhost" || hostname === "127.0.0.1") environment = "Local";
+      else if (hostname.includes("web.app") || hostname.includes("firebaseapp.com")) environment = "Development";
+      else if (hostname === "huahin.properties" || hostname.endsWith(".huahin.properties")) environment = "Production";
+    } catch (e) {}
+
+    const sdk = s.sdkStatus || { sdkLoaded: false, authOk: false, firestoreOk: false, storageOk: false };
+    const previewMode = s.authPhase === "preview";
+    const na = "N/A (Preview)";
+    const naColor = "oklch(55% 0.02 60)";
+    const statusCards = previewMode ? [
+      { label: "Firebase SDK Loaded", value: na, color: naColor },
+      { label: "Authentication Connected", value: na, color: naColor },
+      { label: "Firestore Connected", value: na, color: naColor },
+      { label: "Storage SDK Available", value: na, color: naColor },
+      { label: "Current User", value: "Preview Viewer", color: naColor },
+      { label: "Admin Permission", value: na, color: naColor },
+      { label: "Environment", value: "Design Preview", color: naColor },
+      { label: "Last Refresh", value: s.lastRefresh ? new Date(s.lastRefresh).toLocaleTimeString() : "Never", color: naColor },
+    ] : [
+      { label: "Firebase SDK Loaded", value: sdk.sdkLoaded ? "Yes" : "No", color: sdk.sdkLoaded ? "oklch(40% 0.1 150)" : "oklch(45% 0.13 25)" },
+      { label: "Authentication Connected", value: sdk.authOk ? "Yes" : "No", color: sdk.authOk ? "oklch(40% 0.1 150)" : "oklch(45% 0.13 25)" },
+      { label: "Firestore Connected", value: sdk.firestoreOk ? "Yes" : "No", color: sdk.firestoreOk ? "oklch(40% 0.1 150)" : "oklch(45% 0.13 25)" },
+      { label: "Storage SDK Available", value: sdk.storageOk ? "Yes" : "No", color: sdk.storageOk ? "oklch(40% 0.1 150)" : "oklch(45% 0.13 25)" },
+      { label: "Current User", value: (s.currentUser && s.currentUser.email) || "None", color: "oklch(30% 0.02 60)" },
+      { label: "Admin Permission", value: s.authPhase === "granted" ? "Granted" : "Denied", color: s.authPhase === "granted" ? "oklch(40% 0.1 150)" : "oklch(45% 0.13 25)" },
+      { label: "Environment", value: environment, color: "oklch(30% 0.02 60)" },
+      { label: "Last Refresh", value: s.lastRefresh ? new Date(s.lastRefresh).toLocaleTimeString() : "Never", color: "oklch(30% 0.02 60)" },
+    ];
+
+    const versionCards = [
+      { label: "Project Name", value: "huahin.properties" },
+      { label: "PHS Version", value: "1 (FINAL — Released and Closed)" },
+      { label: "Membership Version", value: "Not configured" },
+      { label: "Database Version", value: "Not configured" },
+      { label: "Schema Version", value: "Not configured" },
+      { label: "Build Version", value: "Not configured" },
+    ];
+
+    const okRows = s.firestoreResults.filter((r) => r.accessStatus === "ok");
+    const firestoreTotal = okRows.length ? okRows.reduce((sum, r) => sum + (r.count || 0), 0) : null;
+
+    const firestoreRows = s.firestoreResults.map((r) => ({
+      collection: r.collection,
+      countLabel: s.firestoreLoading ? "..." : (r.accessStatus === "ok" ? String(r.count) : "—"),
+      accessStatus: s.firestoreLoading ? "loading" : r.accessStatus,
+      statusColor: r.accessStatus === "ok" ? "oklch(40% 0.1 150)" : (r.accessStatus === "permission-denied" ? "oklch(50% 0.1 75)" : "oklch(45% 0.13 25)"),
+      category: r.category,
+      notes: r.accessStatus === "ok" ? "" : (r.error || ""),
+    }));
+
+    const authRelatedRows = s.firestoreResults.filter((r) => r.collection === "listers" || r.collection === "adminUsers").map((r) => ({
+      collection: r.collection,
+      countLabel: s.firestoreLoading ? "..." : (r.accessStatus === "ok" ? String(r.count) : "—"),
+      accessStatus: s.firestoreLoading ? "loading" : r.accessStatus,
+      statusColor: r.accessStatus === "ok" ? "oklch(40% 0.1 150)" : "oklch(45% 0.13 25)",
+    }));
+
+    const isPreview = s.authPhase === "preview";
+    const isGranted = s.authPhase === "granted" || isPreview;
+    const diagnosticRows = [
+      { label: "Runtime Mode", value: isPreview ? "Design Preview" : "Live" },
+      { label: "Hostname", value: (s.runtime && s.runtime.hostname) || "unknown" },
+      { label: "Firebase SDK Loaded", value: isPreview ? "Not used" : (sdk.sdkLoaded ? "Yes" : "No") },
+      { label: "Authentication", value: isPreview ? "Not used" : ({ loadingFirebase: "Loading...", checkingAuth: "Checking...", checkingAdmin: "Checking Admin...", granted: "Ready", denied: "Ready (not Admin)", notSignedIn: "Not signed in", error: "Error" }[s.authPhase] || "Unknown") },
+      { label: "Current User", value: isPreview ? "N/A (Preview Viewer)" : ((s.currentUser && s.currentUser.email) || "None") },
+      { label: "Admin Check Status", value: isPreview ? "N/A" : ({ granted: "Admin verified", denied: "Not Admin", notSignedIn: "Pending sign-in", checkingAdmin: "Checking...", error: "Error" }[s.authPhase] || "Pending") },
+      { label: "SAFE MODE", value: "Locked" },
+      { label: "Data Source", value: isPreview ? "Sample Data" : "Firebase (live)" },
+      { label: "Last Status Update", value: s.lastRefresh ? new Date(s.lastRefresh).toLocaleString() : "Never" },
+    ];
+
+    return {
+      loaded: true, isAdmin: isGranted,
+      authPhase: s.authPhase,
+      isLoadingAuth: ["loadingFirebase", "checkingAuth", "checkingAdmin"].includes(s.authPhase),
+      isDenied: s.authPhase === "denied",
+      isNotSignedIn: s.authPhase === "notSignedIn",
+      isAuthError: s.authPhase === "error",
+      authErrorText: s.authError,
+      isPreview,
+      previewBannerText: "DESIGN PREVIEW — SAMPLE DATA ONLY — NO FIREBASE OPERATIONS",
+      diagnosticRows,
+      sidebarItems,
+      activeTabTitle: titles[s.activeTab] || "System Overview",
+      lastRefreshLabel: s.lastRefresh ? new Date(s.lastRefresh).toLocaleString() : "Never",
+      onRefresh: () => this.onRefresh(),
+      tabOverview: s.activeTab === "overview",
+      tabAuth: s.activeTab === "auth",
+      tabFirestore: s.activeTab === "firestore",
+      tabDisabled: activeDisabled.includes(s.activeTab),
+      statusCards, versionCards,
+      authOverviewText: `Authentication account inventory requires Firebase Admin SDK or a protected server endpoint for complete results. Currently signed in: ${(s.currentUser && s.currentUser.email) || "none"}.`,
+      firestoreOverviewText: s.firestoreLoading ? "Loading..." : `${okRows.length}/${FIRESTORE_COLLECTIONS.length} collections readable, ${firestoreTotal === null ? "—" : firestoreTotal} total documents (successful reads only)`,
+      currentUid: isPreview ? "N/A (Preview Viewer)" : ((s.currentUser && s.currentUser.uid) || "—"),
+      currentEmail: isPreview ? "N/A (Preview Viewer)" : ((s.currentUser && s.currentUser.email) || "—"),
+      currentRole: isPreview ? "Preview Viewer" : (isGranted ? "Admin" : "Unknown"),
+      currentProtected: isPreview ? "No (sample data)" : (isGranted ? "Yes" : "Unknown"),
+      signInStatusText: isPreview ? "Preview Viewer — not an authenticated session" : (s.currentUser ? "Signed in" : "Not signed in"),
+      authRelatedRows,
+      firestoreRows,
+      firestoreTotalLabel: firestoreTotal === null ? "Unavailable" : String(firestoreTotal),
+    };
+  }
+}
+</script>
+</body>
+</html>
