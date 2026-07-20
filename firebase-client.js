@@ -83,7 +83,21 @@ export async function fetchCollectionCount(name) {
     return { collection: name, count: snap.size, accessStatus: "ok" };
   } catch (e) {
     const denied = e && (e.code === "permission-denied" || /permission/i.test(e.message || ""));
-    return { collection: name, count: null, accessStatus: denied ? "permission-denied" : "error", error: String(e && e.message || e) };
+    return { collection: name, count: null, accessStatus: denied ? "permission-denied" : "error", error: String(e && e.message || e), errorCode: (e && e.code) || "" };
+  }
+}
+
+// DMC Phase 2 — read-only Storage folder listing. Client SDK cannot report
+// aggregate folder size (that requires Admin SDK / gsutil), so callers must
+// show "Not available from Client SDK" rather than estimate one.
+export async function fetchStorageFolderInventory(folderPath) {
+  try {
+    const ref = storageRef().ref(folderPath);
+    const res = await ref.listAll();
+    return { folder: folderPath, fileCount: res.items.length, subfolderCount: res.prefixes.length, accessStatus: "ok" };
+  } catch (e) {
+    const denied = e && (e.code === "storage/unauthorized" || /permission|unauthorized/i.test(e.message || ""));
+    return { folder: folderPath, fileCount: null, subfolderCount: null, accessStatus: denied ? "permission-denied" : "error", error: String(e && e.message || e) };
   }
 }
 

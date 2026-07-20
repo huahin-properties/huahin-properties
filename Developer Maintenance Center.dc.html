@@ -88,7 +88,7 @@
         <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:20px;">
           <div>
             <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60);">{{ activeTabTitle }}</div>
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-top:2px;">Last Refresh: {{ lastRefreshLabel }}</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-top:2px;">Last Refresh: {{ lastRefreshLabel }} · {{ scanStage }} · {{ scanDurationLabel }}</div>
           </div>
           <div onClick="{{ onRefresh }}" style="cursor:pointer; background:oklch(35% 0.09 25); color:white; padding:9px 18px; border-radius:100px; font-size:13px; font-weight:600;">🔄 Refresh Data</div>
         </div>
@@ -195,6 +195,51 @@
           <div style="margin-top:14px; font-size:12.5px; color:oklch(45% 0.02 60);">Total documents (successful reads only): <strong>{{ firestoreTotalLabel }}</strong></div>
         </sc-if>
 
+        <sc-if value="{{ tabStorage }}" hint-placeholder-val="{{ false }}">
+          <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+              <tr style="text-align:left; color:oklch(50% 0.02 60); border-bottom:1px solid oklch(88% 0.01 70);">
+                <th style="padding:6px 8px;">Folder</th><th style="padding:6px 8px;">File Count</th><th style="padding:6px 8px;">Size</th><th style="padding:6px 8px;">Access Status</th>
+              </tr>
+              <sc-for list="{{ storageRows }}" as="r" hint-placeholder-count="2">
+                <tr style="border-bottom:1px solid oklch(93% 0.01 70);">
+                  <td style="padding:6px 8px;">{{ r.folder }}</td>
+                  <td style="padding:6px 8px;">{{ r.fileCountLabel }}</td>
+                  <td style="padding:6px 8px; color:oklch(55% 0.02 60);">{{ r.sizeLabel }}</td>
+                  <td style="padding:6px 8px; color:{{ r.statusColor }};">{{ r.accessStatus }}</td>
+                </tr>
+              </sc-for>
+            </table>
+          </div>
+          <div style="margin-top:14px; font-size:12.5px; color:oklch(45% 0.02 60);">Total files (successful reads only): <strong>{{ storageTotalFilesLabel }}</strong> · Last scan: {{ lastRefreshLabel }}</div>
+        </sc-if>
+
+        <sc-if value="{{ tabDependency }}" hint-placeholder-val="{{ false }}">
+          <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+              <tr style="text-align:left; color:oklch(50% 0.02 60); border-bottom:1px solid oklch(88% 0.01 70);">
+                <th style="padding:6px 8px;">Dependency</th><th style="padding:6px 8px;">Status</th>
+              </tr>
+              <sc-for list="{{ dependencyRows }}" as="d" hint-placeholder-count="8">
+                <tr style="border-bottom:1px solid oklch(93% 0.01 70);">
+                  <td style="padding:6px 8px;">{{ d.name }}</td>
+                  <td style="padding:6px 8px; color:{{ d.color }}; font-weight:600;">{{ d.status }}</td>
+                </tr>
+              </sc-for>
+            </table>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ tabAuditLog }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <sc-for list="{{ auditRows }}" as="a" hint-placeholder-count="5">
+              <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 12px; font-size:12.5px; display:flex; justify-content:space-between;">
+                <span style="color:{{ a.color }};">{{ a.text }}</span><span style="color:oklch(60% 0.02 60);">{{ a.time }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
         <!-- TAB: DISABLED PLACEHOLDER -->
         <sc-if value="{{ tabDisabled }}" hint-placeholder-val="{{ false }}">
           <div style="background:white; border:1px dashed oklch(80% 0.02 60); border-radius:8px; padding:40px; text-align:center; color:oklch(55% 0.02 60); font-size:14px;">
@@ -209,6 +254,15 @@
 
 </x-dc>
 <script type="text/x-dc" data-dc-script>
+const STORAGE_FOLDERS = ["propertyPhotos", "profilePhotos"];
+
+const DEPENDENCIES = [
+  { name: "Firebase SDK", key: "sdkLoaded" },
+  { name: "Firestore", key: "firestoreOk" },
+  { name: "Authentication", key: "authOk" },
+  { name: "Storage", key: "storageOk" },
+];
+
 const FIRESTORE_COLLECTIONS = [
   { name: "adminUsers", category: "System" },
   { name: "listers", category: "User" },
@@ -274,7 +328,14 @@ class Component extends DCLogic {
     lastRefresh: null, sdkStatus: null, currentUser: null,
     firestoreResults: [], firestoreLoading: false,
     runtime: null, authError: "",
+    storageResults: [], storageLoading: false,
+    auditLog: [], scanStage: "", scanDurationMs: null,
   };
+
+  logAudit(text, level) {
+    const entry = { id: Math.random().toString(36).slice(2), time: Date.now(), text, level: level || "info" };
+    this.setState({ auditLog: [entry, ...this.state.auditLog].slice(0, 100) });
+  }
 
   async componentDidMount() {
     const runtime = detectRuntimeMode();
@@ -289,9 +350,15 @@ class Component extends DCLogic {
         firestoreResults: SAMPLE_FIRESTORE_ROWS,
         firestoreLoading: false,
         lastRefresh: Date.now(),
+        storageResults: [
+          { folder: "propertyPhotos/", fileCount: 96, subfolderCount: 0, accessStatus: "ok" },
+          { folder: "profilePhotos/", fileCount: 12, subfolderCount: 0, accessStatus: "ok" },
+        ],
       });
+      this.logAudit("Page opened (Design Preview Mode)", "info");
       return;
     }
+    this.logAudit("Page opened (Live Mode)", "info");
 
     // LIVE MODE — real Admin Gate, same workflow as Admin Dashboard:
     // Firebase init → onAdminAuthReady() (auth resolved) → isAdminAuthed().
@@ -314,19 +381,34 @@ class Component extends DCLogic {
   async refreshAll() {
     if (this.state.runtime && this.state.runtime.mode === "preview") return; // never re-fetch in preview
     const fb = this._fb;
+    const t0 = Date.now();
     const sdkStatus = fb.getSdkStatus();
     const currentUser = fb.getCurrentAuthUser();
-    this.setState({ sdkStatus, currentUser, firestoreLoading: true });
-    const results = [];
-    for (const c of FIRESTORE_COLLECTIONS) {
-      const r = await fb.fetchCollectionCount(c.name).catch((e) => ({ collection: c.name, count: null, accessStatus: "error", error: String(e) }));
-      results.push({ ...r, category: c.category });
-    }
-    this.setState({ firestoreResults: results, firestoreLoading: false, lastRefresh: Date.now() });
+    this.setState({ sdkStatus, currentUser, firestoreLoading: true, storageLoading: true, scanStage: "Scanning Firestore..." });
+
+    // Parallel, read-only, per-item error isolation (Module 6 — Performance).
+    this.setState({ scanStage: "Scanning Firestore... / Scanning Storage..." });
+    const [firestoreSettled, storageSettled] = await Promise.all([
+      Promise.all(FIRESTORE_COLLECTIONS.map((c) =>
+        fb.fetchCollectionCount(c.name).then((r) => ({ ...r, category: c.category }))
+          .catch((e) => ({ collection: c.name, count: null, accessStatus: "error", error: String(e), category: c.category })))),
+      Promise.all(STORAGE_FOLDERS.map((f) =>
+        fb.fetchStorageFolderInventory(f).catch((e) => ({ folder: f, fileCount: null, accessStatus: "error", error: String(e) })))),
+    ]);
+
+    this.setState({ scanStage: "Checking Dependencies...", firestoreResults: firestoreSettled, storageResults: storageSettled, firestoreLoading: false, storageLoading: false });
+    const failed = firestoreSettled.filter((r) => r.accessStatus !== "ok").length;
+    if (failed > 0) this.logAudit(`Warnings detected: ${failed} Firestore collection(s) not readable`, "warn");
+
+    this.setState({ scanStage: "Updating Health..." });
+    const duration = Date.now() - t0;
+    this.setState({ scanStage: "Completed", scanDurationMs: duration, lastRefresh: Date.now() });
+    this.logAudit(`Inventory completed in ${duration}ms`, "info");
   }
 
   onRefresh() {
     if (this.state.authPhase === "preview") return;
+    this.logAudit("Refresh executed", "info");
     this.refreshAll();
   }
 
@@ -334,19 +416,19 @@ class Component extends DCLogic {
 
   renderVals() {
     const s = this.state;
-    const activeDisabled = ["storage", "dependency", "cleanupPreview", "cleanupExec", "verification", "golden", "export", "auditLog", "docs"];
+    const activeDisabled = ["cleanupPreview", "cleanupExec", "verification", "golden", "export", "docs"];
     const sidebarDef = [
       { key: "overview", label: "📊 System Overview" },
       { key: "auth", label: "👤 Authentication Inventory" },
       { key: "firestore", label: "🗄️ Firestore Inventory" },
-      { key: "storage", label: "📦 Storage Inventory", disabled: true },
-      { key: "dependency", label: "🔗 Dependency Checker", disabled: true },
+      { key: "storage", label: "📦 Storage Inventory" },
+      { key: "dependency", label: "🔗 Dependency Checker" },
+      { key: "auditLog", label: "📜 Audit Log" },
       { key: "cleanupPreview", label: "🧹 Cleanup Preview", disabled: true },
       { key: "cleanupExec", label: "⚙️ Cleanup Execution", disabled: true },
       { key: "verification", label: "✅ Verification", disabled: true },
       { key: "golden", label: "🌱 Golden Dataset Generator", disabled: true },
       { key: "export", label: "📤 Export Center", disabled: true },
-      { key: "auditLog", label: "📜 Audit Log", disabled: true },
       { key: "docs", label: "📖 Documentation", disabled: true },
     ];
     const sidebarItems = sidebarDef.map((it) => ({
@@ -363,6 +445,21 @@ class Component extends DCLogic {
       export: "Export Center", auditLog: "Audit Log", docs: "Documentation",
     };
 
+    const storageRows = s.storageResults.map((r) => ({
+      folder: r.folder,
+      fileCountLabel: s.storageLoading ? "..." : (r.accessStatus === "ok" ? String(r.fileCount) : "—"),
+      sizeLabel: "Not available from Client SDK",
+      accessStatus: s.storageLoading ? "loading" : r.accessStatus,
+      statusColor: r.accessStatus === "ok" ? "oklch(40% 0.1 150)" : "oklch(50% 0.1 75)",
+    }));
+    const storageTotalFiles = storageRows.filter((r) => r.accessStatus === "ok").reduce((sum, r, i) => sum + (s.storageResults[i] && s.storageResults[i].fileCount || 0), 0);
+
+    const auditRows = s.auditLog.map((a) => ({
+      time: new Date(a.time).toLocaleTimeString(),
+      text: a.text,
+      color: a.level === "warn" ? "oklch(50% 0.13 75)" : (a.level === "error" ? "oklch(45% 0.13 25)" : "oklch(40% 0.02 60)"),
+    }));
+
     let hostname = "Unknown", environment = "Unknown";
     try {
       hostname = window.location.hostname || "Unknown";
@@ -371,11 +468,22 @@ class Component extends DCLogic {
       else if (hostname === "huahin.properties" || hostname.endsWith(".huahin.properties")) environment = "Production";
     } catch (e) {}
 
+    const isPreview = s.authPhase === "preview";
     const sdk = s.sdkStatus || { sdkLoaded: false, authOk: false, firestoreOk: false, storageOk: false };
-    const previewMode = s.authPhase === "preview";
+    const depStatus = (ok) => isPreview ? "Unknown" : (ok === true ? "OK" : (ok === false ? "Missing" : "Unknown"));
+    const dependencyRows = [
+      { name: "Firebase SDK", status: depStatus(sdk.sdkLoaded) },
+      { name: "Firestore", status: depStatus(sdk.firestoreOk) },
+      { name: "Authentication", status: depStatus(sdk.authOk) },
+      { name: "Storage", status: depStatus(sdk.storageOk) },
+      { name: "Maps", status: "Unknown" },
+      { name: "Stripe", status: "Unknown" },
+      { name: "Cloud Functions", status: "Unknown" },
+      { name: "External Services", status: "Unknown" },
+    ].map((d) => ({ ...d, color: d.status === "OK" ? "oklch(40% 0.1 150)" : (d.status === "Missing" ? "oklch(45% 0.13 25)" : "oklch(55% 0.1 75)") }));
     const na = "N/A (Preview)";
     const naColor = "oklch(55% 0.02 60)";
-    const statusCards = previewMode ? [
+    const statusCards = isPreview ? [
       { label: "Firebase SDK Loaded", value: na, color: naColor },
       { label: "Authentication Connected", value: na, color: naColor },
       { label: "Firestore Connected", value: na, color: naColor },
@@ -423,7 +531,6 @@ class Component extends DCLogic {
       statusColor: r.accessStatus === "ok" ? "oklch(40% 0.1 150)" : "oklch(45% 0.13 25)",
     }));
 
-    const isPreview = s.authPhase === "preview";
     const isGranted = s.authPhase === "granted" || isPreview;
     const diagnosticRows = [
       { label: "Runtime Mode", value: isPreview ? "Design Preview" : "Live" },
@@ -455,7 +562,16 @@ class Component extends DCLogic {
       tabOverview: s.activeTab === "overview",
       tabAuth: s.activeTab === "auth",
       tabFirestore: s.activeTab === "firestore",
+      tabStorage: s.activeTab === "storage",
+      tabDependency: s.activeTab === "dependency",
+      tabAuditLog: s.activeTab === "auditLog",
       tabDisabled: activeDisabled.includes(s.activeTab),
+      scanStage: s.scanStage,
+      scanDurationLabel: s.scanDurationMs !== null ? `${s.scanDurationMs}ms` : "—",
+      dependencyRows,
+      storageRows,
+      storageTotalFilesLabel: s.storageLoading ? "..." : String(storageTotalFiles),
+      auditRows,
       statusCards, versionCards,
       authOverviewText: `Authentication account inventory requires Firebase Admin SDK or a protected server endpoint for complete results. Currently signed in: ${(s.currentUser && s.currentUser.email) || "none"}.`,
       firestoreOverviewText: s.firestoreLoading ? "Loading..." : `${okRows.length}/${FIRESTORE_COLLECTIONS.length} collections readable, ${firestoreTotal === null ? "—" : firestoreTotal} total documents (successful reads only)`,
