@@ -1042,3 +1042,7 @@ Priority ที่ใช้ได้: `Critical` / `High` / `Medium` / `Low` / `
 3. `CEO-LOGIN-SHEET.md` is a private operational document.
 4. Only `BLUEPRINT.md` and `export-for-github/BLUEPRINT.md` are intended for GitHub.
 5. `CEO-LOGIN-SHEET.md` must never be committed or uploaded into the GitHub repository.
+
+## 23. PHS Release Principle
+
+Each PHS release is a complete current-state package. The latest approved release is sufficient for opening a new AI conversation; previous releases are retained only as historical reference.

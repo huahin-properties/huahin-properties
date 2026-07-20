@@ -2,9 +2,12 @@ RELEASE MANIFEST
 
 Project: huahin.properties
 PHS Version: 1
-Release status: Complete Snapshot Final
-Release date: 20 July 2026
+Status: RELEASED AND CLOSED
+Closure Date: 20 July 2026
+Firebase deployment required: No (static file changes only — no Cloud Functions/Firestore Rules/Storage Rules touched)
 Total file count: 65 files + 2 folders (functions/, scripts/)
+BLUEPRINT: latest confirmed (includes §23 PHS Release Principle)
+Mission Control: latest confirmed (includes PHS Version 1 closure entry)
 
 Key PHS files included:
 - BLUEPRINT.md

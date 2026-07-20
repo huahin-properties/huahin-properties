@@ -1,230 +1,221 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
-<helmet>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <title>About Us — huahin.properties</title>
-  <meta name="description" content="huahin.properties is a boutique real estate agency serving Hua Hin, Pranburi and Cha-am, Thailand.">
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <style>
-    body { margin: 0; background: oklch(98% 0.01 80); font-family: 'Work Sans', sans-serif; }
-    a { color: oklch(42% 0.12 25); }
-    a:hover { color: oklch(32% 0.13 25); }
-  </style>
-</helmet>
+// Idempotent seed script for pre-registered demo accounts, one per active
+// package, so the CEO can log in and test real UX/UI without manually
+// registering or preparing data. Safe to re-run — reconciles PKG-UX-001
+// rather than duplicating. Run from the browser console on any page that
+// already has the Firebase SDK loaded (e.g. Lister Dashboard.dc.html):
+//
+//   import('./scripts/seed-package-demo.js').then(m => m.runSeed())
+//
+// Or via eval_js in this environment. Reads live tier quotas from
+// firebase-client.js (tierQuota) — does not invent numbers.
 
-<sc-if value="{{ showGate }}">
-  <div style="position:fixed; inset:0; background:oklch(96% 0.015 75); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
-    <img src="logo.png" alt="huahin.properties logo" style="height:56px; width:56px; object-fit:contain; border-radius:50%; margin-bottom:20px;" />
-    <div style="font-family:'Playfair Display',serif; font-size:26px; color:oklch(20% 0.02 60); margin-bottom:10px;">กำลังปรับปรุงเว็บไซต์</div>
-    <div style="font-size:14px; color:oklch(50% 0.02 60); max-width:360px; margin-bottom:26px; line-height:1.6;">เรากำลังปรับปรุงเว็บไซต์อยู่ ขออภัยในความไม่สะดวก จะกลับมาเปิดให้บริการเร็วๆ นี้</div>
-    <div style="width:100%; max-width:300px; display:flex; flex-direction:column; gap:10px;">
-      <input type="text" value="{{ gatePassword }}" onChange="{{ onGatePassword }}" placeholder="รหัสผ่านแอดมิน" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:12px 14px; font-size:14px; font-family:inherit; text-align:center;" />
-      <div onClick="{{ onGateSubmit }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:12px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">เข้าดูตัวอย่าง</div>
-      <sc-if value="{{ gateError }}"><div style="font-size:13px; color:oklch(50% 0.18 30);">{{ gateError }}</div></sc-if>
-    </div>
-  </div>
-</sc-if>
+const BATCH_ID = "PKG-UX-001";
+const DEMO_PASSWORD = "DemoPkg2026!";
 
-<div style="max-width:1600px; margin:0 auto; background:oklch(98% 0.01 80); min-height:100vh;">
+const ACCOUNTS = [
+  {
+    tier: "trial",
+    emailLocal: "demo.trial.pkgux001",
+    displayName: "Anong Srisawat",
+    agency: "บ้านและที่ดินหัวหิน by Anong",
+    phone: "081-234-5601",
+    line: "@anong.huahin",
+    office: "Hua Hin Soi 94, Hua Hin",
+    areas: ["Hua Hin", "Khao Takiab"],
+    languages: ["ไทย", "English"],
+    specialities: ["Pool villas", "Condos"],
+    bio: "ตัวแทนอิสระในหัวหิน ดูแลลูกค้าทั้งซื้อและเช่ามากว่า 4 ปี เน้นความเป็นกันเองและตอบไวทุกช่องทาง",
+    greeting: "สวัสดีค่ะ ยินดีต้อนรับสู่บ้านและที่ดินหัวหิน by Anong มีอะไรให้ช่วยดูทรัพย์ไหมคะ 😊",
+    contactInstructions: "ทักไลน์หรือโทรได้ทุกวัน 9:00-20:00 น.",
+    hours: "จันทร์-อาทิตย์ 9:00-20:00",
+    aiStyle: "เป็นกันเอง อบอุ่น ใช้ภาษาง่ายๆ",
+    faqs: ["ดูบ้านต้องนัดล่วงหน้าไหม? — นัดล่วงหน้า 1 วันจะดีที่สุดค่ะ", "รับฝากขายไหม? — รับค่ะ ติดต่อได้เลย"],
+    viewingProcess: "นัดวันเวลา → ยืนยันทางไลน์ → พาชมจริงพร้อมอธิบายจุดเด่น",
+    ownerProcess: "ติดต่อรับข้อมูลทรัพย์ → ถ่ายภาพ/รังวัด → ลงประกาศภายใน 2 วัน",
+    leadHandoff: "ลูกค้าที่สนใจจริงจะโทรนัดหมายภายใน 24 ชม.",
+  },
+  {
+    tier: "pro",
+    emailLocal: "demo.pro.pkgux001",
+    displayName: "Somchai Puangthong",
+    agency: "Hua Hin Home Finders",
+    phone: "081-234-5602",
+    line: "@somchai.hhf",
+    office: "Petchkasem Rd, Hua Hin",
+    areas: ["Hua Hin", "Cha-Am"],
+    languages: ["ไทย", "English", "Русский"],
+    specialities: ["Single houses", "Land"],
+    bio: "ทีมนายหน้าขนาดเล็กเน้นทรัพย์แนวราบในหัวหินและชะอำ ทำงานร่วมกับเจ้าของทรัพย์โดยตรง",
+    greeting: "สวัสดีครับ ทีม Hua Hin Home Finders ยินดีให้บริการครับ",
+    contactInstructions: "แชทได้ตลอด ทีมงานตอบภายใน 1 ชม.",
+    hours: "จันทร์-เสาร์ 9:00-19:00",
+    aiStyle: "สุภาพ กระชับ ให้ข้อมูลตรงประเด็น",
+    faqs: ["มีบริการติดต่อธนาคารไหม? — แนะนำธนาคารพันธมิตรได้ครับ"],
+    viewingProcess: "ส่งลิสต์ทรัพย์ที่ตรงความต้องการ → นัดชม 2-3 หลังต่อรอบ",
+    ownerProcess: "ประเมินราคาตลาด → เซ็นสัญญาฝากขาย → เริ่มการตลาด",
+    leadHandoff: "ส่งต่อทีมขายภายในวันเดียวกัน",
+  },
+  {
+    tier: "level3",
+    emailLocal: "demo.level3.pkgux001",
+    displayName: "Kanokwan Chaiyasit",
+    agency: "Hua Hin Coastal Homes",
+    phone: "081-234-5603",
+    line: "@kanokwan.coastal",
+    office: "Hua Hin Beach Road",
+    areas: ["Hua Hin", "Pranburi", "Cha-Am"],
+    languages: ["ไทย", "English", "中文", "Deutsch"],
+    specialities: ["Pool villas", "Beachfront", "Investment property"],
+    bio: "เอเจนซี่ระดับกลางเน้นทรัพย์ริมทะเลและพูลวิลล่าระดับกลาง-สูง ดูแลลูกค้าต่างชาติเป็นหลัก",
+    greeting: "Welcome to Hua Hin Coastal Homes — how can we help you find your dream property today?",
+    contactInstructions: "Chat, call, or LINE — we reply within 30 minutes during office hours.",
+    hours: "Every day 8:30-20:00",
+    aiStyle: "Warm but professional, bilingual Thai/English",
+    faqs: ["Can foreigners buy a villa here? — Yes, via leasehold or company structure, we explain both.", "Do you handle rentals? — Yes, both short and long term."],
+    viewingProcess: "Shortlist by criteria → schedule viewings same week → follow-up summary sent after each visit",
+    ownerProcess: "Free valuation → professional photos → listed within 3 days across all 8 languages",
+    leadHandoff: "Dedicated agent assigned within 2 hours of inquiry",
+  },
+  {
+    tier: "level4",
+    emailLocal: "demo.level4.pkgux001",
+    displayName: "David Whitfield-Ross",
+    agency: "Royal Coast Properties",
+    phone: "081-234-5604",
+    line: "@davidwr.royalcoast",
+    office: "Khao Takiab, Hua Hin",
+    areas: ["Hua Hin", "Pranburi", "Cha-Am", "Khao Takiab"],
+    languages: ["English", "ไทย", "Русский", "中文", "Deutsch", "Norsk", "Français", "Italiano"],
+    specialities: ["Luxury villas", "Beachfront estates", "Golf course properties", "Land banking"],
+    bio: "International boutique agency representing premium coastal properties across Hua Hin, Cha-Am and Pranburi for 12 years. Full-service from viewing to legal transfer.",
+    greeting: "Welcome to Royal Coast Properties — Thailand's premier coastal destinations, curated for discerning buyers worldwide.",
+    contactInstructions: "Available on WhatsApp/LINE/phone/email 7 days a week, priority response for VIP clients.",
+    hours: "7 days, 8:00-21:00 (GMT+7)",
+    aiStyle: "Polished, concierge-level, multilingual",
+    faqs: ["Do you assist with visas or long-stay? — We can refer trusted legal partners.", "Is financing available? — We coordinate with partner banks for qualified buyers."],
+    viewingProcess: "Private curated tour → in-depth briefing on ownership structure → optional drone/video follow-up",
+    ownerProcess: "Market analysis → premium photography/videography → featured placement across all channels",
+    leadHandoff: "Senior agent personally follows up within 1 hour, any timezone",
+  },
+];
 
-  <div style="display:flex; align-items:center; justify-content:space-between; gap:24px; padding:22px clamp(20px,4vw,56px); border-bottom:1px solid oklch(90% 0.01 70);">
-    <a href="Home.dc.html" style="white-space:nowrap; display:flex; align-items:center; gap:9px; font-family:'Playfair Display',serif; font-size:clamp(19px,2.4vw,24px); letter-spacing:0.02em; color:oklch(22% 0.02 60); text-decoration:none;"><img src="logo.png" alt="huahin.properties logo" style="height:36px; width:36px; object-fit:contain; border-radius:50%; flex-shrink:0;" />huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</a>
-    <sc-if value="{{ isDesktopNav }}" hint-placeholder-val="{{ true }}">
-      <div style="display:flex; gap:32px; align-items:center; font-size:15px; color:oklch(30% 0.02 60); white-space:nowrap;">
-        <a href="Search Results.dc.html?status=sale" style="text-decoration:none; color:inherit;">{{ t.nav_buy }}</a>
-        <a href="Search Results.dc.html?status=rent" style="text-decoration:none; color:inherit;">{{ t.nav_rent }}</a>
-        <a href="Sell.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_sell }}</a>
-        <a href="About.dc.html" style="text-decoration:none; color:oklch(42% 0.12 25);">{{ t.nav_about }}</a>
-        <a href="Contact.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_contact }}</a>
-      </div>
-      <div style="display:flex; gap:12px; align-items:flex-end; white-space:nowrap;">
-        <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" hint-size="150,54"></dc-import>
-        <div style="width:1px; height:20px; background:oklch(80% 0.02 70); margin:0 4px 8px;"></div>
-        <a href="Admin Login.dc.html" style="font-size:13px; color:oklch(40% 0.02 60); text-decoration:none; padding-bottom:8px;">{{ t.nav_admin }}</a>
-      </div>
-    </sc-if>
-    <sc-if value="{{ isMobileNav }}">
-      <div style="display:flex; align-items:center; gap:6px;">
-        <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" compact="{{ true }}" menu-align="right" hint-size="40,32"></dc-import>
-        <div onClick="{{ toggleMenu }}" style="display:flex; flex-direction:column; gap:5px; padding:8px; cursor:pointer;">
-          <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
-          <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
-          <div style="width:24px; height:2px; background:oklch(22% 0.02 60);"></div>
-        </div>
-      </div>
-    </sc-if>
-  </div>
+// NOTE: Firestore Rules never allow a lister to self-create a listing with
+// listingStatus:"live" (that transition is admin-only — approveListing()).
+// All 3 seed listings are therefore created as "pending" (or left as a
+// draft), matching exactly how a real self-serve lister's listings start.
+// To see a "live" demo listing, an Admin must click Approve on it once from
+// Admin Dashboard / Listing Approvals — same as any real listing. This is
+// the correct real workflow, not a workaround.
+const SAMPLE_LISTINGS = [
+  { area: "hua-hin", zone: "Hua Hin", type: "villa", status: "sale", price: 12500000, bedrooms: 3, bathrooms: 3, land: 400, living: 280, title: "Hua Hin Pool Villa, 3-Bed with Private Garden", desc: "Modern 3-bedroom pool villa in a quiet Hua Hin estate, private garden, covered parking, 10 minutes from the beach.", listingStatus: "pending", isDraft: false },
+  { area: "cha-am", zone: "Cha-Am", type: "condo", status: "sale", price: 3200000, bedrooms: 2, bathrooms: 2, land: 0, living: 65, title: "Cha-Am Beachside Condo, 2-Bed Sea View", desc: "Bright 2-bedroom condo unit with partial sea view, communal pool, walking distance to Cha-Am beach.", listingStatus: "pending", isDraft: false },
+  { area: "pranburi", zone: "Pranburi", type: "house", status: "rent", price: 35000, bedrooms: 2, bathrooms: 2, land: 200, living: 120, title: "Pranburi Rental House Near National Park", desc: "Quiet 2-bedroom house for long-term rent near Pranburi's national park, fenced garden, unfurnished.", listingStatus: "pending", isDraft: true },
+];
 
-  <sc-if value="{{ mobileMenuOpen }}">
-    <div style="position:fixed; inset:0; background:oklch(98% 0.01 80); z-index:60; padding:22px clamp(20px,6vw,56px); display:flex; flex-direction:column; gap:28px; overflow-y:auto;">
-      <div style="display:flex; align-items:center; justify-content:space-between;">
-        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
-        <div onClick="{{ toggleMenu }}" style="font-size:26px; line-height:1; color:oklch(30% 0.02 60); cursor:pointer; padding:6px;">&times;</div>
-      </div>
-      <div style="display:flex; flex-direction:column; gap:22px; font-size:20px; font-family:'Playfair Display',serif; color:oklch(22% 0.02 60);">
-        <a href="Search Results.dc.html?status=sale" style="text-decoration:none; color:inherit;">{{ t.nav_buy }}</a>
-        <a href="Search Results.dc.html?status=rent" style="text-decoration:none; color:inherit;">{{ t.nav_rent }}</a>
-        <a href="Sell.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_sell }}</a>
-        <a href="About.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_about }}</a>
-        <a href="Contact.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_contact }}</a>
-        <a href="Admin Login.dc.html" style="text-decoration:none; color:oklch(50% 0.02 60); font-size:15px; font-family:'Work Sans',sans-serif;">{{ t.nav_admin }}</a>
-      </div>
-      <div style="margin-top:auto; padding-top:20px; border-top:1px solid oklch(90% 0.01 70);">
-        <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" full-width="{{ true }}" hint-size="100%,60"></dc-import>
-      </div>
-    </div>
-  </sc-if>
-
-  <!-- HERO -->
-  <div style="position:relative; height:clamp(280px,40vh,420px); background-image:repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(92% 0.015 75) 2px, oklch(92% 0.015 75) 22px); display:flex; align-items:flex-end;">
-    <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(30,20,10,0.05) 0%, rgba(30,20,10,0.6) 100%);"></div>
-    <div style="position:absolute; top:14px; right:14px; font-family:monospace; font-size:11px; color:oklch(95% 0.01 80 / 0.85); background:rgba(0,0,0,0.32); padding:4px 8px; border-radius:4px;">[photo: Hua Hin railway station, historic teak architecture]</div>
-    <div style="position:relative; z-index:2; padding:0 clamp(20px,4vw,56px) clamp(32px,5vw,48px); color:oklch(98% 0.01 80);">
-      <div style="font-family:'Playfair Display',serif; font-weight:500; font-size:clamp(28px,4.5vw,46px);">{{ t.about_title }}</div>
-    </div>
-  </div>
-
-  <div style="max-width:820px; margin:0 auto; padding:clamp(40px,6vw,64px) clamp(20px,4vw,32px);">
-    <div style="font-size:16px; line-height:1.85; color:oklch(35% 0.02 60); margin-bottom:48px;">{{ t.about_body }}</div>
-
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:24px; margin-bottom:56px; text-align:center;">
-      <div>
-        <div style="font-family:'Playfair Display',serif; font-size:32px; color:oklch(20% 0.02 60);">120+</div>
-        <div style="font-size:13px; color:oklch(50% 0.02 60); margin-top:4px;">Active listings</div>
-      </div>
-      <div>
-        <div style="font-family:'Playfair Display',serif; font-size:32px; color:oklch(20% 0.02 60);">3</div>
-        <div style="font-size:13px; color:oklch(50% 0.02 60); margin-top:4px;">Coastal areas served</div>
-      </div>
-      <div>
-        <div style="font-family:'Playfair Display',serif; font-size:32px; color:oklch(20% 0.02 60);">4</div>
-        <div style="font-size:13px; color:oklch(50% 0.02 60); margin-top:4px;">Languages supported</div>
-      </div>
-    </div>
-
-    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:20px;">
-      <sc-for list="{{ areaCards }}" as="ac" hint-placeholder-count="3">
-        <a href="{{ ac.href }}" style="text-decoration:none; display:flex; flex-direction:column; border-radius:6px; overflow:hidden; background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70);">
-          <div style="{{ ac.photoStyle }}">
-            <sc-if value="{{ ac.noPhoto }}">
-              <div style="position:absolute; bottom:10px; left:10px; font-family:monospace; font-size:11px; color:oklch(20% 0.02 60 / 0.75); background:rgba(255,255,255,0.65); padding:4px 8px; border-radius:4px;">[{{ ac.photoLabel }}]</div>
-            </sc-if>
-          </div>
-          <div style="padding:18px;">
-            <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60); margin-bottom:6px;">{{ ac.label }}</div>
-            <div style="font-size:13px; line-height:1.6; color:oklch(45% 0.02 60);">{{ ac.desc }}</div>
-          </div>
-        </a>
-      </sc-for>
-    </div>
-
-    <div style="text-align:center; margin-top:56px;">
-      <a href="Contact.dc.html" style="display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:14px 30px; border-radius:100px; font-size:14px; text-decoration:none;">{{ t.cta_contact }}</a>
-    </div>
-  </div>
-
-  <div style="border-top:1px solid oklch(90% 0.01 70); padding:32px clamp(20px,4vw,56px); display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between;">
-    <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
-    <div style="font-size:13px; color:oklch(50% 0.02 60);">© 2026 huahin.properties. {{ t.footer_rights }}</div>
-  </div>
-</div>
-
-<sc-if value="{{ showChrome }}"><dc-import name="ContactRail" hint-size="0,0"></dc-import></sc-if>
-
-</x-dc>
-<script type="text/x-dc" data-dc-script>
-class Component extends DCLogic {
-  state = { lang: "en", isMobile: (typeof window !== "undefined" && window.innerWidth < 900), mobileMenuOpen: false, data: null, siteContent: {}, showGate: false, gatePassword: "", gateError: "" };
-
-  async componentDidMount() {
-    const fb = await import("./firebase-client.js");
-    this._fb = fb;
-    if (!fb.hasSiteBypass() && !fb.isAdminAuthed()) {
-      try {
-        const on = await fb.fetchMaintenanceMode();
-        if (on) this.setState({ showGate: true });
-      } catch (e) { console.warn("Failed to check maintenance mode:", e); }
-    }
-    const mod = await import("./data.js");
-    this._mod = mod;
-    this.setState({ lang: mod.getLang(), data: mod });
-    try {
-      const siteContent = await fb.fetchSiteContent();
-      this.setState({ siteContent });
-    } catch (e) {
-      console.warn("Failed to load site content:", e);
-    }
-    this._onResize = () => this.setState({ isMobile: window.innerWidth < 900 });
-    this._onResize();
-    window.addEventListener("resize", this._onResize);
-  }
-  componentWillUnmount() { window.removeEventListener("resize", this._onResize); }
-  selectLang(l) { this._mod.setLang(l); this.setState({ lang: l, mobileMenuOpen: false }); }
-  async submitGate() {
-    try {
-      await this._fb.adminSignIn("doothailand@gmail.com", this.state.gatePassword);
-      this._fb.setSiteBypass();
-      this.setState({ showGate: false, gateError: "" });
-    } catch (e) {
-      this.setState({ gateError: "รหัสผ่านไม่ถูกต้อง" });
-    }
-  }
-
-  renderVals() {
-    const gateVals = {
-      showGate: this.state.showGate,
-      showChrome: !this.state.showGate,
-      gatePassword: this.state.gatePassword,
-      onGatePassword: (e) => this.setState({ gatePassword: e.target.value, gateError: "" }),
-      onGateSubmit: () => this.submitGate(),
-      gateError: this.state.gateError,
-    };
-    const mod = this.state.data;
-    if (!mod) return { t: {}, isDesktopNav: true, isMobileNav: false, langOptions: [], areaCards: [], ...gateVals };
-    const lang = this.state.lang;
-    const t = mod.I18N[lang];
-    const langValue = lang;
-    const onLangChange = (code) => this.selectLang(code);
-    const langOptions = mod.LANGS.map((l) => ({ code: l, label: mod.LANG_LABELS[l] }));
-    const areaDescKey = { "hua-hin": "area_hua_hin_desc", pranburi: "area_pranburi_desc", "cha-am": "area_cha_am_desc" };
-    const areaPhoto = { "hua-hin": "photo: Hua Hin train station & beach", pranburi: "photo: Pranburi beachfront villa", "cha-am": "photo: Cha-am beach promenade" };
-    const sc = this.state.siteContent || {};
-    const areaCards = mod.AREAS.map((a) => {
-      const content = sc["area-" + a.id] || {};
-      return {
-        href: `Search Results.dc.html?area=${a.id}`,
-        label: a.label[lang],
-        desc: content.desc || t[areaDescKey[a.id]],
-        photoLabel: areaPhoto[a.id],
-        noPhoto: !content.photoUrl,
-        photoStyle: {
-          aspectRatio: "16/10", position: "relative",
-          background: content.photoUrl ? `url('${content.photoUrl}') center/cover` : "repeating-linear-gradient(135deg, oklch(86% 0.02 75) 0px, oklch(86% 0.02 75) 2px, oklch(91% 0.015 75) 2px, oklch(91% 0.015 75) 22px)",
-        },
-      };
-    });
-    return {
-      t, lang,
-      isDesktopNav: !this.state.isMobile, isMobileNav: this.state.isMobile,
-      mobileMenuOpen: this.state.isMobile && this.state.mobileMenuOpen,
-      toggleMenu: () => this.setState((s) => ({ mobileMenuOpen: !s.mobileMenuOpen })),
-      langValue, onLangChange, langOptions, areaCards,
-      ...gateVals,
-    };
-  }
+function placeholderPhotoDataUrl(label, hue) {
+  const c = document.createElement("canvas");
+  c.width = 640; c.height = 480;
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = `hsl(${hue},45%,55%)`;
+  ctx.fillRect(0, 0, 640, 480);
+  ctx.fillStyle = "rgba(255,255,255,0.9)";
+  ctx.font = "bold 28px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(label, 320, 240);
+  ctx.font = "16px sans-serif";
+  ctx.fillText("Demo placeholder — replace with real photo", 320, 280);
+  return c.toDataURL("image/png");
 }
 
-</script>
-</body>
-</html>
+export async function runSeed() {
+  const fb = await import("../firebase-client.js");
+  const report = { batchId: BATCH_ID, accounts: [], issues: [] };
+
+  for (const acc of ACCOUNTS) {
+    const email = `${acc.emailLocal}@demo.huahin.properties`;
+    let uid;
+    try {
+      const existing = (await fb.fetchWhere("listers", "isTestAccount", true)).find((l) => l.email === email);
+      if (existing) {
+        uid = existing.id;
+      } else {
+        const cred = await fb.createListerAccount(email, DEMO_PASSWORD);
+        uid = cred.uid || (cred.user && cred.user.uid);
+      }
+    } catch (e) {
+      if (String(e.message).includes("already-in-use") || String(e.message).includes("already in use")) {
+        // Account exists from a prior run but wasn't found via query (e.g. auth
+        // exists, doc doesn't) — sign in to recover the uid.
+        const signed = await fb.listerSignIn(email, DEMO_PASSWORD).catch(() => null);
+        uid = signed && (signed.uid || (signed.user && signed.user.uid));
+      }
+      if (!uid) { report.issues.push({ severity: "P0", tier: acc.tier, msg: "Could not create/find Auth account: " + e.message }); continue; }
+    }
+
+    const quota = fb.tierQuota(acc.tier);
+    const now = Date.now();
+    const listerDoc = {
+      isTestAccount: true, testBatchId: BATCH_ID, cleanupAllowed: true,
+      email, displayName: acc.displayName, agencyName: acc.agency,
+      phone: acc.phone, line: acc.line, office: acc.office,
+      areas: acc.areas, languages: acc.languages, specialities: acc.specialities,
+      bio: acc.bio, greeting: acc.greeting, contactInstructions: acc.contactInstructions,
+      hours: acc.hours, aiStyle: acc.aiStyle, faqs: acc.faqs,
+      viewingProcess: acc.viewingProcess, ownerProcess: acc.ownerProcess, leadHandoff: acc.leadHandoff,
+      tier: acc.tier,
+      subscriptionStatus: acc.tier === "trial" ? undefined : "active",
+      trialUsed: acc.tier === "trial" ? true : undefined,
+      trialStartedAt: acc.tier === "trial" ? now : undefined,
+      trialEndsAt: acc.tier === "trial" ? now + 30 * 86400000 : undefined,
+      status: "approved",
+      profileCompletion: 100,
+      updatedAt: now,
+    };
+    Object.keys(listerDoc).forEach((k) => listerDoc[k] === undefined && delete listerDoc[k]);
+    await fb.setDoc("listers", uid, listerDoc);
+
+    const listingCount = Math.min(3, quota);
+    const listings = [];
+    for (let i = 0; i < listingCount; i++) {
+      const sample = SAMPLE_LISTINGS[i];
+      const code = `PKGUX-${acc.tier.toUpperCase()}-${i + 1}`;
+      const built = {
+        isTestData: true, testBatchId: BATCH_ID,
+        listerId: uid, area: sample.area, zone: sample.zone, type: sample.type,
+        status: sample.status, price: sample.price, currency: "THB",
+        bedrooms: sample.bedrooms, bathrooms: sample.bathrooms, parking: 1,
+        landSize: sample.land, livingArea: sample.living, furnished: true, pool: sample.type === "villa",
+        title: { en: sample.title, th: sample.title },
+        shortDesc: { en: sample.desc, th: sample.desc },
+        fullDesc: { en: sample.desc, th: sample.desc },
+        seo: { title: { en: sample.title }, desc: { en: sample.desc }, keywords: { en: sample.zone + " property" } },
+        features: ["Air conditioning", "Fenced", "24hr security"],
+        photos: [{ label: "cover" }],
+        listingStatus: sample.listingStatus,
+        isDraft: sample.isDraft,
+        publishedAt: null,
+        expiresAt: null,
+        approvedAt: null,
+        createdAt: now,
+      };
+      try {
+        await fb.setDoc("properties", code, built);
+        const photoUrl = placeholderPhotoDataUrl(sample.title.slice(0, 24), (i * 90) % 360);
+        await fb.savePhoto(code, 0, photoUrl);
+        await fb.setDoc("propertyPhotos", `${code}-0`, { isTestData: true, testBatchId: BATCH_ID });
+        listings.push({ code, status: sample.listingStatus });
+      } catch (e) {
+        report.issues.push({ severity: "P1", tier: acc.tier, msg: `Listing ${code} failed: ${e.message}` });
+      }
+    }
+
+    report.accounts.push({
+      tier: acc.tier, email, password: DEMO_PASSWORD, uid,
+      quota, listingsCreated: listings.length, listings,
+      quotaNote: quota < 3 ? `Tier quota is ${quota} — capped at real entitlement, not 3.` : null,
+      note: "All listings start as 'pending' (real self-serve rule — lister cannot set 'live' directly). Approve at least one per account in Admin Dashboard > Listing Approvals to see a live listing.",
+    });
+  }
+
+  return report;
+}
