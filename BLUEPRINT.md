@@ -1049,6 +1049,20 @@ Each PHS release is a complete current-state package. The latest approved releas
 
 ---
 
+## 24.5 Project Knowledge & Handover Center (21 ก.ค. 2569)
+
+`CEO Guide.dc.html` ขยายเป็น Project Knowledge & Handover Center — ศูนย์รวม Knowledge Module 17 หัวข้อ (KM-00–KM-17, excl. KM-10) ครอบคลุมทุกระบบหลัก พร้อม Knowledge Index, Knowledge Health summary, Coverage-by-topic (%), Status/Confidence badge system (เขียว=พร้อม, เหลือง=ต้องตรวจเพิ่ม, แดง=ต้องตัดสินใจ, เทา=ยังไม่เริ่ม, น้ำเงิน=กำลังทำ), และปุ่ม Copy Handover ที่ใช้งานได้จริง (คัดลอกข้อความสรุปของ Module นั้นไปคลิปบอร์ด)
+
+Current-State Synchronization Rule (บันทึกไว้ในตัว CEO Guide, Module Documentation & Governance [KM-13]): การเปลี่ยนแปลงที่อนุมัติแล้วต่อ scope/architecture/business rules/security/database/package/pricing/AI/governance ต้องอัปเดตพร้อมกัน 5 จุด — เอกสารต้นทาง (BLUEPRINT.md นี้), Knowledge Module ที่เกี่ยวข้อง, CEO Guide summary, Decision Log, ความสัมพันธ์ Module ที่กระทบ
+
+Open Decisions ที่ยังค้างและต้องการ CEO/Product Owner ตัดสินใจ (ไม่เดา ไม่สร้างคำตอบเอง):
+- KM-05 Mini Website: publicSlug reservation/uniqueness system ยังไม่พัฒนา — รอ CEO ยืนยันลำดับความสำคัญ
+- KM-06 AI: สถาปัตยกรรม Agent AI แยกต่อ Agent (isolated memory) เคยหารือไว้แต่ไม่พบในโค้ด — ยังไม่ทราบว่ายังอยู่ใน Roadmap หรือ defer ถาวร
+- KM-09 Security: สถานะ Firestore Rules บน Production จริงยังตรวจสอบจากสภาพแวดล้อมนี้ไม่ได้ — ต้อง CEO ยืนยันจาก Firebase Console โดยตรง
+- KM-14 QA/Review Standard: ค้นหาในทุกไฟล์ของโปรเจกต์แล้ว (BLUEPRINT.md, Project-Control-Governance-v2.2.md, RELEASE-NOTES-Step6-9.md, Blueprint Status.dc.html) ไม่พบคำนิยาม PASS/HOLD/NOT PASS อย่างเป็นทางการ — ต้องรอ Product Owner เขียนคำนิยามนี้อย่างเป็นทางการ หรือยืนยันว่าไม่จำเป็น
+
+---
+
 ## 24. Developer Maintenance Center (DMC) — Progress Log
 
 `Developer Maintenance Center.dc.html` — internal Admin-only diagnostics/cleanup tool. Built step-by-step under Product Owner review; each step ships in SAFE MODE (read-only) until explicitly approved for the next phase.
