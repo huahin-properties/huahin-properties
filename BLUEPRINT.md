@@ -1063,6 +1063,12 @@ Open Decisions ที่ยังค้างและต้องการ CEO/
 
 ---
 
+## 24.6 Project Completion Record — Knowledge & Handover Center v1 (21 ก.ค. 2569)
+
+Status: 🟢 PASS FOR PRODUCTION. Deployed. Current Phase → Next Sprint Planning. See `PROJECT-COMPLETION.md` and `NEXT-SPRINT.md` for full record and next-sprint priorities (Mission Control v2, KM-14, KM-09, Mini Website).
+
+---
+
 ## 24. Developer Maintenance Center (DMC) — Progress Log
 
 `Developer Maintenance Center.dc.html` — internal Admin-only diagnostics/cleanup tool. Built step-by-step under Product Owner review; each step ships in SAFE MODE (read-only) until explicitly approved for the next phase.

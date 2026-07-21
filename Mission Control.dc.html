@@ -373,7 +373,7 @@ class Component extends DCLogic {
       workingPrinciples: "Staging ก่อนขึ้นจริงเสมอ (Preview Channel → ทดสอบ → เลื่อนขึ้นเว็บจริง) | ระบบต้องทำงานอัตโนมัติทั้งหมด ไม่ใช่ให้แอดมินไล่จำ/ไล่ลบเอง",
       aiTeamStructure: "CEO: ผู้ตัดสินใจสูงสุด อนุมัติ/ไม่อนุมัติแต่ละขั้นตอน ดำเนินการบนระบบจริง (Deploy, Firebase Console, GitHub, Domain, DNS, Stripe, LINE OA) | ChatGPT: Product Owner/Project Coordinator วิเคราะห์-ตรวจคุณภาพงาน กำหนด Workflow ตัดสิน PASS/FAIL สร้าง Prompt ขั้นถัดไป | Claude: Lead Developer พัฒนาโค้ด/ระบบ/เอกสารตาม Prompt ที่ได้รับ รายงานผล ไม่ข้ามขั้นตอน ไม่เปลี่ยนทิศทางเอง ไม่เพิ่มฟีเจอร์นอกขอบเขต",
       architectureDirection: "Design Component (.dc.html) ต่อหน้า, Firebase เต็มระบบ (Firestore, Authentication, Hosting + Preview Channels, Cloud Functions, Storage) | Firestore Security Rules: role-based + deny-by-default (ตรวจสอบแล้ว 16 ก.ค. 2026) | Deploy ผ่านอัปโหลดไฟล์ GitHub ด้วยมือ | Technology Stack: Anthropic Claude API (ผ่าน Cloud Function เท่านั้น), Google Maps JavaScript API, ผู้ให้บริการโดเมน — Stripe และ LINE Official Account ยังไม่ได้ต่อ",
-      workingContext: "Current Phase: Package Demo & Documentation — Implementation: Complete, Documentation: Complete, CEO Acceptance: Not Tested, Next Activity: CEO Acceptance Testing | เสร็จแล้ว: Demo Accounts, Package Verification, Dashboard Isolation, Translation Pipeline, Demo Listings, Cleanup Scripts, CEO Login Reference, CEO Login Sheet (Private), CEO Acceptance Checklist, Blueprint Updated | เหลือ: CEO Manual Testing, UX Review, Bug Reports, Bug Fixes, Regression Testing, Production Readiness Decision | Open Blocker: index.html ที่ root ไม่ sync อัตโนมัติกับ Home.dc.html — ทุกครั้งที่แก้ Home.dc.html ต้องคัดลอกเนื้อหาไปทับ index.html ด้วยเสมอ",
+      workingContext: "Current Phase: Next Sprint Planning — Knowledge & Handover Center: Completed, deployed to Production (PASS). Production Baseline v1 established. | เสร็จแล้ว: Demo Accounts, Package Verification, Dashboard Isolation, Translation Pipeline, Demo Listings, Cleanup Scripts, CEO Login Reference, CEO Login Sheet (Private), CEO Acceptance Checklist, Blueprint Updated | เหลือ: CEO Manual Testing, UX Review, Bug Reports, Bug Fixes, Regression Testing, Production Readiness Decision | Open Blocker: index.html ที่ root ไม่ sync อัตโนมัติกับ Home.dc.html — ทุกครั้งที่แก้ Home.dc.html ต้องคัดลอกเนื้อหาไปทับ index.html ด้วยเสมอ",
       evolution: [
         { id: "e1", date: today, type: "decision", title: "Mission Control Version 1 (FINAL) อนุมัติแล้ว", reason: "ผ่านการตรวจ Knowledge Extraction → Conflict Resolution → Blueprint-Only Verification → QA → CEO Review ครบทุกขั้นตอน", result: "Mission Control เป็น Single Source of Truth อย่างเป็นทางการของโครงการ" },
         { id: "e2", date: today, type: "decision", title: "เลิกใช้ Agent VIP Pool (ทาง 4)", reason: "ไม่ต้องการให้แพลตฟอร์มเป็นกรรมการตัดสินสิทธิ์ Agent", result: "แทนที่ด้วยระบบ Assisted Sale (ข้อตกลง %ค่าคอมส่วนตัวระหว่างผู้ลงประกาศกับทีมงาน)" },
@@ -387,8 +387,8 @@ class Component extends DCLogic {
         { id: "s3", text: "AI Quick Add — ร่างประกาศจากรูป/เสียง", active: true },
         { id: "s4", text: "แพ็กเกจถาวรฟรี (permanent free tier) แบบเดิม", active: false },
       ],
-      today: "รอ CEO ทดสอบซ้ำ CAT-012 (โควตาแพ็กเกจ) บน Production หลังอัปโหลดไฟล์ล่าสุด",
-      currentTask: "Sprint 01 — CEO Acceptance Testing (CODE FREEZE / Support Mode) — รอผลทดสอบหรือ Bug ใหม่จาก CEO",
+      today: "Knowledge & Handover Center ปิด Sprint แล้ว (PASS FOR PRODUCTION) — เตรียม Next Sprint Planning",
+      currentTask: "Next Sprint Planning — ดู NEXT-SPRINT.md สำหรับลำดับความสำคัญ (Mission Control v2, KM-14, KM-09, Mini Website)",
       progress: [
         { id: "p1", text: "Membership v2 (Trial/Package1/2/3, Approval Queue, Expiry)", done: true },
         { id: "p2", text: "CEO Acceptance Testing รอบแรกเริ่มแล้ว", done: true },
@@ -397,6 +397,7 @@ class Component extends DCLogic {
       nextTasks: [{ id: "n1", text: "รอผล CEO Acceptance Testing รอบถัดไป" }],
       blockers: [],
       decisions: [
+        { id: "d0", date: today, text: "Knowledge & Handover Center: Completed — Production PASS. Project status: Completed, Production, Version 1. Current Phase moved to Next Sprint Planning." },
         { id: "d1", date: today, text: "Mission Control ยกระดับเป็น Project Memory ตามแนวทางสุดท้ายของ CEO" },
         { id: "d2", date: today, text: "Sprint 01 เข้าสถานะ CODE FREEZE จนกว่า CEO Acceptance จะผ่าน" },
       ],
