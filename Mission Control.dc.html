@@ -38,6 +38,9 @@
 </sc-if>
 
 <sc-if value="{{ isAdmin }}">
+<sc-if value="{{ saveFlash }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed; bottom:20px; right:20px; background:oklch(30% 0.1 150); color:white; padding:10px 18px; border-radius:8px; font-size:13px; font-weight:600; box-shadow:0 8px 24px -8px rgba(0,0,0,0.3); z-index:999;">{{ saveFlash }}</div>
+</sc-if>
 <div style="min-height:100vh; padding:clamp(24px,5vw,64px) clamp(16px,4vw,48px); box-sizing:border-box;">
   <div style="max-width:760px; margin:0 auto;">
 
@@ -58,6 +61,39 @@
 
     <sc-if value="{{ loaded }}">
     <div style="display:flex; flex-direction:column; gap:40px;">
+
+      <!-- STEP PROGRESS BOARD -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(22% 0.03 40); margin-bottom:4px;">📊 ความคืบหน้าโครงการ huahin.properties</div>
+        <div style="width:36px; height:2px; background:oklch(45% 0.13 25); margin-bottom:6px;"></div>
+        <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:14px;">ตรวจสอบจากไฟล์และโค้ดจริง (ไม่ใช่ข้อมูลสมมติ) — อัปเดตล่าสุดพร้อมกับ Knowledge Modules ใน <a href="./CEO%20Guide.dc.html">คู่มือ CEO</a></div>
+        <div style="background:white; border-radius:10px; padding:20px 22px; overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse; font-size:13px; color:oklch(30% 0.02 60);">
+            <tr style="text-align:left; color:oklch(50% 0.02 60); border-bottom:1px solid oklch(90% 0.01 70);"><th style="padding:6px 10px 6px 0;">สถานะ</th><th style="padding:6px 10px;">ขั้นตอน</th><th style="padding:6px 10px;">ความคืบหน้า</th></tr>
+            <tr><td style="padding:6px 10px 6px 0;">🟢 เสร็จแล้ว</td><td style="padding:6px 10px;">Step 1 — ระบบความทรงจำโครงการและคลังความรู้ (Project Memory)</td><td style="padding:6px 10px;">Mission Control + คู่มือ CEO + BLUEPRINT.md ใช้งานจริง</td></tr>
+            <tr><td style="padding:6px 10px 6px 0;">🟢 เสร็จแล้ว</td><td style="padding:6px 10px;">Step 2 — คู่มือ CEO และระบบส่งมอบงาน (Handover)</td><td style="padding:6px 10px;">PHS v1 + Knowledge Sync RC1 ส่งมอบแล้ว</td></tr>
+            <tr><td style="padding:6px 10px 6px 0;">🟡 กำลังดำเนินการ</td><td style="padding:6px 10px;">Step 3 — Mission Control และระบบบริหารโครงการ</td><td style="padding:6px 10px;">กำลังสร้าง Step Progress Board นี้</td></tr>
+            <tr><td style="padding:6px 10px 6px 0;">🟢 เสร็จแล้ว</td><td style="padding:6px 10px;">Step 4 — มาตรฐานการบันทึกข้อมูล (Save Standard)</td><td style="padding:6px 10px;">ระบบแจ้งเตือน "✓ Saved Successfully" ใช้งานจริงแล้ว</td></tr>
+            <tr><td style="padding:6px 10px 6px 0;">🟢 เสร็จแล้ว</td><td style="padding:6px 10px;">Step 5 — ระบบสมาชิกและยืนยันตัวตน (Auth &amp; Membership)</td><td style="padding:6px 10px;">Firebase Auth + Trial/Package ยืนยันจากโค้ดแล้ว</td></tr>
+            <tr><td style="padding:6px 10px 6px 0;">🟢 เสร็จแล้ว</td><td style="padding:6px 10px;">Step 6 — แดชบอร์ดสมาชิก (Lister Dashboard)</td><td style="padding:6px 10px;">ใช้งานจริง แก้บั๊ก CAT-012 แล้ว</td></tr>
+            <tr><td style="padding:6px 10px 6px 0;">🟢 เสร็จแล้ว</td><td style="padding:6px 10px;">Step 7 — แพ็กเกจและการควบคุมสิทธิ์ (Packages &amp; Permissions)</td><td style="padding:6px 10px;">Trial + แพ็กเกจ 1/2/3 ใช้งานจริง</td></tr>
+            <tr><td style="padding:6px 10px 6px 0;">🟢 เสร็จแล้ว</td><td style="padding:6px 10px;">Step 8 — ขั้นตอนการลงประกาศและอนุมัติ (Listing &amp; Approval)</td><td style="padding:6px 10px;">`approveListing()`, `runExpirySweep()` ยืนยันจากโค้ดแล้ว</td></tr>
+            <tr><td style="padding:6px 10px 6px 0;">🟣 ยังไม่เริ่ม</td><td style="padding:6px 10px;">Step 9 — เว็บไซต์ส่วนตัวของเอเจนต์ (Agent Mini Website)</td><td style="padding:6px 10px;">หน้าโปรไฟล์ทำแล้ว แต่ระบบ URL ส่วนตัว (publicSlug) ยังไม่สร้าง</td></tr>
+            <tr><td style="padding:6px 10px 6px 0;">🟢 เสร็จแล้ว</td><td style="padding:6px 10px;">Step 10 — ผู้ช่วย AI สำหรับสร้างประกาศ (AI Quick Add)</td><td style="padding:6px 10px;">ใช้งานจริง</td></tr>
+            <tr><td style="padding:6px 10px 6px 0;">🟡 กำลังดำเนินการ</td><td style="padding:6px 10px;">Step 11 — ภาษา, SEO และประสิทธิภาพเว็บไซต์</td><td style="padding:6px 10px;">Sitemap/robots.txt ยื่นแล้ว (16 ก.ค. 2569); Google Business Profile ยังไม่ยืนยัน</td></tr>
+            <tr><td style="padding:6px 10px 6px 0;">🔴 ติดขัด / รอการตัดสินใจ</td><td style="padding:6px 10px;">Step 12 — ตรวจสอบ Production และเปิดใช้งานจริง</td><td style="padding:6px 10px;">สถานะ Firestore Rules บน Production จริงยังตรวจสอบจากที่นี่ไม่ได้ — ต้องให้ CEO ยืนยันจาก Firebase Console โดยตรง</td></tr>
+          </table>
+          <div style="display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:oklch(35% 0.02 60); margin-top:16px; padding-top:14px; border-top:1px solid oklch(92% 0.01 70);">
+            <div>Sprint ปัจจุบัน: <strong>{{ currentTask }}</strong></div>
+            <div>เสร็จแล้ว: <strong>8/12</strong></div>
+            <div>เหลือ: <strong>4/12</strong></div>
+            <div>ความคืบหน้ารวม: <strong>≈73%</strong></div>
+            <div>ปัญหาที่ติดขัด: <strong>1</strong> (สถานะ Firestore Rules Production)</div>
+            <div>รอการตัดสินใจ: <strong>4</strong> (ดู Open Decisions ใน BLUEPRINT §24.5)</div>
+          </div>
+          <div style="font-size:11px; color:oklch(55% 0.02 60); margin-top:8px;">🟢 เสร็จแล้ว &nbsp; 🟡 กำลังดำเนินการ &nbsp; 🟣 ยังไม่เริ่ม &nbsp; 🔴 ติดขัด/รอการตัดสินใจ &nbsp; ⚪ วางแผนแล้ว — ทุกสถานะใช้สีและสัญลักษณ์และข้อความไทยร่วมกันเสมอ</div>
+        </div>
+      </div>
 
       <!-- PROJECT MEMORY -->
       <div>
@@ -154,7 +190,7 @@
             <div style="display:flex; gap:8px;">
               <input value="{{ newEvoReason }}" onChange="{{ onNewEvoReasonChange }}" placeholder="ทำไมจึงเปลี่ยน…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
               <input value="{{ newEvoResult }}" onChange="{{ onNewEvoResultChange }}" placeholder="ผลที่เกิดขึ้น (ถ้ามี)…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
-              <div onClick="{{ onAddEvo }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ บันทึก</div>
+              <div onClick="{{ onAddEvo }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่มรายการึก</div>
             </div>
           </div>
         </div>
@@ -177,7 +213,7 @@
           </div>
           <div style="display:flex; gap:8px;">
             <input value="{{ newSystemText }}" onChange="{{ onNewSystemTextChange }}" placeholder="เพิ่มระบบ (เริ่มต้นเป็น 'ใช้งานอยู่')…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
-            <div onClick="{{ onAddSystem }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่ม</div>
+            <div onClick="{{ onAddSystem }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่มรายการม</div>
           </div>
         </div>
       </div>
@@ -202,7 +238,7 @@
           </div>
           <div style="display:flex; gap:8px;">
             <input value="{{ newProgressText }}" onChange="{{ onNewProgressTextChange }}" placeholder="เพิ่มงานใน Checklist…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
-            <div onClick="{{ onAddProgress }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่ม</div>
+            <div onClick="{{ onAddProgress }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่มรายการม</div>
           </div>
         </div>
       </div>
@@ -241,7 +277,7 @@
           </div>
           <div style="display:flex; gap:8px;">
             <input value="{{ newNextText }}" onChange="{{ onNewNextTextChange }}" placeholder="เพิ่มงานถัดไป…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
-            <div onClick="{{ onAddNext }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่ม</div>
+            <div onClick="{{ onAddNext }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่มรายการม</div>
           </div>
         </div>
 
@@ -258,7 +294,7 @@
           </div>
           <div style="display:flex; gap:8px;">
             <input value="{{ newBlockerText }}" onChange="{{ onNewBlockerTextChange }}" placeholder="เพิ่มปัญหาที่ติดอยู่…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
-            <div onClick="{{ onAddBlocker }}" style="background:oklch(40% 0.13 25); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่ม</div>
+            <div onClick="{{ onAddBlocker }}" style="background:oklch(40% 0.13 25); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่มรายการม</div>
           </div>
         </div>
 
@@ -276,7 +312,7 @@
           </div>
           <div style="display:flex; gap:8px;">
             <input value="{{ newDecisionText }}" onChange="{{ onNewDecisionTextChange }}" placeholder="บันทึกมติใหม่…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
-            <div onClick="{{ onAddDecision }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ บันทึก</div>
+            <div onClick="{{ onAddDecision }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่มรายการึก</div>
           </div>
         </div>
 
@@ -373,7 +409,7 @@ class Component extends DCLogic {
       workingPrinciples: "Staging ก่อนขึ้นจริงเสมอ (Preview Channel → ทดสอบ → เลื่อนขึ้นเว็บจริง) | ระบบต้องทำงานอัตโนมัติทั้งหมด ไม่ใช่ให้แอดมินไล่จำ/ไล่ลบเอง",
       aiTeamStructure: "CEO: ผู้ตัดสินใจสูงสุด อนุมัติ/ไม่อนุมัติแต่ละขั้นตอน ดำเนินการบนระบบจริง (Deploy, Firebase Console, GitHub, Domain, DNS, Stripe, LINE OA) | ChatGPT: Product Owner/Project Coordinator วิเคราะห์-ตรวจคุณภาพงาน กำหนด Workflow ตัดสิน PASS/FAIL สร้าง Prompt ขั้นถัดไป | Claude: Lead Developer พัฒนาโค้ด/ระบบ/เอกสารตาม Prompt ที่ได้รับ รายงานผล ไม่ข้ามขั้นตอน ไม่เปลี่ยนทิศทางเอง ไม่เพิ่มฟีเจอร์นอกขอบเขต",
       architectureDirection: "Design Component (.dc.html) ต่อหน้า, Firebase เต็มระบบ (Firestore, Authentication, Hosting + Preview Channels, Cloud Functions, Storage) | Firestore Security Rules: role-based + deny-by-default (ตรวจสอบแล้ว 16 ก.ค. 2026) | Deploy ผ่านอัปโหลดไฟล์ GitHub ด้วยมือ | Technology Stack: Anthropic Claude API (ผ่าน Cloud Function เท่านั้น), Google Maps JavaScript API, ผู้ให้บริการโดเมน — Stripe และ LINE Official Account ยังไม่ได้ต่อ",
-      workingContext: "Current Phase: Next Sprint Planning — Knowledge & Handover Center: Completed, deployed to Production (PASS). Production Baseline v1 established. | เสร็จแล้ว: Demo Accounts, Package Verification, Dashboard Isolation, Translation Pipeline, Demo Listings, Cleanup Scripts, CEO Login Reference, CEO Login Sheet (Private), CEO Acceptance Checklist, Blueprint Updated | เหลือ: CEO Manual Testing, UX Review, Bug Reports, Bug Fixes, Regression Testing, Production Readiness Decision | Open Blocker: index.html ที่ root ไม่ sync อัตโนมัติกับ Home.dc.html — ทุกครั้งที่แก้ Home.dc.html ต้องคัดลอกเนื้อหาไปทับ index.html ด้วยเสมอ",
+      workingContext: "Sprint 01 Completed. Sprint Closed by CEO. Next Task: Sprint 02 Planning. Knowledge & Handover Center: Completed, deployed to Production (PASS). Production Baseline v1 established. | เสร็จแล้ว: Demo Accounts, Package Verification, Dashboard Isolation, Translation Pipeline, Demo Listings, Cleanup Scripts, CEO Login Reference, CEO Login Sheet (Private), CEO Acceptance Checklist, Blueprint Updated | เหลือ: CEO Manual Testing, UX Review, Bug Reports, Bug Fixes, Regression Testing, Production Readiness Decision | Open Blocker: index.html ที่ root ไม่ sync อัตโนมัติกับ Home.dc.html — ทุกครั้งที่แก้ Home.dc.html ต้องคัดลอกเนื้อหาไปทับ index.html ด้วยเสมอ",
       evolution: [
         { id: "e1", date: today, type: "decision", title: "Mission Control Version 1 (FINAL) อนุมัติแล้ว", reason: "ผ่านการตรวจ Knowledge Extraction → Conflict Resolution → Blueprint-Only Verification → QA → CEO Review ครบทุกขั้นตอน", result: "Mission Control เป็น Single Source of Truth อย่างเป็นทางการของโครงการ" },
         { id: "e2", date: today, type: "decision", title: "เลิกใช้ Agent VIP Pool (ทาง 4)", reason: "ไม่ต้องการให้แพลตฟอร์มเป็นกรรมการตัดสินสิทธิ์ Agent", result: "แทนที่ด้วยระบบ Assisted Sale (ข้อตกลง %ค่าคอมส่วนตัวระหว่างผู้ลงประกาศกับทีมงาน)" },
@@ -387,19 +423,28 @@ class Component extends DCLogic {
         { id: "s3", text: "AI Quick Add — ร่างประกาศจากรูป/เสียง", active: true },
         { id: "s4", text: "แพ็กเกจถาวรฟรี (permanent free tier) แบบเดิม", active: false },
       ],
-      today: "Knowledge & Handover Center ปิด Sprint แล้ว (PASS FOR PRODUCTION) — เตรียม Next Sprint Planning",
-      currentTask: "Next Sprint Planning — ดู NEXT-SPRINT.md สำหรับลำดับความสำคัญ (Mission Control v2, KM-14, KM-09, Mini Website)",
+      today: "CEO Guide restructured (KM-CEO + KM-00..17 accordions, Blueprint Tools ย้ายเข้า KM-12) และสร้าง Launch Readiness Dashboard ใหม่ (Executive Decision Panel, 12 Domain Accordions, Launch Blockers, Executive Task Queue, Navigation ระหว่างหน้า) — รอ Product Owner Final Review ก่อน Upload GitHub",
+      currentTask: "End-of-Work Update + Pre-Upload Verification (RELEASE CHECKLIST) สำหรับ Launch Readiness Dashboard.dc.html และ CEO Guide.dc.html — ยังไม่ Upload GitHub",
       progress: [
         { id: "p1", text: "Membership v2 (Trial/Package1/2/3, Approval Queue, Expiry)", done: true },
         { id: "p2", text: "CEO Acceptance Testing รอบแรกเริ่มแล้ว", done: true },
         { id: "p3", text: "CAT-012 โควตาแพ็กเกจผิด — แก้แล้ว รอ CEO ยืนยันซ้ำ", done: false },
+        { id: "p4", text: "CEO Guide: ย้าย CEO Guide (Meta) เป็น Accordion KM-CEO เหนือ KM-00, ย้าย System Blueprint Studio เข้า KM-12 (Advanced Blueprint Tools)", done: true },
+        { id: "p5", text: "Launch Readiness Dashboard สร้างใหม่: Executive Decision Panel, 12 Readiness Domain Accordions พร้อมหลักฐาน, Launch Blockers, Executive Task Queue, Navigation เชื่อม CEO Guide/Mission Control", done: true },
       ],
-      nextTasks: [{ id: "n1", text: "รอผล CEO Acceptance Testing รอบถัดไป" }],
-      blockers: [],
+      nextTasks: [
+        { id: "n1", text: "Product Owner Final Review ของ Launch Readiness Dashboard + CEO Guide ก่อน Upload GitHub" },
+        { id: "n2", text: "Sprint 02 Planning" },
+      ],
+      blockers: [
+        { id: "b1", text: "Firestore Security Rules บน Production ยังไม่ยืนยันจริง — temporary open rules หมดอายุ 2026-08-08 (ดู Launch Readiness Dashboard → Launch Blockers)" },
+        { id: "b2", text: "คำนิยามมาตรฐาน QA (PASS/HOLD/NOT PASS) ยังไม่เป็นทางการ (ดู Launch Readiness Dashboard → Launch Blockers)" },
+      ],
       decisions: [
-        { id: "d0", date: today, text: "Knowledge & Handover Center: Completed — Production PASS. Project status: Completed, Production, Version 1. Current Phase moved to Next Sprint Planning." },
+        { id: "d0", date: today, text: "Sprint 01 officially closed by CEO" },
         { id: "d1", date: today, text: "Mission Control ยกระดับเป็น Project Memory ตามแนวทางสุดท้ายของ CEO" },
-        { id: "d2", date: today, text: "Sprint 01 เข้าสถานะ CODE FREEZE จนกว่า CEO Acceptance จะผ่าน" },
+        { id: "d2", date: today, text: "CEO Guide (Meta) ย้ายเป็น Accordion KM-CEO เหนือ KM-00 — freeze layout หลัง Product Owner approve" },
+        { id: "d3", date: today, text: "สร้าง Launch Readiness Dashboard.dc.html เป็น Executive Decision Dashboard แยกจาก CEO Guide (Knowledge Center)" },
       ],
       updatedAt: Date.now(),
     };
@@ -412,6 +457,9 @@ class Component extends DCLogic {
 
   async persist(fields) {
     this.setState({ updatedAt: Date.now(), ...fields });
+    clearTimeout(this._saveFlashTimer);
+    this.setState({ saveFlash: "✓ Saved Successfully" });
+    this._saveFlashTimer = setTimeout(() => this.setState({ saveFlash: "" }), 2000);
     try {
       await this._fb.updateDocFields("siteContent", "missionControl", { ...fields, updatedAt: Date.now() });
     } catch (e) { /* best-effort — UI already reflects the change locally */ }
@@ -637,6 +685,7 @@ class Component extends DCLogic {
         this.setState({ newDecisionText: "" });
       },
 
+      saveFlash: s.saveFlash || "",
       showHandoffBox: s.showHandoffBox, handoffText: s.handoffText, copyLabel: s.copyLabel,
       onGenChatGPT: () => this.setState({ showHandoffBox: true, handoffText: this.generateFor("chatgpt"), copyLabel: "📋 Copy" }),
       onGenClaude: () => this.setState({ showHandoffBox: true, handoffText: this.generateFor("claude"), copyLabel: "📋 Copy" }),

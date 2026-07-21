@@ -1069,6 +1069,16 @@ Status: 🟢 PASS FOR PRODUCTION. Deployed. Current Phase → Next Sprint Planni
 
 ---
 
+## 24.7 Launch Readiness Dashboard + CEO Guide Structure Freeze (21 ก.ค. 2569)
+
+**CEO Guide.dc.html — Structure Freeze**: หลัง Product Owner approve (21 ก.ค. 2569) โครงสร้างหลักของหน้านี้ freeze แล้ว: CEO Guide (Meta) เป็น `<details id="km-ceo">` accordion วางเหนือ `<details id="km-00">` (AI Collaboration Framework), ตามด้วย KM-01 ถึง KM-17 ตามลำดับเดิม. System Blueprint Studio (เดิมเป็นกรอบสีฟ้าแยกอยู่กลาง Main Flow) ย้ายเข้าไปเป็น "⭐ Advanced Blueprint Tools" ซ้อนอยู่ใน `<details id="km-12">` (Blueprint Meta) พับเก็บเป็นค่าเริ่มต้น — ฟังก์ชันเดิมครบ (Copy Complete System Blueprint, Copy AI Build Package, Copy Project DNA, Copy Clone Project Package, Export Markdown/JSON/YAML/AI Context, System Blueprints 17 รายการ, Dependency Map, Evidence Registry, Factory Status) อ่านจาก `Component.MODULES`/`buildPackage()` ชุดเดิม ไม่มีข้อมูลซ้ำชุดใหม่. ห้ามปรับโครงสร้างหลักอีกเว้นแต่ Product Owner อนุมัติเป็นกรณีพิเศษ.
+
+**Launch Readiness Dashboard.dc.html — Executive Decision Dashboard (ใหม่)**: แยกบทบาทชัดจาก CEO Guide (Knowledge Center) — หน้านี้ตอบคำถาม "เปิด Production วันนี้ได้ไหม" ภายใน 5 วินาที ประกอบด้วย: Navigation (🏠 Dashboard หลัก / 📘 CEO Guide / 🚦 Launch Readiness active), Executive Decision Panel (Production Status READY/HOLD/NOT READY คำนวณจากจำนวน Launch Blockers + Overall %, Open Decisions, Critical Risks, Recommended Action), Meta Accordion (พับเก็บเริ่มต้น), Overall Website Readiness (gradient scale 5 ช่วง เทา→แดง→ส้ม→เหลือง→เขียว พร้อม marker + Breakdown ต่อ Domain), 12 Readiness Domain Accordions (แต่ละอันมี 8 หัวข้อบังคับ: คุณสมบัติของระบบ/เป้าหมาย/เหตุผล/สิ่งที่เสร็จแล้ว/สิ่งที่ยังไม่เสร็จ/งานที่ต้องทำต่อ/หลักฐาน/Readiness Explanation ผลรวมด้วย Owner/Last Updated/Evidence Count/Dependencies/Data Source), Launch Blockers accordion (Impact/Owner/Launch Scope ต่อ Blocker), Executive Task Queue (แทนที่ Recommended Next Priority เดิม เพิ่ม Priority + Expected Impact ต่อ Task).
+
+**Navigation Standard (ทุกหน้าใหม่ควรทำตาม)**: แถวปุ่ม Pill ใต้ชื่อหน้า/คำอธิบายสั้น เชื่อมไปหน้าอื่นที่เกี่ยวข้อง + แสดงหน้าปัจจุบันเป็น non-clickable span สีต่างจากลิงก์ปกติ — ตรวจสอบชื่อไฟล์จริงก่อนใส่ href เสมอ ห้ามเดา path.
+
+**Percentage Integrity Rule**: เปอร์เซ็นต์ของทุก Readiness Domain มาจากข้อเท็จจริงที่ตรวจสอบได้ (โค้ดจริง/BLUEPRINT/Knowledge Modules) เท่านั้น ห้ามปรับโดยไม่มีหลักฐานใหม่ — ค่าปัจจุบันไม่เปลี่ยนตั้งแต่สร้างหน้าจนถึงรอบนี้.
+
 ## 24. Developer Maintenance Center (DMC) — Progress Log
 
 `Developer Maintenance Center.dc.html` — internal Admin-only diagnostics/cleanup tool. Built step-by-step under Product Owner review; each step ships in SAFE MODE (read-only) until explicitly approved for the next phase.

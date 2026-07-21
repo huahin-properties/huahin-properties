@@ -24,6 +24,16 @@
     .status-low, .status-needs-verification, .status-needs-decision, .status-conflict, .status-failed { background:oklch(93% 0.07 25); color:oklch(35% 0.13 25); border-color:oklch(75% 0.12 25); }
     .status-pending, .status-planned, .status-knowledge-pending, .status-not-started, .status-deprecated, .status-na { background:oklch(94% 0.005 70); color:oklch(45% 0.01 70); border-color:oklch(82% 0.01 70); }
     .status-working, .status-in-progress, .status-under-review { background:oklch(93% 0.06 250); color:oklch(35% 0.1 250); border-color:oklch(75% 0.1 250); }
+    :root {
+      --blueprint-bg: oklch(97% 0.02 200);
+      --blueprint-panel: oklch(94% 0.04 180);
+      --blueprint-card: oklch(99% 0.005 200);
+      --blueprint-border: oklch(85% 0.03 190);
+      --blueprint-accent: oklch(45% 0.08 190);
+      --blueprint-text: oklch(28% 0.03 195);
+    }
+    .bp-btn { cursor:pointer; font-size:12.5px; background:var(--blueprint-accent); color:white; padding:8px 14px; border-radius:100px; font-weight:600; display:inline-block; }
+    .bp-btn:hover { opacity:0.9; }
   </style>
 </helmet>
 
@@ -39,6 +49,7 @@
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
       <a href="./Mission%20Control.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:7px 14px; border-radius:100px;">← กลับ Mission Control</a>
       <a href="./Blueprint.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:7px 14px; border-radius:100px;">← กลับ Blueprint</a>
+      <a href="./Launch%20Readiness%20Dashboard.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">🚦 Launch Readiness Dashboard</a>
     </div>
 
     <div style="display:inline-flex; flex-direction:column; gap:2px; font-size:11.5px; color:oklch(45% 0.02 60); border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:8px 12px; margin-bottom:24px;">
@@ -49,10 +60,10 @@
     <div style="background:oklch(96% 0.04 150); border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:16px 18px; margin-bottom:24px;">
       <div style="font-size:12px; font-weight:600; letter-spacing:0.08em; color:oklch(35% 0.08 150); margin-bottom:10px;">QUICK ACTIONS</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a href="https://chatgpt.com/" target="_blank" rel="noopener" style="font-size:13px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:9px 16px; border-radius:100px; font-weight:600;">🚀 เปิด ChatGPT ห้องใหม่</a>
-        <a href="./HANDOVER%20PROMPT.md" target="_blank" rel="noopener" style="font-size:13px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:9px 16px; border-radius:100px; font-weight:600;">📋 เปิด HANDOVER PROMPT</a>
-        <a href="./PHS%20Document%20Center.dc.html" style="font-size:13px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:9px 16px; border-radius:100px; font-weight:600;">📂 เปิดศูนย์รวมเอกสาร PHS</a>
-        <a href="./Complete%20Snapshot.dc.html" style="font-size:13px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:9px 16px; border-radius:100px; font-weight:600;">📸 Complete Snapshot</a>
+        <a href="https://chatgpt.com/" target="_blank" rel="noopener" style="font-size:12px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:7px 13px; border-radius:100px; font-weight:600;">🚀 เปิด ChatGPT ห้องใหม่</a>
+        <a href="./HANDOVER%20PROMPT.md" target="_blank" rel="noopener" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:7px 13px; border-radius:100px; font-weight:600;">📋 เปิด HANDOVER PROMPT</a>
+        <a href="./PHS%20Document%20Center.dc.html" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:7px 13px; border-radius:100px; font-weight:600;">📂 เปิดศูนย์รวมเอกสาร PHS</a>
+        <a href="./Complete%20Snapshot.dc.html" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:7px 13px; border-radius:100px; font-weight:600;">📸 Complete Snapshot</a>
       </div>
       <div style="font-size:11.5px; color:oklch(45% 0.05 150); margin-top:8px;">เปิดหน้านี้เพื่อดู เปิด หรือดาวน์โหลดเอกสารทั้งหมดที่ต้องใช้ โดยไม่ต้องค้นหาจากห้องแชทเก่า — ปุ่ม "เปิด ChatGPT ห้องใหม่" พาไปหน้า ChatGPT ยังต้องแนบไฟล์และวาง Handover Prompt เองตามหัวข้อ 4-5 ด้านล่าง</div>
     </div>
@@ -77,32 +88,55 @@
       <div style="font-size:11px; color:oklch(55% 0.02 60); margin-top:6px;">ตัวเลขนับตรงจาก Module ที่แสดงจริงในหน้านี้ ไม่ใช่ค่าคาดการณ์ · Coverage By Topic = (จำนวนช่องที่กรอกแล้ว ÷ ช่องที่เกี่ยวข้องทั้งหมด) × 100, ไม่นับช่อง Needs Verification เป็น "กรอกแล้ว"</div>
     </div>
 
+    <!-- KNOWLEDGE INDEX — generated from the single MODULES data array in the
+         logic class (Knowledge Engine). This table is no longer hand-written;
+         it is one render of the same Knowledge Object Model that also feeds
+         the Copy Generator and Relationship Engine below. -->
     <div style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:12px 16px; margin-bottom:16px; overflow-x:auto;">
-      <div style="font-size:12px; font-weight:600; letter-spacing:0.06em; color:oklch(40% 0.02 60); margin-bottom:8px;">KNOWLEDGE INDEX</div>
-      <table style="width:100%; border-collapse:collapse; font-size:12px; color:oklch(30% 0.02 60);">
-        <tr style="text-align:left; color:oklch(50% 0.02 60); border-bottom:1px solid oklch(90% 0.01 70);"><th style="padding:4px 8px 4px 0;">ID</th><th style="padding:4px 8px;">Module</th><th style="padding:4px 8px;">Status</th><th style="padding:4px 8px;">Confidence</th><th style="padding:4px 8px;">Coverage</th></tr>
-        <tr><td style="padding:4px 8px 4px 0;"><a href="#km-00">KM-00</a></td><td style="padding:4px 8px;">AI Collaboration Framework</td><td style="padding:4px 8px;"><span class="badge status-working">● Working</span></td><td style="padding:4px 8px;"><span class="badge status-verified">✓ High</span></td><td style="padding:4px 8px;">100%</td></tr>
-        <tr><td style="padding:4px 8px 4px 0;"><a href="#km-01">KM-01</a></td><td style="padding:4px 8px;">Roles &amp; Responsibilities</td><td style="padding:4px 8px;"><span class="badge status-working">● Working</span></td><td style="padding:4px 8px;"><span class="badge status-verified">✓ High</span></td><td style="padding:4px 8px;">100%</td></tr>
-        <tr><td style="padding:4px 8px 4px 0;"><a href="#km-02">KM-02</a></td><td style="padding:4px 8px;">Authentication</td><td style="padding:4px 8px;"><span class="badge status-implemented">✓ Implemented</span></td><td style="padding:4px 8px;"><span class="badge status-medium">! Medium</span></td><td style="padding:4px 8px;">85%</td></tr>
-        <tr><td style="padding:4px 8px 4px 0;"><a href="#km-03">KM-03</a></td><td style="padding:4px 8px;">Membership / Packages</td><td style="padding:4px 8px;"><span class="badge status-implemented">✓ Implemented</span></td><td style="padding:4px 8px;"><span class="badge status-medium">! Medium</span></td><td style="padding:4px 8px;">85%</td></tr>
-        <tr><td style="padding:4px 8px 4px 0;"><a href="#km-04">KM-04</a></td><td style="padding:4px 8px;">Translation (8 ภาษา)</td><td style="padding:4px 8px;"><span class="badge status-implemented">✓ Implemented</span></td><td style="padding:4px 8px;"><span class="badge status-pending">— Pending</span></td><td style="padding:4px 8px;">25%</td></tr>
-        <tr><td style="padding:4px 8px 4px 0;"><a href="#km-05">KM-05</a></td><td style="padding:4px 8px;">Mini Website (Agent Profile)</td><td style="padding:4px 8px;"><span class="badge status-partial">! Partially Implemented</span></td><td style="padding:4px 8px;"><span class="badge status-pending">— Pending</span></td><td style="padding:4px 8px;">30%</td></tr>
-        <tr><td style="padding:4px 8px 4px 0;"><a href="#km-06">KM-06</a></td><td style="padding:4px 8px;">AI</td><td style="padding:4px 8px;"><span class="badge status-implemented">✓ Implemented (shared)</span> <span class="badge status-planned">— Planned (per-agent)</span></td><td style="padding:4px 8px;"><span class="badge status-pending">— Pending</span></td><td style="padding:4px 8px;">30%</td></tr>
-        <tr><td style="padding:4px 8px 4px 0;"><a href="#km-07">KM-07</a></td><td style="padding:4px 8px;">Stripe / Payments</td><td style="padding:4px 8px;"><span class="badge status-implemented">✓ Implemented</span></td><td style="padding:4px 8px;"><span class="badge status-medium">! Medium</span></td><td style="padding:4px 8px;">80%</td></tr>
-        <tr><td style="padding:4px 8px 4px 0;"><a href="#km-08">KM-08</a></td><td style="padding:4px 8px;">Database</td><td style="padding:4px 8px;"><span class="badge status-implemented">✓ Implemented</span></td><td style="padding:4px 8px;"><span class="badge status-medium">! Medium</span></td><td style="padding:4px 8px;">75%</td></tr>
-        <tr><td style="padding:4px 8px 4px 0;"><a href="#km-09">KM-09</a></td><td style="padding:4px 8px;">Security</td><td style="padding:4px 8px;"><span class="badge status-needs-verification">× Needs Verification</span></td><td style="padding:4px 8px;"><span class="badge status-low">× Low</span></td><td style="padding:4px 8px;">30%</td></tr>
-        <tr><td style="padding:4px 8px 4px 0;"><a href="#km-11">KM-11</a></td><td style="padding:4px 8px;">Business</td><td style="padding:4px 8px;"><span class="badge status-implemented">✓ Implemented</span></td><td style="padding:4px 8px;"><span class="badge status-pending">— Pending</span></td><td style="padding:4px 8px;">25%</td></tr>
-        <tr><td style="padding:4px 8px 4px 0;"><a href="#km-12">KM-12</a></td><td style="padding:4px 8px;">Blueprint (Meta)</td><td style="padding:4px 8px;"><span class="badge status-working">● Working</span></td><td style="padding:4px 8px;"><span class="badge status-verified">✓ High</span></td><td style="padding:4px 8px;">100%</td></tr>
-        <tr><td style="padding:4px 8px 4px 0;"><a href="#km-13">KM-13</a></td><td style="padding:4px 8px;">Documentation &amp; Governance</td><td style="padding:4px 8px;"><span class="badge status-working">● Working</span></td><td style="padding:4px 8px;"><span class="badge status-medium">! Medium</span></td><td style="padding:4px 8px;">90%</td></tr>
-        <tr><td style="padding:4px 8px 4px 0;"><a href="#km-14">KM-14</a></td><td style="padding:4px 8px;">QA / Review Standard</td><td style="padding:4px 8px;"><span class="badge status-needs-decision">× Needs Product Owner Decision</span></td><td style="padding:4px 8px;"><span class="badge status-low">× Low</span></td><td style="padding:4px 8px;">60%</td></tr>
-        <tr><td style="padding:4px 8px 4px 0;"><a href="#km-15">KM-15</a></td><td style="padding:4px 8px;">Developer Maintenance Center</td><td style="padding:4px 8px;"><span class="badge status-implemented">✓ Implemented (SAFE MODE)</span></td><td style="padding:4px 8px;"><span class="badge status-pending">— Pending</span></td><td style="padding:4px 8px;">30%</td></tr>
-        <tr><td style="padding:4px 8px 4px 0;"><a href="#km-16">KM-16</a></td><td style="padding:4px 8px;">SEO</td><td style="padding:4px 8px;"><span class="badge status-planned">— Planned</span></td><td style="padding:4px 8px;"><span class="badge status-pending">— Pending</span></td><td style="padding:4px 8px;">20%</td></tr>
-        <tr><td style="padding:4px 8px 4px 0;"><a href="#km-17">KM-17</a></td><td style="padding:4px 8px;">Cleanup / Data Safety</td><td style="padding:4px 8px;"><span class="badge status-implemented">✓ Implemented</span></td><td style="padding:4px 8px;"><span class="badge status-pending">— Pending</span></td><td style="padding:4px 8px;">30%</td></tr>
-      </table>
+      <div style="font-size:12px; font-weight:600; letter-spacing:0.06em; color:oklch(40% 0.02 60); margin-bottom:8px;">KNOWLEDGE INDEX <span style="font-weight:400; color:oklch(55% 0.02 60);">(generated from Knowledge Engine)</span></div>
+      <div style="display:grid; grid-template-columns:60px 1.6fr 1fr 1fr 70px 1fr 1fr; gap:4px 8px; font-size:12px; color:oklch(30% 0.02 60); min-width:640px;">
+        <div style="font-weight:600; color:oklch(50% 0.02 60); border-bottom:1px solid oklch(90% 0.01 70); padding-bottom:4px;">ID</div>
+        <div style="font-weight:600; color:oklch(50% 0.02 60); border-bottom:1px solid oklch(90% 0.01 70); padding-bottom:4px;">Module</div>
+        <div style="font-weight:600; color:oklch(50% 0.02 60); border-bottom:1px solid oklch(90% 0.01 70); padding-bottom:4px;">Status</div>
+        <div style="font-weight:600; color:oklch(50% 0.02 60); border-bottom:1px solid oklch(90% 0.01 70); padding-bottom:4px;">Confidence</div>
+        <div style="font-weight:600; color:oklch(50% 0.02 60); border-bottom:1px solid oklch(90% 0.01 70); padding-bottom:4px;">Coverage</div>
+        <div style="font-weight:600; color:oklch(50% 0.02 60); border-bottom:1px solid oklch(90% 0.01 70); padding-bottom:4px;">Depends On</div>
+        <div style="font-weight:600; color:oklch(50% 0.02 60); border-bottom:1px solid oklch(90% 0.01 70); padding-bottom:4px;">Depended On By</div>
+        <sc-for list="{{ indexRows }}" as="row" hint-placeholder-count="17">
+          <div style="padding:2px 0;"><a href="{{ row.anchor }}">{{ row.id }}</a></div>
+          <div style="padding:2px 0;">{{ row.name }}</div>
+          <div style="padding:2px 0;"><span style="{{ row.statusStyle }}">{{ row.statusLabel }}</span></div>
+          <div style="padding:2px 0;"><span style="{{ row.confStyle }}">{{ row.confLabel }}</span></div>
+          <div style="padding:2px 0;">{{ row.coverage }}</div>
+          <div style="padding:2px 0; font-size:11px;">{{ row.dependsOnText }}</div>
+          <div style="padding:2px 0; font-size:11px;">{{ row.dependedOnByText }}</div>
+        </sc-for>
+      </div>
     </div>
 
-    <details id="km-00" style="border:1px solid oklch(85% 0.1 25); border-radius:8px; padding:14px 16px; margin-bottom:10px; background:oklch(97% 0.03 25);">
-      <summary style="cursor:pointer; font-weight:700; font-size:14.5px; color:oklch(25% 0.06 25);">🤖 AI Collaboration Framework <span style="font-weight:400; font-size:11px; color:oklch(55% 0.02 60);">[KM-00]</span> <span style="font-weight:400; font-size:12px; color:oklch(50% 0.02 60);">— Working · Confidence: High</span></summary>
+    <details id="km-ceo" style="border:1px solid oklch(85% 0.1 25); border-radius:8px; padding:14px 16px; margin-bottom:10px; background:oklch(97% 0.03 25);">
+      <summary style="cursor:pointer; font-weight:700; font-size:14.5px; color:oklch(25% 0.06 25);">📖 CEO Guide (Meta) <span style="font-weight:400; font-size:11px; color:oklch(55% 0.02 60);">[KM-CEO]</span> <span style="font-weight:400; font-size:12px; color:oklch(50% 0.02 60);">— Working · Confidence: High</span></summary>
+      <div style="font-size:13.5px; line-height:1.8; color:oklch(28% 0.02 60); margin-top:12px;">
+        <p><strong>หน้านี้คืออะไร</strong>: Knowledge Center และคู่มือประจำวันของ CEO สำหรับโครงการ huahin.properties</p>
+        <p><strong>ใช้ทำอะไร</strong>: ส่งต่อบริบทโครงการให้ AI/Developer ใหม่, ดูภาพรวม Knowledge Modules ทั้ง 17, ใช้ System Blueprint Studio สร้าง/ส่งออกข้อมูลระบบ</p>
+        <p><strong>ใช้เมื่อไร</strong>: เปิดห้อง AI ใหม่ทุกครั้ง หรือเมื่อต้องการทบทวนสถานะระบบใดระบบหนึ่ง</p>
+        <p><strong>ใช้งานอย่างไร</strong>: แนบไฟล์ตามหัวข้อ 4 → วาง HANDOVER PROMPT → ตรวจสอบ AI ตามหัวข้อ 6 → เริ่มงาน</p>
+        <p><strong>ประกอบด้วยอะไร</strong>: System Blueprint Studio, Knowledge Modules 17 รายการ, Workflow ประจำวัน (หัวข้อ 1-12)</p>
+        <p><strong>ไม่ใช่อะไร</strong>: ไม่ใช่ Dashboard สถานะ Production (ดู Launch Readiness Dashboard แทน), ไม่ใช่ที่เก็บ Business Logic หรือ Production Data</p>
+        <p><strong>กลุ่มผู้ใช้งาน</strong>: CEO, Product Owner (AI), Lead Developer (AI)</p>
+        <p><strong>Related Pages</strong>: <a href="./Mission%20Control.dc.html">Mission Control</a>, <a href="./Launch%20Readiness%20Dashboard.dc.html">Launch Readiness Dashboard</a>, <a href="./Blueprint.dc.html">Blueprint</a></p>
+        <p><strong>Meta Version</strong>: 1.0 &nbsp;·&nbsp; <strong>Last Updated</strong>: 21 กรกฎาคม 2569 (Phase 7)</p>
+        <div style="height:1px; background:oklch(90% 0.05 25); margin:12px 0;"></div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <a href="./Mission%20Control.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🏠 Dashboard หลัก</a>
+          <a href="./Launch%20Readiness%20Dashboard.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">🚦 Launch Readiness Dashboard</a>
+          <span style="font-size:12.5px; background:oklch(90% 0.01 70); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📘 CEO Guide (คุณอยู่ที่นี่)</span>
+        </div>
+      </div>
+    </details>
+
+    <details id="km-00" style="border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:14px 16px; margin-bottom:8px;">
+      <summary style="cursor:pointer; font-weight:600; font-size:14px; color:oklch(25% 0.02 60);">🤖 AI Collaboration Framework <span style="font-weight:400; font-size:11px; color:oklch(55% 0.02 60);">[KM-00]</span> <span style="font-weight:400; font-size:12px; color:oklch(50% 0.02 60);">— Working · Confidence: High</span></summary>
       <div style="font-size:13.5px; line-height:1.8; color:oklch(28% 0.02 60); margin-top:12px;">
         <p><strong>คืออะไร</strong>: กติกากลางที่ทำให้ Documentation ทั้งหมดไม่ผูกกับ AI Platform ใดเจ้าหนึ่ง ใช้ "บทบาท (Role)" แทน "ชื่อ AI"</p>
         <p><strong>ใช้ทำอะไร</strong>: ให้สลับ AI Platform ได้ (ChatGPT ↔ Claude ↔ อื่นๆ) โดยไม่ต้องแก้ Documentation ทุกครั้ง</p>
@@ -134,7 +168,7 @@
         <p><strong>12. Future Direction</strong>: ไม่มีแผนเปลี่ยนแปลง — เปลี่ยนได้เฉพาะเมื่อ CEO อนุมัติชัดเจนเท่านั้น</p>
         <div style="font-size:11px; color:oklch(50% 0.02 60); margin-top:8px;"><strong>Verification</strong>: Verified against Lead Developer Working Protocol charter &nbsp;·&nbsp; <strong>CEO Notes</strong>: (ว่าง) &nbsp;·&nbsp; <strong>AI Instructions</strong>: ห้ามข้าม Product Owner Review ไม่ว่าในกรณีใด &nbsp;·&nbsp; <strong>Depends On</strong>: ไม่มี (เป็น Module พื้นฐานที่ Module อื่นพึ่งพา) &nbsp;·&nbsp; <strong>Affected By</strong>: เฉพาะคำสั่งของ CEO เท่านั้น &nbsp;·&nbsp; <strong>Change Impact</strong>: หากแก้ไข Module นี้ ทุก Module ต้องถูกตรวจสอบซ้ำ (governance พื้นฐานของทั้งระบบ) &nbsp;·&nbsp; <strong>Relationships</strong>: เกี่ยวข้องกับทุกหัวข้ออื่น</div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center;">
-          <div class="qa-btn" onClick="{{ copyKM01 }}">📋 Copy Handover</div>
+          <div class="qa-btn" onClick="{{ copyKM01 }}">📦 Copy Complete Knowledge Package</div>
           <a href="#km-13" class="qa-btn" style="text-decoration:none; color:inherit;">🔗 Related: Documentation &amp; Governance</a>
           <span style="font-size:11px; color:oklch(50% 0.08 40);">📜 Decision Log / 🕘 History — Planned Action, Not Yet Active</span>
           <span style="font-size:11px; color:oklch(45% 0.1 150);">{{ copyStatusKM01 }}</span>
@@ -154,7 +188,7 @@
         <p><strong>Current Status</strong>: Implemented &nbsp;·&nbsp; <strong>Knowledge Confidence</strong>: Medium (verified against code, not against live Production)</p>
         <div style="font-size:11px; color:oklch(50% 0.02 60); margin-top:8px;"><strong>Depends On</strong>: Database [KM-08] &nbsp;·&nbsp; <strong>Affected By</strong>: Security [KM-09] (Firestore Rules) &nbsp;·&nbsp; <strong>Change Impact</strong>: แก้ auth gate กระทบ Admin Dashboard, DMC, Lister Dashboard, Billing พร้อมกัน &nbsp;·&nbsp; <strong>Related Documents</strong>: firebase-client.js</div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center;">
-          <div class="qa-btn" onClick="{{ copyKM02 }}">📋 Copy Handover</div>
+          <div class="qa-btn" onClick="{{ copyKM02 }}">📦 Copy Complete Knowledge Package</div>
           <span style="font-size:11px; color:oklch(50% 0.08 40);">🔗🕘 อื่นๆ — Planned Action, Not Yet Active</span>
           <span style="font-size:11px; color:oklch(45% 0.1 150);">{{ copyStatusKM02 }}</span>
         </div>
@@ -171,7 +205,7 @@
         <p><strong>Current Status</strong>: Implemented &nbsp;·&nbsp; <strong>Knowledge Confidence</strong>: Medium (code-verified, Production re-test recommended)</p>
         <div style="font-size:11px; color:oklch(50% 0.02 60); margin-top:8px;"><strong>Depends On</strong>: Stripe/Payments [KM-07] &nbsp;·&nbsp; <strong>Affected By</strong>: Database [KM-08] (lister tier field) &nbsp;·&nbsp; <strong>Change Impact</strong>: แก้ quota ต้องตรวจ Lister Dashboard, Billing, Stripe webhook พร้อมกัน &nbsp;·&nbsp; <strong>Related Documents</strong>: BLUEPRINT.md §2</div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center;">
-          <div class="qa-btn" onClick="{{ copyKM03 }}">📋 Copy Handover</div>
+          <div class="qa-btn" onClick="{{ copyKM03 }}">📦 Copy Complete Knowledge Package</div>
           <span style="font-size:11px; color:oklch(50% 0.08 40);">🔗🕘 อื่นๆ — Planned Action, Not Yet Active</span>
           <span style="font-size:11px; color:oklch(45% 0.1 150);">{{ copyStatusKM03 }}</span>
         </div>
@@ -208,7 +242,7 @@
         <p><strong>Current Status</strong>: Implemented &nbsp;·&nbsp; <strong>Knowledge Confidence</strong>: Medium (code-verified, live Stripe dashboard not checked from this environment)</p>
         <div style="font-size:11px; color:oklch(50% 0.02 60); margin-top:8px;"><strong>Depends On</strong>: Database [KM-08] &nbsp;·&nbsp; <strong>Affected By</strong>: Membership/Packages [KM-03] &nbsp;·&nbsp; <strong>Change Impact</strong>: แก้ Stripe function กระทบ Billing, Lister Dashboard tier display ทันที &nbsp;·&nbsp; <strong>Related Documents</strong>: functions/index.js</div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center;">
-          <div class="qa-btn" onClick="{{ copyKM07 }}">📋 Copy Handover</div>
+          <div class="qa-btn" onClick="{{ copyKM07 }}">📦 Copy Complete Knowledge Package</div>
           <span style="font-size:11px; color:oklch(50% 0.08 40);">🔗🕘 อื่นๆ — Planned Action, Not Yet Active</span>
           <span style="font-size:11px; color:oklch(45% 0.1 150);">{{ copyStatusKM07 }}</span>
         </div>
@@ -223,7 +257,7 @@
         <p><strong>Current Status</strong>: Implemented &nbsp;·&nbsp; <strong>Knowledge Confidence</strong>: Medium (code-verified)</p>
         <div style="font-size:11px; color:oklch(50% 0.02 60); margin-top:8px;"><strong>Depends On</strong>: ไม่มี (ชั้นข้อมูลพื้นฐาน) &nbsp;·&nbsp; <strong>Affected By</strong>: Cleanup/Data Safety [KM-17] &nbsp;·&nbsp; <strong>Change Impact</strong>: แก้ setDoc()/merge logic กระทบทุก feature ที่เขียนข้อมูล — ต้อง regression test กว้างที่สุด &nbsp;·&nbsp; <strong>Related Documents</strong>: firebase-client.js</div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center;">
-          <div class="qa-btn" onClick="{{ copyKM08 }}">📋 Copy Handover</div>
+          <div class="qa-btn" onClick="{{ copyKM08 }}">📦 Copy Complete Knowledge Package</div>
           <span style="font-size:11px; color:oklch(50% 0.08 40);">🔗🕘 อื่นๆ — Planned Action, Not Yet Active</span>
           <span style="font-size:11px; color:oklch(45% 0.1 150);">{{ copyStatusKM08 }}</span>
         </div>
@@ -259,11 +293,131 @@
         <p><strong>12. Future Direction</strong>: Mission Control.dc.html และ Complete Snapshot.dc.html จะถูกดูดซับเนื้อหาเข้ามาไว้ใน Deep Knowledge Module แต่ละหัวข้อ ตามแผน Migration ที่อนุมัติไว้ (ยังไม่ดำเนินการ)</p>
         <div style="font-size:11px; color:oklch(50% 0.02 60); margin-top:8px;"><strong>Verification</strong>: Verified against BLUEPRINT.md §0 and section headers directly &nbsp;·&nbsp; <strong>CEO Notes</strong>: (ว่าง) &nbsp;·&nbsp; <strong>AI Instructions</strong>: ห้ามถือว่า BLUEPRINT.md ถูกทั้งหมดโดยไม่ตรวจกับระบบจริง (มีทั้งข้อมูลปัจจุบันและประวัติปนกัน) &nbsp;·&nbsp; <strong>Depends On</strong>: ไม่มี (เป็นเอกสารต้นทาง) &nbsp;·&nbsp; <strong>Affected By</strong>: ทุก Sprint ที่ปิดงาน (ต้องอัปเดต §ที่เกี่ยวข้องเสมอ) &nbsp;·&nbsp; <strong>Change Impact</strong>: หากแก้ไข BLUEPRINT.md ทุก Knowledge Module ที่ชี้มาที่ § นั้นต้องถูกตรวจสอบว่ายังตรงกันหรือไม่ &nbsp;·&nbsp; <strong>Relationships</strong>: เป็นแหล่งอ้างอิงของทุก Knowledge Module</div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center;">
-          <div class="qa-btn" onClick="{{ copyKM12 }}">📋 Copy Handover</div>
+          <div class="qa-btn" onClick="{{ copyKM12 }}">📦 Copy Complete Knowledge Package</div>
           <a href="#km-13" class="qa-btn" style="text-decoration:none; color:inherit;">🔗 Related: Documentation &amp; Governance</a>
           <span style="font-size:11px; color:oklch(50% 0.08 40);">📜🕘 อื่นๆ — Planned Action, Not Yet Active</span>
           <span style="font-size:11px; color:oklch(45% 0.1 150);">{{ copyStatusKM12 }}</span>
         </div>
+
+        <details style="background:var(--blueprint-bg); border:1px solid var(--blueprint-border); border-radius:8px; padding:14px 16px; margin-top:14px; color:var(--blueprint-text);">
+          <summary style="cursor:pointer; font-weight:700; font-size:13.5px; color:var(--blueprint-accent);">⭐ Advanced Blueprint Tools <span style="font-weight:400; font-size:11.5px; opacity:0.75;">— Master Template ของทุกระบบ, สร้างจากข้อมูลปัจจุบันทุกครั้งที่กด Copy</span></summary>
+          <div style="margin-top:12px;">
+            <div style="font-size:11px; opacity:0.75; margin-bottom:14px;">Blueprint packages are generated dynamically from the latest maintained Component.MODULES data at the time of copy. Knowledge Modules must be updated as part of every work-closure process.</div>
+
+            <div style="background:var(--blueprint-card); border:1px solid var(--blueprint-border); border-radius:8px; padding:14px 16px; margin-bottom:14px;">
+              <div style="font-size:12px; font-weight:600; letter-spacing:0.05em; color:var(--blueprint-accent); margin-bottom:6px;">🧬 PROJECT DNA</div>
+              <div style="font-size:13px; line-height:1.7;">{{ projectDNA }}</div>
+            </div>
+
+            <div style="background:var(--blueprint-panel); border:1px solid var(--blueprint-border); border-radius:8px; padding:14px 16px; margin-bottom:14px;">
+              <div style="font-size:12px; font-weight:600; letter-spacing:0.05em; color:var(--blueprint-accent); margin-bottom:6px;">🏗️ UNIVERSAL SYSTEM BLUEPRINT — Knowledge Engine ที่ใช้ร่วมกันทุก Module</div>
+              <div style="font-size:13px; line-height:1.7;">
+                <div>• <strong>Knowledge Object Model</strong>: <code>Component.MODULES</code> — 1 object ต่อ 1 Module (metadata, contexts, evidence, dependsOn)</div>
+                <div>• <strong>Relationship Engine</strong>: <code>computeDependedOnBy()</code> คำนวณความสัมพันธ์ย้อนกลับอัตโนมัติ ไม่เขียนมือ</div>
+                <div>• <strong>Evidence Registry</strong>: <code>evidence[]</code> ต่อ Module — source + confidence</div>
+                <div>• <strong>Copy Generator</strong>: <code>buildPackage(module, type)</code> สร้างทุก Package จาก Object เดียวกัน</div>
+                <div>• <strong>Knowledge Index</strong>: สร้างจาก MODULES โดยตรง (ดูหัวข้อ 0 ด้านล่าง) — ไม่ใช่ตารางเขียนมือ</div>
+              </div>
+            </div>
+
+            <div style="background:var(--blueprint-card); border:1px solid var(--blueprint-border); border-radius:8px; padding:12px 14px; margin-bottom:14px;">
+              <div style="font-size:12px; font-weight:600; color:var(--blueprint-accent); margin-bottom:4px;">📊 BLUEPRINT COMPLETENESS METER</div>
+              <div style="background:oklch(90% 0.02 190); border-radius:100px; height:8px; overflow:hidden; margin-bottom:4px;"><div style="background:var(--blueprint-accent); height:100%; width:{{ blueprintCompletenessPct }};"></div></div>
+              <div style="font-size:11px; opacity:0.8;">{{ blueprintCompletenessLabel }}</div>
+            </div>
+
+            <div style="font-size:11px; opacity:0.75; margin-bottom:14px;">
+              <strong>สถานะรายละเอียดเพิ่มเติมที่ Product Owner ขอ</strong> (Component Blueprint, Workflow Blueprint, Database Blueprint, Security Blueprint, Translation Blueprint, SEO Blueprint, UI/UX Blueprint แยกเป็นหัวข้อของตัวเอง): 🔴 ยังไม่สร้างเป็นหัวข้อเดี่ยว — ข้อมูลมีอยู่แล้วกระจายในแต่ละ Knowledge Module (Database=KM-08, Security=KM-09, Translation=KM-04, SEO=KM-16 ฯลฯ) — เสนอเป็น Phase ถัดไป
+            </div>
+
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+              <div class="bp-btn" onClick="{{ copyCompleteBlueprint }}">📦 Copy Complete System Blueprint</div>
+              <div class="bp-btn" onClick="{{ copyAiBuildPackage }}">🤖 Copy AI Build Package</div>
+              <div class="bp-btn" onClick="{{ copyProjectDNA }}">🧬 Copy Project DNA</div>
+              <div class="bp-btn" onClick="{{ copyClonePackage }}">🚀 Copy Clone Project Package</div>
+              <span style="font-size:11px; color:var(--blueprint-accent);">{{ blueprintCopyStatus }}</span>
+            </div>
+
+            <div style="height:1px; background:var(--blueprint-border); margin:16px 0;"></div>
+            <div style="font-size:12px; font-weight:600; letter-spacing:0.05em; color:var(--blueprint-accent); margin-bottom:8px;">📤 EXPORT (Multi-Format) — สร้างจาก Knowledge Object เดียวกัน</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:16px;">
+              <div class="bp-btn" onClick="{{ exportMarkdown }}">📝 Export Markdown</div>
+              <div class="bp-btn" onClick="{{ exportJSON }}">🧾 Export JSON</div>
+              <div class="bp-btn" onClick="{{ exportYAML }}">📄 Export YAML</div>
+              <div class="bp-btn" onClick="{{ exportAiContext }}">🤖 Export AI Context</div>
+              <span style="font-size:11px; color:var(--blueprint-accent);">{{ exportStatus }}</span>
+            </div>
+
+            <div style="font-size:12px; font-weight:600; letter-spacing:0.05em; color:var(--blueprint-accent); margin-bottom:8px;">🏗️ SYSTEM BLUEPRINTS — ทั้ง 17 Knowledge Modules (Priority 1, Phase 6)</div>
+            <div style="font-size:11px; opacity:0.75; margin-bottom:10px;">Renderer เดียวใช้ร่วมกันทุก Module (ไม่เขียน Layout ซ้ำ 17 ชุด) — สร้างจากข้อมูลที่ยืนยันแล้วใน Knowledge Object เดิม ไม่มีข้อมูลใหม่ที่ไม่มีหลักฐาน</div>
+            <sc-for list="{{ systemBlueprints }}" as="sb" hint-placeholder-count="17">
+              <details style="background:var(--blueprint-card); border:1px solid var(--blueprint-border); border-radius:8px; padding:10px 14px; margin-bottom:6px;">
+                <summary style="cursor:pointer; font-size:13px; font-weight:600;">{{ sb.id }} {{ sb.name }} <a href="{{ sb.anchor }}" style="font-size:11px; font-weight:400; color:var(--blueprint-accent);">(ดู Knowledge Module)</a></summary>
+                <div style="font-size:12px; line-height:1.7; margin-top:8px;">
+                  <div><strong>Purpose</strong>: {{ sb.purpose }}</div>
+                  <div><strong>Technical Strategy</strong>: {{ sb.technicalStrategy }}</div>
+                  <div><strong>Business Context</strong>: {{ sb.businessContext }}</div>
+                  <div><strong>Dependencies</strong>: {{ sb.dependencies }} &nbsp;·&nbsp; <strong>Depended On By</strong>: {{ sb.dependedOnBy }}</div>
+                  <div><strong>Evidence</strong>: {{ sb.evidenceStatus }}</div>
+                  <div><strong>Current Status</strong>: {{ sb.currentStatus }}</div>
+                  <div><strong>Recreation Documentation Readiness</strong> (ความพร้อมของข้อมูล ไม่ใช่ Production Readiness): {{ sb.recreationReadiness }}</div>
+                </div>
+              </details>
+            </sc-for>
+
+            <div style="font-size:11px; opacity:0.7; margin-top:16px; margin-bottom:16px;">System Recreation Prompt / AI Build Generator: รวมอยู่ใน "🤖 Copy AI Build Package" ด้านบน (สร้างจาก Knowledge Object Model ของทั้ง 17 Modules จริง ไม่ Hardcode)</div>
+
+            <div style="height:1px; background:var(--blueprint-border); margin:16px 0;"></div>
+            <div style="font-size:12px; font-weight:600; letter-spacing:0.05em; color:var(--blueprint-accent); margin-bottom:4px;">🕸️ SYSTEM DEPENDENCY MAP <span style="font-weight:400; opacity:0.8;">— แผนผังความเชื่อมโยงและการพึ่งพาของระบบ</span></div>
+            <div style="font-size:11px; opacity:0.75; margin-bottom:10px;">อ่านจาก module.dependsOn[] และ computeDependedOnBy() โดยตรง ไม่มีชุดข้อมูล Dependency แยกต่างหาก</div>
+            <select value="{{ selectedModuleId }}" onChange="{{ onSelectModule }}" style="width:100%; box-sizing:border-box; border:1px solid var(--blueprint-border); border-radius:6px; padding:8px 10px; font-size:13px; margin-bottom:10px; background:var(--blueprint-card);">
+              <sc-for list="{{ moduleOptions }}" as="opt" hint-placeholder-count="17">
+                <option value="{{ opt.value }}">{{ opt.label }}</option>
+              </sc-for>
+            </select>
+            <div style="background:var(--blueprint-card); border:1px solid var(--blueprint-border); border-radius:8px; padding:14px 16px; margin-bottom:16px; display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px;">
+              <div><div style="font-size:11px; opacity:0.7;">Module</div><div style="font-size:13px; font-weight:600;">{{ selectedModuleCard.id }} — {{ selectedModuleCard.name }}</div></div>
+              <div><div style="font-size:11px; opacity:0.7;">สถานะ</div><div style="font-size:13px;">{{ selectedModuleCard.statusLabel }}</div></div>
+              <div><div style="font-size:11px; opacity:0.7;">Knowledge Coverage</div><div style="font-size:13px;">{{ selectedModuleCard.coverage }}</div></div>
+              <div><div style="font-size:11px; opacity:0.7;">จำนวนระบบที่พึ่งพา</div><div style="font-size:13px;">{{ selectedModuleCard.dependsOnCount }}</div></div>
+              <div><div style="font-size:11px; opacity:0.7;">จำนวนระบบที่พึ่งพา Module นี้</div><div style="font-size:13px;">{{ selectedModuleCard.dependedOnByCount }}</div></div>
+              <div style="grid-column:1/-1;"><div style="font-size:11px; opacity:0.7;">Depends On (ต้องพึ่งพา)</div><div style="font-size:13px;">{{ selectedModuleCard.dependsOnText }}</div></div>
+              <div style="grid-column:1/-1;"><div style="font-size:11px; opacity:0.7;">Depended On By (ระบบที่พึ่งพา Module นี้)</div><div style="font-size:13px;">{{ selectedModuleCard.dependedOnByText }}</div></div>
+            </div>
+
+            <div style="height:1px; background:var(--blueprint-border); margin:16px 0;"></div>
+            <div style="font-size:12px; font-weight:600; letter-spacing:0.05em; color:var(--blueprint-accent); margin-bottom:4px;">🔎 EVIDENCE REGISTRY <span style="font-weight:400; opacity:0.8;">— ทะเบียนหลักฐานและสถานะการตรวจสอบของทั้งโครงการ</span></div>
+            <div style="display:flex; gap:14px; flex-wrap:wrap; font-size:12.5px; margin-bottom:10px;">
+              <div>Modules ทั้งหมด: <strong>{{ evidenceSummary.total }}</strong></div>
+              <div>มี Evidence: <strong>{{ evidenceSummary.withEv }}</strong></div>
+              <div>ยังไม่มี Evidence: <strong>{{ evidenceSummary.without }}</strong></div>
+              <div>High Confidence: <strong>{{ evidenceSummary.highConf }}</strong></div>
+              <div>ต้อง Review: <strong>{{ evidenceSummary.needsReview }}</strong></div>
+            </div>
+            <div style="max-height:340px; overflow-y:auto; border:1px solid var(--blueprint-border); border-radius:8px; background:var(--blueprint-card);">
+              <sc-for list="{{ evidenceRows }}" as="row" hint-placeholder-count="17">
+                <div style="padding:10px 14px; border-bottom:1px solid var(--blueprint-border); font-size:12.5px;">
+                  <div style="font-weight:600; margin-bottom:4px;">{{ row.id }} — {{ row.name }}</div>
+                  <sc-if value="{{ row.hasEvidence }}" hint-placeholder-val="{{ true }}">
+                    <sc-for list="{{ row.entries }}" as="ev" hint-placeholder-count="1">
+                      <div style="padding-left:10px; opacity:0.85; margin-bottom:2px;">• Source: {{ ev.source }} · Confidence: {{ ev.confidence }} · Reviewer: {{ ev.reviewer }} · Version: {{ ev.version }} · Reference: {{ ev.reference }}</div>
+                    </sc-for>
+                  </sc-if>
+                  <sc-if value="{{ row.noEvidence }}" hint-placeholder-val="{{ false }}"><div style="padding-left:10px; opacity:0.6; font-style:italic;">ยังไม่มี Evidence บันทึกไว้สำหรับ Module นี้</div></sc-if>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="height:1px; background:var(--blueprint-border); margin:16px 0;"></div>
+            <div style="font-size:12px; font-weight:600; letter-spacing:0.05em; color:var(--blueprint-accent); margin-bottom:8px;">🏭 BLUEPRINT FACTORY V1 STATUS <span style="font-weight:400; opacity:0.8;">— สถานะความพร้อมของศูนย์แม่แบบระบบ</span></div>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:8px; margin-bottom:8px;">
+              <sc-for list="{{ factoryGates }}" as="gate" hint-placeholder-count="12">
+                <div style="background:var(--blueprint-card); border:1px solid var(--blueprint-border); border-radius:6px; padding:8px 10px; font-size:12px;">{{ gate.status }} {{ gate.label }} <div style="font-size:11px; opacity:0.7;">{{ gate.note }}</div></div>
+              </sc-for>
+            </div>
+            <div style="font-size:13px; font-weight:600; color:var(--blueprint-accent);">Overall: {{ factoryOverallStatus }}</div>
+          </div>
+        </details>
       </div>
     </details>
 
@@ -285,7 +439,7 @@
         <p><strong>Current-State Synchronization Rule</strong> (formal, added Step 9): การเปลี่ยนแปลงที่ได้รับอนุมัติต่อ scope/architecture/business rules/สถานะการพัฒนา/security/database/package/pricing/AI workflow/governance ต้องอัปเดตพร้อมกัน 5 จุด: (1) เอกสารต้นทาง (BLUEPRINT.md), (2) Knowledge Module ที่เกี่ยวข้อง, (3) CEO Guide summary, (4) Decision Log, (5) ความสัมพันธ์ Module ที่ได้รับผลกระทบ (Affected By/Change Impact)</p>
         <div style="font-size:11px; color:oklch(50% 0.02 60); margin-top:8px;"><strong>Verification</strong>: Verified against CEO Guide.dc.html + BLUEPRINT.md structure &nbsp;·&nbsp; <strong>CEO Notes</strong>: (ว่าง) &nbsp;·&nbsp; <strong>AI Instructions</strong>: ห้ามสร้างเอกสาร "สถานะปัจจุบัน" เอกสารใหม่อีก — อัปเดต Module ที่มีอยู่แทน &nbsp;·&nbsp; <strong>Depends On</strong>: Blueprint (Meta) [KM-12] &nbsp;·&nbsp; <strong>Affected By</strong>: Roles &amp; Responsibilities [KM-01] (Workflow rules) &nbsp;·&nbsp; <strong>Change Impact</strong>: หากแก้ไข Module นี้ ต้องตรวจสอบ QA/Review Standard [KM-14] และ START HERE.md/HANDOVER PROMPT.md ว่ายังสอดคล้องกัน &nbsp;·&nbsp; <strong>Relationships</strong>: เกี่ยวข้องกับ Blueprint (Meta), QA/Review Standard, Roles &amp; Responsibilities</div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
-          <span style="font-size:11.5px; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:4px 10px; border-radius:100px;">📋 Copy Handover</span>
+          <span style="font-size:11.5px; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:4px 10px; border-radius:100px;">📦 Copy Complete Knowledge Package</span>
           <span style="font-size:11.5px; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:4px 10px; border-radius:100px;">🔗 Related Documents</span>
           <span style="font-size:11px; color:oklch(50% 0.08 40);">📜🕘 อื่นๆ — Planned Action, Not Yet Active</span>
         </div>
@@ -301,7 +455,7 @@
         <p><strong>Current Status</strong>: Needs Product Owner Decision &nbsp;·&nbsp; <strong>Knowledge Confidence</strong>: Low</p>
         <div style="font-size:11px; color:oklch(50% 0.02 60); margin-top:8px;"><strong>Verification</strong>: Searched BLUEPRINT.md, Project-Control-Governance-v2.2.md, RELEASE-NOTES-Step6-9.md, Blueprint Status.dc.html — confirmed not present &nbsp;·&nbsp; <strong>CEO Notes</strong>: (ว่าง) &nbsp;·&nbsp; <strong>AI Instructions</strong>: ห้ามเขียนคำนิยาม PASS/HOLD/NOT PASS จากความจำ — ต้องอ้างอิงไฟล์จริงเท่านั้น หากไม่มี ให้คงสถานะ Needs Product Owner Decision &nbsp;·&nbsp; <strong>Depends On</strong>: Documentation &amp; Governance [KM-13] &nbsp;·&nbsp; <strong>Affected By</strong>: ทุก Step ที่ Product Owner ให้ผลตรวจ &nbsp;·&nbsp; <strong>Change Impact</strong>: หากมีการเขียนคำนิยามนี้ในอนาคต ทุก Module ที่อ้างอิงสถานะ PASS/HOLD ต้องตรวจสอบว่าใช้คำนิยามเดียวกัน &nbsp;·&nbsp; <strong>Relationships</strong>: Documentation &amp; Governance, Roles &amp; Responsibilities</div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center;">
-          <div class="qa-btn" onClick="{{ copyKM14 }}">📋 Copy Handover</div>
+          <div class="qa-btn" onClick="{{ copyKM14 }}">📦 Copy Complete Knowledge Package</div>
           <a href="#km-13" class="qa-btn" style="text-decoration:none; color:inherit;">🔗 Related: Documentation &amp; Governance</a>
           <span style="font-size:11px; color:oklch(50% 0.08 40);">📜🕘 อื่นๆ — Planned Action, Not Yet Active</span>
           <span style="font-size:11px; color:oklch(45% 0.1 150);">{{ copyStatusKM14 }}</span>
@@ -436,8 +590,123 @@
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script>
+// ============================================================
+// KNOWLEDGE ENGINE — single source of truth for every Knowledge
+// Module on this page. This is the Knowledge Object Model:
+//
+//   Knowledge Module (MODULES[i])
+//     → Metadata (id, name, icon, status, confidence, coverage)
+//     → Contexts (ceo/business/technical/qa summaries — short,
+//       structured strings; the LONG prose per Module stays as
+//       hand-written template HTML below, reused as-is per the
+//       "do not discard existing work" directive — this engine
+//       does not duplicate that prose, it only drives the parts
+//       that were genuinely duplicated before: Index rows and
+//       Copy-button text)
+//     → Evidence (evidence[] — structured registry entries)
+//     → Relationships (dependsOn[] — reverse lookups computed
+//       automatically as dependedOnBy, never hand-maintained)
+//     → Copy Generator (buildPackage() — assembles any of
+//       ceo/business/technical/qa/evidence/complete from the
+//       SAME object, so no package duplicates another's text)
+//
+// UI (template) renders MODULES + generator output. It never
+// hand-writes Index rows or Copy text again — add a Module here
+// once, and Index + Copy + Relationships update automatically.
+// ============================================================
 class Component extends DCLogic {
-  state = { copyStatus: {} };
+  state = { copyStatus: {}, selectedModuleId: "KM-08" };
+
+  static STATUS_STYLE = {
+  verified: "display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px;border:1px solid oklch(75% 0.1 150);background:oklch(94% 0.08 150);color:oklch(30% 0.1 150);",
+  medium: "display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px;border:1px solid oklch(78% 0.12 75);background:oklch(95% 0.09 85);color:oklch(35% 0.1 70);",
+  low: "display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px;border:1px solid oklch(75% 0.12 25);background:oklch(93% 0.07 25);color:oklch(35% 0.13 25);",
+  pending: "display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px;border:1px solid oklch(82% 0.01 70);background:oklch(94% 0.005 70);color:oklch(45% 0.01 70);",
+  working: "display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px;border:1px solid oklch(75% 0.1 250);background:oklch(93% 0.06 250);color:oklch(35% 0.1 250);",
+  };
+  static MODULES = [
+  { id: "KM-00", anchor: "#km-00", name: "AI Collaboration Framework", statusLabel: "● Working", statusKey: "working", confLabel: "✓ High", confKey: "verified", coverage: "100%", dependsOn: [], evidence: [{ source: "Lead Developer Working Protocol charter", confidence: "High" }],
+    ceo: "กติกากลางที่ทำให้ AI ทุกแพลตฟอร์มทำงานร่วมกันได้สม่ำเสมอ ใช้บทบาทแทนชื่อ AI", business: "ป้องกัน Scope Creep, ลดเวลา CEO อธิบายกติกาซ้ำ", technical: "ไม่มีไฟล์โค้ด — เป็นกติกาการทำงานร่วมกันของทีม", qa: "Working, บังคับใช้จริงตั้งแต่ Step 6" },
+  { id: "KM-01", anchor: "#km-01", name: "Roles & Responsibilities", statusLabel: "● Working", statusKey: "working", confLabel: "✓ High", confKey: "verified", coverage: "100%", dependsOn: [], evidence: [{ source: "Lead Developer Working Protocol charter", confidence: "High" }],
+    ceo: "กำหนดว่า CEO / Product Owner / Lead Developer ตัดสินใจอะไรได้บ้าง", business: "ป้องกัน Scope Creep และทำให้พัฒนาด้วย AI ปลอดภัย", technical: "โครงสร้างอำนาจ 3 ระดับ ไม่มีการข้ามระดับ", qa: "Working — บังคับใช้จริงใน Sprint ปัจจุบัน" },
+  { id: "KM-02", anchor: "#km-02", name: "Authentication", statusLabel: "✓ Implemented", statusKey: "verified", confLabel: "! Medium", confKey: "medium", coverage: "85%", dependsOn: ["KM-08"], evidence: [{ source: "firebase-client.js", confidence: "Medium — code-verified, not Production-verified" }],
+    ceo: "ระบบยืนยันตัวตน Admin และ Lister/Agent ผ่าน Firebase", business: "ป้องกันข้อมูลส่วนตัว/สิทธิ์ใช้งานจากคนนอก", technical: "Firebase Auth (email/Google/Facebook/phone OTP), isAdminAuthed(), onAdminAuthReady()", qa: "Code-verified; live Production not re-checked this round" },
+  { id: "KM-03", anchor: "#km-03", name: "Membership / Packages", statusLabel: "✓ Implemented", statusKey: "verified", confLabel: "! Medium", confKey: "medium", coverage: "85%", dependsOn: ["KM-07"], evidence: [{ source: "firebase-client.js, BLUEPRINT.md §2", confidence: "Medium" }],
+    ceo: "Trial 30 วันครั้งเดียว + แพ็กเกจ 1/2/3 กำหนดโควตาประกาศ", business: "ไม่มีแพ็กเกจฟรีถาวร — บังคับให้ตัดสินใจจ่ายเงินหลัง Trial", technical: "tierLimit() ต้อง sync กับ webhook เสมอ (CAT-012 bug history)", qa: "Code-verified; Production re-test recommended" },
+  { id: "KM-04", anchor: "#km-04", name: "Translation (8 ภาษา)", statusLabel: "✓ Implemented", statusKey: "verified", confLabel: "— Pending", confKey: "pending", coverage: "25%", dependsOn: [], evidence: [{ source: "firebase-client.js (translateDescriptionAll)", confidence: "Partial — caller sites not traced" }],
+    ceo: "แปลอัตโนมัติ 8 ภาษาตอนบันทึกครั้งเดียว ไม่แปลสดทุกครั้ง", business: "ลดต้นทุน AI call ต่อการดูหน้าเว็บ", technical: "translateDescriptionAll() เรียก Claude API ครั้งเดียวตอน save", qa: "Partially Verified — ต้องตามรอย caller sites เพิ่ม" },
+  { id: "KM-05", anchor: "#km-05", name: "Mini Website (Agent Profile)", statusLabel: "! Partially Implemented", statusKey: "medium", confLabel: "— Pending", confKey: "pending", coverage: "30%", dependsOn: ["KM-02"], evidence: [{ source: "firebase-client.js (fetchListerById)", confidence: "No Formal Documentation Found for slug system" }],
+    ceo: "หน้าโปรไฟล์สาธารณะของ Agent — URL ส่วนตัว (publicSlug) ยังไม่สร้าง", business: "Open Decision: รอ CEO ยืนยันลำดับความสำคัญของ publicSlug", technical: "fetchListerById() มีแล้ว, ไม่มี slug reservation/uniqueness", qa: "Feature genuinely not built — not a documentation gap" },
+  { id: "KM-06", anchor: "#km-06", name: "AI", statusLabel: "✓ Implemented (shared)", statusKey: "verified", confLabel: "— Pending", confKey: "pending", coverage: "30%", dependsOn: [], evidence: [{ source: "functions/index.js (claudeComplete)", confidence: "Needs Verification — per-agent isolation status unclear" }],
+    ceo: "AI Quick Add/Concierge/Chatbot ใช้ Cloud Function เดียวร่วมกัน", business: "AI แยกต่อ Agent (isolated memory) เคยหารือไว้ ยังไม่ยืนยันว่ายัง Roadmap หรือไม่", technical: "exports.claudeComplete — single onRequest proxy ไม่มี per-agent isolation ในโค้ด", qa: "Needs Verification จาก CEO/Product Owner" },
+  { id: "KM-07", anchor: "#km-07", name: "Stripe / Payments", statusLabel: "✓ Implemented", statusKey: "verified", confLabel: "! Medium", confKey: "medium", coverage: "80%", dependsOn: ["KM-08"], evidence: [{ source: "functions/index.js", confidence: "Medium — code-verified, live Stripe dashboard not checked" }],
+    ceo: "รับชำระเงินสมาชิก + Featured/Banner/VIP boost ผ่าน Stripe", business: "3 ช่องทางรายได้หลักของโครงการ", technical: "createCheckoutSession, createPortalSession, stripeWebhook ฯลฯ", qa: "Code-verified" },
+  { id: "KM-08", anchor: "#km-08", name: "Database", statusLabel: "✓ Implemented", statusKey: "verified", confLabel: "! Medium", confKey: "medium", coverage: "75%", dependsOn: [], evidence: [{ source: "firebase-client.js", confidence: "Medium" }],
+    ceo: "Firestore เก็บข้อมูลทรัพย์ สมาชิก เจ้าของ ฯลฯ", business: "ชั้นข้อมูลพื้นฐานของทั้งระบบ", technical: "setDoc()/merge:true เดียวที่ทุก write path ใช้ร่วมกัน — เคยมี P0 overwrite bug แก้แล้ว", qa: "Code-verified — ห้ามแก้โดยไม่ regression test กว้าง" },
+  { id: "KM-09", anchor: "#km-09", name: "Security", statusLabel: "× Needs Verification", statusKey: "low", confLabel: "× Low", confKey: "low", coverage: "30%", dependsOn: [], evidence: [{ source: "BLUEPRINT.md §5", confidence: "Low — Production status unconfirmed from this environment" }],
+    ceo: "กฎความปลอดภัย Firestore — ยังต้องยืนยันสถานะจริงบน Production", business: "Open Decision: CEO ต้องยืนยันจาก Firebase Console โดยตรง", technical: "Firestore Security Rules — review claimed 16 ก.ค. 2026 แต่ไม่ยืนยันได้จากที่นี่", qa: "Needs Verification — highest-priority Open Decision ในโครงการ" },
+  { id: "KM-11", anchor: "#km-11", name: "Business", statusLabel: "✓ Implemented", statusKey: "verified", confLabel: "— Pending", confKey: "pending", coverage: "25%", dependsOn: ["KM-07"], evidence: [{ source: "BLUEPRINT.md §2,§4,§12", confidence: "Partially Verified" }],
+    ceo: "3 ช่องทางรายได้ — สมาชิก, แบนเนอร์, Featured/VIP boost", business: "Assisted Sale model แทน Agent VIP Pool เดิม (ก.ค. 2026)", technical: "ไม่มีตัวเลขรายได้จริงในไฟล์โปรเจกต์", qa: "ต้อง CEO ยืนยันตัวเลข Production จริง" },
+  { id: "KM-12", anchor: "#km-12", name: "Blueprint (Meta)", statusLabel: "● Working", statusKey: "working", confLabel: "✓ High", confKey: "verified", coverage: "100%", dependsOn: [], evidence: [{ source: "BLUEPRINT.md §0 and headers", confidence: "High" }],
+    ceo: "BLUEPRINT.md คือฐานความรู้หลักของทั้งโครงการ", business: "ป้องกันข้อมูลกระจัดกระจาย — จุดเดียวที่ AI ใหม่ต้องอ่าน", technical: "ไฟล์ Markdown เดียว 24+ หัวข้อลำดับเลข", qa: "Verified — เอกสารหลักที่ใช้งานจริง" },
+  { id: "KM-13", anchor: "#km-13", name: "Documentation & Governance", statusLabel: "● Working", statusKey: "working", confLabel: "! Medium", confKey: "medium", coverage: "90%", dependsOn: ["KM-12"], evidence: [{ source: "CEO Guide.dc.html + BLUEPRINT.md structure", confidence: "Medium" }],
+    ceo: "กำหนดว่าเอกสารใดคือ Source of Truth และวิธี Handover ระหว่างห้องแชต", business: "ลดเวลา CEO อธิบายบริบทซ้ำทุกครั้ง", technical: "START HERE → HANDOVER PROMPT → BLUEPRINT → CEO Guide", qa: "Working — Current-State Synchronization Rule บังคับใช้แล้ว" },
+  { id: "KM-14", anchor: "#km-14", name: "QA / Review Standard", statusLabel: "× Needs Product Owner Decision", statusKey: "low", confLabel: "× Low", confKey: "low", coverage: "60%", dependsOn: ["KM-13"], evidence: [{ source: "Searched BLUEPRINT.md, Governance v2.2, Release Notes 6-9, Blueprint Status.dc.html", confidence: "Confirmed absent from all files" }],
+    ceo: "มาตรฐาน PASS/HOLD/NOT PASS ที่ควรมี — ยังไม่เคยถูกเขียนเป็นทางการ", business: "Open Decision: Product Owner ต้องเขียนคำนิยามนี้อย่างเป็นทางการ หรือยืนยันว่าไม่จำเป็น", technical: "ไม่มีไฟล์ใดมีคำนิยามนี้ — ยืนยันด้วย Knowledge Recovery Rule แล้ว", qa: "Needs Product Owner Decision" },
+  { id: "KM-15", anchor: "#km-15", name: "Developer Maintenance Center", statusLabel: "✓ Implemented (SAFE MODE)", statusKey: "verified", confLabel: "— Pending", confKey: "pending", coverage: "30%", dependsOn: ["KM-08"], evidence: [{ source: "BLUEPRINT.md §24", confidence: "Verified — Steps 6-9 all Passed" }],
+    ceo: "เครื่องมือ Admin ตรวจสอบ/ทำความสะอาดข้อมูล — Read-only/Simulation-only", business: "ลดความเสี่ยงจากการลบข้อมูลผิดพลาด", technical: "Steps 6-9 Passed; Step 9 = Cleanup Execution Preparation, real execution ยังล็อกอยู่", qa: "Verified against BLUEPRINT §24" },
+  { id: "KM-16", anchor: "#km-16", name: "SEO", statusLabel: "! Planned/Partial", statusKey: "medium", confLabel: "— Pending", confKey: "pending", coverage: "20%", dependsOn: ["KM-04"], evidence: [{ source: "BLUEPRINT.md §6, §11", confidence: "Partially Verified" }],
+    ceo: "URL ถาวรต่อประกาศ, Sitemap — ทำแล้วบางส่วน, Google Business Profile ยังไม่ยืนยัน", business: "ลำดับความสำคัญสูงสุดตาม Blueprint §6", technical: "Sitemap.xml + robots.txt ยื่นแล้ว 16 ก.ค. 2026; Open Graph + JSON-LD ทำแล้วที่ Property Details", qa: "ต้อง CEO ยืนยัน Google Business Profile" },
+  { id: "KM-17", anchor: "#km-17", name: "Cleanup / Data Safety", statusLabel: "✓ Implemented", statusKey: "verified", confLabel: "— Pending", confKey: "pending", coverage: "30%", dependsOn: ["KM-08"], evidence: [{ source: "firebase-client.js (runExpirySweep, PHOTO_PURGE_DAYS_AFTER_EXPIRY)", confidence: "Verified against code constants" }],
+    ceo: "กฎการจัดการฐานข้อมูล — Dry Run, Phase-by-Phase, ห้ามลบ Production โดยไม่มีรายงาน", business: "ป้องกันความเสียหายจากการลบข้อมูลผิดพลาด", technical: "Listing หมดอายุ 30 วัน, ลบรูปหลัง 90 วัน (photosDeletedAt) — ยืนยันจาก constant จริงในโค้ด", qa: "Verified" },
+  ];
+
+  // Relationship Engine — dependedOnBy is NEVER hand-written; it is derived
+  // from dependsOn so the two directions can never drift out of sync.
+  // Priority 1 (Phase 6) — ONE shared System Blueprint renderer/derivation
+  // for all 17 Modules, NOT 17 hand-written layouts. Derives systemBlueprint
+  // fields from the SAME verified data already in each Module object
+  // (mod.ceo/business/technical/qa/dependsOn/evidence) — no new facts
+  // invented; fields genuinely unknown are marked "Not Verified" per the
+  // Truthfulness rule, never guessed.
+  getSystemBlueprint(mod) {
+    const dependedOnBy = this.computeDependedOnBy()[mod.id] || [];
+    const covNum = parseInt(mod.coverage, 10) || 0;
+    const readiness = covNum >= 80 ? "Ready — enough verified detail to guide a rebuild"
+      : covNum >= 40 ? "Partial — key facts known, some steps would need re-investigation"
+      : "Not Ready — insufficient verified detail to recreate this system from this data alone";
+    return {
+      purpose: mod.ceo || "Not Verified",
+      dependencies: mod.dependsOn.length ? mod.dependsOn.join(", ") : "None",
+      dependedOnBy: dependedOnBy.length ? dependedOnBy.join(", ") : "None",
+      technicalStrategy: mod.technical || "Not Verified",
+      businessContext: mod.business || "Not Verified",
+      evidenceStatus: mod.evidence.map((e) => `${e.source} (${e.confidence})`).join("; "),
+      currentStatus: mod.statusLabel,
+      recreationReadiness: readiness,
+    };
+  }
+
+  computeDependedOnBy() {
+    const map = {};
+    Component.MODULES.forEach((m) => { map[m.id] = []; });
+    Component.MODULES.forEach((m) => m.dependsOn.forEach((depId) => { if (map[depId]) map[depId].push(m.id); }));
+    return map;
+  }
+
+  // Copy Generator — the single function every "Copy X Package" button
+  // calls. Package type selects which context field(s) of the SAME
+  // Knowledge Object are assembled; no package hand-duplicates another's text.
+  buildPackage(mod, type) {
+    const dependedOnBy = this.computeDependedOnBy()[mod.id] || [];
+    const header = `[${mod.id}] ${mod.name} — ${mod.statusLabel} · Confidence: ${mod.confLabel} · Coverage: ${mod.coverage}`;
+    const rel = `Depends On: ${mod.dependsOn.length ? mod.dependsOn.join(", ") : "None"} · Depended On By: ${dependedOnBy.length ? dependedOnBy.join(", ") : "None"}`;
+    const ev = mod.evidence.map((e) => `Evidence: ${e.source} (Confidence: ${e.confidence})`).join(" | ");
+    const parts = { ceo: mod.ceo, business: mod.business, technical: mod.technical, qa: mod.qa };
+    if (type === "complete") return [header, parts.ceo, parts.business, parts.technical, parts.qa, rel, ev].join("\n");
+    if (type === "evidence") return [header, ev].join("\n");
+    return [header, parts[type] || parts.ceo, rel].join("\n");
+  }
 
   copy(key, text) {
     navigator.clipboard.writeText(text).then(() => {
@@ -450,21 +719,110 @@ class Component extends DCLogic {
 
   renderVals() {
     const st = this.state.copyStatus;
+    const dependedOnByMap = this.computeDependedOnBy();
+    const byId = {};
+    Component.MODULES.forEach((m) => { byId[m.id] = m; });
+    const indexRows = Component.MODULES.map((m) => ({
+      id: m.id, anchor: m.anchor, name: m.name,
+      statusStyle: Component.STATUS_STYLE[m.statusKey], statusLabel: m.statusLabel,
+      confStyle: Component.STATUS_STYLE[m.confKey], confLabel: m.confLabel,
+      coverage: m.coverage,
+      dependsOnText: m.dependsOn.length ? m.dependsOn.join(", ") : "—",
+      dependedOnByText: (dependedOnByMap[m.id] || []).length ? dependedOnByMap[m.id].join(", ") : "—",
+    }));
+    const wired = ["KM-01", "KM-02", "KM-03", "KM-07", "KM-08", "KM-12", "KM-14"];
+    const copyFns = {};
+    wired.forEach((id) => {
+      const key = id.toLowerCase().replace("-", "");
+      copyFns["copy" + id.replace("-", "")] = () => this.copy(key, this.buildPackage(byId[id], "complete"));
+      copyFns["copyStatus" + id.replace("-", "")] = st[key] || "";
+    });
+
+    const covNums = Component.MODULES.map((m) => parseInt(m.coverage, 10) || 0);
+    const avgCoverage = Math.round(covNums.reduce((a, b) => a + b, 0) / covNums.length);
+
+    const projectDNA = "huahin.properties — เว็บลงประกาศขาย/เช่าอสังหาริมทรัพย์ หัวหิน/ปราณบุรี/ชะอำ. Stack: Design Component (.dc.html) ต่อหน้า + Firebase (Firestore/Auth/Storage/Cloud Functions) + Stripe. Governance: CEO ตัดสินใจสูงสุด → Product Owner ควบคุม Workflow/PASS → Lead Developer พัฒนา. Knowledge Engine เดียวขับเคลื่อนทั้ง Index/Copy/Relationships ของ 17 Knowledge Modules.";
+
     return {
-      copyStatusKM01: st.km01 || "",
-      copyStatusKM02: st.km02 || "",
-      copyStatusKM03: st.km03 || "",
-      copyStatusKM07: st.km07 || "",
-      copyStatusKM08: st.km08 || "",
-      copyStatusKM12: st.km12 || "",
-      copyStatusKM14: st.km14 || "",
-      copyKM01: () => this.copy("km01", "[KM-01] Roles & Responsibilities — CEO ตัดสินใจสูงสุด, Product Owner ควบคุม Workflow/PASS, Lead Developer พัฒนาแต่ห้ามอนุมัติงานตนเอง. อ้างอิง: Lead Developer Working Protocol."),
-      copyKM02: () => this.copy("km02", "[KM-02] Authentication — Firebase Auth (email/Google/Facebook/phone). Admin ต้องเป็น verified UID เฉพาะ. Owner-role login ยังไม่มี (Needs Verification)."),
-      copyKM03: () => this.copy("km03", "[KM-03] Membership/Packages — Trial 30 วันครั้งเดียว, ไม่มีแพ็กเกจฟรีถาวร. CAT-012 quota-drift bug ระหว่าง client/webhook/billing แก้แล้ว — ต้องอัปเดต 3 จุดพร้อมกันเสมอเมื่อแก้ quota."),
-      copyKM07: () => this.copy("km07", "[KM-07] Stripe/Payments — Checkout/Portal/Webhook + dynamic Featured/Banner/VIP price_data. Webhook tier assignment ต้อง sync กับ client tierLimit() เสมอ (ดู CAT-012)."),
-      copyKM08: () => this.copy("km08", "[KM-08] Database — Firestore. setDoc/updateDocFields/createDoc/replaceDoc ทั้งหมด alias ไปที่ merge-based setDoc() เดียว. เคยมี P0 overwrite bug แก้แล้วด้วย merge:true — ห้ามแก้ฟังก์ชันนี้โดยไม่ regression test กว้าง."),
-      copyKM12: () => this.copy("km12", "[KM-12] Blueprint (Meta) — BLUEPRINT.md เป็น Single Source of Truth หลัก 24+ หัวข้อ. Mission Control/Complete Snapshot กำลังถูกดูดซับเข้า Deep Knowledge Modules (ยังไม่เสร็จ)."),
-      copyKM14: () => this.copy("km14", "[KM-14] QA/Review Standard — Open Decision: PASS/HOLD/NOT PASS formal definitions not found in any project file. Needs Product Owner Decision before this Module is fully verified."),
+      indexRows,
+      blueprintCompletenessPct: avgCoverage + "%",
+      blueprintCompletenessLabel: `${avgCoverage}% — คำนวณจาก Coverage เฉลี่ยของ 17 Knowledge Modules จริง (ไม่ใช่ค่าคาดการณ์)`,
+      projectDNA,
+      blueprintCopyStatus: st.blueprint || "",
+      copyProjectDNA: () => this.copy("blueprint", "[PROJECT DNA]\n" + projectDNA),
+      copyCompleteBlueprint: () => this.copy("blueprint", "[COMPLETE SYSTEM BLUEPRINT — huahin.properties]\n\n" + projectDNA + "\n\n" + Component.MODULES.map((m) => this.buildPackage(m, "complete")).join("\n\n---\n\n")),
+      copyAiBuildPackage: () => this.copy("blueprint", "[AI BUILD PACKAGE — huahin.properties]\nใช้ข้อความนี้เป็น Prompt เริ่มต้นให้ AI สร้างระบบนี้ขึ้นใหม่ (Recreation Prompt):\n\n" + projectDNA + "\n\nสร้างระบบต่อไปนี้ตามลำดับ Module (แต่ละ Module คือ Feature ที่ต้องมี):\n\n" + Component.MODULES.map((m) => `${m.id} ${m.name}: ${m.ceo || m.technical}`).join("\n") + "\n\nดู Relationship (dependsOn) ของแต่ละ Module ก่อนพัฒนา เพื่อสร้างตามลำดับ dependency ที่ถูกต้อง."),
+      copyClonePackage: () => this.copy("blueprint", "[CLONE PROJECT PACKAGE — huahin.properties]\n" + projectDNA + "\n\nModules (" + Component.MODULES.length + "):\n" + Component.MODULES.map((m) => `- ${m.id} ${m.name} (${m.statusLabel}, depends on: ${m.dependsOn.length ? m.dependsOn.join(",") : "none"})`).join("\n") + "\n\nหมายเหตุ: Clone ต้องมี Firebase project ใหม่, Stripe account ใหม่, และปรับ config/keys ทั้งหมดก่อนใช้งานจริง — ไม่ copy ข้อมูล Production เดิม"),
+      systemBlueprints: Component.MODULES.map((m) => {
+        const sb = this.getSystemBlueprint(m);
+        return { id: m.id, anchor: m.anchor, name: m.name, ...sb };
+      }),
+      // Dependency Map — module selector, reads dependsOn/computeDependedOnBy
+      // directly; no separate hand-written dependency data.
+      moduleOptions: Component.MODULES.map((m) => ({ value: m.id, label: `${m.id} — ${m.name}` })),
+      selectedModuleId: this.state.selectedModuleId,
+      onSelectModule: (e) => this.setState({ selectedModuleId: e.target.value }),
+      selectedModuleCard: (() => {
+        const m = byId[this.state.selectedModuleId] || Component.MODULES[0];
+        const dependedOnBy = dependedOnByMap[m.id] || [];
+        return {
+          id: m.id, name: m.name, statusLabel: m.statusLabel, coverage: m.coverage,
+          dependsOnText: m.dependsOn.length ? m.dependsOn.map((d) => `${d} (${(byId[d] || {}).name || "?"})`).join(", ") : "ไม่มี — Module นี้ไม่ต้องพึ่งพา Module อื่น",
+          dependedOnByText: dependedOnBy.length ? dependedOnBy.map((d) => `${d} (${(byId[d] || {}).name || "?"})`).join(", ") : "ไม่มี — ยังไม่มี Module ใดพึ่งพา Module นี้",
+          dependsOnCount: m.dependsOn.length, dependedOnByCount: dependedOnBy.length,
+        };
+      })(),
+      // Standalone Evidence Registry — one row per Module, backward-compatible
+      // with the original {source, confidence} shape (no reviewer/version/
+      // reference fields invented where not recorded).
+      evidenceRows: Component.MODULES.map((m) => ({
+        id: m.id, name: m.name,
+        hasEvidence: m.evidence.length > 0,
+        noEvidence: m.evidence.length === 0,
+        entries: m.evidence.map((e) => ({
+          source: e.source || "ยังไม่ได้บันทึก",
+          confidence: e.confidence || "Unknown",
+          reviewer: e.reviewer || "ยังไม่ได้บันทึก",
+          version: e.version || "ยังไม่ได้บันทึก",
+          reference: e.reference || "No reference recorded",
+        })),
+      })),
+      evidenceSummary: (() => {
+        const total = Component.MODULES.length;
+        const withEv = Component.MODULES.filter((m) => m.evidence.length > 0).length;
+        const highConf = Component.MODULES.filter((m) => m.evidence.some((e) => /high|verified/i.test(e.confidence))).length;
+        const needsReview = Component.MODULES.filter((m) => m.evidence.some((e) => /low|needs|partial|unverified/i.test(e.confidence))).length;
+        return { total, withEv, without: total - withEv, highConf, needsReview };
+      })(),
+      // Blueprint Factory V1 Completion Gate — status reflects what is
+      // actually built in this file, not an assumed checklist.
+      factoryGates: [
+        { label: "Project DNA", status: "✅", note: "พร้อมใช้งาน" },
+        { label: "Knowledge Completeness Meter", status: "✅", note: "พร้อมใช้งาน" },
+        { label: "System Blueprint ครบ 17 Modules", status: "✅", note: "Shared renderer, Phase 6" },
+        { label: "Module Selection", status: "✅", note: "Dependency Map selector, Phase 6B" },
+        { label: "System Dependency Map", status: "✅", note: "Phase 6B" },
+        { label: "Standalone Evidence Registry", status: "✅", note: "Phase 6B" },
+        { label: "Copy Packages", status: "✅", note: "Phase 3-4" },
+        { label: "Markdown Export", status: "✅", note: "Phase 6" },
+        { label: "JSON Export", status: "✅", note: "Phase 6" },
+        { label: "YAML Export", status: "✅", note: "Phase 6" },
+        { label: "AI Context Export", status: "✅", note: "Phase 6" },
+        { label: "Verified / Unknown / Pending Status Labels", status: "🟡", note: "ใช้ในหลาย Module แต่ยังไม่ทุก field ของทุก Module" },
+      ],
+      factoryOverallStatus: "V1 Review Ready — ยังไม่ประกาศ PASS, รอ Product Owner ตรวจสอบ",
+      exportStatus: st.exportfmt || "",
+      exportMarkdown: () => this.copy("exportfmt", "# huahin.properties — Knowledge Export (Markdown)\n\n" + Component.MODULES.map((m) => {
+        const sb = this.getSystemBlueprint(m);
+        return `## ${m.id} ${m.name}\n- Status: ${m.statusLabel}\n- Purpose: ${sb.purpose}\n- Technical Strategy: ${sb.technicalStrategy}\n- Dependencies: ${sb.dependencies}\n- Recreation Readiness: ${sb.recreationReadiness}\n- Evidence: ${sb.evidenceStatus}`;
+      }).join("\n\n")),
+      exportJSON: () => this.copy("exportfmt", JSON.stringify(Component.MODULES.map((m) => ({ id: m.id, name: m.name, status: m.statusLabel, confidence: m.confLabel, coverage: m.coverage, dependsOn: m.dependsOn, systemBlueprint: this.getSystemBlueprint(m) })), null, 2)),
+      exportYAML: () => this.copy("exportfmt", Component.MODULES.map((m) => {
+        const sb = this.getSystemBlueprint(m);
+        return `- id: ${m.id}\n  name: "${m.name}"\n  status: "${m.statusLabel}"\n  coverage: "${m.coverage}"\n  dependsOn: [${m.dependsOn.join(", ")}]\n  purpose: "${sb.purpose.replace(/"/g, "'")}"\n  recreationReadiness: "${sb.recreationReadiness}"`;
+      }).join("\n")),
+      exportAiContext: () => this.copy("exportfmt", "You are joining the huahin.properties project. Read this context before doing anything:\n\n" + projectDNA + "\n\nSystems (Knowledge Modules):\n" + Component.MODULES.map((m) => `${m.id} ${m.name} [${m.statusLabel}, confidence ${m.confLabel}] — ${m.ceo}`).join("\n") + "\n\nDo not assume anything marked 'Not Verified' or 'Needs Verification' is true — confirm with the Product Owner or CEO first."),
+      ...copyFns,
     };
   }
 }

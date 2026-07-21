@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Launch Readiness Dashboard — huahin.properties</title>
+  <style>
+    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    a { color: oklch(45% 0.13 25); }
+    a:hover { color: oklch(35% 0.13 25); }
+    .rd-section-title { font-weight:600; color:oklch(22% 0.02 60); display:block; margin-bottom:4px; }
+    .rd-block { margin-bottom:10px; }
+    .rd-list { margin:4px 0 0; padding-left:18px; }
+    .rd-list-plain { margin:4px 0 0; padding-left:0; list-style:none; }
+  </style>
+</helmet>
+
+<div style="min-height:100vh; padding:clamp(20px,4vw,56px); box-sizing:border-box;">
+  <div style="max-width:900px; margin:0 auto; background:white; border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:clamp(24px,4vw,48px); box-shadow:0 20px 50px -30px rgba(30,20,10,0.25);">
+
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:6px; flex-wrap:wrap;">
+      <div style="width:38px; height:38px; border-radius:10px; background:oklch(35% 0.09 25); display:flex; align-items:center; justify-content:center; color:white; font-size:19px;">🚦</div>
+      <div style="font-family:'Playfair Display',serif; font-size:23px; font-weight:700; color:oklch(20% 0.02 60);">Launch Readiness Dashboard</div>
+    </div>
+    <div style="font-size:13px; color:oklch(55% 0.02 60); margin:0 0 16px;">ภาพรวมความพร้อมเปิดใช้งานจริงของ huahin.properties</div>
+
+    <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
+      <a href="./Mission%20Control.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🏠 Dashboard หลัก</a>
+      <a href="./CEO%20Guide.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📘 CEO Guide</a>
+      <span style="font-size:12.5px; background:oklch(90% 0.01 70); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🚦 Launch Readiness (คุณอยู่ที่นี่)</span>
+    </div>
+
+    <!-- EXECUTIVE DECISION PANEL — answers "Can we launch Production today?" -->
+    <div style="border:2px solid {{ executive.borderColor }}; border-radius:10px; padding:16px 18px; margin-bottom:20px; background:{{ executive.bg }};">
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:10px;">
+        <div style="font-size:20px; font-weight:700; color:{{ executive.textColor }};">{{ executive.statusIcon }} {{ executive.statusLabel }}</div>
+        <div style="font-size:12px; font-weight:600; color:oklch(45% 0.02 60); background:white; border-radius:100px; padding:4px 10px;">Overall {{ overallPct }}</div>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:10px;">
+        <div style="background:white; border-radius:6px; padding:8px 10px;"><div style="font-size:11px; color:oklch(50% 0.02 60);">Launch Blockers</div><div style="font-size:15px; font-weight:700; color:oklch(30% 0.13 25);">{{ blockersCountLabel }}</div></div>
+        <div style="background:white; border-radius:6px; padding:8px 10px;"><div style="font-size:11px; color:oklch(50% 0.02 60);">Open Decisions</div><div style="font-size:15px; font-weight:700; color:oklch(35% 0.1 60);">{{ executive.openDecisionsCount }}</div></div>
+        <div style="background:white; border-radius:6px; padding:8px 10px;"><div style="font-size:11px; color:oklch(50% 0.02 60);">Critical Risks</div><div style="font-size:13px; font-weight:600; color:oklch(35% 0.13 25);">{{ executive.criticalRisksLabel }}</div></div>
+      </div>
+      <div style="font-size:12px; font-weight:600; color:oklch(35% 0.02 60); margin-bottom:4px;">Recommended Action</div>
+      <ol style="margin:0; padding-left:18px; font-size:12.5px; color:oklch(35% 0.02 60); line-height:1.7;">
+        <sc-for list="{{ executive.recommendedActions }}" as="a" hint-placeholder-count="3"><li>{{ a }}</li></sc-for>
+      </ol>
+    </div>
+
+    <!-- PAGE META -->
+    <details style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:14px 18px; margin-bottom:20px; background:oklch(98% 0.005 70);">
+      <summary style="cursor:pointer; font-family:'Playfair Display',serif; font-size:16px; color:oklch(20% 0.02 60);">🚦 Launch Readiness Dashboard (Meta)</summary>
+      <div style="font-size:12.5px; line-height:1.8; color:oklch(35% 0.02 60); margin-top:12px;">
+        <div><strong>หน้านี้คืออะไร</strong>: แดชบอร์ดความพร้อมเปิดใช้งานจริง (Production Launch) ของ huahin.properties</div>
+        <div><strong>ใช้ทำอะไร</strong>: สรุปว่าหมวดใดพร้อม หมวดใดยังไม่พร้อม และอะไรที่ยังกันไม่ให้เปิดระบบได้</div>
+        <div><strong>ใช้เมื่อไร</strong>: ก่อนตัดสินใจเปิดเว็บไซต์จริง หรือทบทวนความคืบหน้าเป็นระยะ</div>
+        <div><strong>ประกอบด้วยอะไร</strong>: Overall Readiness, Readiness Domains (Expand ได้), Launch Blockers, Recommended Next Priority</div>
+        <div><strong>ไม่ใช่อะไร</strong>: ไม่ใช่ Knowledge Center (ดู CEO Guide แทน), ไม่ใช่เอกสารเชิงลึกของแต่ละระบบ, ไม่ใช่ Production Monitoring แบบ Real-time</div>
+        <div><strong>กลุ่มผู้ใช้</strong>: CEO, Product Owner (AI)</div>
+        <div><strong>ข้อมูลมาจากไหน</strong>: ตรวจสอบจาก BLUEPRINT.md, โค้ดจริง (firebase-client.js, functions/index.js) และ Knowledge Modules ใน CEO Guide.dc.html — ไม่ใช่ค่าคาดการณ์</div>
+        <div><strong>Related Pages</strong>: <a href="./Mission%20Control.dc.html">Mission Control</a>, <a href="./CEO%20Guide.dc.html">CEO Guide</a></div>
+        <div><strong>Meta Version</strong>: 1.0 &nbsp;·&nbsp; <strong>Last Updated</strong>: 21 กรกฎาคม 2569 (Phase 7)</div>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;">
+        <a href="./Mission%20Control.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🏠 Dashboard หลัก</a>
+        <a href="./CEO%20Guide.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📘 CEO Guide</a>
+        <span style="font-size:12.5px; background:oklch(90% 0.01 70); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🚦 Launch Readiness (คุณอยู่ที่นี่)</span>
+      </div>
+    </details>
+
+    <div style="height:1px; background:oklch(90% 0.01 70); margin:20px 0;"></div>
+
+    <h2 style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60); margin:0 0 6px;">Overall Website Readiness</h2>
+    <div style="background:oklch(96% 0.04 150); border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:16px 18px; margin-bottom:24px;">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+        <div style="font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:oklch(28% 0.06 150);">{{ overallPct }}</div>
+        <div style="font-size:13px; font-weight:600; color:oklch(35% 0.08 150);">{{ overallStatusLabel }}</div>
+      </div>
+      <div class="lr-track" style="position:relative; height:16px; border-radius:100px; background:linear-gradient(90deg, oklch(75% 0.01 90) 0%, oklch(75% 0.01 90) 20%, oklch(55% 0.2 25) 20%, oklch(55% 0.2 25) 40%, oklch(65% 0.18 55) 40%, oklch(65% 0.18 55) 60%, oklch(80% 0.17 95) 60%, oklch(80% 0.17 95) 80%, oklch(60% 0.15 150) 80%, oklch(60% 0.15 150) 100%); margin-bottom:8px;">
+        <div style="position:absolute; top:-4px; left:{{ overallPct }}; width:4px; height:24px; background:oklch(20% 0.02 60); border-radius:2px; transform:translateX(-2px); box-shadow:0 0 0 2px white;"></div>
+      </div>
+      <div style="font-size:13px; color:oklch(35% 0.06 150); margin-bottom:8px;">{{ overallLabel }}</div>
+      <details>
+        <summary style="cursor:pointer; font-size:12px; font-weight:600; color:oklch(35% 0.08 150);">📊 ดูที่มาของตัวเลข (Overall Readiness Breakdown)</summary>
+        <div style="margin-top:8px; display:grid; grid-template-columns:1fr auto; gap:4px 12px; font-size:12.5px; color:oklch(35% 0.06 150);">
+          <sc-for list="{{ domains }}" as="d" hint-placeholder-count="12">
+            <div>{{ d.icon }} {{ d.name }}</div><div style="font-weight:600;">{{ d.pct }}</div>
+          </sc-for>
+          <div style="border-top:1px solid oklch(85% 0.08 150); padding-top:4px; font-weight:700;">Average</div><div style="border-top:1px solid oklch(85% 0.08 150); padding-top:4px; font-weight:700;">{{ overallPct }}</div>
+        </div>
+      </details>
+    </div>
+
+    <h2 style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60); margin:0 0 4px;">Readiness Domains</h2>
+    <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:10px;">กดหัวข้อเพื่อดูรายละเอียดและหลักฐานที่มาของเปอร์เซ็นต์</div>
+    <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:24px;">
+      <sc-for list="{{ domains }}" as="d" hint-placeholder-count="12">
+        <details style="border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:12px 16px;">
+          <summary style="cursor:pointer; list-style:revert;">
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; font-weight:600; font-size:14px; color:oklch(25% 0.02 60);">
+              <span>{{ d.icon }} {{ d.name }}</span>
+              <span style="font-weight:700; font-size:13px; color:oklch(30% 0.02 60);">{{ d.pct }}</span>
+              <span style="font-weight:400; font-size:12px; color:oklch(50% 0.02 60);">— {{ d.statusLabel }}</span>
+            </div>
+            <div class="lr-track" style="position:relative; height:7px; border-radius:100px; background:linear-gradient(90deg, oklch(75% 0.01 90) 0%, oklch(75% 0.01 90) 20%, oklch(55% 0.2 25) 20%, oklch(55% 0.2 25) 40%, oklch(65% 0.18 55) 40%, oklch(65% 0.18 55) 60%, oklch(80% 0.17 95) 60%, oklch(80% 0.17 95) 80%, oklch(60% 0.15 150) 80%, oklch(60% 0.15 150) 100%); margin-top:8px;">
+              <div style="position:absolute; top:-3px; left:{{ d.pct }}; width:2px; height:13px; background:oklch(20% 0.02 60); border-radius:1px; transform:translateX(-1px);"></div>
+            </div>
+          </summary>
+          <div style="margin-top:10px;">
+            <div style="font-size:12.5px; line-height:1.75; color:oklch(35% 0.02 60);">
+              <div class="rd-block"><span class="rd-section-title">คุณสมบัติของระบบ</span>
+                <ul class="rd-list">
+                  <sc-for list="{{ d.features }}" as="f" hint-placeholder-count="3"><li>{{ f }}</li></sc-for>
+                </ul>
+              </div>
+              <div class="rd-block"><span class="rd-section-title">เป้าหมาย</span><div>{{ d.goal }}</div></div>
+              <div class="rd-block"><span class="rd-section-title">เหตุผล / จุดประสงค์</span><div>{{ d.reason }}</div></div>
+              <div class="rd-block"><span class="rd-section-title">สิ่งที่ทำเสร็จแล้ว</span>
+                <ul class="rd-list-plain">
+                  <sc-for list="{{ d.done }}" as="it" hint-placeholder-count="3"><li>✓ {{ it }}</li></sc-for>
+                </ul>
+              </div>
+              <div class="rd-block"><span class="rd-section-title">สิ่งที่ยังไม่เสร็จ</span>
+                <ul class="rd-list-plain">
+                  <sc-for list="{{ d.pending }}" as="it" hint-placeholder-count="1"><li>○ {{ it }}</li></sc-for>
+                </ul>
+              </div>
+              <div class="rd-block"><span class="rd-section-title">งานที่ต้องทำต่อ</span>
+                <ol class="rd-list">
+                  <sc-for list="{{ d.next }}" as="it" hint-placeholder-count="1"><li>{{ it }}</li></sc-for>
+                </ol>
+              </div>
+              <div class="rd-block"><span class="rd-section-title">หลักฐาน / Source</span>
+                <ul class="rd-list">
+                  <sc-for list="{{ d.evidence }}" as="e" hint-placeholder-count="2"><li>{{ e }}</li></sc-for>
+                </ul>
+              </div>
+              <div style="font-size:11.5px; color:oklch(50% 0.02 60); background:oklch(97% 0.005 70); border-radius:6px; padding:8px 10px; margin-bottom:8px;"><strong>Readiness Explanation</strong>: {{ d.explanation }}</div>
+              <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:6px; font-size:11px; color:oklch(45% 0.02 60); border-top:1px solid oklch(90% 0.01 70); padding-top:8px;">
+                <div><strong>Owner</strong>: {{ d.owner }}</div>
+                <div><strong>Last Updated</strong>: {{ d.lastUpdated }}</div>
+                <div><strong>Evidence</strong>: {{ d.evidenceCount }} รายการ</div>
+                <div><strong>Dependencies</strong>: {{ d.dependencies }}</div>
+                <div style="grid-column:1/-1;"><strong>Data Source</strong>: {{ d.dataSource }}</div>
+                <div style="grid-column:1/-1;"><strong>Checklist</strong>: {{ d.checklistCompletedCount }} เสร็จแล้ว / {{ d.checklistPendingCount }} ยังไม่เสร็จ</div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </sc-for>
+    </div>
+
+    <details style="border:1px solid oklch(75% 0.12 25); border-radius:8px; padding:12px 16px; background:oklch(96% 0.03 25); margin-bottom:24px;">
+      <summary style="cursor:pointer; font-weight:700; font-size:15px; color:oklch(30% 0.13 25); display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <span>🚫 Launch Blockers</span>
+        <span style="font-weight:600; font-size:12.5px; color:oklch(35% 0.13 25);">{{ blockersCountLabel }}</span>
+      </summary>
+      <div style="margin-top:12px; display:flex; flex-direction:column; gap:10px;">
+        <sc-for list="{{ blockers }}" as="b" hint-placeholder-count="2">
+          <details style="border:1px solid oklch(80% 0.1 25); border-radius:8px; padding:10px 14px; background:white;">
+            <summary style="cursor:pointer; font-weight:600; font-size:13.5px; color:oklch(30% 0.1 25);">{{ b.icon }} {{ b.title }}</summary>
+            <div style="font-size:12.5px; line-height:1.75; color:oklch(35% 0.02 60); margin-top:10px;">
+              <div class="rd-block"><span class="rd-section-title">ปัญหาคืออะไร</span><div>{{ b.problem }}</div></div>
+              <div class="rd-block"><span class="rd-section-title">เหตุใดจึงเป็น Launch Blocker</span><div>{{ b.why }}</div></div>
+              <div class="rd-block"><span class="rd-section-title">สิ่งที่ตรวจสอบแล้ว</span><div>{{ b.checked }}</div></div>
+              <div class="rd-block"><span class="rd-section-title">สิ่งที่ยังไม่ได้ตรวจสอบ</span><div>{{ b.notChecked }}</div></div>
+              <div class="rd-block"><span class="rd-section-title">ใครต้องตัดสินใจ</span><div>{{ b.decisionMaker }}</div></div>
+              <div class="rd-block"><span class="rd-section-title">ขั้นตอนแก้ไข</span>
+                <ol class="rd-list">
+                  <sc-for list="{{ b.steps }}" as="s" hint-placeholder-count="3"><li>{{ s }}</li></sc-for>
+                </ol>
+              </div>
+              <div class="rd-block"><span class="rd-section-title">หลักฐานที่ต้องใช้</span><div>{{ b.evidenceNeeded }}</div></div>
+              <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:6px; font-size:11px; color:oklch(45% 0.1 25); border-top:1px solid oklch(85% 0.06 25); padding-top:8px; margin-bottom:8px;">
+                <div><strong>Impact</strong>: {{ b.impact }}</div>
+                <div><strong>Owner</strong>: {{ b.decisionMaker }}</div>
+                <div><strong>Launch Scope</strong>: {{ b.launchScope }}</div>
+              </div>
+              <div style="font-size:11.5px; color:oklch(45% 0.1 25); background:oklch(97% 0.02 25); border-radius:6px; padding:8px 10px;"><strong>เงื่อนไขที่จะถือว่า Blocker ถูกปิด</strong>: {{ b.closeCondition }}</div>
+            </div>
+          </details>
+        </sc-for>
+      </div>
+    </details>
+
+    <details style="border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:12px 16px; background:oklch(97% 0.025 150); margin-bottom:24px;">
+      <summary style="cursor:pointer; font-weight:700; font-size:15px; color:oklch(30% 0.08 150); display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <span>⭐ Executive Task Queue</span>
+        <span style="font-weight:400; font-size:12.5px; color:oklch(40% 0.08 150);">{{ topPriorityLabel }}</span>
+      </summary>
+      <div style="margin-top:12px; display:flex; flex-direction:column; gap:14px;">
+        <div>
+          <div style="font-weight:700; font-size:13px; color:oklch(30% 0.08 150); margin-bottom:8px;">1. สิ่งที่ต้องทำก่อน</div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <sc-for list="{{ priorityMustDo }}" as="p" hint-placeholder-count="1">
+              <details style="border:1px solid oklch(85% 0.06 150); border-radius:8px; padding:10px 14px; background:white;">
+                <summary style="cursor:pointer; font-weight:600; font-size:13px; color:oklch(28% 0.06 150);">{{ p.name }} — <span style="font-weight:400;">{{ p.status }}</span></summary>
+                <div style="font-size:12.5px; line-height:1.75; color:oklch(35% 0.02 60); margin-top:8px;">
+                  <div><strong>Priority</strong>: {{ p.priority }}</div>
+                  <div><strong>เหตุผล</strong>: {{ p.reason }}</div>
+                  <div><strong>ผู้รับผิดชอบ</strong>: {{ p.owner }}</div>
+                  <div><strong>Dependency</strong>: {{ p.dependency }}</div>
+                  <div><strong>Expected Impact</strong>: {{ p.expectedImpact }}</div>
+                  <div><strong>Completion Condition</strong>: {{ p.completionCondition }}</div>
+                </div>
+              </details>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-weight:700; font-size:13px; color:oklch(30% 0.08 150); margin-bottom:8px;">2. สิ่งที่ทำไปแล้ว</div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <sc-for list="{{ priorityDone }}" as="p" hint-placeholder-count="1">
+              <details style="border:1px solid oklch(85% 0.06 150); border-radius:8px; padding:10px 14px; background:white;">
+                <summary style="cursor:pointer; font-weight:600; font-size:13px; color:oklch(28% 0.06 150);">{{ p.name }} — <span style="font-weight:400;">{{ p.status }}</span></summary>
+                <div style="font-size:12.5px; line-height:1.75; color:oklch(35% 0.02 60); margin-top:8px;">
+                  <div><strong>Priority</strong>: {{ p.priority }}</div>
+                  <div><strong>เหตุผล</strong>: {{ p.reason }}</div>
+                  <div><strong>ผู้รับผิดชอบ</strong>: {{ p.owner }}</div>
+                  <div><strong>Dependency</strong>: {{ p.dependency }}</div>
+                  <div><strong>Expected Impact</strong>: {{ p.expectedImpact }}</div>
+                  <div><strong>Completion Condition</strong>: {{ p.completionCondition }}</div>
+                </div>
+              </details>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-weight:700; font-size:13px; color:oklch(30% 0.08 150); margin-bottom:8px;">3. สิ่งที่จะต้องทำต่อ</div>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <sc-for list="{{ priorityNext }}" as="p" hint-placeholder-count="2">
+              <details style="border:1px solid oklch(85% 0.06 150); border-radius:8px; padding:10px 14px; background:white;">
+                <summary style="cursor:pointer; font-weight:600; font-size:13px; color:oklch(28% 0.06 150);">{{ p.name }} — <span style="font-weight:400;">{{ p.status }}</span></summary>
+                <div style="font-size:12.5px; line-height:1.75; color:oklch(35% 0.02 60); margin-top:8px;">
+                  <div><strong>Priority</strong>: {{ p.priority }}</div>
+                  <div><strong>เหตุผล</strong>: {{ p.reason }}</div>
+                  <div><strong>ผู้รับผิดชอบ</strong>: {{ p.owner }}</div>
+                  <div><strong>Dependency</strong>: {{ p.dependency }}</div>
+                  <div><strong>Expected Impact</strong>: {{ p.expectedImpact }}</div>
+                  <div><strong>Completion Condition</strong>: {{ p.completionCondition }}</div>
+                </div>
+              </details>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <div style="margin-top:32px; font-size:12px; color:oklch(55% 0.02 60); text-align:center;">Living Meta Rule: อัปเดต Meta ด้านบนทุกครั้งที่โครงสร้าง/Workflow/Scope ของหน้านี้เปลี่ยน</div>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    // All statuses/percentages trace to facts already established in this
+    // project (BLUEPRINT.md, code, and CEO Guide's Knowledge Modules) — not
+    // invented. Percentages unchanged from prior version; only presentation
+    // and supporting detail were expanded per Product Owner directive.
+    const domains = [
+      { icon: "🌐", name: "Website (Core Pages)", statusLabel: "พร้อม", pct: "95%", barColor: "oklch(55% 0.13 150)",
+        features: ["Home", "Search Results", "Property Details", "Sell", "About", "Contact", "Advertise"],
+        goal: "หน้าหลักทั้งหมดเปิดได้และไม่มี Critical Error ก่อนเปิด Production",
+        reason: "เป็นเส้นทางหลักที่ผู้ใช้ทุกคนต้องผ่านก่อนติดต่อหรือสมัครสมาชิก หากพังจะปิดกั้นทุกฟีเจอร์อื่นทันที",
+        done: ["Home ใช้งานจริง", "Search Results ใช้งานจริง", "Property Details ใช้งานจริง", "About ใช้งานจริง", "Contact ใช้งานจริง", "Sell ใช้งานจริง", "Advertise ใช้งานจริง"],
+        pending: ["ไม่มี"],
+        next: ["Regression Test ก่อนเปิดจริง"],
+        evidence: ["Home.dc.html", "Search Results.dc.html", "Property Details.dc.html", "Sell.dc.html", "About.dc.html", "Contact.dc.html"],
+        explanation: "7 จาก 7 หน้าหลักใช้งานได้จริงตามโค้ด แต่ยังเหลือ Regression Test รอบสุดท้ายก่อนเปิดจริง จึงยังไม่ปัดเป็น 100%" },
+      { icon: "🔍", name: "Search & Filters", statusLabel: "พร้อม", pct: "90%", barColor: "oklch(55% 0.13 150)",
+        features: ["SearchFilters component (desktop sidebar / mobile drawer)", "ตัวกรอง: area/zone/price/type/beds/baths/land/living area/status/features", "Sort"],
+        goal: "กรองและค้นหาผลลัพธ์ได้ครบทุกเงื่อนไขที่ประกาศไว้ และแสดงผลถูกต้องบน Production",
+        reason: "เป็นเครื่องมือหลักที่ผู้ซื้อ/ผู้เช่าใช้ค้นหาทรัพย์ หากพังกระทบ conversion โดยตรง",
+        done: ["SearchFilters component ใช้งานจริงใน Home และ Search Results", "ตัวกรองครบตามสเปคที่ระบุใน BLUEPRINT"],
+        pending: ["ไม่มี"],
+        next: ["ตรวจ Production ซ้ำเฉพาะหน้าค้นหาก่อนเปิดจริง"],
+        evidence: ["SearchFilters.dc.html", "Search Results.dc.html"],
+        explanation: "90% เพราะฟีเจอร์ครบตามสเปคและยืนยันจากโค้ดแล้ว แต่ยังไม่มีการ Regression บน Production รอบสุดท้าย" },
+      { icon: "🏠", name: "Property (Listing/Approval)", statusLabel: "พร้อม", pct: "90%", barColor: "oklch(55% 0.13 150)",
+        features: ["Property Details page", "Listing Approvals queue", "approveListing()", "runExpirySweep()", "Rental-expiry tracker"],
+        goal: "ประกาศขาย/เช่าไหลผ่านสถานะ pending → live → expired/rejected ถูกต้องอัตโนมัติ",
+        reason: "เป็นแกนหลักของธุรกิจ — หาก flow ผิดจะกระทบทั้งประสบการณ์ลูกค้าและรายได้โดยตรง",
+        done: ["approveListing() ยืนยันจากโค้ด", "runExpirySweep() ยืนยันจากโค้ด", "Listing Approvals queue ใช้งานจริง"],
+        pending: ["Firestore rules สำหรับ listing-status write restriction (membership v2) ยังไม่ deploy จริงบน Production"],
+        next: ["รอ Firestore rules deploy (ดู Launch Blocker ด้านล่าง) ก่อนถือว่าปิดสมบูรณ์"],
+        evidence: ["firebase-client.js", "Listing Approvals.dc.html", "BLUEPRINT.md §2.3"],
+        explanation: "โค้ด/ฟีเจอร์เสร็จแล้ว แต่พึ่งพา Firestore rules ที่ยังไม่ deploy จึงไม่ปัด 100%" },
+      { icon: "👤", name: "Membership & Auth", statusLabel: "พร้อม", pct: "85%", barColor: "oklch(55% 0.13 150)",
+        features: ["Firebase Auth", "Trial 30 วัน", "Package 1/2/3", "Duplicate-trial detection (phone matching)", "Owner/Tenant/Buyer directory"],
+        goal: "สมัคร/ล็อกอิน/ทดลองใช้/อัปเกรดแพ็กเกจได้ถูกต้องและปลอดภัย",
+        reason: "ป้องกันการใช้งานผิดประเภทและปกป้องข้อมูลผู้ใช้ก่อนเปิด Production",
+        done: ["Firebase Auth ใช้งานจริง", "Trial/Package 1/2/3 ใช้งานจริง", "CAT-012 bug แก้แล้ว"],
+        pending: ["Owner-role login ยังไม่มี"],
+        next: ["ยืนยันกับ CEO ว่า Owner-role login จำเป็นก่อนเปิดจริงหรือไม่"],
+        evidence: ["firebase-client.js", "Listing Approvals.dc.html (duplicate-trial alert)"],
+        explanation: "85% เพราะฟีเจอร์หลักครบและบั๊กสำคัญแก้แล้ว แต่ยังเปิดคำถาม Owner-role login ที่ยังไม่ตัดสินใจ" },
+      { icon: "🛠️", name: "Admin Tools", statusLabel: "พร้อม", pct: "90%", barColor: "oklch(55% 0.13 150)",
+        features: ["Admin Dashboard (KPI + rental-expiry tracker)", "Listing Approvals", "Owners directory", "Developer Maintenance Center (SAFE MODE)"],
+        goal: "แอดมิน (เจ้าของเว็บ ไม่ใช่โปรแกรมเมอร์) จัดการข้อมูลจริงได้ครบโดยไม่ต้องแก้โค้ด",
+        reason: "เจ้าของเว็บพึ่งพาเครื่องมือแอดมิน 100% ในการดำเนินธุรกิจประจำวัน",
+        done: ["Admin Dashboard ใช้งานจริง", "Listing Approvals ใช้งานจริง", "Owners ใช้งานจริง", "DMC ทำงานใน SAFE MODE"],
+        pending: ["ไม่มี"],
+        next: ["ไม่มี"],
+        evidence: ["Admin Dashboard.dc.html", "Owners.dc.html", "Listing Approvals.dc.html"],
+        explanation: "ฟีเจอร์ครบและยืนยันจากโค้ดแล้วทั้งหมด เหลือเพียงการใช้งานจริงต่อเนื่อง" },
+      { icon: "💳", name: "Packages / Pricing", statusLabel: "พร้อม", pct: "85%", barColor: "oklch(55% 0.13 150)",
+        features: ["Trial 30 วัน", "แพ็กเกจ 1/2/3", "Stripe subscription"],
+        goal: "เก็บเงินได้จริงและสิทธิ์การใช้งานตรงกับแพ็กเกจที่ซื้อ",
+        reason: "เป็นช่องทางรายได้หลักของธุรกิจ",
+        done: ["Trial 30 วัน + แพ็กเกจ 1/2/3 ใช้งานจริง", "Stripe เชื่อมต่อแล้ว"],
+        pending: ["ตัวเลขรายได้จริงบน Production ยังไม่ยืนยันจาก CEO"],
+        next: ["ขอ CEO ยืนยันสถานะ Production revenue"],
+        evidence: ["firebase-client.js (Stripe integration)", "BLUEPRINT.md §2, §4"],
+        explanation: "ระบบเก็บเงินใช้งานได้จริงแล้ว แต่ตัวเลขผลลัพธ์จริงบน Production ยังไม่ถูกยืนยัน จึงไม่ปัด 100%" },
+      { icon: "🔍", name: "SEO", statusLabel: "บางส่วน", pct: "55%", barColor: "oklch(70% 0.12 75)",
+        features: ["Sitemap.xml", "robots.txt", "Open Graph", "JSON-LD (Property Details)", "Google Business Profile (แผน)"],
+        goal: "ติดอันดับค้นหาและแสดงผล Rich Snippet ได้ถูกต้องก่อนเปิดจริง",
+        reason: "เป็นช่องทาง traffic ฟรีที่สำคัญนอกเหนือจากโฆษณาแบบเสียเงิน",
+        done: ["Sitemap.xml + robots.txt ยื่นแล้ว (16 ก.ค. 2569)", "Open Graph + JSON-LD ที่ Property Details ใช้งานจริง"],
+        pending: ["Google Business Profile ยังไม่ยืนยันสถานะจริง", "URL ถาวรต่อประกาศยังไม่ยืนยันครบ (KM-16)"],
+        next: ["CEO ยืนยัน Google Business Profile"],
+        evidence: ["sitemap.xml / robots.txt submission log", "CEO Guide.dc.html — KM-16"],
+        explanation: "55% เพราะงานเทคนิคพื้นฐานเสร็จแล้ว แต่ยังขาดการยืนยัน Google Business Profile ซึ่งมีน้ำหนักสำคัญต่อ Local SEO" },
+      { icon: "🧠", name: "AI Features", statusLabel: "บางส่วน", pct: "60%", barColor: "oklch(70% 0.12 75)",
+        features: ["AI Quick Add", "AI Concierge / Chatbot (ContactRail)", "Cloud Function proxy เดียวกันสำหรับทุกฟีเจอร์ AI"],
+        goal: "ผู้ใช้คุยกับ AI ได้จริง และแอดมินร่างประกาศด้วยเสียง/รูปได้จริง",
+        reason: "ลดเวลาแอดมินและเพิ่ม engagement ฝั่งลูกค้า",
+        done: ["AI Quick Add ใช้งานจริง", "Chatbot ตอบตาม Persona/Restrictions ที่ตั้งค่าได้", "Cloud Function proxy เดียวใช้ร่วมกันทุกฟีเจอร์"],
+        pending: ["Google Maps POI drive-time ยังไม่ verify ครบ end-to-end (รายงานว่าทำงานไม่สม่ำเสมอ)"],
+        next: ["CEO/Product Owner ยืนยันความสำคัญของ POI drive-time ก่อนเปิดจริง"],
+        evidence: ["functions/index.js", "ContactRail.dc.html", "AI Quick Add.dc.html"],
+        explanation: "60% เพราะฟีเจอร์หลักใช้งานได้จริงแล้ว แต่มีรายการที่ยังไม่ verify ครบ (POI drive-time end-to-end)" },
+      { icon: "🔥", name: "Firebase Infrastructure", statusLabel: "พร้อม", pct: "85%", barColor: "oklch(55% 0.13 150)",
+        features: ["Firestore", "Auth", "รูปภาพเก็บเป็น resized data-URL ใน Firestore (ไม่ใช้ Storage แบบเสียเงิน)", "Cloud Functions"],
+        goal: "โครงสร้างพื้นฐานรองรับ Production ได้เสถียร",
+        reason: "ทุกฟีเจอร์ธุรกิจพึ่งพาชั้นนี้โดยตรง",
+        done: ["Firestore/Auth/Cloud Functions ใช้งานจริง", "Photo storage แบบ data-URL ใช้งานได้จริงมาหลาย Release"],
+        pending: ["Firestore free-tier document-size limit ยังไม่ verify ว่ารองรับพอเมื่อจำนวนรูปต่อประกาศเพิ่มขึ้น"],
+        next: ["ติดตาม document size เมื่อจำนวนรูปต่อประกาศเพิ่มขึ้นมาก"],
+        evidence: ["firebase-client.js", "firebase.json"],
+        explanation: "85% เพราะใช้งานจริงเสถียรมาหลาย Sprint แต่มีความเสี่ยง scaling ที่ยังไม่ verify" },
+      { icon: "🛡️", name: "Security (Firestore Rules)", statusLabel: "ต้องตัดสินใจ", pct: "30%", barColor: "oklch(60% 0.12 25)",
+        features: ["Firestore Security Rules ครอบคลุม properties/owners/leads", "Listing-status write restriction (membership v2)", "Public view-count increment rule"],
+        goal: "ปิดกั้นการเขียน/อ่านข้อมูลที่ไม่ได้รับอนุญาตก่อนเปิด Production จริง",
+        reason: "เป็นความเสี่ยงสูงสุดต่อข้อมูลลูกค้าและธุรกิจหากไม่ปิดก่อน deadline",
+        done: ["Rules เขียนไว้ในโค้ดแล้ว รวม listing-status write restriction สำหรับ membership v2"],
+        pending: ["อ้างว่าตรวจแล้ว 16 ก.ค. 2569 ตาม BLUEPRINT §5 แต่ยืนยันสถานะจริงบน Production ไม่ได้จากสภาพแวดล้อมนี้", "Firestore ปัจจุบันยังเป็น temporary open rules (หมดอายุ 2026-08-08)"],
+        next: ["🔴 CEO ต้องยืนยันจาก Firebase Console โดยตรง และ deploy firestore.rules เวอร์ชันล่าสุด — นี่คือ Launch Blocker"],
+        evidence: ["BLUEPRINT.md §5", "firestore.rules (ไฟล์ในโปรเจกต์)"],
+        explanation: "30% เพราะกฎเขียนไว้แล้วแต่ยังไม่ยืนยัน/deploy จริงบน Production ก่อนวันหมดอายุ open rules" },
+      { icon: "✅", name: "QA / Review Standard", statusLabel: "ต้องตัดสินใจ", pct: "40%", barColor: "oklch(70% 0.12 75)",
+        features: ["สถานะ PASS/HOLD/NOT PASS ที่ใช้ในทุก Step Report"],
+        goal: "มีเกณฑ์ตรวจรับงานที่เป็นทางการและใช้ตรงกันทุก Step",
+        reason: "ป้องกันการประกาศ PASS ที่ไม่มีมาตรฐานรองรับ",
+        done: ["PASS/HOLD status ถูกใช้งานจริงในหลาย Sprint แล้ว"],
+        pending: ["คำนิยามที่เป็นทางการของ PASS/HOLD/NOT PASS ไม่พบในไฟล์ใดของโปรเจกต์"],
+        next: ["Product Owner เขียนคำนิยามอย่างเป็นทางการ"],
+        evidence: ["CEO Guide.dc.html — KM-14", "Step Reports ที่ผ่านมา"],
+        explanation: "40% เพราะใช้งานจริงแต่ไม่มีนิยามที่เป็นทางการรองรับ — Needs Product Owner Decision" },
+      { icon: "🚀", name: "Deployment (GitHub → Firebase Hosting)", statusLabel: "พร้อม", pct: "90%", barColor: "oklch(55% 0.13 150)",
+        features: ["อัปโหลดไฟล์ผ่าน GitHub เว็บ (ไม่ใช้ CLI/local git)", "Firebase Hosting auto-deploy สำหรับ static", "Firebase Functions deploy ผ่าน Codespaces terminal"],
+        goal: "เจ้าของเว็บ deploy การเปลี่ยนแปลงได้เองโดยไม่ต้องพึ่งเครื่องมือ dev",
+        reason: "เจ้าของเว็บไม่มี local dev environment และไม่ใช้ CLI",
+        done: ["Workflow อัปโหลดไฟล์ผ่าน GitHub เว็บใช้งานจริงมาหลาย Release แล้ว", "Codespaces terminal deploy Functions ทำสำเร็จมาก่อน"],
+        pending: ["ไม่มี"],
+        next: ["ไม่มี"],
+        evidence: ["export-for-github/ ที่ส่งมอบแล้วทุก Release ที่ผ่านมา"],
+        explanation: "Workflow ใช้งานจริงมาแล้วหลายรอบและเจ้าของทำตามได้สำเร็จ จึงพร้อมสูง" },
+    ];
+    // Domain metadata + computed-readiness architecture (Task 2/3): counts are
+    // derived from the same checklist arrays that already power each domain's
+    // detail view — no new facts invented. Manual % above remains the
+    // current source of truth; these counts prepare future auto-calculation.
+    domains.forEach((d) => {
+      d.checklistCompletedCount = d.done.length;
+      d.checklistPendingCount = (d.pending.length === 1 && d.pending[0] === "ไม่มี") ? 0 : d.pending.length;
+      d.evidenceCount = d.evidence.length;
+      d.lastUpdated = "21 ก.ค. 2569 (Phase 7)";
+      d.dataSource = d.evidence[0] || "—";
+      d.dependencies = d.checklistPendingCount > 0 ? `ขึ้นกับการปิด: ${d.pending[0]}` : "ไม่มี Dependency ที่บล็อก";
+      d.owner = d.name.includes("Security") || d.name === "Packages / Pricing" || d.name === "SEO" ? "CEO"
+        : d.name.includes("QA") ? "Product Owner"
+        : "Lead Developer";
+    });
+    const pcts = domains.map((d) => parseInt(d.pct, 10) || 0);
+    const overall = Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length);
+
+    const blockers = [
+      { icon: "🛡️", title: "Firestore Security Rules",
+        problem: "Firestore ปัจจุบันยังใช้ temporary open rules ซึ่งหมดอายุ 2026-08-08 และ rules ที่เขียนใหม่สำหรับ membership v2 (listing-status write restriction, public view-count increment) ยังไม่ได้ deploy จริง",
+        why: "หากไม่ปิดก่อนวันหมดอายุ หรือไม่ deploy rules ใหม่ ข้อมูลจริงของลูกค้าจะเสี่ยงถูกอ่าน/เขียนโดยไม่ได้รับอนุญาต",
+        checked: "Rules เขียนไว้ในโค้ดแล้ว (firestore.rules); BLUEPRINT §5 อ้างถึงการตรวจสอบเมื่อ 16 ก.ค. 2569",
+        notChecked: "ยืนยันสถานะจริงบน Firebase Console Production ไม่ได้จากสภาพแวดล้อมนี้ (Client SDK เท่านั้น ไม่มีสิทธิ์เข้า Console)",
+        decisionMaker: "CEO (เป็นผู้เดียวที่มีสิทธิ์เข้า Firebase Console/Production)",
+        steps: ["CEO เปิด Firebase Console → Firestore → Rules", "เปรียบเทียบกับ firestore.rules เวอร์ชันล่าสุดในโปรเจกต์", "Deploy ผ่าน Firebase CLI ใน Codespaces (firebase deploy --only firestore:rules)", "แจ้งผลกลับมาที่ Product Owner"],
+        evidenceNeeded: "Screenshot จาก Firebase Console Rules tab หรือผลลัพธ์คำสั่ง deploy",
+        closeCondition: "Rules บน Production ตรงกับไฟล์ในโปรเจกต์ และไม่มี open/test-mode rule หลงเหลือ — ยืนยันก่อนวันที่ 2026-08-08",
+        impact: "ข้อมูลลูกค้า/ทรัพย์สินเสี่ยงถูกอ่านหรือเขียนโดยไม่ได้รับอนุญาต",
+        launchScope: "Cannot Launch" },
+      { icon: "✅", title: "QA / Review Standard",
+        problem: "ยังไม่มีคำนิยามที่เป็นทางการของ PASS/HOLD/NOT PASS",
+        why: "หากไม่มีมาตรฐาน การประกาศ PASS อาจไม่สม่ำเสมอระหว่าง Step ต่างๆ เสี่ยงต่อการเปิด Production ด้วยเกณฑ์ที่ไม่ชัดเจน",
+        checked: "PASS/HOLD ใช้งานจริงมาหลาย Sprint (เชิงปฏิบัติ)",
+        notChecked: "ไม่มีเอกสารที่เป็นทางการกำหนดเกณฑ์แต่ละสถานะ",
+        decisionMaker: "Product Owner",
+        steps: ["Product Owner ร่างเกณฑ์ PASS/HOLD/NOT PASS", "ระบุลงใน BLUEPRINT.md", "อ้างอิงกลับใน CEO Guide KM-14"],
+        evidenceNeeded: "เอกสารคำนิยามที่เผยแพร่แล้ว",
+        closeCondition: "BLUEPRINT.md มีหัวข้อคำนิยาม PASS/HOLD/NOT PASS อย่างเป็นทางการ และ KM-14 อัปเดตสถานะเป็น Working",
+        impact: "การประกาศ PASS อาจไม่สม่ำเสมอระหว่าง Step หากไม่มีเกณฑ์ทางการ",
+        launchScope: "Internal Only" },
+    ];
+
+    const priorityMustDo = [
+      { name: "Verify & Deploy Production Firestore Rules", status: "Blocked — CEO Action Required",
+        reason: "เป็น Launch Blocker เดียวที่กระทบความปลอดภัยข้อมูลจริงโดยตรง",
+        owner: "CEO (เข้า Firebase Console) + Lead Developer (เตรียมคำสั่ง deploy)",
+        dependency: "ไม่มี",
+        expectedResult: "Rules บน Production ตรงกับไฟล์ล่าสุด ไม่มี open-mode หลงเหลือ",
+        completionCondition: "ยืนยันก่อนวันที่ 2026-08-08",
+        priority: "High",
+        expectedImpact: "ปลดล็อก Launch Blocker เดียวที่กระทบความปลอดภัยข้อมูลจริง" },
+    ];
+    const priorityDone = [
+      { name: "Membership v2 rebuild (trial/expiry/approval queue/duplicate detection)", status: "Implementation Complete",
+        reason: "เป็นฐานของฟีเจอร์ที่กำลังรอ rules เพื่อเปิดใช้เต็มรูปแบบบน Production",
+        owner: "Lead Developer",
+        dependency: "รอ Firestore Rules deploy (ด้านบน) ก่อนใช้งานเต็มรูปแบบ",
+        expectedResult: "N/A — เสร็จแล้ว",
+        completionCondition: "N/A — เสร็จแล้ว",
+        priority: "N/A",
+        expectedImpact: "เป็นฐานที่พร้อมใช้งานเต็มรูปแบบทันทีที่ Rules ปิดสมบูรณ์" },
+    ];
+    const priorityNext = [
+      { name: "เขียนคำนิยาม QA / Review Standard อย่างเป็นทางการ", status: "Not Started",
+        reason: "ให้ทุก Step มีเกณฑ์ตรวจรับเดียวกัน ไม่ขึ้นกับดุลยพินิจเฉพาะครั้ง",
+        owner: "Product Owner",
+        dependency: "ไม่มี (ทำคู่ขนานกับ Blocker ได้)",
+        expectedResult: "BLUEPRINT.md มีเกณฑ์ PASS/HOLD/NOT PASS ที่เป็นทางการ",
+        completionCondition: "เอกสารเผยแพร่แล้วและ KM-14 อัปเดตสถานะ",
+        priority: "Medium",
+        expectedImpact: "ปิด Launch Blocker ที่ 2 และทำให้เกณฑ์ PASS สม่ำเสมอทุก Step" },
+      { name: "ยืนยัน Google Business Profile และสถานะรายได้ Production กับ CEO", status: "Not Started",
+        reason: "ปิดช่องว่างข้อมูลด้าน SEO และ Business ที่ยังเป็น Pending",
+        owner: "CEO",
+        dependency: "ไม่มี",
+        expectedResult: "KM-11 และ KM-16 อัปเดตเป็น Verified",
+        completionCondition: "CEO ยืนยันเป็นลายลักษณ์อักษร",
+        priority: "Low",
+        expectedImpact: "ปิดช่องว่างข้อมูล SEO/Business ที่เหลืออยู่ในหน้านี้" },
+    ];
+
+    const overallStatusLabel = overall >= 85 ? "พร้อมเป็นส่วนใหญ่" : overall >= 60 ? "บางส่วนพร้อม" : "ต้องตัดสินใจก่อนเปิดจริง";
+
+    // Executive Decision Panel — computed from the same facts already on
+    // this page (blockers count, domain statusLabels, priority queue), not
+    // a separately invented judgment.
+    const openDecisionsCount = domains.filter((d) => d.statusLabel === "ต้องตัดสินใจ").length;
+    let productionStatus, statusIcon, borderColor, bg, textColor;
+    if (blockers.length > 0) {
+      productionStatus = "HOLD"; statusIcon = "🟡"; borderColor = "oklch(75% 0.12 75)"; bg = "oklch(97% 0.03 75)"; textColor = "oklch(35% 0.1 75)";
+    } else if (overall >= 80) {
+      productionStatus = "READY"; statusIcon = "🟢"; borderColor = "oklch(70% 0.13 150)"; bg = "oklch(96% 0.03 150)"; textColor = "oklch(30% 0.1 150)";
+    } else {
+      productionStatus = "NOT READY"; statusIcon = "🔴"; borderColor = "oklch(70% 0.14 25)"; bg = "oklch(96% 0.04 25)"; textColor = "oklch(35% 0.13 25)";
+    }
+    const executive = {
+      statusLabel: productionStatus,
+      statusIcon,
+      borderColor,
+      bg,
+      textColor,
+      openDecisionsCount,
+      criticalRisksLabel: blockers.some((b) => b.launchScope === "Cannot Launch") ? "1 Cannot-Launch Risk (Security)" : "ไม่มีความเสี่ยงระดับ Cannot Launch",
+      recommendedActions: [
+        ...priorityMustDo.map((p) => p.name),
+        ...priorityNext.map((p) => p.name),
+      ].slice(0, 3),
+    };
+
+    return {
+      overallPct: overall + "%",
+      overallStatusLabel,
+      overallLabel: `${overall}% — คำนวณจากค่าเฉลี่ยของ ${domains.length} หมวด (ไม่ใช่ค่าคาดการณ์)`,
+      domains,
+      executive,
+      blockersCountLabel: `${blockers.length} Critical`,
+      blockers,
+      topPriorityLabel: priorityMustDo[0] ? priorityMustDo[0].name : "",
+      priorityMustDo,
+      priorityDone,
+      priorityNext,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
