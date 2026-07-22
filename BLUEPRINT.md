@@ -1138,6 +1138,40 @@ sitemap.xml จริง (ต้องมี build step/Cloud Function อ่า
 รายการ "งานเก็บตกเล็กๆ" เดิม (ปุ่มรหัสผ่านที่เห็นชัดใน Agent Signup ต้องตัดสินใจ, ShareModal ที่ควรรวมเป็น
 component เดียว, AI Image→Alt-text wiring)
 
+## 24.9 QA & Review Standard Framework — Mission 01 (22 ก.ค. 2569)
+
+**Mission Purpose**: สร้างมาตรฐานกลาง (PASS/HOLD/NOT PASS, Verified/Partially Verified/Pending Verification, Readiness %, Evidence Standard, Approval Workflow) ให้ Claude/Claude Code/Product Owner/CEO/Developer คนใหม่ใช้ความหมายตรงกันทั้งโครงการ
+
+**Mission 01 — สถานะสุดท้าย**: 🚀 RELEASED v1.2 (22 ก.ค. 2569) — ครบ 12/12 Steps + Standard Mission Management Framework ระดับโครงการ (Mission Library/Mission Archive/Mission Template) — Product Owner Final Authorization อนุมัติแล้ว, Architecture (12-Step/Readiness Formula/Evidence Matrix/Approval Workflow) LOCKED ไม่มีการแก้ไขยาย Steps 3/4/5/8/9/12 ให้ลึกครบตามเกณฑ์แล้ว ดูรายละเอียดครบใน `Mission 01 - QA Review Standard.dc.html` และ §24.10 ด้านล่าง
+
+## 24.10 QA & Review Standard Framework v1.0 — Single Source of Truth (22 ก.ค. 2569)
+
+**สถานะ**: มาตรฐานถาวรของโครงการตั้งแต่บัดนี้เป็นต้นไป (v1.1) — ทุกเอกสาร/แดชบอร์ดอ้างอิงกลับมาที่นี่แทนการนิยามซ้ำ Steps 3/4/5/8/9/12 ขยายเต็มรูปแบบแล้ว (Formula Explanation, Score Interpretation, 8 calc examples, Decision Tree, Evidence Matrix 6 ระดับ×15 กรณี, Workflow Diagram+6 Sub-Workflows+Decision Matrix, Report Template 19 ฟิลด์+ตัวอย่างจริง, 10 Simulation Test cases, Framework Manual เต็มรูปแบบ) — รายละเอียดทั้งหมดอยู่ใน `Mission 01 - QA Review Standard.dc.html`
+
+**PASS**: สิ่งที่ถูกตรวจสอบเป็นไปตาม Acceptance Criteria ของระดับที่กำลังประเมิน มีหลักฐานเพียงพอตาม Evidence Matrix ไม่มี Critical Defect และมี Approval Record ตาม Authority Matrix — ไม่ได้แปลว่า Implementation Complete/Verified อย่างเดียว/Production พร้อมใช้งานเสมอไป
+
+**HOLD**: งานยังประเมินเป็น PASS/NOT PASS ไม่ได้ เพราะขาดหลักฐาน/การตัดสินใจ/dependency — ไม่ใช่การตัดสินคุณภาพงาน เฉพาะ Product Owner (ระดับ Step)/CEO (ระดับ Mission/Release) มีอำนาจกำหนดสุดท้าย
+
+**NOT PASS**: ตรวจแล้วพบว่าไม่ผ่าน Acceptance Criteria หรือมีข้อบกพร่องจริง ต้องมี Corrective Action + Retest ก่อนเปลี่ยนเป็น PASS ได้ — **FAIL vs NOT PASS**: ใช้ NOT PASS เป็นคำมาตรฐานเดียว (Option A) ทั้งโครงการ ตั้งแต่ v1.0 นี้ FAIL ถือเป็น Legacy Term เท่านั้น
+
+**Status Hierarchy (5 หมวด — ห้ามปนกัน)**: Workflow Status (⚪🔵🟣🔴) / Review Result (PASS/HOLD/NOT PASS) / Verification Status (Verified/Partially Verified/Pending Verification) / Approval Status (🟡 Review/✅ Approved) / Release Status (🟢 Completed/🚀 Released/👑 CEO Approval)
+
+**Readiness Formula**: `Readiness% = (EvidenceCompleteness×0.35) + (ApprovalCompleteness×0.25) + (DocumentationSync×0.15) + (CriticalIssueFactor×0.25)` — CriticalIssueFactor = 100% ถ้าไม่มี Critical Issue เปิดค้าง มิฉะนั้น 0% (hard gate: คะแนนรวมไม่เกิน 40% ตราบใดที่ยังมี Critical Issue) ใช้สูตรเดียวกันทุกระดับ (Step/Feature/Mission/Release) ต่อยอดจาก Percentage Integrity Rule เดิม (§24.7)
+
+**Evidence Matrix (ย่อ)**: Step=Source Code/Deliverable+Approval Record; Feature=Regression ครบ+Doc Sync+Approval+ไม่มี Critical Defect; Mission=ทุก Step ย่อย PASS+Decision Log+CEO sign-off; Release/Production=Deploy confirm+Production Verification จริง (ไม่ใช่แค่ Preview)+GitHub Upload confirm+PROJECT_HISTORY.md entry
+
+**Severity**: Critical=บล็อก PASS เสมอ (งานพัง/security/ข้อมูลผิด/scope หายทั้งหมด) → NOT PASS; Minor=ไม่บล็อก PASS แต่ต้องบันทึกเป็น Known Issue เสมอ
+
+**Approval Workflow**: Lead Developer (build+test+report) → Product Owner (Review: PASS/HOLD/NOT PASS ระดับ Step/Feature) → CEO (อนุมัติ Mission/Release + สั่ง Deploy) → Deploy (CEO เท่านั้น) → Released → History (PROJECT_HISTORY.md)
+
+**Authority Matrix (หลักการ)**: Lead Developer ห้ามอนุมัติงานของตนเอง (self-approval) และห้ามสั่ง Deploy Production เด็ดขาด — Product Owner มีอำนาจให้ผล PASS/HOLD/NOT PASS ระดับ Step — CEO มีอำนาจสุดท้ายระดับ Mission/Release/Scope/Cost/Deploy
+
+**Scope Levels**: PASS ไม่สืบทอดข้ามระดับอัตโนมัติ — Step PASS ≠ Feature PASS ≠ Mission Completed ≠ Released ≠ Production Verified — แต่ละระดับต้องมีหลักฐานของตัวเอง
+
+**Report Template มาตรฐาน**: ทุก Step/Feature/Mission Report ต้องมี: Step/Feature/Mission ที่รายงาน, Objective, Work Done, Evidence Provided, Review Result+เหตุผล, Reviewer, Approval Status, Current Status (5 หมวด), Next Action, Files Changed+Known Risks
+
+**Known Limitation**: Step-numbering 2 ระบบขนาน (feature-lifecycle Steps 1-12 vs. CEO GUIDE.md §11 governance Steps 6-12) ยังไม่ประสานเป็นระบบเดียว — ทำต่อในรอบถัดไป Pilot Test ของ Mission นี้ใช้กรณีย้อนหลัง/สมมติเท่านั้น ยังไม่ทดสอบกับ Mission ใหม่จริง
+
 ## 24. Developer Maintenance Center (DMC) — Progress Log
 
 `Developer Maintenance Center.dc.html` — internal Admin-only diagnostics/cleanup tool. Built step-by-step under Product Owner review; each step ships in SAFE MODE (read-only) until explicitly approved for the next phase.

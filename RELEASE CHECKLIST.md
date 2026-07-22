@@ -39,7 +39,7 @@ Verify `export-for-github/` contains the latest version of every file above:
 4. Confirm repository is up to date — no pending changes left un-uploaded
 
 ## 6. Completion Record
-- **Version**: Property Details Step 12 Release
+- **Version**: Mission 01 — QA & Review Standard Framework v1.2
 - **Release Date**: 22 กรกฎาคม 2569
-- **Released By**: Product Owner (via CEO Daily Brief workflow)
-- **Notes**: Documentation + export verified byte-identical to source (13 core files checked, all MATCH after re-sync). CLAUDE.md rename classified as Environment Limitation by Product Owner decision — assigned to Project Owner, to be completed manually immediately before GitHub upload. GitHub upload itself remains a manual owner action per this project's deployment workflow (no automated GitHub write access in this environment).
+- **Released By**: Product Owner (Final Authorization) / CEO (execution order)
+- **Notes**: 12-Step Framework/Readiness Formula/Evidence Matrix/Approval Workflow confirmed LOCKED, unmodified. Mission Library, Mission Archive, Mission Template created and cross-linked with Mission Control/Launch Readiness/CEO Guide. BLUEPRINT.md §24.9 synced to v1.2. All updated files re-verified byte-identical between source and export-for-github/. GitHub upload remains a manual owner action per this project's deployment workflow (no automated GitHub write access in this environment).

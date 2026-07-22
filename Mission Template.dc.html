@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Mission Template — huahin.properties</title>
+  <style>
+    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    .m01-title { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: oklch(45% 0.02 60); display: block; margin-bottom: 4px; }
+    .m01-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .m01-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; color: oklch(50% 0.02 60); border-bottom: 2px solid oklch(88% 0.01 70); padding: 6px 8px; }
+    .m01-table td { padding: 7px 8px; border-bottom: 1px solid oklch(92% 0.01 70); vertical-align: top; }
+    .m01-card { background: white; border: 1px solid oklch(90% 0.01 70); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
+    .tmpl-fill { color: oklch(55% 0.1 250); font-style: italic; }
+  </style>
+</helmet>
+<div style="max-width:1020px; margin:0 auto; padding:28px 20px 60px; color:oklch(25% 0.02 60); line-height:1.6;">
+
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:6px; flex-wrap:wrap;">
+    <div style="width:38px; height:38px; border-radius:10px; background:oklch(35% 0.09 25); display:flex; align-items:center; justify-content:center; color:white; font-size:19px;">📄</div>
+    <div>
+      <div style="font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:oklch(20% 0.02 60);">MISSION TEMPLATE</div>
+      <div style="font-size:13px; color:oklch(45% 0.02 60);">คัดลอกไฟล์นี้ทุกครั้งที่เปิด Mission ใหม่ — ห้ามออกแบบ Framework ใหม่ตั้งแต่ต้น</div>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;">
+    <a href="./Mission%20Control.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🧭 Mission Control</a>
+    <a href="./Launch%20Readiness%20Dashboard.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🚦 Launch Readiness</a>
+    <a href="./CEO%20Guide.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📘 CEO Guide</a>
+    <a href="./Mission%20Library.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📚 Mission Library</a>
+    <a href="./Mission%20Archive.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🗄️ Mission Archive</a>
+    <span style="font-size:12.5px; background:oklch(90% 0.01 70); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📄 Mission Template (คุณอยู่ที่นี่)</span>
+  </div>
+
+  <div class="m01-card" style="border:2px solid oklch(60% 0.14 150); background:oklch(96% 0.05 150);">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px 18px; font-size:12.5px;">
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Mission Owner</div><div class="tmpl-fill">[ระบุผู้รับผิดชอบ]</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Lead Implementer</div><div class="tmpl-fill">[Claude / Claude Code / ทีมพัฒนา]</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Approver</div><div class="tmpl-fill">CEO</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Mission Status</div><div class="tmpl-fill">⚪ Planning</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Mission Progress</div><div class="tmpl-fill">0/12 Steps</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Version</div><div class="tmpl-fill">v0.1 (Draft)</div></div>
+    </div>
+  </div>
+
+  <div class="m01-card">
+    <span class="m01-title">Mission Lifecycle (LOCKED — ใช้ทุก Mission)</span>
+    <p style="font-size:12.5px; margin:4px 0;">Planning → Active → Review → CEO Approval → Released → Archived</p>
+  </div>
+
+  <div class="m01-card">
+    <span class="m01-title">12-Step Framework (LOCKED — โครงสร้างเดียวกันทุก Mission)</span>
+    <div class="m01-tablewrap">
+      <table class="m01-table">
+        <thead><tr><th>Step</th><th>ชื่อ Step มาตรฐาน</th><th>สถานะ</th></tr></thead>
+        <tbody>
+          <sc-for list="{{ standardSteps }}" as="s" hint-placeholder-count="12">
+            <tr><td style="font-weight:700;">{{ s.n }}</td><td>{{ s.name }}</td><td class="tmpl-fill">⚪ Pending</td></tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="m01-card">
+    <span class="m01-title">Deliverables</span>
+    <p class="tmpl-fill" style="font-size:12.5px;">[ระบุ Deliverable ของแต่ละ Step เมื่อเสร็จ]</p>
+    <span class="m01-title" style="margin-top:10px;">Decision Log</span>
+    <p class="tmpl-fill" style="font-size:12.5px;">[บันทึกทุก Decision: วันที่/ผู้ตัดสิน/เหตุผล/หลักฐาน/ผลกระทบ]</p>
+    <span class="m01-title" style="margin-top:10px;">Lessons Learned</span>
+    <p class="tmpl-fill" style="font-size:12.5px;">[บันทึกเมื่อ Mission ใกล้ปิด]</p>
+    <span class="m01-title" style="margin-top:10px;">Future Improvements</span>
+    <p class="tmpl-fill" style="font-size:12.5px;">[ระบุสิ่งที่ควรทำต่อในอนาคต]</p>
+    <span class="m01-title" style="margin-top:10px;">Release Notes</span>
+    <p class="tmpl-fill" style="font-size:12.5px;">[สรุปเมื่อ Release]</p>
+  </div>
+
+  <div class="m01-card" style="border:2px solid oklch(60% 0.14 150); background:oklch(96% 0.05 150);">
+    <span class="m01-title">Mission Completion Conditions (LOCKED — ใช้ทุก Mission)</span>
+    <p style="font-size:12.5px; margin:6px 0 0;">MISSION IS COMPLETE ONLY WHEN:<br/>✓ Development Complete&nbsp;&nbsp;✓ Product Owner Approved&nbsp;&nbsp;✓ Upload &amp; Verification Passed&nbsp;&nbsp;✓ Official Completion Notice Published&nbsp;&nbsp;✓ PROJECT_HISTORY.md Updated<br/><strong>เมื่อครบทั้ง 5 ข้อเท่านั้น Mission Status = RELEASED</strong></p>
+  </div>
+
+  <div class="m01-card">
+    <span class="m01-title">References</span>
+    <p class="tmpl-fill" style="font-size:12.5px;">[อ้างอิงไฟล์ที่เกี่ยวข้อง เช่น BLUEPRINT.md section, ไฟล์ .dc.html ที่แก้ไข]</p>
+    <span class="m01-title" style="margin-top:10px;">Mission Metadata</span>
+    <p class="tmpl-fill" style="font-size:12.5px;">[Mission Code / วันที่เริ่ม / ขอบเขต / Stakeholders]</p>
+    <span class="m01-title" style="margin-top:10px;">Mission History</span>
+    <p class="tmpl-fill" style="font-size:12.5px;">[บันทึกทุกเวอร์ชันที่ผ่านมาของ Mission นี้]</p>
+  </div>
+
+  <div class="m01-card" style="background:oklch(96% 0.03 80); border-style:dashed;">
+    <span class="m01-title">วิธีใช้</span>
+    <p style="font-size:12.5px; margin:4px 0;">1) คัดลอกไฟล์นี้เป็น "Mission 0X - [ชื่อ].dc.html" 2) กรอกข้อมูลแทนข้อความสีน้ำเงินตัวเอียงทั้งหมด 3) ห้ามแก้ไข 12-Step Framework/Readiness Formula/Evidence Matrix/Approval Workflow ที่ LOCKED ไว้ 4) เพิ่มลิงก์ Mission ใหม่ใน Mission Library 5) เมื่อ Released ให้บันทึกสรุปลง Mission Archive</p>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const standardSteps = [
+      { n: 1, name: "วิเคราะห์ขอบเขต/สำรวจสถานะปัจจุบัน" },
+      { n: 2, name: "นิยาม/Draft มาตรฐานหลัก (เทียบเท่า PASS/HOLD/NOT PASS ของ Mission 01)" },
+      { n: 3, name: "Readiness/Scoring Framework ของ Mission นี้" },
+      { n: 4, name: "Required Evidence Standard" },
+      { n: 5, name: "Approval Workflow + SLA" },
+      { n: 6, name: "Blueprint Standard (บันทึกเป็น Single Source of Truth)" },
+      { n: 7, name: "Dashboard Integration" },
+      { n: 8, name: "Claude Report Template" },
+      { n: 9, name: "Pilot / Simulation Test" },
+      { n: 10, name: "Product Owner Review Package" },
+      { n: 11, name: "CEO Approval Package" },
+      { n: 12, name: "Mission Closure & Release" },
+    ];
+    return { standardSteps };
+  }
+}
+</script>
+</body>
+</html>

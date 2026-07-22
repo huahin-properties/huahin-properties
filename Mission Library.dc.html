@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Mission Library — huahin.properties</title>
+  <style>
+    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    .m01-title { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: oklch(45% 0.02 60); display: block; margin-bottom: 4px; }
+    .m01-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .m01-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; color: oklch(50% 0.02 60); border-bottom: 2px solid oklch(88% 0.01 70); padding: 6px 8px; }
+    .m01-table td { padding: 7px 8px; border-bottom: 1px solid oklch(92% 0.01 70); vertical-align: top; }
+    .m01-card { background: white; border: 1px solid oklch(90% 0.01 70); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
+    .m01-tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    a.mlib-row:hover { background: oklch(97% 0.02 70); }
+  </style>
+</helmet>
+<div style="max-width:1020px; margin:0 auto; padding:28px 20px 60px; color:oklch(25% 0.02 60); line-height:1.6;">
+
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:6px; flex-wrap:wrap;">
+    <div style="width:38px; height:38px; border-radius:10px; background:oklch(35% 0.09 25); display:flex; align-items:center; justify-content:center; color:white; font-size:19px;">📚</div>
+    <div>
+      <div style="font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:oklch(20% 0.02 60);">MISSION LIBRARY</div>
+      <div style="font-size:13px; color:oklch(45% 0.02 60);">ดัชนีถาวรของทุก Mission ในโครงการ huahin.properties</div>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;">
+    <a href="./Mission%20Control.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🧭 Mission Control</a>
+    <a href="./Launch%20Readiness%20Dashboard.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🚦 Launch Readiness</a>
+    <a href="./CEO%20Guide.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📘 CEO Guide</a>
+    <span style="font-size:12.5px; background:oklch(90% 0.01 70); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📚 Mission Library (คุณอยู่ที่นี่)</span>
+    <a href="./Mission%20Archive.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🗄️ Mission Archive</a>
+    <a href="./Mission%20Template.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📄 Mission Template</a>
+  </div>
+
+  <div class="m01-card">
+    <span class="m01-title">Mission Lifecycle (มาตรฐานเดียวของทุก Mission)</span>
+    <p style="font-size:12.5px; margin:4px 0 0;">Planning → Active → Review → CEO Approval → Released → Archived — ไม่มี Lifecycle อื่นนอกจากนี้</p>
+  </div>
+
+  <div class="m01-card">
+    <span class="m01-title">ดัชนี Mission ทั้งหมด</span>
+    <div class="m01-tablewrap">
+      <table class="m01-table">
+        <thead><tr><th>Mission</th><th>ชื่อ</th><th>Owner</th><th>Version</th><th>สถานะ</th><th>Progress</th><th>Release Date</th></tr></thead>
+        <tbody>
+          <sc-for list="{{ missions }}" as="m" hint-placeholder-count="1">
+            <tr>
+              <td style="font-weight:700;">{{ m.code }}</td>
+              <td><a href="{{ m.link }}" style="color:oklch(35% 0.1 25); text-decoration:none; font-weight:600;">{{ m.name }}</a></td>
+              <td>{{ m.owner }}</td>
+              <td>{{ m.version }}</td>
+              <td style="font-weight:700;">{{ m.status }}</td>
+              <td>{{ m.progress }}</td>
+              <td>{{ m.releaseDate }}</td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="m01-card" style="background:oklch(96% 0.03 80); border-style:dashed;">
+    <span class="m01-title">Mission ถัดไป</span>
+    <p style="font-size:12.5px; margin:4px 0;">ยังไม่มี Mission 02 ในโครงการ — เมื่อ CEO ต้องการเปิด Mission ใหม่ (เช่น Website UX Review, SEO Optimization, Performance, AI Search) ให้เริ่มจาก <a href="./Mission%20Template.dc.html" style="color:oklch(35% 0.1 25);">Mission Template</a> เสมอ ห้ามออกแบบ Framework ใหม่ตั้งแต่ต้น</p>
+  </div>
+
+  <div class="m01-card">
+    <span class="m01-title">Cross Reference</span>
+    <p style="font-size:12.5px; margin:4px 0;">Mission Library อ่านสถานะจาก Mission Dashboard แต่ละไฟล์โดยตรง ไม่คัดลอกข้อมูลซ้ำ — Mission Control และ Launch Readiness Dashboard อ้างอิงกลับมาที่นี่สำหรับรายการ Mission ทั้งหมด แทนการ list ซ้ำในตัวเอง</p>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const missions = [
+      { code: "Mission 01", name: "QA & Review Standard Framework", owner: "Product Owner", version: "v1.2", status: "🚀 Released", progress: "12/12 Steps", releaseDate: "22 Jul 2026", link: "./Mission 01 - QA Review Standard.dc.html" },
+    ];
+    return { missions };
+  }
+}
+</script>
+</body>
+</html>

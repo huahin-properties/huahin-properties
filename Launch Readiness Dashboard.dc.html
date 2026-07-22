@@ -34,6 +34,7 @@
     <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
       <a href="./Mission%20Control.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🏠 Dashboard หลัก</a>
       <a href="./CEO%20Guide.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📘 CEO Guide</a>
+      <a href="./Mission%20Library.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📚 Mission Library</a>
       <span style="font-size:12.5px; background:oklch(90% 0.01 70); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🚦 Launch Readiness (คุณอยู่ที่นี่)</span>
     </div>
 
@@ -462,24 +463,24 @@ class Component extends DCLogic {
         relatedDocs: ["BLUEPRINT.md §5", "firestore.rules", "storage.rules"],
         verificationStatus: "Verified",
         verificationReason: "ยืนยันโดยตรงจากเนื้อหาไฟล์ firestore.rules ในโปรเจกต์ (deny-by-default, isAdmin/isOwner, listerListingStatusOk) — ไม่ใช่แค่อ้างอิงจากเอกสาร" },
-      { icon: "✅", name: "QA / Review Standard", statusLabel: "ต้องตัดสินใจ", pct: "40%", barColor: "oklch(70% 0.12 75)",
-        features: ["สถานะ PASS/HOLD/NOT PASS ที่ใช้ในทุก Step Report"],
+      { icon: "🏆", name: "QA / Review Standard", statusLabel: "Mission 01 Released v1.1 (PO-reviewed)", pct: "90%", barColor: "oklch(55% 0.13 150)",
+        features: ["PASS/HOLD/NOT PASS Definitions v1.1", "Readiness Formula + 8 calc examples + Decision Tree", "Evidence Matrix (6 levels × 15 cases)", "Approval Workflow + 6 sub-workflows + Decision Matrix", "Universal Report Template (19 fields)"],
         goal: "มีเกณฑ์ตรวจรับงานที่เป็นทางการและใช้ตรงกันทุก Step",
         reason: "ป้องกันการประกาศ PASS ที่ไม่มีมาตรฐานรองรับ",
-        done: ["PASS/HOLD status ถูกใช้งานจริงในหลาย Sprint แล้ว"],
-        pending: ["คำนิยามที่เป็นทางการของ PASS/HOLD/NOT PASS ไม่พบในไฟล์ใดของโปรเจกต์"],
-        next: ["Product Owner เขียนคำนิยามอย่างเป็นทางการ"],
-        evidence: ["Step Reports ที่ผ่านมา"],
-        explanation: "40% เพราะใช้งานจริงแต่ไม่มีนิยามที่เป็นทางการรองรับ — Needs Product Owner Decision",
+        done: ["Mission 01 เสร็จสมบูรณ์ 12/12 Steps (v1.0, 22 Jul 2026)", "Product Owner Review รอบ 2 ขยาย Steps 3/4/5/8/9/12 ให้ลึกครบ (v1.1, 22 Jul 2026)", "PASS/HOLD/NOT PASS มีนิยามทางการแล้ว, Readiness Formula+Evidence Matrix+Approval Workflow บันทึกใน BLUEPRINT §24.10"],
+        pending: ["Pilot Test ใช้กรณีย้อนหลัง/สมมติเท่านั้น ยังไม่ทดสอบกับ Mission ใหม่จริง", "Step-numbering 2 ระบบขนานยังไม่ประสาน"],
+        next: ["ใช้ Universal Report Template กับ Mission/Feature ถัดไปเพื่อยืนยัน Framework ในสถานการณ์จริง"],
+        evidence: ["Mission 01 - QA Review Standard.dc.html (v1.1)", "BLUEPRINT.md §24.10", "PROJECT_HISTORY.md"],
+        explanation: "90% (คงเดิมจาก v1.0) — v1.1 เป็นการเพิ่มความลึก/คุณภาพของเนื้อหา ไม่ใช่หลักฐานใหม่เชิงปริมาณที่จะดันเปอร์เซ็นต์ขึ้นอีก — ยังไม่ถึง 100% เพราะ Pilot ยังไม่ทดสอบกับ Mission ใหม่จริงตามที่ระบุไว้",
         purpose: "ให้ทุก Step มีเกณฑ์ตรวจรับเดียวกัน ป้องกันการประกาศ PASS ที่ไม่สม่ำเสมอระหว่างรอบงาน",
-        expectedResult: "ทุก Step Report ใช้เกณฑ์ PASS/HOLD/NOT PASS แบบเดียวกัน อ้างอิงคำนิยามที่เป็นทางการใน BLUEPRINT.md",
-        inProgress: ["ไม่มี"],
-        pendingDecision: ["Product Owner ต้องกำหนดคำนิยาม PASS/HOLD/NOT PASS อย่างเป็นทางการ"],
-        knownRisks: "หากไม่มีนิยามทางการ การตัดสิน PASS อาจขึ้นกับดุลยพินิจของผู้ตรวจแต่ละครั้ง ไม่สม่ำเสมอ",
-        bestPractices: "เมื่อมีนิยามแล้ว ให้ทุก Step Report อ้างอิงกลับไปยัง BLUEPRINT.md แทนการตัดสินเอง",
-        relatedDocs: ["BLUEPRINT.md"],
-        verificationStatus: "Pending Verification",
-        verificationReason: "ไม่พบคำนิยามที่เป็นทางการในไฟล์ใดของโปรเจกต์ — ยังตรวจสอบยืนยันไม่ได้จนกว่าจะมีเอกสาร" },
+        expectedResult: "ทุก Step Report ใช้เกณฑ์ PASS/HOLD/NOT PASS แบบเดียวกัน อ้างอิงคำนิยามที่เป็นทางการใน BLUEPRINT.md §24.10",
+        inProgress: ["ไม่มี — Mission ปิดแล้ว"],
+        pendingDecision: ["ไม่มี — Open Decisions ของ Step 2 (FAIL vs NOT PASS) ถูกปิดแล้วโดยเลือก Option A"],
+        knownRisks: "Step-numbering 2 ระบบขนานยังไม่ประสาน; Pilot Test ยังไม่ได้ทดสอบกับ Mission ใหม่จริง",
+        bestPractices: "ใช้ Universal Report Template (BLUEPRINT §24.10 / Step 8) กับทุกงานตั้งแต่นี้ไป",
+        relatedDocs: ["BLUEPRINT.md §24.10", "Mission 01 - QA Review Standard.dc.html"],
+        verificationStatus: "Verified",
+        verificationReason: "Framework ถูกสร้าง อนุมัติโดย CEO ผ่านสายอนุมัติ Product Owner→CEO, ขยายเพิ่มเติมตาม Product Owner Review รอบ 2 แล้ว — pilot-tested กับ 4+10 กรณีจริง/สมมติ ยังไม่ Verified เต็มที่เพราะยังไม่ได้ใช้กับ Mission ใหม่จริง" },
       { icon: "🚀", name: "Deployment (GitHub → Firebase Hosting)", statusLabel: "พร้อม", pct: "90%", barColor: "oklch(55% 0.13 150)",
         features: ["อัปโหลดไฟล์ผ่าน GitHub เว็บ (ไม่ใช้ CLI/local git)", "Firebase Hosting auto-deploy สำหรับ static", "Firebase Functions deploy ผ่าน Codespaces terminal"],
         goal: "เจ้าของเว็บ deploy การเปลี่ยนแปลงได้เองโดยไม่ต้องพึ่งเครื่องมือ dev",
@@ -518,13 +519,13 @@ class Component extends DCLogic {
     const overall = Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length);
 
     const blockers = [
-      { icon: "✅", title: "QA / Review Standard",
+      { icon: "🏆", title: "QA / Review Standard — Mission 01 RELEASED v1.1 (RESOLVED)",
         problem: "ยังไม่มีคำนิยามที่เป็นทางการของ PASS/HOLD/NOT PASS",
-        why: "หากไม่มีมาตรฐาน การประกาศ PASS อาจไม่สม่ำเสมอระหว่าง Step ต่างๆ เสี่ยงต่อการเปิด Production ด้วยเกณฑ์ที่ไม่ชัดเจน",
-        checked: "PASS/HOLD ใช้งานจริงมาหลาย Sprint (เชิงปฏิบัติ)",
-        notChecked: "ไม่มีเอกสารที่เป็นทางการกำหนดเกณฑ์แต่ละสถานะ",
-        decisionMaker: "Product Owner",
-        steps: ["Product Owner ร่างเกณฑ์ PASS/HOLD/NOT PASS", "ระบุลงใน BLUEPRINT.md", "อ้างอิงกลับใน CEO Guide KM-14"],
+        why: "หากไม่มีมาตรฐาน การประกาศ PASS อาจไม่สม่ำเสมอระหว่าง Step ต่างๆ",
+        checked: "Mission 01 เสร็จสมบูรณ์ 12/12 Steps — Framework เต็มรูปแบบใน BLUEPRINT.md §24.10",
+        notChecked: "Pilot Test ยังใช้กรณีย้อนหลัง/สมมติเท่านั้น — ยังไม่ทดสอบกับ Mission ใหม่จริง",
+        decisionMaker: "CEO (อนุมัติแล้ว)",
+        steps: ["✅ Product Owner review Mission 01 Step 1-2", "✅ CEO สั่งดำเนินการ Step 3-12 ต่อเนื่อง", "✅ BLUEPRINT.md §24.10 เผยแพร่แล้ว", "✅ Dashboard ทั้งหมดเชื่อมโยงแล้ว"],
         evidenceNeeded: "เอกสารคำนิยามที่เผยแพร่แล้ว",
         closeCondition: "BLUEPRINT.md มีหัวข้อคำนิยาม PASS/HOLD/NOT PASS อย่างเป็นทางการ และ KM-14 อัปเดตสถานะเป็น Working",
         impact: "การประกาศ PASS อาจไม่สม่ำเสมอระหว่าง Step หากไม่มีเกณฑ์ทางการ",
@@ -532,16 +533,14 @@ class Component extends DCLogic {
     ];
 
     const priorityMustDo = [
-      { name: "เขียนคำนิยาม QA / Review Standard อย่างเป็นทางการ", status: "Not Started — Product Owner Action Required",
-        reason: "เป็น Launch Blocker เดียวที่เหลืออยู่ หลังจาก Firestore Security Rules ยืนยันว่า deploy แล้วจริง",
-        owner: "Product Owner",
-        dependency: "ไม่มี",
-        expectedResult: "BLUEPRINT.md มีเกณฑ์ PASS/HOLD/NOT PASS ที่เป็นทางการ",
-        completionCondition: "เอกสารเผยแพร่แล้ว",
-        priority: "Medium",
-        expectedImpact: "ปลดล็อก Launch Blocker เดียวที่เหลืออยู่" },
     ];
     const priorityDone = [
+      { name: "QA / Review Standard Framework — Mission 01 v1.1 (12/12 Steps + Product Owner improvement review)", status: "Released",
+        reason: "Launch Blocker เดียวที่เหลืออยู่ได้รับการปิดแล้ว — Readiness 40%→90% ตามสูตร Readiness Formula ใหม่",
+        owner: "Product Owner + CEO",
+        dependency: "ไม่มี",
+        priority: "N/A",
+        expectedImpact: "ปลด Launch Blocker เดียวที่เหลืออยู่ก่อนหน้านี้" },
       { name: "Firestore Security Rules (role-based + deny-by-default) verify & deploy", status: "Verified — Deployed",
         reason: "ยืนยันจากไฟล์ firestore.rules จริงในโปรเจกต์ว่า deny-by-default และมี listing-status write restriction ใช้งานจริงแล้ว ไม่ใช่ temporary open rules อีกต่อไป",
         owner: "CEO + Lead Developer",

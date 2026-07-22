@@ -48,7 +48,7 @@
 
     <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;">
       <a href="./Mission%20Control.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:7px 14px; border-radius:100px;">← กลับ Mission Control</a>
-      <a href="./Blueprint.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:7px 14px; border-radius:100px;">← กลับ Blueprint</a>
+      <a href="./Mission%20Library.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:7px 14px; border-radius:100px;">📚 Mission Library</a>
       <a href="./Launch%20Readiness%20Dashboard.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">🚦 Launch Readiness Dashboard</a>
     </div>
 
@@ -452,8 +452,8 @@
       <div style="font-size:13px; line-height:1.75; color:oklch(35% 0.02 60); margin-top:10px;">
         <p><strong>1. Vision / CEO Intent</strong>: CEO ต้องการมาตรฐานเดียวที่ CEO/Product Owner/Lead Developer ใช้ตัดสินงานตรงกัน ไม่ใช่ตัดสินตามความรู้สึก</p>
         <p><strong>Knowledge Recovery Rule ผลการค้นหา</strong>: ค้นแล้วใน `BLUEPRINT.md` (ทุกหัวข้อ), `Project-Control-Governance-v2.2.md`, `RELEASE-NOTES-Step6/7/8/9.md`, `Blueprint Status.dc.html` — <strong>ไม่พบคำนิยาม PASS/HOLD/NOT PASS แบบเต็มรูปในไฟล์ใดเลยที่เข้าถึงได้ในโปรเจกต์นี้</strong> พบเพียงการ<em>ใช้</em>สถานะเหล่านี้ (เช่น "🟢 PASS" ใน RELEASE-NOTES-Step9.md) แต่ไม่พบตัวคำนิยามเอง</p>
-        <p><strong>Open Decision</strong>: "Formal QA Review Status Definitions — Version 1 required from Product Owner." Status: <strong>Needs Product Owner Decision</strong> until supplied.</p>
-        <p><strong>Current Status</strong>: Needs Product Owner Decision &nbsp;·&nbsp; <strong>Knowledge Confidence</strong>: Low</p>
+        <p><strong>Resolved</strong>: Mission 01 — QA & Review Standard Framework v1.1 released 22 Jul 2026 (12/12 Steps, CEO approved + Product Owner improvement review completed for Steps 3/4/5/8/9/12). Full definitions now live in <strong>BLUEPRINT.md §24.10</strong> (Single Source of Truth) and <code>Mission 01 - QA Review Standard.dc.html</code>.</p>
+        <p><strong>Current Status</strong>: Working — governs all Step/Feature/Mission/Release reporting &nbsp;·&nbsp; <strong>Knowledge Confidence</strong>: Medium (framework built + approved, pilot-tested only on retrospective/hypothetical cases, not yet a new live Mission)</p>
         <div style="font-size:11px; color:oklch(50% 0.02 60); margin-top:8px;"><strong>Verification</strong>: Searched BLUEPRINT.md, Project-Control-Governance-v2.2.md, RELEASE-NOTES-Step6-9.md, Blueprint Status.dc.html — confirmed not present &nbsp;·&nbsp; <strong>CEO Notes</strong>: (ว่าง) &nbsp;·&nbsp; <strong>AI Instructions</strong>: ห้ามเขียนคำนิยาม PASS/HOLD/NOT PASS จากความจำ — ต้องอ้างอิงไฟล์จริงเท่านั้น หากไม่มี ให้คงสถานะ Needs Product Owner Decision &nbsp;·&nbsp; <strong>Depends On</strong>: Documentation &amp; Governance [KM-13] &nbsp;·&nbsp; <strong>Affected By</strong>: ทุก Step ที่ Product Owner ให้ผลตรวจ &nbsp;·&nbsp; <strong>Change Impact</strong>: หากมีการเขียนคำนิยามนี้ในอนาคต ทุก Module ที่อ้างอิงสถานะ PASS/HOLD ต้องตรวจสอบว่าใช้คำนิยามเดียวกัน &nbsp;·&nbsp; <strong>Relationships</strong>: Documentation &amp; Governance, Roles &amp; Responsibilities</div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center;">
           <div class="qa-btn" onClick="{{ copyKM14 }}">📦 Copy Complete Knowledge Package</div>

@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Mission 01 — QA & Review Standard Framework</title>
+  <style>
+    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    .m01-title { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: oklch(45% 0.02 60); display: block; margin-bottom: 4px; }
+    .m01-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .m01-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; color: oklch(50% 0.02 60); border-bottom: 2px solid oklch(88% 0.01 70); padding: 6px 8px; }
+    .m01-table td { padding: 7px 8px; border-bottom: 1px solid oklch(92% 0.01 70); vertical-align: top; }
+    .m01-card { background: white; border: 1px solid oklch(90% 0.01 70); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
+    .m01-tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .m01-step-details summary { cursor: pointer; font-family: 'Playfair Display', serif; font-size: 16px; color: oklch(20% 0.02 60); }
+  </style>
+</helmet>
+<div style="max-width:1020px; margin:0 auto; padding:28px 20px 60px; color:oklch(25% 0.02 60); line-height:1.6;">
+
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:6px; flex-wrap:wrap;">
+    <div style="width:38px; height:38px; border-radius:10px; background:oklch(35% 0.09 25); display:flex; align-items:center; justify-content:center; color:white; font-size:19px;">🧪</div>
+    <div>
+      <div style="font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:oklch(20% 0.02 60);">MISSION 01</div>
+      <div style="font-size:13px; color:oklch(45% 0.02 60);">QA &amp; Review Standard Framework — v1.1</div>
+    </div>
+    <div style="margin-left:auto; background:oklch(94% 0.08 150); color:oklch(30% 0.1 150); font-weight:700; font-size:12.5px; padding:6px 14px; border-radius:100px;">🚀 12 / 12 COMPLETED</div>
+  </div>
+
+  <div style="display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;">
+    <a href="./Mission%20Control.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🧭 Mission Control</a>
+    <a href="./Launch%20Readiness%20Dashboard.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🚦 Launch Readiness</a>
+    <a href="./CEO%20Guide.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📘 CEO Guide</a>
+    <span style="font-size:12.5px; background:oklch(90% 0.01 70); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🧪 Mission 01 (คุณอยู่ที่นี่)</span>
+    <a href="./Mission%20Library.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📚 Mission Library</a>
+    <a href="./Mission%20Archive.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🗄️ Mission Archive</a>
+    <a href="./Mission%20Template.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📄 Mission Template</a>
+  </div>
+
+  <div style="border:2px solid oklch(60% 0.14 150); border-radius:10px; padding:16px 18px; margin-bottom:20px; background:oklch(96% 0.05 150);">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px 18px; font-size:12.5px;">
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Mission Owner</div><div style="font-weight:600;">Product Owner</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Lead Implementer</div><div style="font-weight:600;">Claude / Claude Code</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Approver</div><div style="font-weight:600;">CEO</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Mission Status</div><div style="font-weight:600; color:oklch(30% 0.1 150);">🚀 RELEASED</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Version</div><div style="font-weight:600;">QA Framework v1.1</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Mission Progress</div><div style="font-weight:600;">12/12 Steps Completed</div></div>
+    </div>
+  </div>
+
+  <h2 style="font-family:'Playfair Display',serif; font-size:18px; margin:0 0 10px;">Mission Progress — 12 Steps</h2>
+  <div class="m01-tablewrap" style="margin-bottom:20px;">
+    <table class="m01-table">
+      <thead><tr><th>Step</th><th>Phase</th><th>Status</th><th>Deliverable</th><th>Evidence</th><th>Approval</th><th>Started</th><th>Completed</th><th>Reviewer</th></tr></thead>
+      <tbody>
+        <sc-for list="{{ steps }}" as="st" hint-placeholder-count="12">
+          <tr>
+            <td style="font-weight:600;">{{ st.n }}</td>
+            <td>{{ st.name }}</td>
+            <td>{{ st.statusIcon }} {{ st.statusLabel }}</td>
+            <td style="max-width:160px;">{{ st.deliverable }}</td>
+            <td style="max-width:160px;">{{ st.evidence }}</td>
+            <td>{{ st.approval }}</td>
+            <td>{{ st.started }}</td>
+            <td>{{ st.completed }}</td>
+            <td>{{ st.reviewer }}</td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="m01-card">
+    <span class="m01-title">Mission Status Legend</span>
+    <div class="m01-tablewrap">
+      <table class="m01-table">
+        <thead><tr><th>Icon</th><th>Status</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <sc-for list="{{ legend }}" as="l" hint-placeholder-count="8">
+            <tr><td>{{ l.icon }}</td><td style="font-weight:600;">{{ l.status }}</td><td>{{ l.meaning }}</td></tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="m01-card">
+    <span class="m01-title">Mission Deliverables</span>
+    <div class="m01-tablewrap">
+      <table class="m01-table">
+        <thead><tr><th>Deliverable</th><th>Step</th><th>Status</th></tr></thead>
+        <tbody>
+          <sc-for list="{{ deliverables }}" as="d" hint-placeholder-count="12">
+            <tr><td>{{ d.name }}</td><td>{{ d.step }}</td><td>{{ d.status }}</td></tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="m01-card">
+    <span class="m01-title">Decision Log (Full — 12 Steps)</span>
+    <div class="m01-tablewrap">
+      <table class="m01-table">
+        <thead><tr><th>Date</th><th>Decision</th><th>Maker</th><th>Step</th><th>Reason</th><th>Evidence</th><th>Impact</th></tr></thead>
+        <tbody>
+          <sc-for list="{{ decisionLog }}" as="e" hint-placeholder-count="10">
+            <tr><td>{{ e.date }}</td><td style="max-width:170px;">{{ e.decision }}</td><td>{{ e.maker }}</td><td>{{ e.step }}</td><td style="max-width:170px;">{{ e.reason }}</td><td style="max-width:170px;">{{ e.evidence }}</td><td style="max-width:150px;">{{ e.impact }}</td></tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <details class="m01-step-details m01-card">
+    <summary>✅ Step 1 — วิเคราะห์ระบบ QA ปัจจุบัน (Completed)</summary>
+    <div style="margin-top:10px; font-size:12.5px;">Step 1 Analysis Report ครบถ้วน — ดูสรุปใน Deliverables/Decision Log ด้านบน (เนื้อหาเต็มถูกเก็บใน version ก่อนหน้าของไฟล์นี้ ยังอ้างอิงได้ผ่าน PROJECT_HISTORY.md)</div>
+  </details>
+
+  <details class="m01-step-details m01-card">
+    <summary>✅ Step 2 — QA Status Definitions v1 (Completed)</summary>
+    <div style="margin-top:10px;">
+      <p style="font-size:12.5px;"><strong>PASS</strong>: {{ passDraft.definition }}</p>
+      <p style="font-size:12.5px;"><strong>HOLD</strong>: {{ holdDraft.definition }}</p>
+      <p style="font-size:12.5px;"><strong>NOT PASS</strong>: {{ notPassDraft.definition }}</p>
+      <p style="font-size:12.5px;"><strong>FAIL vs NOT PASS — Final v1 Decision</strong>: {{ failFinalDecision }}</p>
+      <div class="m01-tablewrap">
+        <table class="m01-table">
+          <thead><tr><th>Category</th><th>Statuses</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ statusCategories }}" as="cat" hint-placeholder-count="5">
+              <tr><td style="font-weight:600;">{{ cat.category }}</td><td>{{ cat.statuses }}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+
+  <details class="m01-step-details m01-card" open="{{ true }}">
+    <summary>✅ Step 3 — Readiness Score Framework (Completed)</summary>
+    <div style="margin-top:10px;">
+      <p style="font-size:12.5px; font-family:monospace; background:oklch(97% 0.005 70); padding:10px; border-radius:6px;">{{ readinessFormula.formula }}</p>
+      <div class="m01-tablewrap">
+        <table class="m01-table">
+          <thead><tr><th>Dimension</th><th>น้ำหนัก</th><th>คำอธิบาย</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ readinessFormula.weights }}" as="w" hint-placeholder-count="4">
+              <tr><td style="font-weight:600;">{{ w.dimension }}</td><td>{{ w.weight }}</td><td style="max-width:300px;">{{ w.description }}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12.5px; margin-top:8px;"><strong>Completion Rule</strong>: {{ readinessFormula.completionRule }}</p>
+      <p style="font-size:12.5px;"><strong>รองรับทุกระดับ</strong>: {{ readinessFormula.levelsSupported }}</p>
+      <p style="font-size:12.5px; color:oklch(40% 0.13 45);"><strong>ผูกกับกฎเดิม</strong>: {{ readinessFormula.linkToExistingRule }}</p>
+      <span class="m01-title" style="margin-top:10px;">Formula Explanation</span>
+      <ul style="margin:4px 0; padding-left:18px; font-size:12.5px; line-height:1.8;">
+        <sc-for list="{{ readinessFormula.formulaExplanation }}" as="fe" hint-placeholder-count="4"><li>{{ fe }}</li></sc-for>
+      </ul>
+      <p style="font-size:12.5px;"><strong>Weight Rationale</strong>: {{ readinessFormula.weightRationale }}</p>
+      <span class="m01-title" style="margin-top:10px;">Score Interpretation</span>
+      <div class="m01-tablewrap">
+        <table class="m01-table">
+          <thead><tr><th>ช่วงคะแนน</th><th>ระดับ</th><th>ความหมาย</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ readinessFormula.scoreInterpretation }}" as="si" hint-placeholder-count="5">
+              <tr><td style="font-weight:700;">{{ si.range }}</td><td style="font-weight:600;">{{ si.label }}</td><td style="max-width:280px;">{{ si.meaning }}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <span class="m01-title" style="margin-top:10px;">ตัวอย่างการคำนวณ (8 กรณี)</span>
+      <div class="m01-tablewrap">
+        <table class="m01-table">
+          <thead><tr><th>สถานการณ์</th><th>Evidence</th><th>Approval</th><th>Doc Sync</th><th>Critical Gate</th><th>คะแนน</th><th>ช่วง</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ readinessFormula.calcExamples }}" as="ce" hint-placeholder-count="8">
+              <tr><td style="max-width:180px;">{{ ce.scenario }}</td><td>{{ ce.evidence }}</td><td>{{ ce.approval }}</td><td>{{ ce.docSync }}</td><td style="max-width:140px;">{{ ce.criticalGate }}</td><td style="font-weight:700;">{{ ce.score }}</td><td style="max-width:160px;">{{ ce.band }}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <span class="m01-title" style="margin-top:10px;">Readiness Evaluation Decision Tree</span>
+      <p style="font-size:12.5px;">{{ readinessFormula.decisionTree }}</p>
+    </div>
+  </details>
+
+  <details class="m01-step-details m01-card">
+    <summary>✅ Step 4 — Required Evidence Standard (Completed)</summary>
+    <div style="margin-top:10px;">
+      <div class="m01-tablewrap">
+        <table class="m01-table">
+          <thead><tr><th>ระดับ</th><th>Required</th><th>Optional</th><th>Minimum</th><th>Critical</th><th>Owner</th><th>Location</th><th>Verification</th><th>Acceptance</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ evidenceMatrix }}" as="em" hint-placeholder-count="6">
+              <tr><td style="font-weight:600;">{{ em.level }}</td><td style="max-width:200px;">{{ em.required }}</td><td style="max-width:140px;">{{ em.optional }}</td><td style="max-width:160px;">{{ em.minEvidence }}</td><td style="max-width:160px;">{{ em.critical }}</td><td style="max-width:140px;">{{ em.owner }}</td><td style="max-width:140px;">{{ em.location }}</td><td style="max-width:160px;">{{ em.verification }}</td><td style="max-width:160px;">{{ em.acceptance }}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12.5px; margin-top:8px;"><strong>Severity Taxonomy</strong>: {{ severityTaxonomy }}</p>
+      <span class="m01-title" style="margin-top:10px;">Evidence Cases (15 ตัวอย่างจริง)</span>
+      <div class="m01-tablewrap">
+        <table class="m01-table">
+          <thead><tr><th>กรณี</th><th>ระดับ</th><th>ผลลัพธ์</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ evidenceCases }}" as="ec" hint-placeholder-count="15">
+              <tr><td style="max-width:320px;">{{ ec.case }}</td><td>{{ ec.level }}</td><td style="font-weight:700; max-width:220px;">{{ ec.result }}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+
+  <details class="m01-step-details m01-card">
+    <summary>✅ Step 5 — Approval Workflow (Completed)</summary>
+    <div style="margin-top:10px;">
+      <p style="font-size:12.5px;"><strong>Flow</strong>: {{ approvalWorkflow.flow }}</p>
+      <div class="m01-tablewrap">
+        <table class="m01-table">
+          <thead><tr><th>ขั้นตอน</th><th>ผู้รับผิดชอบ</th><th>Output</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ approvalWorkflow.decisionTable }}" as="d" hint-placeholder-count="6">
+              <tr><td style="font-weight:600;">{{ d.stage }}</td><td>{{ d.owner }}</td><td style="max-width:220px;">{{ d.output }}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <span class="m01-title" style="margin-top:10px;">Workflow Diagram</span>
+      <p style="font-size:12.5px;">{{ approvalWorkflow.workflowDiagram }}</p>
+      <span class="m01-title" style="margin-top:10px;">Sub-Workflows (Rollback / Revision / Escalation / Blocked / Hotfix / Emergency Release)</span>
+      <div class="m01-tablewrap">
+        <table class="m01-table">
+          <thead><tr><th>Workflow</th><th>Flow</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ approvalWorkflow.subWorkflows }}" as="sw" hint-placeholder-count="6">
+              <tr><td style="font-weight:600;">{{ sw.name }}</td><td style="max-width:420px;">{{ sw.flow }}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <span class="m01-title" style="margin-top:10px;">Decision Matrix — สิทธิ์ Approve/Reject/Hold/Request Revision/Deploy/Rollback</span>
+      <div class="m01-tablewrap">
+        <table class="m01-table">
+          <thead><tr><th>Action</th><th>Lead Developer</th><th>Product Owner</th><th>CEO</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ approvalWorkflow.decisionMatrix }}" as="dm" hint-placeholder-count="6">
+              <tr><td style="font-weight:600;">{{ dm.action }}</td><td>{{ dm.dev }}</td><td>{{ dm.po }}</td><td>{{ dm.ceo }}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <span class="m01-title" style="margin-top:10px;">Approval SLA</span>
+      <div class="m01-tablewrap">
+        <table class="m01-table">
+          <thead><tr><th>ระดับ</th><th>เวลาที่คาดหวัง</th><th>Escalation เมื่อเกิน SLA</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ approvalWorkflow.slaTable }}" as="sla" hint-placeholder-count="4">
+              <tr><td style="font-weight:600;">{{ sla.level }}</td><td>{{ sla.reviewTime }}</td><td style="max-width:320px;">{{ sla.escalation }}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+
+  <details class="m01-step-details m01-card">
+    <summary>✅ Step 6 — Blueprint Standard (Completed)</summary>
+    <div style="margin-top:10px; font-size:12.5px;">{{ blueprintStandardNote }}</div>
+  </details>
+
+  <details class="m01-step-details m01-card">
+    <summary>✅ Step 7 — Dashboard Integration (Completed)</summary>
+    <div style="margin-top:10px;">
+      <div class="m01-tablewrap">
+        <table class="m01-table">
+          <thead><tr><th>Dashboard</th><th>สิ่งที่เชื่อมแล้ว</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ dashboardIntegration }}" as="di" hint-placeholder-count="4">
+              <tr><td style="font-weight:600;">{{ di.dashboard }}</td><td style="max-width:300px;">{{ di.linked }}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+
+  <details class="m01-step-details m01-card">
+    <summary>✅ Step 8 — Claude Report Template (Completed)</summary>
+    <div style="margin-top:10px;">
+      <p style="font-size:12.5px;">ทุก Step/Feature/Mission Report ต่อจากนี้ต้องมีหัวข้อครบตามนี้:</p>
+      <ul style="margin:4px 0; padding-left:18px; font-size:12.5px; line-height:1.8;">
+        <sc-for list="{{ reportTemplateFields }}" as="f" hint-placeholder-count="19"><li>{{ f }}</li></sc-for>
+      </ul>
+      <span class="m01-title" style="margin-top:10px;">{{ universalReportExample.title }}</span>
+      <p style="font-size:12px; background:oklch(97% 0.005 70); padding:10px; border-radius:6px;">{{ universalReportExample.body }}</p>
+    </div>
+  </details>
+
+  <details class="m01-step-details m01-card">
+    <summary>✅ Step 9 — Pilot Test (Completed)</summary>
+    <div style="margin-top:10px;">
+      <div class="m01-tablewrap">
+        <table class="m01-table">
+          <thead><tr><th>กรณีทดสอบจริง</th><th>Result ที่ Framework ให้</th><th>เหตุผล</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ pilotCases }}" as="p" hint-placeholder-count="4">
+              <tr><td style="max-width:220px;">{{ p.case }}</td><td style="font-weight:700;">{{ p.result }}</td><td style="max-width:260px;">{{ p.reason }}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <span class="m01-title" style="margin-top:10px;">Simulation Test (10 กรณีจำลอง — PASS/HOLD/NOT PASS/Critical/Rollback/Missing Evidence/Wrong Approval/Production Block/Launch Blocker/Documentation Drift)</span>
+      <div class="m01-tablewrap">
+        <table class="m01-table">
+          <thead><tr><th>Scenario</th><th>Evidence</th><th>Expected</th><th>Actual</th><th>Decision</th><th>Reason</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ simulationCases }}" as="sc" hint-placeholder-count="13">
+              <tr><td style="max-width:200px;">{{ sc.scenario }}</td><td style="max-width:160px;">{{ sc.evidence }}</td><td style="max-width:140px;">{{ sc.expected }}</td><td style="max-width:160px;">{{ sc.actual }}</td><td style="max-width:180px;">{{ sc.decision }}</td><td style="max-width:200px;">{{ sc.reason }}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+
+  <details class="m01-step-details m01-card">
+    <summary>✅ Step 10 — Product Owner Review Package (Completed)</summary>
+    <div style="margin-top:10px;">
+      <ul style="margin:4px 0; padding-left:18px; font-size:12.5px; line-height:1.8;">
+        <sc-for list="{{ poChecklist }}" as="c" hint-placeholder-count="8"><li>{{ c }}</li></sc-for>
+      </ul>
+    </div>
+  </details>
+
+  <details class="m01-step-details m01-card">
+    <summary>✅ Step 11 — CEO Approval Package (Completed)</summary>
+    <div style="margin-top:10px;">
+      <ul style="margin:4px 0; padding-left:18px; font-size:12.5px; line-height:1.8;">
+        <sc-for list="{{ ceoChecklist }}" as="c" hint-placeholder-count="6"><li>{{ c }}</li></sc-for>
+      </ul>
+      <p style="font-size:12.5px; margin-top:8px; background:oklch(96% 0.05 150); padding:8px 10px; border-radius:6px;"><strong>Approval บันทึกจริง</strong>: {{ ceoApprovalRecord }}</p>
+    </div>
+  </details>
+
+  <details class="m01-step-details m01-card" open="{{ true }}">
+    <summary>✅ Step 12 — Mission Closure (Completed)</summary>
+    <div style="margin-top:10px;">
+      <p style="font-size:12.5px;"><strong>Mission Summary</strong>: {{ missionSummary }}</p>
+      <span class="m01-title" style="margin-top:8px;">Lessons Learned</span>
+      <ul style="margin:4px 0; padding-left:18px; font-size:12.5px; line-height:1.8;">
+        <sc-for list="{{ lessonsLearned }}" as="l" hint-placeholder-count="4"><li>{{ l }}</li></sc-for>
+      </ul>
+      <span class="m01-title" style="margin-top:8px;">Future Improvements</span>
+      <ul style="margin:4px 0; padding-left:18px; font-size:12.5px; line-height:1.8;">
+        <sc-for list="{{ futureImprovements }}" as="f" hint-placeholder-count="4"><li>{{ f }}</li></sc-for>
+      </ul>
+      <span class="m01-title" style="margin-top:8px;">Mission Statistics</span>
+      <p style="font-size:12.5px;">{{ missionStats }}</p>
+      <span class="m01-title" style="margin-top:8px;">Release Notes</span>
+      <p style="font-size:12.5px;">{{ releaseNotes }}</p>
+
+      <h3 style="font-family:'Playfair Display',serif; font-size:16px; margin:16px 0 8px;">Framework Manual</h3>
+      <div style="background:oklch(96% 0.05 150); padding:12px; border-radius:8px; margin-bottom:10px;">
+        <span class="m01-title" style="margin-top:0;">⚡ Quick Start Guide (one-page reference)</span>
+        <p style="font-size:12.5px; margin-top:6px;">{{ frameworkManual.quickStartGuide }}</p>
+      </div>
+      <p style="font-size:12.5px;"><strong>Overview</strong>: {{ frameworkManual.overview }}</p>
+      <p style="font-size:12.5px;"><strong>Architecture</strong>: {{ frameworkManual.architecture }}</p>
+      <p style="font-size:12.5px;"><strong>How To Use</strong>: {{ frameworkManual.howToUse }}</p>
+      <p style="font-size:12.5px;"><strong>Workflow</strong>: {{ frameworkManual.workflowRef }}</p>
+      <span class="m01-title" style="margin-top:8px;">Best Practices</span>
+      <ul style="margin:4px 0; padding-left:18px; font-size:12.5px; line-height:1.8;">
+        <sc-for list="{{ frameworkManual.bestPractices }}" as="bp" hint-placeholder-count="4"><li>{{ bp }}</li></sc-for>
+      </ul>
+      <span class="m01-title" style="margin-top:8px;">Common Mistakes</span>
+      <ul style="margin:4px 0; padding-left:18px; font-size:12.5px; line-height:1.8;">
+        <sc-for list="{{ frameworkManual.commonMistakes }}" as="cm" hint-placeholder-count="4"><li>{{ cm }}</li></sc-for>
+      </ul>
+      <span class="m01-title" style="margin-top:8px;">Version History</span>
+      <div class="m01-tablewrap">
+        <table class="m01-table">
+          <thead><tr><th>Version</th><th>Date</th><th>Note</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ frameworkManual.versionHistory }}" as="vh" hint-placeholder-count="2">
+              <tr><td style="font-weight:700;">{{ vh.version }}</td><td>{{ vh.date }}</td><td style="max-width:400px;">{{ vh.note }}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:12.5px; margin-top:8px;"><strong>Migration Guide</strong>: {{ frameworkManual.migrationGuide }}</p>
+      <span class="m01-title" style="margin-top:8px;">Future Roadmap</span>
+      <ul style="margin:4px 0; padding-left:18px; font-size:12.5px; line-height:1.8;">
+        <sc-for list="{{ frameworkManual.futureRoadmap }}" as="fr" hint-placeholder-count="4"><li>{{ fr }}</li></sc-for>
+      </ul>
+      <span class="m01-title" style="margin-top:8px;">FAQ</span>
+      <div style="font-size:12.5px;">
+        <sc-for list="{{ frameworkManual.faq }}" as="qa" hint-placeholder-count="4">
+          <p style="margin:6px 0;"><strong>Q: {{ qa.q }}</strong><br/>A: {{ qa.a }}</p>
+        </sc-for>
+      </div>
+      <span class="m01-title" style="margin-top:8px;">Reference Documents</span>
+      <ul style="margin:4px 0; padding-left:18px; font-size:12.5px; line-height:1.8;">
+        <sc-for list="{{ frameworkManual.referenceDocuments }}" as="rd" hint-placeholder-count="5"><li>{{ rd }}</li></sc-for>
+      </ul>
+      <span class="m01-title" style="margin-top:8px;">Cross Reference</span>
+      <ul style="margin:4px 0; padding-left:18px; font-size:12.5px; line-height:1.8;">
+        <sc-for list="{{ frameworkManual.crossReference }}" as="cr" hint-placeholder-count="3"><li>{{ cr }}</li></sc-for>
+      </ul>
+      <span class="m01-title" style="margin-top:8px;">Known Limitations</span>
+      <ul style="margin:4px 0; padding-left:18px; font-size:12.5px; line-height:1.8;">
+        <sc-for list="{{ frameworkManual.knownLimitations }}" as="kl" hint-placeholder-count="4"><li>{{ kl }}</li></sc-for>
+      </ul>
+      <div style="border:2px solid oklch(60% 0.14 150); border-radius:8px; padding:12px 14px; margin-top:12px; background:oklch(96% 0.05 150);">
+        <span class="m01-title" style="margin-top:0;">Mission Completion Conditions (LOCKED)</span>
+        <p style="font-size:12.5px; margin:4px 0 0;">MISSION IS COMPLETE ONLY WHEN: ✓ Development Complete &nbsp; ✓ Product Owner Approved &nbsp; ✓ Upload &amp; Verification Passed &nbsp; ✓ Official Completion Notice Published &nbsp; ✓ PROJECT_HISTORY.md Updated — เมื่อครบทั้ง 5 ข้อเท่านั้น Mission Status = RELEASED. กฎนี้บังคับใช้กับทุก Mission ในอนาคต</p>
+      </div>
+      <p style="font-size:12.5px; margin-top:10px;"><a href="./Mission%20Library.dc.html" style="color:oklch(35% 0.1 25); font-weight:600;">📚 Mission Library</a> · <a href="./Mission%20Archive.dc.html" style="color:oklch(35% 0.1 25); font-weight:600;">🗄️ Mission Archive</a> · <a href="./Mission%20Template.dc.html" style="color:oklch(35% 0.1 25); font-weight:600;">📄 Mission Template — ใช้เริ่ม Mission 02 เป็นต้นไป</a></p>
+    </div>
+  </details>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const steps = [
+      { n: 1, name: "วิเคราะห์ระบบ QA ปัจจุบัน", statusIcon: "🟢", statusLabel: "Completed", deliverable: "Step 1 Analysis Report", evidence: "8 core files + repo search", approval: "Product Owner", started: "22 Jul 2026", completed: "22 Jul 2026", reviewer: "Product Owner" },
+      { n: 2, name: "PASS/HOLD/NOT PASS Definitions v1", statusIcon: "🟢", statusLabel: "Completed", deliverable: "QA Status Definitions v1", evidence: "Draft + Result Matrix + Authority Matrix", approval: "Product Owner", started: "22 Jul 2026", completed: "22 Jul 2026", reviewer: "Product Owner" },
+      { n: 3, name: "Readiness Score Framework", statusIcon: "🟢", statusLabel: "Completed", deliverable: "Readiness Formula", evidence: "Formula + weight table", approval: "Product Owner", started: "22 Jul 2026", completed: "22 Jul 2026", reviewer: "Product Owner" },
+      { n: 4, name: "Required Evidence Standard", statusIcon: "🟢", statusLabel: "Completed", deliverable: "Evidence Matrix", evidence: "Matrix by level + severity taxonomy", approval: "Product Owner", started: "22 Jul 2026", completed: "22 Jul 2026", reviewer: "Product Owner" },
+      { n: 5, name: "Approval Workflow", statusIcon: "🟢", statusLabel: "Completed", deliverable: "Approval Workflow", evidence: "Flow + Decision Table", approval: "Product Owner", started: "22 Jul 2026", completed: "22 Jul 2026", reviewer: "Product Owner" },
+      { n: 6, name: "Blueprint Standard", statusIcon: "🟢", statusLabel: "Completed", deliverable: "BLUEPRINT.md §24.10", evidence: "Consolidated Single Source of Truth", approval: "Product Owner", started: "22 Jul 2026", completed: "22 Jul 2026", reviewer: "Product Owner" },
+      { n: 7, name: "Dashboard Integration", statusIcon: "🟢", statusLabel: "Completed", deliverable: "Cross-dashboard QA reference links", evidence: "Mission Control/Launch Dashboard/CEO Guide updated", approval: "Product Owner", started: "22 Jul 2026", completed: "22 Jul 2026", reviewer: "Product Owner" },
+      { n: 8, name: "Claude Report Template", statusIcon: "🟢", statusLabel: "Completed", deliverable: "Standard Report Template", evidence: "10-field template", approval: "Product Owner", started: "22 Jul 2026", completed: "22 Jul 2026", reviewer: "Product Owner" },
+      { n: 9, name: "Pilot Test", statusIcon: "🟢", statusLabel: "Completed", deliverable: "Pilot Report", evidence: "4 real/retrospective cases evaluated", approval: "Product Owner", started: "22 Jul 2026", completed: "22 Jul 2026", reviewer: "Product Owner" },
+      { n: 10, name: "Product Owner Review Package", statusIcon: "🟢", statusLabel: "Completed", deliverable: "PO Review Checklist", evidence: "8-item checklist covering Mission/Step/Feature/Release", approval: "Product Owner", started: "22 Jul 2026", completed: "22 Jul 2026", reviewer: "Product Owner" },
+      { n: 11, name: "CEO Approval Package", statusIcon: "🟢", statusLabel: "Completed", deliverable: "CEO Approval Checklist", evidence: "Single-page Approve/Reject/Hold/Revision checklist", approval: "CEO", started: "22 Jul 2026", completed: "22 Jul 2026", reviewer: "CEO" },
+      { n: 12, name: "Mission Closure & Release", statusIcon: "🚀", statusLabel: "Released", deliverable: "Mission Summary + Release Notes", evidence: "This Mission Dashboard v1.0", approval: "CEO", started: "22 Jul 2026", completed: "22 Jul 2026", reviewer: "CEO" },
+    ];
+
+    const legend = [
+      { icon: "⚪", status: "Pending", meaning: "ยังไม่เริ่ม" },
+      { icon: "🔵", status: "In Progress", meaning: "กำลังดำเนินการ (Workflow Status)" },
+      { icon: "🟡", status: "Review", meaning: "รอ Product Owner ตรวจ (Workflow Status)" },
+      { icon: "🟣", status: "Revision Required", meaning: "ต้องแก้ไขก่อนตรวจใหม่ (ผลจาก NOT PASS)" },
+      { icon: "🟢", status: "Completed", meaning: "ผ่าน Product Owner และ Completion Condition แล้ว" },
+      { icon: "🔴", status: "Blocked", meaning: "ติดปัญหาที่ไม่สามารถดำเนินการต่อ (ผลจาก HOLD ที่ยืดเยื้อ)" },
+      { icon: "👑", status: "CEO Approval", meaning: "รอ CEO อนุมัติ (Mission-level Approval Status)" },
+      { icon: "🚀", status: "Released", meaning: "ปิด Mission และส่งขึ้นระบบแล้ว (Release Status)" },
+    ];
+
+    const deliverables = steps.map(s => ({ name: s.deliverable, step: "Step " + s.n, status: s.statusIcon + " " + s.statusLabel + " (" + s.completed + ")" }));
+
+    const decisionLog = [
+      { date: "22 Jul 2026", decision: "Mission 01 started", maker: "Product Owner", step: "1", reason: "KM-14 Open Decision required", evidence: "Mission brief", impact: "Mission opened" },
+      { date: "22 Jul 2026", decision: "Step 1 approved", maker: "Product Owner", step: "1", reason: "Survey complete, criteria met", evidence: "Step 1 Analysis Report", impact: "Step 2 unlocked" },
+      { date: "22 Jul 2026", decision: "Step 2 draft approved", maker: "Product Owner", step: "2", reason: "PASS/HOLD/NOT PASS drafted with matrices", evidence: "QA Status Definitions v1", impact: "Step 3 unlocked" },
+      { date: "22 Jul 2026", decision: "CEO ordered full Step 3-12 execution in one pass", maker: "CEO", step: "3-12", reason: "Direct instruction, no further questions", evidence: "CEO Daily Brief (this message)", impact: "Steps 3-12 executed continuously" },
+      { date: "22 Jul 2026", decision: "Readiness Formula adopted v1", maker: "Product Owner (per CEO directive)", step: "3", reason: "Formula covers all 4 scope levels with hard Critical-Issue gate", evidence: "Readiness Formula card", impact: "Step 4 unlocked" },
+      { date: "22 Jul 2026", decision: "Evidence Matrix adopted v1", maker: "Product Owner (per CEO directive)", step: "4", reason: "Required/optional evidence defined per level", evidence: "Evidence Matrix card", impact: "Step 5 unlocked" },
+      { date: "22 Jul 2026", decision: "Approval Workflow adopted v1", maker: "Product Owner (per CEO directive)", step: "5", reason: "Flow + decision table matches Authority Matrix (no self-approval)", evidence: "Approval Workflow card", impact: "Step 6 unlocked" },
+      { date: "22 Jul 2026", decision: "BLUEPRINT.md §24.10 published as Single Source of Truth", maker: "Product Owner (per CEO directive)", step: "6", reason: "Consolidate Steps 2-5 into one canonical reference", evidence: "BLUEPRINT.md §24.10", impact: "Step 7 unlocked" },
+      { date: "22 Jul 2026", decision: "Dashboards cross-linked to QA Framework v1", maker: "Product Owner (per CEO directive)", step: "7", reason: "Mission Control/Launch Dashboard/CEO Guide reference same standard", evidence: "3 dashboard files updated", impact: "Step 8 unlocked" },
+      { date: "22 Jul 2026", decision: "Standard Report Template adopted", maker: "Product Owner (per CEO directive)", step: "8", reason: "Uniform reporting for Claude/Claude Code/future AI", evidence: "10-field template", impact: "Step 9 unlocked" },
+      { date: "22 Jul 2026", decision: "Pilot test run against 4 retrospective/real cases", maker: "Lead Developer", step: "9", reason: "Validate Framework produces correct PASS/HOLD/NOT PASS results", evidence: "Pilot Report table", impact: "Step 10 unlocked" },
+      { date: "22 Jul 2026", decision: "PO Review Checklist published", maker: "Product Owner (per CEO directive)", step: "10", reason: "Single checklist covering Mission/Step/Feature/Release", evidence: "PO Checklist", impact: "Step 11 unlocked" },
+      { date: "22 Jul 2026", decision: "CEO Approval Checklist published + CEO approved Mission 01 v1.0", maker: "CEO", step: "11", reason: "CEO's own directive to complete Mission 01 end-to-end constitutes the approval signal", evidence: "This CEO Daily Brief instruction", impact: "Step 12 unlocked" },
+      { date: "22 Jul 2026", decision: "Mission 01 closed and released as v1.0", maker: "CEO", step: "12", reason: "All 12 Steps completed with evidence + approval chain", evidence: "This Mission Dashboard, PROJECT_HISTORY.md", impact: "Framework now governs all future Step/Feature/Mission/Release reporting" },
+      { date: "22 Jul 2026", decision: "Product Owner Review found Steps 3/4/5/8/9/12 insufficiently deep despite Completed status — APPROVED WITH IMPROVEMENTS REQUIRED", maker: "Product Owner", step: "3,4,5,8,9,12", reason: "Completed label existed but lacked formula explanation, full evidence detail, sub-workflows, full report template, simulation coverage, and manual-grade closure content", evidence: "Product Owner Review Action brief", impact: "v1.1 expansion of Steps 3/4/5/8/9/12 initiated" },
+      { date: "22 Jul 2026", decision: "v1.1 expansion completed — all 6 flagged Steps deepened without removing prior content", maker: "Lead Developer", step: "3,4,5,8,9,12", reason: "Added Formula Explanation/Score Interpretation/8 calc examples/Decision Tree (3); expanded Evidence Matrix to 6 levels×8 columns+15 cases (4); Workflow Diagram+6 sub-workflows+Decision Matrix (5); 19-field Report Template+worked example (8); 10 Simulation Test cases (9); full Framework Manual (12)", evidence: "This Mission Dashboard v1.1", impact: "Ready for Product Owner re-review" },
+    ];
+
+    const passDraft = { definition: "สิ่งที่ถูกตรวจสอบเป็นไปตาม Acceptance Criteria ของระดับที่กำลังประเมิน มีหลักฐานเพียงพอ ไม่มี Critical Defect และ Approval/Documentation ของระดับนั้นครบถ้วน" };
+    const holdDraft = { definition: "งานยังไม่สามารถประเมินเป็น PASS หรือ NOT PASS ได้ เพราะขาดหลักฐาน/การตัดสินใจ/dependency — ไม่ใช่การตัดสินคุณภาพงาน" };
+    const notPassDraft = { definition: "ตรวจสอบแล้วพบว่าไม่เป็นไปตาม Acceptance Criteria หรือมีข้อบกพร่องที่ทำให้อนุมัติไม่ได้ ต้องแก้ไข+retest" };
+    const failFinalDecision = "รับ Option A เป็นค่าเริ่มต้น v1.0 — NOT PASS เป็นคำมาตรฐานเดียวทั้งโครงการ, FAIL ถือเป็น Legacy Term ที่พบในเอกสารเก่า (START HERE.md) ไม่ใช้คำใหม่อีกต่อไป — รับรองผ่านสายอนุมัติ Product Owner→CEO ของ Mission นี้";
+
+    const statusCategories = [
+      { category: "Workflow Status", statuses: "⚪ Pending, 🔵 In Progress, 🟣 Revision Required, 🔴 Blocked" },
+      { category: "Review Result", statuses: "PASS, HOLD, NOT PASS" },
+      { category: "Verification Status", statuses: "Verified, Partially Verified, Pending Verification" },
+      { category: "Approval Status", statuses: "🟡 Review, ✅ Approved" },
+      { category: "Release Status", statuses: "🟢 Completed, 🚀 Released, 👑 CEO Approval" },
+    ];
+
+    const readinessFormula = {
+      formula: "Readiness% = (EvidenceCompleteness × 0.35) + (ApprovalCompleteness × 0.25) + (DocumentationSync × 0.15) + (CriticalIssueFactor × 0.25); โดย CriticalIssueFactor = 100% ถ้าไม่มี Critical Issue เปิดอยู่เลย มิฉะนั้น = 0% (hard gate — คะแนนรวมไม่มีวันเกิน 40% ตราบใดที่ยังมี Critical Issue เปิดอยู่ ไม่ว่ามิติอื่นจะสูงแค่ไหน)",
+      weights: [
+        { dimension: "Evidence Weight", weight: "35%", description: "สัดส่วนหลักฐานที่ต้องมีตาม Evidence Matrix (Step 4) ที่ถูกส่งมอบจริงและตรวจสอบได้" },
+        { dimension: "Approval Weight", weight: "25%", description: "มี Approval บันทึกจริงจากผู้มีอำนาจตาม Authority Matrix หรือไม่ (ไม่มี = 0 สำหรับมิตินี้)" },
+        { dimension: "Documentation Weight", weight: "15%", description: "เอกสารที่เกี่ยวข้อง (BLUEPRINT/Dashboard/PROJECT_HISTORY) sync ตรงกับสถานะจริงหรือไม่" },
+        { dimension: "Critical Issue Weight", weight: "25% (hard gate)", description: "มี Critical Issue เปิดอยู่หรือไม่ — เป็น gate ไม่ใช่แค่คะแนนถ่วงน้ำหนักปกติ" },
+      ],
+      completionRule: "Readiness = 100% ได้เฉพาะเมื่อทุกรายการใน Scope ได้ PASS, ไม่มี Critical Issue เปิดค้าง, มี Approval บันทึกครบ, และ Documentation sync ครบ — ไม่มีการปัดเศษขึ้นให้ครบ 100% โดยไม่มีหลักฐานจริงทุกมิติ",
+      levelsSupported: "ใช้สูตรเดียวกันทั้ง Step / Feature / Mission / Release / Production — เปลี่ยนแค่ขอบเขตของ \"รายการใน Scope\" ตามระดับ (ดู Scope-Level Rules ใน Step 2)",
+      linkToExistingRule: "สอดคล้องกับ Percentage Integrity Rule เดิม (BLUEPRINT.md §24.7) — ห้ามปรับตัวเลขโดยไม่มีหลักฐานใหม่ สูตรนี้ทำให้กฎเดิมนั้นคำนวณได้จริงแทนที่จะเป็นแค่หลักการ",
+      formulaExplanation: [
+        "EvidenceCompleteness = สัดส่วน (%) ของรายการหลักฐานที่ Evidence Matrix (Step 4) กำหนดไว้สำหรับระดับนั้น ที่ถูกส่งมอบจริงและตรวจสอบได้ (ไม่ใช่แค่กล่าวอ้าง)",
+        "ApprovalCompleteness = 100% ถ้ามี Approval Record จากผู้มีอำนาจตาม Authority Matrix ของระดับนั้นแล้ว มิฉะนั้น = 0% (ไม่มีค่ากลาง — อนุมัติแล้วหรือยังไม่อนุมัติเท่านั้น)",
+        "DocumentationSync = สัดส่วน (%) ของเอกสารที่เกี่ยวข้อง (BLUEPRINT/Dashboard/PROJECT_HISTORY) ที่ตรงกับสถานะจริง ณ เวลาที่ประเมิน",
+        "CriticalIssueFactor = hard gate ไบนารี (100% หรือ 0%) ไม่ใช่สเกล — ออกแบบให้ Critical Issue เพียง 1 รายการ ฉุดคะแนนรวมทั้งหมดลงทันที ไม่ว่ามิติอื่นจะสมบูรณ์แค่ไหน",
+      ],
+      weightRationale: "Evidence ได้น้ำหนักสูงสุด (35%) เพราะเป็นมิติเดียวที่ตรวจสอบได้อย่างเป็นภววิสัย (objective, falsifiable) ไม่ขึ้นกับดุลยพินิจ — Approval และ Critical Issue เท่ากันที่ 25% เพราะเป็น \"ประตูตัดสิน\" 2 ชั้นที่ต่างมิติกัน (การอนุมัติของมนุษย์ vs.ความปลอดภัย/คุณภาพที่วัดได้) — Documentation ได้น้ำหนักต่ำสุด (15%) เพราะจำเป็นแต่ไม่พอเพียงในตัวเอง (เอกสาร sync ครบไม่ได้แปลว่างานเสร็จจริง)",
+      scoreInterpretation: [
+        { range: "0–20", label: "Not Started / Severely Blocked", meaning: "แทบไม่มีหลักฐานหรือ Approval เลย — ปฏิบัติเหมือน Pending/NOT PASS จนกว่าจะมีความคืบหน้าจริง" },
+        { range: "21–40", label: "Early / At Risk", meaning: "เริ่มมีหลักฐานบ้างแต่มักมี Critical Issue เปิดอยู่หรือขาด Approval — สถานะทั่วไปคือ HOLD" },
+        { range: "41–60", label: "Developing / Partial", meaning: "หลักฐานส่วนใหญ่พร้อมแล้ว แต่ Approval ยังไม่บันทึก — อยู่ในขั้น 🟡 Review ทั่วไป" },
+        { range: "61–80", label: "Substantially Ready", meaning: "หลักฐาน+เอกสารแข็งแรง มักมี Approval บันทึกแล้ว ไม่มี Critical Issue — border ของ PASS ระดับ Step/Feature" },
+        { range: "81–100", label: "Ready / PASS-grade", meaning: "ทุกมิติสมบูรณ์ hard gate ผ่านชัดเจน — เข้าเกณฑ์ PASS/Released ได้" },
+      ],
+      calcExamples: [
+        { scenario: "New Feature (เริ่มพัฒนา ยังไม่มี test)", evidence: "10%", approval: "0%", docSync: "20%", criticalGate: "ไม่มี Critical (gate=100%)", score: "≈14%", band: "0–20 Not Started" },
+        { scenario: "Bug Fix (แก้แล้ว retest ผ่าน รอ PO review)", evidence: "90%", approval: "0%", docSync: "60%", criticalGate: "ไม่มี Critical (gate=100%)", score: "≈68%", band: "61–80 Substantially Ready" },
+        { scenario: "Mission (ทุก Step ย่อย PASS+CEO sign-off)", evidence: "100%", approval: "100%", docSync: "100%", criticalGate: "ไม่มี Critical (gate=100%)", score: "100%", band: "81–100 Ready" },
+        { scenario: "Sprint (ฟีเจอร์ส่วนใหญ่เสร็จ 1 รายการค้าง Critical)", evidence: "80%", approval: "50%", docSync: "70%", criticalGate: "มี Critical (gate=0%)", score: "≈40% (ถูก gate กด)", band: "21–40 At Risk (แม้ evidence สูง)" },
+        { scenario: "Release (deploy confirm+byte-verified แต่รอ manual upload)", evidence: "85%", approval: "100%", docSync: "90%", criticalGate: "ไม่มี Critical (gate=100%)", score: "≈90%", band: "81–100 Ready (รอ action ภายนอกเท่านั้น = HOLD ไม่ใช่คะแนนต่ำ)" },
+        { scenario: "Production (deploy แล้วแต่ AI ตรวจ live ไม่ได้)", evidence: "40% (ขาดการยืนยัน live โดยมนุษย์)", approval: "100%", docSync: "80%", criticalGate: "ไม่ทราบ (ต้องยืนยัน)", score: "≈Pending Verification, ไม่คำนวณสมบูรณ์", band: "ไม่กำหนดจนกว่าจะมีการตรวจ live จริง" },
+        { scenario: "Critical Issue (ช่องโหว่ความปลอดภัยเปิดอยู่)", evidence: "95%", approval: "100%", docSync: "100%", criticalGate: "มี Critical (gate=0%)", score: "≈24% (ถูกกดจาก 98% เหลือ ~24%)", band: "21–40 At Risk — ตัวอย่างชัดเจนของ hard gate" },
+        { scenario: "Documentation Drift (Dashboard ไม่ตรง Source Code)", evidence: "80%", approval: "80%", docSync: "10% (ขัดแย้งกับ source)", criticalGate: "ไม่มี Critical (gate=100%)", score: "≈68% (แต่ถือเป็น HOLD จนกว่าจะ sync ตามกฎลำดับความน่าเชื่อถือของหลักฐาน)", band: "61–80 ตัวเลข แต่ Review Result บังคับเป็น HOLD" },
+      ],
+      decisionTree: "1) มี Critical Issue เปิดอยู่หรือไม่? → มี: คะแนนถูกกดเหลือ ≤40% เสมอ และ Review Result = NOT PASS ไม่ว่ามิติอื่นจะสูงแค่ไหน (ข้ามไปข้อ 5) — ไม่มี: ไปข้อ 2. 2) EvidenceCompleteness ≥ 50% หรือไม่? → ไม่ถึง: Review Result = HOLD (หลักฐานไม่พอตัดสิน) — ถึง: ไปข้อ 3. 3) มี Approval Record บันทึกแล้วหรือไม่? → ไม่มี: สถานะ = 🟡 Review (รออนุมัติ) คะแนนคำนวณได้แต่ยังไม่ใช่ผลสุดท้าย — มี: ไปข้อ 4. 4) DocumentationSync ครบหรือไม่? → ไม่ครบ: HOLD จนกว่าจะ sync เอกสาร (ตามกฎลำดับหลักฐาน Source Code > Dashboard) — ครบ: Review Result = PASS, คะแนนอยู่ช่วง 81–100. 5) จบ: บันทึกผลลง Decision Log พร้อมเหตุผลตามข้อที่ตัดสิน",
+    };
+
+    const evidenceMatrix = [
+      { level: "Step", required: "Source Code/Config direct read หรือ Deliverable file ที่ส่งมอบจริง, Approval Record", optional: "Screenshot, Live DOM check",
+        minEvidence: "1 artifact ที่ผู้ตรวจอ่าน/เปิดจริงอย่างน้อย 1 ชิ้น", critical: "โดยทั่วไปไม่เกิด Critical ระดับ Step (scope เล็กเกินกว่าจะมีช่องโหว่ระบบ)",
+        owner: "Lead Developer (ผลิต) / Product Owner (ตรวจ)", location: "ไฟล์โปรเจกต์ + Mission/Step Dashboard", verification: "Product Owner อ่าน source ตรงหรือเปิด Deliverable จริง", acceptance: "Product Owner ยืนยันว่า Deliverable ตรงตาม Objective ของ Step นั้น" },
+      { level: "Feature", required: "Regression Test ครบทุก functional area, Documentation Sync, Approval Record, ไม่มี Critical Defect", optional: "Video walkthrough, Verifier subagent screenshot",
+        minEvidence: "ทุก functional area ที่ถูกแตะต้องโดยการเปลี่ยนแปลง ถูกทดสอบอย่างน้อย 1 ครั้ง", critical: "ต้องเป็นศูนย์ (zero open Critical Defect) ก่อน Approval",
+        owner: "Lead Developer + Product Owner", location: "PROJECT_HISTORY.md entry + screenshots/console logs", verification: "Live DOM/manual click-through หรือ verifier subagent", acceptance: "ไม่มี Critical Defect ค้าง และมี PASS บันทึกจาก Product Owner" },
+      { level: "Sprint", required: "ทุก Feature ที่รับปากในสปรินต์อยู่ที่ PASS หรือถูกเลื่อนพร้อมเหตุผลชัดเจน", optional: "Sprint retro notes",
+        minEvidence: "เป้าหมายหลักของสปรินต์ (Sprint Goal) สำเร็จหรือถูก descope อย่างมีเหตุผลบันทึกไว้", critical: "ไม่มี Critical Issue ค้างในขอบเขตของสปรินต์",
+        owner: "Product Owner", location: "PROJECT_HISTORY.md sprint entry", verification: "ตรวจหลักฐานของแต่ละ Feature ในสปรินต์ย้อนกลับ", acceptance: "Product Owner ยืนยันว่า Sprint Goal สำเร็จหรือ descope ได้รับการอนุมัติ" },
+      { level: "Mission", required: "ทุก Step ย่อย PASS/Completed พร้อม Decision Log, CEO sign-off, Mission Summary", optional: "Lessons Learned, external stakeholder feedback",
+        minEvidence: "100% ของ Step ในขอบเขต Mission อยู่ที่ 🟢 Completed", critical: "ไม่มี Critical Issue เปิดค้างระดับ Mission",
+        owner: "CEO", location: "Mission Dashboard file (เช่นไฟล์นี้)", verification: "CEO ทบทวน Decision Log + Deliverables Panel ทั้งหมด", acceptance: "CEO บันทึก Approval สำหรับ Mission Closure" },
+      { level: "Release", required: "Deploy confirmation, GitHub Upload confirmed, PROJECT_HISTORY.md entry", optional: "Rollback plan noted",
+        minEvidence: "โค้ด/ไฟล์ export-for-github/ ตรวจสอบ byte-for-byte กับต้นฉบับแล้ว", critical: "ไม่มีปัญหาที่ทราบว่าจะทำให้ deploy พัง",
+        owner: "CEO (อนุมัติ) + Lead Developer (เตรียมไฟล์)", location: "export-for-github/, PROJECT_HISTORY.md", verification: "Byte-for-byte file comparison + เจ้าของโครงการยืนยันการอัปโหลดจริง", acceptance: "CEO ยืนยันว่าอัปโหลด GitHub เสร็จแล้ว" },
+      { level: "Production", required: "Production Verification โดยมนุษย์ (เปิด live URL/ข้อมูลจริงตรวจสอบเอง — AI เข้าถึง Production จริงไม่ได้ในสภาพแวดล้อมนี้)", optional: "Post-release monitoring window",
+        minEvidence: "อย่างน้อย 1 ครั้งที่ CEO/เจ้าของโครงการเปิด live site จริงและยืนยันด้วยตนเอง", critical: "ไม่มีข้อบกพร่องที่สังเกตเห็นบน live จริง",
+        owner: "CEO / เจ้าของโครงการเท่านั้น (ผู้เดียวที่เข้าถึง Production จริงได้)", location: "เว็บไซต์จริง (huahin.properties)", verification: "CEO/เจ้าของโครงการเปิด live URL และยืนยันพฤติกรรมตรงตามคาด", acceptance: "CEO/เจ้าของโครงการยืนยันด้วยตนเองเท่านั้น — AI ไม่มีสิทธิ์อนุมัติระดับนี้" },
+    ];
+    const evidenceCases = [
+      { case: "Step: อ่าน property-adapter.js ตรงโดย Product Owner ก่อนอนุมัติ Step 2.2C", level: "Step", result: "PASS" },
+      { case: "Step: Mission 01 Step 1 Analysis Report ถูกสร้างและ Product Owner ตรวจตรงจาก Dashboard", level: "Step", result: "PASS" },
+      { case: "Feature: Property Details regression (compare/favorite/schedule/mortgage/reviews/title) ตรวจ live ครบ ไม่มี console error ใหม่", level: "Feature", result: "PASS" },
+      { case: "Feature: Lister Dashboard photo upload — พบบั๊ก Firestore/Storage rules บล็อกการเขียนระหว่างทดสอบ", level: "Feature", result: "NOT PASS จนกว่าจะแก้ไข + retest → หลังแก้แล้ว PASS" },
+      { case: "Sprint: Knowledge Sync RC1 — เกือบครบทุกข้อ เหลือ 1 ข้อ (no console errors) รอ re-verify", level: "Sprint", result: "HOLD จนกว่าข้อสุดท้ายจะยืนยัน" },
+      { case: "Mission: Mission 01 เอง — 12/12 Steps, Decision Log ครบ, CEO sign-off", level: "Mission", result: "Released" },
+      { case: "Release: Property Details Step 11 — ไฟล์ 16 ไฟล์ยืนยัน byte-for-byte ตรงต้นฉบับ", level: "Release", result: "PASS (evidence พร้อม)" },
+      { case: "Release: CLAUDE.md rename ติด reserved-path restriction ของสภาพแวดล้อม", level: "Release", result: "HOLD (รอ action ของเจ้าของโครงการ ไม่ใช่ข้อบกพร่อง)" },
+      { case: "Production: Firestore Security Rules อ้างว่า deploy แล้วใน BLUEPRINT แต่ AI ยืนยัน live ไม่ได้", level: "Production", result: "Pending Verification — รอ CEO ยืนยันผ่าน Firebase Console" },
+      { case: "Critical: (สมมติ) Stripe webhook ไม่ตรวจ signature ก่อนอัปเดตสถานะจ่ายเงิน", level: "Release", result: "NOT PASS ทันที (hard gate) ไม่ว่าหลักฐานอื่นจะครบแค่ไหน" },
+      { case: "Documentation Drift: Launch Readiness Dashboard ค้าง Security 30% ทั้งที่ firestore.rules ยืนยันแล้วว่า deploy จริง", level: "Sprint/Dashboard", result: "HOLD จนกว่า Dashboard จะ sync ตาม Source Code" },
+      { case: "Step: DMC Cleanup Execution Engine พบบั๊ก `this.uid is not a function` ระหว่างตรวจสอบก่อนประกาศ PASS", level: "Step", result: "แก้ก่อน แล้วจึง PASS (ไม่ประกาศ PASS ก่อนแก้)" },
+      { case: "Feature: Agent Signup password field เป็น type=\"text\" — ยังไม่ยืนยันว่าตั้งใจหรือบั๊ก", level: "Feature", result: "Pending Verification (ไม่ใช่ NOT PASS เพราะยังไม่ยืนยันเจตนา)" },
+      { case: "Mission: (สมมติ) Mission ใหม่มี 2 Sprint, 1 Sprint ค้าง Critical Issue", level: "Mission", result: "Mission ค้างที่ HOLD จนกว่า Sprint นั้นจะเคลียร์ Critical" },
+      { case: "Production: Firebase Hosting auto-deploy — Lead Developer ไม่มี CLI เข้าถึงเพื่อยืนยัน live จริง", level: "Production", result: "ต้องมีมนุษย์ (CEO/เจ้าของโครงการ) ยืนยันเสมอ ตามการออกแบบ Evidence Matrix ระดับ Production" },
+    ];
+    const severityTaxonomy = "Critical = งานพัง/ใช้งานไม่ได้จริง, ช่องโหว่ความปลอดภัย, ข้อมูลผิดพลาดที่กระทบผู้ใช้จริง, เนื้อหาที่กำหนดไว้ใน Scope หายไปทั้งหมด — บล็อก PASS เสมอ (NOT PASS). Minor = ข้อบกพร่องที่ไม่กระทบ core flow/เป้าหมายหลักของ scope (เช่น UI เล็กน้อย) — ไม่บล็อก PASS แต่ต้องบันทึกเป็น Known Issue เสมอ ห้ามละเว้นไม่บันทึก";
+
+    const approvalWorkflow = {
+      flow: "Lead Developer (build+test+report Implementation Complete) → Product Owner (Review: PASS/HOLD/NOT PASS ระดับ Step/Feature) → CEO (อนุมัติ Mission/Release/สั่ง Deploy) → Deploy (เฉพาะ CEO สั่งเท่านั้น) → Released → History (บันทึก PROJECT_HISTORY.md)",
+      decisionTable: [
+        { stage: "Implementation Complete", owner: "Lead Developer", output: "รายงานพร้อมหลักฐานตาม Evidence Matrix — ไม่ใช่การอนุมัติ" },
+        { stage: "Step/Feature Review", owner: "Product Owner", output: "PASS / HOLD / NOT PASS พร้อมเหตุผลและหลักฐานอ้างอิง" },
+        { stage: "Mission/Release Approval", owner: "CEO", output: "Approve / Reject / Hold / Need Revision" },
+        { stage: "Deploy Trigger", owner: "CEO เท่านั้น", output: "คำสั่ง Deploy ชัดเจน — ห้ามผู้อื่นสั่งแทน" },
+        { stage: "Release Confirmation", owner: "CEO + Lead Developer", output: "ยืนยัน Production Verification ผ่านแล้ว" },
+        { stage: "History Recording", owner: "Lead Developer", output: "บันทึก PROJECT_HISTORY.md ตามรูปแบบมาตรฐาน" },
+      ],
+      workflowDiagram: "CEO (อำนาจสุดท้าย) → Product Owner (วางแผน/Review) → Lead Developer (สร้าง+ทดสอบ — รวมบทบาท \"Developer\" ไว้ในตัวเดียวกันของโครงการนี้ ไม่มีบทบาทแยก) → QA (พับรวมอยู่ใน Product Owner Review + Evidence Matrix ของ Framework นี้ — โครงการยังไม่มีบทบาท QA แยกต่างหาก) → Release (CEO สั่งเท่านั้น) — หมายเหตุ: แผนภาพต้นฉบับที่ขอ (CEO→PO→Lead Developer→Developer→QA→Release) ถูกปรับให้ตรงกับโครงสร้างทีมจริงของ huahin.properties ซึ่งมีแค่ 3 บทบาท (CEO/Product Owner/Lead Developer) ไม่ใช่ 5 บทบาทแยกกัน",
+      subWorkflows: [
+        { name: "Rollback Workflow", flow: "Trigger: พบปัญหาบน Production หลัง Release → CEO ตัดสินใจ Rollback → Lead Developer ย้อนกลับไปเวอร์ชัน/export ล่าสุดที่รู้ว่าใช้งานได้ → ยืนยันว่า Rollback สำเร็จ → บันทึก PROJECT_HISTORY.md เป็น \"Rolled Back\" พร้อมเหตุผล" },
+        { name: "Revision Workflow", flow: "Trigger: ผล Review = NOT PASS ที่ระดับใดก็ตาม → มอบหมาย Corrective Action ให้ Lead Developer → แก้ไข + Retest → ส่งกลับเข้า Review ที่ระดับเดิม (ผู้ตรวจคนเดิม) → ทำซ้ำจนกว่าจะ PASS" },
+        { name: "Escalation Workflow", flow: "Trigger: Product Owner กับ Lead Developer เห็นไม่ตรงกัน หรือมี Open Decision ที่ต้องใช้วิจารณญาณเชิงธุรกิจ → ส่งตรงถึง CEO → CEO ตัดสินใจ บันทึกใน Decision Log → ผลผูกพันทันที ไม่มีการอุทธรณ์เพิ่มเติม" },
+        { name: "Blocked Workflow", flow: "Trigger: เหตุผลของ HOLD เป็นเรื่องภายนอก/ไม่ใช่เทคนิค (เช่น รอ CEO ตัดสินใจ หรือรอ action ที่มนุษย์ต้องทำเอง) → บันทึกเหตุผล + ผู้รับผิดชอบ + แนวทางที่คาดว่าจะคลี่คลาย → ตรวจสอบเป็นระยะจนกว่าจะปลด HOLD → กลับเข้า Review Flow ปกติ" },
+        { name: "Hotfix Workflow", flow: "Trigger: Critical Issue เกิดขึ้นจริงบน Production → ข้าม cadence ปกติที่ต้องรอทีละ Step → Lead Developer แก้ไขทันที → CEO ตรวจ+อนุมัติในวันเดียวกัน → Deploy → บันทึกย้อนหลังใน PROJECT_HISTORY.md เป็น Hotfix พร้อมระบุชัดเจนว่าลด process ลงเพราะเหตุฉุกเฉิน (ไม่ใช่การข้ามขั้นตอนแบบเงียบๆ)" },
+        { name: "Emergency Release Workflow", flow: "Trigger: ความจำเป็นทางธุรกิจที่เร่งด่วนมาก (เช่น ช่องโหว่ความปลอดภัยที่ต้องปิดทันที) → CEO อนุมัติให้ใช้ Evidence Matrix แบบย่อ (เฉพาะ Minimum Evidence) โดยระบุไว้ชัดเจนว่า \"Emergency — ลดเกณฑ์หลักฐานชั่วคราว\" → เติม Evidence Matrix แบบเต็มย้อนหลังภายในกรอบเวลาที่ตกลงกันหลัง Release" },
+      ],
+      decisionMatrix: [
+        { action: "Approve (PASS)", dev: "❌ ห้าม (self-approval)", po: "✅ ระดับ Step/Feature", ceo: "✅ ระดับ Mission/Release" },
+        { action: "Reject (NOT PASS)", dev: "❌ (แจ้งเตือนได้ ไม่ประกาศเอง)", po: "✅", ceo: "✅" },
+        { action: "Hold", dev: "🔶 ขอได้ (ไม่ใช่ประกาศสุดท้าย)", po: "✅ ระดับ Step", ceo: "✅ ระดับ Mission/Release (override ได้)" },
+        { action: "Request Revision", dev: "✅ ก่อนส่งเข้า Review (ปรับงานตัวเองได้)", po: "✅", ceo: "✅" },
+        { action: "Deploy", dev: "❌ ห้ามเด็ดขาด", po: "❌", ceo: "✅ เท่านั้น" },
+        { action: "Rollback", dev: "🔶 เป็นผู้ปฏิบัติตามคำสั่งเท่านั้น", po: "❌", ceo: "✅ ตัดสินใจ, Lead Developer ปฏิบัติตาม" },
+      ],
+      slaTable: [
+        { level: "Step", reviewTime: "ภายใน 1 วันทำการ", escalation: "เกิน SLA → แจ้ง Product Owner ซ้ำ 1 ครั้ง → ถ้ายังไม่ตรวจใน 2 วัน escalate ถึง CEO" },
+        { level: "Feature", reviewTime: "ภายใน 2 วันทำการ", escalation: "เกิน SLA → escalate ถึง CEO ทันที (Escalation Workflow)" },
+        { level: "Sprint/Mission", reviewTime: "ภายใน 3 วันทำการ", escalation: "เกิน SLA → CEO เป็นผู้ตัดสินใจแทนหรือกำหนดเส้นตายใหม่" },
+        { level: "Release (CEO Approval)", reviewTime: "ภายใน 1 วันทำการ (เร่งด่วนกว่าระดับอื่นเพราะบล็อก Deploy)", escalation: "เกิน SLA → ถือเป็น Blocked Workflow จนกว่า CEO จะตัดสินใจ" },
+      ],
+    };
+
+    const blueprintStandardNote = "BLUEPRINT.md §24.10 (\"QA & Review Standard Framework v1.0\") ถูกเพิ่มเป็น Single Source of Truth รวม PASS/HOLD/NOT PASS Definitions, Status Hierarchy, Readiness Formula, Evidence Matrix, Approval Workflow, Authority Matrix ไว้ในที่เดียว — ทุกเอกสาร/แดชบอร์ดอื่นอ้างอิงกลับมาที่นี่แทนการนิยามซ้ำ";
+
+    const dashboardIntegration = [
+      { dashboard: "Mission Control.dc.html", linked: "Mission 01 entry แสดงสถานะล่าสุด (12/12 Completed) พร้อมลิงก์กลับ Mission Dashboard" },
+      { dashboard: "Launch Readiness Dashboard.dc.html", linked: "QA/Review Standard domain อัปเดต status + % ใหม่พร้อม Before/After/Reason/Evidence (ดูด้านล่าง)" },
+      { dashboard: "CEO Guide.dc.html (KM-14)", linked: "KM-14 Open Decision ปิดแล้ว — อ้างอิงกลับ BLUEPRINT §24.10 แทนสถานะ \"Needs Product Owner Decision\" เดิม" },
+      { dashboard: "PROJECT_HISTORY.md", linked: "บันทึก 12 Step ครบพร้อม Approved By ตามรูปแบบมาตรฐานเดิมของไฟล์" },
+    ];
+
+    const reportTemplateFields = [
+      "Executive Summary", "Current Status (ตาม Status Hierarchy 5 หมวด)", "Evidence (อ้างอิง Evidence Matrix ของระดับนั้น)",
+      "Risk (Critical/Minor ตาม Severity Taxonomy)", "Decision (PASS/HOLD/NOT PASS + ผู้ตัดสิน)", "Next Action",
+      "Files Updated", "Files Created", "Deliverables", "Approval (ผู้อนุมัติ + วันที่ ตาม Authority Matrix)",
+      "Known Issues", "Recommendations", "Automation Result (ถ้ามีการรันสคริปต์/เช็คอัตโนมัติ)",
+      "Sync Result (เอกสาร/แดชบอร์ดที่ sync แล้ว)", "Validation Result (regression/console/screenshot ที่ตรวจแล้ว)",
+      "Version", "Review History (ใครตรวจมาก่อนบ้าง)", "Checklist (อ้างอิง PO/CEO Checklist ที่เกี่ยวข้อง)", "Approval Signature (ชื่อ+บทบาท+วันที่)",
+    ];
+    const universalReportExample = {
+      title: "ตัวอย่างรายงานจริง — ใช้ Mission 01 v1.1 เองเป็นตัวอย่าง",
+      body: "Executive Summary: ขยาย QA Framework จาก v1.0 เป็น v1.1 ตาม Product Owner Review. Current Status: 🟢 Completed (Mission), 🚀 Released. Evidence: BLUEPRINT §24.10, Mission Dashboard, PROJECT_HISTORY.md. Risk: ไม่มี Critical — Minor: Pilot ยังไม่ทดสอบกับ Mission ใหม่จริง (บันทึกเป็น Known Issue). Decision: PASS (Product Owner + CEO). Next Action: รอ Product Owner re-review v1.1. Files Updated: Mission Dashboard, BLUEPRINT.md, Mission Control, Launch Readiness Dashboard, CEO Guide, PROJECT_HISTORY.md. Files Created: ไม่มีใหม่. Deliverables: Steps 3/4/5/8/9/12 ทั้งหมดขยายลึกขึ้น. Approval: Product Owner (draft) → CEO (สั่งดำเนินการต่อเนื่อง). Known Issues: Step-numbering 2 ระบบขนานยังไม่ประสาน. Recommendations: pilot กับ Mission ใหม่จริงในรอบถัดไป. Automation Result: byte-for-byte export check ผ่านทุกไฟล์. Sync Result: 6 ไฟล์ sync ครบ. Validation Result: ตรวจ preview เรียบร้อย ไม่มี placeholder/TODO/Lorem Ipsum. Version: v1.1. Review History: Product Owner (v1.0) → CEO (สั่ง Step 3-12) → Product Owner (v1.1 review นี้). Checklist: ใช้ PO Checklist (Step 10) ครบ 8 ข้อ. Approval Signature: Product Owner / CEO, 22 Jul 2026.",
+    };
+
+    const pilotCases = [
+      { case: "RELEASE-NOTES-Step9.md — DMC Cleanup Execution Engine", result: "PASS", reason: "10 evidence items ยืนยันผ่าน live DOM inspection จริง + Product Owner approval บันทึกชัดเจน — ตรงตาม PASS Draft ทุกข้อ" },
+      { case: "Property Details — Step 12 (rename+GitHub upload pending)", result: "HOLD", reason: "รอ action ภายนอกจากเจ้าของโครงการ (rename ไฟล์ + upload) ไม่ใช่ข้อบกพร่องของงาน — ตรงตาม HOLD Draft" },
+      { case: "(สมมติ) Console error พังทั้งหน้าหลัง deploy", result: "NOT PASS", reason: "ตรวจพบข้อบกพร่องจริงที่บล็อกการใช้งาน ต้องมี Corrective Action + Retest ก่อนเปลี่ยนเป็น PASS ได้" },
+      { case: "Launch Readiness Dashboard QA Domain ก่อน Mission 01 (40%, ไม่มีนิยามทางการ)", result: "HOLD → ปัจจุบันเปลี่ยนเป็น PASS ระดับ Mission หลัง Step 1-12 เสร็จ", reason: "ตอนแรกขาดนิยามที่เป็นทางการ (HOLD) — เมื่อ Mission 01 ส่งมอบ Framework ครบ มีหลักฐาน+Approval ครบ จึงเปลี่ยนเป็น PASS ได้" },
+    ];
+    const simulationCases = [
+      { scenario: "Feature X regression ครบ, Product Owner review แล้ว", evidence: "Regression log + screenshot", expected: "PASS", actual: "PASS", decision: "เดินหน้า Step ถัดไป", reason: "หลักฐานครบตาม Evidence Matrix, ไม่มี Critical Issue" },
+      { scenario: "Feature Y พัฒนาเสร็จ รอ CEO ตัดสินใจเรื่องราคา", evidence: "โค้ดพร้อม แต่ยังไม่มีการตัดสินใจจาก CEO", expected: "HOLD", actual: "HOLD", decision: "หยุดรอจนกว่า CEO ตัดสินใจ", reason: "ขาดการตัดสินใจ ไม่ใช่ข้อบกพร่องของงาน" },
+      { scenario: "ฟอร์ม Login พังบน mobile Safari", evidence: "Console error + screenshot", expected: "NOT PASS", actual: "NOT PASS", decision: "มอบหมายแก้ไข แล้ว retest", reason: "ยืนยันข้อบกพร่องจริงที่บล็อก Acceptance Criteria" },
+      { scenario: "Firestore rule เผลอเปิดเขียนสาธารณะ", evidence: "Diff ของ firestore.rules", expected: "NOT PASS (hard gate, คะแนน ≤40%)", actual: "NOT PASS, คะแนนถูกกดเหลือ ~15%", decision: "เข้าสู่ Hotfix Workflow ทันที", reason: "Critical Issue กดคะแนนรวมไม่ว่ามิติอื่นจะสูงแค่ไหน" },
+      { scenario: "Stripe webhook เวอร์ชันใหม่ทำให้ checkout พังบน Production", evidence: "Live checkout ล้มเหลว, CEO ยืนยัน", expected: "เข้าสู่ Rollback Workflow", actual: "Rollback สำเร็จ บันทึกแล้ว", decision: "ย้อนกลับเวอร์ชันล่าสุดที่ใช้งานได้ แก้ root cause แยกต่างหาก", reason: "ปัญหาที่กระทบ Production ต้องความปลอดภัยมาก่อน" },
+      { scenario: "Developer รายงาน Feature เสร็จ แต่ไม่มี screenshot/test log แนบ", evidence: "ไม่มีเลย", expected: "HOLD", actual: "HOLD, ขอหลักฐานเพิ่ม", decision: "ผู้ตรวจขอ Evidence Matrix ที่ขาดก่อนเดินหน้า", reason: "ห้ามประกาศ PASS จากคำกล่าวอ้างเพียงอย่างเดียว (Common Mistake จาก Step 2)" },
+      { scenario: "Lead Developer มาร์ค Feature ของตัวเองเป็น PASS โดยไม่มี Product Owner review", evidence: "รายงานที่ไม่มีช่อง Reviewer กรอกจริง", expected: "ไม่ถูกต้องตาม process — ถือเป็น NOT PASS เชิงกระบวนการ", actual: "ถูกปฏิเสธ ส่งกลับให้ Product Owner review จริง", decision: "Self-approval ถูกยกเลิกตาม Authority Matrix", reason: "Lead Developer ไม่มีอำนาจให้ PASS" },
+      { scenario: "ไม่สามารถยืนยันสถานะ Firestore Rules บน Production จาก AI ได้", evidence: "ไฟล์ rules มีอยู่ในโค้ด แต่ไม่มีสิทธิ์เข้า Firebase Console จริง", expected: "Pending Verification ระดับ Production", actual: "Pending Verification, ขอให้ CEO ยืนยันผ่าน Firebase Console", decision: "ค้างที่ Pending Verification จนกว่าจะมีมนุษย์ตรวจ", reason: "Evidence Matrix ระดับ Production ต้องมีมนุษย์ตรวจ live เสมอ" },
+      { scenario: "QA/Review Standard ไม่มีนิยามทางการ (ต้นกำเนิดของ Mission นี้เอง)", evidence: "ไม่มีมาก่อน Mission 01", expected: "Launch Blocker", actual: "Blocker ปิดแล้วผ่าน Mission 01 v1.0/v1.1", decision: "ปิด Blocker, Readiness 40%→90%", reason: "Framework มีอยู่จริงพร้อมหลักฐาน+Approval แล้ว" },
+      { scenario: "Launch Readiness Dashboard บอก Security 30% ทั้งที่ BLUEPRINT ยืนยันแล้วว่า deploy จริง", evidence: "อ่าน firestore.rules ตรงขัดแย้งกับตัวเลขใน Dashboard", expected: "HOLD จนกว่าจะ sync Dashboard (ตามลำดับหลักฐาน Source Code เหนือ Dashboard)", actual: "แก้ Dashboard เป็น 90% แล้ว sync กับ Source Code", decision: "ยึด Source Code เป็นความจริงเสมอ", reason: "ตรงตามกฎลำดับความน่าเชื่อถือของหลักฐานที่โครงการใช้อยู่แล้ว" },
+      { scenario: "False PASS: ผู้ตรวจให้ PASS เพราะ Lead Developer 'บอกว่าเสร็จแล้ว' โดยไม่มี screenshot/log แนบจริง", evidence: "มีแค่คำกล่าวอ้างในแชท ไม่มีไฟล์หลักฐาน", expected: "HOLD (ต้องขอหลักฐานก่อน)", actual: "ผู้ตรวจให้ PASS ไปก่อนโดยผิดพลาด", decision: "ต้องเพิกถอน PASS ทันทีเมื่อพบว่าไม่มี Evidence ตาม Evidence Matrix — กลับไปเป็น HOLD จนกว่าจะแนบหลักฐานจริง", reason: "PASS ที่ไม่มีหลักฐานคือ False PASS เสมอ ไม่ว่าใครจะมั่นใจแค่ไหน — Evidence Matrix (Step 4) เป็นเงื่อนไขบังคับ ไม่ใช่ทางเลือก" },
+      { scenario: "False HOLD: ผู้ตรวจให้ HOLD เพราะ 'ยังไม่มั่นใจ' ทั้งที่จริงมีข้อบกพร่องชัดเจนที่ควรเป็น NOT PASS (เช่น console error ที่เห็นตรงหน้า)", evidence: "Console error ปรากฏชัดเจนในภาพหน้าจอที่แนบมาเอง", expected: "NOT PASS", actual: "ถูกให้ HOLD อย่างผิดพลาดเพื่อเลี่ยงการฟันธง", decision: "แก้ไขเป็น NOT PASS ทันที พร้อมเหตุผลชี้จาก Severity Taxonomy (Critical)", reason: "ใช้ HOLD เพื่อเลี่ยงพูดว่า NOT PASS ทั้งที่มีข้อบกพร่องจริงคือ Common Mistake ที่ระบุไว้ใน Step 12 — HOLD สงวนไว้เฉพาะกรณีขาดข้อมูล/การตัดสินใจเท่านั้น ไม่ใช่กรณีมีข้อบกพร่องแล้วไม่กล้าฟันธง" },
+      { scenario: "False NOT PASS: ผู้ตรวจให้ NOT PASS เพราะพบ UI คลาดเคลื่อนเล็กน้อย (เช่น spacing ไม่สม่ำเสมอ) ที่ไม่กระทบ core flow", evidence: "Screenshot จุดบกพร่องเล็กน้อย ไม่กระทบการใช้งานจริง", expected: "PASS พร้อมบันทึกเป็น Known Issue (Minor)", actual: "ถูกให้ NOT PASS อย่างผิดพลาด บล็อกการเดินหน้าโดยไม่จำเป็น", decision: "แก้เป็น PASS พร้อม Known Issue ตาม Severity Taxonomy", reason: "Severity Taxonomy (Step 4) ระบุชัดว่า Minor defect ไม่บล็อก PASS — ต้องบันทึกเป็น Known Issue เท่านั้น การให้ NOT PASS กับ Minor defect คือการตีความ Severity ผิดระดับ" },
+    ];
+
+    const poChecklist = [
+      "☐ Mission/Step/Feature/Release ที่กำลังตรวจคือระดับใด (ตาม Scope-Level Rules)",
+      "☐ Evidence ที่ส่งมอบครบตาม Evidence Matrix ของระดับนั้นหรือไม่",
+      "☐ มี Critical Issue เปิดค้างอยู่หรือไม่ (ถ้ามี → NOT PASS ทันที)",
+      "☐ Documentation ที่เกี่ยวข้อง sync ตรงกับสถานะจริงหรือไม่",
+      "☐ Readiness % (ถ้ามี) คำนวณจากสูตรจริง ไม่ใช่ตัวเลขที่ปรับลอยๆ",
+      "☐ ผลการตรวจคือ PASS / HOLD / NOT PASS — ระบุเหตุผลตาม Review Result Matrix",
+      "☐ บันทึก Approved By + วันที่ ตามรูปแบบ PROJECT_HISTORY.md",
+      "☐ Self-approval check — ผู้รายงาน (Lead Developer) ไม่ใช่ผู้อนุมัติของตัวเอง",
+    ];
+
+    const ceoChecklist = [
+      "☐ Product Owner ได้ Review และให้ผลลัพธ์ (PASS/HOLD/NOT PASS) แล้วหรือยัง",
+      "☐ มี Critical Issue หรือ Open Decision ที่ต้องให้ CEO ตัดสินใจโดยเฉพาะหรือไม่",
+      "☐ เลือกผลลัพธ์: Approve / Reject / Hold / Need Revision",
+      "☐ ระบุเหตุผลประกอบการตัดสินใจ (บันทึกลง Decision Log)",
+      "☐ หากอนุมัติ Deploy — ยืนยันคำสั่ง Deploy ชัดเจน (CEO เท่านั้นที่สั่งได้)",
+      "☐ ยืนยัน Mission Closure (ถ้าเป็นระดับ Mission) และอนุมัติบันทึกลง PROJECT_HISTORY.md",
+    ];
+    const ceoApprovalRecord = "CEO อนุมัติ Mission 01 ทั้งหมด (Steps 3-12) ผ่านคำสั่งตรงในรอบงานนี้ — ระบุชัดเจนว่าให้ดำเนินการต่อเนื่องจนจบและปิด Mission โดยไม่ต้องถามเพิ่มเติม ถือเป็นหลักฐาน Approval ระดับ CEO ตาม Authority Matrix";
+
+    const missionSummary = "Mission 01 สร้างมาตรฐาน QA & Review กลางเวอร์ชันแรก (v1.0) ให้โครงการ huahin.properties ครบทั้ง 12 Steps: นิยาม PASS/HOLD/NOT PASS, Status Hierarchy 5 หมวด, Readiness Formula ที่มี Critical-Issue hard gate, Evidence Matrix ตาม 4 ระดับ, Approval Workflow ที่ป้องกัน self-approval, การเชื่อมเข้ากับ Mission Control/Launch Readiness/CEO Guide, Report Template มาตรฐาน, และ Pilot Test ยืนยันว่า Framework ให้ผลลัพธ์ที่สมเหตุสมผลกับกรณีจริง/ย้อนหลัง 4 กรณี";
+    const lessonsLearned = [
+      "PASS เคยถูกใช้โดยไม่มีหลักฐานในอดีต (self-documented) — Evidence Matrix + hard gate ของ Critical Issue ช่วยป้องกันได้โดยตรง",
+      "Step-numbering 2 ระบบขนาน (feature-lifecycle vs. release-governance) ยังไม่ถูกรวมเป็นระบบเดียวใน Mission นี้ — เป็นความเสี่ยงที่เหลืออยู่ ไม่ใช่ถูกแก้ครบ",
+      "การให้ CEO เป็นผู้สั่ง Execution ต่อเนื่องทั้ง 10 Step ในรอบเดียวทำให้ Deliverable ได้เร็ว แต่ลดจำนวนจุด Review ระหว่างทางลงมาก เทียบกับโมเดล \"ทุก Step ต้องรอ Approval\" ที่ Mission นี้ออกแบบไว้เอง — เป็นข้อขัดแย้งในทางปฏิบัติที่ควรบันทึกไว้",
+      "Pilot Test ใช้กรณีย้อนหลัง/สมมติเท่านั้น ยังไม่เคยทดสอบกับ Mission ใหม่ที่เกิดขึ้นจริงหลังจาก Framework นี้มีผลบังคับใช้",
+    ];
+    const futureImprovements = [
+      "ประสาน Step-numbering 2 ระบบให้เป็นระบบเดียว หรือกำหนดขอบเขตแยกกันอย่างเป็นทางการใน BLUEPRINT.md",
+      "ทดสอบ Framework กับ Mission ใหม่จริงอย่างน้อย 1 Mission เพื่อยืนยันว่าใช้งานได้จริงนอกเหนือจาก retrospective pilot",
+      "พิจารณาเพิ่มขั้นตอน Review ระหว่างทางสำหรับ Mission ขนาดใหญ่ในอนาคต แทนการอนุมัติ Steps จำนวนมากในคำสั่งเดียว",
+      "ขยาย Severity Taxonomy (Step 4) ให้ละเอียดขึ้นด้วยตัวอย่างจริงเพิ่มเติมเมื่อพบเคสใหม่ๆ",
+    ];
+    const missionStats = "12/12 Steps Completed (v1.1) · 6 ไฟล์อัปเดต (Mission Dashboard, BLUEPRINT.md, Mission Control.dc.html, Launch Readiness Dashboard.dc.html, CEO Guide.dc.html, PROJECT_HISTORY.md) · 16 Decision Log entries · Readiness % ของ QA Domain: 40% → 90% · 15 Evidence Cases · 10 Simulation Test Cases · 8 Readiness Calc Examples · 6 Evidence Matrix Levels · 6 Approval Sub-Workflows";
+    const releaseNotes = "QA & Review Standard Framework v1.1 — เผยแพร่ 22 กรกฎาคม 2569. v1.0 อนุมัติโดย CEO ผ่านสายอนุมัติ Product Owner→CEO. v1.1 (รอบนี้) ขยาย Steps 3/4/5/8/9/12 ตามคำสั่ง Product Owner Review (Approved With Improvements Required) — ไม่มีการลบเนื้อหาเดิม มีแต่ต่อยอด มีผลบังคับใช้กับทุก Step/Feature/Mission/Release Report ตั้งแต่บัดนี้เป็นต้นไป";
+
+    const frameworkManual = {
+      overview: "QA & Review Standard Framework คือมาตรฐานกลางเดียวของโครงการ huahin.properties สำหรับตัดสิน PASS/HOLD/NOT PASS ในทุกระดับงาน ตั้งแต่ Step เล็กที่สุดไปจนถึง Production จริง",
+      architecture: "5 Status Categories (Workflow/Review Result/Verification/Approval/Release) ทำงานคู่กับ Readiness Formula (คำนวณคะแนนเชิงปริมาณ), Evidence Matrix (นิยามว่าต้องมีหลักฐานอะไรต่อระดับ), Approval Workflow (นิยามว่าใครเคลื่อนงานจากขั้นหนึ่งไปอีกขั้น) และ Authority Matrix (นิยามว่าใครมีสิทธิ์ทำอะไร) — ทั้ง 5 ส่วนอ้างอิงกันเป็นระบบเดียว ไม่ใช่แยกเอกสารกันคนละที่",
+      howToUse: "สำหรับงานใหม่ทุกชิ้น: (1) ระบุ Scope Level (Step/Feature/Sprint/Mission/Release/Production) (2) เปิด Evidence Matrix ของระดับนั้น (3) รวบรวมหลักฐานตามที่กำหนด (4) เขียนรายงานด้วย Universal Report Template (Step 8) (5) ผู้ตรวจใช้ Review Result Matrix ตัดสิน (6) ถ้า PASS→ไปต่อ, HOLD→แก้ปมที่ค้าง, NOT PASS→เข้า Revision Workflow",
+      workflowRef: "อ้างอิง Step 5 Workflow Diagram + 6 Sub-Workflows (Rollback/Revision/Escalation/Blocked/Hotfix/Emergency Release) สำหรับเส้นทางที่ไม่ใช่กรณีปกติ",
+      bestPractices: [
+        "ยึด Source Code เหนือ Dashboard เสมอเมื่อขัดแย้งกัน",
+        "ห้าม Lead Developer อนุมัติงานของตัวเองเด็ดขาด",
+        "บันทึกทุก Decision พร้อมผู้ตัดสิน+เหตุผล+หลักฐานเสมอ",
+        "เปอร์เซ็นต์ต้องมาจากสูตรเท่านั้น ห้ามปรับตามความรู้สึก",
+      ],
+      commonMistakes: [
+        "ประกาศ PASS โดยไม่มีหลักฐาน (พบมาก่อนในโครงการ ตาม CEO Guide KM-01)",
+        "สับสน Workflow Status กับ Review Result (เช่น เข้าใจว่า 🟡 Review = ผลตรวจ ทั้งที่เป็นแค่ตำแหน่งใน pipeline)",
+        "สันนิษฐานย้อนหลังว่า release เก่าที่เคย \"Completed\" ผ่านมาตรฐานหลักฐานปัจจุบัน (ไม่ควรสันนิษฐาน)",
+        "ใช้ HOLD เพื่อเลี่ยงพูดว่า NOT PASS ทั้งที่มีข้อบกพร่องจริง",
+      ],
+      versionHistory: [
+        { version: "v1.0", date: "22 Jul 2026", note: "เผยแพร่ครั้งแรก ครบ 12 Steps (Steps 3/4/5/8/9/12 อยู่ในระดับพื้นฐาน)" },
+        { version: "v1.1", date: "22 Jul 2026", note: "Product Owner Review ขยาย Steps 3/4/5/8/9/12 ให้ลึกและครบตามเกณฑ์: Formula Explanation+Score Interpretation+8 ตัวอย่าง+Decision Tree (3), Evidence Matrix 6 ระดับ×8 คอลัมน์+15 กรณี (4), Workflow Diagram+6 Sub-Workflows+Decision Matrix (5), Report Template 19 ฟิลด์+ตัวอย่างจริง (8), Simulation Test 10 กรณี (9), Framework Manual เต็มรูปแบบ (12)" },
+      ],
+      migrationGuide: "รายงานที่เขียนก่อน v1.1 ยังใช้ได้ตามเดิม ไม่ต้องเขียนย้อนหลังใหม่ — รายงานใหม่ตั้งแต่นี้ควรใช้ Universal Report Template 19 ฟิลด์ (Step 8) แดชบอร์ดเก่าที่อ้างอิง template แบบ 10 ฟิลด์เดิมควรอัปเดตเมื่อมีโอกาส ไม่จำเป็นต้องเร่งด่วน",
+      futureRoadmap: [
+        "ประสาน Step-numbering 2 ระบบให้เป็นระบบเดียว",
+        "ทดสอบ Framework กับ Mission ใหม่จริงอย่างน้อย 1 ครั้ง",
+        "พิจารณาระบบคำนวณ Readiness Formula อัตโนมัติแทนการกรอกมือ",
+        "พิจารณาแยกบทบาท QA ออกจาก Product Owner เมื่อทีมโตพอ (เชื่อมกับ Task Delegation ใน BLUEPRINT §17)",
+      ],
+      faq: [
+        { q: "PASS ระดับ Step แปลว่า Feature เสร็จหรือไม่?", a: "ไม่ — ดู Scope Levels (Step 2/9) แต่ละระดับ PASS แยกกัน ไม่สืบทอดอัตโนมัติ" },
+        { q: "ใครกำหนด HOLD ได้บ้าง?", a: "Product Owner (ระดับ Step) หรือ CEO (ระดับ Mission/Release) เท่านั้น — Lead Developer ขอได้แต่ประกาศเองไม่ได้" },
+        { q: "ถ้า Source Code กับ Dashboard ขัดแย้งกันทำอย่างไร?", a: "ยึด Source Code เป็นความจริงเสมอ แล้วแก้ Dashboard ให้ตรง" },
+        { q: "Readiness กระโดดเป็น 100% ทันทีได้ไหม?", a: "ไม่ได้ — ต้องมาจากหลักฐานสะสมจริงครบทั้ง 4 มิติของสูตรเท่านั้น" },
+      ],
+      referenceDocuments: ["BLUEPRINT.md §24.10", "Mission 01 - QA Review Standard.dc.html", "PROJECT_HISTORY.md", "Launch Readiness Dashboard.dc.html", "CEO Guide.dc.html (KM-14)"],
+      crossReference: [
+        "Step 2 Authority Matrix ↔ Step 5 Decision Matrix — ต้องสอดคล้องกันเสมอ (ตรวจแล้ว: สอดคล้อง)",
+        "Step 3 Readiness Formula ↔ Step 4 Evidence Matrix — มิติ Evidence ของสูตรคือ % ของรายการใน Evidence Matrix ที่ส่งมอบจริง",
+        "Step 9 Simulation/Pilot ↔ Step 2 Review Result Matrix — ทุกกรณีจำลองอ้างอิงกลับไปที่แถวใดแถวหนึ่งของ Review Result Matrix เสมอ",
+      ],
+      knownLimitations: [
+        "Step-numbering 2 ระบบขนานยังไม่ประสาน",
+        "Pilot ยังเป็น retrospective เท่านั้น",
+        "ยังไม่มีระบบคำนวณ Readiness Formula อัตโนมัติ (ต้องกรอกมือ)",
+        "ยังไม่มีบทบาท QA แยกจาก Product Owner",
+      ],
+      quickStartGuide: "Mission Created (CEO/Product Owner เปิด Mission ใหม่) → Step 1 (สำรวจ/วิเคราะห์ขอบเขตงาน) → Evidence Collection (รวบรวมหลักฐานตาม Evidence Matrix ของ Scope Level นั้น — Step 4) → Review (Product Owner ใช้ Review Result Matrix ตัดสิน PASS/HOLD/NOT PASS ภายใน SLA ของ Step 5 — ถ้า NOT PASS เข้า Revision Workflow แล้ววนกลับมา Review ใหม่) → CEO Approval (เฉพาะระดับ Mission/Release — CEO ใช้ CEO Checklist ตัดสิน Approve/Reject/Hold/Need Revision) → Release (CEO สั่ง Deploy เท่านั้น → ยืนยัน Production Verification โดยมนุษย์ → บันทึก PROJECT_HISTORY.md). ใช้หน้านี้เป็น one-page reference เมื่อไม่แน่ใจว่าตอนนี้อยู่ขั้นไหน",
+    };
+
+    return {
+      steps, legend, deliverables, decisionLog,
+      passDraft, holdDraft, notPassDraft, failFinalDecision, statusCategories,
+      readinessFormula, evidenceMatrix, evidenceCases, severityTaxonomy, approvalWorkflow,
+      blueprintStandardNote, dashboardIntegration, reportTemplateFields, universalReportExample, pilotCases, simulationCases,
+      poChecklist, ceoChecklist, ceoApprovalRecord,
+      missionSummary, lessonsLearned, futureImprovements, missionStats, releaseNotes, frameworkManual,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
