@@ -180,6 +180,7 @@
         <span style="font-weight:600; font-size:12.5px; color:oklch(35% 0.13 25);">{{ blockersCountLabel }}</span>
       </summary>
       <div style="margin-top:12px; display:flex; flex-direction:column; gap:10px;">
+        <sc-if value="{{ hasNoBlockers }}"><div style="font-size:13px; color:oklch(35% 0.1 150); font-weight:600;">✅ ไม่มี Launch Blocker ที่ยังค้างอยู่ในขณะนี้</div></sc-if>
         <sc-for list="{{ blockers }}" as="b" hint-placeholder-count="2">
           <details style="border:1px solid oklch(80% 0.1 25); border-radius:8px; padding:10px 14px; background:white;">
             <summary style="cursor:pointer; font-weight:600; font-size:13.5px; color:oklch(30% 0.1 25);">{{ b.icon }} {{ b.title }}</summary>
@@ -520,17 +521,6 @@ class Component extends DCLogic {
     const overall = Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length);
 
     const blockers = [
-      { icon: "🏆", title: "QA / Review Standard — Mission 11 RELEASED v1.1 (RESOLVED)",
-        problem: "ยังไม่มีคำนิยามที่เป็นทางการของ PASS/HOLD/NOT PASS",
-        why: "หากไม่มีมาตรฐาน การประกาศ PASS อาจไม่สม่ำเสมอระหว่าง Step ต่างๆ",
-        checked: "Mission 11 เสร็จสมบูรณ์ 12/12 Steps — Framework เต็มรูปแบบใน BLUEPRINT.md §24.10",
-        notChecked: "Pilot Test ยังใช้กรณีย้อนหลัง/สมมติเท่านั้น — ยังไม่ทดสอบกับ Mission ใหม่จริง",
-        decisionMaker: "CEO (อนุมัติแล้ว)",
-        steps: ["✅ Product Owner review Mission 11 Step 1-2", "✅ CEO สั่งดำเนินการ Step 3-12 ต่อเนื่อง", "✅ BLUEPRINT.md §24.10 เผยแพร่แล้ว", "✅ Dashboard ทั้งหมดเชื่อมโยงแล้ว"],
-        evidenceNeeded: "เอกสารคำนิยามที่เผยแพร่แล้ว",
-        closeCondition: "BLUEPRINT.md มีหัวข้อคำนิยาม PASS/HOLD/NOT PASS อย่างเป็นทางการ และ KM-14 อัปเดตสถานะเป็น Working",
-        impact: "การประกาศ PASS อาจไม่สม่ำเสมอระหว่าง Step หากไม่มีเกณฑ์ทางการ",
-        launchScope: "Internal Only" },
     ];
 
     const priorityMustDo = [
@@ -540,6 +530,8 @@ class Component extends DCLogic {
         reason: "Launch Blocker เดียวที่เหลืออยู่ได้รับการปิดแล้ว — Readiness 40%→90% ตามสูตร Readiness Formula ใหม่",
         owner: "Product Owner + CEO",
         dependency: "ไม่มี",
+        expectedResult: "N/A — เสร็จแล้ว",
+        completionCondition: "N/A — เสร็จแล้ว",
         priority: "N/A",
         expectedImpact: "ปลด Launch Blocker เดียวที่เหลืออยู่ก่อนหน้านี้" },
       { name: "Firestore Security Rules (role-based + deny-by-default) verify & deploy", status: "Verified — Deployed",
@@ -612,7 +604,8 @@ class Component extends DCLogic {
       overallLabel: `${overall}% — คำนวณจากค่าเฉลี่ยของ ${domains.length} หมวด (ไม่ใช่ค่าคาดการณ์)`,
       domains,
       executive,
-      blockersCountLabel: `${blockers.length} Critical`,
+      blockersCountLabel: blockers.length > 0 ? `${blockers.length} Critical` : "0 — Resolved",
+      hasNoBlockers: blockers.length === 0,
       blockers,
       topPriorityLabel: priorityMustDo[0] ? priorityMustDo[0].name : "",
       priorityMustDo,
