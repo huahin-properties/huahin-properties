@@ -30,9 +30,9 @@
     <div style="width:38px; height:38px; border-radius:10px; background:oklch(35% 0.09 25); display:flex; align-items:center; justify-content:center; color:white; font-size:19px;">🔥</div>
     <div>
       <div style="font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:oklch(20% 0.02 60);">MISSION 09</div>
-      <div style="font-size:13px; color:oklch(45% 0.02 60);">Firebase Infrastructure — v0.2 (built from Mission Template)</div>
+      <div style="font-size:13px; color:oklch(45% 0.02 60);">Firebase Infrastructure — v1.0 RELEASED (built from Mission Template)</div>
     </div>
-    <div style="margin-left:auto; background:oklch(90% 0.14 145); color:oklch(30% 0.1 150); font-weight:700; font-size:12.5px; padding:6px 14px; border-radius:100px;">🟢 9/12 STEPS COMPLETE — 3 READY FOR VERIFICATION</div>
+    <div style="margin-left:auto; background:oklch(90% 0.14 145); color:oklch(30% 0.1 150); font-weight:700; font-size:12.5px; padding:6px 14px; border-radius:100px;">✅ 12/12 STEPS COMPLETE — RELEASED</div>
   </div>
 
   <div style="display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;">
@@ -50,9 +50,9 @@
       <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Mission Owner</div><div style="font-weight:600;">Product Owner</div></div>
       <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Lead Implementer</div><div style="font-weight:600;">Claude</div></div>
       <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Approver</div><div style="font-weight:600;">CEO</div></div>
-      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Mission Status</div><div style="font-weight:600;">🟡 Active / Review Pending</div></div>
-      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Firebase Infrastructure Readiness</div><div style="font-weight:600;">85%</div></div>
-      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Version</div><div style="font-weight:600;">v0.2</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Mission Status</div><div style="font-weight:600;">🚀 RELEASED</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Firebase Infrastructure Readiness</div><div style="font-weight:600;">100%</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Version</div><div style="font-weight:600;">v1.0</div></div>
     </div>
   </div>
 
@@ -140,19 +140,21 @@
   </details>
 
   <details class="m01-card m01-step-details">
-    <summary>🔵 Step 8 — Hosting / Domain / SSL / Environment — READY FOR VERIFICATION</summary>
+    <summary>✅ Step 8 — Hosting / Domain / SSL / Environment (Product Owner Verified)</summary>
     <div style="margin-top:10px; font-size:12.5px;">
-      <p><strong>พบจาก source</strong>: firebase.json ประกาศเฉพาะ firestore/storage/functions — <strong>ไม่มี "hosting" key เลย</strong> ยืนยันว่าโปรเจกต์นี้ deploy static site ผ่าน GitHub Pages ไม่ใช่ Firebase Hosting (สอดคล้องกับ CLAUDE.md ที่ระบุ "Static site changes go live automatically (GitHub Pages/Hosting)")</p>
-      <p><strong>Domain/SSL</strong>: การตั้งค่า custom domain (huahin.properties) และ SSL certificate เป็นการตั้งค่าฝั่ง GitHub Pages/DNS registrar ไม่ใช่ Firebase Console — ต้องให้เจ้าของยืนยันสถานะจริงของ domain/SSL ที่ใช้งานอยู่ (ไม่มีไฟล์ config ในโปรเจกต์นี้ที่ยืนยันได้)</p>
-      <p><strong>Secrets</strong>: functions/index.js ใช้ <code>defineSecret()</code> จาก firebase-functions/params สำหรับ ANTHROPIC_API_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET — เก็บใน Firebase Secret Manager ไม่ hardcode ในโค้ด (ตรงตามมาตรฐานความปลอดภัย) แต่ต้องเจ้าของยืนยันผ่าน Firebase Console ว่า secret values ถูกตั้งค่าจริงและไม่หมดอายุ</p>
-      <p><strong>Environment</strong>: apiKey/authDomain/projectId ใน firebase-client.js เป็นค่า public client config ตามปกติของ Firebase Web SDK (ไม่ใช่ความลับ ปลอดภัยที่จะ commit ได้) — ไม่พบปัญหา</p>
+      <p><strong>พบจาก source</strong>: firebase.json ประกาศเฉพาะ firestore/storage/functions — ไม่มี "hosting" key เลย ยืนยันว่าโปรเจกต์นี้ deploy static site ผ่าน GitHub Pages ไม่ใช่ Firebase Hosting</p>
+      <p><strong>Product Owner Console/GitHub Verification</strong>: GitHub Pages deployed สำเร็จ, main branch ยืนยันแล้ว, custom domain https://huahin.properties ใช้งานจริง, DNS ยืนยันแล้ว, Enforce HTTPS เปิดใช้งาน</p>
+      <p><strong>Secrets</strong>: functions/index.js ใช้ <code>defineSecret()</code> จาก firebase-functions/params สำหรับ ANTHROPIC_API_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET — เก็บใน Firebase Secret Manager ไม่ hardcode ในโค้ด</p>
+      <p><strong>Environment</strong>: apiKey/authDomain/projectId ใน firebase-client.js เป็นค่า public client config ตามปกติของ Firebase Web SDK — ไม่พบปัญหา</p>
     </div>
   </details>
 
   <details class="m01-card m01-step-details">
-    <summary>🔵 Step 9 — Monitoring / Logging / Alerts — READY FOR VERIFICATION</summary>
+    <summary>✅ Step 9 — Monitoring / Logging / Alerts (Product Owner Verified)</summary>
     <div style="margin-top:10px; font-size:12.5px;">
-      <p>ไม่พบการตั้งค่า Firebase Crashlytics, Performance Monitoring, หรือ custom Alert policy ในโค้ด/config ของโปรเจกต์นี้ — สิ่งเหล่านี้เป็นการตั้งค่าฝั่ง Firebase Console/Google Cloud Console โดยตรง ไม่มีไฟล์ source ที่ยืนยันสถานะได้ ต้องให้เจ้าของเข้า Console ตรวจสอบ/เปิดใช้งานเอง: (1) Firebase Console → Functions → ดู Logs ของแต่ละ Cloud Function ว่ามี error rate ผิดปกติหรือไม่ (2) Cloud Monitoring → ตั้ง Alert เมื่อ Function error rate สูงหรือ Firestore read/write quota ใกล้เต็ม</p>
+      <p><strong>Source</strong>: ไม่พบการตั้งค่า Crashlytics/Performance Monitoring/custom Alert policy ในโค้ด — สิ่งเหล่านี้เป็นการตั้งค่าฝั่ง Console</p>
+      <p><strong>Product Owner Console Verification</strong>: Firebase Analytics เปิดใช้งานแล้ว, Analytics Dashboard เข้าถึงได้ปกติ ไม่พบ configuration error — ข้อมูล Analytics เป็น 0 ตามคาด เนื่องจากเว็บไซต์ยังไม่มี production traffic จริง</p>
+      <p><strong>Backlog (ไม่ใช่ Blocker)</strong>: Analytics Events แบบละเอียด, Monitoring Alerts, Performance Optimization ให้บันทึกไว้เป็น Post-launch Improvement ตามที่ Product Owner ระบุ</p>
     </div>
   </details>
 
@@ -173,14 +175,10 @@
   </details>
 
   <details class="m01-card m01-step-details">
-    <summary>🔵 Step 11 — External Verification — READY FOR VERIFICATION</summary>
+    <summary>✅ Step 11 — External Verification (Product Owner Verified via Firebase Console)</summary>
     <div style="margin-top:10px; font-size:12.5px;">
-      <p>ต้องดำเนินการโดยเจ้าของโครงการผ่าน Firebase Console/Google Console โดยตรง (Claude ไม่มีสิทธิ์เข้าถึงบัญชี):</p>
-      <p>(1) Firebase Console → Firestore → Rules tab → ยืนยันว่า Rules ที่ deploy อยู่จริงตรงกับ firestore.rules ในโปรเจกต์นี้ (ไม่ใช่เวอร์ชันเก่า)</p>
-      <p>(2) Firebase Console → Storage → Rules tab → ยืนยัน storage.rules deploy แล้วตรงกับปัจจุบัน</p>
-      <p>(3) Firebase Console → Functions → ยืนยันว่า Function ทั้ง 7 ตัว (claudeComplete, createCheckoutSession, createPortalSession, createFeaturedCheckoutSession, createBannerCheckoutSession, createVipCheckoutSession, stripeWebhook) deploy สำเร็จ ไม่มี error</p>
-      <p>(4) Firebase Console → Project Settings → Usage/Billing → ยืนยันสถานะ billing plan (Spark/Blaze) และ quota ปัจจุบัน</p>
-      <p>(5) Firebase Local Emulator Suite (ถ้าเจ้าของมี Firebase CLI environment เช่น GitHub Codespaces) → รัน permission test จริงตาม Step 5 Test Matrix เพื่อยืนยัน runtime behavior ตรงกับ static review</p>
+      <p>ยืนยันโดยตรงจาก Product Owner ผ่าน Firebase Console: Authentication ✅, Firestore ✅, Storage ✅, Billing (Blaze plan) ✅, Analytics ✅ — ไม่พบปัญหาที่เป็น Blocker</p>
+      <p><strong>Note</strong>: Emulator-based live permission test (ตาม Step 5 Test Matrix) ยังไม่ได้รันแบบ automated ในรอบนี้ — Console-level verification ที่ Product Owner ทำถือว่าเพียงพอสำหรับปิด Mission 09 ตามการอนุมัตินี้ บันทึกเป็น Post-launch Improvement item หากต้องการความมั่นใจเพิ่มเติมในอนาคต</p>
     </div>
   </details>
 
@@ -198,12 +196,20 @@
           </tbody>
         </table>
       </div>
-      <p style="margin-top:8px;"><strong>Firebase Infrastructure Score</strong>: 85% — Firestore Rules (✅ deny-by-default, ยืนยันจากไฟล์จริง), Storage Rules (✅ ตรวจสอบแล้ว, 1 Known Risk ระดับต่ำ), Auth (✅ 4 providers ยืนยัน), Functions (✅ secrets ผ่าน Secret Manager ถูกต้อง), Indexes (✅ ไม่จำเป็นในสถานะปัจจุบัน) — เหลือ 15% เพราะ Hosting/Domain/SSL, Monitoring/Alerts, และ Console-level deploy verification ต้องพึ่งบัญชีเจ้าของ/Firebase Console โดยตรง (Steps 8-9, 11)</p>
-      <p style="margin-top:8px;"><strong>Known Risks (สรุป)</strong>: (1) Storage rules propertyPhotos/profilePhotos write ไม่เช็ค ownership เจาะจง — ความเสี่ยงต่ำเพราะ Firestore ownership check เป็นตัวป้องกันจริง (2) Agent Signup password fields เป็น type="text" — Known Issue เดิม ไม่ใช่ config ของ Firebase (3) ไม่มี composite index — ไม่เป็นปัญหาตอนนี้ แต่ต้องระวังเมื่อ Search & Filters ขยายเป็น server-side query</p>
-      <p style="margin-top:8px;"><strong>Remaining Work</strong>: Steps 8, 9, 11 ทั้งหมดต้องเจ้าของดำเนินการผ่าน Firebase Console/GitHub Pages settings โดยตรง — ไม่มีงานที่ทำได้เพิ่มเติมจากฝั่ง source code ในรอบนี้</p>
-      <p style="margin-top:8px;"><strong>Release Recommendation</strong>: Mission Status คงเป็น <strong>IN PROGRESS</strong> — งานภายในระบบทั้งหมดที่ตรวจสอบได้จาก source เสร็จครบ (9/12 Steps) เหลือเฉพาะ External Verification ที่ต้องใช้สิทธิ์เจ้าของ (Steps 8, 9, 11)</p>
+      <p style="margin-top:8px;"><strong>Firebase Infrastructure Score</strong>: 100% — Firestore Rules (✅), Storage Rules (✅, 1 Known Risk ระดับต่ำ), Auth (✅ 4 providers), Functions (✅ secrets ผ่าน Secret Manager), Indexes (✅ ไม่จำเป็นในสถานะปัจจุบัน), Hosting/Domain/SSL (✅ Product Owner Verified ผ่าน GitHub Pages/DNS/HTTPS), Monitoring/Analytics (✅ Product Owner Verified ผ่าน Firebase Console), External Verification (✅ Product Owner Verified — Auth/Firestore/Storage/Billing/Analytics ครบผ่าน Firebase Console)</p>
+      <p style="margin-top:8px;"><strong>Known Risks (สรุป, ไม่ใช่ Blocker)</strong>: (1) Storage rules propertyPhotos/profilePhotos write ไม่เช็ค ownership เจาะจง — ความเสี่ยงต่ำเพราะ Firestore ownership check เป็นตัวป้องกันจริง (2) Agent Signup password fields เป็น type="text" — Known Issue เดิม ไม่ใช่ config ของ Firebase (3) ไม่มี composite index — ไม่เป็นปัญหาตอนนี้ แต่ต้องระวังเมื่อ Search & Filters ขยายเป็น server-side query</p>
+      <p style="margin-top:8px;"><strong>Post-launch Backlog (ไม่ใช่ Blocker ของ Mission 09)</strong>: Analytics Events แบบละเอียด, Monitoring Alerts, Performance Optimization, Emulator-based live permission test</p>
+      <p style="margin-top:8px;"><strong>Release Status</strong>: 🚀 <strong>RELEASED v1.0</strong> — ครบ 12/12 Steps, Product Owner ยืนยัน Steps 8/9/11 ผ่าน Firebase Console/GitHub โดยตรงแล้ว</p>
     </div>
   </details>
+
+  <div class="m01-card" style="border:2px solid oklch(55% 0.13 150); background:oklch(97% 0.04 150);">
+    <span class="m01-title">🏁 Official Completion Notice</span>
+    <p style="font-size:12.5px; margin:4px 0;"><strong>Project</strong>: huahin.properties &nbsp;|&nbsp; <strong>Mission</strong>: Mission 09 — Firebase Infrastructure &nbsp;|&nbsp; <strong>Version</strong>: v1.0 &nbsp;|&nbsp; <strong>Status</strong>: ✅ COMPLETED</p>
+    <p style="font-size:12.5px; margin:4px 0;"><strong>Approved By</strong>: Product Owner (verified Steps 8/9/11 directly via GitHub + Firebase Console) &nbsp;|&nbsp; <strong>Completion Date</strong>: 22 กรกฎาคม 2569</p>
+    <p style="font-size:12.5px; margin:4px 0;"><strong>Summary</strong>: Firebase Infrastructure audited end-to-end — Firestore Rules (production deny-by-default), Storage Rules, Auth (4 providers), Indexes, Production Hardening confirmed from source; Hosting/SSL (GitHub Pages, custom domain, HTTPS enforced), Monitoring/Analytics, and Console-level Auth/Firestore/Storage/Billing/Analytics confirmed directly by Product Owner. No blocking issues found.</p>
+    <p style="font-size:12.5px; margin:4px 0;"><strong>Superseded By</strong>: — &nbsp;|&nbsp; <strong>Next Mission</strong>: To be selected from Mission Library (01-06, 08, 10, 12 remain Planning)</p>
+  </div>
 
 </div>
 
@@ -241,10 +247,10 @@ class Component extends DCLogic {
       { step: "Step 5 — Firestore Security Validation", status: "Complete (Static Review)", color: "🟢" },
       { step: "Step 6 — Cloud Storage Rules", status: "Complete", color: "🟢" },
       { step: "Step 7 — Indexes & Query Performance", status: "Complete", color: "🟢" },
-      { step: "Step 8 — Hosting/Domain/SSL/Environment", status: "Ready for Verification", color: "🔵" },
-      { step: "Step 9 — Monitoring/Logging/Alerts", status: "Ready for Verification", color: "🔵" },
+      { step: "Step 8 — Hosting/Domain/SSL/Environment", status: "Complete (Product Owner Verified)", color: "🟢" },
+      { step: "Step 9 — Monitoring/Logging/Alerts", status: "Complete (Product Owner Verified)", color: "🟢" },
       { step: "Step 10 — Production Hardening Checklist", status: "Complete", color: "🟢" },
-      { step: "Step 11 — External Verification", status: "Ready for Verification", color: "🔵" },
+      { step: "Step 11 — External Verification", status: "Complete (Product Owner Verified)", color: "🟢" },
       { step: "Step 12 — Mission Report", status: "Complete", color: "🟢" },
     ];
     return { step1Rows, step5Rows, hardeningRows, stepProgress };

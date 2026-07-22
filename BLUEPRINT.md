@@ -1162,6 +1162,18 @@ component เดียว, AI Image→Alt-text wiring)
 
 **Superseded By**: —
 
+## 24.14 Firebase Infrastructure — Mission 09 (22 ก.ค. 2569, 🚀 RELEASED v1.0)
+
+**Mission Purpose**: ตรวจสอบ Firebase Infrastructure ทั้งหมด (Firestore, Auth, Storage, Functions, Hosting, Monitoring) ให้พร้อม Production ตามมาตรฐาน Mission Framework — ไม่สร้าง Framework ใหม่
+
+**สถานะสุดท้าย**: 🚀 RELEASED v1.0 (12/12 Steps Complete) — Firebase Infrastructure Readiness 100% — รายละเอียดเต็มที่ `Mission 09 - Firebase Infrastructure.dc.html`
+
+**สิ่งที่ทำเสร็จแล้ว**: ยืนยัน Firestore Rules deny-by-default (17 collections, isAdmin/isOwner role model), Storage Rules (1 Known Risk ระดับต่ำ, ไม่ใช่ Blocker), Auth 4 providers, Indexes (ไม่จำเป็นในสถานะปัจจุบัน), Production Hardening Checklist; Product Owner ยืนยัน Hosting/Domain/SSL (GitHub Pages, custom domain huahin.properties, DNS, HTTPS enforced), Monitoring/Analytics (Firebase Analytics เปิดใช้งาน), และ External Verification (Auth/Firestore/Storage/Billing Blaze/Analytics) โดยตรงผ่าน Firebase Console/GitHub
+
+**Post-launch Backlog (ไม่ใช่ Blocker)**: Analytics Events แบบละเอียด, Monitoring Alerts, Performance Optimization
+
+**Superseded By**: —
+
 ## 24.13 Export Package Standard (22 ก.ค. 2569, Product Owner Approved)
 
 **มาตรฐานถาวร**: ทุกไฟล์ใน export package ต้องมีชื่อไฟล์สุดท้ายที่พร้อม Upload ทันที ห้ามต้อง Rename ด้วยมือก่อน Upload
