@@ -1223,7 +1223,9 @@ Mission 01 (QA & Review Standard Framework) และ Mission 02 (SEO Foundation
 
 **Mission Purpose**: สร้างมาตรฐานกลาง (PASS/HOLD/NOT PASS, Verified/Partially Verified/Pending Verification, Readiness %, Evidence Standard, Approval Workflow) ให้ Claude/Claude Code/Product Owner/CEO/Developer คนใหม่ใช้ความหมายตรงกันทั้งโครงการ
 
-**Mission 11 — สถานะสุดท้าย**: 🚀 RELEASED v1.2 (22 ก.ค. 2569) — ครบ 12/12 Steps + Standard Mission Management Framework ระดับโครงการ (Mission Library/Mission Archive/Mission Template) — Product Owner Final Authorization อนุมัติแล้ว, Architecture (12-Step/Readiness Formula/Evidence Matrix/Approval Workflow) LOCKED ไม่มีการแก้ไขยาย Steps 3/4/5/8/9/12 ให้ลึกครบตามเกณฑ์แล้ว ดูรายละเอียดครบใน `Mission 11 - QA Review Standard.dc.html` และ §24.10 ด้านล่าง
+**Mission 11 — สถานะสุดท้าย**: 🚀 RELEASED v1.2 (22 ก.ค. 2569) — ครบ 12/12 Steps + Standard Mission Management Framework ระดับโครงการ (Mission Library/Mission Archive/Mission Template) — Product Owner Final Authorization อนุมัติแล้ว, Architecture (12-Step/Readiness Formula/Evidence Matrix/Approval Workflow) LOCKED ไม่มีการแก้ไข
+
+**Step 8 Reopened (23 ก.ค. 2569, Product Owner Directive)**: Mission Control Dashboard/UI Review — พบและแก้ 3 ข้อบกพร่องจริง: (1) ปุ่ม "เพิ่มรายการ" 6 ปุ่มมีข้อความไทยตัดขาด/เพี้ยน แก้เป็น "+ เพิ่มรายการใหม่" ครบ (2) Nav ขาดลิงก์ Mission 11 เพิ่มแล้ว (3) ตัวเลข "ความคืบหน้ารวม" ผิดสูตร (73% ควรเป็น 67% จาก 8/12) แก้ไขแล้ว, เพิ่ม error banner เมื่อโหลดข้อมูลล้มเหลว — ดูรายละเอียดเต็มที่ Mission 11 - QA Review Standard.dc.html Step 8 Addendumยาย Steps 3/4/5/8/9/12 ให้ลึกครบตามเกณฑ์แล้ว ดูรายละเอียดครบใน `Mission 11 - QA Review Standard.dc.html` และ §24.10 ด้านล่าง
 
 ## 24.10 QA & Review Standard Framework v1.0 — Single Source of Truth (22 ก.ค. 2569)
 

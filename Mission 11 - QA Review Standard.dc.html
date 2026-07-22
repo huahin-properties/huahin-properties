@@ -303,6 +303,19 @@
       </ul>
       <span class="m01-title" style="margin-top:10px;">{{ universalReportExample.title }}</span>
       <p style="font-size:12px; background:oklch(97% 0.005 70); padding:10px; border-radius:6px;">{{ universalReportExample.body }}</p>
+
+      <span class="m01-title" style="margin-top:14px; display:block;">📋 Step 8 Addendum — Mission Control Dashboard/UI Review (Reopened 23 Jul 2026, Product Owner Directive)</span>
+      <p style="font-size:12.5px;">Read first per directive: Mission Control.dc.html source, Mission 11 Dashboard, Launch Readiness Dashboard, Mission Library, BLUEPRINT.md, RELEASE CHECKLIST.md, PROJECT_HISTORY.md, CEO Guide, firebase-client.js (shared component Mission Control depends on).</p>
+      <table style="width:100%; border-collapse:collapse; font-size:12px; margin-top:6px;">
+        <tr style="text-align:left; color:oklch(50% 0.02 60); border-bottom:1px solid oklch(90% 0.01 70);"><th style="padding:4px 8px 4px 0;">Sub-step</th><th style="padding:4px 8px;">Finding</th><th style="padding:4px 8px;">Action</th></tr>
+        <tr><td style="padding:4px 8px 4px 0; font-weight:600;">8.1 Functional</td><td style="padding:4px 8px;">6 "add item" buttons across Evolution/Systems/Progress/Next/Blockers/Decisions showed truncated/garbled Thai text ("+ เพิ่มรายการม" / "...ึก")</td><td style="padding:4px 8px;">Fixed to "+ เพิ่มรายการใหม่" on all 6</td></tr>
+        <tr><td style="padding:4px 8px 4px 0; font-weight:600;">8.2 Navigation</td><td style="padding:4px 8px;">All linked files (Admin Login, Admin Dashboard, Mission 07/08/09, Mission Library, CEO Guide) verified to exist; Mission 11 itself was missing from the nav row</td><td style="padding:4px 8px;">Added Mission 11 nav link</td></tr>
+        <tr><td style="padding:4px 8px 4px 0; font-weight:600;">8.3 Dashboard Consistency</td><td style="padding:4px 8px;">Step board footer showed "≈73%" but 8/12 complete = 67%, an arithmetic mismatch (not synced with Launch Readiness's computed-average pattern)</td><td style="padding:4px 8px;">Corrected to "≈67%"</td></tr>
+        <tr><td style="padding:4px 8px 4px 0; font-weight:600;">8.4 Permission</td><td style="padding:4px 8px;">Guest/Admin gate (authChecked → isAdmin → Admin Login redirect) reviewed — no issues found</td><td style="padding:4px 8px;">No change needed</td></tr>
+        <tr><td style="padding:4px 8px 4px 0; font-weight:600;">8.5 Error Handling</td><td style="padding:4px 8px;">Firestore fetch failure caught but silently rendered an all-blank form with loaded:true — admin could unknowingly Save over real data</td><td style="padding:4px 8px;">Added loadError state + visible warning banner ("อย่ากด Save ทับ")</td></tr>
+        <tr><td style="padding:4px 8px 4px 0; font-weight:600;">8.6 Documentation</td><td style="padding:4px 8px;">Cross-doc sync required</td><td style="padding:4px 8px;">This entry + BLUEPRINT.md §24.10 addendum + PROJECT_HISTORY.md entry added</td></tr>
+      </table>
+      <p style="font-size:12px; margin-top:6px; color:oklch(50% 0.02 60);">Evidence: Mission Control.dc.html (read in full, fixes verified live in preview — console clean, admin gate renders correctly). No other completed Step (1-7, 9-12) touched.</p>
     </div>
   </details>
 

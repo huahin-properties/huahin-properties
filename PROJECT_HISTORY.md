@@ -69,6 +69,16 @@ Permanent record of completed Features, Sprints, Phases, and Releases. Updated e
 - **Superseded By**: —
 - **Next Phase**: Product Owner decides on Step 5 (Recommendation Engine) → owner completes Step 11 (GitHub upload/deploy) → Mission 08 Release
 
+## Mission 11 — Step 8 Reopened: Mission Control Dashboard/UI Review (23 กรกฎาคม 2569)
+- **Date**: 23 กรกฎาคม 2569
+- **Project**: huahin.properties
+- **Work**: Product Owner reopened Mission 11 Step 8 only, scoped to Mission Control.dc.html QA (8.1 Functional, 8.2 Navigation, 8.3 Dashboard Consistency, 8.4 Permission, 8.5 Error Handling, 8.6 Documentation). Fixed: 6 garbled "add item" button labels, missing Mission 11 nav link, incorrect 73%→67% progress arithmetic, added a load-error warning banner to prevent accidental blank-data overwrite.
+- **Status**: 🟢 Step 8 back to Complete (with addendum) — Mission 11 overall status unchanged (v1.2 RELEASED)
+- **Approved By**: Pending Product Owner Review
+- **Summary**: Real, evidence-based fixes only — no redesign of Mission Control. Full sub-task detail in Mission 11 - QA Review Standard.dc.html Step 8 Addendum.
+- **Superseded By**: —
+- **Next Phase**: Product Owner Review of Step 8 Addendum
+
 ## Mission 09 — Firebase Infrastructure v0.2 (In Progress, 22 กรกฎาคม 2569)
 - **Date**: 22 กรกฎาคม 2569
 - **Project**: huahin.properties

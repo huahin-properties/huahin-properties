@@ -39,7 +39,7 @@ Verify `export-for-github/` contains the latest version of every file above:
 4. Confirm repository is up to date — no pending changes left un-uploaded
 
 ## 6. Completion Record
-- **Version**: Mission 08 — AI Features v0.1 (Active / Review Pending)
-- **Release Date**: N/A — not yet released, 11/12 Steps resolved
+- **Version**: Mission 11 — QA / Review Standard, Step 8 Reopened (Dashboard/UI Review Addendum)
+- **Release Date**: N/A — awaiting Product Owner approval
 - **Released By**: N/A
-- **Notes**: Full evidence audit completed for AI Quick Add, ContactRail Chatbot, AI Provider/Architecture, and Cost/Safety. Step 5 (Recommendation Engine) closed via Product Owner Decision — deferred to Future Backlog, not a failed step. Mission remains Active/Review Pending — Step 11 requires Product Owner verification of GitHub upload/deploy before Step 12 Official Completion.
+- **Notes**: Mission 11 overall remains 🚀 RELEASED v1.2 (12/12 Steps, unchanged). Step 8 was reopened solely for a Mission Control.dc.html QA pass: fixed 6 garbled button labels, added missing Mission 11 nav link, corrected 73%→67% progress arithmetic, added load-error warning banner. No other Step touched. Full detail in Mission 11 - QA Review Standard.dc.html Step 8 Addendum.

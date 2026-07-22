@@ -53,6 +53,7 @@
       <a href="./Mission%2007%20-%20SEO%20Foundation.dc.html" style="display:inline-flex; align-items:center; gap:7px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:9px 18px; border-radius:100px; font-size:13px;">🔍 Mission 07</a>
       <a href="./Mission%2009%20-%20Firebase%20Infrastructure.dc.html" style="display:inline-flex; align-items:center; gap:7px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:9px 18px; border-radius:100px; font-size:13px;">🔥 Mission 09</a>
       <a href="./Mission%2008%20-%20AI%20Features.dc.html" style="display:inline-flex; align-items:center; gap:7px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:9px 18px; border-radius:100px; font-size:13px;">🧠 Mission 08</a>
+      <a href="./Mission%2011%20-%20QA%20Review%20Standard.dc.html" style="display:inline-flex; align-items:center; gap:7px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:9px 18px; border-radius:100px; font-size:13px;">✅ Mission 11</a>
       <a href="./Mission%20Library.dc.html" style="display:inline-flex; align-items:center; gap:7px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:9px 18px; border-radius:100px; font-size:13px;">📚 Mission Library</a>
       <a href="./CEO%20Guide.dc.html" style="display:inline-flex; align-items:center; gap:7px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:9px 18px; border-radius:100px; font-size:13px; font-weight:600; white-space:nowrap;">📘 เปิดคู่มือ CEO</a>
       <a href="Admin Dashboard.dc.html" style="font-size:13px; text-decoration:none; white-space:nowrap; margin-top:8px;">← กลับ Admin Dashboard</a>
@@ -83,6 +84,10 @@
       <div style="text-align:center; padding:60px 0; color:oklch(50% 0.02 60); font-size:14px;">กำลังโหลด…</div>
     </sc-if>
 
+    <sc-if value="{{ loadError }}">
+      <div style="background:oklch(97% 0.05 30); border:1px solid oklch(85% 0.1 30); border-radius:8px; padding:14px 18px; margin-bottom:20px; font-size:13px; color:oklch(35% 0.1 30);">⚠️ โหลดข้อมูล Project Memory ไม่สำเร็จ (เช่น เชื่อมต่อ Firestore ไม่ได้) — ฟอร์มด้านล่างว่างเปล่าเพราะไม่มีข้อมูลจริงมาแสดง <strong>อย่ากด Save ทับ</strong> จนกว่าจะรีเฟรชหน้านี้และข้อความนี้หายไป</div>
+    </sc-if>
+
     <sc-if value="{{ loaded }}">
     <div style="display:flex; flex-direction:column; gap:40px;">
 
@@ -111,7 +116,7 @@
             <div>Sprint ปัจจุบัน: <strong>{{ currentTask }}</strong></div>
             <div>เสร็จแล้ว: <strong>8/12</strong></div>
             <div>เหลือ: <strong>4/12</strong></div>
-            <div>ความคืบหน้ารวม: <strong>≈73%</strong></div>
+            <div>ความคืบหน้ารวม: <strong>≈67%</strong></div>
             <div>ปัญหาที่ติดขัด: <strong>1</strong> (สถานะ Firestore Rules Production)</div>
             <div>รอการตัดสินใจ: <strong>4</strong> (ดู Open Decisions ใน BLUEPRINT §24.5)</div>
           </div>
@@ -214,7 +219,7 @@
             <div style="display:flex; gap:8px;">
               <input value="{{ newEvoReason }}" onChange="{{ onNewEvoReasonChange }}" placeholder="ทำไมจึงเปลี่ยน…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
               <input value="{{ newEvoResult }}" onChange="{{ onNewEvoResultChange }}" placeholder="ผลที่เกิดขึ้น (ถ้ามี)…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
-              <div onClick="{{ onAddEvo }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่มรายการึก</div>
+              <div onClick="{{ onAddEvo }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่มรายการใหม่</div>
             </div>
           </div>
         </div>
@@ -237,7 +242,7 @@
           </div>
           <div style="display:flex; gap:8px;">
             <input value="{{ newSystemText }}" onChange="{{ onNewSystemTextChange }}" placeholder="เพิ่มระบบ (เริ่มต้นเป็น 'ใช้งานอยู่')…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
-            <div onClick="{{ onAddSystem }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่มรายการม</div>
+            <div onClick="{{ onAddSystem }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่มรายการใหม่</div>
           </div>
         </div>
       </div>
@@ -262,7 +267,7 @@
           </div>
           <div style="display:flex; gap:8px;">
             <input value="{{ newProgressText }}" onChange="{{ onNewProgressTextChange }}" placeholder="เพิ่มงานใน Checklist…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
-            <div onClick="{{ onAddProgress }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่มรายการม</div>
+            <div onClick="{{ onAddProgress }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่มรายการใหม่</div>
           </div>
         </div>
       </div>
@@ -301,7 +306,7 @@
           </div>
           <div style="display:flex; gap:8px;">
             <input value="{{ newNextText }}" onChange="{{ onNewNextTextChange }}" placeholder="เพิ่มงานถัดไป…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
-            <div onClick="{{ onAddNext }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่มรายการม</div>
+            <div onClick="{{ onAddNext }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่มรายการใหม่</div>
           </div>
         </div>
 
@@ -318,7 +323,7 @@
           </div>
           <div style="display:flex; gap:8px;">
             <input value="{{ newBlockerText }}" onChange="{{ onNewBlockerTextChange }}" placeholder="เพิ่มปัญหาที่ติดอยู่…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
-            <div onClick="{{ onAddBlocker }}" style="background:oklch(40% 0.13 25); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่มรายการม</div>
+            <div onClick="{{ onAddBlocker }}" style="background:oklch(40% 0.13 25); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่มรายการใหม่</div>
           </div>
         </div>
 
@@ -336,7 +341,7 @@
           </div>
           <div style="display:flex; gap:8px;">
             <input value="{{ newDecisionText }}" onChange="{{ onNewDecisionTextChange }}" placeholder="บันทึกมติใหม่…" style="flex:1; border:1px solid oklch(90% 0.01 70); border-radius:6px; padding:8px 10px; font-size:13.5px;" />
-            <div onClick="{{ onAddDecision }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่มรายการึก</div>
+            <div onClick="{{ onAddDecision }}" style="background:oklch(22% 0.02 60); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">+ เพิ่มรายการใหม่</div>
           </div>
         </div>
 
@@ -416,7 +421,7 @@ class Component extends DCLogic {
         this.setState({ loaded: true, ...seed });
       }
     } catch (e) {
-      this.setState({ loaded: true });
+      this.setState({ loaded: true, loadError: true });
     }
   }
 
@@ -449,8 +454,8 @@ class Component extends DCLogic {
         { id: "s3", text: "AI Quick Add — ร่างประกาศจากรูป/เสียง", active: true },
         { id: "s4", text: "แพ็กเกจถาวรฟรี (permanent free tier) แบบเดิม", active: false },
       ],
-      today: "Mission 08 — AI Features: Active/Review Pending, 11/12 Steps resolved (Step 5 closed by Product Owner Decision — Recommendation Engine deferred to Backlog, not a failed step). Full evidence audit done: Provider confirmed Claude-only, no OpenAI/Gemini anywhere in repo; production secrets server-side only; ContactRail escalation/error-fallback paths verified; Chatbot spending cap confirmed Backlog. Step 11 awaiting Product Owner verification of GitHub upload/deploy",
-      currentTask: "Mission 08 Step 11 Ready for Product Owner Verification — Step 12 Official Completion NOT issued until Product Owner confirms GitHub upload/deploy. Backlog: photo alt-text wiring, AI Recommendation Engine (Future Product Evaluation), chatbot spending cap",
+      today: "Mission 11 — QA / Review Standard: Step 8 reopened per Product Owner Directive (23 Jul 2026) for a Mission Control Dashboard/UI Review — fixed 6 garbled button labels, added missing Mission 11 nav link, corrected 73%→67% progress arithmetic, added load-error warning banner. Mission 11 overall remains RELEASED v1.2 (12/12 Steps unchanged). Awaiting Product Owner approval of Step 8 Addendum before Official Completion Notice",
+      currentTask: "Mission 11 Step 8 Addendum awaiting Product Owner Review/GitHub upload verification. Mission 08 — AI Features remains Active/Review Pending in parallel (Step 11 Ready for Product Owner Verification, Step 12 not yet issued). Backlog: photo alt-text wiring, AI Recommendation Engine (Future Product Evaluation), chatbot spending cap",
       progress: [
         { id: "p1", text: "Membership v2 (Trial/Package1/2/3, Approval Queue, Expiry)", done: true },
         { id: "p2", text: "CEO Acceptance Testing รอบแรกเริ่มแล้ว", done: true },
@@ -645,7 +650,7 @@ class Component extends DCLogic {
     const doneCount = s.progress.filter((p) => p.done).length;
 
     return {
-      authChecked: s.authChecked, isAdmin: s.isAdmin, loaded: s.loaded,
+      authChecked: s.authChecked, isAdmin: s.isAdmin, loaded: s.loaded, loadError: s.loadError || false,
       problemText: s.problemText, onProblemChange: (e) => this.persist({ problemText: e.target.value }),
       visionText: s.visionText, onVisionChange: (e) => this.persist({ visionText: e.target.value }),
       businessGoal: s.businessGoal, onBusinessGoalChange: (e) => this.persist({ businessGoal: e.target.value }),
