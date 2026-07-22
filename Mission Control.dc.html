@@ -52,12 +52,32 @@
       </div>
       <a href="./Mission%2007%20-%20SEO%20Foundation.dc.html" style="display:inline-flex; align-items:center; gap:7px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:9px 18px; border-radius:100px; font-size:13px;">🔍 Mission 07</a>
       <a href="./Mission%2009%20-%20Firebase%20Infrastructure.dc.html" style="display:inline-flex; align-items:center; gap:7px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:9px 18px; border-radius:100px; font-size:13px;">🔥 Mission 09</a>
+      <a href="./Mission%2008%20-%20AI%20Features.dc.html" style="display:inline-flex; align-items:center; gap:7px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:9px 18px; border-radius:100px; font-size:13px;">🧠 Mission 08</a>
       <a href="./Mission%20Library.dc.html" style="display:inline-flex; align-items:center; gap:7px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:9px 18px; border-radius:100px; font-size:13px;">📚 Mission Library</a>
       <a href="./CEO%20Guide.dc.html" style="display:inline-flex; align-items:center; gap:7px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:9px 18px; border-radius:100px; font-size:13px; font-weight:600; white-space:nowrap;">📘 เปิดคู่มือ CEO</a>
       <a href="Admin Dashboard.dc.html" style="font-size:13px; text-decoration:none; white-space:nowrap; margin-top:8px;">← กลับ Admin Dashboard</a>
     </div>
     <div style="font-size:14px; color:oklch(42% 0.02 60); line-height:1.75; max-width:60ch; margin-bottom:8px;">Project Memory คือความทรงจำของบริษัท huahin.properties — ไม่ใช่ Dashboard ไม่ใช่เอกสาร แต่คือที่ที่ CEO, ChatGPT, Claude และ AI รุ่นต่อไป อ่านแล้วเข้าใจโครงการทั้งหมดได้ทันที เสมือนอยู่กับโครงการมาตั้งแต่วันแรก โดยไม่ต้องมีใครมาอธิบาย</div>
     <div style="font-size:11.5px; color:oklch(55% 0.1 25); font-weight:600; letter-spacing:0.03em; margin-bottom:36px;">PROJECT HEADQUARTERS — แหล่งความจริงเดียวของทั้งโครงการ</div>
+
+    <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:16px 18px; margin-bottom:24px;">
+      <div style="font-size:11px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:oklch(45% 0.02 60); margin-bottom:8px;">🔢 Mission Numbering Standard</div>
+      <div style="font-size:12px; color:oklch(40% 0.02 60); margin-bottom:10px;">Mission Number = ตัวเลข Domain ในหน้า Launch Readiness Dashboard เสมอ (ไม่ใช่ลำดับการสร้าง) — ทุก Mission ในอนาคตต้องใช้เลขนี้ตั้งแต่เริ่ม ไม่ต้อง renumber ภายหลังอีก</div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:4px 16px; font-size:12px;">
+        <div>Mission 01 — Website (Core Pages)</div>
+        <div>Mission 02 — Search & Filters</div>
+        <div>Mission 03 — Property (Listing/Approval)</div>
+        <div>Mission 04 — Membership & Authentication</div>
+        <div>Mission 05 — Admin Tools</div>
+        <div>Mission 06 — Packages / Pricing</div>
+        <div>Mission 07 — SEO Foundation</div>
+        <div>Mission 08 — AI Features</div>
+        <div>Mission 09 — Firebase Infrastructure</div>
+        <div>Mission 10 — Security</div>
+        <div>Mission 11 — QA / Review Standard</div>
+        <div>Mission 12 — Deployment</div>
+      </div>
+    </div>
 
     <sc-if value="{{ !loaded }}" hint-placeholder-val="{{ true }}">
       <div style="text-align:center; padding:60px 0; color:oklch(50% 0.02 60); font-size:14px;">กำลังโหลด…</div>
@@ -423,13 +443,14 @@ class Component extends DCLogic {
       ],
       missionControlVersion: "Version 1 (FINAL) — อนุมัติจาก CEO และผ่านการตรวจจาก Product Owner เรียบร้อยแล้ว | Phase \"Mission Control Version 1\" ปิดแล้ว — สถานะ Completed | Mission Control Version 1 (FINAL) และ BLUEPRINT.md เป็น Source of Truth หลักสำหรับ Workflow ถัดไป | Phase closed. | PHS Version 1 (Project Handover System) — RELEASED AND CLOSED (20 July 2026). Next operational action: start a new ChatGPT conversation using the approved handover workflow (START HERE.md → Mission Control.dc.html → BLUEPRINT.md → HANDOVER PROMPT.md).",
       systems: [
-        { id: "s0", text: "Mission 11 — QA & Review Standard Framework: 🚀 RELEASED v1.1 (22 Jul 2026, 12/12 Steps + Product Owner improvement review completed) — QA Domain Readiness 90% — ดู Mission 11 - QA Review Standard.dc.html + BLUEPRINT.md §24.10", active: true },\n        { id: "s1", text: "Membership v2 — Trial/Package1(5)/Package2(12)/Package3(25), Approval Queue, 30-day Expiry", active: true },
+        { id: "s0", text: "Mission 11 — QA & Review Standard Framework: 🚀 RELEASED v1.1 (22 Jul 2026, 12/12 Steps + Product Owner improvement review completed) — QA Domain Readiness 90% — ดู Mission 11 - QA Review Standard.dc.html + BLUEPRINT.md §24.10", active: true },
+        { id: "s1", text: "Membership v2 — Trial/Package1(5)/Package2(12)/Package3(25), Approval Queue, 30-day Expiry", active: true },
         { id: "s2", text: "AI Chatbot (ContactRail) ผ่าน Firebase Function proxy", active: true },
         { id: "s3", text: "AI Quick Add — ร่างประกาศจากรูป/เสียง", active: true },
         { id: "s4", text: "แพ็กเกจถาวรฟรี (permanent free tier) แบบเดิม", active: false },
       ],
-      today: "Mission 09 — Firebase Infrastructure: RELEASED v1.0 (22 Jul 2026, 12/12 Steps). Source audit confirmed Firestore Rules production deny-by-default, Storage Rules, Auth (4 providers), Indexes, Hardening. Product Owner independently verified Hosting/SSL (GitHub Pages, huahin.properties domain, HTTPS enforced), Monitoring/Analytics, and External Verification (Auth/Firestore/Storage/Billing Blaze/Analytics) via Firebase Console — no blocking issues",
-      currentTask: "Mission 09 CLOSED. Post-launch Backlog (Analytics Events, Monitoring Alerts, Performance Optimization) carried forward as non-blocking. Awaiting CEO selection of next Mission from Mission Library (01-06, 08, 10, 12 remain Planning)",ta ครบ, favicon ครบ 9 หน้า public, ตรวจ crawlability/duplicate-meta/title-uniqueness/structured-data ทั้งหมด PASS), Step 8 Multilingual SEO เสร็จแบบ Documentation (Future Enhancement + Migration Plan สำหรับ URL-based routing, ไม่สร้าง hreflang จริงเพราะสถาปัตยกรรม URL ยังไม่รองรับ). SEO Domain 55%→92%. Steps 1-8, 11-12 Complete (10/12). Step 9/10 ยังเป็น READY FOR VERIFICATION รอเจ้าของ/production จริง",
+      today: "Mission 08 — AI Features: Active/Review Pending, 11/12 Steps resolved (Step 5 closed by Product Owner Decision — Recommendation Engine deferred to Backlog, not a failed step). Full evidence audit done: Provider confirmed Claude-only, no OpenAI/Gemini anywhere in repo; production secrets server-side only; ContactRail escalation/error-fallback paths verified; Chatbot spending cap confirmed Backlog. Step 11 awaiting Product Owner verification of GitHub upload/deploy",
+      currentTask: "Mission 08 Step 11 Ready for Product Owner Verification — Step 12 Official Completion NOT issued until Product Owner confirms GitHub upload/deploy. Backlog: photo alt-text wiring, AI Recommendation Engine (Future Product Evaluation), chatbot spending cap",
       progress: [
         { id: "p1", text: "Membership v2 (Trial/Package1/2/3, Approval Queue, Expiry)", done: true },
         { id: "p2", text: "CEO Acceptance Testing รอบแรกเริ่มแล้ว", done: true },

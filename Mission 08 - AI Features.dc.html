@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Mission 08 — AI Features</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    .m01-title { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: oklch(45% 0.02 60); display: block; margin-bottom: 4px; }
+    .m01-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .m01-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; color: oklch(50% 0.02 60); border-bottom: 2px solid oklch(88% 0.01 70); padding: 6px 8px; }
+    .m01-table td { padding: 7px 8px; border-bottom: 1px solid oklch(92% 0.01 70); vertical-align: top; }
+    .m01-card { background: white; border: 1px solid oklch(90% 0.01 70); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
+    .m01-tablewrap { overflow-x: auto; }
+    .m01-step-details summary { cursor: pointer; font-family: 'Playfair Display', serif; font-size: 16px; color: oklch(20% 0.02 60); }
+  </style>
+</helmet>
+<div style="max-width:1020px; margin:0 auto; padding:28px 20px 60px; color:oklch(25% 0.02 60); line-height:1.6;">
+
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:6px; flex-wrap:wrap;">
+    <div style="width:38px; height:38px; border-radius:10px; background:oklch(35% 0.09 25); display:flex; align-items:center; justify-content:center; color:white; font-size:19px;">🧠</div>
+    <div>
+      <div style="font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:oklch(20% 0.02 60);">MISSION 08</div>
+      <div style="font-size:13px; color:oklch(45% 0.02 60);">AI Features — v0.1 (built from Mission Template)</div>
+    </div>
+    <div style="margin-left:auto; background:oklch(90% 0.08 80); color:oklch(35% 0.1 60); font-weight:700; font-size:12.5px; padding:6px 14px; border-radius:100px;">🟡 ACTIVE / REVIEW PENDING — 11/12 STEPS RESOLVED, 1 AWAITING VERIFICATION</div>
+  </div>
+
+  <div style="display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;">
+    <a href="./Mission%20Control.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🧭 Mission Control</a>
+    <a href="./Launch%20Readiness%20Dashboard.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🚦 Launch Readiness</a>
+    <a href="./CEO%20Guide.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📘 CEO Guide</a>
+    <a href="./Mission%20Library.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📚 Mission Library</a>
+    <a href="./Mission%2009%20-%20Firebase%20Infrastructure.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🔥 Mission 09</a>
+    <span style="font-size:12.5px; background:oklch(90% 0.01 70); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🧠 Mission 08 (คุณอยู่ที่นี่)</span>
+  </div>
+
+  <div style="border:2px solid oklch(60% 0.14 150); border-radius:10px; padding:16px 18px; margin-bottom:20px; background:oklch(96% 0.05 150);">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px 18px; font-size:12.5px;">
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Mission Owner</div><div style="font-weight:600;">Product Owner</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Lead Implementer</div><div style="font-weight:600;">Claude</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Approver</div><div style="font-weight:600;">CEO</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Mission Status</div><div style="font-weight:600;">🟡 Active / Review Pending</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">AI Features Readiness</div><div style="font-weight:600;">70%</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Version</div><div style="font-weight:600;">v0.1</div></div>
+    </div>
+  </div>
+
+  <details class="m01-card m01-step-details" open="{{ true }}">
+    <summary>✅ Step 1 — AI Vision & Requirements</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p><strong>Vision ที่มีอยู่จริง</strong> (ยืนยันจาก BLUEPRINT.md/CLAUDE.md): "AI by Default" — ใช้ AI ลดงานซ้ำของ Admin/Lister ทุกที่ที่ปลอดภัยจะทำได้: (1) AI Quick Add — สร้างประกาศจากรูป/เสียง/PDF (2) AI Concierge/ContactRail Chatbot — ตอบลูกค้าแทน Admin</p>
+      <p><strong>Requirements ยืนยันจาก Source</strong>: Chatbot ต้องตอบจากข้อมูลจริงเท่านั้น (ห้ามมโนราคา/สถานะ), รองรับ 8 ภาษา auto-detect, ปฏิเสธ Restricted Topics อย่างสุภาพ; AI Quick Add ต้องสร้าง SEO title/description/keywords/photo captions ที่ใช้ได้จริงเป็น alt-text</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details" open="{{ true }}">
+    <summary>✅ Step 2 — AI Architecture Design</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p><strong>Architecture ที่ใช้จริง</strong>: Client (ContactRail.dc.html / AI Quick Add.dc.html) → <code>window.claude.complete()</code> (เฉพาะ preview environment นี้) หรือ Cloud Function <code>claudeComplete</code> (production) → Anthropic API (server-side secret ผ่าน Firebase Secret Manager) → ตอบกลับ client</p>
+      <p><strong>Data Context Injection</strong>: Chatbot ดึง CURRENT LISTINGS + AI Notes + AI Persona + AI Restrictions จาก Firestore ผ่าน firebase-client.js แล้วฉีดเข้า system prompt ทุกครั้งที่ถาม — ไม่มี fine-tuning หรือ vector DB ใช้ prompt injection แบบ context-window ล้วน (เหมาะกับขนาดข้อมูลปัจจุบัน 24 properties)</p>
+      <p><strong>ข้อจำกัดที่ทราบ</strong>: <code>window.claude.complete</code> ทำงานเฉพาะใน design-preview environment นี้เท่านั้น — Production ต้องผ่าน Cloud Function เสมอ (มี fallback logic อยู่แล้วในโค้ด ContactRail.dc.html บรรทัด 480-483)</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details" open="{{ true }}">
+    <summary>✅ Step 3 — AI Provider and Architecture — Evidence Audit</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p><strong>Provider ที่ใช้งานจริง</strong>: <strong>Anthropic Claude เท่านั้น</strong> — ยืนยันจาก functions/index.js (<code>fetch("https://api.anthropic.com/v1/messages")</code>, header <code>x-api-key</code> จาก ANTHROPIC_API_KEY secret)</p>
+      <p><strong>ไม่พบ OpenAI หรือ Gemini</strong> — ค้นหาทั้ง Repository (keyword: openai, gemini, OPENAI_API_KEY, GEMINI_API_KEY) ไม่พบการเชื่อมต่อหรือ dependency ใดๆ ทั้งสิ้น — ยืนยันว่า Claude เป็น Provider เดียวจริง ไม่มี integration ที่ active หรือ dormant หลงเหลืออยู่</p>
+      <p><strong>Production Secrets เป็น Server-side จริง</strong>: ANTHROPIC_API_KEY ใช้ <code>defineSecret()</code> จาก firebase-functions/params เก็บใน Firebase Secret Manager — เรียกด้วย <code>.value()</code> เฉพาะภายใน Cloud Function เท่านั้น</p>
+      <p><strong>ไม่พบ API Secret รั่วไหลใน Client Files</strong> — ตรวจสอบ ContactRail.dc.html และ AI Quick Add.dc.html แล้วไม่พบ API key ใดๆ ฝัง hardcode ทั้ง 2 ไฟล์เรียกผ่าน Cloud Function URL เท่านั้น</p>
+      <p><strong>แยก Preview-only Code จาก Production Code ชัดเจน</strong>: ContactRail.dc.html บรรทัด 480 มีเงื่อนไข <code>if (window.claude && window.claude.complete)</code> — ใช้ได้เฉพาะใน design-preview environment นี้เท่านั้น; หากไม่มี <code>window.claude</code> (กรณี Production จริง) จะ fallback ไปเรียก Cloud Function URL โดยตรงเสมอ (บรรทัด 483)</p>
+      <p><strong>Model ที่ใช้แยกตามงาน</strong>: claude-haiku-4-5 (chat แบบ real-time, max_tokens 600) และ claude-sonnet-4-5 (AI Quick Add ร่างประกาศ, max_tokens 4096)</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details" open="{{ true }}">
+    <summary>✅ ContactRail AI Chatbot — Evidence Audit (เสริม Step 6)</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p><strong>Source File</strong>: <code>ContactRail.dc.html</code> (ยืนยันโดยตรง)</p>
+      <p><strong>ใช้ข้อมูลจริง</strong>: ดึง CURRENT LISTINGS ผ่าน <code>getEffectiveProperties()</code> ฉีดเข้า system prompt ทุกครั้งที่ถาม — system prompt สั่งชัดเจนว่าตอบข้อเท็จจริง (ราคา/ห้อง/สถานะ/รหัสทรัพย์) จาก CURRENT LISTINGS context เท่านั้น ห้ามมโน</p>
+      <p><strong>ภาษาที่รองรับ</strong>: 8 ภาษา (EN/TH/RU/ZH/DE/NO/FR/IT) ยืนยันจาก CHAT_I18N object จริง — auto-detect ภาษาจากข้อความล่าสุดของลูกค้าเสมอ</p>
+      <p><strong>AI Persona/Restrictions</strong>: ดึงจาก Firestore ผ่าน fetchAiPersona()/fetchAiRestrictions()/fetchAiNotes() จริง — persona name/role default เป็น "Anna" หากยังไม่ตั้งค่า</p>
+      <p><strong>Restricted-topic Handling</strong>: system prompt สั่งให้ปฏิเสธหัวข้อต้องห้ามอย่างสุภาพ redirect ไปติดต่อแทน โดยไม่เปิดเผยว่ามีข้อจำกัดอยู่ (ยืนยันจาก prompt text จริง)</p>
+      <p><strong>ไม่มโนราคา/สถานะ/ทำเล/ข้อมูลทรัพย์</strong>: ยืนยันจาก system prompt บรรทัด FACTS ที่บังคับใช้เฉพาะ CURRENT LISTINGS เท่านั้น</p>
+      <p><strong>Escalation/Contact Path</strong>: ยืนยัน 2 กลไกจริง — (1) เมื่อ reply มีคำว่า "contact us"/"ติดต่อเรา" ฯลฯ (regex ตรวจ 7 ภาษา) ระบบแสดงปุ่ม "Contact us" ที่เปิด Inquiry Form ทันที (2) เมื่อเกิด Error จาก AI Service ระบบแสดงข้อความ "Sorry, something went wrong. Please try again or contact us directly." พร้อมปุ่ม Contact us เสมอ — ไม่ปล่อยให้ลูกค้าติดค้างโดยไม่มีทางออก</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details" open="{{ true }}">
+    <summary>✅ Step 4 — AI Service Layer (API Integration)</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p><strong>Cloud Function เดียวรองรับ 2 รูปแบบ Call</strong> (functions/index.js <code>claudeComplete</code>): (1) Chat mode — รับ {system, messages} ส่งตรงไป Messages API (2) Structured mode — รับ content + tool schema บังคับ Claude ตอบเป็น JSON ที่ validate โดย Anthropic เอง (ใช้ใน AI Quick Add เพื่อไม่ให้เกิด malformed JSON)</p>
+      <p><strong>Error Handling</strong>: try/catch ครบทั้ง 2 mode, ส่ง error message ที่มีประโยชน์กลับ client (ไม่ leak API key หรือ stack trace ดิบ)</p>
+      <p><strong>Timeout/Memory</strong>: timeoutSeconds: 300, memory: 512MiB — เพียงพอสำหรับ Sonnet ตอบยาวสุด 4096 tokens</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details">
+    <summary>✅ Step 5 — AI Property Recommendation Engine: Product Owner Decision Completed — Deferred to Future Backlog</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p>ไม่ใช่ Failed Step และไม่ใช่ Bug — Product Owner ตัดสินใจแล้วว่าไม่สร้าง Recommendation Engine ใน Mission 08 v0.1 เนื่องจากไม่ได้อยู่ใน Original Implementation (ซึ่งมีเพียง AI Quick Add และ ContactRail Chatbot), และต้องการ Business Rules/Ranking Logic/Consent/Data-Quality/Testing/Cost Review แยกต่างหากก่อน</p>
+      <span class="m01-title" style="margin-top:8px; display:block;">Future Backlog Item</span>
+      <p><strong>AI Property Recommendation Engine</strong> — Status: Future Product Evaluation — Priority: To Be Decided</p>
+      <p>ข้อกำหนดที่ต้องมีก่อนเริ่มพัฒนา: Recommendation business rules, Property ranking criteria, Customer preference data model, Privacy and consent review, AI cost estimate, Accuracy testing, Human-readable explanation of recommendations</p>
+      <p>ไม่มีการกำหนดหมายเลข Mission ใหม่ในขณะนี้ — จะจัดสรรตาม Mission Numbering Standard เมื่อ Product Owner อนุมัติให้เริ่ม</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details" open="{{ true }}">
+    <summary>✅ Step 6 — AI Listing Assistant (AI Quick Add) — Evidence Audit</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p><strong>Source File</strong>: <code>AI Quick Add.dc.html</code> (ยืนยันโดยตรง)</p>
+      <p><strong>Workflow จริง</strong>: อัปโหลดรูป (multi-select) → บันทึกเสียง (hold-to-talk, transcript แก้ไขได้ เพิ่มได้เรื่อยๆ) → แนบ PDF/รูป project doc (เสริม) → ใส่พิกัด Google Maps (decimal lat,lng) → กด "ให้ AI ร่างประกาศ" → รีวิว/แก้ไข draft → กรอกข้อมูลเจ้าของ → เผยแพร่จริง</p>
+      <p><strong>Generated Fields</strong> (structured tool schema, บังคับ format โดย Anthropic เอง): title, shortDesc, fullDesc, seoKeywords, photoCaptions (array, 1 ต่อรูป), internalNotes (แยกข้อมูลลับ เช่น ชื่อโครงการ/developer ไม่ให้ขึ้น public)</p>
+      <p><strong>SEO Title/Description/Keywords/Photo Captions</strong>: ยืนยันจาก prompt จริง — title เป็น SEO headline ผสมไทย/อังกฤษตาม pattern ที่คนค้นจริง, seoKeywords 10-14 คำ, photoCaptions ออกแบบเป็น '{{"{keyword-rich phrase}"}} {{"{{CODE}}"}}' สลับภาษาไทย/อังกฤษ 50/50</p>
+      <p><strong>Data Validation/Error Handling</strong>: fbCaptionError/refineError state มี UI แสดง error พร้อมปุ่ม "ลองใหม่"; รูปภาพต้องมีอย่างน้อย 1 รูปก่อน generate; ไม่พบ validation ฝั่ง client สำหรับพิกัด (lat,lng format) — ต้องพึ่งผู้ใช้กรอกถูกรูปแบบเอง เป็น Known Gap เล็กน้อย</p>
+      <p><strong>Alt Text</strong>: <strong>ยังเป็น Backlog</strong> — AI สร้าง photoCaptions ที่ออกแบบให้ใช้เป็น alt-text ได้อยู่แล้ว (มี {"{{CODE}}"} placeholder) แต่ <strong>ยังไม่ได้เชื่อมกับ &lt;img alt&gt; จริงบนหน้าเว็บไซต์ public</strong> — ยืนยันตรงกับ CLAUDE.md §24.8 ที่บันทึกไว้ก่อนหน้านี้</p>
+      <p><strong>Nearby POI</strong>: ใช้ Google Places + Distance Matrix API จริง (client-side, key จำกัดด้วย HTTP referrer) ค้นหา 7 ประเภทสถานที่ แล้วคำนวณระยะทาง/เวลาขับรถจริง — ไม่ได้ mock</p>
+      <p><strong>Facebook Post</strong>: AI ร่าง caption แยกจาก footer คงที่ (contact block + hashtag ที่ Admin ตั้งใน Site Content), Copy-to-clipboard พร้อมใช้</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details" open="{{ true }}">
+    <summary>✅ Step 7 — AI Content Generation (SEO / Translation / Description)</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p><strong>SEO Content Generation</strong>: ยืนยันจาก prompt จริงใน AI Quick Add.dc.html — title ออกแบบเป็น SEO headline ตาม pattern ที่คนค้นจริง (ผสมไทย/อังกฤษ), photoCaptions ออกแบบให้ใช้เป็น alt-text ได้ทันที (มี placeholder {"{{CODE}}"} ให้ template แทนรหัสทรัพย์จริง), สุ่มภาษาไทย/อังกฤษ 50/50 ต่อ caption เพื่อดึง traffic ทั้ง 2 กลุ่ม</p>
+      <p><strong>Translation</strong>: <strong>ไม่พบ AI-powered translation pipeline สำหรับเนื้อหาเว็บไซต์ในโค้ดปัจจุบัน</strong> — 8 ภาษาของเว็บไซต์ (data.js i18n dictionary) เป็นการแปลที่เตรียมไว้ล่วงหน้า (static translations) ไม่ใช่ AI แปลสด ส่วนที่ AI แปลจริงมีเพียง Chatbot ที่ auto-detect ภาษาผู้ใช้และตอบภาษาเดียวกัน (translation แบบ conversational เท่านั้น ไม่ใช่แปลเนื้อหาเว็บไซต์)</p>
+      <p><strong>Description Generation</strong>: ยืนยันแล้วใน Step 6 — AI Quick Add สร้าง shortDesc/fullDesc พร้อม keyword natural</p>
+      <p><strong>Known Gap ที่มีอยู่แล้ว (บันทึกไว้ก่อนหน้านี้ใน CLAUDE.md §24.8)</strong>: AI สร้าง photoCaptions/alt-text ไว้แล้ว แต่ <strong>ยังไม่ได้เชื่อมกับ <code>&lt;img alt&gt;</code> จริงบนหน้าเว็บไซต์ public</strong> — เป็นช่องว่าง SEO ที่มีมูลค่าสูงสุดที่ยังไม่ปิด</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details" open="{{ true }}">
+    <summary>✅ Step 8 — AI Testing & Implementation Review</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p><strong>Prompt Safety ตรวจสอบจากโค้ดจริง</strong>: Chatbot system prompt บังคับ (1) ตอบข้อเท็จจริงจาก CURRENT LISTINGS เท่านั้น ห้ามมโน (2) ปฏิเสธ Restricted Topics แบบสุภาพ ไม่เปิดเผยว่ามีข้อห้าม (3) ตอบภาษาเดียวกับที่ผู้ใช้พิมพ์เสมอ (4) จำกัดความยาวคำตอบ 2-5 ประโยค</p>
+      <p><strong>AI Quick Add Privacy Rule</strong>: prompt สั่งชัดเจนห้ามเปิดเผยชื่อโครงการ/developer ใน public fields (title/shortDesc/fullDesc/photoCaptions) — ให้เก็บไว้ใน internalNotes เท่านั้น</p>
+      <p><strong>ข้อจำกัด</strong>: นี่คือ Static Prompt/Code Review ยืนยันว่า Safety Rule ถูกเขียนไว้ในโค้ดถูกต้อง — ไม่ใช่ Live Adversarial Testing (ทดลองยั่วให้ AI ทำผิดกฎจริงบน Production) ซึ่งต้องทำโดยเจ้าของหรือ QA ที่มีสิทธิ์เข้าถึงระบบจริง</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details" open="{{ true }}">
+    <summary>✅ Step 9 — AI Cost, Safety & Reliability — Evidence Audit</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p><strong>Usage Controls ที่มีอยู่จริง</strong>: max_tokens กำหนดไว้ชัดเจนทั้ง 2 mode (600 chat / 4096 Quick Add) ป้องกัน runaway cost ต่อ 1 request; Model Selection คุม cost ที่ระดับ architecture (Haiku ถูก/เร็วสำหรับ chat volume สูง, Sonnet เฉพาะ Quick Add ที่ใช้ไม่บ่อย)</p>
+      <p><strong>Rate-limit/Spending-control สถานะปัจจุบัน</strong>: <strong>Backlog — ยังไม่ implement</strong> ยืนยันจาก functions/index.js ไม่พบ rate-limiter หรือ App Check middleware ใดๆ ในทั้ง claudeComplete function</p>
+      <p><strong>🔖 Chatbot Spending Cap: Backlog</strong> (ตามคำสั่ง Product Owner ให้ทำเครื่องหมายชัดเจน) — เจ้าของเคยถามเรื่องนี้มาก่อนแล้ว ยังไม่มี hard cap หรือ rate-limit ระดับผู้ใช้/วัน</p>
+      <p><strong>Failure Handling เมื่อ AI Service ไม่พร้อมใช้งาน</strong>: ยืนยันจาก ContactRail.dc.html catch block จริง — แสดงข้อความ "Sorry, something went wrong. Please try again or contact us directly." พร้อมปุ่ม Contact us ทันที ไม่ persist error message ลง chat history ถาวร (ป้องกัน error เก่าปนกับบทสนทนาจริงในอนาคต) — เป็น failure handling ที่ออกแบบมาอย่างรอบคอบ</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details" open="{{ true }}">
+    <summary>✅ Step 10 — Documentation & Dashboard Synchronization</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p>อัปเดต Mission Control, Launch Readiness Dashboard (AI Features domain + Mission-number prefix ทุก Domain), Mission Library, BLUEPRINT.md, RELEASE CHECKLIST.md, PROJECT_HISTORY.md — ครบตามรายการ</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details">
+    <summary>🔵 Step 11 — Release Verification — READY FOR VERIFICATION</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p>ตรวจ RELEASE CHECKLIST.md ส่วนที่ทำได้จาก source: Documentation Sync ✅, Export Package ✅ — ส่วนที่ต้องพึ่งบัญชีเจ้าของ/Console (GitHub upload, GitHub Pages deploy verification จริง) ยังไม่ทำในรอบนี้ เพราะ Claude ไม่มีสิทธิ์ Push/Deploy — รอเจ้าของยืนยันตามขั้นตอนปกติของโครงการ</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details" open="{{ true }}">
+    <summary>✅ Step 12 — Mission Report</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <span class="m01-title">Mission Completion Matrix</span>
+      <div class="m01-tablewrap">
+        <table class="m01-table">
+          <thead><tr><th>Step</th><th>สถานะ</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ stepProgress }}" as="s" hint-placeholder-count="12">
+              <tr><td>{{ s.step }}</td><td style="font-weight:600;">{{ s.status }}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:8px;"><strong>AI Features Score</strong>: 70% — Provider Integration (✅ Claude, เดี่ยวแต่ครบ), Service Layer (✅ Cloud Function proxy เดียวรองรับ chat+structured), AI Quick Add (✅ ครบ photo/voice/PDF/POI/SEO/Facebook), Content Generation (✅ SEO title/desc/captions, 🟡 ไม่มี AI translation pipeline สำหรับเว็บไซต์), Testing (✅ static prompt safety review), Cost (✅ model selection เหมาะสม, 🔴 ไม่มี spending cap) — เหลือเพราะ: (1) Recommendation Engine ยังไม่มี Product Owner Decision (2) photo alt-text ยังไม่เชื่อมจริง (3) ไม่มี spending cap</p>
+      <p style="margin-top:8px;"><strong>Post-launch Backlog (ไม่ใช่ Blocker)</strong>: เชื่อม AI photo caption → &lt;img alt&gt; จริง (มูลค่า SEO สูงสุดที่ยังไม่ปิด), AI Property Recommendation Engine (Future Product Evaluation — ดู Step 5), Hard spending cap/rate-limit สำหรับ Chatbot, Live Adversarial Prompt Testing บน Production</p>
+      <p style="margin-top:8px;"><strong>Product Owner Verification Required</strong>: Step 11 (GitHub upload/deploy) ต้องได้รับหลักฐานยืนยันจาก Product Owner ก่อนจึงจะปิด Mission 08 ได้</p>
+      <p style="margin-top:8px;"><strong>Release Recommendation</strong>: Mission Status คงเป็น <strong>Active / Review Pending</strong> — Steps 1-10 resolved (Step 5 ปิดโดย Product Owner Decision, ไม่ใช่ Failed Step) เหลือเฉพาะ Step 11 ที่รอหลักฐานการยืนยันจาก Product Owner (GitHub upload/deploy) ก่อนจึงจะ Step 12 Official Completion ได้ — <strong>ยังไม่ออก Official Completion Notice, ยังไม่ปิด Mission 08</strong></p>
+    </div>
+  </details>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const stepProgress = [
+      { step: "Step 1 — AI Vision & Requirements", status: "Complete", color: "🟢" },
+      { step: "Step 2 — AI Architecture Design", status: "Complete", color: "🟢" },
+      { step: "Step 3 — AI Provider Integration", status: "Complete (Claude only — verified)", color: "🟢" },
+      { step: "Step 4 — AI Service Layer (API Integration)", status: "Complete", color: "🟢" },
+      { step: "Step 5 — AI Property Recommendation Engine", status: "Product Owner Decision Completed — Deferred to Backlog", color: "🟢" },
+      { step: "Step 6 — AI Listing Assistant (AI Quick Add)", status: "Complete", color: "🟢" },
+      { step: "Step 7 — AI Content Generation (SEO/Translation/Description)", status: "Complete (1 Known Gap documented)", color: "🟢" },
+      { step: "Step 8 — AI Testing & Implementation Review", status: "Complete", color: "🟢" },
+      { step: "Step 9 — AI Performance & Cost Optimization", status: "Complete (1 Known Risk documented)", color: "🟢" },
+      { step: "Step 10 — Documentation & Dashboard Synchronization", status: "Complete", color: "🟢" },
+      { step: "Step 11 — Release Verification", status: "Ready for Product Owner Verification", color: "🔵" },
+      { step: "Step 12 — Official Completion", status: "Not Closed — Awaiting Product Owner Verification", color: "⚪" },
+    ];
+    return { stepProgress };
+  }
+}
+</script>
+</body>
+</html>

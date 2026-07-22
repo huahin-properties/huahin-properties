@@ -39,8 +39,7 @@ Verify `export-for-github/` contains the latest version of every file above:
 4. Confirm repository is up to date — no pending changes left un-uploaded
 
 ## 6. Completion Record
-- **Version**: Mission 09 — Firebase Infrastructure v1.0
-- **Release Date**: 22 กรกฎาคม 2569
-- **Released By**: Product Owner (verified Steps 8/9/11 via GitHub Pages + Firebase Console)
-- **Notes**: 12/12 Steps Complete. Firestore Rules verified production deny-by-default from source. Hosting/SSL, Monitoring/Analytics, and External Verification confirmed directly by Product Owner. No blocking issues. Post-launch Backlog items (Analytics Events, Monitoring Alerts, Performance Optimization) are non-blocking and carried forward.
-- **Notes**: Mission Status correctly remains IN PROGRESS per Completion Rule (Steps 9-10 require owner Google account + production URL, marked READY FOR VERIFICATION). All internal work now complete: canonical/OG/Twitter Card/JSON-LD across 9 public pages, robots.txt Disallow + noindex across 33 internal pages, favicon consistency, full Technical SEO checklist PASS, Multilingual SEO documentation. No Official Completion Notice or Completion History entry created — reserved for after Step 9/10 pass.
+- **Version**: Mission 08 — AI Features v0.1 (Active / Review Pending)
+- **Release Date**: N/A — not yet released, 11/12 Steps resolved
+- **Released By**: N/A
+- **Notes**: Full evidence audit completed for AI Quick Add, ContactRail Chatbot, AI Provider/Architecture, and Cost/Safety. Step 5 (Recommendation Engine) closed via Product Owner Decision — deferred to Future Backlog, not a failed step. Mission remains Active/Review Pending — Step 11 requires Product Owner verification of GitHub upload/deploy before Step 12 Official Completion.

@@ -1162,6 +1162,20 @@ component เดียว, AI Image→Alt-text wiring)
 
 **Superseded By**: —
 
+## 24.15 AI Features — Mission 08 (22 ก.ค. 2569, In Progress v0.1)
+
+**Mission Purpose**: ตรวจสอบ AI Features ทั้งหมด (Provider Integration, Service Layer, AI Quick Add, Chatbot, Content Generation, Cost) ให้สอดคล้องกับ Vision "AI by Default" ตามมาตรฐาน Mission Framework
+
+**สถานะปัจจุบัน**: 🟡 Active/Review Pending (11/12 Steps resolved, Step 11 Ready for Product Owner Verification) — AI Features Readiness 70% — รายละเอียดเต็มที่ `Mission 08 - AI Features.dc.html`
+
+**Step 5 — AI Property Recommendation Engine**: Product Owner Decision Completed — Deferred to Future Backlog (ไม่ใช่ Failed Step). Future Backlog item: ต้องมี Business Rules, Ranking Criteria, Customer Preference Data Model, Privacy/Consent Review, Cost Estimate, Accuracy Testing, Human-readable Explanation ก่อนเริ่มพัฒนา — ยังไม่กำหนดหมายเลข Mission
+
+**สิ่งที่ทำเสร็จแล้ว**: ยืนยัน AI Provider เป็น Anthropic Claude เท่านั้น (Haiku สำหรับ chat, Sonnet สำหรับ AI Quick Add) — ไม่มี OpenAI/Gemini integration ตามที่คำสั่งเดิมสันนิษฐาน; ยืนยัน Cloud Function Service Layer (chat mode + structured tool-schema mode); ยืนยัน AI Quick Add ครบ (photo/voice/PDF intake, Google Places+Distance Matrix POI จริง, SEO content generation); ยืนยัน Prompt Safety rules ถูกเขียนถูกต้อง (privacy rule, restricted topics, language auto-detect)
+
+**Known Gap**: photo alt-text ยังไม่เชื่อมจริง; ไม่มี hard spending cap สำหรับ Chatbot (ยืนยันเป็น Backlog); AI Recommendation Engine เป็น Future Product Evaluation (ไม่ใช่ Blocker ของ Mission 08)
+
+**Superseded By**: —
+
 ## 24.14 Firebase Infrastructure — Mission 09 (22 ก.ค. 2569, 🚀 RELEASED v1.0)
 
 **Mission Purpose**: ตรวจสอบ Firebase Infrastructure ทั้งหมด (Firestore, Auth, Storage, Functions, Hosting, Monitoring) ให้พร้อม Production ตามมาตรฐาน Mission Framework — ไม่สร้าง Framework ใหม่

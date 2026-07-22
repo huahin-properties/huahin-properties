@@ -59,6 +59,16 @@ Permanent record of completed Features, Sprints, Phases, and Releases. Updated e
 - **Superseded By**: —
 - **Next Mission**: To be selected by CEO from Mission Library (Missions 01-06, 08, 10, 12 remain Planning) — Post-launch Backlog items (Analytics Events, Monitoring Alerts, Performance Optimization) carried forward, not blockers.
 
+## Mission 08 — AI Features v0.1 (In Progress, 22 กรกฎาคม 2569)
+- **Date**: 22 กรกฎาคม 2569
+- **Project**: huahin.properties
+- **Work**: Original instruction called this "Mission 10" — corrected to Mission 08 per approved Mission Numbering Standard (AI Features = 08, Security = 10). Completed Steps 1-4, 6-10, 12: AI Vision/Requirements, Architecture Design, Provider Integration (confirmed Claude-only — no OpenAI/Gemini despite original prompt mentioning them), Service Layer, AI Listing Assistant (AI Quick Add — photo/voice/PDF/POI/SEO/Facebook all verified from source), Content Generation (SEO title/desc/captions; no AI translation pipeline for site content — 8 languages are static), Testing (static prompt-safety review), Cost Optimization (model selection sound, no spending cap — known risk), Documentation Sync (added "Mission NN —" prefix to all 12 Launch Readiness domains).
+- **Status**: 🟡 IN PROGRESS (9/12 Steps Complete, 1 Ready for Verification — Step 11 requires owner GitHub/deploy action)
+- **Approved By**: Pending Product Owner Review
+- **Summary**: AI Features Readiness confirmed 70% with source-level evidence. Step 5 (AI Recommendation Engine) requires a Product Owner Decision before any development — new feature, out of this Mission's scope. Full detail in `Mission 08 - AI Features.dc.html`.
+- **Superseded By**: —
+- **Next Phase**: Product Owner decides on Step 5 (Recommendation Engine) → owner completes Step 11 (GitHub upload/deploy) → Mission 08 Release
+
 ## Mission 09 — Firebase Infrastructure v0.2 (In Progress, 22 กรกฎาคม 2569)
 - **Date**: 22 กรกฎาคม 2569
 - **Project**: huahin.properties
