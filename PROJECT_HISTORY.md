@@ -47,6 +47,16 @@ Permanent record of completed Features, Sprints, Phases, and Releases. Updated e
 - **Superseded By**: —
 - **Next Mission**: Mission 07 (to be created from Mission Template.dc.html when CEO initiates it — no Mission 07 exists yet)
 
+## Mission 09 — Firebase Infrastructure v0.2 (In Progress, 22 กรกฎาคม 2569)
+- **Date**: 22 กรกฎาคม 2569
+- **Project**: huahin.properties
+- **Work**: Firebase Infrastructure audit completed against actual repository source. Completed Steps 1-7, 10, 12: Firebase Project Health Audit, Firestore Structure Audit (17 collections), Auth Config Review (4 providers), Firestore Rules Audit (production deny-by-default confirmed, no change needed — already least-privilege), Firestore Security Validation (static review), Storage Rules Audit (1 low-risk finding), Indexes/Query Performance (no composite index needed currently), Production Hardening Checklist, Mission Report.
+- **Status**: 🟡 IN PROGRESS (9/12 Steps Complete, 3 Ready for Verification — Steps 8/9/11 require Firebase Console/owner account)
+- **Approved By**: Pending Product Owner Review
+- **Summary**: Firebase Infrastructure Readiness confirmed 85% with source-level evidence. Full step detail in `Mission 09 - Firebase Infrastructure.dc.html`.
+- **Superseded By**: —
+- **Next Phase**: Product Owner Review → owner completes Step 8 (Hosting/SSL verification), Step 9 (Monitoring/Alerts setup), Step 11 (Firebase Console deploy verification) → Mission 09 Release
+
 ## Mission 07 — SEO Foundation v0.2 (In Progress, Product Owner Review Revision 2, 22 กรกฎาคม 2569)
 - **Date**: 22 กรกฎาคม 2569
 - **Project**: huahin.properties

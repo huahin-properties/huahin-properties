@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Mission 09 — Firebase Infrastructure</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    .m01-title { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: oklch(45% 0.02 60); display: block; margin-bottom: 4px; }
+    .m01-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .m01-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; color: oklch(50% 0.02 60); border-bottom: 2px solid oklch(88% 0.01 70); padding: 6px 8px; }
+    .m01-table td { padding: 7px 8px; border-bottom: 1px solid oklch(92% 0.01 70); vertical-align: top; }
+    .m01-card { background: white; border: 1px solid oklch(90% 0.01 70); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
+    .m01-tablewrap { overflow-x: auto; }
+    .m01-step-details summary { cursor: pointer; font-family: 'Playfair Display', serif; font-size: 16px; color: oklch(20% 0.02 60); }
+  </style>
+</helmet>
+<div style="max-width:1020px; margin:0 auto; padding:28px 20px 60px; color:oklch(25% 0.02 60); line-height:1.6;">
+
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:6px; flex-wrap:wrap;">
+    <div style="width:38px; height:38px; border-radius:10px; background:oklch(35% 0.09 25); display:flex; align-items:center; justify-content:center; color:white; font-size:19px;">🔥</div>
+    <div>
+      <div style="font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:oklch(20% 0.02 60);">MISSION 09</div>
+      <div style="font-size:13px; color:oklch(45% 0.02 60);">Firebase Infrastructure — v0.2 (built from Mission Template)</div>
+    </div>
+    <div style="margin-left:auto; background:oklch(90% 0.14 145); color:oklch(30% 0.1 150); font-weight:700; font-size:12.5px; padding:6px 14px; border-radius:100px;">🟢 9/12 STEPS COMPLETE — 3 READY FOR VERIFICATION</div>
+  </div>
+
+  <div style="display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;">
+    <a href="./Mission%20Control.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🧭 Mission Control</a>
+    <a href="./Launch%20Readiness%20Dashboard.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🚦 Launch Readiness</a>
+    <a href="./CEO%20Guide.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📘 CEO Guide</a>
+    <a href="./Mission%20Library.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📚 Mission Library</a>
+    <a href="./Mission%2007%20-%20SEO%20Foundation.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🔍 Mission 07</a>
+    <a href="./Mission%2011%20-%20QA%20Review%20Standard.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🧪 Mission 11</a>
+    <span style="font-size:12.5px; background:oklch(90% 0.01 70); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🔥 Mission 09 (คุณอยู่ที่นี่)</span>
+  </div>
+
+  <div style="border:2px solid oklch(60% 0.14 150); border-radius:10px; padding:16px 18px; margin-bottom:20px; background:oklch(96% 0.05 150);">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px 18px; font-size:12.5px;">
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Mission Owner</div><div style="font-weight:600;">Product Owner</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Lead Implementer</div><div style="font-weight:600;">Claude</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Approver</div><div style="font-weight:600;">CEO</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Mission Status</div><div style="font-weight:600;">🟡 Active / Review Pending</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Firebase Infrastructure Readiness</div><div style="font-weight:600;">85%</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Version</div><div style="font-weight:600;">v0.2</div></div>
+    </div>
+  </div>
+
+  <details class="m01-card m01-step-details" open="{{ true }}">
+    <summary>✅ Step 1 — Firebase Project Health Audit</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <div class="m01-tablewrap">
+        <table class="m01-table">
+          <thead><tr><th>รายการ</th><th>ผลตรวจสอบ (จากไฟล์จริง)</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ step1Rows }}" as="r" hint-placeholder-count="6">
+              <tr><td style="font-weight:600;">{{ r.item }}</td><td>{{ r.result }}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details" open="{{ true }}">
+    <summary>✅ Step 2 — Firestore Database Structure Audit</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p><strong>Collections พบใน firestore.rules</strong> (17 collections, ยืนยันจาก match statement จริงทุกอัน): properties, propertyPhotos, siteContent (+ projectDashboard/projectDashboard_backup_v1 sub-cases), profilePhotos, aiNotes, banners, externalServices, buyerRegistrations, adminUsers, staffInvites, leads, payments, listers, owners, tenants, settings, listerLeads</p>
+      <p><strong>Naming</strong>: camelCase สม่ำเสมอทุก collection ไม่พบชื่อไม่ตรงรูปแบบ</p>
+      <p><strong>Relationships</strong>: propertyPhotos↔properties ผ่าน field ที่เชื่อมด้วย listerId ownership check; buyerRegistrations↔listers ผ่าน listerId; listerLeads↔listers ผ่าน listerId — ทุกความสัมพันธ์ enforce ที่ระดับ Rules ไม่ใช่แค่ระดับ UI</p>
+      <p><strong>Indexes</strong>: ไม่พบไฟล์ <code>firestore.indexes.json</code> ในโปรเจกต์ — หมายความว่ายังไม่มี composite index ที่ประกาศไว้ชัดเจน (Firestore auto-index เฉพาะ single-field query; query ที่ซับซ้อนกว่านั้นบน production จะ throw error พร้อมลิงก์สร้าง index อัตโนมัติจาก Firebase Console — ยังไม่เคยเห็น error แบบนี้ในโค้ด แปลว่า query ปัจจุบันทั้งหมดยังอยู่ในระดับที่ไม่ต้องการ composite index)</p>
+      <p><strong>Scalability</strong>: Default-deny + per-collection allow เป็นรูปแบบที่ scale ได้ปลอดภัย ไม่มี wildcard เปิดกว้างที่พบ</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details" open="{{ true }}">
+    <summary>✅ Step 3 — Authentication Configuration Review</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p><strong>Providers ที่ใช้จริง</strong> (ยืนยันจาก Agent Signup.dc.html และ BLUEPRINT.md): Email+Password, Google Sign-In, Facebook Sign-In, Phone/OTP</p>
+      <p><strong>Roles</strong>: isAdmin() (hardcoded Owner UID + adminUsers collection สำหรับ Staff), isOwner() (เฉพาะ Owner UID หรือ adminUsers ที่มี role=="owner") — role model นี้สอดคล้องกับ BLUEPRINT.md §1 (Owner/Staff)</p>
+      <p><strong>Known Issue (บันทึกไว้แล้วใน CLAUDE.md)</strong>: Agent Signup.dc.html password field ใช้ type="text" ไม่ใช่ type="password" — plaintext มองเห็นได้บนจอ ยังไม่ยืนยันว่าตั้งใจหรือเป็น defect — ไม่ใช่ขอบเขต Mission 09 (เป็นเรื่อง UI ไม่ใช่ Firebase config) แต่บันทึกไว้เป็น Known Risk เพราะเกี่ยวโยงกับ Authentication</p>
+      <p><strong>Session</strong>: ใช้ Firebase Auth SDK มาตรฐาน (firebase-auth-compat.js) — persistence ตาม default ของ SDK ไม่พบการ override ที่ผิดปกติ</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details" open="{{ true }}">
+    <summary>✅ Step 4 — Firestore Security Rules Audit</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p><strong>Current Rules</strong>: Deny-by-default (บรรทัดสุดท้ายของไฟล์คือ <code>match /{document=**} {"{"} allow read, write: if false {"}"}</code>) — ทุก collection ที่ไม่ได้ประกาศไว้ explicit จะถูกปฏิเสธทั้งหมด</p>
+      <p><strong>Role Model</strong>: isAdmin()/isOwner() ตรวจ request.auth.uid ตรงกับ hardcoded Owner UID หรือ exists() lookup ใน adminUsers — ไม่มี client ฝั่งไหนตั้งค่า role ของตัวเองได้</p>
+      <p><strong>Least Privilege</strong>: ตรวจสอบทีละ collection พบรูปแบบที่เหมาะสม เช่น payments (allow write: if false — เขียนได้เฉพาะฝั่ง server/Function เท่านั้น), settings/siteContent sensitive docs (isAdmin/isOwner only), leads (create: if true, read: isAdmin only — ป้องกันข้อมูลติดต่อรั่วไหล)</p>
+      <p><strong>Documentation Consistency</strong>: comment ในไฟล์ rules เองอธิบายเหตุผลของแต่ละกฎละเอียด (เช่นเหตุผลที่ storage rules หลวมกว่า Firestore rules สำหรับ propertyPhotos) — สอดคล้องกับ BLUEPRINT.md §5/§11</p>
+      <p><strong>สรุป</strong>: ไม่พบข้อบกพร่องที่มีหลักฐานเพียงพอให้แก้ Rules ในรอบนี้ — Rules คงเดิม</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details" open="{{ true }}">
+    <summary>✅ Step 5 — Firestore Security Validation (Static Review)</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <div class="m01-tablewrap">
+        <table class="m01-table">
+          <thead><tr><th>Role</th><th>CRUD ที่ควรทำได้ตาม Rules</th><th>ตรวจสอบจาก</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ step5Rows }}" as="r" hint-placeholder-count="4">
+              <tr><td style="font-weight:600;">{{ r.role }}</td><td>{{ r.crud }}</td><td>{{ r.source }}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:8px;"><strong>ข้อจำกัด</strong>: นี่คือ Static Rule Review (อ่าน logic ของ Rules โดยตรง) ไม่ใช่ Live Permission Test ผ่าน Firebase Emulator หรือ production จริง — ยืนยัน "ไม่มี Permission Denied/Data Leak" แบบ runtime ต้องรันผ่าน Firebase Local Emulator Suite ซึ่งต้องมี Firebase CLI environment ที่ไม่มีในนี้ → บันทึกเป็นส่วนของ Step 11 External Verification</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details" open="{{ true }}">
+    <summary>✅ Step 6 — Cloud Storage Rules</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p><strong>storage.rules ตรวจสอบจริง</strong>: propertyPhotos/ และ profilePhotos/ — read: public (จำเป็นสำหรับแสดงรูปบนเว็บไซต์), write: isAdmin() หรือ signed-in user ใดก็ได้ (comment ในไฟล์อธิบายเหตุผลชัดเจน: Storage rules parse propertyId จาก filename ไม่ได้แม่นยำเท่า Firestore rules จึงจงใจหลวมกว่าเล็กน้อย โดยพึ่ง Firestore doc's listerId check เป็นการควบคุมที่แท้จริง)</p>
+      <p><strong>Fallback path</strong> ({"{"}allPaths=**{"}"}): read: public, write: isAdmin() only — ปลอดภัยเป็น default สำหรับ path อื่นที่ไม่ได้ระบุ</p>
+      <p><strong>ข้อสังเกต (ไม่ใช่ข้อบกพร่อง)</strong>: write: request.auth != null (ไม่เช็ค ownership เจาะจง) หมายความว่า lister ที่ signed-in คนหนึ่งสามารถ upload ไปที่ path ของ property คนอื่นได้ทาง Storage โดยตรง — แต่ Firestore doc ที่เชื่อมรูปเข้ากับ property ยังคง enforce listerId ownership อยู่ จึงไม่เกิดความเสียหายจริงในทางปฏิบัติ (ไฟล์ orphan ใน Storage ที่ไม่มี Firestore doc อ้างอิงจะไม่แสดงผลที่ไหนเลย) — บันทึกเป็น Known Risk ระดับต่ำ ไม่ใช่ Launch Blocker</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details" open="{{ true }}">
+    <summary>✅ Step 7 — Indexes & Query Performance</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p><strong>Indexes</strong>: ไม่มี <code>firestore.indexes.json</code> — ทุก query ที่มีอยู่ในโค้ดปัจจุบันเป็น single-field หรือใช้ client-side filter/sort หลังโหลดข้อมูล (ตรวจสอบจาก getEffectiveProperties() pattern ใน data.js/firebase-client.js) จึงไม่ต้องพึ่ง composite index</p>
+      <p><strong>Slow Query Risk</strong>: หากอนาคตเพิ่ม server-side query ที่ filter+sort พร้อมกันหลาย field (เช่น area + price range + beds ในคำสั่งเดียวผ่าน Firestore query แทน client filter) จะต้องสร้าง composite index ก่อน มิฉะนั้น production จะ throw error — เป็นความเสี่ยงที่ควรระวังเมื่อ Mission 02 (Search & Filters) ขยายเป็น server-side query ในอนาคต</p>
+      <p><strong>Optimization ปัจจุบัน</strong>: Client-side filter บน dataset ขนาดเล็ก (24 sample properties) ทำงานได้เร็วพอ — ยังไม่มีปัญหาประสิทธิภาพที่วัดได้จริงในสภาพแวดล้อมนี้ (ต้องวัดจริงบน production กับข้อมูลจริงจำนวนมากกว่านี้ — ดู Step 11)</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details">
+    <summary>🔵 Step 8 — Hosting / Domain / SSL / Environment — READY FOR VERIFICATION</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p><strong>พบจาก source</strong>: firebase.json ประกาศเฉพาะ firestore/storage/functions — <strong>ไม่มี "hosting" key เลย</strong> ยืนยันว่าโปรเจกต์นี้ deploy static site ผ่าน GitHub Pages ไม่ใช่ Firebase Hosting (สอดคล้องกับ CLAUDE.md ที่ระบุ "Static site changes go live automatically (GitHub Pages/Hosting)")</p>
+      <p><strong>Domain/SSL</strong>: การตั้งค่า custom domain (huahin.properties) และ SSL certificate เป็นการตั้งค่าฝั่ง GitHub Pages/DNS registrar ไม่ใช่ Firebase Console — ต้องให้เจ้าของยืนยันสถานะจริงของ domain/SSL ที่ใช้งานอยู่ (ไม่มีไฟล์ config ในโปรเจกต์นี้ที่ยืนยันได้)</p>
+      <p><strong>Secrets</strong>: functions/index.js ใช้ <code>defineSecret()</code> จาก firebase-functions/params สำหรับ ANTHROPIC_API_KEY, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET — เก็บใน Firebase Secret Manager ไม่ hardcode ในโค้ด (ตรงตามมาตรฐานความปลอดภัย) แต่ต้องเจ้าของยืนยันผ่าน Firebase Console ว่า secret values ถูกตั้งค่าจริงและไม่หมดอายุ</p>
+      <p><strong>Environment</strong>: apiKey/authDomain/projectId ใน firebase-client.js เป็นค่า public client config ตามปกติของ Firebase Web SDK (ไม่ใช่ความลับ ปลอดภัยที่จะ commit ได้) — ไม่พบปัญหา</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details">
+    <summary>🔵 Step 9 — Monitoring / Logging / Alerts — READY FOR VERIFICATION</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p>ไม่พบการตั้งค่า Firebase Crashlytics, Performance Monitoring, หรือ custom Alert policy ในโค้ด/config ของโปรเจกต์นี้ — สิ่งเหล่านี้เป็นการตั้งค่าฝั่ง Firebase Console/Google Cloud Console โดยตรง ไม่มีไฟล์ source ที่ยืนยันสถานะได้ ต้องให้เจ้าของเข้า Console ตรวจสอบ/เปิดใช้งานเอง: (1) Firebase Console → Functions → ดู Logs ของแต่ละ Cloud Function ว่ามี error rate ผิดปกติหรือไม่ (2) Cloud Monitoring → ตั้ง Alert เมื่อ Function error rate สูงหรือ Firestore read/write quota ใกล้เต็ม</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details" open="{{ true }}">
+    <summary>✅ Step 10 — Production Hardening Checklist</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <div class="m01-tablewrap">
+        <table class="m01-table">
+          <thead><tr><th>รายการ</th><th>ผลตรวจสอบ</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ hardeningRows }}" as="r" hint-placeholder-count="6">
+              <tr><td style="font-weight:600;">{{ r.item }}</td><td>{{ r.result }}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details">
+    <summary>🔵 Step 11 — External Verification — READY FOR VERIFICATION</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p>ต้องดำเนินการโดยเจ้าของโครงการผ่าน Firebase Console/Google Console โดยตรง (Claude ไม่มีสิทธิ์เข้าถึงบัญชี):</p>
+      <p>(1) Firebase Console → Firestore → Rules tab → ยืนยันว่า Rules ที่ deploy อยู่จริงตรงกับ firestore.rules ในโปรเจกต์นี้ (ไม่ใช่เวอร์ชันเก่า)</p>
+      <p>(2) Firebase Console → Storage → Rules tab → ยืนยัน storage.rules deploy แล้วตรงกับปัจจุบัน</p>
+      <p>(3) Firebase Console → Functions → ยืนยันว่า Function ทั้ง 7 ตัว (claudeComplete, createCheckoutSession, createPortalSession, createFeaturedCheckoutSession, createBannerCheckoutSession, createVipCheckoutSession, stripeWebhook) deploy สำเร็จ ไม่มี error</p>
+      <p>(4) Firebase Console → Project Settings → Usage/Billing → ยืนยันสถานะ billing plan (Spark/Blaze) และ quota ปัจจุบัน</p>
+      <p>(5) Firebase Local Emulator Suite (ถ้าเจ้าของมี Firebase CLI environment เช่น GitHub Codespaces) → รัน permission test จริงตาม Step 5 Test Matrix เพื่อยืนยัน runtime behavior ตรงกับ static review</p>
+    </div>
+  </details>
+
+  <details class="m01-card m01-step-details" open="{{ true }}">
+    <summary>✅ Step 12 — Mission Report</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <span class="m01-title">Mission Completion Matrix</span>
+      <div class="m01-tablewrap">
+        <table class="m01-table">
+          <thead><tr><th>Step</th><th>สถานะ</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ stepProgress }}" as="s" hint-placeholder-count="12">
+              <tr><td>{{ s.step }}</td><td style="font-weight:600;">{{ s.status }}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:8px;"><strong>Firebase Infrastructure Score</strong>: 85% — Firestore Rules (✅ deny-by-default, ยืนยันจากไฟล์จริง), Storage Rules (✅ ตรวจสอบแล้ว, 1 Known Risk ระดับต่ำ), Auth (✅ 4 providers ยืนยัน), Functions (✅ secrets ผ่าน Secret Manager ถูกต้อง), Indexes (✅ ไม่จำเป็นในสถานะปัจจุบัน) — เหลือ 15% เพราะ Hosting/Domain/SSL, Monitoring/Alerts, และ Console-level deploy verification ต้องพึ่งบัญชีเจ้าของ/Firebase Console โดยตรง (Steps 8-9, 11)</p>
+      <p style="margin-top:8px;"><strong>Known Risks (สรุป)</strong>: (1) Storage rules propertyPhotos/profilePhotos write ไม่เช็ค ownership เจาะจง — ความเสี่ยงต่ำเพราะ Firestore ownership check เป็นตัวป้องกันจริง (2) Agent Signup password fields เป็น type="text" — Known Issue เดิม ไม่ใช่ config ของ Firebase (3) ไม่มี composite index — ไม่เป็นปัญหาตอนนี้ แต่ต้องระวังเมื่อ Search & Filters ขยายเป็น server-side query</p>
+      <p style="margin-top:8px;"><strong>Remaining Work</strong>: Steps 8, 9, 11 ทั้งหมดต้องเจ้าของดำเนินการผ่าน Firebase Console/GitHub Pages settings โดยตรง — ไม่มีงานที่ทำได้เพิ่มเติมจากฝั่ง source code ในรอบนี้</p>
+      <p style="margin-top:8px;"><strong>Release Recommendation</strong>: Mission Status คงเป็น <strong>IN PROGRESS</strong> — งานภายในระบบทั้งหมดที่ตรวจสอบได้จาก source เสร็จครบ (9/12 Steps) เหลือเฉพาะ External Verification ที่ต้องใช้สิทธิ์เจ้าของ (Steps 8, 9, 11)</p>
+    </div>
+  </details>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const step1Rows = [
+      { item: "Project ID", result: "huahin-properties-5f1b5 (ยืนยันจาก firebase-client.js)" },
+      { item: "Auth Domain", result: "huahin-properties-5f1b5.firebaseapp.com" },
+      { item: "Storage Bucket", result: "huahin-properties-5f1b5.firebasestorage.app" },
+      { item: "Billing/Region", result: "Cloud Functions ตั้ง region: \"asia-southeast1\" ทุกตัว (7 functions) — ตรงกับพื้นที่ให้บริการ (ประเทศไทย)" },
+      { item: "Services ที่ใช้จริง", result: "Firestore, Storage, Cloud Functions (v2, onRequest) — ไม่มี Firebase Hosting config (ดู Step 8)" },
+      { item: "Dependencies", result: "firebase-functions v2, firebase-admin, Stripe SDK, Anthropic API — ยืนยันจาก functions/index.js require() statements" },
+    ];
+    const step5Rows = [
+      { role: "Public (ไม่ signed-in)", crud: "Read: properties/propertyPhotos/listers/owners/tenants/banners/siteContent(ทั่วไป)/aiNotes — Write: เกือบทั้งหมด false ยกเว้น create ที่จำกัด (leads, banners self-serve, buyerRegistrations)", source: "firestore.rules บรรทัด 42-196" },
+      { role: "Signed-in Lister", crud: "Create/Update/Delete เฉพาะ property ของตน (listerId ตรงกับ auth.uid ก่อน/หลังเขียน), จัดการ listers/{ตนเอง}", source: "firestore.rules match /properties, match /listers" },
+      { role: "Admin (isAdmin)", crud: "Read/Write เกือบทุก collection ยกเว้น payments (write: false เสมอ แม้ admin)", source: "firestore.rules isAdmin() ทุก match block" },
+      { role: "Owner (isOwner, สูงกว่า Admin)", crud: "เฉพาะ Owner เข้าถึง externalServices, siteContent sensitive docs, adminUsers write, aiNotes write", source: "firestore.rules isOwner() function + match blocks ที่เจาะจง" },
+    ];
+    const hardeningRows = [
+      { item: "Backups", result: "🔵 ไม่พบ config การตั้งค่า Firestore scheduled backup ในโปรเจกต์นี้ — ต้องตั้งค่าผ่าน Firebase Console/gcloud CLI โดยตรง (ดู Step 11)" },
+      { item: "Recovery Plan", result: "🔵 ไม่มีเอกสาร Disaster Recovery Plan ในโปรเจกต์ — เสนอเป็น Next Step แยก ไม่ใช่ config ที่ทำได้จาก source" },
+      { item: "Rate Limits", result: "✅ Cloud Functions v2 มี timeoutSeconds/memory กำหนดไว้ (เช่น claudeComplete: 300s/512MiB) ป้องกัน runaway execution ระดับหนึ่ง — ไม่พบ App Check หรือ custom rate-limiting middleware" },
+      { item: "Secrets Management", result: "✅ ทุก secret ใช้ defineSecret() ผ่าน Firebase Secret Manager ไม่ hardcode ในซอร์สโค้ด — ตรวจสอบจาก functions/index.js จริง" },
+      { item: "CORS", result: "✅ ทุก onRequest function ตั้ง cors: true หรือ custom CORS_HEADERS อย่างชัดเจน" },
+      { item: "Least-Privilege Rules", result: "✅ ยืนยันจาก Step 4 — deny-by-default + per-collection least privilege" },
+    ];
+    const stepProgress = [
+      { step: "Step 1 — Firebase Project Health Audit", status: "Complete", color: "🟢" },
+      { step: "Step 2 — Firestore Database Structure Audit", status: "Complete", color: "🟢" },
+      { step: "Step 3 — Authentication Configuration Review", status: "Complete", color: "🟢" },
+      { step: "Step 4 — Firestore Security Rules Audit", status: "Complete (no change needed)", color: "🟢" },
+      { step: "Step 5 — Firestore Security Validation", status: "Complete (Static Review)", color: "🟢" },
+      { step: "Step 6 — Cloud Storage Rules", status: "Complete", color: "🟢" },
+      { step: "Step 7 — Indexes & Query Performance", status: "Complete", color: "🟢" },
+      { step: "Step 8 — Hosting/Domain/SSL/Environment", status: "Ready for Verification", color: "🔵" },
+      { step: "Step 9 — Monitoring/Logging/Alerts", status: "Ready for Verification", color: "🔵" },
+      { step: "Step 10 — Production Hardening Checklist", status: "Complete", color: "🟢" },
+      { step: "Step 11 — External Verification", status: "Ready for Verification", color: "🔵" },
+      { step: "Step 12 — Mission Report", status: "Complete", color: "🟢" },
+    ];
+    return { step1Rows, step5Rows, hardeningRows, stepProgress };
+  }
+}
+</script>
+</body>
+</html>

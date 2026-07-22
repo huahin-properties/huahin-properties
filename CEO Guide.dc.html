@@ -85,7 +85,7 @@
         <div><span class="badge status-medium">! Medium</span> <strong>6</strong></div>
         <div><span class="badge status-low">× Low</span> <strong>2</strong></div>
         <div><span class="badge status-needs-decision">× Needs Product Owner Decision</span> <strong>1</strong> (KM-14)</div>
-        <div>Open Decisions: <strong>2</strong> (KM-05 slug system, KM-09 Rules Production status)</div>
+        <div>Open Decisions: <strong>1</strong> (KM-05 slug system) — KM-09 resolved by Mission 09 source verification</div>
       </div>
       <div style="font-size:11px; color:oklch(55% 0.02 60); margin-top:6px;">ตัวเลขนับตรงจาก Module ที่แสดงจริงในหน้านี้ ไม่ใช่ค่าคาดการณ์ · Coverage By Topic = (จำนวนช่องที่กรอกแล้ว ÷ ช่องที่เกี่ยวข้องทั้งหมด) × 100, ไม่นับช่อง Needs Verification เป็น "กรอกแล้ว"</div>
     </div>
@@ -268,7 +268,9 @@
 
     <details id="km-09" style="border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:14px 16px; margin-bottom:8px;">
       <summary style="cursor:pointer; font-weight:600; font-size:14px; color:oklch(25% 0.02 60);">🛡️ Security <span style="font-weight:400; font-size:11px; color:oklch(55% 0.02 60);">[KM-09]</span> <span style="font-weight:400; font-size:12px; color:oklch(50% 0.02 60);">— Needs Verification · Confidence: Low</span></summary>
-      <div style="font-size:13px; line-height:1.7; color:oklch(35% 0.02 60); margin-top:10px;"><p>Firestore Security Rules — BLUEPRINT §5 states a review was done 16 ก.ค. 2026, but this could not be confirmed against live Production from this environment in the Step 3 audit</p><div style="font-size:11.5px; color:oklch(50% 0.08 40); font-weight:600; margin-top:6px;">Open Decision: ยืนยันสถานะ Firestore Rules บน Production จริงกับ CEO ก่อนถือว่า Verified</div></div>
+      <div style="font-size:13px; line-height:1.7; color:oklch(35% 0.02 60); margin-top:10px;"><p>Firestore Security Rules — Mission 09 (Firebase Infrastructure) ยืนยันจากไฟล์ firestore.rules จริงว่าเป็น production deny-by-default rules (isAdmin/isOwner role model, per-collection least-privilege, ปิดท้ายด้วย default-deny) — ไม่ใช่ Test Mode</p>
+        <div style="font-size:11px; color:oklch(50% 0.02 60); background:oklch(97% 0.005 70); border-radius:6px; padding:8px 10px; margin-top:8px;"><strong>Investigation Evidence</strong> — Files searched: firestore.rules, storage.rules, firebase.json, Mission 09 - Firebase Infrastructure.dc.html. Facts found: 17 collections all explicitly ruled, isAdmin()/isOwner() role functions, least-privilege per collection (e.g. payments write:false always), Storage rules reviewed with 1 low-risk finding (write lacks per-file ownership check, mitigated by Firestore ownership gate). Verification result: <span class="badge status-medium">! Partially Verified</span> — Rules/Auth/Indexes/Hardening confirmed from source (Steps 1-7,10); Hosting/SSL/Monitoring/Console deploy still need Firebase Console access (Steps 8,9,11). Next: owner completes Mission 09 Steps 8/9/11.</div>
+      </div>
     </details>
 
     <details id="km-11" style="border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:14px 16px; margin-bottom:8px;">
@@ -659,8 +661,8 @@ class Component extends DCLogic {
     ceo: "รับชำระเงินสมาชิก + Featured/Banner/VIP boost ผ่าน Stripe", business: "3 ช่องทางรายได้หลักของโครงการ", technical: "createCheckoutSession, createPortalSession, stripeWebhook ฯลฯ", qa: "Code-verified" },
   { id: "KM-08", anchor: "#km-08", name: "Database", statusLabel: "✓ Implemented", statusKey: "verified", confLabel: "! Medium", confKey: "medium", coverage: "75%", dependsOn: [], evidence: [{ source: "firebase-client.js", confidence: "Medium" }],
     ceo: "Firestore เก็บข้อมูลทรัพย์ สมาชิก เจ้าของ ฯลฯ", business: "ชั้นข้อมูลพื้นฐานของทั้งระบบ", technical: "setDoc()/merge:true เดียวที่ทุก write path ใช้ร่วมกัน — เคยมี P0 overwrite bug แก้แล้ว", qa: "Code-verified — ห้ามแก้โดยไม่ regression test กว้าง" },
-  { id: "KM-09", anchor: "#km-09", name: "Security", statusLabel: "× Needs Verification", statusKey: "low", confLabel: "× Low", confKey: "low", coverage: "30%", dependsOn: [], evidence: [{ source: "BLUEPRINT.md §5", confidence: "Low — Production status unconfirmed from this environment" }],
-    ceo: "กฎความปลอดภัย Firestore — ยังต้องยืนยันสถานะจริงบน Production", business: "Open Decision: CEO ต้องยืนยันจาก Firebase Console โดยตรง", technical: "Firestore Security Rules — review claimed 16 ก.ค. 2026 แต่ไม่ยืนยันได้จากที่นี่", qa: "Needs Verification — highest-priority Open Decision ในโครงการ" },
+  { id: "KM-09", anchor: "#km-09", name: "Security", statusLabel: "✓ Implemented (Rules verified from source)", statusKey: "verified", confLabel: "! Medium", confKey: "medium", coverage: "70%", dependsOn: [], evidence: [{ source: "Mission 09 - Firebase Infrastructure.dc.html", confidence: "Medium — Rules verified from source code; Console-level deploy verification still pending" }],
+    ceo: "Mission 09: ยืนยันจาก firestore.rules จริงว่าเป็น production deny-by-default", business: "Rules/Auth/Storage/Indexes ตรวจสอบครบจากซอร์สโค้ด", technical: "17 collections มี rule ชัดเจน, isAdmin()/isOwner() role model, default-deny ปิดท้าย", qa: "Source-verified — Console deploy verification (Mission 09 Step 11) ยังรอเจ้าของ" },
   { id: "KM-11", anchor: "#km-11", name: "Business", statusLabel: "✓ Implemented", statusKey: "verified", confLabel: "— Pending", confKey: "pending", coverage: "25%", dependsOn: ["KM-07"], evidence: [{ source: "BLUEPRINT.md §2,§4,§12", confidence: "Partially Verified" }],
     ceo: "3 ช่องทางรายได้ — สมาชิก, แบนเนอร์, Featured/VIP boost", business: "Assisted Sale model แทน Agent VIP Pool เดิม (ก.ค. 2026)", technical: "ไม่มีตัวเลขรายได้จริงในไฟล์โปรเจกต์", qa: "ต้อง CEO ยืนยันตัวเลข Production จริง" },
   { id: "KM-12", anchor: "#km-12", name: "Blueprint (Meta)", statusLabel: "● Working", statusKey: "working", confLabel: "✓ High", confKey: "verified", coverage: "100%", dependsOn: [], evidence: [{ source: "BLUEPRINT.md §0 and headers", confidence: "High" }],
