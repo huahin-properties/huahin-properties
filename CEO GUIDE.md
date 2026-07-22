@@ -93,6 +93,18 @@ Checklist:
 11. ปิดโครงการ/ปิดเฟส (Official Completion): ก่อนประกาศว่างานใดเสร็จสิ้น ต้องได้รับการอนุมัติจาก Product Owner ก่อนเสมอ จากนั้นจัดทำ 🏁 Official Completion Notice ประกอบด้วย Project, Phase/Sprint/Feature, Status ✅ COMPLETED, Approved By (Product Owner), Completion Date, Summary, Superseded By (ถ้ามี), Next Phase — หากไม่มี Official Completion Notice ให้ถือว่างาน "ยังไม่ปิดอย่างเป็นทางการ" แม้ว่าจะ Upload ขึ้น GitHub สำเร็จแล้วก็ตาม
 12. Completion History: ทุก Feature/Sprint/Phase/Release ที่เสร็จสมบูรณ์ต้องถูกบันทึกลง PROJECT_HISTORY.md (หรือ COMPLETION_HISTORY.md หากโครงการใช้ชื่อนี้) — นี่คือประวัติถาวรของโครงการ (Date, Project, Work, Status, Approved By Product Owner, Summary, Next Phase) เพื่อให้ผู้รับช่วงต่อเข้าใจได้ทันทีว่างานใดเสร็จแล้ว ใครอนุมัติ เมื่อใด และงานถัดไปคืออะไร
 
+## 13. 🔒 Definition of Done (DoD)
+
+งานจะถือว่า "เสร็จสมบูรณ์" ต่อเมื่อผ่านครบทั้ง 5 ขั้นต่อไปนี้:
+
+1. พัฒนาเสร็จ
+2. Product Owner อนุมัติ
+3. Upload และ Verification ผ่าน
+4. Official Completion Notice ถูกสร้างและบันทึกแล้ว
+5. PROJECT_HISTORY.md ได้รับการอัปเดตแล้ว
+
+หากขาดข้อใดข้อหนึ่ง ให้ถือว่างาน "ยังไม่เสร็จ" แม้ว่าจะ Upload ขึ้น GitHub แล้วก็ตาม
+
 ---
 
 **ตำแหน่งที่แนะนำ**: ควรวาง CEO GUIDE ไว้ใน Mission Control (ลิงก์/แท็บเข้าถึงได้จากหน้าแรก) เพราะ Mission Control เป็นจุดที่ CEO เปิดดูเป็นจุดแรกอยู่แล้วทุกครั้งก่อนเริ่มงาน (ตามหัวข้อ 2) การวางไว้ที่เดียวกันทำให้ CEO ไม่ต้องจำตำแหน่งไฟล์แยกต่างหาก
