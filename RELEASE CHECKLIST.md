@@ -39,7 +39,7 @@ Verify `export-for-github/` contains the latest version of every file above:
 4. Confirm repository is up to date — no pending changes left un-uploaded
 
 ## 6. Completion Record
-- **Version**: _____
-- **Release Date**: _____
-- **Released By**: _____
-- **Notes**: _____
+- **Version**: Property Details Step 12 Release
+- **Release Date**: 22 กรกฎาคม 2569
+- **Released By**: Product Owner (via CEO Daily Brief workflow)
+- **Notes**: Documentation + export verified byte-identical to source (13 core files checked, all MATCH after re-sync). CLAUDE.md rename classified as Environment Limitation by Product Owner decision — assigned to Project Owner, to be completed manually immediately before GitHub upload. GitHub upload itself remains a manual owner action per this project's deployment workflow (no automated GitHub write access in this environment).

@@ -625,17 +625,20 @@ class Component extends DCLogic {
       viewDetailsLabel: t.view_details,
     });
 
+    const fallbackCard = cardProps(raw);
     const p = {
-      ...cardProps(raw),
+      ...fallbackCard,
       // Identity/price fields now sourced from the normalized adapter
       // model when available (Step 2.2C) — falls back to the pre-existing
       // cardProps() computation during the brief window before the
       // adapter's dynamic import resolves, so nothing regresses.
-      title: normalized ? normalized.title : cardProps(raw).title,
+      // (Step 4 tech-debt fix: cardProps(raw) was previously called 3x
+      // redundantly to build this one fallback — computed once here.)
+      title: normalized ? normalized.title : fallbackCard.title,
       priceLabel: normalized && normalized.priceValid
         ? mod.formatPrice(normalized.price, normalized.currency, lang) + (normalized.status === "rent" ? t.per_month : "")
-        : cardProps(raw).priceLabel,
-      areaLabel: normalized ? normalized.areaLabel : cardProps(raw).areaLabel,
+        : fallbackCard.priceLabel,
+      areaLabel: normalized ? normalized.areaLabel : fallbackCard.areaLabel,
       zone: normalized ? normalized.zone : raw.zone,
       // Self-serve listings (Lister Dashboard) never set `fullDesc` — they
       // only have `description` (plain string, or a per-lang object after

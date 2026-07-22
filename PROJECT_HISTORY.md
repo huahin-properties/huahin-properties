@@ -4,6 +4,26 @@ Permanent record of completed Features, Sprints, Phases, and Releases. Updated e
 
 ---
 
+## Property Details — Step 12 (Release Preparation Verified, GitHub Upload Pending)
+- **Date**: 22 กรกฎาคม 2569
+- **Project**: huahin.properties
+- **Work**: Step 11 Release Preparation confirmed READY (16 files staged in export-for-github/, all code/doc files byte-verified matching root source). Step 12 attempted: file rename of `CLAUDE (rename to CLAUDE.md before upload).md` → `CLAUDE.md` blocked by an environment-level reserved-path restriction (cannot be renamed via available tooling without explicit named approval). GitHub upload itself was not attempted — this environment has no GitHub write access; uploads are performed manually by the project owner per the documented deployment workflow.
+- **Status**: 🟡 PARTIAL — blocked on manual owner action
+- **Approved By**: Product Owner (Step 11 Release Preparation only)
+- **Summary**: Release package is content-complete and verified consistent with source. Two manual actions remain with the owner: (1) rename the CLAUDE.md file locally after download, (2) upload the package to GitHub via the web UI. Sprint cannot be marked closed until these are done and confirmed.
+- **Superseded By**: —
+- **Next Phase**: Owner performs manual rename + GitHub upload, then requests final closure verification
+
+## Property Details — Step 4/5/6 (Technical Debt, Final QA, Release Closure)
+- **Date**: 22 กรกฎาคม 2569
+- **Project**: huahin.properties
+- **Work**: Step 4 Technical Debt Completion (fixed redundant `cardProps(raw)` triple-call in renderVals — computed once, reused), Step 5 Final QA (desktop/mobile regression: compare/favorite/schedule/mortgage/reviews/title all verified live, no new console errors), Step 6 Release Closure (this record + Mission Control + RELEASE CHECKLIST run)
+- **Status**: ✅ COMPLETED
+- **Approved By**: Product Owner
+- **Summary**: Property Details module closed out through its full Step 1→6 lifecycle (Analyze → Architecture → Adapter → Repository → Business Logic → Integration Testing → Architecture Audit → Technical Debt → Final QA → Release Closure). Known residual items (pre-existing `nav_*`/`footer_rights` first-paint-only console warnings from `data.js` i18n streaming timing, not a Property Details defect; Schedule Viewing/Media error branches untestable without a real backend) carried forward as documented, not hidden.
+- **Superseded By**: —
+- **Next Phase**: Awaiting Product Owner's official closure of Property Details before any other module begins
+
 ## Phase 1 — Blueprint Refresh
 - **Date**: 22 กรกฎาคม 2569
 - **Project**: huahin.properties
