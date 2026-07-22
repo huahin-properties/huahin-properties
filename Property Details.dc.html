@@ -92,9 +92,9 @@
   <sc-if value="{{ hasProperty }}" hint-placeholder-val="{{ true }}">
 
     <!-- ============ BANNER SLOT (top) ============ -->
-    <sc-if value="{{ hasTopBanner }}">
-      <a href="{{ topBanner.link }}" style="display:block; width:100%; height:clamp(64px,10vw,140px); overflow:hidden;">
-        <img src="{{ topBanner.imageUrl }}" alt="banner" style="width:100%; height:100%; display:block; object-fit:cover;" />
+    <sc-if value="{{ topBannerImageUrl }}" hint-placeholder-val="{{ false }}">
+      <a href="{{ topBannerLink }}" style="display:block; width:100%; height:clamp(64px,10vw,140px); overflow:hidden;">
+        <img ref="{{ bannerImgRef }}" alt="banner" style="width:100%; height:100%; display:block; object-fit:cover;" />
       </a>
     </sc-if>
 
@@ -107,24 +107,58 @@
 
     <!-- ============ GALLERY ============ -->
     <div style="padding:14px clamp(20px,4vw,56px) 0;">
-      <div style="{{ heroPhotoStyle }}">
+      <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+        <sc-for list="{{ galleryTabs }}" as="gt" hint-placeholder-count="3">
+          <div onClick="{{ gt.onClick }}" style="padding:8px 16px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer; background:{{ gt.bg }}; color:{{ gt.color }}; border:1px solid oklch(88% 0.01 70);">{{ gt.icon }} {{ gt.label }}</div>
+        </sc-for>
+      </div>
+      <div style="position:relative;">
+        <sc-if value="{{ showPhotoGallery }}" hint-placeholder-val="{{ true }}">
+        <div style="{{ heroPhotoStyle }}">
+          <div style="position:absolute; bottom:14px; right:14px; font-family:monospace; font-size:11px; font-weight:600; letter-spacing:0.02em; color:oklch(20% 0.02 60); background:rgba(255,255,255,0.8); padding:4px 10px; border-radius:100px; pointer-events:none;">{{ p.propertyId }}</div>
+          <sc-if value="{{ activePhotoNoPhoto }}">
+            <div style="position:absolute; bottom:14px; left:14px; font-family:monospace; font-size:12px; color:oklch(20% 0.02 60 / 0.8); background:rgba(255,255,255,0.7); padding:5px 10px; border-radius:4px; pointer-events:none;">[{{ activePhotoLabel }}]</div>
+          </sc-if>
+          <div onClick="{{ prevPhoto }}" style="position:absolute; top:50%; left:14px; transform:translateY(-50%); width:38px; height:38px; border-radius:100px; background:rgba(255,255,255,0.8); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; color:oklch(25% 0.02 60); z-index:2;">‹</div>
+          <div onClick="{{ nextPhoto }}" style="position:absolute; top:50%; right:14px; transform:translateY(-50%); width:38px; height:38px; border-radius:100px; background:rgba(255,255,255,0.8); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; color:oklch(25% 0.02 60); z-index:2;">›</div>
+          <div style="position:absolute; bottom:14px; left:14px; font-size:12px; color:oklch(20% 0.02 60); background:rgba(255,255,255,0.7); padding:5px 10px; border-radius:4px; pointer-events:none;">{{ activePhotoNum }} / {{ photoCount }}</div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:10px; overflow-x:auto; padding-bottom:4px;">
+          <sc-for list="{{ photos }}" as="ph" hint-placeholder-count="6">
+            <div onClick="{{ ph.select }}" style="{{ ph.thumbStyle }}">
+              <div style="position:absolute; inset:0; opacity:{{ ph.dim }}; background:oklch(20% 0.02 60); pointer-events:none;"></div>
+            </div>
+          </sc-for>
+        </div>
+        </sc-if>
+        <sc-if value="{{ showVideoPlaceholder }}">
+          <div style="aspect-ratio:16/9; max-height:560px; border-radius:6px; background:oklch(93% 0.015 75); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px; color:oklch(45% 0.02 60);">
+            <div style="font-size:32px;">🎬</div><div style="font-size:14px;">วิดีโอนำชม — เร็วๆ นี้</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ showVideoPlayer }}">
+          <div style="aspect-ratio:16/9; max-height:560px; border-radius:6px; overflow:hidden;"><iframe src="{{ mediaVideoUrl }}" style="width:100%; height:100%; border:0;" allowfullscreen></iframe></div>
+        </sc-if>
+        <sc-if value="{{ show360Placeholder }}">
+          <div style="aspect-ratio:16/9; max-height:560px; border-radius:6px; background:oklch(93% 0.015 75); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px; color:oklch(45% 0.02 60);">
+            <div style="font-size:32px;">🧭</div><div style="font-size:14px;">360° Virtual Tour — เร็วๆ นี้</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ show360Player }}">
+          <div style="aspect-ratio:16/9; max-height:560px; border-radius:6px; overflow:hidden;"><iframe src="{{ mediaVirtualTourUrl }}" style="width:100%; height:100%; border:0;" allowfullscreen></iframe></div>
+        </sc-if>
         <div style="position:absolute; top:14px; left:14px; background:{{ p.statusColor }}; color:oklch(99% 0.005 80); font-size:12px; font-weight:600; padding:5px 14px; border-radius:100px; pointer-events:none;">{{ p.statusLabel }}</div>
+        <div onClick="{{ onToggleCompare }}" title="เปรียบเทียบทรัพย์" style="position:absolute; top:14px; right:102px; width:36px; height:36px; border-radius:50%; background:{{ compareBg }}; display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15); z-index:2;">
+          ⚖️
+          <sc-if value="{{ hasCompareItems }}">
+            <div style="position:absolute; top:-4px; right:-4px; background:oklch(40% 0.13 25); color:white; font-size:10px; font-weight:700; min-width:16px; height:16px; border-radius:100px; display:flex; align-items:center; justify-content:center; padding:0 4px;">{{ compareCount }}</div>
+          </sc-if>
+          <sc-if value="{{ compareLimitMessage }}">
+            <div style="position:absolute; top:44px; right:0; background:oklch(25% 0.02 60); color:white; font-size:11px; padding:5px 10px; border-radius:6px; white-space:nowrap;">{{ compareLimitMessage }}</div>
+          </sc-if>
+        </div>
         <div onClick="{{ onToggleFav }}" title="{{ favTitle }}" style="position:absolute; top:14px; right:14px; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; font-size:19px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15); z-index:2;">{{ favIcon }}</div>
         <div onClick="{{ onOpenShare }}" title="แชร์ประกาศ" style="position:absolute; top:14px; right:58px; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15); z-index:2;">🔗</div>
-        <div style="position:absolute; bottom:14px; right:14px; font-family:monospace; font-size:11px; font-weight:600; letter-spacing:0.02em; color:oklch(20% 0.02 60); background:rgba(255,255,255,0.8); padding:4px 10px; border-radius:100px; pointer-events:none;">{{ p.propertyId }}</div>
-        <sc-if value="{{ activePhotoNoPhoto }}">
-          <div style="position:absolute; bottom:14px; left:14px; font-family:monospace; font-size:12px; color:oklch(20% 0.02 60 / 0.8); background:rgba(255,255,255,0.7); padding:5px 10px; border-radius:4px; pointer-events:none;">[{{ activePhotoLabel }}]</div>
-        </sc-if>
-        <div onClick="{{ prevPhoto }}" style="position:absolute; top:50%; left:14px; transform:translateY(-50%); width:38px; height:38px; border-radius:100px; background:rgba(255,255,255,0.8); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; color:oklch(25% 0.02 60); z-index:2;">‹</div>
-        <div onClick="{{ nextPhoto }}" style="position:absolute; top:50%; right:14px; transform:translateY(-50%); width:38px; height:38px; border-radius:100px; background:rgba(255,255,255,0.8); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; color:oklch(25% 0.02 60); z-index:2;">›</div>
-        <div style="position:absolute; bottom:14px; left:14px; font-size:12px; color:oklch(20% 0.02 60); background:rgba(255,255,255,0.7); padding:5px 10px; border-radius:4px; pointer-events:none;">{{ activePhotoNum }} / {{ photoCount }}</div>
-      </div>
-      <div style="display:flex; gap:10px; margin-top:10px; overflow-x:auto; padding-bottom:4px;">
-        <sc-for list="{{ photos }}" as="ph" hint-placeholder-count="6">
-          <div onClick="{{ ph.select }}" style="{{ ph.thumbStyle }}">
-            <div style="position:absolute; inset:0; opacity:{{ ph.dim }}; background:oklch(20% 0.02 60); pointer-events:none;"></div>
-          </div>
-        </sc-for>
       </div>
     </div>
 
@@ -185,6 +219,20 @@
           <a href="https://wa.me/6632000000" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background:oklch(52% 0.13 150); color:oklch(98% 0.01 80); padding:12px; border-radius:4px; font-size:14px; text-decoration:none;">💬 {{ t.whatsapp }}</a>
           <a href="https://line.me/ti/p/huahinproperties" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background:oklch(58% 0.16 145); color:oklch(98% 0.01 80); padding:12px; border-radius:4px; font-size:14px; text-decoration:none;">✆ {{ t.line_app }}</a>
           <a href="mailto:hello@huahin.properties" style="display:flex; align-items:center; justify-content:center; gap:8px; border:1px solid oklch(75% 0.02 60); color:oklch(25% 0.02 60); padding:12px; border-radius:4px; font-size:14px; text-decoration:none;">✉ {{ t.email_cta }}</a>
+          <div onClick="{{ onOpenSchedule }}" style="display:flex; align-items:center; justify-content:center; gap:8px; border:1px solid oklch(80% 0.02 60); color:oklch(25% 0.02 60); padding:12px; border-radius:4px; font-size:14px; cursor:pointer;">📅 นัดชมทรัพย์</div>
+          <div style="font-size:11px; color:oklch(55% 0.02 60); text-align:center;">Mini Site: huahin.properties/{{ miniSiteSlug }}</div>
+        </div>
+
+        <div style="background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:6px; padding:20px 22px; display:flex; flex-direction:column; gap:10px;">
+          <div style="font-family:'Playfair Display',serif; font-size:16px; color:oklch(20% 0.02 60);">🧮 คำนวณสินเชื่อเบื้องต้น</div>
+          <div style="display:flex; flex-direction:column; gap:10px; font-size:13px;">
+            <label style="color:oklch(50% 0.02 60);">เงินดาวน์ ({{ mortgageDownPct }}%)<input type="range" min="10" max="50" value="{{ mortgageDownPct }}" onChange="{{ onMortgageDownChange }}" style="width:100%; margin-top:4px;" /></label>
+            <label style="color:oklch(50% 0.02 60);">ระยะเวลากู้ ({{ mortgageYears }} ปี)<input type="range" min="5" max="30" value="{{ mortgageYears }}" onChange="{{ onMortgageYearsChange }}" style="width:100%; margin-top:4px;" /></label>
+            <label style="color:oklch(50% 0.02 60);">อัตราดอกเบี้ย ({{ mortgageRate }}%)<input type="range" min="3" max="10" step="0.1" value="{{ mortgageRate }}" onChange="{{ onMortgageRateChange }}" style="width:100%; margin-top:4px;" /></label>
+            <div style="display:flex; justify-content:space-between; color:oklch(30% 0.02 60); padding-top:6px; border-top:1px solid oklch(91% 0.01 70);"><span>ผ่อนโดยประมาณ / เดือน</span><strong>{{ monthlyPaymentLabel }}</strong></div>
+          </div>
+          <sc-if value="{{ mortgageErrorMessage }}"><div style="font-size:11.5px; color:oklch(50% 0.18 25);">{{ mortgageErrorMessage }}</div></sc-if>
+          <div style="font-size:11px; color:oklch(55% 0.02 60);">เป็นการประมาณเบื้องต้น (เงินต้น+ดอกเบี้ยเท่านั้น ไม่รวมค่าธรรมเนียม/ประกัน) ไม่ใช่ข้อเสนอสินเชื่อจริง</div>
         </div>
 
         <div style="background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:6px; padding:22px; display:flex; flex-direction:column; gap:12px;">
@@ -200,6 +248,36 @@
             <div onClick="{{ sendEnquiry }}" style="background:oklch(40% 0.13 25); color:oklch(98% 0.01 80); text-align:center; padding:12px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">{{ t.send }}</div>
           </sc-if>
         </div>
+      </div>
+    </div>
+
+    <!-- ============ REVIEWS (mock data — component ready for real data) ============ -->
+    <div style="padding:0 clamp(20px,4vw,56px) clamp(24px,4vw,40px);">
+      <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:14px;">
+        <div style="font-family:'Playfair Display',serif; font-size:21px; color:oklch(20% 0.02 60);">รีวิวจากลูกค้า</div>
+        <sc-if value="{{ reviewsEmpty }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px; color:oklch(55% 0.02 60);">ยังไม่มีรีวิว</div></sc-if>
+        <sc-if value="{{ reviewCount }}"><div style="font-size:13px; color:oklch(55% 0.02 60);">★ {{ avgRating }} ({{ reviewCount }} รีวิว) — ข้อมูลตัวอย่าง</div></sc-if>
+      </div>
+      <sc-if value="{{ reviewsLoading }}" hint-placeholder-val="{{ true }}">
+        <div style="font-size:13.5px; color:oklch(55% 0.02 60); padding:12px 0;">กำลังโหลดรีวิว…</div>
+      </sc-if>
+      <sc-if value="{{ reviewsErrored }}" hint-placeholder-val="{{ false }}">
+        <div style="border:1px solid oklch(85% 0.1 25); background:oklch(97% 0.03 25); border-radius:6px; padding:16px; text-align:center; font-size:13.5px; color:oklch(40% 0.15 25);">ไม่สามารถโหลดรีวิวได้ในขณะนี้</div>
+      </sc-if>
+      <sc-if value="{{ reviewsEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="border:1px dashed oklch(85% 0.01 70); border-radius:6px; padding:24px; text-align:center; font-size:13.5px; color:oklch(55% 0.02 60);">ยังไม่มีรีวิว — พื้นที่นี้เตรียมไว้สำหรับระบบรีวิวในเวอร์ชันถัดไป</div>
+      </sc-if>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <sc-for list="{{ reviews }}" as="rv" hint-placeholder-count="3">
+          <div style="border:1px solid oklch(91% 0.01 70); border-radius:6px; padding:16px 18px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <div style="font-weight:600; font-size:14px; color:oklch(25% 0.02 60);">{{ rv.reviewer }}</div>
+              <div style="font-size:12px; color:oklch(55% 0.02 60);">{{ rv.date }}</div>
+            </div>
+            <div style="color:oklch(60% 0.14 75); font-size:14px; margin-bottom:6px;">{{ rv.stars }}</div>
+            <div style="font-size:13.5px; color:oklch(35% 0.02 60); line-height:1.6;">{{ rv.comment }}</div>
+          </div>
+        </sc-for>
       </div>
     </div>
 
@@ -224,6 +302,46 @@
 
 <sc-if value="{{ showChrome }}"><dc-import name="ContactRail" current-property-id="{{ currentPropertyId }}" hint-size="0,0"></dc-import></sc-if>
 
+<sc-if value="{{ showSchedule }}">
+  <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:200;" onClick="{{ onCloseSchedule }}">
+    <div style="background:white; border-radius:10px; padding:24px; width:min(400px,90vw);" onClick="{{ stopProp }}">
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:4px;">นัดชมทรัพย์</div>
+      <div style="font-size:12.5px; color:oklch(55% 0.02 60); margin-bottom:16px;">{{ p.propertyId }} — {{ p.title }}</div>
+      <sc-if value="{{ scheduleSent }}">
+        <div style="font-size:14px; color:oklch(45% 0.1 150); padding:16px 0; text-align:center;">ขอบคุณ! ทีมงานจะติดต่อกลับเพื่อยืนยันนัดหมาย (ตัวอย่างฟอร์ม — ยังไม่ส่งข้อมูลจริง)</div>
+      </sc-if>
+      <sc-if value="{{ scheduleNotSent }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <input placeholder="ชื่อของคุณ" value="{{ scheduleName }}" onChange="{{ onScheduleName }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+          <sc-if value="{{ scheduleErrorName }}"><div style="font-size:11.5px; color:oklch(50% 0.18 25); margin-bottom:4px;">{{ scheduleErrorName }}</div></sc-if>
+          <input type="date" value="{{ scheduleDate }}" onChange="{{ onScheduleDate }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; margin-top:6px;" />
+          <sc-if value="{{ scheduleErrorDate }}"><div style="font-size:11.5px; color:oklch(50% 0.18 25); margin-bottom:4px;">{{ scheduleErrorDate }}</div></sc-if>
+          <input placeholder="เบอร์โทร / WhatsApp" value="{{ schedulePhone }}" onChange="{{ onSchedulePhone }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; margin-top:6px;" />
+          <sc-if value="{{ scheduleErrorPhone }}"><div style="font-size:11.5px; color:oklch(50% 0.18 25); margin-bottom:4px;">{{ scheduleErrorPhone }}</div></sc-if>
+          <sc-if value="{{ scheduleSubmitError }}"><div style="font-size:12px; color:oklch(50% 0.18 25); text-align:center;">{{ scheduleSubmitError }}</div></sc-if>
+          <div onClick="{{ onSubmitSchedule }}" style="background:oklch(40% 0.13 25); color:white; text-align:center; padding:12px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer; margin-top:6px;">ยืนยันนัดหมาย</div>
+        </div>
+      </sc-if>
+      <div onClick="{{ onCloseSchedule }}" style="text-align:center; margin-top:16px; font-size:12px; color:oklch(50% 0.02 60); cursor:pointer;">ปิด</div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ isMobileNav }}">
+  <sc-if value="{{ hasProperty }}">
+    <div style="position:sticky; bottom:0; z-index:80; background:white; border-top:1px solid oklch(90% 0.01 70); padding:12px 20px; display:flex; gap:10px; align-items:center; justify-content:space-between;">
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:16px; color:oklch(20% 0.02 60);">{{ p.priceLabel }}</div>
+        <div style="font-size:11px; color:oklch(55% 0.02 60);">{{ p.areaLabel }}</div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <a href="tel:+6632000000" style="text-decoration:none; background:oklch(22% 0.02 60); color:white; padding:10px 16px; border-radius:100px; font-size:13px; font-weight:600;">📞 {{ t.call }}</a>
+        <a href="https://wa.me/6632000000" target="_blank" style="text-decoration:none; background:oklch(52% 0.13 150); color:white; padding:10px 16px; border-radius:100px; font-size:13px; font-weight:600;">WhatsApp</a>
+      </div>
+    </div>
+  </sc-if>
+</sc-if>
+
 <sc-if value="{{ showShare }}">
   <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:200;" onClick="{{ onCloseShare }}">
     <div style="background:white; border-radius:10px; padding:24px; width:min(360px,90vw);" onClick="{{ stopProp }}">
@@ -246,6 +364,9 @@ class Component extends DCLogic {
     lang: "en",
     isFav: false,
     banners: [],
+    reviewsState: "loading", reviewsData: [],
+    mediaState: "loading", mediaVideo: null, mediaVirtualTour: null,
+    scheduleSubmitError: "",
     isMobile: (typeof window !== "undefined" && window.innerWidth < 900),
     mobileMenuOpen: false,
     data: null,
@@ -255,9 +376,17 @@ class Component extends DCLogic {
     filterReady: false,
     showGate: false, gatePassword: "", gateError: "",
     showShare: false, shareCopyLabel: "คัดลอกลิงก์",
+    compareActive: false, galleryTab: "photos", mortgageDownPct: 20,
+    mortgageYears: 20, mortgageRate: 6.5,
+    compareList: [], showSchedule: false, scheduleSent: false,
+    scheduleName: "", scheduleDate: "", schedulePhone: "",
+    scheduleErrors: { name: "", date: "", phone: "" }, scheduleSubmitAttempted: false,
+    bizLoaded: false,
   };
 
   async componentDidMount() {
+    import("./property-business-logic.js").then((biz) => { this._biz = biz; this.setState({ bizLoaded: true }); });
+    import("./property-adapter.js").then((adapter) => { this._adapter = adapter; this._maybeFetchMedia(); });
     const fb0 = await import("./firebase-client.js");
     this._fb = fb0;
     if (!fb0.hasSiteBypass() && !fb0.isAdminAuthed()) {
@@ -271,8 +400,16 @@ class Component extends DCLogic {
     const params = new URLSearchParams(window.location.search);
     this._id = params.get("id") || mod.PROPERTIES[0].id;
     this.setState({ lang: mod.getLang(), data: mod });
+    // Reviews fetch was previously fired before this._id was assigned (a
+    // pre-existing ordering bug invisible until reviews became per-property
+    // — now fixed by running it only once the real id is known).
+    import("./property-repositories.js").then(async (repo) => {
+      this._repo = repo;
+      const result = await repo.fetchReviews(this._id);
+      this.setState({ reviewsState: result.state, reviewsData: result.reviews || [] });
+    });
     const effProps = await mod.getEffectiveProperties(mod);
-    this.setState({ effProps });
+    this.setState({ effProps }, () => this._maybeFetchMedia());
     // Self-serve listings (Lister Dashboard) track a per-listing view count
     // the owner sees on their dashboard — increment once per page view.
     // Safe no-op for admin-created listings without listingStatus too.
@@ -281,7 +418,6 @@ class Component extends DCLogic {
       const allBanners = await fb0.fetchCollection("banners");
       this.setState({ banners: allBanners });
     } catch (e) { console.warn("banners fetch failed:", e); }
-    this._updateSeoTags(effProps, mod, this.state.lang);
     this._onResize = () => this.setState({ isMobile: window.innerWidth < 900 });
     this._onResize();
     window.addEventListener("resize", this._onResize);
@@ -292,6 +428,44 @@ class Component extends DCLogic {
       favs.recordPropertyView(this._id);
       this._longViewTimer = setTimeout(() => favs.recordLongView(this._id), 60000);
     } catch (e) {}
+    // Fires LAST, after every synchronous state update this mount performs
+    // (banners/favorites/etc. each trigger a re-render that recommits the
+    // template's literal <title> element, silently undoing an earlier
+    // document.title assignment — that was the actual root cause of the
+    // tab title never updating). componentDidUpdate below re-asserts it
+    // only on the specific state changes that should change the title —
+    // not a polling loop, just two guarded comparisons.
+    this._updateSeoTags(this.state.effProps, mod, this.state.lang);
+  }
+
+  /** Runs once both the adapter and effProps are available (order-independent
+   * — called from both places that could be the "last" one to resolve). */
+  async _maybeFetchMedia() {
+    if (this._mediaFetchStarted || !this._adapter || !this.state.effProps || !this._mod) return;
+    this._mediaFetchStarted = true;
+    const raw = this.state.effProps.find((x) => x.id === this._id);
+    if (!raw) { this.setState({ mediaState: "not_found" }); return; }
+    const repo = this._repo || await import("./property-repositories.js");
+    this._repo = repo;
+    const normalized = this._adapter.normalizeProperty(raw, this._mod, this.state.lang);
+    const result = await repo.fetchMedia(normalized);
+    this.setState({ mediaState: result.state, mediaVideo: result.video, mediaVirtualTour: result.virtualTour });
+  }
+
+  componentDidUpdate() {
+    // This runtime's componentDidUpdate does not reliably pass prevState
+    // (confirmed by testing — it throws if you read it), so re-run the SEO
+    // tag update keyed off a locally-tracked "have the inputs changed"
+    // fingerprint instead of comparing against a prevState argument.
+    try {
+      if (!this._mod) return;
+      const fingerprint = this.state.lang + "|" + (this.state.effProps ? this.state.effProps.length : 0) + "|" + (this.state.data ? 1 : 0) + "|" + this._id;
+      if (this._seoFingerprint !== fingerprint) {
+        this._seoFingerprint = fingerprint;
+        this._updateSeoTags(this.state.effProps, this._mod, this.state.lang);
+      }
+      if (this._lastSeoTitle && document.title !== this._lastSeoTitle) document.title = this._lastSeoTitle;
+    } catch (e) { console.warn("SEO title guard failed:", e); }
   }
 
   componentWillUnmount() {
@@ -317,22 +491,29 @@ class Component extends DCLogic {
   _updateSeoTags(effProps, mod, lang) {
     const raw = (effProps || []).find((p) => p.id === this._id) || (mod.PROPERTIES || []).find((p) => p.id === this._id);
     if (!raw || !raw.seo) return;
-    document.title = raw.seo.title;
-    this._upsertMeta("name", "description", raw.seo.desc);
+    const n = this._adapter ? this._adapter.normalizeProperty(raw, mod, lang) : null;
+    const seoTitle = (n && n.seoTitle) || raw.seo.title;
+    this._lastSeoTitle = seoTitle;
+    const seoDesc = (n && n.seoDesc) || raw.seo.desc;
+    const seoKeywords = (n && n.seoKeywords) || raw.seo.keywords || "";
+    const ogImage = (n && n.hasPhotos && n.photos.find((ph) => ph.url).url) || (raw.photos[0] && raw.photos[0].url) || `${window.location.origin}/logo.png`;
+    document.title = seoTitle;
+    this._upsertMeta("name", "description", seoDesc);
+    if (seoKeywords) this._upsertMeta("name", "keywords", seoKeywords);
     this._upsertLink("canonical", `${window.location.origin}${window.location.pathname}?id=${raw.id}`);
-    this._upsertMeta("property", "og:title", raw.seo.title);
-    this._upsertMeta("property", "og:description", raw.seo.desc);
-    this._upsertMeta("property", "og:image", (raw.photos[0] && raw.photos[0].url) || `${window.location.origin}/logo.png`);
+    this._upsertMeta("property", "og:title", seoTitle);
+    this._upsertMeta("property", "og:description", seoDesc);
+    this._upsertMeta("property", "og:image", ogImage);
     this._upsertMeta("property", "og:url", `${window.location.origin}${window.location.pathname}?id=${raw.id}`);
     let ld = document.getElementById("__seo_jsonld");
     if (!ld) { ld = document.createElement("script"); ld.type = "application/ld+json"; ld.id = "__seo_jsonld"; document.head.appendChild(ld); }
     ld.textContent = JSON.stringify({
       "@context": "https://schema.org", "@type": "Product",
-      name: raw.title[lang] || raw.title.en, description: raw.seo.desc,
-      image: (raw.photos || []).filter((ph) => ph && ph.url).map((ph) => ph.url),
+      name: (n && n.title) || raw.title[lang] || raw.title.en, description: seoDesc,
+      image: (n ? n.photos.filter((ph) => ph.url).map((ph) => ph.url) : (raw.photos || []).filter((ph) => ph && ph.url).map((ph) => ph.url)),
       sku: raw.id,
       offers: {
-        "@type": "Offer", priceCurrency: raw.currency || "THB", price: raw.price,
+        "@type": "Offer", priceCurrency: (n && n.currency) || raw.currency || "THB", price: (n && n.priceValid) ? n.price : raw.price,
         availability: raw.status === "sold" || raw.status === "rented" ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
         url: `${window.location.origin}${window.location.pathname}?id=${raw.id}`,
       },
@@ -342,6 +523,20 @@ class Component extends DCLogic {
   selectLang(l) {
     this._mod.setLang(l);
     this.setState({ lang: l, mobileMenuOpen: false });
+  }
+
+  _bannerImgRefCb = (el) => {
+    this._bannerImgEl = el;
+    this._syncBannerImgSrc();
+  };
+
+  _syncBannerImgSrc() {
+    if (!this._bannerImgEl) return;
+    const url = this._lastTopBannerImageUrl || "";
+    if (this._bannerImgEl.getAttribute("src") !== url) {
+      if (url) this._bannerImgEl.setAttribute("src", url);
+      else this._bannerImgEl.removeAttribute("src");
+    }
   }
 
   async submitGate() {
@@ -358,17 +553,23 @@ class Component extends DCLogic {
     const gateVals = {
       showGate: this.state.showGate,
       showChrome: !this.state.showGate,
-      hasTopBanner: (() => {
+      topBannerImageUrl: (() => {
         const now = Date.now();
-        const active = (this.state.banners || []).filter((b) => b.page === "property" && b.position === "top" && b.active !== false && b.imageUrl && (!b.expiresAt || b.expiresAt > now));
-        return active.length > 0;
+        const active = (this.state.banners || []).filter((b) => b.page === "property" && b.position === "top" && b.active !== false && !!b.imageUrl && (!b.expiresAt || b.expiresAt > now));
+        const url = active.length ? active[Math.floor(Math.random() * active.length)].imageUrl : "";
+        this._lastTopBannerImageUrl = url;
+        // src is set imperatively (see bannerImgRef) — never through a template
+        // hole — so an unresolved-hole HTML fragment can never reach a real
+        // <img src>, which would fire a bad network request during streaming.
+        Promise.resolve().then(() => this._syncBannerImgSrc());
+        return url;
       })(),
-      topBanner: (() => {
+      bannerImgRef: this._bannerImgRefCb,
+      topBannerLink: (() => {
         const now = Date.now();
-        const active = (this.state.banners || []).filter((b) => b.page === "property" && b.position === "top" && b.active !== false && b.imageUrl && (!b.expiresAt || b.expiresAt > now));
-        if (!active.length) return { imageUrl: "", link: "#" };
-        const pick = active[Math.floor(Math.random() * active.length)];
-        return { imageUrl: pick.imageUrl, link: pick.link || "#" };
+        const active = (this.state.banners || []).filter((b) => b.page === "property" && b.position === "top" && b.active !== false && !!b.imageUrl && (!b.expiresAt || b.expiresAt > now));
+        if (!active.length) return "#";
+        return active[Math.floor(Math.random() * active.length)].link || "#";
       })(),
       gatePassword: this.state.gatePassword,
       onGatePassword: (e) => this.setState({ gatePassword: e.target.value, gateError: "" }),
@@ -390,6 +591,11 @@ class Component extends DCLogic {
 
     const propsList = this.state.effProps || mod.PROPERTIES;
     const raw = propsList.find((x) => x.id === this._id);
+    // Normalized model (Step 2.2C): single safe read-through for identity/
+    // price/facts/photos. Gallery index math and SEO tag injection below
+    // still read `raw` directly (already defensively guarded, untouched to
+    // avoid regressing tested behavior) — see property-adapter.js header.
+    const normalized = (this._adapter && raw) ? this._adapter.normalizeProperty(raw, mod, lang) : null;
     if (!raw) {
       return { t, lang, isDesktopNav: !this.state.isMobile, isMobileNav: this.state.isMobile, hasProperty: false, langValue, onLangChange, langOptions,
         currentPropertyId: this._id,
@@ -421,6 +627,16 @@ class Component extends DCLogic {
 
     const p = {
       ...cardProps(raw),
+      // Identity/price fields now sourced from the normalized adapter
+      // model when available (Step 2.2C) — falls back to the pre-existing
+      // cardProps() computation during the brief window before the
+      // adapter's dynamic import resolves, so nothing regresses.
+      title: normalized ? normalized.title : cardProps(raw).title,
+      priceLabel: normalized && normalized.priceValid
+        ? mod.formatPrice(normalized.price, normalized.currency, lang) + (normalized.status === "rent" ? t.per_month : "")
+        : cardProps(raw).priceLabel,
+      areaLabel: normalized ? normalized.areaLabel : cardProps(raw).areaLabel,
+      zone: normalized ? normalized.zone : raw.zone,
       // Self-serve listings (Lister Dashboard) never set `fullDesc` — they
       // only have `description` (plain string, or a per-lang object after
       // auto-translate). Fall back to that, then to a standard placeholder,
@@ -435,35 +651,80 @@ class Component extends DCLogic {
     };
 
     const specs = [
-      { label: t.type_label, value: typeLabelOf(raw.type) },
-      raw.bedrooms ? { label: t.bedrooms_label, value: raw.bedrooms } : null,
-      raw.bathrooms ? { label: t.bathrooms_label, value: raw.bathrooms } : null,
-      raw.landSize ? { label: t.land_size_label, value: raw.landSize + " " + t.sqm } : null,
-      raw.livingArea ? { label: t.living_area_label, value: raw.livingArea + " " + t.sqm } : null,
-      { label: t.admin_field_parking, value: raw.parking || "—" },
-      { label: t.admin_field_ownership, value: mod.ownershipLabel(raw.ownership, lang) },
+      { label: t.type_label, value: normalized ? normalized.typeLabel : typeLabelOf(raw.type) },
+      (normalized ? normalized.bedrooms : raw.bedrooms) ? { label: t.bedrooms_label, value: normalized ? normalized.bedrooms : raw.bedrooms } : null,
+      (normalized ? normalized.bathrooms : raw.bathrooms) ? { label: t.bathrooms_label, value: normalized ? normalized.bathrooms : raw.bathrooms } : null,
+      (normalized ? normalized.landSize : raw.landSize) ? { label: t.land_size_label, value: (normalized ? normalized.landSize : raw.landSize) + " " + t.sqm } : null,
+      (normalized ? normalized.livingArea : raw.livingArea) ? { label: t.living_area_label, value: (normalized ? normalized.livingArea : raw.livingArea) + " " + t.sqm } : null,
+      { label: t.admin_field_parking, value: (normalized ? normalized.parking : raw.parking) || "—" },
+      { label: t.admin_field_ownership, value: mod.ownershipLabel(normalized ? normalized.ownership : raw.ownership, lang) },
     ].filter(Boolean);
 
+    // Gallery — now routed through the normalized adapter's `photos` array
+    // (Step 2.2C continued). normalized.photos is always an array of
+    // {label,url} objects (adapter guarantees this shape even for raw
+    // string-only photo entries), so downstream index/ordering/placeholder
+    // logic is unchanged — only the raw-shape guards became simpler.
+    const photosSrc = normalized ? normalized.photos : raw.photos.map((ph) => ({ label: (ph && ph.label) || ph || "photo", url: (ph && ph.url) || "" }));
     // Only show gallery slots that actually have an uploaded photo — an
     // empty slot an admin added to make room for a future upload shouldn't
     // appear as a blank tile on the public site.
-    const filledIndices = raw.photos.map((_, i) => i).filter((i) => raw.photos[i] && raw.photos[i].url);
-    const effectiveIndices = filledIndices.length > 0 ? filledIndices : raw.photos.map((_, i) => i);
+    const filledIndices = photosSrc.map((_, i) => i).filter((i) => photosSrc[i].url);
+    const effectiveIndices = filledIndices.length > 0 ? filledIndices : photosSrc.map((_, i) => i);
     const activePos = Math.max(0, effectiveIndices.indexOf(this.state.activePhoto));
     const activeIndex = effectiveIndices[activePos] ?? effectiveIndices[0];
 
-    const bgOf = (i) => (raw.photos[i] && raw.photos[i].url) ? `url('${raw.photos[i].url}') center/cover` : "repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(92% 0.015 75) 2px, oklch(92% 0.015 75) 22px)";
+    const bgOf = (i) => photosSrc[i].url ? `url('${photosSrc[i].url}') center/cover` : "repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(92% 0.015 75) 2px, oklch(92% 0.015 75) 22px)";
 
     const photos = effectiveIndices.map((i, pos) => ({
-      label: (raw.photos[i] && raw.photos[i].label) || raw.photos[i] || "photo",
+      label: photosSrc[i].label,
       thumbStyle: { flexShrink: 0, width: "100px", height: "72px", borderRadius: "4px", overflow: "hidden", cursor: "pointer", boxShadow: (i === activeIndex ? "0 0 0 2px oklch(40% 0.13 25)" : "none"), background: bgOf(i), position: "relative" },
-      noPhoto: !(raw.photos[i] && raw.photos[i].url),
+      noPhoto: !photosSrc[i].url,
       select: () => this.setState({ activePhoto: i }),
       ring: i === activeIndex ? "0 0 0 2px oklch(40% 0.13 25)" : "none",
       dim: i === activeIndex ? 0 : 0.15,
     }));
 
-    const similar = propsList.filter((pr) => pr.area === raw.area && pr.id !== raw.id && pr.status !== "rented" && pr.status !== "sold" && pr.status !== "reserved").slice(0, 3).map(cardProps);
+    const similar = propsList.filter((pr) => pr.area === raw.area && pr.id !== raw.id && pr.status !== "rented" && pr.status !== "sold" && pr.status !== "reserved").slice(0, 3).map((pr) => {
+      const n = this._adapter ? this._adapter.normalizeProperty(pr, mod, lang) : null;
+      const base = cardProps(pr);
+      if (!n) return base;
+      return { ...base, title: n.title, areaLabel: n.areaLabel, typeLabel: n.typeLabel,
+        priceLabel: n.priceValid ? (mod.formatPrice(n.price, n.currency, lang) + (n.status === "rent" ? t.per_month : "")) : base.priceLabel,
+        coverPhotoLabel: (n.photos[0] && n.photos[0].label) || base.coverPhotoLabel,
+        coverPhotoBg: n.photos[0] && n.photos[0].url ? `url('${n.photos[0].url}') center/cover` : base.coverPhotoBg,
+        noPhoto: !(n.photos[0] && n.photos[0].url) };
+    });
+
+    // UI-only additions (Step 2.1 — display/layout only, no Firebase/Firestore
+    // writes, no persistence). Reserves the approved UX for later real wiring.
+    const galleryTabDefs = [
+      { key: "photos", icon: "📷", label: t.gallery_tab_photos || "รูปภาพ" },
+      { key: "video", icon: "🎬", label: (t.gallery_tab_video || "วิดีโอนำชม") + " (เร็วๆ นี้)" },
+      { key: "360", icon: "🧭", label: (t.gallery_tab_360 || "360° Tour") + " (เร็วๆ นี้)" },
+    ];
+    const galleryTabs = galleryTabDefs.map((g) => ({
+      icon: g.icon, label: g.label,
+      bg: this.state.galleryTab === g.key ? "oklch(22% 0.02 60)" : "white",
+      color: this.state.galleryTab === g.key ? "white" : "oklch(35% 0.02 60)",
+      onClick: () => this.setState({ galleryTab: g.key }),
+    }));
+    const biz = this._biz;
+    // Business logic (compare/mortgage/reviews/mini-site) lives in
+    // property-business-logic.js; guard for the brief window before its
+    // dynamic import resolves on first paint.
+    const mortgage = biz
+      ? biz.computeMortgage({ price: normalized ? normalized.price : raw.price, downPct: this.state.mortgageDownPct, years: this.state.mortgageYears, rate: this.state.mortgageRate })
+      : { monthly: 0, valid: false, error: "" };
+    // Reviews now sourced through the Repository layer (property-repositories.js)
+    // instead of calling biz.MOCK_REVIEWS directly — DATA_STATE drives the
+    // loading/error/empty/loaded UI below.
+    const reviewsModel = biz ? biz.getReviewsModel(this.state.reviewsData) : { reviews: [], avgRating: "0.0", count: 0, isEmpty: true };
+    const reviewsLoading = this.state.reviewsState === "loading";
+    const reviewsErrored = this.state.reviewsState === "error" || this.state.reviewsState === "permission_denied";
+    const miniSiteSlugResolved = biz ? biz.resolveMiniSiteSlug(raw.agentSlug) : "agent-name";
+    const isComparing = this.state.compareList.includes(raw.id);
+    const compareAtLimit = biz ? biz.compareLimitReached(this.state.compareList) : false;
 
     return {
       t, lang,
@@ -501,8 +762,8 @@ class Component extends DCLogic {
       activePhotoNum: activePos + 1,
       activePhotoBg: bgOf(activeIndex),
       heroPhotoStyle: { position: "relative", aspectRatio: "16/9", maxHeight: "560px", borderRadius: "6px", overflow: "hidden", background: bgOf(activeIndex) },
-      activePhotoLabel: (raw.photos[activeIndex] && raw.photos[activeIndex].label) || raw.photos[activeIndex] || "",
-      activePhotoNoPhoto: !(raw.photos[activeIndex] && raw.photos[activeIndex].url),
+      activePhotoLabel: photosSrc[activeIndex] ? photosSrc[activeIndex].label : "",
+      activePhotoNoPhoto: !(photosSrc[activeIndex] && photosSrc[activeIndex].url),
       prevPhoto: () => this.setState(() => ({ activePhoto: effectiveIndices[(activePos - 1 + effectiveIndices.length) % effectiveIndices.length] })),
       nextPhoto: () => this.setState(() => ({ activePhoto: effectiveIndices[(activePos + 1) % effectiveIndices.length] })),
       gridCols: this.state.isMobile ? "1fr" : "2fr 1fr",
@@ -512,6 +773,71 @@ class Component extends DCLogic {
       enquiryThanks: lang === "th" ? "ขอบคุณ! ทีมงานจะติดต่อกลับเร็วๆ นี้" : lang === "ru" ? "Спасибо! Мы скоро свяжемся с вами." : lang === "zh" ? "谢谢！我们会尽快与您联系。" : "Thank you! We'll be in touch shortly.",
       sendEnquiry: () => this.setState({ enquirySent: true }),
       similar,
+      galleryTabs,
+      showPhotoGallery: this.state.galleryTab === "photos",
+      // Media Repository connected (Step 2.2C finalization): if fetchMedia()
+      // ever returns a real video/tour URL, show it instead of the
+      // Coming-Soon placeholder — today it always returns null (no
+      // videoUrl/virtualTourUrl field exists anywhere in data.js, confirmed
+      // by the Track A audit), so behavior is visually unchanged.
+      showVideoPlaceholder: this.state.galleryTab === "video" && !this.state.mediaVideo,
+      showVideoPlayer: this.state.galleryTab === "video" && !!this.state.mediaVideo,
+      mediaVideoUrl: this.state.mediaVideo,
+      show360Placeholder: this.state.galleryTab === "360" && !this.state.mediaVirtualTour,
+      show360Player: this.state.galleryTab === "360" && !!this.state.mediaVirtualTour,
+      mediaVirtualTourUrl: this.state.mediaVirtualTour,
+      compareBg: isComparing ? "oklch(90% 0.05 25)" : "rgba(255,255,255,0.9)",
+      compareIconFill: isComparing ? "oklch(45% 0.13 25)" : "none",
+      onToggleCompare: () => this.setState((s) => ({
+        compareList: this._biz ? this._biz.toggleCompareId(s.compareList, raw.id) : s.compareList,
+      })),
+      compareCount: this.state.compareList.length,
+      hasCompareItems: this.state.compareList.length > 0,
+      compareLimitMessage: compareAtLimit && !isComparing ? `เปรียบเทียบได้สูงสุด ${biz ? biz.COMPARE_MAX : 4} รายการ` : "",
+
+      mortgageDownPct: this.state.mortgageDownPct,
+      onMortgageDownChange: (e) => this.setState({ mortgageDownPct: Number(e.target.value) }),
+      mortgageYears: this.state.mortgageYears,
+      onMortgageYearsChange: (e) => this.setState({ mortgageYears: Number(e.target.value) }),
+      mortgageRate: this.state.mortgageRate,
+      onMortgageRateChange: (e) => this.setState({ mortgageRate: Number(e.target.value) }),
+      monthlyPaymentLabel: mortgage.valid ? mod.formatPrice(mortgage.monthly, raw.currency, lang) : "—",
+      mortgageErrorMessage: mortgage.valid ? "" : (mortgage.error || "ไม่สามารถคำนวณได้"),
+
+      showSchedule: this.state.showSchedule,
+      onOpenSchedule: () => this.setState({ showSchedule: true, scheduleSent: false, scheduleSubmitAttempted: false, scheduleErrors: { name: "", date: "", phone: "" } }),
+      onCloseSchedule: () => this.setState({ showSchedule: false }),
+      scheduleSent: this.state.scheduleSent,
+      scheduleNotSent: !this.state.scheduleSent,
+      scheduleName: this.state.scheduleName,
+      onScheduleName: (e) => this.setState({ scheduleName: e.target.value }),
+      scheduleDate: this.state.scheduleDate,
+      onScheduleDate: (e) => this.setState({ scheduleDate: e.target.value }),
+      schedulePhone: this.state.schedulePhone,
+      onSchedulePhone: (e) => this.setState({ schedulePhone: e.target.value }),
+      scheduleErrorName: this.state.scheduleSubmitAttempted ? this.state.scheduleErrors.name : "",
+      scheduleErrorDate: this.state.scheduleSubmitAttempted ? this.state.scheduleErrors.date : "",
+      scheduleErrorPhone: this.state.scheduleSubmitAttempted ? this.state.scheduleErrors.phone : "",
+      scheduleSubmitError: this.state.scheduleSubmitError,
+      onSubmitSchedule: async () => {
+        const fields = { name: this.state.scheduleName, date: this.state.scheduleDate, phone: this.state.schedulePhone };
+        const result = this._biz ? this._biz.validateScheduleForm(fields) : { valid: true, errors: {} };
+        this.setState({ scheduleSubmitAttempted: true, scheduleErrors: result.errors, scheduleSubmitError: "" });
+        if (!result.valid) return;
+        if (!this._repo) { this.setState({ scheduleSent: true }); return; }
+        const res = await this._repo.submitViewingRequest({ propertyId: raw.id, ...fields });
+        if (res.ok) this.setState({ scheduleSent: true });
+        else this.setState({ scheduleSubmitError: "ส่งคำขอไม่สำเร็จ กรุณาลองใหม่อีกครั้ง" });
+      },
+
+      miniSiteSlug: miniSiteSlugResolved,
+
+      reviews: reviewsModel.reviews,
+      avgRating: reviewsModel.avgRating,
+      reviewCount: reviewsModel.count,
+      reviewsEmpty: reviewsModel.isEmpty && !reviewsLoading && !reviewsErrored,
+      reviewsLoading,
+      reviewsErrored,
       ...gateVals,
     };
   }

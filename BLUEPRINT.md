@@ -1012,26 +1012,24 @@ Priority ที่ใช้ได้: `Critical` / `High` / `Medium` / `Low` / `
 
 ## 21. Phase Status
 
-**Phase**: Package Demo & Documentation
+**Phase**: Phase 1 — Blueprint Refresh (Finalization)
 
-**Implementation Status**: Complete
-**Documentation Status**: Complete
-**CEO Acceptance Status**: Not Tested
-**Next Activity**: CEO Acceptance Testing
+**Implementation Status**: Property Details Step 2.2C (Data Integration) + Step 3 (Integration Testing) — Complete
+**Documentation Status**: Complete (BLUEPRINT/Mission Control/START HERE/HANDOVER PROMPT/HANDOVER TEST PROCEDURE/OPERATION MANUAL/RELEASE CHECKLIST/CLAUDE.md all cross-checked 22 ก.ค. 2569)
+**CEO Acceptance Status**: Not Tested (carried over — see §19-20, unrelated to this phase's documentation scope)
+**Next Activity**: Product Owner review of this Release Package → approval → GitHub upload (by Product Owner/CEO, not Claude)
 
 **Deliverables**:
-☑ Demo Accounts
-☑ Package Verification
-☑ Dashboard Isolation
-☑ Translation Pipeline
-☑ Demo Listings
-☑ Cleanup Scripts
-☑ CEO Login Reference
-☑ CEO Login Sheet (Private)
-☑ CEO Acceptance Checklist
-☑ Blueprint Updated
+☑ Property Adapter/Repository architecture (property-adapter.js, property-repositories.js)
+☑ Integration Testing (Step 3) passed
+☑ Architecture Audit (Lister Dashboard, Agent Profile, Agent Signup, Billing, Shared Components)
+☑ BLUEPRINT.md refreshed (feature classification BUILT/PARTIALLY BUILT/PLANNED, Roadmap Refresh, TikTok Priority-A)
+☑ Mission Control.dc.html refreshed (current phase, stale fields corrected)
+☑ CLAUDE.md corrected (removed 3 factually outdated claims: open Firestore rules, Firestore-stored photos, missing Stripe/page inventory)
+☑ Cross-document consistency check (START HERE/HANDOVER PROMPT/HANDOVER TEST PROCEDURE/OPERATION MANUAL — reviewed, no contradictions found, no updates needed)
+☑ RELEASE CHECKLIST.md run honestly (see release notes for this cycle)
 
-**Remaining Work**: CEO Manual Testing, UX Review, Bug Reports, Bug Fixes, Regression Testing, Production Readiness Decision
+**Remaining Work**: Product Owner review of this package; your decision on the Agent Signup password-field issue; your decision on the AI photo-caption→alt-text wiring priority.
 
 ---
 
@@ -1078,6 +1076,67 @@ Status: 🟢 PASS FOR PRODUCTION. Deployed. Current Phase → Next Sprint Planni
 **Navigation Standard (ทุกหน้าใหม่ควรทำตาม)**: แถวปุ่ม Pill ใต้ชื่อหน้า/คำอธิบายสั้น เชื่อมไปหน้าอื่นที่เกี่ยวข้อง + แสดงหน้าปัจจุบันเป็น non-clickable span สีต่างจากลิงก์ปกติ — ตรวจสอบชื่อไฟล์จริงก่อนใส่ href เสมอ ห้ามเดา path.
 
 **Percentage Integrity Rule**: เปอร์เซ็นต์ของทุก Readiness Domain มาจากข้อเท็จจริงที่ตรวจสอบได้ (โค้ดจริง/BLUEPRINT/Knowledge Modules) เท่านั้น ห้ามปรับโดยไม่มีหลักฐานใหม่ — ค่าปัจจุบันไม่เปลี่ยนตั้งแต่สร้างหน้าจนถึงรอบนี้.
+
+## 24.8 Property Details Data Integration + Architecture Audit (Step 2.2C / Step 3, 22 ก.ค. 2569)
+
+**Property Details.dc.html — สถาปัตยกรรม Adapter/Repository ใหม่**: เพิ่มไฟล์ `property-adapter.js`
+(`normalizeProperty()` — จุดเดียวที่ทำให้ข้อมูลทรัพย์ดิบปลอดภัยก่อนใช้ใน UI: ราคา/ห้อง/รูป/SEO ครบ, ป้องกัน
+NaN/undefined/รูปหาย ทุกกรณี — ทดสอบกับข้อมูลผิดรูปแบบเต็มแล้ว) และ `property-repositories.js`
+(`fetchReviews`/`submitViewingRequest`/`fetchMedia` — ชั้นเตรียมพร้อมสำหรับข้อมูลจริงในอนาคต ยังไม่เขียน
+Firestore จริง) — Gallery/SEO/Similar Properties/Mortgage Calculator ผ่าน adapter แล้ว ~80% ของจุดที่อ่านข้อมูล
+ทรัพย์ดิบ (รายละเอียด/ข้อยกเว้นที่เหลือดู RELEASE-NOTES ที่เกี่ยวข้อง)
+
+**บั๊กจริงที่พบและแก้ระหว่างงานนี้ (ไม่ใช่แค่ Feature ใหม่)**:
+1. `document.title` ไม่เปลี่ยนตามทรัพย์แต่ละหลัง — สาเหตุจริง: runtime นี้ไม่ส่ง `prevState` แบบมาตรฐานให้
+   `componentDidUpdate` (throw เงียบทุกครั้งที่เรียก) ทำให้ title ที่ตั้งไว้ถูกรีเซ็ตกลับที่ค่า static ของ
+   `<title>` ในทุก re-render ถัดไป — แก้ด้วยการอ้างอิง fingerprint ภายใน component เองแทนการอ่าน `prevState`
+2. Reviews ไม่ผูกกับ propertyId — เพราะเรียก `fetchReviews(this._id)` ก่อน `this._id` ถูกกำหนดค่าจริงใน
+   `componentDidMount` (bug ที่มองไม่เห็นมาก่อนเพราะ reviews เดิมเหมือนกันทุกทรัพย์) — แก้แล้ว
+3. Banner image ที่ยังไม่ resolve เคยหลุดเป็น URL literal `{{ topBannerImageUrl }}` ทำให้เกิด HTTP request
+   เสีย — แก้โดยเลิกผูก `src` ผ่าน template hole ทั้งหมด ใช้ ref + set attribute เองแทน
+
+**การจำแนกฟีเจอร์ (BUILT / PARTIALLY BUILT / PLANNED) — Property Details + platform-wide ที่ตรวจพบระหว่าง Step 3B**:
+- **BUILT ทั้งหมด**: Photo Gallery (จริง), Favorite, Share (FB/LINE/copy link), Compare (client-side store, cap 4),
+  Schedule Viewing (client-side validate + mock submit), Mortgage Calculator (คำนวณจริง, ป้องกัน NaN/Infinity),
+  SEO (title/desc/keywords/canonical/OG/JSON-LD ต่อทรัพย์จริง), Social Login (Google/Facebook/Phone OTP —
+  Agent Signup.dc.html), Social Profile + Social Sharing (Agent Profile.dc.html), AI photo caption/SEO keyword
+  generation ต่อรูป (AI Quick Add — เนื้อหาสร้างจริงแล้ว), Stripe billing (Lister Billing.dc.html จริง ไม่ใช่ stub)
+- **PARTIALLY BUILT**: Reviews (repository/DATA_STATE พร้อม, ข้อมูลยัง mock ผูกราย propertyId บางส่วนเท่านั้น),
+  Media/Video-360 Tour (fetchMedia ต่อ pipeline พร้อมแล้ว แต่ไม่มีทรัพย์ไหนมี videoUrl/virtualTourUrl จริง),
+  AI Semantic Image Pipeline (caption/alt-text/keyword สร้างโดย AI แล้วจริง แต่ยังไม่ถูกใช้เป็น `<img alt>` จริง
+  บนเว็บ — เนื้อหามีแล้ว ขาดแค่การเชื่อมเข้ากับ markup จริง)
+- **PLANNED**: Incentive-based Sharing (ยังไม่พบในโค้ดที่ใดเลย), Cloud Scheduler แทน client-side sweep,
+  LINE Official Account แจ้งเตือน, TikTok integration (ดูหมวด Roadmap ด้านล่าง)
+
+**Technical debt ที่พบระหว่าง audit (ยังไม่แก้ในรอบนี้ ตามข้อจำกัดขอบเขต)**:
+- Agent Signup.dc.html: ช่องรหัสผ่าน (signup + login) เป็น `type="text"` ไม่ใช่ `type="password"` — เห็นตัวอักษร
+  ชัดบนหน้าจอ (ต่างจาก Admin Login ที่ตั้งใจให้เห็นชัดตามหมวด 5 ข้อ 8 — จุดนี้ยังไม่ยืนยันว่าตั้งใจเหมือนกันหรือ
+  เป็นบั๊ก ต้องให้ Product Owner ยืนยัน)
+- Share-modal markup ซ้ำกันระหว่าง Property Details และ Agent Profile — ควรรวมเป็น shared component ทีหลัง
+- Lister Dashboard ไม่พบ `isMobile` state (ต่างจาก Property Details/Agent Profile ที่มี) — ยังไม่ยืนยันว่า
+  responsive จริงหรือไม่
+
+### Roadmap Refresh (22 ก.ค. 2569)
+
+**AI Roadmap**: (1) เชื่อม AI-generated photo captions เข้ากับ `<img alt>` จริง — priority สูงสุดเพราะเนื้อหา
+SEO มีอยู่แล้ว ยังไม่ถูกใช้ (2) Semantic filename generation จากรูปที่อัปโหลด (ยังไม่มีในโค้ดเลย) (3) สำนวน
+AI จริง (Claude) แทนเทมเพลตประกอบข้อมูลในข้อความโพสต์ของ Lister Dashboard (ดูหมวด 2.2)
+
+**SEO Roadmap**: (1) เชื่อม photo alt-text/semantic filename ตามข้างบน (2) URL รายทรัพย์แต่ละหลังเข้า
+sitemap.xml จริง (ต้องมี build step/Cloud Function อ่าน Firestore สด — ยังไม่ได้สร้าง ดูหมวด 6 ข้อ 4)
+
+**Social Ecosystem Roadmap — ปรับปรุงสำคัญ**: Social Login/Social Profile/Social Sharing/Social Contact
+**สร้างเสร็จแล้วเป็นส่วนใหญ่** (ไม่ใช่ของในอนาคตอย่างที่เข้าใจไว้ก่อน audit นี้) งานที่เหลือจริง:
+- **Incentive-based Sharing** — ระบบให้รางวัล/สิทธิประโยชน์เมื่อมีคนแชร์ประกาศต่อ (ยังไม่มีเลย ต้องออกแบบใหม่)
+- **TikTok — กำหนดเป็น Priority-A platform สำหรับกลยุทธ์เติบโตในไทย** (คำสั่ง Product Owner 22 ก.ค. 2569)
+  ตามหมวด 2 ทาง 2 ที่มีแผน TikTok caption generator ไว้แล้ว (AI ร่างแคปชั่น + hashtag + รหัสทรัพย์ในวิดีโอ +
+  ลิงก์ถาวรใน bio บัญชีธุรกิจ) — **ยังไม่ implement โค้ดใดๆ รอบนี้ เป็นแค่การจัดลำดับความสำคัญในเอกสารแผน**
+  ลำดับ Social Ecosystem แนะนำใหม่: TikTok caption pipeline (ใช้โครง AI Quick Add เดิมต่อยอดได้เร็ว) → Facebook
+  auto-post integration (Make.com/n8n หรือ Graph API — คุยแนวคิดไว้แล้ว ยังไม่สร้าง) → Incentive-based Sharing
+
+**Product Roadmap**: ไม่มีการเปลี่ยนลำดับ Phase หลักจากหมวด 11 — เพิ่มเพียงงานเก็บตกที่พบจาก audit นี้เข้าไปใน
+รายการ "งานเก็บตกเล็กๆ" เดิม (ปุ่มรหัสผ่านที่เห็นชัดใน Agent Signup ต้องตัดสินใจ, ShareModal ที่ควรรวมเป็น
+component เดียว, AI Image→Alt-text wiring)
 
 ## 24. Developer Maintenance Center (DMC) — Progress Log
 
