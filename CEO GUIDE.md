@@ -85,10 +85,13 @@ Checklist:
 3. คัดลอกวางเนื้อหา HANDOVER PROMPT.md เป็นข้อความแรก
 4. ตรวจสอบ AI ผ่านเกณฑ์ 4 ข้อในหัวข้อ 5
 5. สั่งงานตามที่ต้องการ
-6. จบวัน: อัปเดต Mission Control/Blueprint/Documentation ให้ตรงปัจจุบัน
-7. ก่อน Upload: ใช้ RELEASE CHECKLIST.md ตรวจครบทุกข้อ
-8. Upload ขึ้น GitHub แล้วตรวจสอบไฟล์ที่อัปโหลดจริง
-9. ปิดโครงการ/เฟส: ตรวจสอบอนุมัติครบ + บันทึกเอกสารปิดงาน
+6. จบวัน (Daily Close): อัปเดต Mission Control, Blueprint และ Documentation ให้ตรงกับสถานะปัจจุบันของระบบ — หากมีการเปลี่ยนแปลง Feature, Roadmap, Architecture หรือ Workflow ต้องบันทึกลง Documentation ก่อนจบวันทุกครั้ง
+7. ก่อน Upload (Release Verification): ใช้ RELEASE CHECKLIST.md ตรวจสอบครบทุกข้อ — หากมีข้อใดไม่ผ่าน ❌ ห้าม Upload ต้องแก้ไขจนผ่านทั้งหมดก่อน
+8. GitHub Upload: Upload ไฟล์ที่เปลี่ยนแปลงขึ้น GitHub ตามขั้นตอนของโครงการ (Add file → Upload files ผ่านหน้าเว็บ GitHub)
+9. GitHub Verification: หลัง Upload ตรวจสอบ ✅ Commit สำเร็จ ✅ Branch ถูกต้อง ✅ ไฟล์อัปโหลดครบ ✅ GitHub Actions ผ่าน ✅ GitHub Pages Build ผ่าน
+10. Final Release Verification: ตรวจซ้ำอีกรอบหลัง Upload ว่า ✅ Commit สำเร็จ ✅ Branch ถูกต้อง ✅ ไฟล์อัปเดตครบ ✅ GitHub Actions PASS ✅ GitHub Pages PASS ✅ เว็บไซต์ใช้งานได้จริง ✅ เวอร์ชันถูกต้อง — หากข้อใดไม่ผ่าน ถือว่า Release ยังไม่เสร็จสมบูรณ์
+11. ปิดโครงการ/ปิดเฟส (Official Completion): ก่อนประกาศว่างานใดเสร็จสิ้น ต้องได้รับการอนุมัติจาก Product Owner ก่อนเสมอ จากนั้นจัดทำ 🏁 Official Completion Notice ประกอบด้วย Project, Phase/Sprint/Feature, Status ✅ COMPLETED, Approved By (Product Owner), Completion Date, Summary, Superseded By (ถ้ามี), Next Phase — หากไม่มี Official Completion Notice ให้ถือว่างาน "ยังไม่ปิดอย่างเป็นทางการ" แม้ว่าจะ Upload ขึ้น GitHub สำเร็จแล้วก็ตาม
+12. Completion History: ทุก Feature/Sprint/Phase/Release ที่เสร็จสมบูรณ์ต้องถูกบันทึกลง PROJECT_HISTORY.md (หรือ COMPLETION_HISTORY.md หากโครงการใช้ชื่อนี้) — นี่คือประวัติถาวรของโครงการ (Date, Project, Work, Status, Approved By Product Owner, Summary, Next Phase) เพื่อให้ผู้รับช่วงต่อเข้าใจได้ทันทีว่างานใดเสร็จแล้ว ใครอนุมัติ เมื่อใด และงานถัดไปคืออะไร
 
 ---
 
