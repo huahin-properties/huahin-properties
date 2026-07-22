@@ -12,6 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <title>Mission Library — huahin.properties</title>
+  <meta name="robots" content="noindex, nofollow">
   <style>
     body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
     .m01-title { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: oklch(45% 0.02 60); display: block; margin-bottom: 4px; }
@@ -51,7 +52,7 @@
     <span class="m01-title">ดัชนี Mission ทั้งหมด</span>
     <div class="m01-tablewrap">
       <table class="m01-table">
-        <thead><tr><th>Mission</th><th>ชื่อ</th><th>Owner</th><th>Version</th><th>สถานะ</th><th>Progress</th><th>Release Date</th></tr></thead>
+        <thead><tr><th>Mission</th><th>ชื่อ</th><th>Owner</th><th>Version</th><th>สถานะ</th><th>Progress</th><th>Dashboard %</th><th>Release Date</th><th>Description</th></tr></thead>
         <tbody>
           <sc-for list="{{ missions }}" as="m" hint-placeholder-count="1">
             <tr>
@@ -61,7 +62,9 @@
               <td>{{ m.version }}</td>
               <td style="font-weight:700;">{{ m.status }}</td>
               <td>{{ m.progress }}</td>
+              <td style="font-weight:700;">{{ m.dashPct }}</td>
               <td>{{ m.releaseDate }}</td>
+              <td style="font-size:11px; color:oklch(50% 0.02 60);">{{ m.desc }}</td>
             </tr>
           </sc-for>
         </tbody>
@@ -69,9 +72,14 @@
     </div>
   </div>
 
+  <div class="m01-card" style="background:oklch(96% 0.05 150); border:1px solid oklch(70% 0.1 150);">
+    <span class="m01-title">🔢 Mission Numbering Standard</span>
+    <p style="font-size:12.5px; margin:4px 0;">Mission Number = ตัวเลข Domain ในหน้า Launch Readiness Dashboard เสมอ (ไม่ใช่ลำดับการสร้าง) — ดูรายละเอียดใน BLUEPRINT.md → Mission Numbering Standard</p>
+  </div>
+
   <div class="m01-card" style="background:oklch(96% 0.03 80); border-style:dashed;">
     <span class="m01-title">Mission ถัดไป</span>
-    <p style="font-size:12.5px; margin:4px 0;">ยังไม่มี Mission 02 ในโครงการ — เมื่อ CEO ต้องการเปิด Mission ใหม่ (เช่น Website UX Review, SEO Optimization, Performance, AI Search) ให้เริ่มจาก <a href="./Mission%20Template.dc.html" style="color:oklch(35% 0.1 25);">Mission Template</a> เสมอ ห้ามออกแบบ Framework ใหม่ตั้งแต่ต้น</p>
+    <p style="font-size:12.5px; margin:4px 0;">เมื่อ CEO ต้องการเปิด Mission ใหม่ (01-06, 08-10, 12) ให้เริ่มจาก <a href="./Mission%20Template.dc.html" style="color:oklch(35% 0.1 25);">Mission Template</a> เสมอ โดย Mission Number ต้องตรงกับ Domain ตาม Launch Readiness Dashboard — ห้ามออกแบบ Framework ใหม่ตั้งแต่ต้น</p>
   </div>
 
   <div class="m01-card">
@@ -86,7 +94,18 @@
 class Component extends DCLogic {
   renderVals() {
     const missions = [
-      { code: "Mission 01", name: "QA & Review Standard Framework", owner: "Product Owner", version: "v1.2", status: "🚀 Released", progress: "12/12 Steps", releaseDate: "22 Jul 2026", link: "./Mission 01 - QA Review Standard.dc.html" },
+      { code: "Mission 01", name: "Website (Core Pages)", owner: "—", version: "—", status: "⚪ Planning", progress: "0 / 12 Steps", dashPct: "95%", releaseDate: "—", link: "", hasLink: false, desc: "Home, Search Results, Sell, About, Contact — core public pages" },
+      { code: "Mission 02", name: "Search & Filters", owner: "—", version: "—", status: "⚪ Planning", progress: "0 / 12 Steps", dashPct: "90%", releaseDate: "—", link: "", hasLink: false, desc: "Search Results filters, sort, area/type/price/beds/baths" },
+      { code: "Mission 03", name: "Property (Listing / Approval)", owner: "—", version: "—", status: "⚪ Planning", progress: "0 / 12 Steps", dashPct: "95%", releaseDate: "—", link: "", hasLink: false, desc: "Property Details, Listing Approvals, self-serve lister flow" },
+      { code: "Mission 04", name: "Membership & Authentication", owner: "—", version: "—", status: "⚪ Planning", progress: "0 / 12 Steps", dashPct: "85%", releaseDate: "—", link: "", hasLink: false, desc: "Agent Signup/Login, Lister Billing, Stripe subscriptions" },
+      { code: "Mission 05", name: "Admin Tools", owner: "—", version: "—", status: "⚪ Planning", progress: "0 / 12 Steps", dashPct: "90%", releaseDate: "—", link: "", hasLink: false, desc: "Admin Dashboard, Owners, Property Map, Site Content" },
+      { code: "Mission 06", name: "Packages / Pricing", owner: "—", version: "—", status: "⚪ Planning", progress: "0 / 12 Steps", dashPct: "85%", releaseDate: "—", link: "", hasLink: false, desc: "Tier pricing, Featured Listing, banner pricing" },
+      { code: "Mission 07", name: "SEO Foundation", owner: "Product Owner", version: "v0.2", status: "🟡 Active / Review Pending", progress: "10 / 12 Steps", dashPct: "92%", releaseDate: "—", link: "./Mission 07 - SEO Foundation.dc.html", hasLink: true, desc: "Meta/canonical/OG/JSON-LD/technical SEO across public pages" },
+      { code: "Mission 08", name: "AI Features", owner: "—", version: "—", status: "⚪ Planning", progress: "0 / 12 Steps", dashPct: "60%", releaseDate: "—", link: "", hasLink: false, desc: "AI Quick Add, AI Concierge/chatbot, AI Image Pipeline" },
+      { code: "Mission 09", name: "Firebase Infrastructure", owner: "—", version: "—", status: "⚪ Planning", progress: "0 / 12 Steps", dashPct: "85%", releaseDate: "—", link: "", hasLink: false, desc: "Firestore, Storage, Cloud Functions, config" },
+      { code: "Mission 10", name: "Security", owner: "—", version: "—", status: "⚪ Planning", progress: "0 / 12 Steps", dashPct: "90%", releaseDate: "—", link: "", hasLink: false, desc: "Firestore Security Rules, role-based access, deny-by-default" },
+      { code: "Mission 11", name: "QA / Review Standard", owner: "Product Owner", version: "v1.2", status: "🟢 Released", progress: "12 / 12 Steps", dashPct: "90%", releaseDate: "22 Jul 2026", link: "./Mission 11 - QA Review Standard.dc.html", hasLink: true, desc: "PASS/HOLD/NOT PASS definitions, Readiness Formula, Evidence Matrix" },
+      { code: "Mission 12", name: "Deployment", owner: "—", version: "—", status: "⚪ Planning", progress: "0 / 12 Steps", dashPct: "90%", releaseDate: "—", link: "", hasLink: false, desc: "GitHub upload workflow, Firebase Hosting/Functions deploy" },
     ];
     return { missions };
   }

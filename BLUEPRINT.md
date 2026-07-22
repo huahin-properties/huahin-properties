@@ -1138,15 +1138,58 @@ sitemap.xml จริง (ต้องมี build step/Cloud Function อ่า
 รายการ "งานเก็บตกเล็กๆ" เดิม (ปุ่มรหัสผ่านที่เห็นชัดใน Agent Signup ต้องตัดสินใจ, ShareModal ที่ควรรวมเป็น
 component เดียว, AI Image→Alt-text wiring)
 
-## 24.9 QA & Review Standard Framework — Mission 01 (22 ก.ค. 2569)
+## 24.11 SEO Foundation — Mission 07 (22 ก.ค. 2569, In Progress v0.2, Product Owner Review Revision 2)
+
+**Mission Purpose**: ยกระดับ SEO Domain ของเว็บไซต์ huahin.properties จาก 55% ให้ใกล้ 95-100% ตามมาตรฐาน Mission Framework (Mission 11) — ไม่สร้าง Framework ใหม่
+
+**สถานะปัจจุบัน**: 🟡 Active/Review Pending (10/12 Steps Complete, 2 Steps เป็น READY FOR VERIFICATION รอบัญชี Google ของเจ้าของ/production จริง) — SEO Domain 55%→92% — รายละเอียดเต็มทุก Step ดูที่ `Mission 07 - SEO Foundation.dc.html`
+
+**สิ่งที่ทำเสร็จแล้ว**: Canonical/OG/Twitter Card/JSON-LD (RealEstateAgent+WebSite) เพิ่มครบ 9 หน้า public (Home, Search Results, Sell, About, Contact, Property Details, Agent Signup, Agent Profile, Advertise); Property Details JSON-LD อัปเกรดเป็น `RealEstateListing`; Step 7 Technical SEO เสร็จสมบูรณ์ — robots.txt เพิ่ม Disallow 33 หน้า internal/admin (เดิม Allow: / ทั้งหมดโดยไม่ตั้งใจ), noindex meta ครบ 33 หน้า, favicon ครบ 9 หน้า public, ตรวจสอบ crawlability/duplicate-meta/broken-reference/title-uniqueness/structured-data ทั้งหมด PASS; Step 8 Multilingual SEO เสร็จแบบ Documentation (Future Enhancement + Migration Plan สำหรับ URL-based routing, ไม่สร้าง hreflang จริงเพราะ URL architecture ปัจจุบันยังไม่รองรับ — รอ CEO/Product Owner อนุมัติก่อนเปลี่ยน routing)
+
+**Known Gap (ตั้งใจไม่แก้ในรอบนี้ พร้อมเหตุผล)**: sitemap.xml/image sitemap ยังไม่มี URL ของ Property Details/Agent Profile เพราะข้อมูลเป็น dynamic จาก Firestore — ต้องสร้างผ่าน Cloud Function จึงจะไม่ล้าสมัย (เป็นงานพัฒนาฟีเจอร์ใหม่ นอกขอบเขต Mission นี้)
+
+**Superseded By**: —
+
+## 24.13 Export Package Standard (22 ก.ค. 2569, Product Owner Approved)
+
+**มาตรฐานถาวร**: ทุกไฟล์ใน export package ต้องมีชื่อไฟล์สุดท้ายที่พร้อม Upload ทันที ห้ามต้อง Rename ด้วยมือก่อน Upload
+
+ชื่อไฟล์ที่ถูกต้อง เช่น `CLAUDE.md`, `BLUEPRINT.md`, `PROJECT_HISTORY.md`, `RELEASE CHECKLIST.md`, `Mission Library.dc.html`
+
+ชื่อไฟล์ที่ห้ามใช้: ชื่อที่มีวงเล็บคำแนะนำ (เช่น "(rename to X before upload)"), คำว่า "FINAL", "(new)", "(fixed)", "copy" ต่อท้าย
+
+ก่อน present download package ทุกครั้งต้องตรวจสอบ: ✓ ชื่อไฟล์ถูกต้อง ✓ นามสกุลถูกต้อง ✓ ไม่มีชื่อ placeholder ✓ Upload Ready — หากไม่ผ่านข้อใดข้อหนึ่ง ห้ามเรียกว่า Upload Ready
+
+## 24.12 Mission Numbering Standard (22 ก.ค. 2569, Product Owner Approved)
+
+**มาตรฐานถาวร**: Mission Number = ตัวเลข Domain ในหน้า Launch Readiness Dashboard เสมอ **ไม่ใช่ลำดับการสร้าง Mission**
+
+| Mission | Domain |
+|---|---|
+| Mission 01 | Website (Core Pages) |
+| Mission 02 | Search & Filters |
+| Mission 03 | Property (Listing / Approval) |
+| Mission 04 | Membership & Authentication |
+| Mission 05 | Admin Tools |
+| Mission 06 | Packages / Pricing |
+| Mission 07 | SEO Foundation |
+| Mission 08 | AI Features |
+| Mission 09 | Firebase Infrastructure |
+| Mission 10 | Security |
+| Mission 11 | QA / Review Standard |
+| Mission 12 | Deployment |
+
+Mission 01 (QA & Review Standard Framework) และ Mission 02 (SEO Foundation) ที่สร้างตามลำดับก่อนหน้านี้ ถูก renumber ตามมาตรฐานนี้เป็น **Mission 11** และ **Mission 07** ตามลำดับ (ไฟล์เปลี่ยนชื่อจริง, ทุก reference ในโครงการอัปเดตแล้ว) อนาคตห้าม renumber ตามลำดับการสร้างอีก — Mission ใหม่ทุกตัวต้องใช้เลขตาม Domain ที่ตรงกับ Launch Readiness Dashboard เสมอ
+
+## 24.9 QA & Review Standard Framework — Mission 11 (22 ก.ค. 2569)
 
 **Mission Purpose**: สร้างมาตรฐานกลาง (PASS/HOLD/NOT PASS, Verified/Partially Verified/Pending Verification, Readiness %, Evidence Standard, Approval Workflow) ให้ Claude/Claude Code/Product Owner/CEO/Developer คนใหม่ใช้ความหมายตรงกันทั้งโครงการ
 
-**Mission 01 — สถานะสุดท้าย**: 🚀 RELEASED v1.2 (22 ก.ค. 2569) — ครบ 12/12 Steps + Standard Mission Management Framework ระดับโครงการ (Mission Library/Mission Archive/Mission Template) — Product Owner Final Authorization อนุมัติแล้ว, Architecture (12-Step/Readiness Formula/Evidence Matrix/Approval Workflow) LOCKED ไม่มีการแก้ไขยาย Steps 3/4/5/8/9/12 ให้ลึกครบตามเกณฑ์แล้ว ดูรายละเอียดครบใน `Mission 01 - QA Review Standard.dc.html` และ §24.10 ด้านล่าง
+**Mission 11 — สถานะสุดท้าย**: 🚀 RELEASED v1.2 (22 ก.ค. 2569) — ครบ 12/12 Steps + Standard Mission Management Framework ระดับโครงการ (Mission Library/Mission Archive/Mission Template) — Product Owner Final Authorization อนุมัติแล้ว, Architecture (12-Step/Readiness Formula/Evidence Matrix/Approval Workflow) LOCKED ไม่มีการแก้ไขยาย Steps 3/4/5/8/9/12 ให้ลึกครบตามเกณฑ์แล้ว ดูรายละเอียดครบใน `Mission 11 - QA Review Standard.dc.html` และ §24.10 ด้านล่าง
 
 ## 24.10 QA & Review Standard Framework v1.0 — Single Source of Truth (22 ก.ค. 2569)
 
-**สถานะ**: มาตรฐานถาวรของโครงการตั้งแต่บัดนี้เป็นต้นไป (v1.1) — ทุกเอกสาร/แดชบอร์ดอ้างอิงกลับมาที่นี่แทนการนิยามซ้ำ Steps 3/4/5/8/9/12 ขยายเต็มรูปแบบแล้ว (Formula Explanation, Score Interpretation, 8 calc examples, Decision Tree, Evidence Matrix 6 ระดับ×15 กรณี, Workflow Diagram+6 Sub-Workflows+Decision Matrix, Report Template 19 ฟิลด์+ตัวอย่างจริง, 10 Simulation Test cases, Framework Manual เต็มรูปแบบ) — รายละเอียดทั้งหมดอยู่ใน `Mission 01 - QA Review Standard.dc.html`
+**สถานะ**: มาตรฐานถาวรของโครงการตั้งแต่บัดนี้เป็นต้นไป (v1.1) — ทุกเอกสาร/แดชบอร์ดอ้างอิงกลับมาที่นี่แทนการนิยามซ้ำ Steps 3/4/5/8/9/12 ขยายเต็มรูปแบบแล้ว (Formula Explanation, Score Interpretation, 8 calc examples, Decision Tree, Evidence Matrix 6 ระดับ×15 กรณี, Workflow Diagram+6 Sub-Workflows+Decision Matrix, Report Template 19 ฟิลด์+ตัวอย่างจริง, 10 Simulation Test cases, Framework Manual เต็มรูปแบบ) — รายละเอียดทั้งหมดอยู่ใน `Mission 11 - QA Review Standard.dc.html`
 
 **PASS**: สิ่งที่ถูกตรวจสอบเป็นไปตาม Acceptance Criteria ของระดับที่กำลังประเมิน มีหลักฐานเพียงพอตาม Evidence Matrix ไม่มี Critical Defect และมี Approval Record ตาม Authority Matrix — ไม่ได้แปลว่า Implementation Complete/Verified อย่างเดียว/Production พร้อมใช้งานเสมอไป
 

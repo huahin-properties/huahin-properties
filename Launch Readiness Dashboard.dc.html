@@ -11,6 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <title>Launch Readiness Dashboard — huahin.properties</title>
+  <meta name="robots" content="noindex, nofollow">
   <style>
     body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
     a { color: oklch(45% 0.13 25); }
@@ -391,24 +392,24 @@ class Component extends DCLogic {
         relatedDocs: ["BLUEPRINT.md §2, §4", "Lister Billing.dc.html"],
         verificationStatus: "Verified",
         verificationReason: "Stripe integration ยืนยันจาก firebase-client.js/functions/index.js และ CLAUDE.md ว่า live แล้ว" },
-      { icon: "🔍", name: "SEO", statusLabel: "บางส่วน", pct: "55%", barColor: "oklch(70% 0.12 75)",
-        features: ["Sitemap.xml", "robots.txt", "Open Graph", "JSON-LD (Property Details)", "Google Business Profile (แผน)"],
+      { icon: "🔍", name: "SEO", statusLabel: "ดีขึ้นมาก", pct: "92%", barColor: "oklch(65% 0.15 140)",
+        features: ["Sitemap.xml", "robots.txt (Disallow 33 หน้า internal)", "Open Graph (9 หน้า public)", "Twitter Card", "Canonical URL (9 หน้า public)", "Favicon (9 หน้า public)", "Noindex บนหน้า internal (33 หน้า)", "JSON-LD RealEstateListing (Property Details)", "JSON-LD RealEstateAgent+WebSite (ทุกหน้า public)", "Google Business Profile (แผน)"],
         goal: "ติดอันดับค้นหาและแสดงผล Rich Snippet ได้ถูกต้องก่อนเปิดจริง",
         reason: "เป็นช่องทาง traffic ฟรีที่สำคัญนอกเหนือจากโฆษณาแบบเสียเงิน",
-        done: ["Sitemap.xml + robots.txt ยื่นแล้ว (16 ก.ค. 2569)", "Open Graph + JSON-LD ที่ Property Details ใช้งานจริง"],
-        pending: ["Google Business Profile ยังไม่ยืนยันสถานะจริง", "URL ถาวรต่อประกาศยังไม่ยืนยันครบ", "AI-generated photo alt-text ยังไม่เชื่อมกับ <img alt> จริงบนเว็บไซต์ (ช่องว่าง SEO ที่มีมูลค่าสูงสุดที่ระบุไว้)"],
-        next: ["CEO ยืนยัน Google Business Profile", "เชื่อม AI photo caption เข้ากับ <img alt> จริง"],
-        evidence: ["sitemap.xml / robots.txt submission log", "CLAUDE.md §24.8"],
-        explanation: "55% เพราะงานเทคนิคพื้นฐานเสร็จแล้ว แต่ยังขาดการยืนยัน Google Business Profile และการเชื่อม photo alt-text ที่มีมูลค่า SEO สูง",
+        done: ["Sitemap.xml + robots.txt ยื่นแล้ว (16 ก.ค. 2569)", "Mission 07: Canonical/OG/Twitter Card/JSON-LD เพิ่มครบ 9 หน้า public (Home/Search Results/Sell/About/Contact/Property Details/Agent Signup/Advertise)", "Mission 07: Property Details schema อัปเกรดจาก Product → RealEstateListing", "Mission 07 Step 7: robots.txt Disallow ครบ 33 หน้า internal, noindex meta ครบทุกหน้า, favicon ครบ, ตรวจสอบ crawlability/duplicate-meta/title-uniqueness/structured-data ทั้งหมด PASS", "Mission 07 Step 8: Multilingual SEO documentation + URL routing migration plan เสร็จ"],
+        pending: ["Google Business Profile ยังไม่ยืนยันสถานะจริง", "AI-generated photo alt-text ยังไม่เชื่อมกับ <img alt> จริงบนเว็บไซต์", "hreflang รอ CEO/Product Owner อนุมัติ URL-based language routing ก่อน (Mission 07 Step 8 Future Enhancement)", "Dynamic sitemap สำหรับ Property Details/Agent Profile รอ Cloud Function"],
+        next: ["CEO ยืนยัน Google Business Profile", "เชื่อม AI photo caption เข้ากับ <img alt> จริง", "Google Search Console/Analytics verification (Mission 07 Step 9, รอ owner)", "Lighthouse/Rich Results validation บน production จริง (Mission 07 Step 10)"],
+        evidence: ["sitemap.xml / robots.txt submission log", "CLAUDE.md §24.8", "Mission 07 - SEO Foundation.dc.html"],
+        explanation: "92% เพราะ Mission 07 ปิด Gap ทางเทคนิคเกือบทั้งหมดที่ทำได้ภายในระบบ (meta/canonical/OG/JSON-LD/noindex/favicon ครบทุกหน้า public+internal) เหลือเฉพาะส่วนที่ต้องพึ่งบัญชี Google ของเจ้าของ (Search Console/Analytics) และการวัดผลบน production จริง (Lighthouse/Rich Results)",
         purpose: "เพิ่ม organic traffic ฟรีจาก Google Search โดยไม่ต้องพึ่งงบโฆษณา",
         expectedResult: "หน้าประกาศติดอันดับค้นหาด้วยคำค้นที่เกี่ยวข้อง และแสดง Rich Snippet ราคา/รูปภาพใน Google ได้",
         inProgress: ["ไม่มี"],
-        pendingDecision: ["ยืนยัน Google Business Profile สถานะจริงกับ CEO"],
+        pendingDecision: ["ยืนยัน Google Business Profile สถานะจริงกับ CEO", "อนุมัติสถาปัตยกรรม URL-based language routing ก่อนใส่ hreflang จริง (Mission 07 Step 8 Future Enhancement)"],
         knownRisks: "AI สร้าง caption/alt-text ไว้แล้วแต่ไม่ได้ใช้จริง เป็นโอกาส SEO ที่เสียไปฟรีๆ จนกว่าจะเชื่อมต่อ",
         bestPractices: "ทุกภาพที่อัปโหลดควรมี alt-text ที่มีคำค้นเกี่ยวข้องเสมอ ไม่ปล่อยว่าง",
-        relatedDocs: ["CLAUDE.md §24.8", "sitemap.xml", "robots.txt"],
+        relatedDocs: ["CLAUDE.md §24.8", "sitemap.xml", "robots.txt", "Mission 07 - SEO Foundation.dc.html"],
         verificationStatus: "Partially Verified",
-        verificationReason: "Sitemap/robots/JSON-LD ยืนยันจากไฟล์จริง แต่ Google Business Profile และ alt-text wiring ยังไม่ verify" },
+        verificationReason: "Sitemap/robots/canonical/OG/JSON-LD/noindex/favicon ยืนยันจากไฟล์จริง (Mission 07 Step 1-8) แต่ Google Business Profile, Search Console/Analytics, และ Lighthouse/Rich Results ยังไม่ verify" },
       { icon: "🧠", name: "AI Features", statusLabel: "บางส่วน", pct: "60%", barColor: "oklch(70% 0.12 75)",
         features: ["AI Quick Add", "AI Concierge / Chatbot (ContactRail)", "Cloud Function proxy เดียวกันสำหรับทุกฟีเจอร์ AI"],
         goal: "ผู้ใช้คุยกับ AI ได้จริง และแอดมินร่างประกาศด้วยเสียง/รูปได้จริง",
@@ -463,14 +464,14 @@ class Component extends DCLogic {
         relatedDocs: ["BLUEPRINT.md §5", "firestore.rules", "storage.rules"],
         verificationStatus: "Verified",
         verificationReason: "ยืนยันโดยตรงจากเนื้อหาไฟล์ firestore.rules ในโปรเจกต์ (deny-by-default, isAdmin/isOwner, listerListingStatusOk) — ไม่ใช่แค่อ้างอิงจากเอกสาร" },
-      { icon: "🏆", name: "QA / Review Standard", statusLabel: "Mission 01 Released v1.1 (PO-reviewed)", pct: "90%", barColor: "oklch(55% 0.13 150)",
+      { icon: "🏆", name: "QA / Review Standard", statusLabel: "Mission 11 Released v1.1 (PO-reviewed)", pct: "90%", barColor: "oklch(55% 0.13 150)",
         features: ["PASS/HOLD/NOT PASS Definitions v1.1", "Readiness Formula + 8 calc examples + Decision Tree", "Evidence Matrix (6 levels × 15 cases)", "Approval Workflow + 6 sub-workflows + Decision Matrix", "Universal Report Template (19 fields)"],
         goal: "มีเกณฑ์ตรวจรับงานที่เป็นทางการและใช้ตรงกันทุก Step",
         reason: "ป้องกันการประกาศ PASS ที่ไม่มีมาตรฐานรองรับ",
-        done: ["Mission 01 เสร็จสมบูรณ์ 12/12 Steps (v1.0, 22 Jul 2026)", "Product Owner Review รอบ 2 ขยาย Steps 3/4/5/8/9/12 ให้ลึกครบ (v1.1, 22 Jul 2026)", "PASS/HOLD/NOT PASS มีนิยามทางการแล้ว, Readiness Formula+Evidence Matrix+Approval Workflow บันทึกใน BLUEPRINT §24.10"],
+        done: ["Mission 11 เสร็จสมบูรณ์ 12/12 Steps (v1.0, 22 Jul 2026)", "Product Owner Review รอบ 2 ขยาย Steps 3/4/5/8/9/12 ให้ลึกครบ (v1.1, 22 Jul 2026)", "PASS/HOLD/NOT PASS มีนิยามทางการแล้ว, Readiness Formula+Evidence Matrix+Approval Workflow บันทึกใน BLUEPRINT §24.10"],
         pending: ["Pilot Test ใช้กรณีย้อนหลัง/สมมติเท่านั้น ยังไม่ทดสอบกับ Mission ใหม่จริง", "Step-numbering 2 ระบบขนานยังไม่ประสาน"],
         next: ["ใช้ Universal Report Template กับ Mission/Feature ถัดไปเพื่อยืนยัน Framework ในสถานการณ์จริง"],
-        evidence: ["Mission 01 - QA Review Standard.dc.html (v1.1)", "BLUEPRINT.md §24.10", "PROJECT_HISTORY.md"],
+        evidence: ["Mission 11 - QA Review Standard.dc.html (v1.1)", "BLUEPRINT.md §24.10", "PROJECT_HISTORY.md"],
         explanation: "90% (คงเดิมจาก v1.0) — v1.1 เป็นการเพิ่มความลึก/คุณภาพของเนื้อหา ไม่ใช่หลักฐานใหม่เชิงปริมาณที่จะดันเปอร์เซ็นต์ขึ้นอีก — ยังไม่ถึง 100% เพราะ Pilot ยังไม่ทดสอบกับ Mission ใหม่จริงตามที่ระบุไว้",
         purpose: "ให้ทุก Step มีเกณฑ์ตรวจรับเดียวกัน ป้องกันการประกาศ PASS ที่ไม่สม่ำเสมอระหว่างรอบงาน",
         expectedResult: "ทุก Step Report ใช้เกณฑ์ PASS/HOLD/NOT PASS แบบเดียวกัน อ้างอิงคำนิยามที่เป็นทางการใน BLUEPRINT.md §24.10",
@@ -478,7 +479,7 @@ class Component extends DCLogic {
         pendingDecision: ["ไม่มี — Open Decisions ของ Step 2 (FAIL vs NOT PASS) ถูกปิดแล้วโดยเลือก Option A"],
         knownRisks: "Step-numbering 2 ระบบขนานยังไม่ประสาน; Pilot Test ยังไม่ได้ทดสอบกับ Mission ใหม่จริง",
         bestPractices: "ใช้ Universal Report Template (BLUEPRINT §24.10 / Step 8) กับทุกงานตั้งแต่นี้ไป",
-        relatedDocs: ["BLUEPRINT.md §24.10", "Mission 01 - QA Review Standard.dc.html"],
+        relatedDocs: ["BLUEPRINT.md §24.10", "Mission 11 - QA Review Standard.dc.html"],
         verificationStatus: "Verified",
         verificationReason: "Framework ถูกสร้าง อนุมัติโดย CEO ผ่านสายอนุมัติ Product Owner→CEO, ขยายเพิ่มเติมตาม Product Owner Review รอบ 2 แล้ว — pilot-tested กับ 4+10 กรณีจริง/สมมติ ยังไม่ Verified เต็มที่เพราะยังไม่ได้ใช้กับ Mission ใหม่จริง" },
       { icon: "🚀", name: "Deployment (GitHub → Firebase Hosting)", statusLabel: "พร้อม", pct: "90%", barColor: "oklch(55% 0.13 150)",
@@ -519,13 +520,13 @@ class Component extends DCLogic {
     const overall = Math.round(pcts.reduce((a, b) => a + b, 0) / pcts.length);
 
     const blockers = [
-      { icon: "🏆", title: "QA / Review Standard — Mission 01 RELEASED v1.1 (RESOLVED)",
+      { icon: "🏆", title: "QA / Review Standard — Mission 11 RELEASED v1.1 (RESOLVED)",
         problem: "ยังไม่มีคำนิยามที่เป็นทางการของ PASS/HOLD/NOT PASS",
         why: "หากไม่มีมาตรฐาน การประกาศ PASS อาจไม่สม่ำเสมอระหว่าง Step ต่างๆ",
-        checked: "Mission 01 เสร็จสมบูรณ์ 12/12 Steps — Framework เต็มรูปแบบใน BLUEPRINT.md §24.10",
+        checked: "Mission 11 เสร็จสมบูรณ์ 12/12 Steps — Framework เต็มรูปแบบใน BLUEPRINT.md §24.10",
         notChecked: "Pilot Test ยังใช้กรณีย้อนหลัง/สมมติเท่านั้น — ยังไม่ทดสอบกับ Mission ใหม่จริง",
         decisionMaker: "CEO (อนุมัติแล้ว)",
-        steps: ["✅ Product Owner review Mission 01 Step 1-2", "✅ CEO สั่งดำเนินการ Step 3-12 ต่อเนื่อง", "✅ BLUEPRINT.md §24.10 เผยแพร่แล้ว", "✅ Dashboard ทั้งหมดเชื่อมโยงแล้ว"],
+        steps: ["✅ Product Owner review Mission 11 Step 1-2", "✅ CEO สั่งดำเนินการ Step 3-12 ต่อเนื่อง", "✅ BLUEPRINT.md §24.10 เผยแพร่แล้ว", "✅ Dashboard ทั้งหมดเชื่อมโยงแล้ว"],
         evidenceNeeded: "เอกสารคำนิยามที่เผยแพร่แล้ว",
         closeCondition: "BLUEPRINT.md มีหัวข้อคำนิยาม PASS/HOLD/NOT PASS อย่างเป็นทางการ และ KM-14 อัปเดตสถานะเป็น Working",
         impact: "การประกาศ PASS อาจไม่สม่ำเสมอระหว่าง Step หากไม่มีเกณฑ์ทางการ",
@@ -535,7 +536,7 @@ class Component extends DCLogic {
     const priorityMustDo = [
     ];
     const priorityDone = [
-      { name: "QA / Review Standard Framework — Mission 01 v1.1 (12/12 Steps + Product Owner improvement review)", status: "Released",
+      { name: "QA / Review Standard Framework — Mission 11 v1.1 (12/12 Steps + Product Owner improvement review)", status: "Released",
         reason: "Launch Blocker เดียวที่เหลืออยู่ได้รับการปิดแล้ว — Readiness 40%→90% ตามสูตร Readiness Formula ใหม่",
         owner: "Product Owner + CEO",
         dependency: "ไม่มี",

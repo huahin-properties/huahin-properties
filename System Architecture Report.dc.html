@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>doc-page:not(:defined){visibility:hidden}
+    body{margin:0;font-family:'Work Sans',sans-serif;}
+  </style>
+  <title>System Architecture Report v1 — huahin.properties</title>
+  <meta name="robots" content="noindex, nofollow">
+</helmet>
+<x-import component-from-global-scope="doc-page" from="./doc-page.js" size="a4" margin="0.9in" hint-size="100%,100%">
+
+<div style="text-align:center; margin-bottom:36px; padding-bottom:20px; border-bottom:3px solid oklch(40% 0.13 25);">
+  <div style="font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:oklch(50% 0.02 60);">huahin.properties</div>
+  <h1 style="font-family:'Playfair Display',serif; font-size:30px; color:oklch(20% 0.02 60); margin:8px 0 6px;">System Architecture Report v1</h1>
+  <div style="font-size:13px; color:oklch(50% 0.02 60);">รายงานสถาปัตยกรรมระบบฉบับที่ 1 — สำหรับ Product Owner (ไม่มี Source Code)</div>
+  <div style="font-size:12px; color:oklch(60% 0.02 60); margin-top:6px;">อัปเดตล่าสุด: 17 กรกฎาคม 2569</div>
+</div>
+
+<h2 style="font-family:'Playfair Display',serif; color:oklch(25% 0.02 60); border-bottom:2px solid oklch(90% 0.01 70); padding-bottom:6px;">1. บทสรุปผู้บริหาร</h2>
+<p style="line-height:1.8; color:oklch(25% 0.02 60);">huahin.properties คือเว็บมาร์เก็ตเพลสอสังหาริมทรัพย์เฉพาะพื้นที่หัวหิน/ปราณบุรี/ชะอำ ประกอบด้วยเว็บสาธารณะสำหรับผู้ซื้อ/ผู้เช่า, ระบบให้เจ้าของบ้าน/นายหน้าสมัครสมาชิกและลงประกาศเอง (self-serve), ผู้ช่วย AI ตอบลูกค้าอัตโนมัติ, และหลังบ้านสำหรับแอดมินจัดการทุกอย่าง ระบบทั้งหมดสร้างด้วยสถาปัตยกรรม "Design Component" (หน้าเว็บอิสระต่อไฟล์) เชื่อมกับฐานข้อมูล Firebase เพียงชุดเดียว ทำให้ทุกหน้าเห็นข้อมูลตรงกันแบบเรียลไทม์</p>
+<p style="line-height:1.8; color:oklch(25% 0.02 60);">รายได้ของธุรกิจมาจาก 3 ทางหลัก: (1) ค่าคอมมิชชันจากลีดที่ระบบกรองมาให้, (2) ค่าสมาชิกรายเดือนจากเจ้าของบ้าน/นายหน้าที่ต้องการลงประกาศเอง (พร้อมระบบทดลองใช้ฟรี), (3) ค่าโฆษณา/แบนเนอร์ ทั้งหมดเก็บเงินผ่าน Stripe อัตโนมัติ</p>
+
+<h2 style="font-family:'Playfair Display',serif; color:oklch(25% 0.02 60); border-bottom:2px solid oklch(90% 0.01 70); padding-bottom:6px; break-before:page;">2. สถาปัตยกรรมเทคนิคโดยรวม</h2>
+<p style="line-height:1.8;">ระบบแบ่งเป็น 4 ชั้นทำงานร่วมกัน:</p>
+<table style="width:100%; border-collapse:collapse; margin:14px 0;">
+  <thead><tr style="background:oklch(95% 0.01 70);"><th style="text-align:left; padding:8px; border:1px solid oklch(85% 0.01 70);">ชั้น</th><th style="text-align:left; padding:8px; border:1px solid oklch(85% 0.01 70);">เทคโนโลยี</th><th style="text-align:left; padding:8px; border:1px solid oklch(85% 0.01 70);">หน้าที่</th></tr></thead>
+  <tbody>
+    <tr><td style="padding:8px; border:1px solid oklch(88% 0.01 70);">หน้าเว็บ (Frontend)</td><td style="padding:8px; border:1px solid oklch(88% 0.01 70);">Design Components (ไฟล์ .dc.html แยกต่อหน้า)</td><td style="padding:8px; border:1px solid oklch(88% 0.01 70);">หน้าเว็บสาธารณะ + หน้าสมาชิก + หน้าแอดมิน ทั้งหมดวาดผลทันทีที่โหลด</td></tr>
+    <tr><td style="padding:8px; border:1px solid oklch(88% 0.01 70);">ฐานข้อมูล</td><td style="padding:8px; border:1px solid oklch(88% 0.01 70);">Firebase Firestore</td><td style="padding:8px; border:1px solid oklch(88% 0.01 70);">เก็บทรัพย์ สมาชิก เจ้าของ/ผู้เช่า ลีด การชำระเงิน ฯลฯ ทุกหน้าอ่าน/เขียนชุดเดียวกัน</td></tr>
+    <tr><td style="padding:8px; border:1px solid oklch(88% 0.01 70);">ไฟล์รูปภาพ</td><td style="padding:8px; border:1px solid oklch(88% 0.01 70);">Firebase Storage</td><td style="padding:8px; border:1px solid oklch(88% 0.01 70);">เก็บรูปทรัพย์/โปรไฟล์จริง (ย้ายจากการฝังในฐานข้อมูลมาไว้ที่นี่แล้ว)</td></tr>
+    <tr><td style="padding:8px; border:1px solid oklch(88% 0.01 70);">ประมวลผลฝั่งเซิร์ฟเวอร์</td><td style="padding:8px; border:1px solid oklch(88% 0.01 70);">Firebase Cloud Functions</td><td style="padding:8px; border:1px solid oklch(88% 0.01 70);">ตัวกลางเรียก Claude AI (กัน API key รั่ว) + รับ Webhook จาก Stripe</td></tr>
+  </tbody>
+</table>
+<p style="line-height:1.8;">บริการภายนอกที่เชื่อมต่อ: <b>Anthropic Claude API</b> (สมองแชทบอท + ผู้ช่วยร่างประกาศ/แปลภาษา), <b>Stripe</b> (รับชำระเงินสมาชิก/บูสต์/โฆษณา), <b>Google Maps JavaScript API</b> (แผนที่ปักหมุดทรัพย์), <b>GitHub</b> (ที่เก็บโค้ด ใช้อัปโหลดไฟล์เวลาอัปเดต ไม่ใช่ระบบที่เว็บเรียกใช้งานตอนทำงานจริง)</p>
+<p style="line-height:1.8;">การขึ้นเว็บจริงใช้ <b>Firebase Hosting</b> — ไม่มีเซิร์ฟเวอร์ที่ต้องดูแลเอง ปรับขนาดตามผู้ใช้งานอัตโนมัติ</p>
+
+<h2 style="font-family:'Playfair Display',serif; color:oklch(25% 0.02 60); border-bottom:2px solid oklch(90% 0.01 70); padding-bottom:6px; break-before:page;">3. หน้าเว็บทั้งหมดในระบบ</h2>
+<h3 style="color:oklch(35% 0.1 25);">3.1 ฝั่งสาธารณะ (ผู้ซื้อ/ผู้เช่าทั่วไป)</h3>
+<ul style="line-height:1.9;">
+  <li><b>หน้าแรก (Home)</b> — Hero, ช่องค้นหา, ปุ่ม CTA 4 ปุ่ม, กริดทรัพย์แนะนำ (พร้อม Featured/แบนเนอร์ปนอยู่ด้านบนสุด), แบ่งหน้า 10 รายการ/หน้า</li>
+  <li><b>ผลการค้นหา (Search Results)</b> — กริด/รายการ พร้อมตัวกรอง (โซน/ประเภท/ราคา/ห้องนอน/สถานะ ฯลฯ) และการเรียงลำดับ Featured ก่อนเสมอ</li>
+  <li><b>รายละเอียดทรัพย์ (Property Details)</b> — แกลเลอรีรูป, ข้อมูลครบ, ระยะทางจุดสำคัญใกล้เคียง, ทรัพย์ใกล้เคียง, ปุ่มติดต่อ (โทร/WhatsApp/LINE/อีเมล), ฟอร์มสอบถาม, นับจำนวนผู้เข้าชม</li>
+  <li><b>ฝากขาย/เช่า (Sell)</b> — ฟอร์มให้เจ้าของบ้านกรอกข้อมูลทรัพย์เบื้องต้นส่งเข้าระบบ</li>
+  <li><b>เกี่ยวกับเรา / ติดต่อเรา (About / Contact)</b></li>
+  <li><b>โฆษณา (Advertise)</b> — ธุรกิจภายนอกซื้อพื้นที่แบนเนอร์เอง จ่ายผ่าน Stripe ทันที</li>
+  <li><b>AI Concierge</b> — หน้าทางเลือกที่เปิดมาเจอกล่องคุยกับ AI เต็มจอ ใช้ทำการตลาดแยกจากหน้าแรก</li>
+</ul>
+<h3 style="color:oklch(35% 0.1 25);">3.2 ฝั่งสมาชิก (เจ้าของบ้าน/นายหน้าที่ลงประกาศเอง)</h3>
+<ul style="line-height:1.9;">
+  <li><b>สมัคร/เข้าสู่ระบบ (Agent Signup)</b> — สมัครฟรีทันที ไม่ต้องรอแอดมินอนุมัติบัญชี (อนุมัติเฉพาะ "ประกาศ" แต่ละรายการ ไม่ใช่ตัวบัญชี)</li>
+  <li><b>หน้าทำงานของฉัน (Lister Dashboard)</b> — ศูนย์กลางของสมาชิก: รายการทรัพย์ของตัวเอง + สถานะ (ร่าง/รออนุมัติ/กำลังแสดง/หมดอายุ/ถูกปฏิเสธ) + วันหมดอายุ + จำนวนผู้เข้าชม, ฟอร์มเพิ่ม/แก้ไขทรัพย์, ตั้งค่าเว็บไซต์ส่วนตัว (ภาพปก/สีธีม/ลิงก์โซเชียล/ข้อความแนะนำตัว), เครื่องมือร่างข้อความโพสต์ Facebook ด้วย AI, ระบบลงทะเบียนผู้ซื้อ (เฉพาะสมาชิก VIP)</li>
+  <li><b>แพ็กเกจ & ราคา (Lister Billing)</b> — ตารางเทียบแพ็กเกจ, ปุ่มเริ่มทดลองใช้ฟรี/อัปเกรดที่พาไปชำระเงินผ่าน Stripe จริง, ส่วนสมัคร VIP nayหน้า (ปิดซ่อนอยู่จนกว่าจะปลดล็อกตามจำนวนสมาชิก)</li>
+  <li><b>เว็บไซต์ส่วนตัวของสมาชิก (Agent Profile)</b> — หน้าสาธารณะรวมทรัพย์ทั้งหมดของสมาชิกคนหนึ่ง แชร์ให้ลูกค้าดูได้โดยตรง ปรับแต่งได้ตามระดับแพ็กเกจ</li>
+</ul>
+<h3 style="color:oklch(35% 0.1 25);">3.3 ฝั่งแอดมิน (เจ้าของเว็บ/ทีมงาน)</h3>
+<ul style="line-height:1.9;">
+  <li><b>เข้าสู่ระบบแอดมิน (Admin Login)</b></li>
+  <li><b>แดชบอร์ดแอดมิน (Admin Dashboard)</b> — สรุปสถิติทรัพย์ทุกสถานะ, ตัวติดตามสัญญาเช่าใกล้หมดอายุ, การ์ดแจ้งเตือน "สถานะระบบ" 3 หมวด (เช็คอัตโนมัติ/ปฏิทินความปลอดภัย/บริการภายนอก), ปุ่มตั้งค่า Featured/VIP boost ต่อทรัพย์, ลิงก์เข้าเครื่องมือย่อยทั้งหมด</li>
+  <li><b>คิวอนุมัติประกาศ (Listing Approvals)</b> — ตรวจ/อนุมัติ/ปฏิเสธประกาศใหม่จากสมาชิก พร้อมแจ้งเตือนบัญชีต้องสงสัยว่าสมัครทดลองซ้ำ (จับคู่เบอร์โทร)</li>
+  <li><b>รายชื่อสมัครสมาชิก (Agent Approvals)</b> — ดู/ระงับบัญชีสมาชิกที่ประพฤติไม่เหมาะสม</li>
+  <li><b>แผนที่ทรัพย์ (Property Map)</b> — Google Maps ปักหมุดทุกทรัพย์ สีตามสถานะ/ประเภท คลิกดู/แก้ไขได้</li>
+  <li><b>ไดเรกทอรีรวม (Owners)</b> — เจ้าของ/ผู้เช่า/ผู้ซื้อในที่เดียว เชื่อมโยงกับรหัสทรัพย์</li>
+  <li><b>เพิ่มทรัพย์ด่วนด้วย AI (AI Quick Add)</b> — แอดมินถ่ายรูป/พูดบอกข้อมูล ให้ Claude AI ร่างประกาศ 8 ภาษา + คำนวณระยะทางจุดสำคัญ + โพสต์ Facebook อัตโนมัติ</li>
+  <li><b>ตั้งค่าเนื้อหาเว็บ (Site Content)</b> — ข้อความ Facebook post, บุคลิก/ข้อจำกัดของแชทบอท AI, ราคาแบนเนอร์/Featured/VIP, สวิตช์เปิด-ปิดฟีเจอร์ (Rollout Level), เปลี่ยนรหัสผ่านแอดมิน</li>
+  <li><b>ทีมงาน (Team / Staff Signup)</b> — เชิญ/จัดการบัญชี Staff แยกสิทธิ์จาก Owner</li>
+</ul>
+
+<h2 style="font-family:'Playfair Display',serif; color:oklch(25% 0.02 60); border-bottom:2px solid oklch(90% 0.01 70); padding-bottom:6px; break-before:page;">4. ระบบสมาชิกและแพ็กเกจ (Membership v2)</h2>
+<p style="line-height:1.8;">แทนที่แนวคิด "แพ็กเกจฟรีถาวร" เดิมทั้งหมด ด้วยโครงสร้างที่จูงใจให้ทดลองแล้วอัปเกรดจริง:</p>
+<table style="width:100%; border-collapse:collapse; margin:14px 0; font-size:13px;">
+  <thead><tr style="background:oklch(95% 0.01 70);"><th style="padding:7px; border:1px solid oklch(85% 0.01 70);">ระดับ</th><th style="padding:7px; border:1px solid oklch(85% 0.01 70);">ราคา/เดือน</th><th style="padding:7px; border:1px solid oklch(85% 0.01 70);">จำนวนประกาศ</th><th style="padding:7px; border:1px solid oklch(85% 0.01 70);">ตัวเร่งการมองเห็น</th></tr></thead>
+  <tbody>
+    <tr><td style="padding:7px; border:1px solid oklch(88% 0.01 70);">🎁 ทดลองใช้ฟรี (ครั้งเดียว 30 วัน)</td><td style="padding:7px; border:1px solid oklch(88% 0.01 70);">ฟรี</td><td style="padding:7px; border:1px solid oklch(88% 0.01 70);">5</td><td style="padding:7px; border:1px solid oklch(88% 0.01 70);">เทียบเท่าแพ็กเกจ 3 ทุกอย่าง</td></tr>
+    <tr><td style="padding:7px; border:1px solid oklch(88% 0.01 70);">แพ็กเกจ 1</td><td style="padding:7px; border:1px solid oklch(88% 0.01 70);">590 บาท</td><td style="padding:7px; border:1px solid oklch(88% 0.01 70);">5</td><td style="padding:7px; border:1px solid oklch(88% 0.01 70);">ลิงก์โซเชียล 1 ช่องทาง</td></tr>
+    <tr><td style="padding:7px; border:1px solid oklch(88% 0.01 70);">แพ็กเกจ 2</td><td style="padding:7px; border:1px solid oklch(88% 0.01 70);">1,190 บาท</td><td style="padding:7px; border:1px solid oklch(88% 0.01 70);">12</td><td style="padding:7px; border:1px solid oklch(88% 0.01 70);">Featured 2 รายการ + ลิงก์โซเชียล 2 ช่องทาง</td></tr>
+    <tr><td style="padding:7px; border:1px solid oklch(88% 0.01 70);">แพ็กเกจ 3</td><td style="padding:7px; border:1px solid oklch(88% 0.01 70);">2,290 บาท</td><td style="padding:7px; border:1px solid oklch(88% 0.01 70);">25</td><td style="padding:7px; border:1px solid oklch(88% 0.01 70);">Featured ไม่จำกัด + ลิงก์โซเชียลครบ 4 ช่องทาง</td></tr>
+    <tr><td style="padding:7px; border:1px solid oklch(88% 0.01 70);">ระดับ 4-5 (VIP เงิน/ทอง/เพชร)</td><td style="padding:7px; border:1px solid oklch(88% 0.01 70);">เตรียมไว้/ยังไม่เปิด</td><td style="padding:7px; border:1px solid oklch(88% 0.01 70);">—</td><td style="padding:7px; border:1px solid oklch(88% 0.01 70);">เข้าพูล Agent VIP ช่วยขาย (ปลดล็อกทีหลังเมื่อฐานสมาชิกพอ)</td></tr>
+  </tbody>
+</table>
+<p style="line-height:1.8;">หลักการ: <b>ฟีเจอร์พื้นฐานทุกแพ็กเกจเท่ากัน</b> (แปล 8 ภาษา, ข้อมูลติดต่อ, สถิติวิว, แก้ไขประกาศ, ออกแบบเว็บไซต์/แก้ไขโปรไฟล์) — สิ่งที่ต่างกันมีแค่ <b>จำนวนประกาศ</b> และ <b>ตัวเร่งการมองเห็น</b> ฟีเจอร์ที่แพ็กเกจนั้นยังไม่มีสิทธิ์จะแสดงเป็นสีเทา (ไอคอนล็อก) ไม่ใช่ซ่อนหายไปเฉยๆ เพื่อกระตุ้นให้อัปเกรด</p>
+<p style="line-height:1.8;">การใช้ trial ครั้งเดียวต่อคน (ล็อกถาวรใน field ของบัญชี ใช้แล้วเริ่มใหม่ไม่ได้อีก) และมีระบบตรวจจับสมัครซ้ำโดยจับคู่เบอร์โทรศัพท์ให้แอดมินตรวจสอบในคิวอนุมัติ</p>
+
+<h2 style="font-family:'Playfair Display',serif; color:oklch(25% 0.02 60); border-bottom:2px solid oklch(90% 0.01 70); padding-bottom:6px; break-before:page;">5. วงจรชีวิตของประกาศ</h2>
+<p style="line-height:1.8;">ทุกประกาศมีสถานะ 4 แบบ ไหลเป็นลำดับ:</p>
+<div style="display:flex; gap:8px; align-items:center; margin:16px 0; font-size:12.5px; flex-wrap:wrap;">
+  <div style="background:oklch(95% 0.06 75); padding:8px 14px; border-radius:100px;">⏳ รออนุมัติ</div>
+  <div>→</div>
+  <div style="background:oklch(93% 0.05 145); padding:8px 14px; border-radius:100px;">✅ กำลังแสดง (30 วัน)</div>
+  <div>→</div>
+  <div style="background:oklch(93% 0.02 30); padding:8px 14px; border-radius:100px;">⏰ หมดอายุ (ซ่อนจากเว็บ)</div>
+  <div>→ กดต่ออายุ →</div>
+  <div style="background:oklch(93% 0.05 145); padding:8px 14px; border-radius:100px;">✅ กลับมาแสดงทันที</div>
+</div>
+<p style="line-height:1.8;">รายละเอียดสำคัญ:</p>
+<ul style="line-height:1.9;">
+  <li>ประกาศใหม่ทุกรายการต้องผ่านแอดมินอนุมัติก่อนขึ้นเว็บจริงเสมอ</li>
+  <li>ครบ 30 วันนับจากวันอนุมัติ → ซ่อนจากหน้าเว็บสาธารณะอัตโนมัติ แต่ข้อมูลไม่ถูกลบ</li>
+  <li>เจ้าของกด "ต่ออายุ" ได้เองทันที ไม่ต้องรอแอดมินอนุมัติซ้ำ</li>
+  <li>ถ้าปฏิเสธ แอดมินระบุเหตุผลได้ เจ้าของแก้ไขแล้วส่งใหม่ได้</li>
+  <li>ประกาศที่หมดอายุเกิน 90 วันไม่มีการต่ออายุ → ระบบลบเฉพาะไฟล์รูป (เก็บรูปปก 1 รูป + ข้อความ/ราคาไว้ตลอดไป) เพื่อประหยัดพื้นที่จัดเก็บ</li>
+  <li>นับจำนวนผู้เข้าชมทุกประกาศ แสดงให้เจ้าของเห็นในหน้าทำงานของตัวเอง ใกล้หมด trial จะสรุปยอดรวมพร้อมชวนอัปเกรด</li>
+</ul>
+<p style="line-height:1.8; font-size:12.5px; color:oklch(50% 0.02 60);">⚠️ ข้อจำกัดทางเทคนิค: การตรวจสอบวันหมดอายุ/ลบรูป ทำงานแบบ "สแกนตอนมีคนเปิดหน้าแดชบอร์ด" ไม่ใช่ระบบตั้งเวลาอัตโนมัติในเซิร์ฟเวอร์ (ยังไม่ได้ติดตั้ง Cloud Scheduler) หมายความว่าถ้าไม่มีใครเข้าเว็บเลยเกิน 30 วัน การซ่อน/ลบจะล่าช้าไปจนกว่าจะมีคนเข้าใช้อีกครั้ง</p>
+
+<h2 style="font-family:'Playfair Display',serif; color:oklch(25% 0.02 60); border-bottom:2px solid oklch(90% 0.01 70); padding-bottom:6px; break-before:page;">6. ระบบ AI</h2>
+<h3 style="color:oklch(35% 0.1 25);">6.1 แชทบอทลูกค้า (ContactRail — ทุกหน้าเว็บสาธารณะ)</h3>
+<ul style="line-height:1.9;">
+  <li>ตอบคำถามทั่วไป/ทักทายแบบธรรมชาติ + ตอบข้อมูลจริง (ราคา/ห้อง/สถานะ/รหัสทรัพย์) จากฐานข้อมูลจริงเท่านั้น ไม่มโนข้อมูล</li>
+  <li>ปฏิเสธหัวข้อต้องห้าม (ตั้งค่าได้จากหลังบ้าน) อย่างสุภาพ ไม่เปิดเผยว่ามีข้อจำกัดอยู่</li>
+  <li>ตรวจจับภาษาลูกค้าอัตโนมัติ ตอบครบทั้ง 8 ภาษา</li>
+  <li>เจอรหัสทรัพย์ในคำตอบ → สร้างปุ่ม "ดูรายละเอียด" อัตโนมัติ, เจอคำว่า "ติดต่อเรา" → สร้างปุ่มเปิดฟอร์มสอบถาม</li>
+  <li>บุคลิก (ชื่อ/บทบาท) และหัวข้อต้องห้ามแก้ไขได้จากหน้า Site Content โดยไม่ต้องแก้โค้ด</li>
+  <li>รู้บริบทหน้าที่ลูกค้ากำลังเปิดดูอยู่ (ผูกรหัสทรัพย์อัตโนมัติ) และจำกัดจำนวนทรัพย์ที่ส่งให้ AI อ่านต่อข้อความ (คุมต้นทุนเมื่อทรัพย์เยอะขึ้น)</li>
+  <li>บันทึกบทสนทนาไว้ในเบราว์เซอร์ลูกค้า คุยต่อได้ข้ามหน้า ไม่เริ่มใหม่ทุกครั้ง</li>
+</ul>
+<h3 style="color:oklch(35% 0.1 25);">6.2 AI Quick Add (เครื่องมือแอดมิน)</h3>
+<p style="line-height:1.8;">แอดมินถ่ายรูปหลายรูป + พูดบอกข้อมูล (voice dictation) + ปักหมุด Google Maps → Claude AI ร่างประกาศให้ครบ 8 ภาษา พร้อมคำนวณระยะทาง 10+ จุดสำคัญใกล้เคียง และร่างโพสต์ Facebook พร้อมแฮชแท็ก แอดมินตรวจ/แก้ก่อนบันทึกจริง</p>
+<h3 style="color:oklch(35% 0.1 25);">6.3 แปลภาษาอัตโนมัติ (สมาชิก self-serve)</h3>
+<p style="line-height:1.8;">เมื่อสมาชิกกรอกคำอธิบายทรัพย์/ข้อความแนะนำตัวเป็นภาษาเดียวแล้วกดบันทึก ระบบยิง AI แปลเป็นครบ 8 ภาษาให้อัตโนมัติทันที (เรียกครั้งเดียวตอนบันทึก ไม่ใช่แปลสดทุกครั้งที่มีคนเปิดดู ประหยัดต้นทุน)</p>
+
+<h2 style="font-family:'Playfair Display',serif; color:oklch(25% 0.02 60); border-bottom:2px solid oklch(90% 0.01 70); padding-bottom:6px; break-before:page;">7. ระบบการเงิน (Stripe)</h2>
+<p style="line-height:1.8;">ทุกรายการเงินผ่าน Stripe Checkout จริง (โหมด Test พร้อมเปลี่ยนเป็น Live ได้) มี Webhook ยืนยันลายเซ็นก่อนอัปเดตสถานะเสมอ กันข้อมูลปลอม:</p>
+<ul style="line-height:1.9;">
+  <li><b>ค่าสมาชิกรายเดือน</b> (แพ็กเกจ 1/2/3) — subscription ต่อเนื่อง จ่ายไม่ผ่าน/ยกเลิก → ซ่อนประกาศอัตโนมัติ ไม่ลบข้อมูล</li>
+  <li><b>Featured Listing boost</b> — จ่ายครั้งเดียว 7/30 วัน ดันประกาศขึ้นก่อน</li>
+  <li><b>VIP boost ฝั่งเจ้าของบ้าน</b> (เงิน/ทอง/เพชร) — จ่ายครั้งเดียว/30 วัน เข้าพูลให้ Agent VIP เห็น</li>
+  <li><b>Agent VIP subscription</b> — ฝั่งนายหน้าสมัครสมาชิก VIP รายเดือน (รอเปิดใช้งานเมื่อฐานสมาชิกมากพอ)</li>
+  <li><b>แบนเนอร์โฆษณา</b> — ธุรกิจภายนอกจ่ายครั้งเดียว 30 วันต่อตำแหน่ง</li>
+  <li>ทุกการจ่ายเงินสำเร็จถูกบันทึกลง Ledger (`payments`) เขียนได้เฉพาะผ่านระบบเซิร์ฟเวอร์เท่านั้น ตรวจสอบย้อนหลังได้</li>
+</ul>
+<p style="line-height:1.8; font-size:12.5px; color:oklch(50% 0.02 60);">ปุ่มจัดการ/ยกเลิกการเป็นสมาชิกใช้ Stripe Customer Portal สำเร็จรูป ไม่ต้องสร้างหน้าเอง</p>
+
+<h2 style="font-family:'Playfair Display',serif; color:oklch(25% 0.02 60); border-bottom:2px solid oklch(90% 0.01 70); padding-bottom:6px; break-before:page;">8. ความปลอดภัยและสิทธิ์การเข้าถึง</h2>
+<ul style="line-height:1.9;">
+  <li><b>Firebase Authentication</b> จริง (ไม่ใช่รหัสผ่านฝังโค้ดแบบเดิม) แยกบัญชี Owner / Staff / สมาชิกลงประกาศ / ผู้ใช้ทั่วไป</li>
+  <li><b>Firestore Security Rules</b> แบบ role-based + deny-by-default — สมาชิกแก้ไข/ลบได้เฉพาะทรัพย์ของตัวเอง, ห้ามตั้งสถานะ "กำลังแสดง" เอง (ต้องผ่านแอดมินอนุมัติ ยกเว้นการต่ออายุ), แก้ไขได้เฉพาะฟิลด์ที่กำหนด</li>
+  <li><b>สิทธิ์ 2 ระดับในทีมงาน</b>: Owner เห็น/แก้ทุกอย่างรวมการเงิน, Staff จัดการประกาศ/ลีด/แชทได้แต่แตะการเงิน-ตั้งค่าไซต์ไม่ได้</li>
+  <li>ฟิลด์สำคัญของทรัพย์ (รูปปก/ราคา/ที่อยู่/รหัส) ถูกล็อกถาวรเมื่อขายสำเร็จ กันการ "สวมประกาศ" เอาทรัพย์ใหม่มาแทนของเดิม</li>
+  <li>API key ของ Claude เก็บเป็นความลับฝั่งเซิร์ฟเวอร์เท่านั้น ไม่มีทางรั่วออกฝั่งเบราว์เซอร์ผู้ใช้</li>
+  <li>Stripe Webhook ตรวจลายเซ็นทุกครั้งก่อนเชื่อ กันคำสั่งปลอม</li>
+</ul>
+<p style="line-height:1.8; font-size:12.5px; color:oklch(50% 0.02 60);">⚠️ ยังไม่ได้ทำ: Firebase App Check (กันบอทยิง request ตรง), Rate limiting ต่อ IP, reCAPTCHA บนฟอร์ม — เป็นงานเสริมด้านความปลอดภัยที่ยังไม่เร่งด่วนแต่ควรทำก่อนสเกลใหญ่</p>
+
+<h2 style="font-family:'Playfair Display',serif; color:oklch(25% 0.02 60); border-bottom:2px solid oklch(90% 0.01 70); padding-bottom:6px; break-before:page;">9. SEO</h2>
+<ul style="line-height:1.9;">
+  <li>URL ถาวรต่อประกาศ + Meta title/description เฉพาะหน้า + Open Graph สำหรับแชร์โซเชียล</li>
+  <li>Structured data (schema.org RealEstateListing) แบบ JSON-LD ทุกหน้าทรัพย์ — ช่วย Google เข้าใจว่าเป็นประกาศอสังหาฯ</li>
+  <li>Sitemap.xml + robots.txt ยื่น Google Search Console สำเร็จแล้ว (ครอบคลุมหน้า static หลัก — ยังไม่ครอบคลุมหน้าทรัพย์รายตัวที่สร้างจาก Firestore สด)</li>
+  <li>ลิงก์กลับเว็บ (backlink) ฝังอัตโนมัติในทุกโพสต์ Facebook ที่ AI ร่างให้ + ลิงก์แชร์ที่สมาชิกกดคัดลอกได้เอง</li>
+</ul>
+
+<h2 style="font-family:'Playfair Display',serif; color:oklch(25% 0.02 60); border-bottom:2px solid oklch(90% 0.01 70); padding-bottom:6px; break-before:page;">10. โครงสร้างข้อมูลหลัก (แนวคิด ไม่ใช่โค้ด)</h2>
+<p style="line-height:1.8;">ฐานข้อมูลแบ่งเป็น "คอลเลกชัน" (เหมือนตารางในฐานข้อมูลทั่วไป) หลักๆ ดังนี้:</p>
+<table style="width:100%; border-collapse:collapse; margin:14px 0; font-size:12.5px;">
+  <thead><tr style="background:oklch(95% 0.01 70);"><th style="padding:6px; border:1px solid oklch(85% 0.01 70);">คอลเลกชัน</th><th style="padding:6px; border:1px solid oklch(85% 0.01 70);">เก็บอะไร</th></tr></thead>
+  <tbody>
+    <tr><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">properties</td><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">ทรัพย์ทุกรายการ — ข้อมูล+สถานะวงจรชีวิต+วันหมดอายุ+จำนวนวิว</td></tr>
+    <tr><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">propertyPhotos</td><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">ลิงก์รูปภาพแต่ละใบ (ไฟล์จริงอยู่ Storage)</td></tr>
+    <tr><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">listers</td><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">บัญชีสมาชิกที่ลงประกาศเอง + แพ็กเกจ/trial/VIP ของแต่ละคน</td></tr>
+    <tr><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">owners / tenants</td><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">ไดเรกทอรีเจ้าของบ้าน/ผู้เช่า (ที่แอดมินดูแลเอง)</td></tr>
+    <tr><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">leads / listerLeads</td><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">ผู้สนใจที่ทักเข้ามาผ่านฟอร์ม/แชท</td></tr>
+    <tr><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">buyerRegistrations</td><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">การลงทะเบียนผู้ซื้อของ Agent VIP (กันข้อพิพาท)</td></tr>
+    <tr><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">payments</td><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">ประวัติการจ่ายเงินทุกรายการจาก Stripe</td></tr>
+    <tr><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">banners</td><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">แบนเนอร์โฆษณาทุกตำแหน่ง</td></tr>
+    <tr><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">siteContent / settings</td><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">ค่าตั้งค่าทั้งหมดที่แอดมินแก้ได้เอง (ราคา/บุคลิก AI/ข้อความ/สวิตช์เปิดปิดฟีเจอร์)</td></tr>
+    <tr><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">adminUsers / staffInvites</td><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">บัญชีทีมงานและคำเชิญ</td></tr>
+  </tbody>
+</table>
+
+<h2 style="font-family:'Playfair Display',serif; color:oklch(25% 0.02 60); border-bottom:2px solid oklch(90% 0.01 70); padding-bottom:6px; break-before:page;">11. กระบวนการอัปเดตเว็บ (Deployment)</h2>
+<p style="line-height:1.8;">เจ้าของเว็บไม่ใช้เครื่องมือพัฒนาในเครื่องตัวเอง (ไม่มี git/command line ส่วนตัว) ขั้นตอนอัปเดตทุกครั้ง:</p>
+<ol style="line-height:1.9;">
+  <li>ทีมออกแบบ/พัฒนาเตรียมไฟล์ที่แก้ไขไว้ให้ดาวน์โหลดเป็นชุด</li>
+  <li>เจ้าของเว็บอัปโหลดไฟล์ทับใน GitHub ผ่านหน้าเว็บ (Add file → Upload files) — ไม่ใช้คำสั่ง git</li>
+  <li>เว็บไซต์หลัก (Hosting) อัปเดตอัตโนมัติหลังอัปโหลด</li>
+  <li>ถ้ามีการแก้ Cloud Functions หรือ Security Rules ต้องเปิด GitHub Codespace (เทอร์มินัลบนคลาวด์) แล้วรันคำสั่ง `firebase deploy` เพิ่มอีกขั้นหนึ่ง</li>
+</ol>
+<p style="line-height:1.8;">มีระบบ "ลิงก์ทดลอง" (Firebase Hosting Preview Channels) ให้ทดสอบฟีเจอร์ใหม่ก่อนขึ้นเว็บจริงเสมอ กันเว็บจริงพังกลางอากาศระหว่างพัฒนา</p>
+
+<h2 style="font-family:'Playfair Display',serif; color:oklch(25% 0.02 60); border-bottom:2px solid oklch(90% 0.01 70); padding-bottom:6px; break-before:page;">12. สถานะปัจจุบันและความเสี่ยงที่ต้องติดตาม</h2>
+<table style="width:100%; border-collapse:collapse; margin:14px 0; font-size:12.5px;">
+  <thead><tr style="background:oklch(95% 0.06 60);"><th style="padding:6px; border:1px solid oklch(85% 0.01 70); text-align:left;">ระดับ</th><th style="padding:6px; border:1px solid oklch(85% 0.01 70); text-align:left;">เรื่อง</th></tr></thead>
+  <tbody>
+    <tr><td style="padding:6px; border:1px solid oklch(88% 0.01 70); color:oklch(45% 0.18 30); font-weight:600;">🔴 ด่วน</td><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">ต้องตรวจสอบให้แน่ใจว่า Firestore Security Rules ล็อกครบทุกจุดก่อนวันที่ 8 ส.ค. 2569</td></tr>
+    <tr><td style="padding:6px; border:1px solid oklch(88% 0.01 70); color:oklch(50% 0.1 60); font-weight:600;">🟡 ควรทำต่อ</td><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">ตั้ง Cloud Scheduler แทนการสแกนหมดอายุ/ลบรูปแบบ client-side (ตอนนี้ทำงานเฉพาะมีคนเปิดหน้าแดชบอร์ด)</td></tr>
+    <tr><td style="padding:6px; border:1px solid oklch(88% 0.01 70); color:oklch(50% 0.1 60); font-weight:600;">🟡 ควรทำต่อ</td><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">เพิ่ม Firebase App Check + reCAPTCHA + Rate limiting</td></tr>
+    <tr><td style="padding:6px; border:1px solid oklch(88% 0.01 70); color:oklch(55% 0.1 145); font-weight:600;">🟢 ยังไม่เร่งด่วน</td><td style="padding:6px; border:1px solid oklch(88% 0.01 70);">Agent VIP tier 4-5 (ยังไม่เปิดใช้งาน รอฐานสมาชิกมากพอ), LINE Official Account แจ้งเตือน, Facebook auto-post ผ่าน Make.com/n8n (คุยแนวคิดไว้ ยังไม่สร้าง)</td></tr>
+  </tbody>
+</table>
+
+<p style="line-height:1.8; margin-top:24px; font-size:12px; color:oklch(55% 0.02 60); text-align:center;">— จบรายงาน System Architecture Report v1 — เอกสารนี้อัปเดตควบคู่กับ BLUEPRINT.md / CLAUDE.md ทุกครั้งที่ระบบเปลี่ยนแปลงสำคัญ —</p>
+
+</x-import>
+
+</x-dc>
+</body>
+</html>

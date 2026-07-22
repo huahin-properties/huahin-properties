@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="./image-slot.js"></script>
+  <title>Property Detail Prototype — huahin.properties</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    body { margin: 0; background: oklch(98% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    a { color: oklch(42% 0.12 25); }
+    a:hover { color: oklch(32% 0.13 25); }
+  </style>
+</helmet>
+
+<div style="max-width:1600px; margin:0 auto; background:oklch(98% 0.01 80); min-height:100vh;">
+
+  <div style="text-align:center; background:oklch(22% 0.02 60); color:white; font-size:11px; letter-spacing:0.06em; padding:7px 12px; font-weight:600;">PROTOTYPE — SAMPLE DATA — NOT CONNECTED TO PRODUCTION</div>
+
+  <!-- HEADER -->
+  <div style="display:flex; align-items:center; justify-content:space-between; gap:24px; padding:20px clamp(20px,4vw,56px); border-bottom:1px solid oklch(90% 0.01 70);">
+    <div style="display:flex; align-items:center; gap:9px; font-family:'Playfair Display',serif; font-size:clamp(19px,2.4vw,24px); letter-spacing:0.02em; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <div style="display:flex; align-items:center; gap:6px; border:1px solid oklch(85% 0.01 70); border-radius:100px; padding:8px 12px; font-size:13px; color:oklch(35% 0.02 60); background:white; cursor:pointer;">🇹🇭 ไทย <span style="font-size:10px;">▾</span></div>
+      <div onClick="{{ toggleCompare }}" style="width:40px; height:40px; border-radius:50%; border:1px solid oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; cursor:pointer; background:{{ compareBg }};" title="เปรียบเทียบทรัพย์">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="oklch(30% 0.02 60)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="7" height="16" rx="1"></rect><rect x="14" y="4" width="7" height="16" rx="1"></rect></svg>
+      </div>
+      <div onClick="{{ toggleFavorite }}" style="width:40px; height:40px; border-radius:50%; border:1px solid oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; cursor:pointer; background:white;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="{{ favIconFill }}" stroke="oklch(30% 0.1 25)" stroke-width="1.8"><path d="M12 21s-7.5-4.6-10-9.2C.4 8.2 2 4.5 5.6 4A5.6 5.6 0 0112 7.3 5.6 5.6 0 0118.4 4C22 4.5 23.6 8.2 22 11.8 19.5 16.4 12 21 12 21z"></path></svg>
+      </div>
+      <div onClick="{{ toggleShare }}" style="width:40px; height:40px; border-radius:50%; border:1px solid oklch(85% 0.01 70); display:flex; align-items:center; justify-content:center; cursor:pointer; background:white;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="oklch(30% 0.02 60)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><path d="M8.6 13.5l6.8 3.9M15.4 6.6L8.6 10.5"></path></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- HERO GALLERY -->
+  <div style="padding:20px clamp(20px,4vw,56px) 0;">
+    <div style="display:flex; gap:8px; margin-bottom:10px;">
+      <sc-for list="{{ galleryTabs }}" as="gt" hint-placeholder-count="3">
+        <div onClick="{{ gt.onClick }}" style="padding:8px 16px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer; background:{{ gt.bg }}; color:{{ gt.color }}; border:1px solid oklch(88% 0.01 70);">{{ gt.icon }} {{ gt.label }}</div>
+      </sc-for>
+    </div>
+    <div style="display:grid; grid-template-columns:2fr 1fr 1fr; grid-template-rows:1fr 1fr; gap:8px; height:clamp(320px,52vw,560px); border-radius:10px; overflow:hidden;">
+      <div style="grid-row:1/3; min-width:0; min-height:0; position:relative;"><div style="position:absolute; inset:0;"><image-slot id="hero-main" shape="rect" placeholder="รูปหลัก / Main Hero Photo"></image-slot></div></div>
+      <div style="min-width:0; min-height:0; position:relative;"><div style="position:absolute; inset:0;"><image-slot id="hero-2" shape="rect" placeholder="รูปที่ 2"></image-slot></div></div>
+      <div style="min-width:0; min-height:0; position:relative;"><div style="position:absolute; inset:0;"><image-slot id="hero-3" shape="rect" placeholder="รูปที่ 3"></image-slot></div></div>
+      <div style="min-width:0; min-height:0; position:relative;"><div style="position:absolute; inset:0;"><image-slot id="hero-4" shape="rect" placeholder="รูปที่ 4"></image-slot></div></div>
+      <div style="min-width:0; min-height:0; position:relative;">
+        <div style="position:absolute; inset:0;"><image-slot id="hero-5" shape="rect" placeholder="รูปที่ 5"></image-slot></div>
+        <div onClick="{{ openGallery }}" style="position:absolute; inset:0; background:rgba(20,15,10,0.45); display:flex; align-items:center; justify-content:center; color:white; font-size:14px; font-weight:600; cursor:pointer; pointer-events:none; text-align:center; padding:8px;">ดูรูปทั้งหมด (24)</div>
+      </div>
+    </div>
+    <!-- THUMBNAIL STRIP -->
+    <div style="display:flex; gap:8px; margin-top:8px; overflow-x:auto; padding-bottom:4px;">
+      <sc-for list="{{ thumbs }}" as="th" hint-placeholder-count="8">
+        <div style="width:88px; height:64px; flex-shrink:0; border-radius:6px; overflow:hidden; border:2px solid {{ th.borderColor }};"><image-slot id="{{ th.id }}" shape="rect" placeholder="{{ th.label }}"></image-slot></div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- TITLE / PRICE / QUICK FACTS -->
+  <div style="padding:28px clamp(20px,4vw,56px) 0; display:flex; flex-wrap:wrap; gap:24px; justify-content:space-between; align-items:flex-end; border-bottom:1px solid oklch(90% 0.01 70); padding-bottom:24px; margin-bottom:32px;">
+    <div style="max-width:640px;">
+      <div style="font-size:13px; letter-spacing:0.08em; text-transform:uppercase; color:oklch(42% 0.12 25); margin-bottom:8px; display:flex; align-items:center; gap:10px;">พูลวิลล่า · หัวหิน — หนองแก <span style="background:oklch(94% 0.05 150); color:oklch(35% 0.1 150); padding:3px 10px; border-radius:100px; font-size:11px; letter-spacing:0.03em;">ขาย</span></div>
+      <div style="font-family:'Playfair Display',serif; font-size:clamp(28px,3.6vw,40px); color:oklch(20% 0.02 60); margin-bottom:10px; line-height:1.2;">พูลวิลล่าดีไซน์โมเดิร์น 4 ห้องนอน วิวเขาโล่ง ใกล้หาด 5 นาที</div>
+      <div style="display:flex; gap:18px; flex-wrap:wrap; font-size:14px; color:oklch(45% 0.02 60);">
+        <span>🛏 4 ห้องนอน</span><span>🛁 5 ห้องน้ำ</span><span>📐 420 ตร.ม. พื้นที่ใช้สอย</span><span>🌳 800 ตร.ว. ที่ดิน</span>
+      </div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-family:'Playfair Display',serif; font-size:clamp(26px,3vw,34px); color:oklch(20% 0.02 60);">฿24,900,000</div>
+      <div style="font-size:12.5px; color:oklch(55% 0.02 60); margin-top:2px;">≈ ฿59,286 / ตร.ม.</div>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1.7fr 1fr; gap:56px; padding:0 clamp(20px,4vw,56px) 56px; align-items:start;">
+
+    <div style="display:flex; flex-direction:column; gap:44px;">
+
+      <!-- PROPERTY FACTS -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); margin-bottom:14px;">รายละเอียดทรัพย์</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:1px; background:oklch(90% 0.01 70); border:1px solid oklch(90% 0.01 70); border-radius:8px; overflow:hidden;">
+          <sc-for list="{{ facts }}" as="f" hint-placeholder-count="8">
+            <div style="background:white; padding:16px 14px;">
+              <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:4px;">{{ f.label }}</div>
+              <div style="font-size:15px; font-weight:600; color:oklch(22% 0.02 60);">{{ f.value }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- HIGHLIGHTS -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); margin-bottom:14px;">จุดเด่นของทรัพย์</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px;">
+          <sc-for list="{{ highlights }}" as="h" hint-placeholder-count="6">
+            <div style="display:flex; align-items:center; gap:10px; padding:13px 15px; background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; font-size:14px; color:oklch(30% 0.02 60);">
+              <span style="font-size:17px;">{{ h.icon }}</span>{{ h.text }}
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <!-- DESCRIPTION -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); margin-bottom:14px;">รายละเอียด</div>
+        <div style="font-size:15px; line-height:1.85; color:oklch(35% 0.02 60); white-space:pre-wrap;">วิลล่าสไตล์โมเดิร์นทรอปิคอลตั้งอยู่บนที่ดิน 800 ตร.ว. ในซอยหนองแก เงียบสงบ ห่างจากชายหาดเพียง 5 นาทีโดยรถยนต์ ตัวบ้านออกแบบให้เปิดรับแสงธรรมชาติและวิวภูเขาจากทุกมุมห้องนัก ห้องนั่งเล่นเพดานสูงเชื่อมต่อกับสระว่ายน้ำระบบเกลือขนาด 12 เมตรและศาลาริมสระ
+
+ห้องนอนทั้ง 4 ห้องเป็น En-suite พร้อมห้องแต่งตัวแยก ห้องนอนใหญ่ชั้นบนมีระเบียงส่วนตัววิวเขา ครัวไทยแยกจากครัวฝรั่งเพื่อการใช้งานจริง จอดรถในร่มได้ 3 คัน ระบบโซลาร์เซลล์ติดตั้งแล้ว ลดค่าไฟได้กว่า 60%
+
+เหมาะสำหรับอยู่อาศัยเองหรือปล่อยเช่าระยะสั้น ทำเลใกล้ทั้งตลาดน้ำหัวหินและสนามกอล์ฟชั้นนำ</div>
+      </div>
+
+      <!-- FLOOR PLAN -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); margin-bottom:14px;">ผังพื้น (Floor Plan)</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px;">
+          <div>
+            <div style="aspect-ratio:4/3; border-radius:8px; overflow:hidden; border:1px solid oklch(90% 0.01 70);"><image-slot id="floor-1" shape="rect" placeholder="ชั้น 1"></image-slot></div>
+            <div style="font-size:12.5px; color:oklch(50% 0.02 60); margin-top:6px; text-align:center;">ชั้น 1 — 220 ตร.ม.</div>
+          </div>
+          <div>
+            <div style="aspect-ratio:4/3; border-radius:8px; overflow:hidden; border:1px solid oklch(90% 0.01 70);"><image-slot id="floor-2" shape="rect" placeholder="ชั้น 2"></image-slot></div>
+            <div style="font-size:12.5px; color:oklch(50% 0.02 60); margin-top:6px; text-align:center;">ชั้น 2 — 200 ตร.ม.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MAP -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); margin-bottom:14px;">ตำแหน่งที่ตั้ง</div>
+        <div style="aspect-ratio:16/8; border-radius:8px; overflow:hidden; border:1px solid oklch(90% 0.01 70);"><image-slot id="map-slot" shape="rect" placeholder="Google Map — ตำแหน่งทรัพย์ (จะฝัง Google Maps จริงในระบบใช้งานจริง)"></image-slot></div>
+        <div style="font-size:13px; color:oklch(50% 0.02 60); margin-top:10px;">📍 ซอยหนองแก 24, หัวหิน, ประจวบคีรีขันธ์</div>
+      </div>
+
+      <!-- NEARBY PLACES -->
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); margin-bottom:14px;">สถานที่ใกล้เคียง</div>
+        <div style="display:flex; flex-direction:column; gap:2px; border:1px solid oklch(91% 0.01 70); border-radius:8px; overflow:hidden;">
+          <sc-for list="{{ nearby }}" as="n" hint-placeholder-count="6">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:13px 16px; background:white; border-bottom:1px solid oklch(94% 0.005 80); font-size:14px;">
+              <div style="display:flex; align-items:center; gap:10px; color:oklch(30% 0.02 60);"><span>{{ n.icon }}</span>{{ n.name }}</div>
+              <div style="color:oklch(50% 0.02 60); font-size:13px;">{{ n.time }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- SIDEBAR: CONTACT + AGENT -->
+    <div style="display:flex; flex-direction:column; gap:16px; position:sticky; top:24px;">
+
+      <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:10px; padding:22px; display:flex; flex-direction:column; gap:14px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:52px; height:52px; border-radius:50%; overflow:hidden; flex-shrink:0;"><image-slot id="agent-photo" shape="circle" placeholder="รูป Agent"></image-slot></div>
+          <div>
+            <div style="font-weight:600; font-size:15px; color:oklch(22% 0.02 60);">คุณนภัสสร วงศ์ธาดา</div>
+            <div style="font-size:12.5px; color:oklch(55% 0.02 60);">Senior Property Consultant</div>
+          </div>
+        </div>
+        <a href="tel:+6632000000" style="display:flex; align-items:center; justify-content:center; gap:8px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:12px; border-radius:6px; text-decoration:none; font-size:14px; font-weight:500;">📞 โทรหา Agent</a>
+        <a href="https://wa.me/6632000000" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background:oklch(52% 0.13 150); color:oklch(98% 0.01 80); padding:12px; border-radius:6px; text-decoration:none; font-size:14px; font-weight:500;">WhatsApp</a>
+        <a href="https://line.me/ti/p/huahinproperties" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background:oklch(58% 0.16 145); color:oklch(98% 0.01 80); padding:12px; border-radius:6px; text-decoration:none; font-size:14px; font-weight:500;">LINE</a>
+        <div style="display:flex; align-items:center; justify-content:center; gap:8px; border:1px solid oklch(80% 0.02 60); color:oklch(25% 0.02 60); padding:12px; border-radius:6px; font-size:14px; font-weight:500; cursor:pointer;">📅 นัดชมทรัพย์</div>
+        <div style="font-size:11.5px; color:oklch(55% 0.02 60); text-align:center;">Mini Site: huahin.properties/napassorn</div>
+      </div>
+
+      <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:10px; padding:20px 22px; display:flex; flex-direction:column; gap:10px;">
+        <div style="font-family:'Playfair Display',serif; font-size:16px; color:oklch(20% 0.02 60);">🧮 คำนวณสินเชื่อเบื้องต้น</div>
+        <div style="display:flex; flex-direction:column; gap:8px; font-size:13px;">
+          <label style="color:oklch(50% 0.02 60);">เงินดาวน์ (%)<input type="range" min="10" max="50" value="20" style="width:100%; margin-top:4px;" /></label>
+          <div style="display:flex; justify-content:space-between; color:oklch(30% 0.02 60);"><span>ผ่อนโดยประมาณ / เดือน</span><strong>฿98,500</strong></div>
+        </div>
+        <div style="font-size:11px; color:oklch(55% 0.02 60);">ตัวเลขประมาณการ — ระบบคำนวณจริงจะเชื่อมในเวอร์ชันถัดไป</div>
+      </div>
+
+      <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:10px; padding:22px; display:flex; flex-direction:column; gap:12px;">
+        <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60);">สอบถามรายละเอียดเพิ่มเติม</div>
+        <input placeholder="ชื่อของคุณ" style="border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+        <input placeholder="เบอร์โทร / WhatsApp" style="border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+        <textarea placeholder="ข้อความ" rows="3" style="border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
+        <div style="background:oklch(40% 0.13 25); color:oklch(98% 0.01 80); text-align:center; padding:12px; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer;">ส่งข้อความ</div>
+      </div>
+
+      <div style="background:oklch(96% 0.03 25); border:1px solid oklch(85% 0.08 25); border-radius:10px; padding:18px 20px; font-size:13px; color:oklch(35% 0.1 25); line-height:1.6;">รหัสทรัพย์ HH-PROTO-01 — ราคานี้เป็นราคาต่อรองได้ ติดต่อ Agent เพื่อนัดชมทรัพย์จริง</div>
+
+    </div>
+  </div>
+
+  <!-- REVIEWS (placeholder for future) -->
+  <div style="padding:0 clamp(20px,4vw,56px) 56px;">
+    <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); margin-bottom:14px;">รีวิวจากลูกค้า</div>
+    <div style="border:1px dashed oklch(85% 0.01 70); border-radius:8px; padding:24px; text-align:center; font-size:13.5px; color:oklch(55% 0.02 60);">ยังไม่มีรีวิว — พื้นที่นี้เตรียมไว้สำหรับระบบรีวิวในเวอร์ชันถัดไป</div>
+  </div>
+
+  <!-- AI CHAT BUBBLE (placeholder) -->
+  <div style="position:fixed; bottom:88px; right:22px; z-index:90; width:52px; height:52px; border-radius:50%; background:oklch(35% 0.09 25); color:white; display:flex; align-items:center; justify-content:center; font-size:22px; box-shadow:0 6px 18px rgba(0,0,0,0.2); cursor:pointer;">💬</div>
+
+  <!-- STICKY MOBILE CTA -->
+  <div style="position:sticky; bottom:0; z-index:80; background:white; border-top:1px solid oklch(90% 0.01 70); padding:12px 20px; display:flex; gap:10px; align-items:center; justify-content:space-between;">
+    <div>
+      <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60);">฿24,900,000</div>
+      <div style="font-size:11.5px; color:oklch(55% 0.02 60);">4 ห้องนอน · หนองแก หัวหิน</div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <a href="tel:+6632000000" style="text-decoration:none; background:oklch(22% 0.02 60); color:white; padding:11px 18px; border-radius:100px; font-size:13.5px; font-weight:600;">📞 โทร</a>
+      <a href="https://wa.me/6632000000" target="_blank" style="text-decoration:none; background:oklch(52% 0.13 150); color:white; padding:11px 18px; border-radius:100px; font-size:13.5px; font-weight:600;">WhatsApp</a>
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { favorite: false, compare: false, galleryTab: "photos" };
+  renderVals() {
+    const tabDefs = [
+      { key: "photos", icon: "📷", label: "รูปภาพ (24)" },
+      { key: "video", icon: "🎬", label: "Video Tour" },
+      { key: "360", icon: "🧭", label: "360° Tour" },
+    ];
+    const galleryTabs = tabDefs.map((t) => ({
+      icon: t.icon, label: t.label,
+      bg: this.state.galleryTab === t.key ? "oklch(22% 0.02 60)" : "white",
+      color: this.state.galleryTab === t.key ? "white" : "oklch(35% 0.02 60)",
+      onClick: () => this.setState({ galleryTab: t.key }),
+    }));
+    const facts = [
+      { label: "ประเภท", value: "พูลวิลล่า" },
+      { label: "ห้องนอน", value: "4" },
+      { label: "ห้องน้ำ", value: "5" },
+      { label: "พื้นที่ใช้สอย", value: "420 ตร.ม." },
+      { label: "ที่ดิน", value: "800 ตร.ว." },
+      { label: "จอดรถ", value: "3 คัน" },
+      { label: "ปีที่สร้าง", value: "2022" },
+      { label: "สถานะ", value: "พร้อมอยู่" },
+    ];
+    const highlights = [
+      { icon: "🏊", text: "สระว่ายน้ำระบบเกลือ 12 ม." },
+      { icon: "☀️", text: "ติดตั้งโซลาร์เซลล์แล้ว" },
+      { icon: "⛰️", text: "วิวเขาโล่งไม่บดบัง" },
+      { icon: "🏖️", text: "ห่างชายหาด 5 นาที" },
+      { icon: "🍳", text: "ครัวไทยแยกจากครัวฝรั่ง" },
+      { icon: "🔒", text: "หมู่บ้านมีระบบรักษาความปลอดภัย" },
+    ];
+    const nearby = [
+      { icon: "🏖️", name: "ชายหาดหัวหิน", time: "5 นาที (รถยนต์)" },
+      { icon: "🛍️", name: "ตลาดน้ำหัวหิน สามพันนาม", time: "8 นาที" },
+      { icon: "⛳", name: "สนามกอล์ฟ Banyan", time: "12 นาที" },
+      { icon: "🏥", name: "โรงพยาบาลกรุงเทพหัวหิน", time: "10 นาที" },
+      { icon: "✈️", name: "สนามบินหัวหิน", time: "18 นาที" },
+      { icon: "🏫", name: "โรงเรียนนานาชาติ", time: "15 นาที" },
+    ];
+    const thumbLabels = ["ห้องนั่งเล่น", "สระว่ายน้ำ", "ห้องนอนใหญ่", "ครัว", "ห้องน้ำ", "ระเบียง", "สวน", "ที่จอดรถ"];
+    const thumbs = thumbLabels.map((label, i) => ({ id: "thumb-" + i, label, borderColor: i === 0 ? "oklch(45% 0.13 25)" : "transparent" }));
+
+    return {
+      facts, highlights, nearby, thumbs, galleryTabs,
+      favIconFill: this.state.favorite ? "oklch(50% 0.18 25)" : "none",
+      compareBg: this.state.compare ? "oklch(90% 0.05 25)" : "white",
+      toggleFavorite: () => this.setState((s) => ({ favorite: !s.favorite })),
+      toggleCompare: () => this.setState((s) => ({ compare: !s.compare })),
+      toggleShare: () => {},
+      openGallery: () => {},
+    };
+  }
+}
+
+</script>
+</body>
+</html>

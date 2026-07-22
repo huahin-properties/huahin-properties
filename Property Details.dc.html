@@ -15,6 +15,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <title>huahin.properties</title>
+  <link rel="icon" type="image/png" href="./logo.png">
   <meta name="description" content="Real estate listings in Hua Hin, Pranburi and Cha-am, Thailand.">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
@@ -507,14 +508,22 @@ class Component extends DCLogic {
     this._upsertMeta("property", "og:url", `${window.location.origin}${window.location.pathname}?id=${raw.id}`);
     let ld = document.getElementById("__seo_jsonld");
     if (!ld) { ld = document.createElement("script"); ld.type = "application/ld+json"; ld.id = "__seo_jsonld"; document.head.appendChild(ld); }
+    const isRental = raw.listingType === "rent" || raw.type === "rent";
     ld.textContent = JSON.stringify({
-      "@context": "https://schema.org", "@type": "Product",
-      name: (n && n.title) || raw.title[lang] || raw.title.en, description: seoDesc,
+      "@context": "https://schema.org", "@type": "RealEstateListing",
+      name: (n && n.title) || raw.title[lang] || raw.title.en, description: seoDesc, url: `${window.location.origin}${window.location.pathname}?id=${raw.id}`,
       image: (n ? n.photos.filter((ph) => ph.url).map((ph) => ph.url) : (raw.photos || []).filter((ph) => ph && ph.url).map((ph) => ph.url)),
-      sku: raw.id,
+      identifier: raw.id,
+      address: { "@type": "PostalAddress", addressLocality: raw.area || raw.zone || "Hua Hin", addressRegion: "Prachuap Khiri Khan", addressCountry: "TH" },
+      mainEntity: {
+        "@type": "Residence",
+        numberOfRooms: raw.beds, numberOfBathroomsTotal: raw.baths,
+        floorSize: raw.livingArea ? { "@type": "QuantitativeValue", value: raw.livingArea, unitCode: "MTK" } : undefined,
+      },
       offers: {
         "@type": "Offer", priceCurrency: (n && n.currency) || raw.currency || "THB", price: (n && n.priceValid) ? n.price : raw.price,
         availability: raw.status === "sold" || raw.status === "rented" ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+        businessFunction: isRental ? "http://purl.org/goodrelations/v1#LeaseOut" : "http://purl.org/goodrelations/v1#Sell",
         url: `${window.location.origin}${window.location.pathname}?id=${raw.id}`,
       },
     });

@@ -12,6 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <title>Mission Archive — huahin.properties</title>
+  <meta name="robots" content="noindex, nofollow">
   <style>
     body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
     .m01-title { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: oklch(45% 0.02 60); display: block; margin-bottom: 4px; }
@@ -43,7 +44,7 @@
   </div>
 
   <details class="m01-card arch-step-details" open="{{ true }}">
-    <summary>🚀 Mission 01 — QA &amp; Review Standard Framework (v1.2, Released 22 Jul 2026)</summary>
+    <summary>🚀 Mission 11 — QA &amp; Review Standard Framework (v1.2, Released 22 Jul 2026)</summary>
     <div style="margin-top:10px; font-size:12.5px;">
       <p><strong>Completion Date</strong>: {{ m1.completionDate }} &nbsp;|&nbsp; <strong>Version History</strong>: {{ m1.versionHistory }}</p>
       <span class="m01-title" style="margin-top:8px;">Mission Summary</span>
@@ -64,7 +65,7 @@
       <p>{{ m1.stats }}</p>
       <span class="m01-title" style="margin-top:8px;">References</span>
       <p>{{ m1.references }}</p>
-      <p style="margin-top:10px;"><a href="./Mission%2001%20-%20QA%20Review%20Standard.dc.html" style="color:oklch(35% 0.1 25); font-weight:600;">→ เปิด Mission 01 Dashboard เต็มรูปแบบ (ทุกตาราง/ทุก Step โดยละเอียด)</a></p>
+      <p style="margin-top:10px;"><a href="./Mission%2011%20-%20QA%20Review%20Standard.dc.html" style="color:oklch(35% 0.1 25); font-weight:600;">→ เปิด Mission 11 Dashboard เต็มรูปแบบ (ทุกตาราง/ทุก Step โดยละเอียด)</a></p>
     </div>
   </details>
 
@@ -82,7 +83,7 @@ class Component extends DCLogic {
     const m1 = {
       completionDate: "22 กรกฎาคม 2569",
       versionHistory: "v1.0 (12/12 Steps) → v1.1 (Product Owner improvement review: Steps 3/4/5/8/9/12 ขยายลึก) → v1.2 (SLA table, false-positive/negative simulation cases, Quick Start Guide)",
-      summary: "Mission 01 สร้างมาตรฐาน QA & Review กลางของโครงการ huahin.properties ครบ 12 Steps: นิยาม PASS/HOLD/NOT PASS, Status Hierarchy, Readiness Formula (พร้อม Critical-Issue hard gate), Evidence Matrix 6 ระดับ, Approval Workflow + SLA + 6 Sub-Workflows, Universal Report Template 19 ฟิลด์, Simulation Test 13 กรณี, และ Framework Manual ฉบับสมบูรณ์ — ปัจจุบันขยายบทบาทเป็น Standard Mission Management Framework ของทั้งโครงการ",
+      summary: "Mission 11 สร้างมาตรฐาน QA & Review กลางของโครงการ huahin.properties ครบ 12 Steps: นิยาม PASS/HOLD/NOT PASS, Status Hierarchy, Readiness Formula (พร้อม Critical-Issue hard gate), Evidence Matrix 6 ระดับ, Approval Workflow + SLA + 6 Sub-Workflows, Universal Report Template 19 ฟิลด์, Simulation Test 13 กรณี, และ Framework Manual ฉบับสมบูรณ์ — ปัจจุบันขยายบทบาทเป็น Standard Mission Management Framework ของทั้งโครงการ",
       lessonsLearned: [
         "PASS เคยถูกใช้โดยไม่มีหลักฐานในอดีต — Evidence Matrix + hard gate ป้องกันได้โดยตรง",
         "การให้ CEO สั่ง Execution ต่อเนื่องหลาย Step ในคำสั่งเดียวลดจุด Review ระหว่างทางลง เป็นข้อขัดแย้งเชิงปฏิบัติที่บันทึกไว้ ไม่ปกปิด",

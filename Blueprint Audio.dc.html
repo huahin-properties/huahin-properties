@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    @font-face { font-family: 'sys'; src: local('Arial'); }
+    body { margin: 0; }
+  </style>
+</helmet>
+<div style="min-height:100vh; background:oklch(96% 0.015 75); font-family: -apple-system, 'Noto Sans Thai', sans-serif; color:oklch(25% 0.03 40); padding:24px; box-sizing:border-box;">
+  <div style="max-width:720px; margin:0 auto;">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:4px;">
+      <div style="width:40px; height:40px; border-radius:10px; background:oklch(35% 0.09 25); display:flex; align-items:center; justify-content:center; color:white; font-size:20px;">🏠</div>
+      <div>
+        <div style="font-family:'Playfair Display', serif; font-size:22px; font-weight:700;">huahin . properties</div>
+        <div style="font-size:13px; opacity:0.6;">ฟังสรุป Blueprint ด้วยเสียง</div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px; background:white; border-radius:16px; padding:20px; box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+        <div style="font-size:15px; opacity:0.65;">{{ statusText }}</div>
+        <select value="{{ rate }}" onChange="{{ onRateChange }}" style="border:1px solid oklch(85% 0.02 60); border-radius:8px; padding:6px 10px; font-size:14px; background:oklch(98% 0.01 70);">
+          <option value="0.85">ช้า</option>
+          <option value="1">ปกติ</option>
+          <option value="1.25">เร็ว</option>
+        </select>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-bottom:18px;">
+        <button onClick="{{ onPrev }}" style="flex:0 0 auto; width:52px; height:52px; border-radius:50%; border:none; background:oklch(93% 0.02 60); font-size:20px; cursor:pointer;">⏮</button>
+        <button onClick="{{ onPlayPause }}" style="flex:1; height:52px; border-radius:26px; border:none; background:oklch(35% 0.09 25); color:white; font-size:17px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <span>{{ playIcon }}</span><span>{{ playLabel }}</span>
+        </button>
+        <button onClick="{{ onNext }}" style="flex:0 0 auto; width:52px; height:52px; border-radius:50%; border:none; background:oklch(93% 0.02 60); font-size:20px; cursor:pointer;">⏭</button>
+      </div>
+
+      <div style="background:oklch(97% 0.012 70); border-radius:12px; padding:16px; min-height:120px;">
+        <div style="font-size:14px; font-weight:700; color:oklch(35% 0.09 25); margin-bottom:6px;">{{ currentTitle }}</div>
+        <div style="font-size:14px; line-height:1.7; opacity:0.85;">{{ currentPreview }}</div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px; background:white; border-radius:16px; padding:8px; box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+      <sc-for list="{{ sections }}" as="sec" hint-placeholder-count="12">
+        <div onClick="{{ sec.onJump }}" style="display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius:10px; cursor:pointer; background:{{ sec.bg }};">
+          <div style="width:26px; height:26px; border-radius:50%; background:{{ sec.dotBg }}; color:{{ sec.dotColor }}; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex:0 0 auto;">{{ sec.num }}</div>
+          <div style="font-size:14px; font-weight:{{ sec.weight }};">{{ sec.title }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="text-align:center; margin-top:16px; font-size:12px; opacity:0.5;">ใช้เสียงอ่านของเบราว์เซอร์ (ไม่ต้องดาวน์โหลดไฟล์) — เปิดหน้านี้ค้างไว้แล้วฟังระหว่างทำงานอื่นได้</div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    sections: [],
+    idx: 0,
+    isPlaying: false,
+    rate: 1,
+    loaded: false,
+  };
+
+  componentDidMount() {
+    fetch('./blueprint-sections.json').then(r => r.json()).then(data => {
+      this.setState({ sections: data, loaded: true });
+    }).catch(() => {
+      this.setState({ sections: [{ title: 'ไม่พบข้อมูล', text: 'ไม่สามารถโหลดเนื้อหาได้' }], loaded: true });
+    });
+    this.synth = window.speechSynthesis;
+  }
+
+  componentWillUnmount() {
+    if (this.synth) this.synth.cancel();
+  }
+
+  pickVoice() {
+    const voices = this.synth ? this.synth.getVoices() : [];
+    return voices.find(v => v.lang && v.lang.toLowerCase().startsWith('th')) || null;
+  }
+
+  buildQueue(fromIdx) {
+    const sections = this.state.sections || [];
+    const queue = [];
+    for (let i = fromIdx; i < sections.length; i++) {
+      const raw = (sections[i].title + '. ' + sections[i].text);
+      // split into short chunks (by sentence-ish boundaries) so each utterance stays well under
+      // the ~15s ceiling where Chrome's speech engine tends to stall/stutter on long utterances
+      const parts = raw.split(/(?<=[.!?।ๆฯ])\s+|(?<=,)\s+(?=[A-Zก-๙])/).filter(Boolean);
+      let chunk = '';
+      const flush = () => { if (chunk.trim()) { queue.push({ idx: i, text: chunk.trim() }); chunk = ''; } };
+      for (const p of parts) {
+        if ((chunk + ' ' + p).length > 90) { flush(); }
+        chunk += (chunk ? ' ' : '') + p;
+      }
+      flush();
+    }
+    return queue;
+  }
+
+  speakFrom(fromIdx) {
+    if (!this.synth || !this.state.sections.length) return;
+    this.synth.cancel();
+    this.queue = this.buildQueue(fromIdx);
+    this.qPos = 0;
+    this.speakNextChunk();
+  }
+
+  speakNextChunk = () => {
+    if (!this.queue || this.qPos >= this.queue.length) {
+      this.setState({ isPlaying: false });
+      return;
+    }
+    const item = this.queue[this.qPos];
+    if (item.idx !== this.state.idx) this.setState({ idx: item.idx });
+    const utter = new SpeechSynthesisUtterance(item.text);
+    utter.lang = 'th-TH';
+    utter.rate = this.state.rate;
+    const v = this.pickVoice();
+    if (v) utter.voice = v;
+    utter.onend = () => {
+      this.qPos += 1;
+      if (this.state.isPlaying) this.speakNextChunk();
+    };
+    utter.onerror = () => { this.qPos += 1; if (this.state.isPlaying) this.speakNextChunk(); };
+    this.synth.speak(utter);
+  };
+
+  playPause = () => {
+    if (this.state.isPlaying) {
+      if (this.synth) this.synth.cancel();
+      this.setState({ isPlaying: false });
+    } else {
+      this.setState({ isPlaying: true });
+      this.speakFrom(this.state.idx);
+    }
+  };
+
+  jumpTo = (i) => {
+    this.setState({ idx: i, isPlaying: true }, () => this.speakFrom(i));
+  };
+
+  next = () => {
+    const n = Math.min(this.state.idx + 1, this.state.sections.length - 1);
+    if (this.state.isPlaying) { this.jumpTo(n); } else { this.setState({ idx: n }); }
+  };
+
+  prev = () => {
+    const p = Math.max(this.state.idx - 1, 0);
+    if (this.state.isPlaying) { this.jumpTo(p); } else { this.setState({ idx: p }); }
+  };
+
+  onRateChange = (e) => {
+    const r = parseFloat(e.target.value);
+    this.setState({ rate: r });
+    if (this.state.isPlaying) this.speakFrom(this.state.idx);
+  };
+
+  renderVals() {
+    const sections = this.state.sections || [];
+    const cur = sections[this.state.idx] || { title: '', text: '' };
+    const preview = cur.text ? (cur.text.length > 260 ? cur.text.slice(0, 260) + '…' : cur.text) : (this.state.loaded ? '' : 'กำลังโหลด…');
+
+    return {
+      statusText: this.state.loaded ? ('หัวข้อ ' + (this.state.idx + 1) + ' / ' + sections.length) : 'กำลังโหลดเนื้อหา…',
+      rate: String(this.state.rate),
+      onRateChange: this.onRateChange,
+      onPrev: this.prev,
+      onNext: this.next,
+      onPlayPause: this.playPause,
+      playIcon: this.state.isPlaying ? '⏸' : '▶',
+      playLabel: this.state.isPlaying ? 'หยุดชั่วคราว' : 'เล่นเสียงอ่าน',
+      currentTitle: cur.title,
+      currentPreview: preview,
+      sections: sections.map((s, i) => ({
+        num: i + 1,
+        title: s.title,
+        onJump: () => this.jumpTo(i),
+        bg: i === this.state.idx ? 'oklch(93% 0.03 40)' : 'transparent',
+        dotBg: i === this.state.idx ? 'oklch(35% 0.09 25)' : 'oklch(90% 0.01 60)',
+        dotColor: i === this.state.idx ? 'white' : 'oklch(40% 0.02 40)',
+        weight: i === this.state.idx ? '700' : '500',
+      })),
+    };
+  }
+}
+
+</script>
+</body>
+</html>
