@@ -109,7 +109,7 @@
   </sc-if>
 
   <!-- ============ PERSISTENT CHAT BUBBLE (always visible) ============ -->
-  <div style="position:fixed; right:16px; bottom:16px; z-index:70; display:flex; align-items:center; gap:10px;">
+  <div style="{{ chatPillWrapStyle }}">
     <div onClick="{{ onOpenChat }}" style="background:#fff; color:oklch(25% 0.02 60); padding:12px 18px; border-radius:100px; font-size:14px; font-family:'Work Sans',sans-serif; box-shadow:0 4px 16px oklch(0% 0 0 / 0.15); cursor:pointer; white-space:nowrap;">{{ t.rail_chat_hint }} 👋</div>
   </div>
 
@@ -300,7 +300,7 @@ class Component extends DCLogic {
     name: "", phone: "", email: "", message: "",
     lang: "th",
     chatOpen: false, chatMinimized: false, chatMessages: [], chatInput: "", chatLoading: false,
-    chatTab: "ai", chatMobileView: "list", demoNote: "", convListCollapsed: false,
+    chatTab: "ai", chatMobileView: "conversation", demoNote: "", convListCollapsed: true,
   };
 
   chatScrollRef = React.createRef();
@@ -637,7 +637,7 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
     const lang = this.state.lang;
     const t = CHAT_I18N[lang] || CHAT_I18N.en;
     const next = alreadyGreeted ? this.state.chatMessages : [{ role: "assistant", text: t.chat_greeting, links: [], bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" }];
-    this.setState({ chatOpen: true, formOpen: false, chatMessages: next, chatMobileView: "list", chatTab: "ai" });
+    this.setState({ chatOpen: true, formOpen: false, chatMessages: next, chatMobileView: "conversation", convListCollapsed: true, chatTab: "ai", favoritesOpen: false });
     this._persistHistory(next);
     this._scrollChat();
   }
@@ -716,6 +716,7 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       whatsappUrl: "https://wa.me/" + whatsappNumber,
       telUrl: "tel:" + phone,
       chatHintVisible: !this.state.isMobile,
+      chatPillWrapStyle: (this.state.isMobile && this.state.favoritesOpen) ? "display:none;" : "position:fixed; right:16px; bottom:16px; z-index:70; display:flex; align-items:center; gap:10px;",
       formOpen: this.state.formOpen,
       onOpenForm: () => this.setState({ formOpen: true, chatOpen: false, submitted: false }),
       onCloseForm: () => this.setState({ formOpen: false }),
@@ -748,13 +749,13 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       chatScrollRef: this.chatScrollRef,
       onOpenChat: () => this.openChat(),
       onCloseChat: () => this.setState({ chatOpen: false, chatMinimized: false }),
-      showFavButton: true,
+      showFavButton: !(this.state.isMobile && this.state.chatOpen),
       showFavLabel: !this.state.isMobile,
       favButtonPadding: this.state.isMobile ? "12px" : "12px 18px",
       favButtonLabel: FAV_PANEL_LABELS[this.state.lang] || FAV_PANEL_LABELS.en,
       favCount: this.state.favIds.length,
       hasFavCount: this.state.favIds.length > 0,
-      onOpenFavorites: () => this.setState({ favoritesOpen: true }),
+      onOpenFavorites: () => this.setState({ favoritesOpen: true, chatOpen: false }),
       onCloseFavorites: () => this.setState({ favoritesOpen: false }),
       onToggleShareMenu: () => this.setState((s) => ({ shareMenuOpen: !s.shareMenuOpen })),
       onCloseShareMenu: () => this.setState({ shareMenuOpen: false }),
