@@ -110,7 +110,10 @@
 
   <!-- ============ PERSISTENT CHAT BUBBLE (always visible) ============ -->
   <div style="{{ chatPillWrapStyle }}">
-    <div onClick="{{ onOpenChat }}" style="background:#fff; color:oklch(25% 0.02 60); padding:12px 18px; border-radius:100px; font-size:14px; font-family:'Work Sans',sans-serif; box-shadow:0 4px 16px oklch(0% 0 0 / 0.15); cursor:pointer; white-space:nowrap;">{{ t.rail_chat_hint }} 👋</div>
+    <div onClick="{{ onOpenChat }}" style="background:#fff; color:oklch(25% 0.02 60); padding:{{ chatPillPadding }}; border-radius:100px; font-size:14px; font-family:'Work Sans',sans-serif; box-shadow:0 4px 16px oklch(0% 0 0 / 0.15); cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:6px;">
+      <span style="font-size:16px;">💬</span>
+      <sc-if value="{{ showFavLabel }}"><span>{{ t.rail_chat_hint }}</span></sc-if>
+    </div>
   </div>
 
   <!-- ============ AI CHAT — MINIMIZED BAR ============ -->
@@ -716,6 +719,7 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       whatsappUrl: "https://wa.me/" + whatsappNumber,
       telUrl: "tel:" + phone,
       chatHintVisible: !this.state.isMobile,
+      chatPillPadding: this.state.isMobile ? "13px" : "12px 18px",
       chatPillWrapStyle: (this.state.isMobile && this.state.favoritesOpen) ? "display:none;" : "position:fixed; right:16px; bottom:16px; z-index:70; display:flex; align-items:center; gap:10px;",
       formOpen: this.state.formOpen,
       onOpenForm: () => this.setState({ formOpen: true, chatOpen: false, submitted: false }),
