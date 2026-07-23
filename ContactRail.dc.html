@@ -753,7 +753,7 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       chatScrollRef: this.chatScrollRef,
       onOpenChat: () => this.openChat(),
       onCloseChat: () => this.setState({ chatOpen: false, chatMinimized: false }),
-      showFavButton: !(this.state.isMobile && this.state.chatOpen),
+      showFavButton: !(this.state.isMobile && this.state.chatOpen && !this.state.chatMinimized),
       showFavLabel: !this.state.isMobile,
       favButtonPadding: this.state.isMobile ? "12px" : "12px 18px",
       favButtonLabel: FAV_PANEL_LABELS[this.state.lang] || FAV_PANEL_LABELS.en,
