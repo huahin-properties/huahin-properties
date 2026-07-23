@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Product Development Dashboard — huahin.properties</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    .pd-title { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: oklch(45% 0.02 60); display: block; margin-bottom: 4px; }
+    .pd-card { background: white; border: 1px solid oklch(90% 0.01 70); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
+    .pd-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .pd-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; color: oklch(50% 0.02 60); border-bottom: 2px solid oklch(88% 0.01 70); padding: 6px 8px; }
+    .pd-table td { padding: 7px 8px; border-bottom: 1px solid oklch(92% 0.01 70); vertical-align: top; }
+    .pd-tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  </style>
+</helmet>
+<div style="max-width:1060px; margin:0 auto; padding:28px 20px 60px; color:oklch(25% 0.02 60); line-height:1.6;">
+  <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:10px;">huahin.properties &rsaquo; <a href="./Mission%20Control.dc.html" style="color:oklch(50% 0.02 60);">Project Headquarters</a> &rsaquo; Phase 2 &rsaquo; <strong style="color:oklch(30% 0.02 60);">Product Development Dashboard</strong></div>
+
+  <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; background:oklch(93% 0.02 280); border:1px solid oklch(80% 0.05 280); border-radius:10px; padding:8px 10px;">
+    <span style="font-size:11px; color:oklch(40% 0.06 280); align-self:center; font-weight:600;">← กลับระบบหลัก (Phase 1):</span>
+    <a href="./Mission%20Control.dc.html" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.05 280); color:oklch(35% 0.1 280); padding:5px 12px; border-radius:100px;">🧭 Mission Control หลัก</a>
+    <a href="./CEO%20Guide.dc.html" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.05 280); color:oklch(35% 0.1 280); padding:5px 12px; border-radius:100px;">📘 CEO Guide หลัก</a>
+    <a href="./Launch%20Readiness%20Dashboard.dc.html" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.05 280); color:oklch(35% 0.1 280); padding:5px 12px; border-radius:100px;">🚦 Launch Readiness Phase 1</a>
+    <a href="Admin%20Dashboard.dc.html" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.05 280); color:oklch(35% 0.1 280); padding:5px 12px; border-radius:100px;">🛠️ Admin Dashboard</a>
+    <a href="Home.dc.html" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.05 280); color:oklch(35% 0.1 280); padding:5px 12px; border-radius:100px;">🏠 เว็บไซต์หลัก</a>
+  </div>
+
+
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:6px; flex-wrap:wrap;">
+    <div style="width:38px; height:38px; border-radius:10px; background:oklch(40% 0.1 280); display:flex; align-items:center; justify-content:center; color:white; font-size:19px;">🧩</div>
+    <div>
+      <div style="font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:oklch(20% 0.02 60);">PRODUCT DEVELOPMENT DASHBOARD</div>
+      <div style="font-size:13px; color:oklch(45% 0.02 60);">Phase 2 — Product Development · huahin.properties</div>
+    </div>
+    <div style="margin-left:auto; background:oklch(90% 0.08 80); color:oklch(35% 0.1 60); font-weight:700; font-size:12.5px; padding:6px 14px; border-radius:100px;">🟡 1/12 MISSIONS STARTED — Mission 01 Step 1/12</div>
+  </div>
+
+  <div style="display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;">
+    <span style="font-size:12.5px; background:oklch(90% 0.01 70); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🧩 Product Dashboard (คุณอยู่ที่นี่)</span>
+    <a href="./Product%20CEO%20Guide.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📘 Product CEO Guide</a>
+    <a href="./Product%20Mission%20Control.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🧭 Product Mission Control</a>
+    <a href="./Product%20Mission%20Library.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📚 Product Mission Library</a>
+    <a href="./Product%20Readiness%20Dashboard.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🚦 Product Readiness</a>
+    <a href="./Product%20Documentation.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📖 Product Documentation</a>
+  </div>
+
+  <div style="display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; border-top:1px dashed oklch(88% 0.01 70); padding-top:10px;">
+    <span style="font-size:11px; color:oklch(50% 0.02 60); align-self:center;">Platform Foundation (Phase 1, ไม่แก้ไข):</span>
+    <a href="./Mission%20Control.dc.html" style="font-size:12px; text-decoration:none; color:oklch(35% 0.1 25);">Mission Control</a>
+    <a href="./Mission%20Library.dc.html" style="font-size:12px; text-decoration:none; color:oklch(35% 0.1 25);">Mission Library</a>
+    <a href="./CEO%20Guide.dc.html" style="font-size:12px; text-decoration:none; color:oklch(35% 0.1 25);">CEO Guide</a>
+    <a href="./Launch%20Readiness%20Dashboard.dc.html" style="font-size:12px; text-decoration:none; color:oklch(35% 0.1 25);">Launch Readiness Dashboard</a>
+  </div>
+
+  <div class="pd-card" style="border:2px solid oklch(55% 0.1 280); background:oklch(97% 0.03 280);">
+    <span class="pd-title">Phase 2 คืออะไร (ไม่ใช่ Platform Foundation)</span>
+    <p style="font-size:12.5px; margin:4px 0;">Platform Foundation (Mission 01–12 เดิม, Phase 1) ตอบคำถาม "ระบบทำงานได้หรือไม่" — เสร็จสมบูรณ์และ Freeze แล้ว ห้ามแก้ไขในรอบนี้. Phase 2 — Product Development ตอบคำถาม "ผู้ใช้ใช้งานแล้วรู้สึกดีหรือไม่" มุ่งเน้น UX/UI/Mobile First/Customer/Agent/Owner/AI Experience โดยใช้ Framework (12-Step, Mission Lifecycle, Completion Rule) ชุดเดียวกับ Phase 1 แต่เป็นชุด Mission ใหม่ทั้งหมด ไม่ทับซ้อนกับ Mission 01-12 เดิม</p>
+  </div>
+
+  <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:14px;">
+    <div class="pd-card" style="margin-bottom:0; text-align:center;"><div style="font-size:11px; color:oklch(50% 0.02 60);">Overall Product Progress</div><div style="font-size:22px; font-weight:700; font-family:'Playfair Display',serif;">~2%</div></div>
+    <div class="pd-card" style="margin-bottom:0; text-align:center;"><div style="font-size:11px; color:oklch(50% 0.02 60);">Current Sprint</div><div style="font-size:15px; font-weight:700; margin-top:4px;">Sprint 1 — Mission 01</div></div>
+    <div class="pd-card" style="margin-bottom:0; text-align:center;"><div style="font-size:11px; color:oklch(50% 0.02 60);">Active Mission</div><div style="font-size:15px; font-weight:700; margin-top:4px;">Mission 01 — Mobile First UX</div></div>
+    <div class="pd-card" style="margin-bottom:0; text-align:center;"><div style="font-size:11px; color:oklch(50% 0.02 60);">Product Health</div><div style="font-size:15px; font-weight:700; margin-top:4px; color:oklch(45% 0.1 60);">🟡 In Progress (Step 2/12 done)</div></div>
+  </div>
+
+  <div class="pd-card">
+    <span class="pd-title">Open Decisions</span>
+    <p style="font-size:12.5px; margin:4px 0;">รอ Product Owner Review ผล Mission 01 Step 3 (Mobile Customer Journey) ก่อนอนุมัติเริ่ม Step 4 (Mobile Design System); Business Decision ค้าง: ควรแยก Role "Agent" ออกจาก "Owner/Lister" ในระบบจริงหรือไม่</p>
+  </div>siness Decision ค้าง: ควรแยก Role "Agent" ออกจาก "Owner/Lister" ในระบบจริงหรือไม่</p>
+  </div>
+
+  <div class="pd-card">
+    <span class="pd-title">Product Blockers</span>
+    <p style="font-size:12.5px; margin:4px 0;">✅ ไม่มี Blocker</p>
+  </div>
+
+  <div class="pd-card" style="border:2px solid oklch(55% 0.13 145); background:oklch(97% 0.04 145);">
+    <span class="pd-title">⭐ Next Recommended Action</span>
+    <p style="font-size:12.5px; margin:4px 0;">Mission 01 — Mobile First UX: Step 2 🟢 APPROVED; Step 3 v2.0 (Final Product Guide Level — Journey Map ภาพเดียว Buyer+Seller, Stage Detail Matrix ครบ 6 ขั้น, Wireframe Agent+Administrator เพิ่ม) เสร็จแล้ว — ดูที่ <a href="./Mission%2001%20-%20Mobile%20First%20UX.dc.html" style="color:oklch(35% 0.1 25);">Mission 01 - Mobile First UX.dc.html</a>. รอ Product Owner Review ก่อนเริ่ม Step 4 (Information Architecture)</p>
+  </div>
+
+  <div class="pd-card">
+    <span class="pd-title">Mission Table (12 Missions, ทั้งหมด Not Started)</span>
+    <div class="pd-tablewrap">
+      <table class="pd-table">
+        <thead><tr><th>Mission</th><th>Description</th><th>Step</th><th>Progress</th><th>Status</th></tr></thead>
+        <tbody>
+          <sc-for list="{{ missions }}" as="m" hint-placeholder-count="12">
+            <tr><td style="font-weight:700;"><sc-if value="{{ m.link }}"><a href="{{ m.link }}" style="color:oklch(35% 0.1 25); text-decoration:none;">{{ m.code }}</a></sc-if><sc-if value="{{ !m.link }}">{{ m.code }}</sc-if></td><td>{{ m.name }}</td><td>{{ m.step }}</td><td>{{ m.progress }}</td><td>{{ m.status }}</td></tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {};
+  renderVals() {
+    const missions = [
+      { code: "Mission 01", name: "Mobile First UX", step: "3/12", progress: "25%", status: "🟡 In Progress", link: "./Mission%2001%20-%20Mobile%20First%20UX.dc.html" },
+      { code: "Mission 02", name: "Customer Journey", step: "0/12", progress: "0%", status: "⚪ Not Started" },
+      { code: "Mission 03", name: "Registration Experience", step: "0/12", progress: "0%", status: "⚪ Not Started" },
+      { code: "Mission 04", name: "Agent Workspace", step: "0/12", progress: "0%", status: "⚪ Not Started" },
+      { code: "Mission 05", name: "Owner Workspace", step: "0/12", progress: "0%", status: "⚪ Not Started" },
+      { code: "Mission 06", name: "AI Experience", step: "0/12", progress: "0%", status: "⚪ Not Started" },
+      { code: "Mission 07", name: "Search Experience", step: "0/12", progress: "0%", status: "⚪ Not Started" },
+      { code: "Mission 08", name: "Content & Marketing Experience", step: "0/12", progress: "0%", status: "⚪ Not Started" },
+      { code: "Mission 09", name: "Performance", step: "0/12", progress: "0%", status: "⚪ Not Started" },
+      { code: "Mission 10", name: "Accessibility", step: "0/12", progress: "0%", status: "⚪ Not Started" },
+      { code: "Mission 11", name: "Product QA", step: "0/12", progress: "0%", status: "⚪ Not Started" },
+      { code: "Mission 12", name: "Product Launch", step: "0/12", progress: "0%", status: "⚪ Not Started" },
+    ];
+    return { missions };
+  }
+}
+</script>
+</body>
+</html>

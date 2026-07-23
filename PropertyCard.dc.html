@@ -18,6 +18,10 @@
         <div style="background:oklch(30% 0.02 60); color:oklch(85% 0.13 95); font-size:11px; font-weight:700; letter-spacing:0.03em; padding:5px 10px; border-radius:100px; pointer-events:none;">💎 VIP</div>
       </sc-if>
     </div>
+    <div onClick="{{ onShare }}" title="{{ shareTitle }}" style="{{ shareBtnStyle }}">
+      <sc-if value="{{ shareCopied }}"><span style="font-size:13px; color:oklch(45% 0.15 145);">✓</span></sc-if>
+      <sc-if value="{{ shareNotCopied }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M18 8a3 3 0 1 0-2.83-4H15a3 3 0 0 0 .09 3.26L8.9 10.7a3 3 0 1 0 0 2.6l6.2 3.44A3 3 0 1 0 16 15l-6.2-3.44a3 3 0 0 0 0-1.12L16 7a3 3 0 0 0 2 1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></sc-if>
+    </div>
     <div onClick="{{ onToggleFav }}" title="{{ favTitle }}" style="{{ favBadgeStyle }}">
       <span style="font-size:15px; line-height:1;">{{ favIcon }}</span>
       <sc-if value="{{ isFav }}"><span style="font-size:10px; font-weight:600; letter-spacing:0.02em; white-space:nowrap;">{{ favLabel }}</span></sc-if>
@@ -58,8 +62,10 @@ const FAV_TITLES = {
   it: ["Aggiungi ai preferiti", "Rimuovi dai preferiti"],
 };
 
+const SHARE_TITLES = { en: "Share this property", th: "แชร์ทรัพย์นี้", ru: "Поделиться объектом", zh: "分享此房源", de: "Immobilie teilen", no: "Del denne eiendommen", fr: "Partager ce bien", it: "Condividi questo immobile" };
+
 class Component extends DCLogic {
-  state = { isFav: false, lang: "en" };
+  state = { isFav: false, lang: "en", shareCopied: false };
 
   async componentDidMount() {
     const [favs, mod] = await Promise.all([import("./favorites.js"), import("./data.js")]);
@@ -74,6 +80,21 @@ class Component extends DCLogic {
     if (!this._favs || !this.props.propertyId) return;
     const nowFav = this._favs.toggleFavorite(this.props.propertyId);
     this.setState({ isFav: nowFav });
+  }
+
+  async share(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const p = this.props;
+    const url = new URL(p.href, window.location.origin).href;
+    if (navigator.share) {
+      try { await navigator.share({ title: p.title, url }); return; } catch (err) { /* cancelled or unsupported */ }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      this.setState({ shareCopied: true });
+      setTimeout(() => this.setState({ shareCopied: false }), 2000);
+    } catch (err) { console.warn("Copy failed:", err); }
   }
 
   renderVals() {
@@ -93,6 +114,11 @@ class Component extends DCLogic {
         ? "position:absolute; top:10px; right:10px; display:flex; align-items:center; gap:5px; background:oklch(35% 0.09 25); color:white; border-radius:100px; padding:6px 12px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.2); z-index:2;"
         : "position:absolute; top:10px; right:10px; width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.85); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15); z-index:2;",
       onToggleFav: (e) => this.toggleFav(e),
+      onShare: (e) => this.share(e),
+      shareTitle: SHARE_TITLES[this.state.lang] || SHARE_TITLES.en,
+      shareCopied: this.state.shareCopied,
+      shareNotCopied: !this.state.shareCopied,
+      shareBtnStyle: `position:absolute; top:10px; right:${this.state.isFav ? 116 : 52}px; width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,0.85); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15); z-index:2;`,
       coverPhotoLabel: p.coverPhotoLabel,
       propertyId: p.propertyId || "",
       // Data-URL backgrounds contain a literal ";" (data:image/webp;base64,...)

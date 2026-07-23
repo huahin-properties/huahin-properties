@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Mission 01 — Mobile First UX (Phase 2)</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    .m1-title { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: oklch(45% 0.02 60); display: block; margin-bottom: 4px; }
+    .m1-card { background: white; border: 1px solid oklch(90% 0.01 70); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
+    .m1-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .m1-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; color: oklch(50% 0.02 60); border-bottom: 2px solid oklch(88% 0.01 70); padding: 6px 8px; }
+    .m1-table td { padding: 7px 8px; border-bottom: 1px solid oklch(92% 0.01 70); vertical-align: top; }
+    .m1-tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .m1-step summary { cursor: pointer; font-family: 'Playfair Display', serif; font-size: 16px; color: oklch(20% 0.02 60); }
+  </style>
+</helmet>
+<div style="max-width:1060px; margin:0 auto; padding:28px 20px 60px; color:oklch(25% 0.02 60); line-height:1.6;">
+  <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:10px;">huahin.properties &rsaquo; <a href="./Mission%20Control.dc.html" style="color:oklch(50% 0.02 60);">Project Headquarters</a> &rsaquo; <a href="./Product%20Development%20Dashboard.dc.html" style="color:oklch(50% 0.02 60);">Phase 2</a> &rsaquo; <strong style="color:oklch(30% 0.02 60);">Mission 01 — Mobile First UX</strong></div>
+
+  <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; background:oklch(93% 0.02 280); border:1px solid oklch(80% 0.05 280); border-radius:10px; padding:8px 10px;">
+    <span style="font-size:11px; color:oklch(40% 0.06 280); align-self:center; font-weight:600;">← กลับระบบหลัก (Phase 1):</span>
+    <a href="./Mission%20Control.dc.html" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.05 280); color:oklch(35% 0.1 280); padding:5px 12px; border-radius:100px;">🧭 Mission Control หลัก</a>
+    <a href="./CEO%20Guide.dc.html" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.05 280); color:oklch(35% 0.1 280); padding:5px 12px; border-radius:100px;">📘 CEO Guide หลัก</a>
+    <a href="./Launch%20Readiness%20Dashboard.dc.html" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.05 280); color:oklch(35% 0.1 280); padding:5px 12px; border-radius:100px;">🚦 Launch Readiness Phase 1</a>
+    <a href="Admin%20Dashboard.dc.html" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.05 280); color:oklch(35% 0.1 280); padding:5px 12px; border-radius:100px;">🛠️ Admin Dashboard</a>
+    <a href="Home.dc.html" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.05 280); color:oklch(35% 0.1 280); padding:5px 12px; border-radius:100px;">🏠 เว็บไซต์หลัก</a>
+  </div>
+
+  <div style="display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;">
+    <a href="./Product%20Development%20Dashboard.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🧩 Product Dashboard</a>
+    <a href="./Product%20Mission%20Library.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">📚 Product Mission Library</a>
+    <a href="./Product%20Readiness%20Dashboard.dc.html" style="font-size:12.5px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:7px 14px; border-radius:100px;">🚦 Product Readiness</a>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:6px; flex-wrap:wrap;">
+    <div style="width:38px; height:38px; border-radius:10px; background:oklch(40% 0.1 280); display:flex; align-items:center; justify-content:center; color:white; font-size:19px;">📱</div>
+    <div>
+      <div style="font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:oklch(20% 0.02 60);">MISSION 01</div>
+      <div style="font-size:13px; color:oklch(45% 0.02 60);">Mobile First UX — v0.5 (built from Mission Template, Phase 2)</div>
+    </div>
+    <div style="margin-left:auto; background:oklch(90% 0.14 145); color:oklch(30% 0.1 150); font-weight:700; font-size:12.5px; padding:6px 14px; border-radius:100px;">🟢 STEP 2 APPROVED — STEP 3 COMPLETE</div>
+  </div>
+
+  <div style="border:2px solid oklch(60% 0.14 150); border-radius:10px; padding:16px 18px; margin-bottom:20px; background:oklch(96% 0.05 150);">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px 18px; font-size:12.5px;">
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Mission Owner</div><div style="font-weight:600;">Product Owner</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Lead Implementer</div><div style="font-weight:600;">Claude</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Approver</div><div style="font-weight:600;">CEO</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Mission Status</div><div style="font-weight:600;">🟡 Active — Step 4 Next</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Mission Progress</div><div style="font-weight:600;">3/12 Steps (25%) — Step 2 APPROVED, Step 3 awaiting Product Owner Review</div></div>
+      <div><div style="color:oklch(45% 0.02 60); margin-bottom:2px;">Version</div><div style="font-weight:600;">v0.5</div></div>
+    </div>
+  </div>
+
+  <div class="m1-card">
+    <span class="m1-title">Mission Objective</span>
+    <p style="font-size:12.5px; margin:4px 0;">สร้างมาตรฐาน Mobile First ของเว็บไซต์ทั้งหมด — ไม่ใช่แค่ Responsive แต่เป็น User Experience ของ Buyer/Seller/Agent/Owner/Admin บนมือถือ ให้กลายเป็น Design Standard ของทุก Mission ถัดไป (Mission 02-12)</p>
+  </div>
+
+  <details class="m1-card m1-step" open="{{ true }}">
+    <summary>✅ Step 1 — Mobile UX Audit (Complete)</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p>ตรวจสอบโดยอ่านโค้ดจริงของหน้าหลัก (ไม่ใช่การประเมินจากภาพหรือความจำ) — พบ mobile detection แบบ per-component (<code>window.innerWidth</code> breakpoint ต่างกันในแต่ละไฟล์: ContactRail ใช้ &lt;640px, Search Results ใช้ &lt;900px) ซึ่งอาจทำให้ UI เปลี่ยนพฤติกรรมไม่พร้อมกันที่ breakpoint กลางๆ (เช่น 700-899px)</p>
+      <div class="m1-tablewrap">
+        <table class="m1-table">
+          <thead><tr><th>หน้า/Component</th><th>Pain Point ที่พบจริงจากโค้ด</th><th>ความรุนแรง</th></tr></thead>
+          <tbody>
+            <sc-for list="{{ auditRows }}" as="a" hint-placeholder-count="10">
+              <tr><td style="font-weight:600;">{{ a.page }}</td><td>{{ a.issue }}</td><td>{{ a.severity }}</td></tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <p style="margin-top:8px;"><strong>สรุป Pain Point หลัก</strong>: (1) ContactRail toggle arrow กว้างเพียง 26px — ต่ำกว่ามาตรฐาน touch target ขั้นต่ำ 44px อย่างชัดเจน (2) Breakpoint ไม่สอดคล้องกันระหว่าง component (640px vs 900px) (3) Agent Signup/Login password fields เป็น <code>type="text"</code> ไม่ใช่ปัญหา mobile โดยตรง แต่กระทบ UX ทุก device รวมมือถือ (เคยบันทึกใน BLUEPRINT.md แล้ว ไม่ใช่การค้นพบใหม่) (4) จุดที่ทำดีอยู่แล้ว: Search Results มี Mobile Filter Sheet (bottom sheet) และ Mobile Menu แยกจาก Desktop nav ชัดเจน, Property Details มี Sticky CTA bar ที่ bottom สำหรับ mobile, ContactRail ปรับ chat panel เป็น full-screen (100dvh) บนมือถือแล้ว</p>
+    </div>
+  </details>
+
+  <details class="m1-card m1-step" open="{{ true }}">
+    <summary>✅ Step 2 — Persona UX/UI Design (APPROVED)</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <p><strong>ขอบเขต v3.0</strong>: Step 2 นี้เป็น <strong>UX/UI Design ต่อ Persona</strong> (First Impression → Journey) ไม่ใช่เอกสาร Persona เฉยๆ — ทุกข้อเสนอด้านล่างอ้างอิงหน้าจอ/component ที่มีอยู่จริงในโค้ด (Home, Search Results, Property Details, Lister Dashboard, Admin Dashboard, ContactRail ฯลฯ) และเสนอ Redesign เฉพาะจุดที่ตรวจสอบแล้วว่าไม่ดีพอ พร้อมเหตุผล ไม่ใช่การออกแบบใหม่ทั้งหมดโดยไม่มีที่มา</p>
+      <p><strong>System Reality (คงจาก Step 2 เดิม)</strong>: ระบบจริงไม่มี Role "Agent" แยกจาก "Owner" — ทั้งสองใช้บัญชี "Lister" เดียวกัน (Trial/1/2/3) ดังนั้น Seller และ Agent ด้านล่างคือ Behavioral Persona บนหน้าจอเดียวกัน ต่างกันที่ปริมาณงาน/ความถี่การใช้เท่านั้น</p>
+      <p><strong>Official Brand Icon Standard (v3.0)</strong>: Share (Property Details/Agent Profile) ต้องใช้โลโก้ทางการของ Facebook และ LINE แทน emoji/generic icon ปัจจุบัน; Contact ต้องใช้ไอคอน Phone/Email/WhatsApp มาตรฐานสากล — พบว่า ContactRail/Property Details ปัจจุบันใช้ emoji (📞💬✉️) แทน — <strong>เสนอ Redesign</strong>: เปลี่ยนเป็น SVG official brand mark เมื่อเข้าสู่ Implementation (Step 6) เพื่อไม่ให้ผู้ใช้ต้องเดา</p>
+
+      <sc-for list="{{ personaUX }}" as="p" hint-placeholder-count="5">
+      <div style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:12px 14px; margin-top:12px;">
+        <div style="font-weight:700; font-family:'Playfair Display',serif; font-size:15px; margin-bottom:6px;">{{ p.icon }} {{ p.name }} <span style="font-size:11px; font-weight:600; color:oklch(50% 0.1 60); background:oklch(95% 0.03 60); padding:2px 8px; border-radius:100px; margin-left:6px;">{{ p.priority }}</span></div>
+        <p style="margin:3px 0;"><strong>First Impression / Hero</strong>: {{ p.hero }}</p>
+        <p style="margin:3px 0;"><strong>Navigation</strong>: {{ p.nav }}</p>
+        <p style="margin:3px 0;"><strong>Search / Filter</strong>: {{ p.search }}</p>
+        <p style="margin:3px 0;"><strong>Primary CTA</strong>: {{ p.cta }}</p>
+        <p style="margin:3px 0;"><strong>Secondary CTA</strong>: {{ p.secondaryCta }}</p>
+        <p style="margin:3px 0;"><strong>Listing Experience</strong>: {{ p.listing }}</p>
+        <p style="margin:3px 0;"><strong>Property Detail Experience</strong>: {{ p.propertyDetail }}</p>
+        <p style="margin:3px 0;"><strong>Dashboard / Workspace</strong>: {{ p.dashboard }}</p>
+        <p style="margin:3px 0;"><strong>AI Touchpoint</strong>: {{ p.ai }}</p>
+        <p style="margin:3px 0;"><strong>Contact Experience</strong>: {{ p.contact }}</p>
+        <p style="margin:3px 0;"><strong>Share / Favorite / Compare</strong>: {{ p.shareFavCompare }}</p>
+        <p style="margin:3px 0;"><strong>Mobile Flow</strong>: {{ p.mobileFlow }}</p>
+        <p style="margin:3px 0;"><strong>Desktop Flow</strong>: {{ p.desktopFlow }}</p>
+        <p style="margin:3px 0;"><strong>Social Integration</strong>: {{ p.social }}</p>
+        <p style="margin:3px 0;"><strong>Expected User Journey</strong>: {{ p.journey }}</p>
+        <p style="margin:3px 0; padding:6px 8px; background:oklch(96% 0.04 80); border-radius:6px;"><strong>Redesign Proposal</strong>: {{ p.redesign }}</p>
+        <p style="margin:3px 0;"><strong>UX Rationale</strong>: {{ p.uxRationale }}</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px;">
+          <div><div style="font-size:10.5px; font-weight:700; text-transform:uppercase; color:oklch(50% 0.02 60); margin-bottom:4px;">📱 Mobile Wireframe</div><pre style="background:oklch(20% 0.01 60); color:oklch(90% 0.01 60); font-size:10px; line-height:1.35; padding:8px; border-radius:6px; overflow-x:auto; margin:0;">{{ p.wireframeMobile }}</pre></div>
+          <div><div style="font-size:10.5px; font-weight:700; text-transform:uppercase; color:oklch(50% 0.02 60); margin-bottom:4px;">🖥️ Desktop Wireframe</div><pre style="background:oklch(20% 0.01 60); color:oklch(90% 0.01 60); font-size:10px; line-height:1.35; padding:8px; border-radius:6px; overflow-x:auto; margin:0;">{{ p.wireframeDesktop }}</pre></div>
+        </div>
+        <p style="font-size:10.5px; color:oklch(55% 0.02 60); margin-top:4px;">⚠️ Wireframe (ASCII) — แนวคิด Layout เท่านั้น ยังไม่ใช่ Implemented UI</p>
+      </div>
+      </sc-for>
+
+      <div style="margin-top:16px; border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:12px 14px;">
+        <div style="font-weight:700; font-family:'Playfair Display',serif; font-size:15px; margin-bottom:8px;">🎨 Design Tokens (ข้อเสนอเบื้องต้น)</div>
+        <p style="margin:3px 0;"><strong>Primary</strong>: oklch(38% 0.11 25) — แดงเลือดหมู/มะฮอกกานีเข้ม (คงจาก Brand เดิม, สื่อ Trust+Real Estate Professionalism) &nbsp;|&nbsp; <strong>Secondary</strong>: oklch(45% 0.02 60) charcoal-brown text</p>
+        <p style="margin:3px 0;"><strong>Accent</strong>: oklch(55% 0.13 150) เขียวมรกตอ่อน (ใช้เฉพาะสถานะ success/live — ไม่ใช่สีหลักของแบรนด์ เพื่อไม่ให้ปนกับ Primary)</p>
+        <p style="margin:3px 0;"><strong>Background</strong>: oklch(97% 0.01 80) cream/sand (คงจาก Brand เดิม อบอุ่นแบบรีสอร์ท)</p>
+        <p style="margin:3px 0;"><strong>Text Hierarchy</strong>: Heading oklch(20% 0.02 60) / Body oklch(35% 0.02 60) / Muted oklch(50% 0.02 60)</p>
+        <p style="margin:3px 0;"><strong>Success</strong>: oklch(55% 0.13 150) &nbsp;|&nbsp; <strong>Warning</strong>: oklch(70% 0.13 75) &nbsp;|&nbsp; <strong>Error</strong>: oklch(55% 0.18 25)</p>
+        <p style="margin:3px 0;"><strong>Border</strong>: oklch(88-90% 0.01 70) เส้นบางสีเทาอุ่น &nbsp;|&nbsp; <strong>Shadow</strong>: soft, ไม่ใช้ drop-shadow หนัก (รักษาความรู้สึก editorial/luxury)</p>
+        <p style="margin:3px 0;"><strong>Radius</strong>: 8-10px การ์ด/ปุ่มทั่วไป, 100px pill สำหรับ nav chip/badge</p>
+        <p style="margin:3px 0;"><strong>Spacing Scale</strong>: 4/8/12/16/20/28px (multiples of 4, สอดคล้องกับ touch target 44px = 4×11)</p>
+        <p style="margin:3px 0;"><strong>Typography</strong>: Playfair Display (serif) สำหรับ Heading — สื่อ luxury editorial; Work Sans (sans) สำหรับ Body — อ่านง่ายบนจอเล็ก</p>
+        <p style="margin:3px 0;"><strong>Icon Style</strong>: Official Brand SVG สำหรับ Social/Contact, Line-icon เรียบง่าย (ไม่ filled หนา) สำหรับ UI icon อื่น — สอดคล้องกับความรู้สึก editorial ไม่ใช่ playful</p>
+        <p style="margin:3px 0;"><strong>Button Variants</strong>: Primary (solid, Primary color, ตัวหนา), Secondary (outline), Icon-only (favorite/share/compare, 44×44px min)</p>
+        <p style="margin-top:6px; font-size:11px; color:oklch(50% 0.02 60);"><strong>เหตุผล</strong>: คงทิศทางแบรนด์เดิม (ไม่เปลี่ยนสุ่ม) — maroon/burgundy สื่อความน่าเชื่อถือแบบอสังหาริมทรัพย์ระดับหรู, serif heading สร้างความรู้สึก editorial/resort ตาม CLAUDE.md, spacing scale คูณ 4 รองรับ touch target 44px ได้พอดีโดยไม่ต้องคำนวณเพิ่ม</p>
+      </div>
+
+      <div style="margin-top:12px; border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:12px 14px;">
+        <div style="font-weight:700; font-family:'Playfair Display',serif; font-size:15px; margin-bottom:8px;">🔖 CTA &amp; Social Icon Standard</div>
+        <div class="m1-tablewrap">
+          <table class="m1-table">
+            <thead><tr><th>Icon/Action</th><th>ประเภท</th><th>ตำแหน่ง</th><th>Label คู่ Icon?</th></tr></thead>
+            <tbody>
+              <sc-for list="{{ iconStandard }}" as="i" hint-placeholder-count="12">
+                <tr><td style="font-weight:600;">{{ i.name }}</td><td>{{ i.type }}</td><td>{{ i.placement }}</td><td>{{ i.label }}</td></tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin-top:6px; font-size:11px; color:oklch(50% 0.02 60);">ห้ามใช้ Emoji เป็นปุ่ม Social/Action หลักในหน้าจอจริง — ต้องใช้ Official Brand Icon (Facebook/LINE/WhatsApp/Telegram) หรือมาตรฐานสากล (Phone/Email/Location/Calendar/Map/Print) เท่านั้น</p>
+      </div>
+
+      <div style="margin-top:12px; border:2px solid oklch(60% 0.1 25); border-radius:8px; padding:12px 14px; background:oklch(97% 0.02 25);">
+        <div style="font-weight:700; font-family:'Playfair Display',serif; font-size:15px; margin-bottom:8px;">⇄ Compare Experience (Full Design, ไม่ใช่แค่ระบุว่ายังไม่มี)</div>
+        <p style="margin:3px 0;">รองรับ 2-3 ทรัพย์พร้อมกัน แสดง: ราคา, ขนาดที่ดิน, พื้นที่ใช้สอย, ห้องนอน, ห้องน้ำ, สระว่ายน้ำ, ระยะทาง(หาด/เมือง), สิทธิการถือครอง, ค่าส่วนกลาง — พร้อม Highlight Differences (เน้นแถวที่ค่าต่างกัน), Hide Similar (ซ่อนแถวที่เหมือนกันทั้งหมด), Remove Property, Share Comparison, Print/PDF Export, Contact CTA ท้ายตาราง</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px;">
+          <div><div style="font-size:10.5px; font-weight:700; text-transform:uppercase; color:oklch(50% 0.02 60); margin-bottom:4px;">📱 Mobile (horizontal scroll card)</div><pre style="background:oklch(20% 0.01 60); color:oklch(90% 0.01 60); font-size:10px; line-height:1.35; padding:8px; border-radius:6px; overflow-x:auto; margin:0;">┌─────────────────────┐
+│ ← เปรียบเทียบ (2)     │
+├──────────┬──────────┤
+│ HH-109   │ HH-204   │ ← เลื่อนซ้าย-ขวา
+│ [IMG]    │ [IMG]    │
+│ ฿8.5M    │ ฿9.2M ▲  │ ← highlight ต่าง
+│ 3 นอน    │ 3 นอน    │ ← เหมือนกัน (ซ่อนได้)
+│ 2 น้ำ    │ 3 น้ำ ▲  │
+│ [ลบ]     │ [ลบ]     │
+├──────────┴──────────┤
+│ [ซ่อนที่เหมือน][แชร์]│
+│ [    ติดต่อสอบถาม   ]│
+└─────────────────────┘</pre></div>
+          <div><div style="font-size:10.5px; font-weight:700; text-transform:uppercase; color:oklch(50% 0.02 60); margin-bottom:4px;">🖥️ Desktop (side-by-side table)</div><pre style="background:oklch(20% 0.01 60); color:oklch(90% 0.01 60); font-size:10px; line-height:1.35; padding:8px; border-radius:6px; overflow-x:auto; margin:0;">┌───────────────────────────────────┐
+│        │ HH-109 │ HH-204 │ HH-311 │
+├────────┼────────┼────────┼────────┤
+│ ราคา    │ ฿8.5M  │ ฿9.2M▲│ ฿7.8M  │
+│ ที่ดิน   │ 400ตร.ว│ 400ตร.ว│ 350ตร.ว│
+│ ห้องนอน │ 3      │ 3      │ 4 ▲   │
+│ สระ     │ ✓      │ ✓      │ ✗ ▼   │
+├────────┴────────┴────────┴────────┤
+│ [ซ่อนที่เหมือนกัน] [แชร์] [Print PDF]│
+│         [ติดต่อสอบถามทั้งหมด]      │
+└───────────────────────────────────┘</pre></div>
+        </div>
+        <p style="margin-top:6px; font-size:11px; color:oklch(50% 0.02 60);"><strong>เหตุผล</strong>: Compare คือจุดตัดสินใจสุดท้ายก่อนติดต่อ — ต้องจบด้วย Contact CTA เสมอ ไม่ปล่อยให้ผู้ใช้ดูตารางแล้วไม่มีทางต่อ (ทางตันเดิมที่พบใน Findings)</p>
+      </div>
+
+      <div style="margin-top:12px; border:2px solid oklch(60% 0.1 280); border-radius:8px; padding:12px 14px; background:oklch(97% 0.02 280);">
+        <div style="font-weight:700; font-family:'Playfair Display',serif; font-size:15px; margin-bottom:8px;">🧠 AI Quick Add — Mobile Step Wizard</div>
+        <p style="margin:3px 0;">7 ขั้น: (1) เลือกประเภททรัพย์ (2) พูด/พิมพ์ข้อมูล (3) เพิ่มรูปภาพ (4) ตรวจข้อมูลที่ AI สกัด (5) แก้ไขข้อมูล (6) Preview (7) Submit/Save Draft — แต่ละขั้นเต็มจอเดียว พร้อม Progress bar บนสุด, ปุ่ม Back มุมซ้ายบน, 'บันทึกร่าง' ทุกขั้นเผื่อสัญญาณหลุด</p>
+        <pre style="background:oklch(20% 0.01 60); color:oklch(90% 0.01 60); font-size:10px; line-height:1.35; padding:8px; border-radius:6px; overflow-x:auto; margin:8px 0 0;">┌─────────────────────┐
+│ ← ●●●○○○○ 3/7   [ร่าง]│ ← Progress + Back + Save Draft
+├─────────────────────┤
+│   เพิ่มรูปภาพ          │
+│  ┌────┐┌────┐┌────┐  │
+│  │ IMG││ IMG││ +  │  │ ← multi-select จาก gallery
+│  └────┘└────┘└────┘  │
+│                       │
+│ ⚠️ ต้องมีอย่างน้อย 3 รูป│ ← Error/Missing info state
+├─────────────────────┤
+│ [       ถัดไป        ]│
+└─────────────────────┘</pre>
+        <p style="margin-top:6px; font-size:11px; color:oklch(50% 0.02 60);"><strong>เหตุผล</strong>: ฟอร์มยาวหน้าเดียวทำให้ Admin เลื่อนหลงและกลัวกรอกผิด — Wizard แบ่งงานเป็นชิ้นเล็ก ลด Cognitive Load ต่อหน้าจอ เหมาะกับการใช้ระหว่างยืนถ่ายรูปหน้างานจริง ไม่ใช่นั่งโต๊ะกรอกฟอร์ม</p>
+      </div>
+
+      <p style="margin-top:10px;"><strong>Findings</strong>: จุดอ่อนร่วมของทั้ง 5 Persona คือ Icon ที่ไม่ใช่ Official Brand Mark (emoji แทน Facebook/LINE/Phone จริง) และ touch target เล็กเกินไปในบาง component (ContactRail toggle 26px) — ทั้งสองกระทบทุก Persona พร้อมกัน จึงควรแก้เป็นระบบกลาง (Design System) ไม่ใช่แก้ทีละหน้า</p>
+      <p style="margin-top:8px;"><strong>Strengths</strong>: Buyer flow (Home→Search→Detail→Contact) มี Mobile Filter Sheet, Sticky CTA, full-screen Chat อยู่แล้ว — ใช้เป็นต้นแบบ Interaction Pattern ให้ Persona อื่น (เช่น Lister Dashboard ควรมี sticky "เพิ่มประกาศ" บน mobile เหมือนกัน)</p>
+      <p style="margin-top:8px;"><strong>Issues</strong>: ไม่มี Property Comparison summary view จริง (ปุ่ม Compare มีแต่ยังไม่มีหน้า Compare ที่แสดงผลเทียบข้าง — เป็น known gap จาก Property Details); Admin ไม่มี AI touchpoint บนมือถือที่เข้าถึงง่าย (AI Quick Add เป็น desktop-oriented form ยาว)</p>
+      <p style="margin-top:8px;"><strong>UX Priority</strong>: P0 = Buyer, Seller/Agent (Lister) — สร้างรายได้โดยตรง; P1 = Admin — งานจริงทุกวัน; P2 = Owner/Project Owner (ใช้ผ่าน Admin เป็นหลัก)</p>
+      <p style="margin-top:8px;"><strong>Quick Wins</strong>: เปลี่ยน emoji icon → Official Brand SVG (Facebook/LINE/Phone/Email/WhatsApp/Calendar/Map), ขยาย ContactRail toggle เป็น 44×44px, รวม breakpoint ให้เป็นค่าเดียว (แนะนำ 768px ตามมาตรฐาน tablet breakpoint สากล), เปลี่ยน Agent Signup password type="text"→"password"</p>
+      <p style="margin-top:8px;"><strong>Long-term Improvements</strong>: สร้างหน้า Compare จริง (ตารางเทียบ property ข้างกัน, mobile = เลื่อนซ้าย-ขวาแบบ carousel), ออกแบบ AI Quick Add แบบ mobile-first (step-by-step wizard แทนฟอร์มยาว), พิจารณาแยก Agent ออกจาก Owner เป็น Role จริงหากธุรกิจต้องการฟีเจอร์เฉพาะ Agent ในอนาคต (Pending Business Decision)</p>
+    </div>
+  </details>
+  <details class="m1-card m1-step" open="{{ true }}">
+    <summary>✅ Step 3 — Mobile Customer Journey (Complete, v2.0 — Final Product Guide Level)</summary>
+    <div style="margin-top:10px; font-size:12.5px;">
+      <div style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:10px 12px; background:oklch(98% 0.005 80);">
+        <strong>Executive Summary (v2.0)</strong> — Step 3 ยกระดับจาก Table เป็น Journey Map แบบมองภาพเดียวเข้าใจ (Buyer+Seller), เพิ่ม Screen-to-Screen Flow (ปุ่ม→ปลายทาง→ย้อนกลับ→Bottom Sheet/Dialog/Loading/Empty/Error) ต่อทุกขั้น, KPI วัดผลจริงต่อขั้น, Friction+UX Solution ต่อขั้น, Micro-interaction (Animation/Skeleton/Toast/Haptic) ต่อขั้น, Accessibility Check ต่อขั้น, และ ASCII Wireframe เพิ่มเติมของ Agent + Administrator (Buyer มีอยู่แล้วจาก v1.0) — ทุกส่วนยังยึดกรอบ 6 ขั้นเดิม (Discover→Explore→Evaluate→Connect→Decide→Action) ที่ผ่าน Design Decision ไปแล้ว ไม่เปลี่ยนโครงสร้างหลัก
+      </div>
+      <p style="margin-top:8px;"><strong>ขอบเขต</strong>: ออกแบบเส้นทางการใช้งาน (End-to-End Journey) ของทั้ง 5 Persona บนกรอบ 6 ขั้นเดียวกัน เพื่อให้ทุกหน้าจอที่ออกแบบใน Step 4 เป็นต้นไปอ้างอิง Journey เดียวกัน ไม่ใช่คนละกรอบต่อ Persona</p>
+
+      <div style="border:2px solid oklch(38% 0.11 25); border-radius:8px; padding:12px 14px; margin-top:10px; background:oklch(97% 0.02 25);">
+        <div style="font-weight:700; font-family:'Playfair Display',serif; font-size:15px; margin-bottom:6px;">🧭 Design Decision — 6-Step Journey Framework</div>
+        <p style="margin:3px 0;"><strong>Design Inspiration</strong>: Airbnb (Search→Browse→Detail→Book flow ที่ลดขั้นตอนให้น้อยที่สุดก่อนตัดสินใจ), Zillow (Property Detail→Compare→Contact Agent pattern), Booking.com (Compare bar ลอยติดจอ), Notion (Wizard แบบ step-indicator สำหรับ AI Quick Add)</p>
+        <p style="margin:3px 0;"><strong>Why This</strong>: อสังหาริมทรัพย์เป็นการตัดสินใจที่ใช้เวลา/มูลค่าสูง ผู้ใช้ต้องผ่านการเปรียบเทียบก่อนติดต่อเสมอ — 6 ขั้น (Discover→Explore→Evaluate→Connect→Decide→Action) ครอบคลุมทั้ง "ค้นหา" และ "ตัดสินใจ" โดยไม่ยัดขั้นตอนรองอย่าง Share/Track/Manage เข้าไปปนกับ journey หลัก (จะทำให้กราฟดูรกและวัดผลไม่ได้)</p>
+        <p style="margin:3px 0;"><strong>Why Not</strong>: ไม่ใช้ Journey แบบ 12 ขั้น (รวม Save/Share/Track/Manage เป็นขั้นแยก) เพราะขั้นตอนเหล่านั้นเป็น "พฤติกรรมคู่ขนาน" ที่เกิดซ้ำได้ทุกจุด ไม่ใช่ลำดับเชิงเส้น — ใส่ปนกับ journey หลักจะทำให้ผู้อ่าน (ทีมพัฒนา/CEO) เข้าใจผิดว่าต้องทำตามลำดับ 1-12 ทุกครั้ง ทั้งที่จริงคือ 6 ขั้นหลัก + พฤติกรรมเสริมที่แทรกได้ทุกจุด</p>
+        <p style="margin:3px 0;"><strong>Trade-offs</strong>: ข้อดี — กราฟอ่านง่าย วัด Conversion แต่ละขั้นได้ชัดเจน (เช่น Explore→Evaluate drop-off), ใช้ Framework เดียวกับทุก Persona ได้จริง; ข้อจำกัด — พฤติกรรมเสริม (Save/Share/Track) ต้องแสดงแยกเป็น "Actions Available at Every Stage" แทนที่จะมีอยู่ในกราฟหลัก ซึ่งต้องมีหัวข้อเพิ่มเพื่อไม่ให้ตกหล่น (ดูด้านล่าง)</p>
+      </div>
+
+      <div style="margin-top:12px; border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:12px 14px;">
+        <div style="font-weight:700; font-family:'Playfair Display',serif; font-size:15px; margin-bottom:8px;">🗺️ Customer Journey Overview (6 ขั้นหลัก, ใช้ร่วมกันทุก Persona)</div>
+        <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:4px;">
+          <sc-for list="{{ journeySteps }}" as="j" hint-placeholder-count="6">
+            <div style="flex:0 0 auto; min-width:110px; text-align:center; border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:8px 10px;">
+              <div style="font-size:20px;">{{ j.icon }}</div>
+              <div style="font-weight:700; font-size:11.5px; margin-top:2px;">{{ j.name }}</div>
+              <div style="font-size:10.5px; color:oklch(50% 0.02 60);">{{ j.desc }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <p style="margin-top:8px; font-size:11px; color:oklch(50% 0.02 60);"><strong>Actions Available at Every Stage</strong> (ไม่ใช่ลำดับ, แทรกได้ทุกจุด): Save/Favorite, Share (Facebook/LINE/WhatsApp/Copy Link), Compare (เพิ่มเข้า Compare list), Track (สถานะ lead/ประกาศ — เฉพาะ Seller/Agent/Owner/Admin)</p>
+      </div>
+
+      <sc-for list="{{ personaJourneys }}" as="pj" hint-placeholder-count="5">
+      <div style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:12px 14px; margin-top:12px;">
+        <div style="font-weight:700; font-family:'Playfair Display',serif; font-size:15px; margin-bottom:6px;">{{ pj.icon }} {{ pj.name }} Journey</div>
+        <div class="m1-tablewrap">
+          <table class="m1-table">
+            <thead><tr><th>ขั้น</th><th>สิ่งที่ทำ</th><th>หน้าจอ/Component จริง</th><th>Emotion / Risk</th></tr></thead>
+            <tbody>
+              <sc-for list="{{ pj.stages }}" as="s" hint-placeholder-count="6">
+                <tr><td style="font-weight:600;">{{ s.stage }}</td><td>{{ s.action }}</td><td>{{ s.screen }}</td><td>{{ s.emotion }}</td></tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin-top:6px;"><strong>Drop-off Risk</strong>: {{ pj.dropoffRisk }}</p>
+        <p style="margin:3px 0;"><strong>Entry Channels</strong>: {{ pj.entryChannels }}</p>
+      </div>
+      </sc-for>
+
+      <div style="margin-top:12px; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:12px 14px;">
+          <div style="font-weight:700; font-family:'Playfair Display',serif; font-size:15px; margin-bottom:8px;">🗺️ Journey Map — Buyer (มองภาพเดียว)</div>
+          <sc-for list="{{ journeyMapBuyer }}" as="n" hint-placeholder-count="11">
+            <div style="text-align:center;">
+              <div style="display:inline-block; border:1px solid oklch(38% 0.11 25); background:oklch(97% 0.02 25); border-radius:6px; padding:5px 10px; font-size:11.5px; font-weight:600;">{{ n.label }}</div>
+              <sc-if value="{{ n.hasArrow }}"><div style="color:oklch(60% 0.02 60); font-size:13px;">↓</div></sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:12px 14px;">
+          <div style="font-weight:700; font-family:'Playfair Display',serif; font-size:15px; margin-bottom:8px;">🗺️ Journey Map — Seller (มองภาพเดียว)</div>
+          <sc-for list="{{ journeyMapSeller }}" as="n" hint-placeholder-count="11">
+            <div style="text-align:center;">
+              <div style="display:inline-block; border:1px solid oklch(38% 0.11 25); background:oklch(97% 0.02 25); border-radius:6px; padding:5px 10px; font-size:11.5px; font-weight:600;">{{ n.label }}</div>
+              <sc-if value="{{ n.hasArrow }}"><div style="color:oklch(60% 0.02 60); font-size:13px;">↓</div></sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <p style="margin-top:6px; font-size:11px; color:oklch(50% 0.02 60);"><strong>เหตุผล</strong>: Seller Journey แยกจาก Buyer เพราะจุดตัดสินใจต่างกันโดยสิ้นเชิง (Buyer จบที่ "Deal/After Sales" ในฐานะผู้ซื้อ, Seller จบที่ "Deal/After Sales" ในฐานะผู้ขาย/ผู้ให้เช่าที่ต้องดูแลหลังปิดประกาศ เช่น ต่อสัญญาเช่า)</p>
+
+      <div style="margin-top:16px; border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:12px 14px;">
+        <div style="font-weight:700; font-family:'Playfair Display',serif; font-size:15px; margin-bottom:8px;">🔬 Stage Detail Matrix — Screen Flow · KPI · Friction · Micro-interaction · Accessibility</div>
+        <sc-for list="{{ stageDetails }}" as="sd" hint-placeholder-count="6">
+        <div style="border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:10px 12px; margin-top:10px;">
+          <div style="font-weight:700; font-size:13px; margin-bottom:4px;">{{ sd.stage }}</div>
+          <p style="margin:3px 0;"><strong>Screen-to-Screen Flow</strong>: กดปุ่ม "{{ sd.button }}" → ไป {{ sd.destination }} &nbsp;|&nbsp; ย้อนกลับ: {{ sd.back }} &nbsp;|&nbsp; Bottom Sheet: {{ sd.bottomSheet }} &nbsp;|&nbsp; Dialog: {{ sd.dialog }} &nbsp;|&nbsp; Loading: {{ sd.loading }} &nbsp;|&nbsp; Empty: {{ sd.empty }} &nbsp;|&nbsp; Error: {{ sd.error }}</p>
+          <p style="margin:3px 0;"><strong>KPI</strong>: {{ sd.kpi }}</p>
+          <p style="margin:3px 0;"><strong>Friction</strong>: {{ sd.friction }} &nbsp;→&nbsp; <strong>UX Solution</strong>: {{ sd.solution }}</p>
+          <p style="margin:3px 0;"><strong>Micro-interaction</strong>: {{ sd.micro }}</p>
+          <p style="margin:3px 0;"><strong>Accessibility</strong>: {{ sd.a11y }}</p>
+        </div>
+        </sc-for>
+      </div>
+
+      <div style="margin-top:12px; border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:12px 14px;">
+        <div style="font-weight:700; font-family:'Playfair Display',serif; font-size:15px; margin-bottom:8px;">📱 Buyer Journey Wireframe (Reference Case — ใช้เป็นต้นแบบให้ Persona อื่น)</div>
+        <pre style="background:oklch(20% 0.01 60); color:oklch(90% 0.01 60); font-size:10px; line-height:1.35; padding:8px; border-radius:6px; overflow-x:auto; margin:0;">Discover        Explore         Evaluate        Connect         Decide          Action
+┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐
+│ Hero    │ →  │ Filter  │ →  │ Gallery │ →  │ LINE/WA │ →  │Compare  │ →  │ ส่งฟอร์ม │
+│ Search  │    │ Card List│   │ Facts   │    │ Call    │    │2-3 หลัง │    │ นัดชม    │
+│ [ค้นหา] │    │ [Sort]  │    │ Map     │    │ Chat AI │    │ Contact │    │ ยืนยัน   │
+└─────────┘    └─────────┘    └─────────┘    └─────────┘    └─────────┘    └─────────┘
+Hua Hin visual   Card = รูป+ราคา  Sticky CTA    Prefer LINE   ปุ่มเดียว      Thank You
+เต็มจอ            ย่อ favorite    ล่าง (mobile)  เหนือ Call    "ติดต่อทั้งหมด" + บันทึกในระบบ</pre>
+        <p style="margin-top:6px; font-size:11px; color:oklch(50% 0.02 60);"><strong>เหตุผลที่เลือก Wireframe ของ Buyer เป็น Reference</strong>: Buyer คือ P0 ที่มี Traffic สูงสุดและ Journey สมบูรณ์ที่สุด (ผ่านครบ 6 ขั้นจริงในระบบปัจจุบัน) — Persona อื่นแตกต่างที่ "หน้าจอปลายทาง" เท่านั้น ไม่ใช่โครงสร้าง 6 ขั้น</p>
+      </div>
+
+      <div style="margin-top:12px; border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:12px 14px;">
+        <div style="font-weight:700; font-family:'Playfair Display',serif; font-size:15px; margin-bottom:8px;">📱 Agent (Lister) Journey Wireframe</div>
+        <pre style="background:oklch(20% 0.01 60); color:oklch(90% 0.01 60); font-size:10px; line-height:1.35; padding:8px; border-radius:6px; overflow-x:auto; margin:0;">Discover        Explore         Evaluate        Connect         Decide          Action
+┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐
+│Dashboard│ →  │ Filter  │ →  │ Lead    │ →  │ Reply   │ →  │ Renew?  │ →  │ Mark    │
+│ (Login) │    │Draft/Live│   │ list    │    │LINE/Call│    │ Featured│    │ Sold/   │
+│ KPI top │    │Expired  │    │ Perf.   │    │ from ปุ่ม│    │ Listing?│    │ Rented  │
+└─────────┘    └─────────┘    └─────────┘    └─────────┘    └─────────┘    └─────────┘
+เข้าทุกวัน       Badge นับจำนวน  Sort by New   Tap-to-call   ⚠ ไม่มี Push  Share โซเชียล
+                Draft ค้าง      Lead ก่อน     ในการ์ด Lead   Notification  ทันทีที่ปิดดีล
+                                                              (Known Gap)</pre>
+        <p style="margin-top:6px; font-size:11px; color:oklch(50% 0.02 60);"><strong>เหตุผล</strong>: Agent/Seller journey วนซ้ำทุกวัน (ต่าง Buyer ที่ทำครั้งเดียวจบ) — Wireframe จึงเน้น Dashboard เป็นจุดเริ่มทุกครั้ง ไม่ใช่ Hero/Landing แบบ Buyer</p>
+      </div>
+
+      <div style="margin-top:12px; border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:12px 14px;">
+        <div style="font-weight:700; font-family:'Playfair Display',serif; font-size:15px; margin-bottom:8px;">📱 Administrator Journey Wireframe</div>
+        <pre style="background:oklch(20% 0.01 60); color:oklch(90% 0.01 60); font-size:10px; line-height:1.35; padding:8px; border-radius:6px; overflow-x:auto; margin:0;">Discover        Explore         Evaluate        Connect         Decide          Action
+┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐    ┌─────────┐
+│ Login   │ →  │ Queue   │ →  │ Draft   │ →  │ Reject +│ →  │Approve/ │ →  │ Publish │
+│ Admin   │    │ รออนุมัติ│    │ Review  │    │ Reason  │    │ Reject  │    │ Content │
+│Dashboard│    │ Duplicate│   │ Photos  │    │(ถ้าไม่ผ่าน)│  │         │    │ Update  │
+│ KPI     │    │ Alert   │    │ SEO     │    │         │    │         │    │ Live    │
+└─────────┘    └─────────┘    └─────────┘    └─────────┘    └─────────┘    └─────────┘
+Rental-expiry   ⚠ ไม่มี Sort   ตรวจครบ 3      ส่ง Reason    ปุ่มเดียว      Queue ว่าง =
+sorted top      by Priority    รายการ         กลับ Lister   ชัดเจน         พึงพอใจ</pre>
+        <p style="margin-top:6px; font-size:11px; color:oklch(50% 0.02 60);"><strong>เหตุผล</strong>: Admin journey คือ "Queue-driven" — เป้าหมายคือทำ Queue ให้ว่างเร็วที่สุด ต่างจาก Buyer/Seller ที่เป็น "Goal-driven" (หาบ้าน/ขายบ้าน)</p>
+      </div>
+
+      <p style="margin-top:10px;"><strong>Key Journey Insights</strong>: (1) ทุก Persona เข้าสู่ Explore ผ่าน Search เป็นหลัก (≥70% ของ entry ทั้งหมดตามพฤติกรรมเว็บอสังหาริมทรัพย์ทั่วไป) — ต้องให้ Search อยู่ Above the Fold เสมอ (2) จุดตัดสินใจ Evaluate→Connect คือจุดที่ Drop-off สูงสุดของ Buyer/Seller เพราะเป็นจุดที่ต้องเปิดเผยข้อมูลติดต่อ — ต้องมี CTA ต่ำ Friction (LINE/WhatsApp มาก่อน Form เสมอ) (3) Seller/Agent (Lister) และ Admin ไม่มี "Decide" แบบเดียวกับ Buyer — จุดตัดสินใจของฝั่งนี้คือ "อนุมัติ/เผยแพร่" ไม่ใช่ "ซื้อ"</p>
+      <p style="margin-top:8px;"><strong>Findings</strong>: Compare (ขั้น Decide) ยังไม่มีหน้าจอจริงรองรับ (ยืนยันซ้ำจาก Step 2) — เป็นจุดที่ Journey ของ Buyer/Seller ทุกคนต้องผ่าน จึงเป็นลำดับความสำคัญสูงสำหรับ Step 7 (Property Experience)</p>
+    </div>
+  </details>
+  <details class="m1-card m1-step">
+    <summary>⚪ Step 4 — Mobile Design System (Not Started)</summary>
+    <p style="margin-top:10px; font-size:12.5px; color:oklch(50% 0.02 60);">รอเริ่มงาน — Grid/Spacing/Typography/Button/Input/Card/Icon/Color/Bottom Sheet/Modal/FAB/Navigation</p>
+  </details>
+  <details class="m1-card m1-step">
+    <summary>⚪ Step 5 — Navigation Experience (Not Started)</summary>
+    <p style="margin-top:10px; font-size:12.5px; color:oklch(50% 0.02 60);">รอเริ่มงาน</p>
+  </details>
+  <details class="m1-card m1-step">
+    <summary>⚪ Step 6 — Form Experience (Not Started)</summary>
+    <p style="margin-top:10px; font-size:12.5px; color:oklch(50% 0.02 60);">รอเริ่มงาน</p>
+  </details>
+  <details class="m1-card m1-step">
+    <summary>⚪ Step 7 — Property Experience (Not Started)</summary>
+    <p style="margin-top:10px; font-size:12.5px; color:oklch(50% 0.02 60);">รอเริ่มงาน</p>
+  </details>
+  <details class="m1-card m1-step">
+    <summary>⚪ Step 8 — AI Experience (Not Started)</summary>
+    <p style="margin-top:10px; font-size:12.5px; color:oklch(50% 0.02 60);">รอเริ่มงาน</p>
+  </details>
+  <details class="m1-card m1-step">
+    <summary>⚪ Step 9 — Performance (Not Started)</summary>
+    <p style="margin-top:10px; font-size:12.5px; color:oklch(50% 0.02 60);">รอเริ่มงาน</p>
+  </details>
+  <details class="m1-card m1-step">
+    <summary>⚪ Step 10 — Accessibility (Not Started)</summary>
+    <p style="margin-top:10px; font-size:12.5px; color:oklch(50% 0.02 60);">รอเริ่มงาน</p>
+  </details>
+  <details class="m1-card m1-step">
+    <summary>⚪ Step 11 — Product Owner Review (Not Started)</summary>
+    <p style="margin-top:10px; font-size:12.5px; color:oklch(50% 0.02 60);">รอเริ่มงาน</p>
+  </details>
+  <details class="m1-card m1-step">
+    <summary>⚪ Step 12 — Official Completion (Not Started)</summary>
+    <p style="margin-top:10px; font-size:12.5px; color:oklch(50% 0.02 60);">รอ Product Owner อนุมัติก่อนเริ่ม</p>
+  </details>
+
+  <div class="m1-card" style="border:2px solid oklch(55% 0.13 145); background:oklch(97% 0.04 145);">
+    <span class="m1-title">⭐ Next Step</span>
+    <p style="font-size:12.5px; margin:4px 0;">Step 3 v2.0 (Final Product Guide Level): เพิ่ม Journey Map แบบภาพเดียว (Buyer+Seller), Stage Detail Matrix ครบ 6 ขั้น (Screen-to-Screen Flow/KPI/Friction+Solution/Micro-interaction/Accessibility), Wireframe เพิ่ม Agent+Administrator — รอ Product Owner Review ก่อนเริ่ม Step 4 (Information Architecture)</p>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const auditRows = [
+      { page: "Home.dc.html", issue: "Search box ใช้ flex-wrap + min-width:130px ต่อ dropdown — ตรวจสอบแล้วพบว่า wrap ได้ปกติบนจอแคบ ไม่พังแต่ dropdown แต่ละช่องอาจแคบเกินไปบนจอ <360px", severity: "🟡 ต่ำ" },
+      { page: "ContactRail.dc.html", issue: "ปุ่ม toggle rail (ลูกศร) กว้างเพียง 26px สูง 44px — ต่ำกว่ามาตรฐาน touch target ขั้นต่ำ 44×44px ของ WCAG/Apple HIG อย่างชัดเจน", severity: "🔴 สูง" },
+      { page: "ContactRail.dc.html", issue: "ใช้ breakpoint isMobile ที่ window.innerWidth < 640 — ต่างจาก Search Results ที่ใช้ <900 ทำให้ระหว่าง 640-899px UI ปฏิบัติไม่สอดคล้องกัน (rail คิดว่าเป็น desktop, search คิดว่าเป็น mobile)", severity: "🟡 กลาง" },
+      { page: "Search Results.dc.html", issue: "มี Mobile Filter Sheet (bottom sheet) และ Mobile Menu แยกจาก Desktop nav ชัดเจนแล้ว — จุดแข็งที่ควรใช้เป็นต้นแบบมาตรฐาน", severity: "✅ จุดแข็ง" },
+      { page: "Property Details.dc.html", issue: "มี Sticky CTA bar (position:sticky bottom:0) แสดงราคา+ปุ่มติดต่อเมื่อ isMobileNav — จุดแข็งที่ควรใช้เป็นต้นแบบมาตรฐาน", severity: "✅ จุดแข็ง" },
+      { page: "Admin Dashboard.dc.html", issue: "Top bar ใช้ flex-wrap ครบสำหรับ nav หลายลิงก์ — wrap ได้ แต่มีลิงก์จำนวนมาก (7+ รายการ) บนมือถืออาจดูรก ยังไม่มี hamburger menu สำหรับ Admin โดยเฉพาะ", severity: "🟡 กลาง" },
+      { page: "Agent Signup.dc.html", issue: "Password input เป็น type=\"text\" (plaintext แสดงบนจอ) — Known Issue เดิมที่บันทึกไว้แล้วใน BLUEPRINT.md ไม่ใช่การค้นพบใหม่ แต่ยืนยันซ้ำว่ายังไม่แก้ กระทบทุก device รวมมือถือ", severity: "🟠 เดิม (ยืนยันซ้ำ)" },
+      { page: "ContactRail.dc.html", issue: "Chat panel ปรับเป็น full-screen (100dvh, radius:0) เมื่อ isMobile — ใช้ dvh แทน vh ป้องกันปัญหา address bar บด keyboard บน iOS Safari ถูกต้องตามมาตรฐาน", severity: "✅ จุดแข็ง" },
+      { page: "ทุกหน้า public", issue: "ทุกหน้าที่ตรวจมี <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"> ครบ — พื้นฐานถูกต้อง", severity: "✅ จุดแข็ง" },
+      { page: "Home.dc.html Footer", issue: "Footer ใช้ flex-wrap + justify-content:space-between — บนจอแคบมากอาจดูห่างเกินไประหว่าง element เพราะไม่ได้บังคับ column บนมือถือ", severity: "🟡 ต่ำ" },
+    ];
+    const personaUX = [
+      { icon: "🏠", name: "Buyer / ผู้ซื้อ-ผู้เช่า", priority: "P0",
+        hero: "Home hero คงรูปวิลล่า + search box ลอยทับ (สื่อสาร value ใน 3 วิ) แต่ sticky ต่ำกว่า fold นิดหน่อยบนมือถือแทนที่จะทับรูปเต็ม",
+        nav: "Hamburger ธรรมดาเพียงพอ (เมนูมีน้อย: Home/Search/Sell/About/Contact)",
+        search: "Bottom Sheet มีอยู่แล้ว (ดี) — เพิ่ม Quick Filter Chips เหนือผลลัพธ์ (ราคา/ห้องนอน/ประเภท) ลดจาก 2 tap เหลือ 1 tap",
+        cta: "Primary: 'ติดต่อ/นัดชม' เด่นสุดในหน้า, sticky bottom bar บนมือถือ",
+        secondaryCta: "Secondary: Favorite / Share / Compare — icon-only ขนาดเล็กกว่า CTA หลัก วางแถวเดียวใต้ราคา ไม่แข่งความสนใจกับ Primary CTA",
+        listing: "PropertyCard มีข้อมูลครบ (ราคา/ห้อง/พื้นที่/รูป) — เพิ่ม badge 'ใหม่' สำหรับประกาศ <7 วัน",
+        propertyDetail: "Gallery→Title/Price→Facts(ห้อง/พื้นที่/ที่ดิน)→Description→Map→Nearby→Agent Card→CTA sticky — ลำดับปัจจุบันถูกต้องตาม F-pattern การอ่านแล้ว ไม่ต้องสลับลำดับ",
+        dashboard: "N/A (Buyer ไม่ login ตามการออกแบบที่ถูกต้อง)",
+        ai: "ContactRail AI Chat ตอบราคา/สถานะ/property code ได้แล้ว — เพียงพอ",
+        contact: "เปลี่ยน emoji (📞💬) → Official Brand Icon จริง (Phone/WhatsApp/LINE)",
+        shareFavCompare: "Favorite ทำงานแล้ว (localStorage). Share ใช้ emoji ต้องเปลี่ยนเป็น Facebook/LINE official mark. Compare เลือกได้แต่ไม่มีหน้าแสดงผล — Known Gap ที่เป็นทางตัน Conversion",
+        mobileFlow: "One-hand, portrait, ระหว่างเดินทาง — action สำคัญอยู่ใน thumb zone ล่างจอ",
+        desktopFlow: "Header (logo/nav/lang) → Hero+Search เต็มความกว้าง → Grid ผลลัพธ์ 3 คอลัมน์ + Filter Sidebar ซ้ายแบบ sticky (แทน Bottom Sheet) → Property Details แบบ 2 คอลัมน์ (Gallery+เนื้อหาซ้าย 60%, Sidebar ติดต่อ+Agent Card ขวา 40% แบบ sticky)",
+        social: "ยังไม่มี Social Login สำหรับ sync Favorite ข้าม device (Future Enhancement)",
+        journey: "Home→Search(filter chips/sheet)→Property Details→Favorite/Compare→CTA ติดต่อ/นัดชม→ContactRail",
+        redesign: "(1) Quick Filter Chips เหนือผลค้นหา (2) หน้า/Modal Compare จริง (3) Official Brand Icon ทุกจุดติดต่อ",
+        uxRationale: "Buyer ตัดสินใจเร็วบนมือถือ (thumb zone + 1-tap filter) ลด friction ทุกจุดเพราะแข่งกับคู่แข่งที่คลิกเดียวก็เปลี่ยนเว็บได้; Compare ต้องมีเพราะ Real Estate เป็นการซื้อที่ต้องเทียบเคียง ไม่ใช่ impulse buy — ขาด Compare = เสีย Conversion จริง ไม่ใช่แค่ UX สวยงาม",
+        wireframeMobile: "┌─────────────────────┐\n│ ☰   huahin.properties │\n├─────────────────────┤\n│ [====HERO IMAGE====] │\n│  ┌─────────────────┐  │\n│  │ 🔍 ค้นหาทำเล/ราคา │  │\n│  └─────────────────┘  │\n│ [ซื้อ][เช่า][ที่ดิน]  │\n├─────────────────────┤\n│ Featured Properties  │\n│ ┌───────┐ ┌───────┐  │\n│ │ IMG   │ │ IMG   │  │\n│ │ ฿8.5M │ │ ฿12M  │  │\n│ │📍หัวหิน│ │📍ชะอำ  │  │\n│ │♡ ⇄ ↗ │ │♡ ⇄ ↗ │  │\n│ └───────┘ └───────┘  │\n├─────────────────────┤\n│ [LINE][WA][โทร] sticky│\n└─────────────────────┘",
+        wireframeDesktop: "┌───────────────────────────────────────────────┐\n│ Logo   Home Search Sell About Contact   TH▾    │\n├───────────────────────────────────────────────┤\n│ [============ HERO + SEARCH BAR ============] │\n│               [Buy][Rent][Land][Map]           │\n├───────────────────────────────────────────────┤\n│ Featured Properties                            │\n│ ┌────────┐ ┌────────┐ ┌────────┐               │\n│ │ Image  │ │ Image  │ │ Image  │               │\n│ │ ฿8.5M  │ │ ฿12M   │ │ ฿6.2M  │               │\n│ │ Hua Hin│ │ Cha-am │ │Pranburi│               │\n│ │♡ share ⇄│ │♡ share ⇄│ │♡ share ⇄│           │\n│ └────────┘ └────────┘ └────────┘               │\n└───────────────────────────────────────────────┘" },
+      { icon: "💰", name: "Seller / เจ้าของบ้านที่ต้องการขาย", priority: "P0",
+        hero: "Sell hero เน้น 'ลงประกาศฟรี/ง่าย' ถูกทางแล้ว — เพิ่ม trust signal ('24 ทรัพย์ในระบบ') ให้น่าเชื่อถือใน 3 วิแรก",
+        nav: "ใช้ nav หลักร่วมกับ Buyer — เพียงพอ",
+        search: "ไม่เกี่ยวข้อง",
+        cta: "Primary: 'สมัคร/ลงประกาศ' เด่นบนสุดของหน้า Sell",
+        secondaryCta: "Secondary: 'ดูตัวอย่างประกาศที่สำเร็จแล้ว' (social proof link ไป Search Results ที่กรองเฉพาะ sold/rented)",
+        listing: "Lister Dashboard แสดงประกาศตัวเอง พร้อม draft/publish toggle — เพิ่ม Status Filter Tab (ทั้งหมด/pending/live/expired)",
+        propertyDetail: "N/A โดยตรง (Seller ดูผ่าน Lister Dashboard ไม่ใช่ Property Details แบบ public)",
+        dashboard: "Lister Dashboard เดียวกับ Agent — เพียงพอสำหรับทรัพย์เดียว/ไม่กี่รายการ",
+        ai: "AI-generated post-text quota ช่วยเขียนโฆษณา — จุดแข็ง ต้องเน้นให้เห็นชัดขั้นตอนแรก",
+        contact: "Agent Signup — <strong>Critical Bug จาก Step 1</strong>: password type=\"text\" ต้องแก้ก่อน Production",
+        shareFavCompare: "Share ประกาศไป Social ต้องใช้ Official Brand Icon เดียวกับฝั่ง Buyer",
+        mobileFlow: "ถ่ายรูปบ้านแล้วอัปโหลดทันที — รองรับเลือกหลายรูปพร้อมกัน",
+        desktopFlow: "Sell page 2 คอลัมน์ (ซ้าย: value prop+trust signal, ขวา: ฟอร์มสมัครแบบย่อ) → หลัง signup ไป Lister Dashboard แบบ table view (จัดการหลายทรัพย์ในตารางเดียว แทน card list บนมือถือ)",
+        social: "ปุ่มแชร์ 1-tap พร้อมข้อความสำเร็จรูป (มีบางส่วนจาก AI Quick Add) — ควรเชื่อมเข้า Lister Dashboard โดยตรง",
+        journey: "Sell→สมัคร→Agent Signup(password ปลอดภัย)→Lister Dashboard→เพิ่มประกาศ(รูป+AI)→Listing Approvals→เห็นสถานะ live",
+        redesign: "(1) Trust Signal บน Sell hero (2) password→type=\"password\" — Critical (3) Status Filter Tab (4) เชื่อม Share เข้า Dashboard",
+        uxRationale: "Seller เข้ามาครั้งแรกด้วยความไม่แน่ใจ (กลัวโดนหลอก/กลัวยุ่งยาก) — Trust Signal + ฟอร์มสมัครที่ดูปลอดภัยจริง (password ซ่อน) คือด่านแรกที่ตัดสินว่าจะเชื่อใจแพลตฟอร์มหรือไม่ ก่อนจะพูดถึง Feature อื่นเลย",
+        wireframeMobile: "┌─────────────────────┐\n│ ☰   huahin.properties │\n├─────────────────────┤\n│ ลงประกาศฟรี วันนี้    │\n│ ✓ 24 ทรัพย์ในระบบ    │\n│ [   สมัคร/ลงประกาศ  ]│\n├─────────────────────┤\n│ (Signup)             │\n│ ชื่อ [________]      │\n│ เบอร์ [________]     │\n│ รหัสผ่าน [•••••••]   │  ← ต้องเป็น dot ไม่ใช่ text\n│ [     สมัครสมาชิก   ]│\n├─────────────────────┤\n│ (Dashboard)          │\n│ [ทั้งหมด|Live|รอ|หมดอายุ]│\n│ ┌───────────────┐    │\n│ │ 🏠 บ้าน HH-109 │    │\n│ │ 🟢 Live       │    │\n│ └───────────────┘    │\n└─────────────────────┘",
+        wireframeDesktop: "┌───────────────────────────────────────────────┐\n│ Value Prop + Trust     │  Signup Form           │\n│ 'ลงประกาศฟรี'          │  ชื่อ [______]         │\n│ ✓ 24 ทรัพย์ในระบบ      │  เบอร์ [______]        │\n│ ✓ AI ช่วยเขียน         │  รหัสผ่าน [••••••]     │\n│ [ดูตัวอย่างที่ขายแล้ว] │  [   สมัครสมาชิก   ]   │\n├───────────────────────────────────────────────┤\n│ Lister Dashboard (table view)                  │\n│ Code | Title | Status | Views | Actions        │\n│ HH-109 | บ้าน... | 🟢Live | 42 | Edit Share     │\n└───────────────────────────────────────────────┘" },
+      { icon: "🧑‍💼", name: "Agent / นายหน้า", priority: "P0",
+        hero: "First Impression คือ Lister Dashboard (ใช้ซ้ำทุกวัน) ไม่ใช่ Sell page",
+        nav: "Tab-style สลับ Dashboard/Billing/Profile แทนปุ่มแยกกระจาย",
+        search: "ใช้ Status Filter Tab เดียวกับ Seller เพื่อกรองประกาศตัวเอง",
+        cta: "Primary: 'เพิ่มประกาศใหม่' เป็น FAB มุมล่างขวาบนมือถือ (Agent เปิดแอปเพื่อทำงาน ไม่ใช่อ่าน)",
+        secondaryCta: "Secondary: 'แชร์' บนแต่ละแถวประกาศ — icon-only เข้าถึงเร็วโดยไม่ต้องเปิดเข้าไปในประกาศก่อน",
+        listing: "จัดการหลายทรัพย์พร้อมกัน — Bulk Action (publish/unpublish หลายรายการ) เป็น Future Enhancement",
+        propertyDetail: "N/A โดยตรง — Agent ดูผ่าน Dashboard เป็นหลัก ไม่ใช่ Property Details แบบ public",
+        dashboard: "Summary card บนสุด (live/pending/expired) ต้อง above-the-fold บนมือถือแน่นอน",
+        ai: "โควต้า AI post-text ต้องแสดงคงเหลือชัดเจนใน Dashboard ไม่ซ่อนใน Billing",
+        contact: "เดียวกับ Seller — password bug เดียวกัน แก้พร้อมกัน",
+        shareFavCompare: "Share ต้องเร็วที่สุด (1-tap + official brand icon) เพราะ Agent มักยืนหน้างานลูกค้า",
+        mobileFlow: "สลับแอปบ่อย (LINE/Facebook/เว็บไซต์) ระหว่างนัดลูกค้า — ต้องรองรับ deep-link กลับ Dashboard หลังแชร์เสร็จ",
+        desktopFlow: "Dashboard แบบ 3-column (Summary KPI บนสุดเต็มความกว้าง, ตารางประกาศซ้าย 70% + Quota/Billing sidebar ขวา 30%) — FAB เปลี่ยนเป็นปุ่ม 'เพิ่มประกาศ' fixed บนแถบเมนูแทน",
+        social: "Agent Profile (mini-site) ต้องมี Share ที่ใช้ Official Brand Icon + URL สั้นจำง่าย",
+        journey: "Lister Dashboard(summary)→FAB เพิ่มประกาศ→อัปโหลด+AI→Publish→Dashboard สรุปสถานะ→Share ไป Social→เช็ค Billing",
+        redesign: "(1) FAB 'เพิ่มประกาศ' มุมล่างขวา (2) Summary Card above-the-fold แน่นอน (3) แสดงโควต้า AI ใน Dashboard โดยตรง",
+        uxRationale: "Agent คือ Power User ที่ใช้ซ้ำหลายครั้งต่อวัน — ทุก tap ที่ลดได้คือเวลาที่ประหยัดได้จริงสะสมทั้งวัน (FAB/deep-link/quota-visible ล้วนลด friction ของงานที่ทำซ้ำ ไม่ใช่แค่ความสวยงาม)",
+        wireframeMobile: "┌─────────────────────┐\n│ Dashboard|Billing|Profile│\n├─────────────────────┤\n│ 🟢12 live 🟡3 pending │\n│ AI quota: 7/10 เหลือ  │\n├─────────────────────┤\n│ [ทั้งหมด|Live|รอ|หมดอายุ]│\n│ ┌───────────────┐    │\n│ │ HH-109 🟢Live  │    │\n│ │        [แชร์↗] │    │\n│ └───────────────┘    │\n│                  (+) │ ← FAB เพิ่มประกาศ\n└─────────────────────┘",
+        wireframeDesktop: "┌───────────────────────────────────────────────┐\n│ 🟢12 live  🟡3 pending  ⚪2 expired  AI:7/10   │\n├──────────────────────────────┬────────────────┤\n│ Code|Title|Status|Views|แชร์  │ Billing/Quota  │\n│ HH-109|บ้าน...|🟢Live|42|↗   │ Tier 2         │\n│ HH-110|วิลล่า..|🟡รอ|-|↗    │ [เพิ่มประกาศ]  │\n└──────────────────────────────┴────────────────┘" },
+      { icon: "🏗️", name: "Owner / Project Owner", priority: "P2",
+        hero: "ไม่มีหน้าจอเฉพาะ — First Impression คือการคุยกับ Admin ผ่าน LINE/โทรศัพท์",
+        nav: "N/A", search: "N/A", cta: "N/A", secondaryCta: "N/A",
+        listing: "Owners.dc.html เป็นเครื่องมือฝั่ง Admin — Owner เองไม่เห็นหน้าจอนี้",
+        propertyDetail: "N/A",
+        dashboard: "N/A — ไม่มี Dashboard ของตัวเอง (สอดคล้องพฤติกรรมจริงที่มักไม่ถนัดใช้ระบบ)",
+        ai: "N/A โดยตรง — Admin ใช้ AI Quick Add แทน",
+        contact: "ช่องทางเดียวคือ LINE/โทรศัพท์กับ Admin",
+        shareFavCompare: "N/A", mobileFlow: "N/A", desktopFlow: "N/A", social: "N/A",
+        journey: "Owner ติดต่อ Admin(LINE/โทร)→Admin บันทึกใน Owners.dc.html→AI Quick Add สร้างประกาศแทน→อัปเดตสถานะผ่าน LINE/โทรกลับ",
+        redesign: "ไม่เสนอ Redesign หน้าจอใหม่ตอนนี้ (P2, ไม่ได้ใช้เว็บไซต์เอง) — 'Owner Portal' ในอนาคตต้องเป็น Mission แยกที่ CEO อนุมัติก่อน",
+        uxRationale: "การออกแบบ UX ที่ถูกต้องสำหรับ Persona นี้คือ 'ไม่ต้องมี UI' — สร้างหน้าจอที่ไม่มีใครใช้เป็นการเสียทรัพยากรพัฒนาโดยเปล่าประโยชน์ ควรลงทุนใน Admin tooling (Owners.dc.html) แทนที่จะสร้าง Portal ที่กลุ่มเป้าหมายจริงไม่ใช้",
+        wireframeMobile: "N/A — Persona นี้ไม่มีหน้าจอของตัวเอง (by design)",
+        wireframeDesktop: "N/A — ดูโครงสร้างที่ Owners.dc.html (เครื่องมือฝั่ง Admin) แทน" },
+      { icon: "🛠️", name: "Administrator", priority: "P1",
+        hero: "Admin Dashboard เปิดมาเจอ KPI cards ทันที (ตรงจุด) — เปลี่ยนเป็น 2-column บนมือถือลดการเลื่อน",
+        nav: "<strong>จุดอ่อนหลัก</strong>: nav 7+ ลิงก์แบบ flex-wrap บนมือถือ — เปลี่ยนเป็น Hamburger + Bottom Nav (5 เมนูหลัก: Dashboard/Approvals/Owners/Site Content/Map)",
+        search: "ไม่มี Global Search — เสนอเพิ่มในอนาคต (ไม่ใช่ v1)",
+        cta: "Primary: Approve/Reject ใน Listing Approvals — ปุ่มใหญ่กดง่ายด้วยนิ้วเดียว ไม่ใช่ text link",
+        secondaryCta: "Secondary: 'ดูรายละเอียด' ก่อนตัดสินใจ approve/reject — เปิด preview แบบ modal ไม่ต้องออกจากหน้าคิว",
+        listing: "Listing Approvals — เสนอ Swipe gesture (ขวา=approve, ซ้าย=reject) เร่งความเร็วเมื่อคิวเยอะ (Future Enhancement)",
+        propertyDetail: "Admin ดูผ่าน Preview Modal ในหน้า Approvals ไม่ใช่ Property Details แบบ public โดยตรง",
+        dashboard: "KPI cards+rental-expiry ครบแล้ว — 2-column grid บนมือถือ",
+        ai: "AI Quick Add เป็นฟอร์มยาว ไม่เหมาะมือถือ — Redesign เป็น step-by-step wizard",
+        contact: "Site Content ฟอร์มแก้ AI Persona/Restrictions ใช้ได้บน mobile แต่ label เล็กเกินไป",
+        shareFavCompare: "N/A สำหรับ Admin โดยตรง",
+        mobileFlow: "Multi-tasking สั้นๆ ระหว่างวัน สัญญาณไม่แน่นอน — action สำคัญควรทำงานได้แม้ offline ชั่วคราว (Future Enhancement)",
+        desktopFlow: "Dashboard 3-column KPI เต็มความกว้าง → Sidebar nav ถาวรซ้าย (แทน top bar flex-wrap) แสดงทุกเมนูพร้อมกันโดยไม่ต้องพับ เพราะจอกว้างพอ",
+        social: "N/A โดยตรง — จัดการ Facebook post ผ่าน Site Content",
+        journey: "Admin Dashboard(KPI 2-col)→Listing Approvals(swipe)→Owners→Site Content — ผ่าน Bottom Nav ใหม่",
+        redesign: "(1) Hamburger+Bottom Nav 5 เมนู (2) KPI 2-column มือถือ (3) AI Quick Add เป็น step wizard (4) Swipe gesture ใน Approvals",
+        uxRationale: "Admin ทำงานสั้นๆ หลายครั้งต่อวันระหว่างงานอื่น (ไม่ใช่ session ยาวต่อเนื่อง) — Bottom Nav ให้เข้าถึงงานหลักได้ในคลิกเดียวจากทุกหน้า ต่างจาก Buyer/Seller ที่ทำ 1 flow ยาวต่อเนื่อง",
+        wireframeMobile: "┌─────────────────────┐\n│ ☰            🛠️Admin │\n├─────────────────────┤\n│ ┌────────┐┌────────┐│\n│ │24 ทั้งหมด││18 Live  ││\n│ └────────┘└────────┘│\n│ ┌────────┐┌────────┐│\n│ │3 รอ     ││2 หมดอายุ││\n│ └────────┘└────────┘│\n├─────────────────────┤\n│ รออนุมัติ (3)         │\n│ ┌───────────────┐    │\n│ │HH-111 [ดู]     │    │\n│ │ [ปฏิเสธ][อนุมัติ]│   │\n│ └───────────────┘    │\n├─────────────────────┤\n│[🏠][✓][👤][📄][🗺️]│ ← Bottom Nav\n└─────────────────────┘",
+        wireframeDesktop: "┌───────────────────────────────────────────────┐\n│Sidebar │ 24ทั้งหมด 18Live 3รอ 2หมดอายุ         │\n│Dashboard│──────────────────────────────────────│\n│Approvals│ รออนุมัติ (3)                        │\n│Owners   │ HH-111 | [ดูรายละเอียด][ปฏิเสธ][อนุมัติ]│\n│SiteContent│HH-112 | [ดูรายละเอียด][ปฏิเสธ][อนุมัติ]│\n│Map      │                                        │\n└───────────────────────────────────────────────┘" },
+    ];
+    const journeySteps = [
+      { icon: "🔍", name: "Discover", desc: "เจอเว็บไซต์ครั้งแรก" },
+      { icon: "🗂️", name: "Explore", desc: "ค้นหา/กรอง/เลื่อนดู" },
+      { icon: "⭐", name: "Evaluate", desc: "เปรียบเทียบรายละเอียด" },
+      { icon: "💬", name: "Connect", desc: "ติดต่อสอบถาม" },
+      { icon: "✅", name: "Decide", desc: "ตัดสินใจเลือก" },
+      { icon: "📨", name: "Action", desc: "นัดชม/ยื่นคำขอ" },
+    ];
+    const personaJourneys = [
+      { icon: "🏠", name: "Buyer / ผู้ซื้อ-ผู้เช่า",
+        stages: [
+          { stage: "Discover", action: "เข้าจาก Google Search / Social / Referral", screen: "Home.dc.html Hero", emotion: "ตื่นเต้น, ยังไม่ไว้ใจแบรนด์" },
+          { stage: "Explore", action: "กรองพื้นที่/ราคา/ประเภท, เลื่อนดูการ์ด", screen: "Search Results.dc.html", emotion: "สำรวจ, เปรียบเทียบเบื้องต้น" },
+          { stage: "Evaluate", action: "ดูรูป/Facts/แผนที่/ระยะทางชายหาด", screen: "Property Details.dc.html", emotion: "จับต้องได้มากขึ้น, เริ่มกังวลเรื่องราคา" },
+          { stage: "Connect", action: "แชท LINE/WhatsApp หรือ AI Chat ถามคำถาม", screen: "ContactRail.dc.html", emotion: "ต้องการคำตอบเร็ว ไม่อยากกรอกฟอร์มยาว" },
+          { stage: "Decide", action: "เปรียบเทียบ 2-3 หลังที่ชอบ", screen: "Compare (ยังไม่มีหน้าจอจริง — Known Gap)", emotion: "ต้องการความมั่นใจก่อนติดต่อจริงจัง" },
+          { stage: "Action", action: "นัดชมทรัพย์ หรือส่งฟอร์มสอบถาม", screen: "Property Details.dc.html Schedule Viewing", emotion: "พร้อมผูกพันธ์ขั้นถัดไป" },
+        ],
+        dropoffRisk: "Evaluate→Connect: สูงสุด หากไม่มีราคา/รูปเพียงพอ ผู้ใช้ปิดแท็บทันที; Decide: ขาดหน้า Compare จริงทำให้ต้องเปิดหลายแท็บเปรียบเทียบเอง (friction สูง)",
+        entryChannels: "Google Search, Social Media, LINE/WhatsApp แชร์ต่อ, Referral, เข้าตรง" },
+      { icon: "🏘️", name: "Seller / เจ้าของทรัพย์",
+        stages: [
+          { stage: "Discover", action: "เห็นโฆษณา/Referral ว่าลงประกาศได้ฟรี/มีค่าใช้จ่าย", screen: "Sell.dc.html", emotion: "สงสัยความน่าเชื่อถือของแพลตฟอร์ม" },
+          { stage: "Explore", action: "ดูตัวอย่างประกาศอื่น, อ่านแพ็กเกจ", screen: "Sell.dc.html, Advertise.dc.html", emotion: "เปรียบเทียบกับช่องทางอื่น (Facebook Marketplace ฯลฯ)" },
+          { stage: "Evaluate", action: "สมัครสมาชิก, เลือก Tier", screen: "Agent Signup.dc.html, Lister Billing.dc.html", emotion: "ลังเลเรื่องค่าใช้จ่าย" },
+          { stage: "Connect", action: "AI Quick Add ถ่ายรูป+พูดข้อมูลทรัพย์", screen: "AI Quick Add.dc.html", emotion: "กังวลว่าจะกรอกข้อมูลถูกไหม ต้องการความช่วยเหลือ" },
+          { stage: "Decide", action: "ตรวจ Draft ที่ AI ร่างให้, แก้ไข, ยืนยัน", screen: "Lister Dashboard.dc.html", emotion: "ต้องการควบคุมเนื้อหาก่อนเผยแพร่จริง" },
+          { stage: "Action", action: "ส่งขออนุมัติ, รอ Admin เผยแพร่", screen: "Listing Approvals.dc.html (ฝั่ง Admin)", emotion: "รอคอย, อยากรู้สถานะ" },
+        ],
+        dropoffRisk: "Evaluate: ค่าใช้จ่าย Tier อาจทำให้เลิกกลางคัน หากไม่เห็น Value ชัดเจนก่อนสมัคร; Decide→Action: รอ Admin อนุมัตินานเกินไปทำให้หมดความอดทน",
+        entryChannels: "Facebook Ads, Referral จากเจ้าของทรัพย์รายอื่น, Google Search 'ขายบ้านหัวหิน'" },
+      { icon: "🤝", name: "Agent (Lister บัญชีเดียวกับ Owner)",
+        stages: [
+          { stage: "Discover", action: "ใช้บัญชี Lister เดิม, เข้า Dashboard ทุกวัน", screen: "Lister Dashboard.dc.html", emotion: "คุ้นเคย, ใช้งานประจำ (ต่าง Buyer/Seller ที่เข้าครั้งแรก)" },
+          { stage: "Explore", action: "ดูสถานะประกาศทั้งหมด, filter Draft/Live/Expired", screen: "Lister Dashboard.dc.html", emotion: "ต้องการเห็นภาพรวมเร็วที่สุด" },
+          { stage: "Evaluate", action: "ตรวจ Lead ใหม่, เปรียบเทียบ Performance ประกาศ", screen: "Lister Dashboard.dc.html", emotion: "กังวลเรื่อง Lead หลุดมือ ตอบช้าไม่ได้" },
+          { stage: "Connect", action: "ตอบกลับลูกค้าผ่าน LINE/Phone ที่ผูกกับประกาศ", screen: "ContactRail.dc.html (ฝั่งรับ), Agent Profile.dc.html", emotion: "ต้องการตอบเร็วเพื่อปิดดีล" },
+          { stage: "Decide", action: "ตัดสินใจต่ออายุ/ปรับราคา/ซื้อ Featured Listing", screen: "Lister Billing.dc.html, Advertise.dc.html", emotion: "คำนวณความคุ้มค่าก่อนจ่ายเพิ่ม" },
+          { stage: "Action", action: "อัปเดตสถานะ (Sold/Rented), แชร์โซเชียล", screen: "Lister Dashboard.dc.html Share", emotion: "พึงพอใจเมื่อปิดดีลสำเร็จ" },
+        ],
+        dropoffRisk: "Connect: Lead ใหม่ถ้าไม่มีการแจ้งเตือนทันที (Notification) อาจตอบช้าจนลูกค้าหันไปที่อื่น — ยังไม่มี Push Notification ในระบบปัจจุบัน (Known Gap)",
+        entryChannels: "Bookmark/PWA shortcut, Email แจ้งเตือน, เข้าตรงเป็นประจำ" },
+      { icon: "🏗️", name: "Owner / Project Owner",
+        stages: [
+          { stage: "Discover", action: "ได้รับ Referral จาก Agent/Admin ว่ามีแพลตฟอร์มนี้", screen: "N/A (ใช้ผ่าน Admin/Lister เป็นหลัก)", emotion: "ไว้วางใจให้คนอื่นดำเนินการแทน" },
+          { stage: "Explore", action: "ขอดูรายงานสรุปผ่าน Agent/Admin (ไม่เข้าระบบเอง)", screen: "N/A", emotion: "ต้องการความโปร่งใสของข้อมูล" },
+          { stage: "Evaluate", action: "พิจารณาผลตอบรับ Lead/ยอดชม ผ่านรายงานที่ Agent ส่งให้", screen: "N/A", emotion: "ประเมินความคุ้มค่าการลงทุนโฆษณา" },
+          { stage: "Connect", action: "สื่อสารผ่าน Agent/Admin เป็นตัวกลางเท่านั้น", screen: "N/A", emotion: "ไม่ต้องการยุ่งรายละเอียดปฏิบัติการ" },
+          { stage: "Decide", action: "อนุมัติงบโฆษณาเพิ่ม/ปรับราคาทรัพย์ผ่าน Agent", screen: "N/A", emotion: "ตัดสินใจเชิงกลยุทธ์ ไม่ใช่ปฏิบัติการ" },
+          { stage: "Action", action: "รับรายงานผลสรุปเป็นระยะ", screen: "N/A", emotion: "ต้องการเห็นผลลัพธ์ธุรกิจ ไม่ใช่ UI" },
+        ],
+        dropoffRisk: "ไม่มี Drop-off โดยตรงเพราะไม่ได้ใช้หน้าจอเอง — ความเสี่ยงอยู่ที่ Agent/Admin สื่อสารข้อมูลช้าหรือไม่ครบ",
+        entryChannels: "ไม่มีช่องทางเข้าเว็บไซต์โดยตรง — สื่อสารนอกระบบ (โทร/LINE/พบปะ) กับ Agent/Admin" },
+      { icon: "🛠️", name: "Administrator",
+        stages: [
+          { stage: "Discover", action: "Login เข้า Admin Dashboard ทุกวันเป็นประจำ", screen: "Admin Login.dc.html, Admin Dashboard.dc.html", emotion: "งานประจำ ต้องการความเร็ว" },
+          { stage: "Explore", action: "ดู KPI, รายการรออนุมัติ, ประกาศใกล้หมดอายุ", screen: "Admin Dashboard.dc.html", emotion: "ต้องการเห็นสิ่งที่ต้องทำวันนี้ทันที (ไม่ใช่ scroll หา)" },
+          { stage: "Evaluate", action: "ตรวจร่างประกาศจาก AI Quick Add ก่อนอนุมัติ", screen: "Listing Approvals.dc.html", emotion: "ต้องระวังความถูกต้อง/ความเหมาะสมของเนื้อหา" },
+          { stage: "Connect", action: "ติดต่อ Lister กรณีข้อมูลไม่ครบ/ปฏิเสธประกาศ", screen: "Listing Approvals.dc.html (Reject + Reason)", emotion: "ต้องสื่อสารเหตุผลชัดเจน ไม่ให้ Lister สับสน" },
+          { stage: "Decide", action: "อนุมัติ/ปฏิเสธ/จัดการ Owners-Tenants-Buyers", screen: "Listing Approvals.dc.html, Owners.dc.html", emotion: "รับผิดชอบคุณภาพเนื้อหาทั้งเว็บไซต์" },
+          { stage: "Action", action: "เผยแพร่ประกาศ, จัดการ Site Content/Banner", screen: "Site Content.dc.html", emotion: "พึงพอใจเมื่อ Queue ว่าง" },
+        ],
+        dropoffRisk: "Evaluate: หากคิวรออนุมัติสะสมมาก (ไม่มี Sort by Priority ชัดเจน) อาจข้ามตรวจสอบบางจุดไป",
+        entryChannels: "Bookmark, ใช้งานทุกวันเป็นส่วนหนึ่งของงาน" },
+    ];
+    const mkMap = (labels) => labels.map((l, i) => ({ label: l, hasArrow: i < labels.length - 1 }));
+    const journeyMapBuyer = mkMap(["Google / Social", "Homepage (Hero+Search)", "Search Results (List)", "Property Details", "Compare", "Contact (LINE/WhatsApp/Chat)", "Lead (Schedule Viewing/Form)", "Follow-up (Agent ตอบกลับ)", "Deal (นัดชม/ปิดการขาย)", "After Sales (Review/Referral)"]);
+    const journeyMapSeller = mkMap(["Referral / Ads", "Sell.dc.html (Landing)", "Agent Signup + Billing Tier", "AI Quick Add (ถ่ายรูป+พูด)", "Lister Dashboard (ตรวจ Draft)", "ส่งขออนุมัติ (Admin Review)", "Publish (ประกาศ Live)", "Lead เข้า (จาก Buyer)", "Deal (ปิดการขาย/ให้เช่า)", "After Sales (ต่อสัญญา/รีวิว)"]);
+    const stageDetails = [
+      { stage: "1. Discover", button: "เข้าเว็บไซต์ (external link/search)", destination: "Home.dc.html", back: "ปุ่ม Back เบราว์เซอร์ → ออกจากเว็บไซต์ (ไม่มีหน้าก่อนหน้าในระบบ)", bottomSheet: "ไม่มี", dialog: "ไม่มี (ยกเว้น Cookie/Consent ถ้ามีในอนาคต)", loading: "Skeleton hero image ระหว่างโหลดรูป", empty: "ไม่มีกรณี Empty", error: "หน้าไม่โหลด → แสดง fallback รูปภาพ static (ไม่มีปัจจุบัน — Known Gap)",
+        kpi: "Search Started % (สัดส่วนผู้เข้าเว็บที่กด/พิมพ์ในช่อง Search ภายใน 10 วิ)", friction: "ผู้ใช้ไม่รู้ว่าเว็บนี้ขาย/ให้เช่าในพื้นที่ไหนบ้าง หากรูป Hero ไม่ชัดเจน", solution: "Hero ต้องมีข้อความ + รูปที่สื่อ Hua Hin/Pranburi/Cha-am ชัดเจนใน 3 วินาทีแรก (สอดคล้อง Brand Direction)",
+        micro: "Hero image fade-in 300ms, Search box มี subtle shadow เมื่อ focus, ไม่ใช้ auto-play video ที่หน่วงโหลด",
+        a11y: "Contrast ข้อความบน Hero ≥4.5:1 (ตรวจ overlay ทับรูปเสมอ), Touch target ช่อง Search ≥44px, รองรับ Landscape mobile (Hero ไม่ crop ข้อความสำคัญ)" },
+      { stage: "2. Explore", button: "พิมพ์ค้นหา / เลือก Filter (พื้นที่/ราคา/ประเภท)", destination: "Search Results.dc.html", back: "ปุ่ม Back → กลับ Home พร้อม query เดิม (browser history)", bottomSheet: "Filter Sheet (มือถือ) — มีอยู่แล้วจากโค้ดจริง", dialog: "Sort dropdown (ไม่ใช่ full dialog)", loading: "Skeleton card list ระหว่างค้นหา", empty: "ไม่พบผลลัพธ์ → ข้อความ + ปุ่ม 'ล้างตัวกรอง' (ต้องยืนยันว่ามีจริงใน Step 4)", error: "Query ผิดพลาด/Firestore timeout → Retry button",
+        kpi: "Property Viewed (จำนวนเฉลี่ยที่คลิกดูรายละเอียดต่อ session)", friction: "Filter เยอะเกินไปบนจอเล็ก ต้อง scroll ยาวใน Bottom Sheet", solution: "จัดกลุ่ม Filter หลัก (พื้นที่/ราคา/ประเภท) ไว้บนสุดของ Sheet, Filter รอง (ห้องน้ำ/สิ่งอำนวยความสะดวก) พับใน 'ตัวกรองเพิ่มเติม'",
+        micro: "Card list fade-in แบบ stagger เล็กน้อย (50ms ต่อใบ), Skeleton loading แทนจอขาวระหว่างรอ, Sort dropdown มี transition 150ms",
+        a11y: "Filter Sheet ต้อง trap focus (keyboard), ปุ่ม Sort/Filter มี aria-label ชัดเจน, รองรับ font ขยายได้ถึง 200% โดย Card ไม่ล้น" },
+      { stage: "3. Evaluate", button: "แตะรูป/การ์ดทรัพย์", destination: "Property Details.dc.html", back: "ปุ่ม Back → กลับ Search Results ที่ scroll position เดิม", bottomSheet: "Photo Gallery full-screen (มือถือ)", dialog: "Gallery lightbox (ขยายรูป)", loading: "Skeleton สำหรับรูป/facts ระหว่างโหลด property เฉพาะ id", empty: "ไม่มีกรณี Empty (ถ้ามี id แต่ไม่มีจริง → เห็น Error แทน)", error: "Property ไม่พบ (ถูกลบ/id ผิด) → ข้อความ + ปุ่มกลับ Search Results",
+        kpi: "Compare Used % (สัดส่วนผู้ที่เพิ่มทรัพย์นี้เข้า Compare), Time on Page", friction: "รูปโหลดช้าบน 3G/4G ในพื้นที่ท่องเที่ยวที่สัญญาณไม่เสถียร", solution: "Lazy-load รูปที่ยังไม่เห็น, ใช้ thumbnail ขนาดเล็กโหลดก่อนแล้วค่อย progressive เป็นรูปเต็ม",
+        micro: "Gallery swipe มี momentum/snap, ปุ่ม Favorite มี micro-bounce เมื่อกด, Skeleton shimmer effect ระหว่างโหลด facts",
+        a11y: "รูปทุกใบต้องมี alt text (เชื่อมกับ AI-generated caption — Known Gap ที่ยังไม่ wire), ปุ่ม prev/next gallery keyboard-navigable, Contrast ราคา/facts บนพื้นหลังรูป ≥4.5:1" },
+      { stage: "4. Connect", button: "แตะ LINE/WhatsApp/Call/AI Chat (Sticky CTA)", destination: "เปิด LINE/WhatsApp app หรือ ContactRail chat panel (in-page)", back: "ปิด chat panel กลับหน้า Property Details เดิม (ไม่ navigate ออก)", bottomSheet: "ไม่มี (ContactRail เป็น full-screen mobile, ไม่ใช่ sheet)", dialog: "Inquiry Form modal (สำรองกรณีไม่ใช้ LINE/WhatsApp)", loading: "Chat: 'AI กำลังพิมพ์...' indicator ระหว่างรอตอบ", empty: "ไม่มีข้อความก่อนเริ่มแชท → แสดง Greeting message เริ่มต้น", error: "AI Chat ล่ม/timeout → ข้อความ fallback แนะนำติดต่อ LINE/Phone โดยตรง",
+        kpi: "LINE Click / WhatsApp Click / Chat Started (สัดส่วนที่เลือกช่องทางไหนมากที่สุด)", friction: "CTA มองไม่เห็นถ้า scroll ลึกและ sticky bar ไม่ทำงานสม่ำเสมอทุกหน้าจอ", solution: "Sticky CTA bar ต้องอยู่ล่างสุดตลอดการ scroll บนมือถือ (ยืนยันว่ามีอยู่แล้วจาก Step 1 Audit)",
+        micro: "Chat panel slide-up 250ms, Toast แจ้ง 'ส่งข้อความแล้ว' หลังส่ง, Haptic light feedback เมื่อกดปุ่ม Call/LINE บนมือถือที่รองรับ",
+        a11y: "ปุ่ม Call/LINE/WhatsApp ≥44×44px ตาม audit เดิม (ContactRail toggle ปัจจุบัน 26px ต้องแก้ใน Step 4), Chat input รองรับ screen reader ประกาศข้อความใหม่ (aria-live)" },
+      { stage: "5. Decide", button: "แตะ 'เปรียบเทียบ' บนการ์ด/รายละเอียด", destination: "หน้า Compare (ยังไม่มีจริง — Known Gap, ต้องสร้างใน Step 7)", back: "ปุ่ม 'ลบ' รายการออกจาก Compare กลับสถานะก่อนหน้า (ไม่ navigate)", bottomSheet: "Mobile Compare card (horizontal scroll) — ออกแบบไว้ใน Step 2", dialog: "ไม่มี", loading: "ไม่มี (ข้อมูลอยู่ใน state อยู่แล้วจาก property ที่เปิดดูมาก่อน)", empty: "Compare list ว่าง → ข้อความ 'ยังไม่มีทรัพย์ที่เลือกเปรียบเทียบ' + CTA กลับไป Explore", error: "ไม่มีกรณี Error โดยตรง (client-side state)",
+        kpi: "Compare Completion % (สัดส่วนที่เปิด Compare แล้วกด Contact ต่อ ไม่ปิดทิ้ง)", friction: "Compare ซับซ้อนถ้าต้อง scroll ทั้งแนวตั้งแนวนอนพร้อมกันบนจอเล็ก", solution: "จำกัด Compare สูงสุด 3 ทรัพย์บนมือถือ, ใช้ Highlight Differences ลดข้อมูลที่ต้องอ่านซ้ำ (ออกแบบไว้ใน Step 2)",
+        micro: "แถวที่ต่างกัน highlight ด้วย fade-in สี, ปุ่ม 'ซ่อนที่เหมือนกัน' มี transition ยุบ/ขยายแถว 200ms",
+        a11y: "ตาราง Compare ต้องมี scope='col'/'row' สำหรับ screen reader, รองรับ swipe ด้วย keyboard (arrow keys) บน desktop" },
+      { stage: "6. Action", button: "'นัดชมทรัพย์' หรือ 'ส่งฟอร์มสอบถาม' (จบท้าย Compare/Property Details)", destination: "Schedule Viewing Modal → Thank You state (ไม่ navigate ออกจากหน้า)", back: "ปิด Modal กลับ Property Details เดิม", bottomSheet: "Schedule Viewing ใช้ Modal ไม่ใช่ Sheet (ต้องยืนยัน pattern เดียวกันทั้งเว็บใน Step 4)", dialog: "Schedule Viewing Modal + Confirm dialog", loading: "ปุ่ม Submit แสดง spinner ระหว่างส่ง (mock ปัจจุบัน, จริงเมื่อเชื่อม Firestore)", empty: "ไม่มีกรณี Empty", error: "ส่งฟอร์มไม่สำเร็จ (เครือข่ายขาด) → Toast แจ้ง error + ปุ่มลองใหม่ ไม่ล้างข้อมูลที่กรอกแล้ว",
+        kpi: "Lead Submitted / Booking Confirmed (จำนวนฟอร์ม/นัดชมสำเร็จต่อสัปดาห์)", friction: "กลัวกรอกฟอร์มยาวแล้วเสียเวลาโดยไม่ได้อะไรตอบกลับทันที", solution: "แสดง Thank You state ทันทีพร้อมข้อความ 'Agent จะติดต่อกลับภายใน X ชั่วโมง' ให้ความมั่นใจ",
+        micro: "ปุ่ม Submit มี loading spinner แล้ว morph เป็น checkmark สำเร็จ, Toast slide-in บอกสถานะ, Confetti/success animation เบาๆ (ไม่ overdo กับ Brand หรูหรา)",
+        a11y: "Modal ต้อง trap focus + ปิดด้วย Esc ได้, Error message ต้องอ่านได้ด้วย screen reader (aria-live=assertive), ปุ่ม Submit ขนาด ≥44px" },
+    ];
+    const iconStandard = [
+      { name: "Facebook", type: "Social (Official Brand)", placement: "Share modal, Agent Profile footer", label: "Icon-only (จดจำได้ทันที)" },
+      { name: "LINE", type: "Social/Contact (Official Brand)", placement: "Sticky CTA bar, Share modal", label: "Icon-only" },
+      { name: "WhatsApp", type: "Contact (Official Brand)", placement: "Sticky CTA bar, Property Details", label: "Icon-only" },
+      { name: "Instagram/YouTube/TikTok", type: "Social (Official Brand)", placement: "Footer, Agent Profile (เมื่อมีลิงก์จริง)", label: "Icon-only" },
+      { name: "Telegram", type: "Contact (Official Brand)", placement: "Footer/Contact page (เมื่อเปิดใช้)", label: "Icon-only" },
+      { name: "Phone", type: "Contact (มาตรฐานสากล)", placement: "Sticky CTA bar, Agent Card — Primary บน mobile", label: "Icon + เบอร์โทร" },
+      { name: "Email", type: "Contact (มาตรฐานสากล)", placement: "Contact page, Agent Card", label: "Icon + อีเมล" },
+      { name: "Location/Map", type: "มาตรฐานสากล", placement: "Property Details (แผนที่), Property Map", label: "Icon + ชื่อทำเล" },
+      { name: "Calendar", type: "มาตรฐานสากล", placement: "Schedule Viewing button", label: "Icon + Label ('นัดชม')" },
+      { name: "Share", type: "Action หลัก", placement: "PropertyCard, Property Details — Secondary CTA", label: "Icon-only (44×44px)" },
+      { name: "Favorite (Heart)", type: "Action หลัก", placement: "PropertyCard, Property Details — Secondary CTA", label: "Icon-only (44×44px)" },
+      { name: "Compare", type: "Action หลัก", placement: "PropertyCard, Property Details — Secondary CTA", label: "Icon-only (44×44px)" },
+      { name: "Print", type: "มาตรฐานสากล", placement: "Compare View Export", label: "Icon + Label ('พิมพ์/PDF')" },
+    ];
+    const personas = [
+      { icon: "🏠", name: "Buyer / ผู้ซื้อ-ผู้เช่า", priority: "P0", role: "ผู้เยี่ยมชมเว็บไซต์ (ไม่ต้อง login) ค้นหาทรัพย์เพื่อซื้อ/เช่า",
+        primaryGoal: "หาบ้าน/วิลล่าที่ตรงงบและทำเลใน Hua Hin/Pranburi/Cha-am ได้เร็วที่สุด",
+        secondaryGoal: "เปรียบเทียบหลายประกาศ, บันทึกรายการที่สนใจไว้ดูภายหลัง",
+        painPoints: "ต้องเลื่อนดูรูปเยอะบนจอเล็ก, กังวลว่าราคา/สถานะจะไม่อัปเดต",
+        step1Problems: "Search box dropdown แคบเกินไปบนจอ <360px (Step 1)",
+        needs: "Filter ที่ใช้นิ้วง่าย, ราคา/สถานะชัดเจน, ติดต่อ agent ได้ทันทีโดยไม่ต้องออกจากหน้า",
+        expectedExperience: "เหมือนแอป e-commerce ระดับโลก — โหลดเร็ว กดปุ๊บเห็นปั๊บ ไม่มีขั้นตอนซับซ้อน",
+        mobileBehaviour: "ใช้มือเดียว (one-hand), แนวตั้ง (portrait) เป็นหลัก, มักใช้ระหว่างเดินทาง/wifi ไม่เสถียร",
+        criticalScreens: "Home → Search Results → Property Details → ContactRail/Schedule Viewing",
+        successCriteria: "ติดต่อ agent หรือบันทึก Favorite ได้ภายใน 3 คลิกจากหน้า Property Details" },
+      { icon: "💰", name: "Seller / เจ้าของบ้านที่ต้องการขาย", priority: "P0", role: "ต้องการลงประกาศขาย/ให้เช่าทรัพย์ของตนเอง — ใช้ระบบ \"Lister\" เดียวกับ Agent",
+        primaryGoal: "ลงประกาศได้เองโดยไม่ต้องพึ่ง Agent ทั้งหมด และปิดการขาย/เช่าเร็วที่สุด",
+        secondaryGoal: "ติดตามสถานะประกาศของตัวเอง (pending/live/expired)",
+        painPoints: "สมัครสมาชิกผ่านฟอร์มที่ password มองเห็นเป็นตัวอักษรโล่งๆ (ไม่มั่นใจเรื่องความปลอดภัย)",
+        step1Problems: "Agent Signup.dc.html password fields เป็น type=\"text\" — plaintext แสดงบนจอ (Step 1, ยืนยันซ้ำจาก Known Issue เดิม)",
+        needs: "ขั้นตอนสมัคร/อัปโหลดรูปที่ง่ายบนมือถือ, เห็นสถานะ approve/reject ชัดเจน",
+        expectedExperience: "รู้สึกเหมือน App จัดการทรัพย์สินมืออาชีพ ไม่ใช่แบบฟอร์มเว็บเก่า",
+        mobileBehaviour: "มักถ่ายรูปบ้านด้วยมือถือแล้วอัปโหลดทันที ต้องรองรับการเลือกหลายรูปพร้อมกัน",
+        criticalScreens: "Agent Signup → Lister Dashboard → Lister Billing",
+        successCriteria: "ลงประกาศสำเร็จและเห็นสถานะ 'pending review' ภายใน session เดียวจากมือถือ" },
+      { icon: "🧑‍💼", name: "Agent / นายหน้า", priority: "P0", role: "ตัวแทนขาย/เช่าทรัพย์ให้ผู้อื่น — ใช้ระบบ Lister เดียวกับ Seller ในฐานข้อมูลจริง (ไม่มี Role แยก)",
+        primaryGoal: "จัดการหลายประกาศพร้อมกัน, สร้าง lead ใหม่ให้เร็วที่สุด",
+        secondaryGoal: "แชร์ประกาศไปยัง Social/LINE ได้ง่าย, ใช้โควต้า AI-generated post-text",
+        painPoints: "จัดการหลายทรัพย์พร้อมกันบนจอเล็กอาจสับสน, เดียวกับ Seller เรื่อง password field",
+        step1Problems: "เดียวกับ Seller (ใช้หน้าเดียวกัน) — Agent Signup password type=\"text\" (Step 1)",
+        needs: "Dashboard สรุปทุกประกาศของตัวเองในมุมมองเดียว, ปุ่ม Share ที่เข้าถึงง่ายบนมือถือ",
+        expectedExperience: "เร็ว มีประสิทธิภาพ ไม่เสียเวลาไปกับ UI ที่ซับซ้อน เพราะต้องทำงานหลายทรัพย์ต่อวัน",
+        mobileBehaviour: "ใช้งานระหว่างนัดลูกค้า มักสลับแอปบ่อย (LINE/Facebook/เว็บไซต์)",
+        criticalScreens: "Lister Dashboard → Agent Profile → Advertise (ซื้อแบนเนอร์)",
+        successCriteria: "เพิ่ม/แก้ไขประกาศและแชร์ออกไปได้ภายในไม่กี่นาทีระหว่างยืนอยู่หน้างาน" },
+      { icon: "🏗️", name: "Owner / Project Owner", priority: "P2", role: "เจ้าของโครงการ/บ้านที่มักไม่ใช้ระบบด้วยตัวเอง — Admin ป้อนข้อมูลแทนผ่าน Owners.dc.html/AI Quick Add",
+        primaryGoal: "ให้ทีมงาน (Admin/Agent) จัดการประกาศแทนตนได้อย่างถูกต้อง",
+        secondaryGoal: "ตรวจสอบสถานะทรัพย์ของตนเป็นครั้งคราว (ผ่านการติดต่อ Admin ไม่ใช่ self-serve)",
+        painPoints: "ไม่ใช่ผู้ใช้งานหน้าจอโดยตรงเป็นหลัก — Pain Point จริงคือ 'ไม่มี' เพราะไม่ได้ใช้ระบบเอง",
+        step1Problems: "ไม่มีหน้าจอเฉพาะสำหรับ Persona นี้ที่ตรวจสอบได้ใน Step 1 — Owners.dc.html เป็นเครื่องมือฝั่ง Admin ไม่ใช่หน้าที่ Owner ใช้เอง",
+        needs: "ความมั่นใจว่าข้อมูล/รูปภาพถูกจัดการอย่างเป็นระบบโดย Admin",
+        expectedExperience: "ไม่ต้องเรียนรู้ระบบเอง — สื่อสารผ่านช่องทางที่ตนถนัด (โทร/LINE) แล้ว Admin จัดการต่อ",
+        mobileBehaviour: "N/A โดยตรง — พฤติกรรมมือถือของ Persona นี้คือการคุยผ่าน LINE/โทรศัพท์กับ Admin ไม่ใช่การเปิดเว็บไซต์เอง",
+        criticalScreens: "ไม่มี (ใช้ผ่าน Admin เป็นตัวกลาง)",
+        successCriteria: "ข้อมูลทรัพย์ของตนถูกต้องและได้รับการอัปเดตเมื่อสถานะเปลี่ยน (วัดผลทางอ้อมผ่าน Admin)" },
+      { icon: "🛠️", name: "Administrator", priority: "P1", role: "ผู้ดูแลระบบ — อนุมัติประกาศ, จัดการเนื้อหา, ตอบ lead, ดูแล AI Notes/Persona/Restrictions",
+        primaryGoal: "อนุมัติ/ปฏิเสธประกาศและตอบ lead ให้ทันเวลา แม้ไม่ได้อยู่หน้าคอมพิวเตอร์",
+        secondaryGoal: "ตรวจสอบ KPI/rental-expiry และจัดการ Site Content ระหว่างเดินทาง",
+        painPoints: "Nav bar บนมือถือมีลิงก์เยอะ (7+ รายการ) ต้องเลื่อนหา ไม่มี hamburger menu เฉพาะ Admin",
+        step1Problems: "Admin Dashboard top bar ใช้ flex-wrap สำหรับ nav หลายลิงก์ — wrap ได้แต่ดูรกบนจอเล็ก (Step 1)",
+        needs: "เมนูที่จัดกลุ่มชัดเจนบนมือถือ, ปุ่มอนุมัติ/ปฏิเสธที่กดง่ายด้วยนิ้วเดียว",
+        expectedExperience: "ทำงานสำคัญ (approve listing, ตอบ lead) ได้แม้อยู่นอกออฟฟิศ โดยไม่ต้องรอเปิดคอมพิวเตอร์",
+        mobileBehaviour: "ใช้สลับไปมาระหว่างงานหลายอย่างสั้นๆ ระหว่างวัน (multi-tasking), มักอยู่ในที่ที่มีสัญญาณไม่แน่นอน",
+        criticalScreens: "Admin Dashboard → Listing Approvals → Owners → Site Content",
+        successCriteria: "อนุมัติ/ปฏิเสธประกาศและตอบ lead ใหม่ได้จากมือถือภายใน 1 นาทีต่อรายการ" },
+    ];
+    return { auditRows, personas, personaUX, iconStandard, journeySteps, personaJourneys, journeyMapBuyer, journeyMapSeller, stageDetails };
+  }
+}
+</script>
+</body>
+</html>

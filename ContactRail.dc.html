@@ -12,21 +12,25 @@
   <!-- Toggle arrow stays pinned at the edge always (never slides away) so a
        collapsed rail can still be reopened. Only the 3 tabs below it slide. -->
   <div style="position:fixed; top:50%; right:0; transform:translateY(-160px); z-index:61;">
-    <div onClick="{{ onToggle }}" style="width:26px; height:44px; background:oklch(22% 0.02 60); border-radius:6px 0 0 6px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:-2px 2px 8px oklch(0% 0 0 / 0.15);">
+    <div onClick="{{ onToggle }}" style="width:44px; height:44px; background:oklch(22% 0.02 60); border-radius:6px 0 0 6px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:-2px 2px 8px oklch(0% 0 0 / 0.15);">
       <div style="color:oklch(97% 0.01 80); font-size:14px; transform:{{ arrowRotate }};">→</div>
     </div>
   </div>
-  <div style="position:fixed; top:50%; right:0; transform:translateY(-104px) {{ railTransform }}; transition:transform .28s ease; z-index:60; display:flex; flex-direction:column; align-items:flex-end;">
+  <div style="position:fixed; top:50%; right:0; transform:translateY(-104px) {{ railTransform }}; transition:transform .28s ease; z-index:60; display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
     <!-- CONTACT US vertical tab -> opens form -->
     <div onClick="{{ onOpenForm }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:16px 8px; border-radius:6px 0 0 6px; writing-mode:vertical-rl; text-orientation:mixed; font-size:12px; letter-spacing:0.12em; cursor:pointer; box-shadow:-2px 2px 8px oklch(0% 0 0 / 0.12);">{{ t.rail_contact_us }}</div>
-    <!-- LINE bubble -->
-    <a href="{{ lineUrl }}" target="_blank" rel="noopener" style="margin-top:10px; width:48px; height:48px; border-radius:50% 0 0 50%; background:#06C755; display:flex; align-items:center; justify-content:center; text-decoration:none; box-shadow:-2px 2px 8px oklch(0% 0 0 / 0.15);">
-      <span style="color:#fff; font-size:11px; font-weight:700; font-family:'Work Sans',sans-serif;">LINE</span>
-    </a>
-    <!-- WhatsApp pill -->
-    <a href="{{ whatsappUrl }}" target="_blank" rel="noopener" style="margin-top:10px; background:#25D366; color:#fff; padding:14px 16px; border-radius:6px 0 0 6px; text-decoration:none; font-size:13px; font-family:'Work Sans',sans-serif; font-weight:600; display:flex; align-items:center; gap:8px; box-shadow:-2px 2px 8px oklch(0% 0 0 / 0.15);">
-      WhatsApp
-    </a>
+    <!-- Unified compact icon row: LINE / WhatsApp / Phone, equal sizing -->
+    <div style="display:flex; flex-direction:column; gap:8px; background:oklch(99% 0.005 80); padding:8px; border-radius:10px 0 0 10px; box-shadow:-2px 2px 10px oklch(0% 0 0 / 0.14);">
+      <a href="{{ lineUrl }}" target="_blank" rel="noopener" title="LINE" style="width:44px; height:44px; border-radius:50%; background:#06C755; display:flex; align-items:center; justify-content:center; text-decoration:none;">
+        <span style="color:#fff; font-size:10px; font-weight:700; font-family:'Work Sans',sans-serif;">LINE</span>
+      </a>
+      <a href="{{ whatsappUrl }}" target="_blank" rel="noopener" title="WhatsApp" style="width:44px; height:44px; border-radius:50%; background:#25D366; display:flex; align-items:center; justify-content:center; text-decoration:none;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.06-1.33A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2Zm0 18.2c-1.6 0-3.1-.44-4.4-1.2l-.32-.19-3.06.8.82-2.99-.2-.3A8.18 8.18 0 0 1 3.8 12c0-4.53 3.68-8.2 8.2-8.2 4.53 0 8.2 3.67 8.2 8.2 0 4.52-3.67 8.2-8.2 8.2Z"/></svg>
+      </a>
+      <a href="{{ telUrl }}" title="{{ t.call }}" style="width:44px; height:44px; border-radius:50%; background:oklch(22% 0.02 60); display:flex; align-items:center; justify-content:center; text-decoration:none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.5.6.6 0 1.1.5 1.1 1.1V20c0 .6-.5 1.1-1.1 1.1C10.9 21.1 2.9 13.1 2.9 3.2 2.9 2.6 3.4 2.1 4 2.1h3.3c.6 0 1.1.5 1.1 1.1 0 1.2.2 2.4.6 3.5.1.3 0 .7-.2 1L6.6 10.8Z" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
   </div>
 
   <!-- ============ MY FAVORITES (persistent, cart-style) ============ -->
@@ -42,22 +46,64 @@
     <div onClick="{{ onCloseFavorites }}" style="position:fixed; inset:0; background:oklch(15% 0.01 60 / 0.5); z-index:86; display:flex; align-items:flex-end; justify-content:flex-start; padding:20px;">
       <div onClick="{{ stopProp }}" style="background:oklch(99% 0.005 80); border-radius:10px; width:100%; max-width:360px; max-height:70vh; display:flex; flex-direction:column; box-shadow:0 20px 60px oklch(0% 0 0 / 0.35); overflow:hidden;">
         <div style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:16px 18px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
-          <div style="font-family:'Playfair Display',serif; font-size:16px;">⭐ {{ favButtonLabel }}</div>
+          <div>
+            <div style="font-family:'Playfair Display',serif; font-size:16px;">⭐ {{ favButtonLabel }}</div>
+            <div style="font-size:11px; color:oklch(80% 0.02 75); margin-top:2px;">{{ t.fav_subtitle }}</div>
+          </div>
           <div onClick="{{ onCloseFavorites }}" style="cursor:pointer; padding:6px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></div>
         </div>
         <div style="flex:1; overflow-y:auto; padding:12px;">
           <sc-for list="{{ favoriteRows }}" as="fr" hint-placeholder-count="1">
-            <a href="{{ fr.href }}" style="display:flex; gap:10px; align-items:center; padding:10px; border-radius:8px; text-decoration:none; margin-bottom:6px;" style-hover="background:oklch(96% 0.01 75);">
+            <a href="{{ fr.href }}" style="display:flex; gap:10px; align-items:flex-start; padding:10px; border-radius:8px; text-decoration:none; margin-bottom:6px;" style-hover="background:oklch(96% 0.01 75);">
               <div style="{{ fr.thumbStyle }}"></div>
               <div style="flex:1; min-width:0;">
                 <div style="font-size:13px; color:oklch(25% 0.02 60); font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ fr.title }}</div>
-                <div style="font-size:12px; color:oklch(50% 0.02 60);">{{ fr.priceLabel }}</div>
+                <div style="font-size:12.5px; color:oklch(35% 0.13 25); font-weight:600; margin-top:2px;">{{ fr.priceLabel }}</div>
+                <sc-if value="{{ fr.locationLabel }}"><div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📍 {{ fr.locationLabel }}</div></sc-if>
+                <sc-if value="{{ fr.specsLabel }}"><div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-top:1px;">{{ fr.specsLabel }}</div></sc-if>
               </div>
               <div onClick="{{ fr.onRemove }}" style="font-size:11px; color:oklch(50% 0.15 30); cursor:pointer; padding:6px; flex-shrink:0;">✕</div>
             </a>
           </sc-for>
           <sc-if value="{{ noFavorites }}"><div style="text-align:center; padding:30px 10px; font-size:13px; color:oklch(55% 0.02 60);">{{ noFavoritesLabel }}</div></sc-if>
         </div>
+        <sc-if value="{{ hasFavCount }}">
+          <div style="flex-shrink:0; padding:12px; border-top:1px solid oklch(90% 0.01 70); position:relative;">
+            <div onClick="{{ onToggleShareMenu }}" style="cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:11px; border-radius:100px; font-size:13px; font-weight:600;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5" r="3" stroke="currentColor" stroke-width="1.8"/><circle cx="6" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="19" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M8.6 10.6L15.4 6.4M8.6 13.4L15.4 17.6" stroke="currentColor" stroke-width="1.8"/></svg>
+              {{ t.fav_share_btn }}
+            </div>
+            <sc-if value="{{ shareMenuOpen }}">
+              <div style="position:absolute; left:12px; right:12px; bottom:100%; margin-bottom:8px; background:oklch(99% 0.005 80); border:1px solid oklch(88% 0.01 70); border-radius:10px; box-shadow:0 8px 28px oklch(0% 0 0 / 0.18); overflow:hidden;">
+                <a href="{{ lineShareUrl }}" target="_blank" rel="noopener" onClick="{{ onCloseShareMenu }}" style="display:flex; align-items:center; gap:10px; padding:11px 14px; text-decoration:none; border-bottom:1px solid oklch(93% 0.01 70);" style-hover="background:oklch(96% 0.01 75);">
+                  <div style="width:26px; height:26px; border-radius:50%; background:#06C755; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><span style="color:#fff; font-size:8.5px; font-weight:700; font-family:'Work Sans',sans-serif;">LINE</span></div>
+                  <div style="font-size:13px; color:oklch(25% 0.02 60); font-weight:500;">LINE</div>
+                </a>
+                <a href="{{ facebookShareUrl }}" target="_blank" rel="noopener" onClick="{{ onCloseShareMenu }}" style="display:flex; align-items:center; gap:10px; padding:11px 14px; text-decoration:none; border-bottom:1px solid oklch(93% 0.01 70);" style-hover="background:oklch(96% 0.01 75);">
+                  <div style="width:26px; height:26px; border-radius:50%; background:#1877F2; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><span style="color:#fff; font-size:14px; font-weight:700; font-family:serif;">f</span></div>
+                  <div style="font-size:13px; color:oklch(25% 0.02 60); font-weight:500;">Facebook</div>
+                </a>
+                <a href="{{ whatsappShareUrl }}" target="_blank" rel="noopener" onClick="{{ onCloseShareMenu }}" style="display:flex; align-items:center; gap:10px; padding:11px 14px; text-decoration:none; border-bottom:1px solid oklch(93% 0.01 70);" style-hover="background:oklch(96% 0.01 75);">
+                  <div style="width:26px; height:26px; border-radius:50%; background:#25D366; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.06-1.33A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2Zm0 2c4.42 0 8 3.58 8 8s-3.58 8-8 8a7.95 7.95 0 0 1-4.06-1.11l-.29-.17-3 .79.8-2.93-.19-.3A7.95 7.95 0 0 1 4 12c0-4.42 3.58-8 8-8Z"/></svg></div>
+                  <div style="font-size:13px; color:oklch(25% 0.02 60); font-weight:500;">WhatsApp</div>
+                </a>
+                <div onClick="{{ onCopyShareLink }}" style="display:flex; align-items:center; gap:10px; padding:11px 14px; cursor:pointer;" style-hover="background:oklch(96% 0.01 75);">
+                  <div style="width:26px; height:26px; border-radius:50%; background:oklch(88% 0.01 70); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="12" height="12" rx="2" stroke="oklch(35% 0.02 60)" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="oklch(35% 0.02 60)" stroke-width="1.8"/></svg></div>
+                  <div style="font-size:13px; color:oklch(25% 0.02 60); font-weight:500;">{{ t.fav_copy_link }}</div>
+                </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ shareCopied }}"><div style="text-align:center; font-size:11.5px; color:oklch(45% 0.15 150); margin-top:6px;">{{ t.fav_share_copied }}</div></sc-if>
+          </div>
+        </sc-if>
+        <sc-if value="{{ hasFavCount }}">
+          <div style="flex-shrink:0; padding:0 12px 12px;">
+            <div onClick="{{ onCopyShareLink }}" style="cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; background:oklch(96% 0.01 75); border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:10px; border-radius:100px; font-size:12.5px; font-weight:600;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.8"/></svg>
+              {{ t.fav_copy_link }}
+            </div>
+          </div>
+        </sc-if>
       </div>
     </div>
   </sc-if>
@@ -84,52 +130,107 @@
   <!-- ============ AI CHAT MODAL ============ -->
   <sc-if value="{{ chatPanelOpen }}">
     <div style="position:fixed; inset:0; z-index:85; display:flex; align-items:flex-end; justify-content:flex-end; padding:{{ chatOverlayPadding }}; pointer-events:none;">
-      <div onClick="{{ stopProp }}" style="background:oklch(99% 0.005 80); border-radius:{{ chatPanelRadius }}; width:100%; max-width:{{ chatPanelMaxWidth }}; height:{{ chatPanelHeight }}; display:flex; flex-direction:column; box-shadow:0 20px 60px oklch(0% 0 0 / 0.35); overflow:hidden; pointer-events:auto;">
-        <div style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:16px 18px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
-          <div>
-            <div style="font-family:'Playfair Display',serif; font-size:17px;">{{ t.chat_title }}</div>
-            <div style="font-size:11px; color:oklch(80% 0.01 70); margin-top:2px;">{{ t.chat_subtitle }}</div>
-          </div>
-          <div style="display:flex; align-items:center; gap:4px;">
-            <div onClick="{{ onMinimizeChat }}" title="ย่อหน้าต่างแชท" style="cursor:pointer; padding:8px; border-radius:8px; display:flex; align-items:center; justify-content:center;" style-hover="background:oklch(30% 0.02 60);">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div onClick="{{ stopProp }}" style="background:oklch(99% 0.005 80); border-radius:{{ chatPanelRadius }}; width:100%; max-width:{{ chatPanelMaxWidth }}; height:{{ chatPanelHeight }}; display:flex; flex-direction:row; box-shadow:0 20px 60px oklch(0% 0 0 / 0.35); overflow:hidden; pointer-events:auto;">
+
+        <!-- ===== CONVERSATION LIST (left column) — Owner Preview only. Real customers never see this list (spec: customer gets AI/Human tabs only, no inbox). ===== -->
+        <sc-if value="{{ showConvList }}">
+          <div style="width:{{ convListWidth }}; flex-shrink:0; border-right:1px solid oklch(90% 0.01 70); display:flex; flex-direction:column; background:oklch(98% 0.005 78);">
+            <div style="padding:16px 18px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); flex-shrink:0; display:flex; align-items:center; gap:8px;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.7"/><circle cx="17" cy="9" r="2.4" stroke="currentColor" stroke-width="1.7"/><path d="M2.5 19c.7-3.2 3-5 5.5-5s4.8 1.8 5.5 5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M14.5 14.3c2.1.2 3.7 1.7 4.2 4.2" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+              <div style="font-family:'Work Sans',sans-serif; font-size:12.5px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase;">{{ t.chat_conversations_title }}</div>
             </div>
-            <div onClick="{{ onClearChat }}" title="ล้างประวัติแชท เริ่มใหม่" style="cursor:pointer; padding:6px 10px 6px 6px; border-radius:8px; display:flex; align-items:center; gap:5px;" style-hover="background:oklch(30% 0.02 60);">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 7H20M9 7V4.5C9 4 9.4 3.5 10 3.5H14C14.6 3.5 15 4 15 4.5V7M18 7L17.3 19C17.25 19.8 16.6 20.5 15.8 20.5H8.2C7.4 20.5 6.75 19.8 6.7 19L6 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <span style="font-size:11px;">ล้าง</span>
-            </div>
-          </div>
-        </div>
-        <div ref="{{ chatScrollRef }}" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px;">
-          <sc-for list="{{ chatMessages }}" as="m" hint-placeholder-count="1">
-            <div style="{{ m.bubbleWrapStyle }}">
-              <div style="{{ m.bubbleStyle }}">{{ m.text }}</div>
-              <sc-for list="{{ m.links }}" as="lnk" hint-placeholder-count="0">
-                <sc-if value="{{ lnk.thumbBg }}">
-                  <div onClick="{{ lnk.onClick }}" style="display:flex; align-items:center; gap:0; margin-top:6px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); border-radius:12px; cursor:pointer; width:100%; min-height:72px; overflow:hidden;">
-                    <div style="width:72px; height:72px; background:{{ lnk.thumbBg }}; flex-shrink:0;"></div>
-                    <div style="min-width:0; flex:1; padding:8px 10px;">
-                      <div style="font-size:12.5px; font-weight:600;">{{ lnk.label }}</div>
-                      <sc-if value="{{ lnk.priceLabel }}"><div style="font-size:12px; color:oklch(85% 0.02 70);">{{ lnk.priceLabel }}</div></sc-if>
-                      <sc-if value="{{ lnk.specsLabel }}"><div style="font-size:11px; color:oklch(70% 0.02 70);">{{ lnk.specsLabel }}</div></sc-if>
-                    </div>
+            <div style="flex:1; overflow-y:auto; background:oklch(99% 0.005 80);">
+              <div onClick="{{ onSelectDemoContact }}" style="cursor:pointer; padding:6px 16px 8px; border-bottom:1px solid oklch(92% 0.01 70); background:{{ demoRowBg }};">
+                <div style="display:flex; align-items:flex-start; gap:8px;">
+                  <div style="width:28px; height:28px; border-radius:50%; background:oklch(58% 0.11 210); color:white; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; font-weight:700;">คส</div>
+                  <div style="min-width:0; flex:1;">
+                    <div style="font-size:12px; font-weight:600; color:oklch(20% 0.02 60); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; line-height:1.3; margin-bottom:2px;">{{ t.chat_demo_name }}</div>
+                    <input value="{{ demoNote }}" onChange="{{ onDemoNoteChange }}" onClick="{{ stopProp }}" placeholder="{{ t.chat_note_placeholder }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:5px; padding:3px 7px; font-size:10.5px; font-family:inherit; box-sizing:border-box; background:oklch(99% 0.005 80); line-height:1.4;" />
                   </div>
-                </sc-if>
-                <sc-if value="{{ lnk.noThumb }}">
-                  <div onClick="{{ lnk.onClick }}" style="display:inline-block; margin-top:6px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:8px 16px; border-radius:100px; font-size:13px; cursor:pointer;">{{ lnk.label }}</div>
-                </sc-if>
+                </div>
+              </div>
+              <div style="padding:16px 16px; text-align:center; font-size:11.5px; color:oklch(58% 0.02 60); line-height:1.6;">{{ t.chat_no_human_convos }}</div>
+            </div>
+          </div>
+        </sc-if>
+
+        <!-- ===== CURRENT CONVERSATION (right column) ===== -->
+        <sc-if value="{{ showConvPane }}">
+        <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
+          <div style="background:oklch(99% 0.005 80); color:oklch(22% 0.02 60); padding:14px 18px 0; flex-shrink:0; border-bottom:1px solid oklch(92% 0.01 70);">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+              <sc-if value="{{ showBackToList }}">
+                <div onClick="{{ onBackToList }}" style="cursor:pointer; padding:4px; display:flex; align-items:center; color:oklch(22% 0.02 60);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+              </sc-if>
+              <div style="width:34px; height:34px; border-radius:50%; background:{{ convHeaderAvatarBg }}; color:white; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; font-weight:700;">{{ convHeaderAvatar }}</div>
+              <div style="flex:1; min-width:0;">
+                <div style="font-family:'Work Sans',sans-serif; font-size:14.5px; font-weight:700; color:oklch(20% 0.02 60); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ convHeaderName }}</div>
+                <div style="font-size:11px; color:oklch(55% 0.02 60); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ convHeaderSubtitle }}</div>
+              </div>
+              <div style="display:flex; align-items:center; gap:4px;">
+                <div onClick="{{ onMinimizeChat }}" title="ย่อหน้าต่างแชท" style="cursor:pointer; padding:8px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:oklch(40% 0.02 60);" style-hover="background:oklch(93% 0.01 75);">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;">
+              <div onClick="{{ onSelectAiTab }}" style="cursor:pointer; padding:8px 4px 10px; margin-right:22px; font-size:12.5px; font-weight:600; color:{{ aiTabColor }}; border-bottom:2px solid {{ aiTabBorder }}; white-space:nowrap;">🤖 {{ t.chat_tab_ai }}</div>
+              <div onClick="{{ onSelectDemoContact }}" style="cursor:pointer; padding:8px 4px 10px; font-size:12.5px; font-weight:600; color:{{ humanTabColor }}; border-bottom:2px solid {{ humanTabBorder }}; white-space:nowrap;">💬 {{ t.chat_demo_name }}</div>
+            </div>
+          </div>
+          <sc-if value="{{ isAiTab }}"><div style="flex-shrink:0; background:oklch(97% 0.03 80); color:oklch(45% 0.03 60); font-size:11.5px; padding:8px 18px;">{{ t.chat_ai_scope_note }}</div></sc-if>
+
+          <sc-if value="{{ isDemoContact }}">
+            <div ref="{{ demoScrollRef }}" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px;">
+              <sc-if value="{{ !hasDemoMessages }}"><div style="text-align:center; padding:24px 10px; font-size:12.5px; color:oklch(55% 0.02 60);">{{ t.chat_demo_empty }}</div></sc-if>
+              <sc-for list="{{ demoMessages }}" as="m" hint-placeholder-count="0">
+                <div style="{{ m.bubbleWrapStyle }}"><div style="{{ m.bubbleStyle }}">{{ m.text }}</div></div>
               </sc-for>
             </div>
-          </sc-for>
-          <sc-if value="{{ chatLoading }}">
-            <div style="align-self:flex-start; background:oklch(93% 0.01 75); color:oklch(45% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px;">{{ t.chat_thinking }}</div>
+            <div style="flex-shrink:0; border-top:1px solid oklch(90% 0.01 70); padding:10px 12px 12px; display:flex; gap:8px;">
+              <input value="{{ demoInput }}" onChange="{{ onDemoInput }}" onKeyDown="{{ onDemoKeyDown }}" placeholder="{{ t.chat_demo_placeholder }}" style="flex:1; border:1px solid oklch(85% 0.01 70); border-radius:100px; padding:10px 16px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0;" />
+              <div onClick="{{ onDemoSend }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; font-size:16px;">➤</div>
+            </div>
+          </sc-if>
+
+          <!-- AI TAB -->
+          <sc-if value="{{ isAiTab }}">
+            <div ref="{{ chatScrollRef }}" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px;">
+              <sc-for list="{{ chatMessages }}" as="m" hint-placeholder-count="1">
+                <div style="{{ m.bubbleWrapStyle }}">
+                  <div style="{{ m.bubbleStyle }}">{{ m.text }}</div>
+                  <sc-for list="{{ m.links }}" as="lnk" hint-placeholder-count="0">
+                    <sc-if value="{{ lnk.thumbBg }}">
+                      <div onClick="{{ lnk.onClick }}" style="display:flex; align-items:center; gap:0; margin-top:6px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); border-radius:12px; cursor:pointer; width:100%; min-height:72px; overflow:hidden;">
+                        <div style="width:72px; height:72px; background:{{ lnk.thumbBg }}; flex-shrink:0;"></div>
+                        <div style="min-width:0; flex:1; padding:8px 10px;">
+                          <div style="font-size:12.5px; font-weight:600;">{{ lnk.label }}</div>
+                          <sc-if value="{{ lnk.priceLabel }}"><div style="font-size:12px; color:oklch(85% 0.02 70);">{{ lnk.priceLabel }}</div></sc-if>
+                          <sc-if value="{{ lnk.specsLabel }}"><div style="font-size:11px; color:oklch(70% 0.02 70);">{{ lnk.specsLabel }}</div></sc-if>
+                        </div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ lnk.noThumb }}">
+                      <div onClick="{{ lnk.onClick }}" style="display:inline-block; margin-top:6px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:8px 16px; border-radius:100px; font-size:13px; cursor:pointer;">{{ lnk.label }}</div>
+                    </sc-if>
+                  </sc-for>
+                </div>
+              </sc-for>
+              <sc-if value="{{ chatLoading }}">
+                <div style="align-self:flex-start; background:oklch(93% 0.01 75); color:oklch(45% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px;">{{ t.chat_thinking }}</div>
+              </sc-if>
+            </div>
+            <div style="flex-shrink:0; border-top:1px solid oklch(90% 0.01 70); padding:10px 12px 4px; display:flex; gap:8px;">
+              <input value="{{ chatInput }}" onChange="{{ onChatInput }}" onKeyDown="{{ onChatKeyDown }}" placeholder="{{ t.chat_type_or_speak }}" style="flex:1; border:1px solid oklch(85% 0.01 70); border-radius:100px; padding:10px 16px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0;" />
+              <div onClick="{{ onChatSend }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; font-size:16px;">➤</div>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-shrink:0; padding:6px 12px 9px;">
+              <div onClick="{{ onClearChat }}" style="cursor:pointer; font-size:11.5px; color:oklch(55% 0.02 60);">{{ t.chat_clear }}</div>
+              <div onClick="{{ onSelectDemoContact }}" style="cursor:pointer; font-size:12px; color:oklch(35% 0.13 25); font-weight:600;">{{ t.chat_talk_to_human }} →</div>
+            </div>
           </sc-if>
         </div>
-        <div style="flex-shrink:0; border-top:1px solid oklch(90% 0.01 70); padding:12px; display:flex; gap:8px;">
-          <input value="{{ chatInput }}" onChange="{{ onChatInput }}" onKeyDown="{{ onChatKeyDown }}" placeholder="{{ t.chat_type_or_speak }}" style="flex:1; border:1px solid oklch(85% 0.01 70); border-radius:100px; padding:10px 16px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0;" />
-          <div onClick="{{ onChatSend }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; font-size:16px;">➤</div>
-        </div>
-        <div onClick="{{ onOpenFormFromChat }}" style="flex-shrink:0; text-align:center; padding:9px; font-size:12px; color:oklch(45% 0.02 60); border-top:1px solid oklch(93% 0.01 70); cursor:pointer;">{{ t.chat_talk_to_human }}</div>
+        </sc-if>
       </div>
     </div>
   </sc-if>
@@ -178,8 +279,8 @@ const I18N_RAIL = {
 };
 
 const CHAT_I18N = {
-  en: { chat_title: "Ask about our properties", chat_subtitle: "AI assistant · huahin.properties listings only", chat_placeholder: "e.g. Any 4-bedroom pool villas?", chat_type_or_speak: "Type or tap 🎙️ to speak", chat_thinking: "Typing…", chat_talk_to_human: "Prefer a human? Leave your contact →", chat_greeting: "Hi! Ask me anything about our listings — bedrooms, price, area, property codes, availability.", chat_view_property: "View property", chat_contact_us: "Contact us", chat_autobot_intro: "Hi! I noticed you've been looking closely at", chat_autobot_help: "Want me to help with anything specific?" },
-  th: { chat_type_or_speak: "พิมพ์หรือกด 🎙️ เพื่อพูดก็ได้", chat_title: "ถามเกี่ยวกับทรัพย์ของเรา", chat_subtitle: "ผู้ช่วย AI · ข้อมูลจากประกาศใน huahin.properties เท่านั้น", chat_placeholder: "เช่น มีพูลวิลล่า 4 ห้องนอนไหม", chat_thinking: "กำลังพิมพ์…", chat_talk_to_human: "อยากคุยกับเจ้าหน้าที่? ฝากข้อมูลติดต่อ →", chat_greeting: "สวัสดีค่ะ ถามอะไรก็ได้เกี่ยวกับทรัพย์ของเรา เช่น จำนวนห้องนอน ราคา โซน รหัสทรัพย์ หรือสถานะว่าง/เช่าแล้ว", chat_view_property: "ดูรายละเอียด", chat_contact_us: "ติดต่อเรา", chat_autobot_intro: "สวัสดีค่ะ เห็นว่าคุณสนใจดู", chat_autobot_help: "อยากให้ช่วยอะไรเพิ่มเติมไหมคะ?" },
+  en: { chat_title: "Ask about our properties", chat_subtitle: "AI assistant · huahin.properties listings only", chat_placeholder: "e.g. Any 4-bedroom pool villas?", chat_type_or_speak: "Type or tap 🎙️ to speak", chat_thinking: "Typing…", chat_talk_to_human: "Talk to a human", chat_greeting: "Hi! Ask me anything about our listings — bedrooms, price, area, property codes, availability.", chat_view_property: "View property", chat_contact_us: "Contact us", chat_autobot_intro: "Hi! I noticed you've been looking closely at", chat_autobot_help: "Want me to help with anything specific?", chat_conversations_title: "People", chat_ai_name: "AI Assistant", chat_ai_last: "Ask about listings, prices, areas…", chat_ai_subtitle_small: "Automated AI assistant", chat_no_human_convos: "This space fills up as real people message you — each will be saved here with an editable note.", chat_tab_ai: "AI Assistant", chat_tab_human: "Human", chat_ai_scope_note: "Chatting with our AI assistant — answers based only on real listing data.", chat_human_soon_title: "Live chat with a real person is coming soon", chat_human_soon_desc: "We're preparing real human live chat. For now, reach our team directly through any of these:", chat_human_alt_title: "Contact us directly", chat_contact_form_btn: "Send us a message", chat_clear: "Clear chat", chat_demo_name: "Somchai", chat_demo_tag: "Live conversation", chat_demo_empty: "No messages yet — start typing to chat with Somchai.", chat_demo_placeholder: "Message Somchai…", chat_note_placeholder: "Add a note about this person…", chat_demo_title: "This is a simulated example", chat_demo_desc: "Shows how a real person's conversation and note will look once someone actually messages you. Not a real conversation yet." },
+  th: { chat_type_or_speak: "พิมพ์หรือกด 🎙️ เพื่อพูดก็ได้", chat_title: "ถามเกี่ยวกับทรัพย์ของเรา", chat_subtitle: "ผู้ช่วย AI · ข้อมูลจากประกาศใน huahin.properties เท่านั้น", chat_placeholder: "เช่น มีพูลวิลล่า 4 ห้องนอนไหม", chat_thinking: "กำลังพิมพ์…", chat_talk_to_human: "คุยกับเจ้าหน้าที่จริง", chat_greeting: "สวัสดีค่ะ ถามอะไรก็ได้เกี่ยวกับทรัพย์ของเรา เช่น จำนวนห้องนอน ราคา โซน รหัสทรัพย์ หรือสถานะว่าง/เช่าแล้ว", chat_view_property: "ดูรายละเอียด", chat_contact_us: "ติดต่อเรา", chat_autobot_intro: "สวัสดีค่ะ เห็นว่าคุณสนใจดู", chat_autobot_help: "อยากให้ช่วยอะไรเพิ่มเติมไหมคะ?", chat_conversations_title: "ผู้คน", chat_ai_name: "AI Assistant", chat_ai_last: "ถามเกี่ยวกับทรัพย์ ราคา ทำเล…", chat_ai_subtitle_small: "ผู้ช่วย AI อัตโนมัติ", chat_no_human_convos: "พื้นที่นี้จะเต็มไปด้วยรายชื่อคนที่ทักมาคุยจริง แต่ละคนจะถูกบันทึกไว้ที่นี่พร้อมช่องบันทึกข้อความที่แก้ไขได้", chat_tab_ai: "AI Assistant", chat_tab_human: "เจ้าหน้าที่", chat_ai_scope_note: "กำลังคุยกับ AI ผู้ช่วยของ huahin.properties — ตอบจากข้อมูลทรัพย์จริงเท่านั้น", chat_human_soon_title: "ระบบแชทกับคนจริงกำลังเตรียมเปิดใช้งาน", chat_human_soon_desc: "เรากำลังเตรียมระบบแชทสดกับเจ้าหน้าที่จริง ระหว่างนี้ติดต่อทีมงานของเราได้โดยตรงผ่านช่องทางด้านล่าง", chat_human_alt_title: "ติดต่อเราโดยตรง", chat_contact_form_btn: "ส่งข้อความถึงเรา", chat_clear: "ล้างประวัติแชท", chat_demo_name: "คุณสมชาย", chat_demo_tag: "การสนทนาสด", chat_demo_empty: "ยังไม่มีข้อความ — เริ่มพิมพ์เพื่อคุยกับคุณสมชายได้เลย", chat_demo_placeholder: "พิมพ์ข้อความถึงคุณสมชาย…", chat_note_placeholder: "บันทึกข้อความเกี่ยวกับคนนี้…", chat_demo_title: "นี่คือตัวอย่างจำลอง", chat_demo_desc: "แสดงให้เห็นว่าบทสนทนาและบันทึกของคนจริงจะมีหน้าตาแบบนี้ เมื่อมีคนทักมาคุยจริง ยังไม่ใช่บทสนทนาจริง", chat_collection_greeting: "สวัสดีค่ะ นี่คือคอลเลคชั่นทรัพย์ที่ถูกแชร์มาให้คุณ:" },
   ru: { chat_title: "Спросите о наших объектах", chat_subtitle: "ИИ-ассистент · только объекты huahin.properties", chat_placeholder: "напр. Есть виллы с 4 спальнями?", chat_thinking: "Печатает…", chat_talk_to_human: "Хотите поговорить с человеком? Оставьте контакт →", chat_greeting: "Здравствуйте! Спрашивайте о наших объектах — спальни, цена, район, код объекта, наличие.", chat_view_property: "Смотреть объект", chat_contact_us: "Связаться с нами", chat_autobot_intro: "Здравствуйте! Я заметила, что вас заинтересовали", chat_autobot_help: "Могу чем-то помочь?" },
   zh: { chat_title: "咨询我们的房源", chat_subtitle: "AI 助手 · 仅限 huahin.properties 房源信息", chat_placeholder: "例如：有4卧室泳池别墅吗？", chat_thinking: "输入中…", chat_talk_to_human: "想联系真人客服？留下联系方式 →", chat_greeting: "您好！可以问我关于房源的任何问题 — 卧室数、价格、区域、房源编号或是否可租。", chat_view_property: "查看房源", chat_contact_us: "联系我们", chat_autobot_intro: "您好！我注意到您一直在关注", chat_autobot_help: "需要我帮您什么吗？" },
   de: { chat_title: "Fragen zu unseren Immobilien", chat_subtitle: "KI-Assistent · nur huahin.properties Angebote", chat_placeholder: "z.B. Poolvillen mit 4 Schlafzimmern?", chat_thinking: "Tippt…", chat_talk_to_human: "Lieber mit einem Menschen sprechen? Kontakt hinterlassen →", chat_greeting: "Hallo! Fragen Sie mich alles zu unseren Angeboten — Schlafzimmer, Preis, Gebiet, Objektcode oder Verfügbarkeit.", chat_view_property: "Immobilie ansehen", chat_contact_us: "Kontaktieren Sie uns", chat_autobot_intro: "Hallo! Mir ist aufgefallen, dass Sie sich für", chat_autobot_help: "interessieren. Kann ich Ihnen bei etwas Bestimmtem helfen?" },
@@ -190,17 +291,32 @@ const CHAT_I18N = {
 
 const FAV_PANEL_LABELS = { en: "My Favorites", th: "รายการโปรดของฉัน", ru: "Избранное", zh: "我的收藏", de: "Meine Favoriten", no: "Mine favoritter", fr: "Mes favoris", it: "I miei preferiti" };
 const FAV_EMPTY_LABELS = { en: "No saved favorites yet — tap the star on any listing.", th: "ยังไม่มีรายการโปรด — กดดาวที่ประกาศที่สนใจได้เลย", ru: "Пока нет избранного — нажмите звезду на объекте.", zh: "暂无收藏 — 点击房源上的星标即可收藏", de: "Noch keine Favoriten — tippen Sie auf den Stern bei einem Angebot.", no: "Ingen favoritter ennå — trykk på stjernen på en oppføring.", fr: "Aucun favori pour l'instant — appuyez sur l'étoile d'une annonce.", it: "Nessun preferito ancora — tocca la stella su un annuncio." };
+const FAV_SUBTITLE = { en: "Save properties, come back later, or share this collection", th: "บันทึกทรัพย์ที่สนใจไว้ดูภายหลัง หรือแชร์เป็นคอลเลคชั่นให้ลูกค้า", ru: "Сохраняйте объекты или поделитесь подборкой", zh: "保存房源，稍后查看，或分享此收藏", de: "Objekte speichern oder diese Auswahl teilen", no: "Lagre eiendommer eller del denne samlingen", fr: "Enregistrez des biens ou partagez cette sélection", it: "Salva immobili o condividi questa selezione" };
+const FAV_SHARE_BTN = { en: "Share this Collection", th: "แชร์คอลเลคชั่นนี้", ru: "Поделиться подборкой", zh: "分享此收藏", de: "Auswahl teilen", no: "Del samlingen", fr: "Partager la sélection", it: "Condividi la selezione" };
+const FAV_SHARE_COPIED = { en: "Link copied — send it to your customer", th: "คัดลอกลิงก์แล้ว — ส่งให้ลูกค้าได้เลย", ru: "Ссылка скопирована", zh: "链接已复制", de: "Link kopiert", no: "Lenke kopiert", fr: "Lien copié", it: "Link copiato" };
+const FAV_COPY_LINK = { en: "Copy Link", th: "คัดลอกลิงก์ (Copy Link)", ru: "Копировать ссылку", zh: "复制链接", de: "Link kopieren", no: "Kopier lenke", fr: "Copier le lien", it: "Copia link" };
 
 class Component extends DCLogic {
   state = {
     isMobile: (typeof window !== "undefined" && window.innerWidth < 640),
+    ownerPreview: false,
     railOpen: true, formOpen: false, submitted: false, favoritesOpen: false, favIds: [],
     name: "", phone: "", email: "", message: "",
     lang: "th",
     chatOpen: false, chatMinimized: false, chatMessages: [], chatInput: "", chatLoading: false,
+    chatTab: "ai", chatMobileView: "list", demoNote: "",
   };
 
   chatScrollRef = React.createRef();
+  demoScrollRef = React.createRef();
+
+  sendDemoMessage() {
+    const text = (this.state.demoInput || "").trim();
+    if (!text) return;
+    const msg = { text, bubbleWrapStyle: "align-self:flex-end; max-width:85%;", bubbleStyle: "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:10px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
+    this.setState((s) => ({ demoMessages: [...(s.demoMessages || []), msg], demoInput: "" }));
+    setTimeout(() => { if (this.demoScrollRef.current) this.demoScrollRef.current.scrollTop = this.demoScrollRef.current.scrollHeight; }, 60);
+  }
 
   async componentDidMount() {
     try {
@@ -226,7 +342,7 @@ class Component extends DCLogic {
     window.addEventListener("langchange", this._onStorage);
     await this._loadProperties();
     const restored = this._restoreHistory();
-    if (!restored) this._maybeAutoTrigger();
+    if (!restored) this._maybeAutoTriggerFromCollectionLink() || this._maybeAutoTrigger();
     this._refreshFavIds();
     this._onFavChange = () => this._refreshFavIds();
     window.addEventListener("hh_favorites_changed", this._onFavChange);
@@ -278,6 +394,36 @@ class Component extends DCLogic {
   clearChatHistory() {
     try { localStorage.removeItem("hh_chat_history"); } catch (e) {}
     this.setState({ chatMessages: [] });
+  }
+
+  // A member/admin shared a Collection link (?collection=ID1,ID2,...) — the
+  // recipient is a stranger who has never used this site before, so we skip
+  // the favorites-based auto-trigger entirely and greet with exactly the
+  // shared properties instead. Today the human side of this always shows as
+  // "Admin" (no signed-in member identity flows into this anonymous page
+  // yet) — real per-member attribution needs a logged-in sharer flow later.
+  _maybeAutoTriggerFromCollectionLink() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const raw = params.get("collection");
+      if (!raw) return false;
+      const ids = raw.split(",").map((s) => s.trim()).filter(Boolean);
+      if (!ids.length) return false;
+      const props = this._properties || (this._mod ? this._mod.PROPERTIES : []) || [];
+      const lang = this.state.lang;
+      const matched = ids.map((id) => props.find((p) => p.id === id)).filter(Boolean);
+      const t = CHAT_I18N[lang] || CHAT_I18N.en;
+      const titles = matched.slice(0, 5).map((p) => (p.title && (p.title[lang] || p.title.en)) || p.id);
+      const greetingText = matched.length
+        ? (t.chat_collection_greeting || "Hi! Here's the collection of properties shared with you:") + " " + matched.map((p) => p.id).join(", ")
+        : t.chat_greeting;
+      const bubbleStyle = "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;";
+      const greetMsg = { role: "assistant", text: greetingText, links: this._extractLinks(matched.map((p) => p.id).join(" "), lang), bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle };
+      this.setState({ chatOpen: true, chatMinimized: false, chatMessages: [greetMsg], chatMobileView: "conversation", chatTab: "ai" });
+      this._persistHistory([greetMsg]);
+      this._scrollChat();
+      return true;
+    } catch (e) { console.warn("Collection-link auto-trigger failed:", e); return false; }
   }
 
   async _maybeAutoTrigger() {
@@ -522,7 +668,7 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
     const lang = this.state.lang;
     const t = CHAT_I18N[lang] || CHAT_I18N.en;
     const next = alreadyGreeted ? this.state.chatMessages : [{ role: "assistant", text: t.chat_greeting, links: [], bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" }];
-    this.setState({ chatOpen: true, formOpen: false, chatMessages: next });
+    this.setState({ chatOpen: true, formOpen: false, chatMessages: next, chatMobileView: "list", chatTab: "ai" });
     this._persistHistory(next);
     this._scrollChat();
   }
@@ -541,6 +687,17 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
   removeFavorite(id) {
     if (this._favs) this._favs.toggleFavorite(id);
     this._refreshFavIds();
+  }
+
+  async shareCollection() {
+    const ids = this.state.favIds;
+    if (!ids.length) return;
+    const url = `${window.location.origin}${window.location.pathname}?collection=${ids.map(encodeURIComponent).join(",")}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      this.setState({ shareCopied: true, shareMenuOpen: false });
+      setTimeout(() => this.setState({ shareCopied: false }), 3000);
+    } catch (e) { console.warn("Copy failed:", e); }
   }
 
   toggle() {
@@ -581,9 +738,11 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
     };
 
     const chatT = CHAT_I18N[this.state.lang] || CHAT_I18N.en;
+    const favExtra = { fav_subtitle: FAV_SUBTITLE[this.state.lang] || FAV_SUBTITLE.en, fav_share_btn: FAV_SHARE_BTN[this.state.lang] || FAV_SHARE_BTN.en, fav_share_copied: FAV_SHARE_COPIED[this.state.lang] || FAV_SHARE_COPIED.en, fav_copy_link: FAV_COPY_LINK[this.state.lang] || FAV_COPY_LINK.en };
+    const collectionUrl = `${window.location.origin}${window.location.pathname}?collection=${this.state.favIds.map(encodeURIComponent).join(",")}`;
 
     return {
-      t: { ...t, ...shared, ...chatT },
+      t: { ...t, ...shared, ...chatT, ...favExtra },
       railTransform: this.state.railOpen ? "translateX(0)" : "translateX(100%)",
       arrowRotate: this.state.railOpen ? "rotate(0deg)" : "rotate(180deg)",
       onToggle: () => this.toggle(),
@@ -610,7 +769,7 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       chatBarLeft: "auto",
       chatOverlayPadding: this.state.isMobile ? "0" : "20px",
       chatPanelRadius: this.state.isMobile ? "0" : "10px",
-      chatPanelMaxWidth: this.state.isMobile ? "100%" : "380px",
+      chatPanelMaxWidth: this.state.isMobile ? "100%" : "520px",
       chatPanelHeight: this.state.isMobile ? "100dvh" : "min(560px, 80vh)",
       chatBarOpen: this.state.chatOpen && this.state.chatMinimized,
       chatBarMaxWidth: this.state.isMobile ? "52px" : "260px",
@@ -631,6 +790,14 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       hasFavCount: this.state.favIds.length > 0,
       onOpenFavorites: () => this.setState({ favoritesOpen: true }),
       onCloseFavorites: () => this.setState({ favoritesOpen: false }),
+      onToggleShareMenu: () => this.setState((s) => ({ shareMenuOpen: !s.shareMenuOpen })),
+      onCloseShareMenu: () => this.setState({ shareMenuOpen: false }),
+      onCopyShareLink: () => this.shareCollection(),
+      shareMenuOpen: this.state.shareMenuOpen,
+      lineShareUrl: "https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(collectionUrl),
+      facebookShareUrl: "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(collectionUrl),
+      whatsappShareUrl: "https://wa.me/?text=" + encodeURIComponent(collectionUrl),
+      shareCopied: this.state.shareCopied,
       favoritesOpen: this.state.favoritesOpen,
       noFavoritesLabel: FAV_EMPTY_LABELS[this.state.lang] || FAV_EMPTY_LABELS.en,
       noFavorites: this.state.favIds.length === 0,
@@ -643,7 +810,9 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
           href: `Property Details.dc.html?id=${encodeURIComponent(id)}`,
           title,
           priceLabel: p ? `${(p.price || 0).toLocaleString()} ${p.currency || "THB"}` : "",
-          thumbStyle: `width:48px; height:48px; border-radius:6px; flex-shrink:0; background:${cover ? `url(${cover}) center/cover` : "oklch(90% 0.01 70)"};`,
+          locationLabel: p ? [p.zone, p.area].filter(Boolean).join(", ") : "",
+          specsLabel: p ? [p.bedrooms ? `${p.bedrooms} ${this.state.lang === "th" ? "ห้องนอน" : "bed"}` : null, p.bathrooms ? `${p.bathrooms} ${this.state.lang === "th" ? "ห้องน้ำ" : "bath"}` : null].filter(Boolean).join(" · ") : "",
+          thumbStyle: `width:64px; height:64px; border-radius:6px; flex-shrink:0; background:${cover ? `url(${cover}) center/cover` : "oklch(90% 0.01 70)"};`,
           onRemove: (e) => { e.preventDefault(); e.stopPropagation(); this.removeFavorite(id); },
         };
       }),
@@ -652,6 +821,38 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       onChatKeyDown: (e) => { if (e.key === "Enter") { e.preventDefault(); this.sendChat(); } },
 
       onOpenFormFromChat: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }),
+
+      // ===== Conversation list / AI-Human tab shell =====
+      showConvList: !this.state.isMobile || this.state.chatMobileView === "list",
+      showConvPane: !this.state.isMobile || this.state.chatMobileView === "conversation",
+      showBackToList: this.state.isMobile,
+      aiRowBg: this.state.chatTab !== "demo" ? "oklch(94% 0.025 75)" : "transparent",
+      demoRowBg: this.state.chatTab === "demo" ? "oklch(94% 0.03 220)" : "transparent",
+      aiTabColor: this.state.chatTab === "ai" ? "oklch(22% 0.02 60)" : "oklch(60% 0.02 70)",
+      aiTabBorder: this.state.chatTab === "ai" ? "oklch(40% 0.13 25)" : "transparent",
+      humanTabColor: this.state.chatTab === "demo" ? "oklch(22% 0.02 60)" : "oklch(60% 0.02 70)",
+      humanTabBorder: this.state.chatTab === "demo" ? "oklch(40% 0.13 25)" : "transparent",
+      isAiTab: this.state.chatTab === "ai",
+      isDemoContact: this.state.chatTab === "demo",
+      demoMessages: this.state.demoMessages || [],
+      hasDemoMessages: (this.state.demoMessages || []).length > 0,
+      demoInput: this.state.demoInput || "",
+      demoScrollRef: this.demoScrollRef,
+      onDemoInput: (e) => this.setState({ demoInput: e.target.value }),
+      onDemoKeyDown: (e) => { if (e.key === "Enter") { e.preventDefault(); this.sendDemoMessage(); } },
+      onDemoSend: () => this.sendDemoMessage(),
+      convHeaderAvatar: this.state.chatTab === "demo" ? "คส" : "🤖",
+      convHeaderAvatarBg: this.state.chatTab === "demo" ? "oklch(58% 0.11 210)" : "oklch(55% 0.14 300)",
+      convHeaderName: this.state.chatTab === "demo" ? chatT.chat_demo_name : chatT.chat_ai_name,
+      convHeaderSubtitle: this.state.chatTab === "demo" ? chatT.chat_demo_tag : chatT.chat_ai_subtitle_small,
+      demoNote: this.state.demoNote,
+      onDemoNoteChange: (e) => this.setState({ demoNote: e.target.value }),
+      onSelectAiConversation: () => this.setState({ chatTab: "ai", chatMobileView: "conversation" }),
+      onSelectDemoContact: () => this.setState({ chatTab: "demo", chatMobileView: "conversation" }),
+      onSelectAiTab: () => this.setState({ chatTab: "ai" }),
+      onSelectHumanTab: () => this.setState({ chatTab: "human" }),
+      onBackToList: () => this.setState({ chatMobileView: "list" }),
+      convListWidth: this.state.isMobile ? "100%" : "190px",
     };
   }
 }

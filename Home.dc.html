@@ -15,6 +15,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="./image-slot.js"></script>
   <title>huahin.properties — Luxury Pool Villas &amp; Homes in Hua Hin, Pranburi, Cha-am</title>
   <link rel="icon" type="image/png" href="./logo.png">
   <meta name="description" content="Curated pool villas, beachfront homes and land for sale and rent across Hua Hin, Pranburi and Cha-am, Thailand.">
@@ -53,6 +54,7 @@
 <div style="max-width:1600px; margin:0 auto; background:oklch(98% 0.01 80);">
 
   <!-- ============ HEADER ============ -->
+  <div style="height:4px; background:linear-gradient(90deg, oklch(40% 0.13 25) 0%, oklch(40% 0.13 25) 60%, oklch(96% 0.02 80) 60%, oklch(96% 0.02 80) 80%, oklch(52% 0.1 220) 80%, oklch(52% 0.1 220) 100%);"></div>
   <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:14px clamp(10px,4vw,56px); border-bottom:1px solid oklch(90% 0.01 70); position:relative;">
     <a href="Home.dc.html" style="{{ logoStyle }}"><img src="logo.png" alt="huahin.properties logo" style="height:36px; width:36px; object-fit:contain; border-radius:50%; flex-shrink:0;" />huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</a>
 
@@ -68,6 +70,8 @@
         <div onClick="{{ onVoiceChatOpen }}" style="width:38px; height:38px; border-radius:50%; background:oklch(90% 0.005 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; font-size:17px; cursor:pointer; flex-shrink:0;">🎙️</div>
         <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" hint-size="150,54"></dc-import>
         <div style="width:1px; height:20px; background:oklch(80% 0.02 70); margin:0 4px;"></div>
+        <div style="width:1px; height:20px; background:oklch(80% 0.02 70); margin:0 4px;"></div>
+        <div onClick="{{ onShareOpen }}" title="{{ t.share_site }}" style="width:38px; height:38px; border-radius:50%; background:oklch(90% 0.005 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 8a3 3 0 1 0-2.83-4H15a3 3 0 0 0 .09 3.26L8.9 10.7a3 3 0 1 0 0 2.6l6.2 3.44A3 3 0 1 0 16 15l-6.2-3.44a3 3 0 0 0 0-1.12L16 7a3 3 0 0 0 2 1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
         <a href="Lister Billing.dc.html" title="Login" style="font-size:16px; text-decoration:none; color:oklch(40% 0.02 60);">👤</a>
         <a href="Agent Signup.dc.html" title="Sign up Free" style="font-size:13px; font-weight:600; text-decoration:none; color:white; background:oklch(62% 0.19 45); padding:6px 12px; border-radius:100px; white-space:nowrap;">Sign up Free</a>
         <a href="Admin Login.dc.html" style="font-size:13px; color:oklch(40% 0.02 60); text-decoration:none;">{{ t.nav_admin }}</a>
@@ -79,6 +83,7 @@
         <div onClick="{{ onVoiceChatOpen }}" style="width:30px; height:30px; border-radius:50%; background:oklch(90% 0.005 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; flex-shrink:0;">🎙️</div>
         <a href="Agent Signup.dc.html" title="Login / Sign up" style="width:30px; height:30px; border-radius:50%; background:oklch(90% 0.005 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; font-size:14px; text-decoration:none; flex-shrink:0;">👤</a>
         <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" compact="{{ true }}" menu-align="right" hint-size="34,30"></dc-import>
+        <div onClick="{{ onShareOpen }}" title="{{ t.share_site }}" style="width:36px; height:36px; border-radius:50%; background:oklch(90% 0.005 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M18 8a3 3 0 1 0-2.83-4H15a3 3 0 0 0 .09 3.26L8.9 10.7a3 3 0 1 0 0 2.6l6.2 3.44A3 3 0 1 0 16 15l-6.2-3.44a3 3 0 0 0 0-1.12L16 7a3 3 0 0 0 2 1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
         <div onClick="{{ toggleMenu }}" style="display:flex; flex-direction:column; gap:4px; padding:6px 4px; cursor:pointer; flex-shrink:0;">
           <div style="width:20px; height:2px; background:oklch(22% 0.02 60);"></div>
           <div style="width:20px; height:2px; background:oklch(22% 0.02 60);"></div>
@@ -111,16 +116,22 @@
   </sc-if>
 
   <!-- ============ HERO ============ -->
-  <div style="{{ heroStyle }}">
-    <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(30,20,10,0.08) 0%, rgba(30,20,10,0.68) 100%);"></div>
-    <sc-if value="{{ heroNoPhoto }}">
-      <div style="position:absolute; top:14px; right:14px; font-family:monospace; font-size:11px; color:oklch(95% 0.01 80 / 0.85); background:rgba(0,0,0,0.32); padding:4px 8px; border-radius:4px;">[photo placeholder]</div>
+  <div style="position:relative; height:clamp(480px,70vh,680px); overflow:hidden;">
+    <sc-if value="{{ heroHasCms }}">
+      <div style="position:absolute; inset:0; background:{{ heroCmsBg }};"></div>
     </sc-if>
+    <sc-if value="{{ heroNoCms }}">
+      <image-slot id="hero-main" shape="rect" placeholder="วางภาพ Hero จริง: Hua Hin Railway Station / ชายหาดหัวหิน" fit="cover"></image-slot>
+    </sc-if>
+    <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(30,20,10,0.1) 0%, rgba(30,20,10,0.7) 100%); pointer-events:none;"></div>
 
-    <div style="position:relative; z-index:2; padding:{{ heroTextPadding }}; color:oklch(98% 0.01 80); max-width:760px;">
+    <div style="position:absolute; inset:0; z-index:2; display:flex; align-items:{{ heroAlign }}; pointer-events:none;">
+    <div style="padding:{{ heroTextPadding }}; color:oklch(98% 0.01 80); max-width:760px; pointer-events:auto;">
+      <div style="width:44px; height:3px; background:oklch(72% 0.15 45); margin-bottom:14px;"></div>
       <div style="font-size:13px; letter-spacing:0.2em; text-transform:uppercase; opacity:0.88; margin-bottom:16px;">{{ t.hero_kicker }}</div>
       <div style="font-family:'Playfair Display',serif; font-weight:500; font-size:clamp(34px,6vw,64px); line-height:1.1; margin-bottom:18px;">{{ t.hero_title_1 }}<br>{{ t.hero_title_2 }}</div>
       <div style="font-size:clamp(14px,1.6vw,17px); line-height:1.6; max-width:520px; opacity:0.92; font-weight:300;">{{ t.hero_sub }}</div>
+    </div>
     </div>
   </div>
 
@@ -189,6 +200,84 @@
     <a href="Agent Signup.dc.html" style="flex:1; text-align:center; background:oklch(62% 0.19 45); color:white; padding:8px 2px; border-radius:8px; font-size:{{ ctaFontSize }}; text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600;">สมัครฟรี</a>
   </div>
 
+  <!-- ============ QUICK DISCOVERY CATEGORIES ============ -->
+  <div style="padding:8px clamp(20px,4vw,56px) clamp(28px,4vw,48px);">
+    <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">
+      <sc-for list="{{ discoveryCategories }}" as="dc" hint-placeholder-count="6">
+        <a href="{{ dc.href }}" style="text-decoration:none; display:flex; align-items:center; gap:8px; background:oklch(97% 0.015 75); border:1px solid oklch(88% 0.02 70); color:oklch(28% 0.02 60); padding:10px 18px; border-radius:100px; font-size:13.5px; font-weight:500; white-space:nowrap;" style-hover="background:oklch(40% 0.13 25); color:white; border-color:oklch(40% 0.13 25);">{{ dc.label }}</a>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- ============ QUICK ACTIONS (WORKSPACE GATEWAY) ============ -->
+  <div style="padding:0 clamp(20px,4vw,56px) clamp(28px,4vw,48px);">
+    <div style="text-align:center; margin-bottom:18px;">
+      <div style="font-family:'Playfair Display',serif; font-size:clamp(20px,2.6vw,26px); color:oklch(20% 0.02 60);">{{ t.quick_actions_title }}</div>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; max-width:900px; margin:0 auto;">
+      <sc-for list="{{ quickActions }}" as="qa" hint-placeholder-count="4">
+        <a href="{{ qa.href }}" onClick="{{ qa.onClick }}" style="text-decoration:none; display:flex; flex-direction:column; align-items:center; gap:8px; text-align:center; background:oklch(99% 0.005 80); border:1px solid oklch(88% 0.02 70); border-radius:12px; padding:18px 12px;" style-hover="border-color:oklch(40% 0.13 25); box-shadow:0 8px 20px -8px rgba(80,30,20,0.2);">
+          <div style="width:42px; height:42px; border-radius:50%; background:{{ qa.bg }}; color:white; display:flex; align-items:center; justify-content:center; font-size:18px;">{{ qa.icon }}</div>
+          <div style="font-size:13px; font-weight:600; color:oklch(25% 0.02 60);">{{ qa.label }}</div>
+          <div style="font-size:11.5px; line-height:1.4; color:oklch(50% 0.02 60);">{{ qa.desc }}</div>
+        </a>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- ============ MY FAVORITES ============ -->
+  <div style="margin:0 clamp(20px,4vw,56px) clamp(20px,4vw,32px); background:oklch(97% 0.02 75); border:1px solid oklch(88% 0.03 70); border-radius:12px; padding:clamp(18px,3vw,26px);">
+    <div style="display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap; margin-bottom:14px;">
+      <div style="width:40px; height:40px; border-radius:50%; background:oklch(40% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0;">♥</div>
+      <div style="flex:1; min-width:200px;">
+        <div style="font-size:16px; font-weight:700; color:oklch(22% 0.02 60);">{{ t.my_favorites_title }}</div>
+        <div style="font-size:12.5px; color:oklch(48% 0.02 60); line-height:1.55; margin-top:2px;">{{ t.my_favorites_desc }}</div>
+        <div style="font-size:12.5px; color:oklch(40% 0.13 25); font-weight:600; margin-top:6px;">{{ favoritesCountLabel }}</div>
+      </div>
+    </div>
+
+    <sc-if value="{{ hasFavorites }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:14px;">
+        <sc-for list="{{ favPreview }}" as="fp" hint-placeholder-count="3">
+          <a href="{{ fp.href }}" style="text-decoration:none; background:white; border:1px solid oklch(90% 0.02 70); border-radius:8px; overflow:hidden; display:flex; flex-direction:column;">
+            <div style="aspect-ratio:4/3; background:{{ fp.photoBg }};"></div>
+            <div style="padding:8px 10px;">
+              <div style="font-size:12px; font-weight:600; color:oklch(25% 0.02 60); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ fp.title }}</div>
+              <div style="font-size:11.5px; color:oklch(50% 0.02 60);">{{ fp.areaLabel }}</div>
+              <div style="font-size:12px; font-weight:600; color:oklch(40% 0.13 25); margin-top:2px;">{{ fp.priceLabel }}</div>
+            </div>
+          </a>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ noFavorites }}" hint-placeholder-val="{{ false }}">
+      <div style="text-align:center; padding:18px 14px; border:1px dashed oklch(85% 0.02 70); border-radius:8px; font-size:12.5px; color:oklch(50% 0.02 60); line-height:1.6; margin-bottom:14px;">{{ t.my_favorites_empty }}</div>
+    </sc-if>
+
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <a href="{{ favoritesHref }}" style="text-decoration:none; font-size:13px; font-weight:600; color:white; background:oklch(40% 0.13 25); padding:10px 18px; border-radius:100px; white-space:nowrap;">{{ t.my_favorites_view }} →</a>
+      <div onClick="{{ onCollectionSoonClick }}" style="cursor:pointer; text-decoration:none; font-size:13px; font-weight:600; color:oklch(55% 0.02 60); border:1.5px dashed oklch(80% 0.02 70); padding:10px 18px; border-radius:100px; white-space:nowrap; display:flex; align-items:center; gap:6px;">🔒 {{ t.my_favorites_collection }}</div>
+    </div>
+  </div>
+
+  <!-- ============ COLLECTIONS ============ -->
+  <div style="padding:clamp(24px,4vw,48px) clamp(20px,4vw,56px) 0;">
+    <div style="text-align:center; margin-bottom:28px;">
+      <div style="font-family:'Playfair Display',serif; font-size:clamp(24px,3vw,32px); color:oklch(20% 0.02 60); margin-bottom:6px;">{{ t.collections_title }}</div>
+      <div style="font-size:14px; color:oklch(48% 0.02 60);">{{ t.collections_sub }}</div>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px;">
+      <sc-for list="{{ collections }}" as="col" hint-placeholder-count="6">
+        <a href="{{ col.href }}" style="text-decoration:none; position:relative; aspect-ratio:4/3; border-radius:10px; overflow:hidden; display:flex; align-items:flex-end; background:{{ col.bg }};">
+          <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(20,15,10,0) 40%, rgba(20,15,10,0.75) 100%);"></div>
+          <div style="position:relative; z-index:1; padding:14px 16px; color:white;">
+            <div style="font-size:15px; font-weight:600; font-family:'Playfair Display',serif;">{{ col.label }}</div>
+          </div>
+        </a>
+      </sc-for>
+    </div>
+  </div>
+
   <!-- ============ FEATURED PROPERTIES ============ -->
   <div style="padding:clamp(32px,5vw,72px) clamp(20px,4vw,56px);">
     <div style="text-align:center; margin-bottom:40px;">
@@ -212,6 +301,20 @@
     </sc-if>
   </div>
 
+  <!-- ============ FEATURED PROJECTS ============ -->
+  <div style="padding:0 clamp(20px,4vw,56px) clamp(32px,5vw,72px);">
+    <div style="text-align:center; margin-bottom:28px;">
+      <div style="font-family:'Playfair Display',serif; font-size:clamp(24px,3.2vw,34px); color:oklch(20% 0.02 60); margin-bottom:8px;">{{ t.projects_title }}</div>
+      <div style="font-size:14px; color:oklch(48% 0.02 60);">{{ t.projects_sub }}</div>
+    </div>
+    <sc-if value="{{ hasProjects }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px;"></div>
+    </sc-if>
+    <sc-if value="{{ noProjects }}" hint-placeholder-val="{{ true }}">
+      <div style="text-align:center; padding:32px 20px; border:1px dashed oklch(85% 0.02 70); border-radius:10px; color:oklch(50% 0.02 60); font-size:13.5px; max-width:520px; margin:0 auto;">{{ t.projects_empty }}</div>
+    </sc-if>
+  </div>
+
   <!-- ============ AREAS ============ -->
   <div style="padding:clamp(32px,5vw,72px) clamp(20px,4vw,56px); background:oklch(96% 0.015 75);">
     <div style="text-align:center; margin-bottom:40px;">
@@ -220,16 +323,96 @@
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px;">
       <sc-for list="{{ areaCards }}" as="ac" hint-placeholder-count="3">
         <a href="{{ ac.href }}" style="text-decoration:none; display:flex; flex-direction:column; border-radius:6px; overflow:hidden; background:oklch(99% 0.005 80);">
-          <div style="{{ ac.photoStyle }}">
-            <sc-if value="{{ ac.noPhoto }}">
-              <div style="position:absolute; bottom:10px; left:10px; font-family:monospace; font-size:11px; color:oklch(20% 0.02 60 / 0.75); background:rgba(255,255,255,0.65); padding:4px 8px; border-radius:4px;">[{{ ac.photoLabel }}]</div>
-            </sc-if>
-          </div>
+          <sc-if value="{{ ac.hasCms }}">
+            <div style="aspect-ratio:16/10; background:{{ ac.cmsBg }};"></div>
+          </sc-if>
+          <sc-if value="{{ ac.noCms }}">
+            <div style="aspect-ratio:16/10;"><image-slot id="{{ ac.slotId }}" shape="rect" placeholder="{{ ac.slotPlaceholder }}" fit="cover"></image-slot></div>
+          </sc-if>
           <div style="padding:20px;">
             <div style="font-family:'Playfair Display',serif; font-size:21px; color:oklch(20% 0.02 60); margin-bottom:8px;">{{ ac.label }}</div>
-            <div style="font-size:14px; line-height:1.6; color:oklch(45% 0.02 60);">{{ ac.desc }}</div>
+            <div style="font-size:14px; line-height:1.6; color:oklch(45% 0.02 60); margin-bottom:10px;">{{ ac.desc }}</div>
+            <sc-if value="{{ ac.neighborhoods }}">
+              <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                <sc-for list="{{ ac.neighborhoods }}" as="nb" hint-placeholder-count="3">
+                  <span style="font-size:11.5px; color:oklch(45% 0.09 220); background:oklch(95% 0.02 220); padding:3px 10px; border-radius:100px;">{{ nb }}</span>
+                </sc-for>
+              </div>
+            </sc-if>
           </div>
         </a>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- ============ PROPERTY MAP ============ -->
+  <div style="padding:clamp(32px,5vw,64px) clamp(20px,4vw,56px);">
+    <div style="max-width:1000px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:28px; align-items:center;">
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:clamp(24px,3.2vw,32px); color:oklch(20% 0.02 60); margin-bottom:10px;">{{ t.map_title }}</div>
+        <div style="font-size:14px; line-height:1.7; color:oklch(48% 0.02 60); margin-bottom:16px;">{{ t.map_desc }}</div>
+        <a href="Search%20Results.dc.html" style="text-decoration:none; display:inline-block; background:oklch(30% 0.1 30); color:white; font-size:13.5px; font-weight:600; padding:11px 22px; border-radius:100px;">{{ t.map_cta }}</a>
+      </div>
+      <div style="aspect-ratio:16/10; border-radius:12px; background:oklch(93% 0.02 220); display:flex; align-items:center; justify-content:center; color:oklch(50% 0.03 220); font-size:13px; text-align:center; padding:20px;">🗺️ {{ t.map_placeholder }}</div>
+    </div>
+  </div>
+
+  <!-- ============ TALK HUB (3 separate systems) ============ -->
+  <div style="padding:clamp(32px,5vw,56px) clamp(20px,4vw,56px); background:oklch(96% 0.015 75);">
+    <div style="text-align:center; margin-bottom:22px;">
+      <div style="font-family:'Playfair Display',serif; font-size:clamp(22px,3vw,30px); color:oklch(20% 0.02 60); margin-bottom:6px;">{{ t.talkhub_title }}</div>
+      <div style="font-size:13.5px; color:oklch(48% 0.02 60); max-width:520px; margin:0 auto;">{{ t.talkhub_sub }}</div>
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:16px; max-width:1080px; margin:0 auto;">
+
+      <div onClick="{{ onVoiceChatOpen }}" style="cursor:pointer; background:oklch(99% 0.005 80); border:1px solid oklch(88% 0.02 70); border-radius:12px; padding:20px; display:flex; flex-direction:column; gap:10px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:44px; height:44px; border-radius:50%; background:oklch(40% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0;">🤖</div>
+          <div style="font-size:15px; font-weight:700; color:oklch(20% 0.02 60);">{{ t.talk_ai_title }}</div>
+        </div>
+        <div style="font-size:12.5px; line-height:1.6; color:oklch(48% 0.02 60);">{{ t.talk_ai_desc }}</div>
+        <div style="font-size:11.5px; color:oklch(55% 0.1 25); font-weight:600; margin-top:auto; padding-top:6px;">{{ t.talk_ai_who }}</div>
+      </div>
+
+      <a href="Search Results.dc.html" style="text-decoration:none; cursor:pointer; background:oklch(99% 0.005 80); border:1px solid oklch(88% 0.02 70); border-radius:12px; padding:20px; display:flex; flex-direction:column; gap:10px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:44px; height:44px; border-radius:50%; background:oklch(45% 0.09 230); color:white; display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0;">🧑‍💼</div>
+          <div style="font-size:15px; font-weight:700; color:oklch(20% 0.02 60);">{{ t.talk_agent_title }}</div>
+        </div>
+        <div style="font-size:12.5px; line-height:1.6; color:oklch(48% 0.02 60);">{{ t.talk_agent_desc }}</div>
+        <div style="font-size:11.5px; color:oklch(55% 0.1 230); font-weight:600; margin-top:auto; padding-top:6px;">{{ t.talk_agent_who }} →</div>
+      </a>
+
+      <div onClick="{{ onAdminSupportOpen }}" style="cursor:pointer; background:oklch(99% 0.005 80); border:1px solid oklch(88% 0.02 70); border-radius:12px; padding:20px; display:flex; flex-direction:column; gap:10px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="width:44px; height:44px; border-radius:50%; background:oklch(35% 0.02 60); color:white; display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0;">🛟</div>
+          <div style="font-size:15px; font-weight:700; color:oklch(20% 0.02 60);">{{ t.talk_admin_title }}</div>
+        </div>
+        <div style="font-size:12.5px; line-height:1.6; color:oklch(48% 0.02 60);">{{ t.talk_admin_desc }}</div>
+        <div style="font-size:11.5px; color:oklch(40% 0.02 60); font-weight:600; margin-top:auto; padding-top:6px;">{{ t.talk_admin_who }}</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ NEWS & UPDATES ============ -->
+  <div style="padding:clamp(32px,5vw,64px) clamp(20px,4vw,56px);">
+    <div style="text-align:center; margin-bottom:24px;">
+      <div style="font-family:'Playfair Display',serif; font-size:clamp(24px,3.2vw,32px); color:oklch(20% 0.02 60); margin-bottom:8px;">{{ t.news_title }}</div>
+      <div style="font-size:14px; color:oklch(48% 0.02 60);">{{ t.news_sub }}</div>
+    </div>
+    <div style="text-align:center; padding:28px 20px; border:1px dashed oklch(85% 0.02 70); border-radius:10px; color:oklch(50% 0.02 60); font-size:13.5px; max-width:520px; margin:0 auto;">{{ t.news_empty }}</div>
+  </div>
+
+  <!-- ============ TRUST / SERVICE ============ -->
+  <div style="padding:clamp(32px,5vw,64px) clamp(20px,4vw,56px);">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:28px; max-width:1100px; margin:0 auto;">
+      <sc-for list="{{ trustItems }}" as="ti" hint-placeholder-count="4">
+        <div style="text-align:center;">
+          <div style="width:48px; height:48px; border-radius:50%; background:oklch(95% 0.02 220); color:oklch(42% 0.1 220); display:flex; align-items:center; justify-content:center; font-size:20px; margin:0 auto 14px;">{{ ti.mark }}</div>
+          <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:6px;">{{ ti.title }}</div>
+          <div style="font-size:13.5px; line-height:1.55; color:oklch(48% 0.02 60);">{{ ti.desc }}</div>
+        </div>
       </sc-for>
     </div>
   </div>
@@ -241,13 +424,79 @@
     <a href="About.dc.html" style="font-size:14px; font-weight:600; color:oklch(42% 0.12 25); text-decoration:none;">{{ t.nav_about }} →</a>
   </div>
 
+  <!-- ============ FINAL CTA ============ -->
+  <div style="background:oklch(24% 0.06 30); color:oklch(97% 0.01 80); padding:clamp(36px,6vw,64px) clamp(20px,4vw,56px); text-align:center;">
+    <div style="font-family:'Playfair Display',serif; font-size:clamp(22px,2.8vw,30px); margin-bottom:20px;">{{ t.final_cta_title }}</div>
+    <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+      <a href="{{ buyHref }}" style="text-decoration:none; border:1.5px solid oklch(80% 0.02 70 / 0.6); color:oklch(97% 0.01 80); padding:11px 22px; border-radius:100px; font-size:14px;">{{ t.cta_find }}</a>
+      <a href="Sell.dc.html" style="text-decoration:none; background:oklch(97% 0.01 80); color:oklch(24% 0.06 30); padding:11px 22px; border-radius:100px; font-size:14px; font-weight:600;">{{ t.cta_list }}</a>
+      <a href="Agent Signup.dc.html" style="text-decoration:none; border:1.5px solid oklch(80% 0.02 70 / 0.6); color:oklch(97% 0.01 80); padding:11px 22px; border-radius:100px; font-size:14px;">สมัครฟรี</a>
+    </div>
+  </div>
+
+  <!-- ============ CONTACT US ============ -->
+  <div style="padding:clamp(32px,5vw,64px) clamp(20px,4vw,56px); background:linear-gradient(135deg, oklch(30% 0.08 30), oklch(22% 0.05 30)); color:oklch(97% 0.01 80);">
+    <div style="max-width:900px; margin:0 auto; text-align:center;">
+      <div style="font-family:'Playfair Display',serif; font-size:clamp(24px,3.2vw,32px); margin-bottom:10px;">{{ t.contact_us_title }}</div>
+      <div style="font-size:14px; opacity:0.85; margin-bottom:26px;">{{ t.contact_us_sub }}</div>
+      <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:14px;">
+        <a href="https://line.me/R/ti/p/@huahinproperties" style="text-decoration:none; display:flex; align-items:center; gap:8px; background:oklch(97% 0.01 80 / 0.12); border:1px solid oklch(97% 0.01 80 / 0.3); color:#fff; padding:11px 20px; border-radius:100px; font-size:13.5px;">💬 LINE</a>
+        <a href="https://wa.me/66000000000" style="text-decoration:none; display:flex; align-items:center; gap:8px; background:oklch(97% 0.01 80 / 0.12); border:1px solid oklch(97% 0.01 80 / 0.3); color:#fff; padding:11px 20px; border-radius:100px; font-size:13.5px;">📱 WhatsApp</a>
+        <a href="tel:+66000000000" style="text-decoration:none; display:flex; align-items:center; gap:8px; background:oklch(97% 0.01 80 / 0.12); border:1px solid oklch(97% 0.01 80 / 0.3); color:#fff; padding:11px 20px; border-radius:100px; font-size:13.5px;">📞 +66 00 000 0000</a>
+        <a href="mailto:hello@huahin.properties" style="text-decoration:none; display:flex; align-items:center; gap:8px; background:oklch(97% 0.01 80 / 0.12); border:1px solid oklch(97% 0.01 80 / 0.3); color:#fff; padding:11px 20px; border-radius:100px; font-size:13.5px;">✉️ Email</a>
+        <a href="Contact.dc.html" style="text-decoration:none; display:flex; align-items:center; gap:8px; background:#fff; color:oklch(30% 0.1 30); padding:11px 20px; border-radius:100px; font-size:13.5px; font-weight:600;">{{ t.contact_us_form }} →</a>
+      </div>
+    </div>
+  </div>
+
   <!-- ============ FOOTER ============ -->
-  <div style="border-top:1px solid oklch(90% 0.01 70); padding:32px clamp(20px,4vw,56px); display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between;">
-    <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(22% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
-    <div style="font-size:13px; color:oklch(50% 0.02 60);">© 2026 huahin.properties. {{ t.footer_rights }}</div>
+  <div style="border-top:1px solid oklch(90% 0.01 70); padding:clamp(28px,4vw,44px) clamp(20px,4vw,56px) 20px;">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:28px; margin-bottom:26px;">
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(22% 0.02 60); margin-bottom:10px;">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</div>
+        <div style="font-size:13px; line-height:1.6; color:oklch(50% 0.02 60);">{{ t.footer_tagline }}</div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px; font-size:13.5px;">
+        <div style="font-weight:600; color:oklch(30% 0.02 60); margin-bottom:2px;">{{ t.footer_explore }}</div>
+        <a href="{{ buyHref }}" style="text-decoration:none; color:oklch(48% 0.02 60);">{{ t.nav_buy }}</a>
+        <a href="{{ rentHref }}" style="text-decoration:none; color:oklch(48% 0.02 60);">{{ t.nav_rent }}</a>
+        <a href="Sell.dc.html" style="text-decoration:none; color:oklch(48% 0.02 60);">{{ t.nav_sell }}</a>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px; font-size:13.5px;">
+        <div style="font-weight:600; color:oklch(30% 0.02 60); margin-bottom:2px;">{{ t.footer_company }}</div>
+        <a href="About.dc.html" style="text-decoration:none; color:oklch(48% 0.02 60);">{{ t.nav_about }}</a>
+        <a href="Contact.dc.html" style="text-decoration:none; color:oklch(48% 0.02 60);">{{ t.nav_contact }}</a>
+        <a href="Agent Signup.dc.html" style="text-decoration:none; color:oklch(48% 0.02 60);">{{ t.nav_sell }} — Agent</a>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px; font-size:13.5px;">
+        <div style="font-weight:600; color:oklch(30% 0.02 60); margin-bottom:2px;">{{ t.footer_contact }}</div>
+        <a href="tel:+66000000000" style="text-decoration:none; color:oklch(48% 0.02 60);">📞 +66 00 000 0000</a>
+        <a href="mailto:hello@huahin.properties" style="text-decoration:none; color:oklch(48% 0.02 60);">✉️ hello@huahin.properties</a>
+      </div>
+    </div>
+    <div style="border-top:1px solid oklch(92% 0.01 70); padding-top:16px; display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;">
+      <div style="font-size:12.5px; color:oklch(52% 0.02 60);">© 2026 huahin.properties. {{ t.footer_rights }}</div>
+    </div>
   </div>
 
 </div>
+
+  <sc-if value="{{ shareModalOpen }}">
+    <div onClick="{{ onShareClose }}" style="position:fixed; inset:0; background:oklch(15% 0.01 60 / 0.5); z-index:90; display:flex; align-items:center; justify-content:center; padding:20px;">
+      <div onClick="{{ stopProp }}" style="background:oklch(99% 0.005 80); border-radius:10px; padding:24px; width:100%; max-width:360px; box-shadow:0 20px 60px oklch(0% 0 0 / 0.3);">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+          <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60);">{{ t.share_site }}</div>
+          <div onClick="{{ onShareClose }}" style="font-size:22px; line-height:1; color:oklch(50% 0.02 60); cursor:pointer; padding:4px;">&times;</div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <a href="{{ shareFbUrl }}" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:10px; text-decoration:none; background:#1877F2; color:#fff; padding:12px 16px; border-radius:6px; font-size:14px; font-weight:600;">Facebook</a>
+          <a href="{{ shareLineUrl }}" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:10px; text-decoration:none; background:#06C755; color:#fff; padding:12px 16px; border-radius:6px; font-size:14px; font-weight:600;">LINE</a>
+          <a href="{{ shareWaUrl }}" target="_blank" rel="noopener" style="display:flex; align-items:center; gap:10px; text-decoration:none; background:#25D366; color:#fff; padding:12px 16px; border-radius:6px; font-size:14px; font-weight:600;">WhatsApp</a>
+          <div onClick="{{ onCopyLink }}" style="display:flex; align-items:center; gap:10px; background:oklch(94% 0.01 75); color:oklch(25% 0.02 60); padding:12px 16px; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer;">{{ copyLinkLabel }}</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
 
 <sc-if value="{{ showChrome }}"><dc-import name="ContactRail" hint-size="0,0"></dc-import></sc-if>
 
@@ -274,6 +523,8 @@ class Component extends DCLogic {
     data: null,
     banners: [],
     bannerPage: 0,
+    shareModalOpen: false,
+    copyLinkCopied: false,
   };
 
   async componentDidMount() {
@@ -287,6 +538,7 @@ class Component extends DCLogic {
     }
     const mod = await import("./data.js");
     this._mod = mod;
+    try { this._favs = await import("./favorites.js"); } catch (e) { console.warn("favorites.js load failed:", e); }
     this.setState({ lang: mod.getLang(), data: mod });
     const effProps = await mod.getEffectiveProperties(mod);
     this.setState({ effProps });
@@ -313,6 +565,23 @@ class Component extends DCLogic {
   selectLang(l) {
     this._mod.setLang(l);
     this.setState({ lang: l, mobileMenuOpen: false });
+  }
+
+  async shareSite() {
+    const url = window.location.href;
+    const title = document.title;
+    if (navigator.share) {
+      try { await navigator.share({ title, url }); return; } catch (e) { /* user cancelled or unsupported — fall through to modal */ }
+    }
+    this.setState({ shareModalOpen: true, copyLinkCopied: false });
+  }
+
+  async copyShareLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      this.setState({ copyLinkCopied: true });
+      setTimeout(() => this.setState({ copyLinkCopied: false }), 2000);
+    } catch (e) { console.warn("Copy failed:", e); }
   }
 
   async submitGate() {
@@ -409,8 +678,52 @@ class Component extends DCLogic {
     const featured = allOrdered.slice((featuredPage - 1) * perPage, featuredPage * perPage).map(cardProps);
 
     const areaDescKey = { "hua-hin": "area_hua_hin_desc", pranburi: "area_pranburi_desc", "cha-am": "area_cha_am_desc" };
+    const areaNeighborhoods = { "hua-hin": ["Khao Takiab", "Soi 88", "Bor Fai"], pranburi: [], "cha-am": [] };
+    const areaSlotPlaceholder = { "hua-hin": "วางภาพ: สถานีรถไฟหัวหิน / ชายหาด", pranburi: "วางภาพ: วิลล่าริมชายหาดปราณบุรี", "cha-am": "วางภาพ: ชายหาดชะอำ" };
     const areaPhoto = { "hua-hin": "photo: Hua Hin train station & beach", pranburi: "photo: Pranburi beachfront villa", "cha-am": "photo: Cha-am beach promenade" };
     const sc = this.state.siteContent || {};
+    const homeStrings = {
+      en: { my_favorites_title: "My Favorites", my_favorites_view: "View saved properties", collections_title: "Curated Collections", collections_sub: "Handpicked selections for every kind of buyer",
+        quick_actions_title: "Get Started",
+        projects_title: "Featured Projects", projects_sub: "New developments and off-plan projects across Hua Hin", projects_empty: "No active project launches right now — check back soon, or ask our team about upcoming developments.",
+        map_title: "Explore on the Map", map_desc: "See where every listing sits relative to the beach, town centre and key landmarks. Full interactive map view is coming soon — for now, browse all listings with area filters.", map_cta: "Browse Listings", map_placeholder: "Interactive map — coming soon",
+        news_title: "News & Updates", news_sub: "Local market insights and platform updates", news_empty: "No news posted yet — this section will feature Hua Hin market updates and platform announcements.",
+        talkhub_title: "Talk Hub", talkhub_sub: "Choose the channel that fits what you need — each one connects you with someone different",
+        talk_ai_title: "AI Assistant", talk_ai_desc: "Let AI help you search, compare, and get recommendations by budget and location, and answer questions about listings. Type or speak.", talk_ai_who: "You're talking to: Automated AI assistant",
+        talk_agent_title: "Contact a Member or Agent", talk_agent_desc: "Reach the listing owner or agent directly — start from a property card or the property detail page you're interested in", talk_agent_who: "Go to Search Properties",
+        talk_admin_title: "Admin Support", talk_admin_desc: "Ask our team about your account, package, listings, or how to use the platform", talk_admin_who: "You're talking to: huahin.properties team",
+        contact_us_title: "Talk to Us", contact_us_sub: "Reach our team directly through any channel below", contact_us_form: "Contact Form", ai_chat_title: "AI Property Assistant", ai_chat_desc: "Ask in your own words — search, compare, or get answers instantly.", admin_chat_title: "Chat with our Team", admin_chat_desc: "Talk to huahin.properties directly for support or general questions.", member_chat_hint: "Viewing a specific listing? You can message that property's agent directly from its details page." },
+      th: {
+        quick_actions_title: "เริ่มต้นใช้งาน",
+        projects_title: "โครงการแนะนำ", projects_sub: "โครงการใหม่และพรีเซลทั่วหัวหิน", projects_empty: "ขณะนี้ยังไม่มีโครงการเปิดตัวใหม่ — กลับมาดูอีกครั้งเร็วๆ นี้ หรือสอบถามทีมงานเกี่ยวกับโครงการที่กำลังจะมา",
+        map_title: "สำรวจบนแผนที่", map_desc: "ดูตำแหน่งของแต่ละประกาศเทียบกับชายหาด ตัวเมือง และจุดสำคัญต่างๆ แผนที่แบบอินเทอร์แอกทีฟเต็มรูปแบบกำลังจะมาเร็วๆ นี้ — ระหว่างนี้เลือกดูประกาศทั้งหมดพร้อมตัวกรองพื้นที่ได้เลย", map_cta: "ดูรายการทรัพย์", map_placeholder: "แผนที่อินเทอร์แอกทีฟ — เร็วๆ นี้",
+        news_title: "ข่าวสารและอัปเดต", news_sub: "ข้อมูลตลาดหัวหินและความเคลื่อนไหวของแพลตฟอร์ม", news_empty: "ยังไม่มีข่าวสารในขณะนี้ — ส่วนนี้จะแสดงอัปเดตตลาดหัวหินและประกาศจากแพลตฟอร์ม",
+        contact_us_title: "ติดต่อเรา", contact_us_sub: "ติดต่อทีมงานของเราได้โดยตรงผ่านช่องทางด้านล่าง", contact_us_form: "แบบฟอร์มติดต่อ",
+        talkhub_title: "ศูนย์การพูดคุย", talkhub_sub: "เลือกช่องทางที่ตรงกับสิ่งที่คุณต้องการ — แต่ละช่องทางเชื่อมกับคนละคน",
+        talk_ai_title: "AI Assistant", talk_ai_desc: "ให้ AI ช่วยค้นหาทรัพย์ เปรียบเทียบ แนะนำตามงบและทำเล และตอบคำถามเกี่ยวกับประกาศ พิมพ์หรือพูดก็ได้", talk_ai_who: "กำลังคุยกับ: ผู้ช่วย AI อัตโนมัติ",
+        talk_agent_title: "ติดต่อสมาชิกหรือเอเจนต์", talk_agent_desc: "ติดต่อผู้ดูแลประกาศหรือเจ้าของทรัพย์โดยตรง — เริ่มจากการ์ดทรัพย์หรือหน้ารายละเอียดทรัพย์ที่คุณสนใจ", talk_agent_who: "ไปที่หน้าค้นหาทรัพย์",
+        talk_admin_title: "Admin Support", talk_admin_desc: "สอบถามเรื่องบัญชี แพ็กเกจ การลงประกาศ หรือการใช้งานระบบกับทีมงาน", talk_admin_who: "กำลังคุยกับ: ทีมงาน huahin.properties",
+        my_favorites_title: "รายการโปรดของฉัน", my_favorites_view: "ดูทรัพย์ที่บันทึกไว้", my_favorites_collection: "สร้าง Collection จากรายการโปรด", my_favorites_desc: "บันทึกทรัพย์ที่คุณสนใจ กลับมาดูภายหลัง เปรียบเทียบทรัพย์ หรือนำไปสร้าง Collection เพื่อส่งให้ลูกค้า", my_favorites_empty: "คุณยังไม่มีทรัพย์ที่บันทึกไว้ กดไอคอน ♥ บนประกาศใดก็ได้เพื่อเพิ่มที่นี่", collections_title: "ชุดทรัพย์คัดสรร", collections_sub: "คัดสรรไว้สำหรับผู้ซื้อทุกไลฟ์สไตล์", ai_chat_title: "AI ผู้ช่วยค้นหาทรัพย์", ai_chat_desc: "พิมพ์คำถามด้วยภาษาของคุณเอง ค้นหา เปรียบเทียบ หรือขอคำตอบได้ทันที", admin_chat_title: "คุยกับทีมงาน", admin_chat_desc: "ติดต่อ huahin.properties โดยตรงเพื่อขอความช่วยเหลือหรือสอบถามทั่วไป", member_chat_hint: "ดูประกาศเฉพาะรายการอยู่ใช่ไหม? คุณสามารถส่งข้อความถึงตัวแทนของทรัพย์นั้นได้โดยตรงจากหน้ารายละเอียด" },
+    };
+    const tMerged = { ...t, ...(homeStrings[lang] || homeStrings.en) };
+
+    const favCount = (this._favs && this._favs.favoriteCount) ? this._favs.favoriteCount() : 0;
+    const favIds = (this._favs && this._favs.getFavoritedIds) ? this._favs.getFavoritedIds() : [];
+
+    const collectionDefs = [
+      { key: "villa", labelEn: "Pool Villas", labelTh: "พูลวิลล่า", tint: "oklch(55% 0.1 220)" },
+      { key: "beachfront", labelEn: "Beachfront", labelTh: "ริมชายหาด", tint: "oklch(50% 0.1 220)" },
+      { key: "mountain", labelEn: "Mountain View", labelTh: "วิวเขา", tint: "oklch(45% 0.08 150)" },
+      { key: "investment", labelEn: "Investment", labelTh: "เพื่อการลงทุน", tint: "oklch(40% 0.13 25)" },
+      { key: "family", labelEn: "Family Homes", labelTh: "บ้านครอบครัว", tint: "oklch(55% 0.1 80)" },
+      { key: "luxury", labelEn: "Luxury Homes", labelTh: "บ้านหรู", tint: "oklch(30% 0.08 30)" },
+    ];
+    const collections = collectionDefs.map((c) => ({
+      href: c.key === "villa" ? "Search Results.dc.html?type=villa" : c.key === "investment" ? "Search Results.dc.html?status=sale" : "Search Results.dc.html",
+      label: lang === "th" ? c.labelTh : c.labelEn,
+      bg: `linear-gradient(160deg, ${c.tint}, oklch(20% 0.03 60))`,
+    }));
+
     const areaCards = mod.AREAS.map((a) => {
       const content = sc["area-" + a.id] || {};
       return {
@@ -423,17 +736,37 @@ class Component extends DCLogic {
           aspectRatio: "16/10", position: "relative",
           background: content.photoUrl ? `url('${content.photoUrl}') center/cover` : "repeating-linear-gradient(135deg, oklch(86% 0.02 75) 0px, oklch(86% 0.02 75) 2px, oklch(91% 0.015 75) 2px, oklch(91% 0.015 75) 22px)",
         },
+        hasCms: !!content.photoUrl,
+        cmsBg: content.photoUrl ? `url('${content.photoUrl}') center/cover` : "",
+        noCms: !content.photoUrl,
+        slotId: "area-" + a.id,
+        slotPlaceholder: areaSlotPlaceholder[a.id] || ("วางภาพ: " + a.label[lang]),
+        neighborhoods: areaNeighborhoods[a.id] || [],
       };
     });
 
     return {
-      t,
+      t: tMerged,
       lang,
       isDesktopNav: !this.state.isMobile,
       isMobileNav: this.state.isMobile,
       mobileMenuOpen: this.state.isMobile && this.state.mobileMenuOpen,
       toggleMenu: () => this.setState((s) => ({ mobileMenuOpen: !s.mobileMenuOpen })),
       onVoiceChatOpen: () => window.dispatchEvent(new CustomEvent("hh-open-voice-chat")),
+      onCollectionSoonClick: () => alert(lang === "th" ? "Collection Builder จะเปิดใช้งานเร็ว ๆ นี้ — เก็บรายการโปรดไว้ก่อน แล้วกลับมาสร้าง Collection ได้เมื่อฟีเจอร์นี้เปิดใช้งาน" : "Collection Builder is coming soon — keep saving favorites now, you'll be able to turn them into a Collection once this feature launches."),
+      onAdminSupportOpen: () => {
+        const tab = document.querySelector('[style*="vertical-rl"]');
+        if (tab) tab.click();
+      },
+      onShareOpen: () => this.shareSite(),
+      onShareClose: () => this.setState({ shareModalOpen: false }),
+      shareModalOpen: this.state.shareModalOpen,
+      stopProp: (e) => e.stopPropagation(),
+      shareFbUrl: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(typeof window !== "undefined" ? window.location.href : "")}`,
+      shareLineUrl: `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(typeof window !== "undefined" ? window.location.href : "")}`,
+      shareWaUrl: `https://wa.me/?text=${encodeURIComponent(typeof window !== "undefined" ? window.location.href : "")}`,
+      onCopyLink: () => this.copyShareLink(),
+      copyLinkLabel: this.state.copyLinkCopied ? (t.link_copied || "Copied!") : (t.copy_link || "Copy link"),
       logoStyle: {
         whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: this.state.isMobile ? "6px" : "9px",
         fontFamily: "'Playfair Display',serif", fontSize: this.state.isMobile ? "16px" : "clamp(19px,2.4vw,24px)",
@@ -473,12 +806,43 @@ class Component extends DCLogic {
       onFeaturedPrevPage: () => this.goToPage(Math.max(1, featuredPage - 1)),
       onFeaturedNextPage: () => this.goToPage(Math.min(totalFeaturedPages, featuredPage + 1)),
       areaCards,
-      heroStyle: {
-        position: "relative", height: "clamp(480px,70vh,680px)", display: "flex",
-        alignItems: this.state.isMobile ? "flex-start" : "flex-end",
-        background: (sc.hero && sc.hero.photoUrl) ? `url('${sc.hero.photoUrl}') center/cover` : "repeating-linear-gradient(135deg, oklch(88% 0.02 75) 0px, oklch(88% 0.02 75) 2px, oklch(92% 0.015 75) 2px, oklch(92% 0.015 75) 22px)",
-      },
-      heroNoPhoto: !(sc.hero && sc.hero.photoUrl),
+      hasProjects: false, noProjects: true,
+      quickActions: [
+        { href: "Agent Signup.dc.html", icon: "🏠", bg: "oklch(40% 0.13 25)", label: lang === "th" ? "ฝากขาย/ฝากเช่า" : "List a Property", desc: lang === "th" ? "ลงประกาศทรัพย์ของคุณฟรี" : "Post your listing free" },
+        { href: "Search Results.dc.html", icon: "🔍", bg: "oklch(45% 0.09 230)", label: lang === "th" ? "ค้นหาทรัพย์" : "Search Properties", desc: lang === "th" ? "เรียกดูประกาศทั้งหมด" : "Browse all listings" },
+        { href: "Lister Dashboard.dc.html", icon: "💼", bg: "oklch(50% 0.1 145)", label: lang === "th" ? "Workspace ของฉัน" : "My Workspace", desc: lang === "th" ? "จัดการทรัพย์ที่คุณลงไว้" : "Manage your own listings" },
+        { href: "#", icon: "🤖", bg: "oklch(55% 0.14 300)", label: lang === "th" ? "ถาม AI" : "Ask AI", desc: lang === "th" ? "ให้ AI ช่วยหาบ้าน" : "Get AI help finding a home", onClick: (e) => { e.preventDefault(); window.dispatchEvent(new CustomEvent("hh-open-voice-chat")); } },
+      ],
+      hasFavorites: favCount > 0,
+      noFavorites: favCount === 0,
+      favPreview: favIds.slice(0, 3).map((id) => propsList.find((p) => p.id === id)).filter(Boolean).map((p) => ({
+        href: `Property Details.dc.html?id=${p.id}`,
+        photoBg: (p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
+        title: p.title[lang],
+        areaLabel: areaLabelOf(p.area),
+        priceLabel: mod.formatPrice(p.price, p.currency, lang) + (p.status === "rent" ? t.per_month : ""),
+      })),
+      favoritesCountLabel: lang === "th" ? `บันทึกไว้ ${favCount} รายการ` : `${favCount} propert${favCount === 1 ? "y" : "ies"} saved`,
+      favoritesHref: favIds.length ? `Search Results.dc.html?ids=${favIds.join(",")}` : "Search Results.dc.html",
+      collections,
+      discoveryCategories: [
+        { href: "Search Results.dc.html?type=villa", label: mod.TYPES.find((ty) => ty.id === "villa").label[lang] },
+        { href: "Search Results.dc.html?type=condo", label: mod.TYPES.find((ty) => ty.id === "condo").label[lang] },
+        { href: "Search Results.dc.html?type=house", label: mod.TYPES.find((ty) => ty.id === "house").label[lang] },
+        { href: "Search Results.dc.html?type=land", label: mod.TYPES.find((ty) => ty.id === "land").label[lang] },
+        { href: "Search Results.dc.html?status=rent", label: t.rent },
+        { href: "Search Results.dc.html?type=commercial", label: mod.TYPES.find((ty) => ty.id === "commercial").label[lang] },
+      ],
+      trustItems: [
+        { mark: "◆", title: t.trust_local_title, desc: t.trust_local_desc },
+        { mark: "✓", title: t.trust_verified_title, desc: t.trust_verified_desc },
+        { mark: "🌐", title: t.trust_lang_title, desc: t.trust_lang_desc },
+        { mark: "☎", title: t.trust_contact_title, desc: t.trust_contact_desc },
+      ],
+      heroHasCms: !!(sc.hero && sc.hero.photoUrl),
+      heroCmsBg: (sc.hero && sc.hero.photoUrl) ? `url('${sc.hero.photoUrl}') center/cover` : "",
+      heroNoCms: !(sc.hero && sc.hero.photoUrl),
+      heroAlign: this.state.isMobile ? "flex-start" : "flex-end",
       heroTextPadding: this.state.isMobile ? "clamp(24px,6vw,40px) clamp(16px,4vw,56px) 0" : "0 clamp(20px,4vw,56px) clamp(40px,7vw,64px)",
       searchBoxTransform: this.state.isMobile ? "none" : "translateY(clamp(-24px,-3vw,-46px))",
       ctaGap: this.state.isMobile ? "6px" : "12px",
