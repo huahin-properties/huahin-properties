@@ -130,10 +130,12 @@
     <div style="position:fixed; inset:0; z-index:85; display:flex; align-items:flex-end; justify-content:flex-end; padding:{{ chatOverlayPadding }}; pointer-events:none;">
       <div onClick="{{ stopProp }}" style="background:oklch(99% 0.005 80); border-radius:{{ chatPanelRadius }}; width:100%; max-width:{{ chatPanelMaxWidth }}; height:{{ chatPanelHeight }}; display:flex; flex-direction:row; box-shadow:0 20px 60px oklch(0% 0 0 / 0.35); overflow:hidden; pointer-events:auto;">
 
-        <!-- ===== CONVERSATION LIST (left column) — Owner Preview only. Real customers never see this list (spec: customer gets AI/Human tabs only, no inbox). ===== -->
+        <!-- ===== CONVERSATION LIST toggle (left column) — Owner Mode only. Customers who arrive via a shared Collection link never see this (no sidebar, no other customers, no Owner CRM). ===== -->
+        <sc-if value="{{ showConvToggle }}">
         <div onClick="{{ onToggleConvList }}" title="{{ t.chat_conversations_title }}" style="position:relative; z-index:2; flex-shrink:0; width:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; background:oklch(96% 0.01 75); border-right:1px solid oklch(90% 0.01 70);">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="transform:{{ convListArrowRotate }};"><path d="M9 6L15 12L9 18" stroke="oklch(35% 0.02 60)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
+        </sc-if>
         <sc-if value="{{ showConvList }}">
           <div style="width:{{ convListWidth }}; flex-shrink:0; border-right:1px solid oklch(90% 0.01 70); display:flex; flex-direction:column; background:oklch(98% 0.005 78);">
             <div style="padding:16px 18px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); flex-shrink:0; display:flex; align-items:center; gap:8px;">
@@ -176,7 +178,9 @@
             </div>
             <div style="display:flex;">
               <div onClick="{{ onSelectAiTab }}" style="cursor:pointer; padding:8px 4px 10px; margin-right:22px; font-size:12.5px; font-weight:600; color:{{ aiTabColor }}; border-bottom:2px solid {{ aiTabBorder }}; white-space:nowrap;">🤖 {{ t.chat_tab_ai }}</div>
-              <div onClick="{{ onSelectDemoContact }}" style="cursor:pointer; padding:8px 4px 10px; font-size:12.5px; font-weight:600; color:{{ humanTabColor }}; border-bottom:2px solid {{ humanTabBorder }}; white-space:nowrap;">💬 {{ t.chat_demo_name }}</div>
+              <sc-if value="{{ showHumanTab }}">
+              <div onClick="{{ onSelectDemoContact }}" style="cursor:pointer; padding:8px 4px 10px; font-size:12.5px; font-weight:600; color:{{ humanTabColor }}; border-bottom:2px solid {{ humanTabBorder }}; white-space:nowrap;">💬 {{ humanTabLabel }}</div>
+              </sc-if>
             </div>
           </div>
           <sc-if value="{{ isAiTab }}"><div style="flex-shrink:0; background:oklch(97% 0.03 80); color:oklch(45% 0.03 60); font-size:11.5px; padding:8px 18px;">{{ t.chat_ai_scope_note }}</div></sc-if>
@@ -396,6 +400,8 @@ class Component extends DCLogic {
       const params = new URLSearchParams(window.location.search);
       const raw = params.get("collection");
       if (!raw) return false;
+      const senderName = params.get("sender") || params.get("agent") || "Admin";
+      this.setState({ customerMode: true, convListCollapsed: true, senderName });
       const ids = raw.split(",").map((s) => s.trim()).filter(Boolean);
       if (!ids.length) return false;
       const props = this._properties || (this._mod ? this._mod.PROPERTIES : []) || [];
@@ -793,7 +799,10 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
 
       onOpenFormFromChat: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }),
 
-      showConvList: (!this.state.isMobile || this.state.chatMobileView === "list") && !this.state.convListCollapsed,
+      showConvList: !this.state.customerMode && (!this.state.isMobile || this.state.chatMobileView === "list") && !this.state.convListCollapsed,
+      showConvToggle: !this.state.customerMode,
+      showHumanTab: !this.state.customerMode,
+      humanTabLabel: this.state.senderName,
       onToggleConvList: () => this.setState((s) => ({ convListCollapsed: !s.convListCollapsed })),
       convListArrowRotate: this.state.convListCollapsed ? "rotate(180deg)" : "rotate(0deg)",
       showConvPane: !this.state.isMobile || this.state.chatMobileView === "conversation",
@@ -815,7 +824,7 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       onDemoSend: () => this.sendDemoMessage(),
       convHeaderAvatar: this.state.chatTab === "demo" ? "คส" : "🤖",
       convHeaderAvatarBg: this.state.chatTab === "demo" ? "oklch(58% 0.11 210)" : "oklch(55% 0.14 300)",
-      convHeaderName: this.state.chatTab === "demo" ? chatT.chat_demo_name : chatT.chat_ai_name,
+      convHeaderName: this.state.chatTab === "demo" ? this.state.senderName : chatT.chat_ai_name,
       convHeaderSubtitle: this.state.chatTab === "demo" ? chatT.chat_demo_tag : chatT.chat_ai_subtitle_small,
       demoNote: this.state.demoNote,
       onDemoNoteChange: (e) => this.setState({ demoNote: e.target.value }),
