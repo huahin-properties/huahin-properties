@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./assets/css/app.css">
+<script src="./assets/js/i18n.js"></script>
+<script src="./assets/js/app.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Workspace Resources — huahin.properties</title>
+  <style>
+    body { margin: 0; background: oklch(96% 0.01 75); font-family: 'Work Sans', sans-serif; color: oklch(25% 0.02 60); }
+    a { color: oklch(35% 0.14 25); } a:hover { color: oklch(28% 0.15 25); }
+    .demo-tag { display:inline-block; font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; background:oklch(88% 0.1 80); color:oklch(35% 0.1 60); padding:2px 7px; border-radius:4px; }
+    .card { background:white; border:1px solid oklch(89% 0.01 70); border-radius:12px; }
+    .bar-track { height:8px; border-radius:5px; background:oklch(93% 0.01 70); overflow:hidden; }
+    .bar-fill { height:100%; border-radius:5px; }
+  </style>
+</helmet>
+
+<div style="max-width:1180px; margin:0 auto; padding:20px 20px 100px;">
+
+  <div style="background:oklch(98% 0.02 85); border:1px solid oklch(85% 0.05 70); border-radius:10px; padding:12px 16px; margin-bottom:16px; font-size:12.5px; color:oklch(40% 0.03 60);">
+    <span class="demo-tag">Frontend Demonstration</span>&nbsp; WEM v1 — Demo pricing/usage only. No real payments, metering, or AI billing. Internal cost/margin never shown here or to Members.
+  </div>
+
+  <div style="display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;">
+    <sc-for list="{{ navTabs }}" as="t" hint-placeholder-count="7">
+      <button onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</button>
+    </sc-for>
+    <a href="./workspace.html" style="margin-left:auto; font-size:12.5px; align-self:center; text-decoration:none; color:oklch(35% 0.1 30);">← Workspace</a>
+  </div>
+
+  <!-- ============ RESOURCES ============ -->
+  <sc-if value="{{ isResources }}" hint-placeholder-val="{{ true }}">
+    <div class="card" style="padding:20px 22px; margin-bottom:16px;">
+      <div style="font-family:'Playfair Display',serif; font-size:19px; margin-bottom:4px;">Your Workspace Resources</div>
+      <div style="font-size:12.5px; color:oklch(45% 0.02 60);">Everything your digital office uses in one place. Review usage, add resources, or expand your Workspace without interrupting your work.</div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-bottom:16px;">
+      <sc-for list="{{ resourceMeters }}" as="r" hint-placeholder-count="6">
+        <div class="card" style="padding:14px 16px;">
+          <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;"><strong>{{ r.name }}</strong><span style="color:{{ r.stateColor }};">{{ r.stateLabel }}</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:{{ r.pct }}%; background:{{ r.barColor }};"></div></div>
+          <div style="font-size:11px; color:oklch(50% 0.02 60); margin-top:5px;">{{ r.used }} / {{ r.total }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div class="card" style="padding:18px 20px; margin-bottom:16px;">
+      <div style="font-family:'Playfair Display',serif; font-size:16px; margin-bottom:12px;">AI Assistant Usage</div>
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px;">
+        <sc-for list="{{ aiStateButtons }}" as="b" hint-placeholder-count="8">
+          <button onClick="{{ b.onClick }}" style="font-size:10.5px; background:{{ b.active }}; border:1px solid oklch(85% 0.02 60); border-radius:100px; padding:5px 10px; cursor:pointer;">{{ b.label }}</button>
+        </sc-for>
+      </div>
+      <div style="background:{{ aiStateBg }}; border:1px solid {{ aiStateBorder }}; border-radius:10px; padding:14px 16px;">
+        <div style="font-size:13.5px; font-weight:600; margin-bottom:6px;">{{ aiStateTitle }}</div>
+        <div style="font-size:12.5px; line-height:1.7; color:oklch(35% 0.02 60); white-space:pre-line;">{{ aiStateBody }}</div>
+        <div style="display:flex; gap:8px; margin-top:12px; flex-wrap:wrap;">
+          <sc-for list="{{ aiStateActions }}" as="a" hint-placeholder-count="2">
+            <button onClick="{{ a.onClick }}" style="font-size:12px; background:{{ a.primary }}; color:{{ a.color }}; border:1px solid oklch(85% 0.02 60); border-radius:8px; padding:8px 14px; cursor:pointer;">{{ a.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:18px 20px;">
+      <div style="font-family:'Playfair Display',serif; font-size:16px; margin-bottom:10px;">Workspace Storage</div>
+      <div style="font-size:12.5px; margin-bottom:10px;">430 MB of 1 GB used</div>
+      <div class="bar-track" style="margin-bottom:14px;"><div class="bar-fill" style="width:43%; background:oklch(60% 0.14 150);"></div></div>
+      <sc-for list="{{ storageBreakdown }}" as="s" hint-placeholder-count="4">
+        <div style="display:flex; justify-content:space-between; font-size:12px; padding:6px 0; border-bottom:1px solid oklch(95% 0.01 70);"><span>{{ s.label }}</span><span style="color:oklch(50% 0.02 60);">{{ s.size }}</span></div>
+      </sc-for>
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <button style="font-size:12px; background:white; border:1px solid oklch(85% 0.02 60); border-radius:8px; padding:8px 14px; cursor:pointer;">Manage Files</button>
+        <button onClick="{{ onGoAddons }}" style="font-size:12px; background:oklch(30% 0.1 30); color:white; border:none; border-radius:8px; padding:8px 14px; cursor:pointer;">Add Storage</button>
+      </div>
+    </div>
+
+    <div class="card" style="padding:18px 20px; margin-top:16px;">
+      <div style="font-family:'Playfair Display',serif; font-size:16px; margin-bottom:10px;">AI Usage History</div>
+      <sc-for list="{{ usageHistory }}" as="u" hint-placeholder-count="3">
+        <div style="display:flex; justify-content:space-between; font-size:12px; padding:7px 0; border-bottom:1px solid oklch(95% 0.01 70);">
+          <span>{{ u.date }} — {{ u.action }}</span><span style="color:oklch(50% 0.02 60);">{{ u.credits }} Credits</span>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- ============ ADD-ONS ============ -->
+  <sc-if value="{{ isAddons }}" hint-placeholder-val="{{ false }}">
+    <div style="font-size:11px; margin-bottom:12px;"><span class="demo-tag">Demo Pricing — Not Final</span></div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-bottom:20px;">
+      <sc-for list="{{ addonCards }}" as="a" hint-placeholder-count="6">
+        <div class="card" style="padding:16px 18px;">
+          <div style="font-size:13.5px; font-weight:600; margin-bottom:4px;">{{ a.title }}</div>
+          <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:8px;">{{ a.useCase }}</div>
+          <div style="font-size:11px; color:oklch(50% 0.02 60); line-height:1.7; margin-bottom:10px;">Validity: {{ a.validity }}<br/>Rollover: {{ a.rollover }}</div>
+          <div style="font-size:15px; font-weight:700; color:oklch(35% 0.14 25); margin-bottom:10px;">฿{{ a.price }}</div>
+          <button onClick="{{ a.onBuy }}" style="width:100%; font-size:12px; background:oklch(30% 0.1 30); color:white; border:none; border-radius:8px; padding:8px; cursor:pointer;">Add to Workspace</button>
+        </div>
+      </sc-for>
+    </div>
+
+    <div class="card" style="padding:18px 20px; margin-bottom:16px;">
+      <div style="font-family:'Playfair Display',serif; font-size:15px; margin-bottom:10px;">Add-on vs Upgrade</div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; font-size:12.5px;">
+        <div style="border:1px solid oklch(90% 0.02 70); border-radius:8px; padding:12px;"><strong>Option A — Add AI Credits</strong><div style="color:oklch(50% 0.02 60); margin-top:4px;">Best for temporary extra usage this cycle only</div></div>
+        <div style="border:1px solid oklch(90% 0.02 70); border-radius:8px; padding:12px;"><strong>Option B — Upgrade Workspace</strong><div style="color:oklch(50% 0.02 60); margin-top:4px;">Best for ongoing higher usage + more Listings, Storage, Customer Spaces</div></div>
+      </div>
+    </div>
+
+    <sc-if value="{{ orderStep }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ onCloseOrder }}" style="position:fixed; inset:0; background:oklch(0% 0 0 / 0.4); display:flex; align-items:center; justify-content:center; z-index:80;">
+        <div onClick="{{ stopProp }}" style="background:white; border-radius:12px; padding:22px 24px; width:min(380px,90vw);">
+          <sc-if value="{{ isOrderSummary }}" hint-placeholder-val="{{ true }}">
+            <div style="font-family:'Playfair Display',serif; font-size:16px; margin-bottom:12px;">Order Summary (Demo)</div>
+            <div style="font-size:12.5px; display:flex; justify-content:space-between; margin-bottom:6px;"><span>{{ orderItemName }}</span><span>฿{{ orderItemPrice }}</span></div>
+            <div style="font-size:11px; color:oklch(50% 0.02 60); margin-bottom:14px;">Demo payment only — no real charge</div>
+            <button onClick="{{ onConfirmOrder }}" style="width:100%; font-size:12.5px; background:oklch(30% 0.1 30); color:white; border:none; border-radius:8px; padding:9px; cursor:pointer;">Confirm Demo Payment</button>
+          </sc-if>
+          <sc-if value="{{ isOrderSuccess }}" hint-placeholder-val="{{ false }}">
+            <div style="text-align:center; padding:10px 0;">
+              <div style="font-size:32px; margin-bottom:8px;">✓</div>
+              <div style="font-family:'Playfair Display',serif; font-size:16px; margin-bottom:6px;">Resource Added</div>
+              <div style="font-size:12.5px; color:oklch(50% 0.02 60);">{{ orderItemName }} is now available in your Workspace (demo)</div>
+            </div>
+          </sc-if>
+          <button onClick="{{ onCloseOrder }}" style="width:100%; margin-top:14px; font-size:12.5px; background:white; border:1px solid oklch(85% 0.02 60); border-radius:8px; padding:9px; cursor:pointer;">Close</button>
+        </div>
+      </div>
+    </sc-if>
+  </sc-if>
+
+  <!-- ============ MINI-SITE CUSTOMISER ============ -->
+  <sc-if value="{{ isCustomiser }}" hint-placeholder-val="{{ false }}">
+    <div style="display:grid; grid-template-columns:300px 1fr; gap:18px; align-items:start;">
+      <div class="card" style="padding:18px 20px;">
+        <div style="font-family:'Playfair Display',serif; font-size:15px; margin-bottom:12px;">Customise Mini-Site</div>
+        <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:6px;">Theme</div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;">
+          <sc-for list="{{ themeOptions }}" as="th" hint-placeholder-count="7">
+            <button onClick="{{ th.onClick }}" style="font-size:11px; padding:6px 11px; border-radius:100px; cursor:pointer; border:1px solid oklch(85% 0.02 60); background:{{ th.active }};">{{ th.label }}</button>
+          </sc-for>
+        </div>
+        <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:6px;">Primary Colour</div>
+        <div style="display:flex; gap:6px; margin-bottom:14px;">
+          <sc-for list="{{ colorSwatches }}" as="c" hint-placeholder-count="5">
+            <div onClick="{{ c.onClick }}" style="width:26px; height:26px; border-radius:50%; background:{{ c.color }}; cursor:pointer; border:2px solid {{ c.border }};"></div>
+          </sc-for>
+        </div>
+        <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:6px;">Section Visibility &amp; Order</div>
+        <sc-for list="{{ sections }}" as="s" hint-placeholder-count="6">
+          <label style="display:flex; align-items:center; gap:8px; font-size:12px; padding:5px 0;"><input type="checkbox" checked="{{ s.visible }}" onChange="{{ s.onToggle }}"/> {{ s.label }}</label>
+        </sc-for>
+      </div>
+      <div class="card" style="padding:0; overflow:hidden;">
+        <div style="background:{{ previewAccent }}; height:90px;"></div>
+        <div style="padding:0 20px 20px;">
+          <div style="width:64px; height:64px; border-radius:50%; background:{{ previewAccent }}; color:white; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-size:22px; border:4px solid white; margin-top:-32px;">S</div>
+          <div style="font-family:'Playfair Display',serif; font-size:18px; margin-top:6px;">คุณสมชาย <span class="demo-tag">Theme: {{ previewTheme }}</span></div>
+          <div style="font-size:12.5px; color:oklch(45% 0.02 60);">huahin.properties/@somchai</div>
+          <button style="margin-top:12px; font-size:12px; background:{{ previewAccent }}; color:white; border:none; border-radius:8px; padding:8px 16px; cursor:pointer;">Contact</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ LANGUAGES ============ -->
+  <sc-if value="{{ isLanguages }}" hint-placeholder-val="{{ false }}">
+    <div class="card" style="padding:20px 22px; max-width:460px; margin-bottom:16px;">
+      <div style="font-family:'Playfair Display',serif; font-size:16px; margin-bottom:12px;">Mini-Site Languages</div>
+      <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">Primary Language</div>
+      <div style="font-size:13px; margin-bottom:14px;">Thai</div>
+      <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">Additional Languages</div>
+      <sc-for list="{{ langOptions }}" as="l" hint-placeholder-count="6">
+        <label style="display:flex; align-items:center; gap:8px; font-size:13px; padding:5px 0;"><input type="checkbox" checked="{{ l.on }}" onChange="{{ l.onToggle }}"/> {{ l.name }}</label>
+      </sc-for>
+      <div style="font-size:12px; color:oklch(50% 0.02 60); margin:14px 0 8px;">Translation Method</div>
+      <label style="display:block; font-size:12.5px; margin-bottom:4px;"><input type="radio" name="tm" checked="{{ true }}"/> AI-assisted translation</label>
+      <label style="display:block; font-size:12.5px;"><input type="radio" name="tm"/> Use my own text</label>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <sc-for list="{{ translationStatuses }}" as="t" hint-placeholder-count="4">
+        <span style="font-size:11px; background:{{ t.bg }}; color:{{ t.color }}; border-radius:100px; padding:5px 12px;">{{ t.label }}</span>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- ============ FAVORITES FILTERS ============ -->
+  <sc-if value="{{ isFilters }}" hint-placeholder-val="{{ false }}">
+    <div style="display:grid; grid-template-columns:220px 1fr; gap:16px; align-items:start;">
+      <div class="card" style="padding:16px 18px;">
+        <div style="font-size:12.5px; font-weight:600; margin-bottom:10px;">Filters</div>
+        <sc-for list="{{ filterGroups }}" as="g" hint-placeholder-count="6">
+          <div style="font-size:11px; color:oklch(50% 0.02 60); margin:10px 0 4px;">{{ g.label }}</div>
+          <div style="font-size:12px;">{{ g.value }}</div>
+        </sc-for>
+        <button onClick="{{ onSaveFilter }}" style="width:100%; margin-top:14px; font-size:11.5px; background:oklch(96% 0.02 80); border:1px solid oklch(87% 0.03 70); border-radius:8px; padding:7px; cursor:pointer;">💾 Save this filter</button>
+        <sc-if value="{{ filterSaved }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px; color:oklch(45% 0.12 150); margin-top:6px;">Saved as "Pool Villas under 15M"</div></sc-if>
+      </div>
+      <div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
+          <sc-for list="{{ appliedChips }}" as="c" hint-placeholder-count="5">
+            <span style="font-size:11px; background:white; border:1px solid oklch(87% 0.02 70); border-radius:100px; padding:5px 11px;">{{ c }} ✕</span>
+          </sc-for>
+        </div>
+        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:10px;">4 results · Sort: Most Used in Collections</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; margin-bottom:16px;">
+          <sc-for list="{{ filterResults }}" as="p" hint-placeholder-count="4">
+            <div class="card" style="padding:10px 12px; font-size:12px;">{{ p.code }} — {{ p.title }}<div style="font-size:10.5px; color:oklch(50% 0.02 60);">{{ p.source }}</div></div>
+          </sc-for>
+        </div>
+        <a href="./workspace.html" style="display:inline-block; font-size:12.5px; background:oklch(30% 0.1 30); color:white; text-decoration:none; border-radius:8px; padding:9px 16px;">Create Collection from Results →</a>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ ONBOARDING ============ -->
+  <sc-if value="{{ isOnboarding }}" hint-placeholder-val="{{ false }}">
+    <div class="card" style="padding:20px 22px; max-width:520px; margin-bottom:16px;">
+      <div style="font-family:'Playfair Display',serif; font-size:17px; margin-bottom:12px;">How do you plan to use huahin.properties?</div>
+      <sc-for list="{{ roleOptions }}" as="r" hint-placeholder-count="6">
+        <label style="display:flex; align-items:center; gap:8px; font-size:13px; padding:7px 0; cursor:pointer;"><input type="radio" name="role" checked="{{ r.active }}" onChange="{{ r.onClick }}"/> {{ r.label }}</label>
+      </sc-for>
+    </div>
+    <div class="card" style="padding:18px 20px; max-width:520px;">
+      <div style="font-family:'Playfair Display',serif; font-size:15px; margin-bottom:10px;">Start your Digital Office</div>
+      <sc-for list="{{ onboardingSteps }}" as="s" hint-placeholder-count="5">
+        <div style="font-size:12.5px; padding:6px 0; border-bottom:1px solid oklch(95% 0.01 70);">{{ s }}</div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- ============ MARKETING ============ -->
+  <sc-if value="{{ isMarketing }}" hint-placeholder-val="{{ false }}">
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px;">
+      <sc-for list="{{ marketingBlocks }}" as="m" hint-placeholder-count="4">
+        <div class="card" style="padding:18px 20px;">
+          <div style="font-size:11px; color:oklch(50% 0.02 60); margin-bottom:8px;">{{ m.lang }} · Direction {{ m.n }}</div>
+          <div style="font-family:'Playfair Display',serif; font-style:italic; font-size:14px; line-height:1.7; white-space:pre-line;">{{ m.text }}</div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    page: (typeof location !== "undefined" && ["resources","addons","customiser","languages","filters","onboarding","marketing"].includes(location.hash.slice(1))) ? location.hash.slice(1) : "resources",
+    aiState: 0, orderStep: null, orderItem: null,
+    theme: "Luxury", color: "oklch(30% 0.1 30)",
+    sections: { Header: true, Listings: true, About: true, Contact: true, Collections: true, Reviews: false },
+    langs: { English: true, Chinese: true, Russian: false, German: false, French: false, Japanese: false },
+    filterSaved: false, role: "agent",
+  };
+  aiStates = [
+    { label: "1. Normal", title: "AI Assistant — Ready", body: "Included this cycle: 1,000 AI Credits\nUsed: 620   Remaining: 380\nResets: 1 August 2026", bg: "oklch(97% 0.02 150)", border: "oklch(85% 0.05 150)", actions: [] },
+    { label: "2. Approaching", title: "Your AI usage is higher than usual", body: "You have 15% of your included AI resources remaining.\nYou can continue working normally. To avoid interruption later, you may add AI Credits or compare packages now.", bg: "oklch(97% 0.05 80)", border: "oklch(85% 0.08 75)", actions: ["Add AI Credits", "Compare Packages", "Remind Me Later"] },
+    { label: "3. Reached", title: "Included AI resources for this cycle have been used", body: "We have provided temporary grace access so you can complete urgent work.\nChoose the best option for continued use:", bg: "oklch(96% 0.06 30)", border: "oklch(83% 0.09 30)", actions: ["Add AI Credits", "Upgrade Package", "View Usage Details"] },
+    { label: "4. Grace", title: "Temporary Grace Usage Active", body: "You're using grace credits provided as a courtesy. Regular usage resumes after adding credits or your next billing cycle.", bg: "oklch(96% 0.06 30)", border: "oklch(83% 0.09 30)", actions: ["Add AI Credits"] },
+    { label: "5. Add-on Available", title: "AI Credit Packs Available", body: "Choose a credit pack sized for how you work — small top-ups or larger packs for heavy AI use.", bg: "oklch(97% 0.02 85)", border: "oklch(85% 0.05 75)", actions: ["View Add-ons"] },
+    { label: "6. Upgrade Recommended", title: "Your usage pattern fits Professional Tier better", body: "Based on recent usage, upgrading may be more cost-effective than repeated add-on purchases.", bg: "oklch(97% 0.02 85)", border: "oklch(85% 0.05 75)", actions: ["Compare Packages"] },
+    { label: "7. Paused", title: "AI Assistant Paused for Resource Protection", body: "To protect fair use across all Members, AI actions are temporarily paused. Add credits or upgrade to resume immediately.", bg: "oklch(95% 0.03 30)", border: "oklch(80% 0.08 30)", actions: ["Add AI Credits", "Upgrade Package"] },
+    { label: "8. Restored", title: "AI Resources Restored", body: "Your AI Assistant is fully available again after your recent purchase/renewal.", bg: "oklch(97% 0.02 150)", border: "oklch(85% 0.05 150)", actions: [] },
+  ];
+  renderVals() {
+    const s = this.state;
+    const tabStyle = (active) => `font-size:12.5px; padding:9px 16px; border-radius:100px; cursor:pointer; border:1px solid oklch(85% 0.02 60); background:${active ? "oklch(30% 0.1 30)" : "white"}; color:${active ? "#fff" : "oklch(30% 0.02 60)"};`;
+    const st = this.aiStates[s.aiState];
+    return {
+      navTabs: [
+        { label: "📊 Resources", onClick: () => this.setState({ page: "resources" }), style: tabStyle(s.page === "resources") },
+        { label: "🛒 Add-ons", onClick: () => this.setState({ page: "addons" }), style: tabStyle(s.page === "addons") },
+        { label: "🎨 Mini-Site Customiser", onClick: () => this.setState({ page: "customiser" }), style: tabStyle(s.page === "customiser") },
+        { label: "🌐 Languages", onClick: () => this.setState({ page: "languages" }), style: tabStyle(s.page === "languages") },
+        { label: "🔎 Favorites Filters", onClick: () => this.setState({ page: "filters" }), style: tabStyle(s.page === "filters") },
+        { label: "🚀 Onboarding", onClick: () => this.setState({ page: "onboarding" }), style: tabStyle(s.page === "onboarding") },
+        { label: "📣 Marketing", onClick: () => this.setState({ page: "marketing" }), style: tabStyle(s.page === "marketing") },
+      ],
+      isResources: s.page === "resources", isAddons: s.page === "addons", isCustomiser: s.page === "customiser",
+      isLanguages: s.page === "languages", isFilters: s.page === "filters", isOnboarding: s.page === "onboarding", isMarketing: s.page === "marketing",
+      resourceMeters: [
+        { name: "AI Credits", used: 620, total: 1000, pct: 62, stateLabel: "Healthy", stateColor: "oklch(45% 0.12 150)", barColor: "oklch(60% 0.14 150)" },
+        { name: "Storage", used: "430 MB", total: "1 GB", pct: 43, stateLabel: "Healthy", stateColor: "oklch(45% 0.12 150)", barColor: "oklch(60% 0.14 150)" },
+        { name: "Active Listings", used: 12, total: 20, pct: 60, stateLabel: "Getting Busy", stateColor: "oklch(45% 0.1 60)", barColor: "oklch(70% 0.12 75)" },
+        { name: "Customer Spaces", used: 8, total: 20, pct: 40, stateLabel: "Healthy", stateColor: "oklch(45% 0.12 150)", barColor: "oklch(60% 0.14 150)" },
+        { name: "Translation Credits", used: 24, total: 100, pct: 24, stateLabel: "Healthy", stateColor: "oklch(45% 0.12 150)", barColor: "oklch(60% 0.14 150)" },
+        { name: "Team Members", used: 1, total: 1, pct: 100, stateLabel: "Action Required", stateColor: "oklch(50% 0.15 30)", barColor: "oklch(60% 0.15 30)" },
+      ],
+      aiStateButtons: this.aiStates.map((a, i) => ({ label: a.label, onClick: () => this.setState({ aiState: i }), active: i === s.aiState ? "oklch(30% 0.1 30)" : "white" })).map((b, i) => ({ ...b, active: i === s.aiState ? "oklch(30% 0.1 30)" : "white" })),
+      aiStateTitle: st.title, aiStateBody: st.body, aiStateBg: st.bg, aiStateBorder: st.border,
+      aiStateActions: st.actions.map((label) => ({ label, onClick: () => this.setState({ page: "addons" }), primary: "oklch(30% 0.1 30)", color: "white" })),
+      storageBreakdown: [
+        { label: "Property Photos", size: "260 MB" }, { label: "Documents", size: "90 MB" }, { label: "Brand Assets", size: "45 MB" }, { label: "Customer Files", size: "35 MB" },
+      ],
+      usageHistory: [
+        { date: "23 Jul", action: "Property description generated", credits: 12 },
+        { date: "23 Jul", action: "Customer Collection summary", credits: 8 },
+        { date: "22 Jul", action: "Listing translation — 3 languages", credits: 24 },
+      ],
+      onGoAddons: () => this.setState({ page: "addons" }),
+      addonCards: [
+        { title: "AI Credit Pack — Small", useCase: "Light monthly top-up", validity: "90 days", rollover: "No", price: "199" },
+        { title: "AI Credit Pack — Medium", useCase: "Regular Collection/description generation", validity: "90 days", rollover: "No", price: "449" },
+        { title: "AI Credit Pack — Large", useCase: "Heavy AI users, teams", validity: "180 days", rollover: "Yes, up to 50%", price: "899" },
+        { title: "Translation Pack", useCase: "Multi-language listings", validity: "365 days", rollover: "No", price: "299" },
+        { title: "AI Image Processing Pack", useCase: "Bulk photo caption/alt-text", validity: "90 days", rollover: "No", price: "349" },
+        { title: "Storage Pack +2GB", useCase: "More photos & documents", validity: "Recurring monthly", rollover: "N/A", price: "149" },
+      ].map((a) => ({ ...a, onBuy: () => this.setState({ orderStep: "summary", orderItem: a }) })),
+      orderStep: s.orderStep, isOrderSummary: s.orderStep === "summary", isOrderSuccess: s.orderStep === "success",
+      orderItemName: s.orderItem?.title || "", orderItemPrice: s.orderItem?.price || "",
+      onConfirmOrder: () => this.setState({ orderStep: "success" }), onCloseOrder: () => this.setState({ orderStep: null, orderItem: null }),
+      stopProp: (e) => e.stopPropagation(),
+      themeOptions: ["Classic", "Modern", "Luxury", "Minimal", "Coastal", "Professional", "Dark"].map((label) => ({
+        label, onClick: () => this.setState({ theme: label }), active: label === s.theme ? "oklch(30% 0.1 30)" : "white",
+      })).map((t) => ({ ...t, active: t.label === s.theme ? "oklch(90% 0.05 30)" : "white" })),
+      colorSwatches: ["oklch(30% 0.1 30)", "oklch(35% 0.1 250)", "oklch(45% 0.12 150)", "oklch(40% 0.02 60)", "oklch(55% 0.15 60)"].map((color) => ({
+        color, onClick: () => this.setState({ color }), border: color === s.color ? "oklch(20% 0.02 60)" : "white",
+      })),
+      sections: Object.entries(s.sections).map(([label, visible]) => ({ label, visible, onToggle: () => this.setState((st2) => ({ sections: { ...st2.sections, [label]: !st2.sections[label] } })) })),
+      previewAccent: s.color, previewTheme: s.theme,
+      langOptions: Object.entries(s.langs).map(([name, on]) => ({ name, on, onToggle: () => this.setState((st2) => ({ langs: { ...st2.langs, [name]: !st2.langs[name] } })) })),
+      translationStatuses: [
+        { label: "Original", bg: "oklch(95% 0.01 70)", color: "oklch(35% 0.02 60)" },
+        { label: "AI Translated", bg: "oklch(95% 0.05 250)", color: "oklch(35% 0.1 250)" },
+        { label: "Reviewed", bg: "oklch(95% 0.06 150)", color: "oklch(35% 0.12 150)" },
+        { label: "Needs Review", bg: "oklch(95% 0.06 60)", color: "oklch(40% 0.12 60)" },
+      ],
+      filterGroups: [
+        { label: "Sale/Rent", value: "Sale" }, { label: "Area", value: "Hua Hin" }, { label: "Property Type", value: "Pool Villa" },
+        { label: "Bedrooms", value: "3+" }, { label: "Price Range", value: "Under ฿15M" }, { label: "Availability", value: "Available" },
+      ],
+      appliedChips: ["Sale", "Hua Hin", "Pool Villa", "3+ bed", "Under ฿15M"],
+      filterResults: [
+        { code: "HH-111", title: "Pool Villa Ready to Move", source: "My Listing" },
+        { code: "HH-318", title: "Golf View Villa", source: "My Listing" },
+        { code: "HH-205", title: "Family Home near School", source: "Team Listing" },
+        { code: "HH-089", title: "Investment Townhome", source: "Platform Listing" },
+      ],
+      onSaveFilter: () => this.setState({ filterSaved: true }), filterSaved: s.filterSaved,
+      roleOptions: [
+        "I am a property agent", "I am a property owner", "I manage a property project",
+        "I am starting a real-estate business", "I am looking to buy or rent", "I am exploring the platform",
+      ].map((label, i) => ({ label, active: i === 0, onClick: () => {} })),
+      onboardingSteps: [
+        "1. เลือกชื่อ Mini-Site ของคุณ (huahin.properties/@username)",
+        "2. เพิ่มโปรไฟล์และพื้นที่ให้บริการ",
+        "3. บันทึกทรัพย์รายการแรกใน My Favorites",
+        "4. สร้าง Customer Collection รายการแรก",
+        "5. แชร์ Mini-Site ของคุณ",
+      ],
+      marketingBlocks: [
+        { lang: "TH", n: 1, text: "ไม่ใช่แค่ลงประกาศบ้าน\n\nแต่คือพื้นที่ทำงานอสังหาริมทรัพย์ของคุณ\n\nมีเว็บไซต์ส่วนตัว มีคลังทรัพย์ มีเครื่องมือ AI\nมีพื้นที่จัดบ้านให้ลูกค้า และติดตามงานได้จากที่เดียว" },
+        { lang: "TH", n: 2, text: "อยากขายบ้าน อยากเริ่มเป็นนายหน้า\nหรืออยากทำงานให้เป็นระบบกว่าเดิม?\n\nเริ่มต้นสำนักงานดิจิทัลของคุณ\nบน huahin.properties" },
+        { lang: "TH", n: 3, text: "จากการส่งลิงก์บ้านทีละหลัง\n\nสู่ Customer Space\nที่ออกแบบให้ลูกค้าแต่ละคนโดยเฉพาะ" },
+        { lang: "EN", n: 1, text: "More than property listings.\n\nYour complete real-estate Workspace.\n\nBuild your Digital Office, organise properties,\nserve customers, and grow your business\nfrom one connected platform." },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

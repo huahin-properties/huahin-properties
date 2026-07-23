@@ -1,23 +1,25 @@
-# huahin.properties — เพิ่มโหมดปิดปรับปรุงเว็บไซต์ (Maintenance Mode)
+# huahin.properties — Phase 2 Mission 1 (FINAL)
 
-## อัปเดตล่าสุด
-เพิ่มระบบ "โหมดปิดปรับปรุงเว็บไซต์" — ใช้ตอนกำลังแก้ไข/พัฒนาเว็บอยู่ ไม่อยากให้คนทั่วไปเห็นงานที่ยังไม่เสร็จ
+**A connected static frontend demo** of huahin.properties as a Real Estate Workspace Platform. 12/12 Mission Steps complete at the frontend level (10 🟢 fully frontend-complete, 2 🟡 frontend-complete with documented production/QA follow-up).
 
-**วิธีใช้งาน (ไม่ต้องแก้โค้ด แก้ผ่านหน้าเว็บได้เลย):**
-1. เข้าสู่ระบบแอดมิน → ไปที่หน้า **Site Content**
-2. ด้านบนสุดจะเห็นกล่อง "🚧 โหมดปิดปรับปรุงเว็บไซต์" พร้อมปุ่มเปิด/ปิด
-3. กดปุ่ม **"เปิดโหมดนี้"** — ทุกหน้าสาธารณะ (หน้าแรก, ค้นหา, รายละเอียดทรัพย์, ขาย, เกี่ยวกับเรา, ติดต่อ) จะแสดงหน้า "กำลังปรับปรุงเว็บไซต์" แทนเนื้อหาจริงให้คนทั่วไปเห็น ทันทีไม่ต้องอัปโหลดใหม่
-4. สถานะจะแสดงเป็นตัวหนังสือ **สีแดง** "🔴 ปิดกั้นอยู่ — เห็นเฉพาะคุณเท่านั้น" เพื่อคอยเตือนตลอดว่าเว็บกำลังถูกซ่อนจากคนอื่นอยู่ ถ้ากด "ปิดโหมดนี้" สถานะจะเปลี่ยนเป็นตัวหนังสือ **สีเขียว** "🟢 เปิดให้ทุกคนดูได้แล้ว"
-5. ตัวคุณเองยังเข้าดูเว็บจริงได้ตามปกติทุกหน้า ไม่ต้องผ่านหน้ากั้นเลย เพราะระบบจำไว้ว่าคุณคือแอดมิน (ผ่านการล็อกอินแอดมิน)
-6. ถ้ามีคนอื่น (เช่น ทีมงาน) ต้องการดูตัวอย่างระหว่างปิดปรับปรุง — พิมพ์ **รหัสผ่านแอดมินเดิม** (ตัวเดียวกับที่ใช้เข้าสู่ระบบแอดมิน) ที่หน้ากั้นนั้นได้เลย ไม่ต้องจำรหัสใหม่ กดครั้งเดียวเบราว์เซอร์จะจำไว้ให้ไม่ต้องใส่ซ้ำ
+This is a **frontend demo only** — no real backend, Firebase, Firestore, payments, or AI. All data is demo data.
 
-**ข้อควรรู้:** นี่คือการ "บังหน้าจอ" กันคนทั่วไปเข้าใจผิดว่าเว็บพังหรือยังไม่พร้อม ไม่ใช่ระบบรักษาความปลอดภัยระดับสูง เหมาะสำหรับช่วงพัฒนา/ทดสอบ ไม่ใช่การป้องกันข้อมูลลับ
+## How to open locally
+Open `index.html` in any browser. No build step, no server.
 
-## สิ่งที่แก้ในรอบก่อนหน้า
-- เมนูแอดมินล้นจอบนมือถือ (Admin Dashboard, Owners, Property Map, Site Content, AI Quick Add)
-- ช่องรหัสผ่านหน้า Admin Login ตอนนี้แสดงตัวอักษรที่พิมพ์ให้เห็นชัดเจน
+## One connected website
+Every page shares: `assets/css/app.css` (design system), `assets/js/i18n.js` (translation dictionary: ไทย/English/中文/Русский), `assets/js/app.js` (global header, navigation, language switcher with localStorage persistence, footer, Reset Demo). No page-facing "Prototype"/Claude/DC wording remains — footer reads "Frontend Demonstration".
 
-## ยังไม่ได้แก้ (ค้างจากรอบก่อน)
-- ล็อก Firestore security rules ก่อนวันที่ 8 ส.ค. 2026 (ตอนนี้ยังเป็น rules แบบเปิดชั่วคราว)
-- ตรวจสอบ AI Quick Add ว่าคำนวณระยะทาง/สถานที่ใกล้เคียงจากพิกัดได้ครบ 10+ จุด ทั้ง EN/TH จริงหรือไม่
-- ตรวจว่าอัปโหลดรูปหลายรูปพร้อมกันใช้ได้ทุกจุดในแอดมิน
+## Pages
+- `index.html` — landing + 12-step summary
+- `workspace.html` — Command Center (hash-routed tabs: `#workspace` `#favorites` `#builder` `#minisite`)
+- `favorites.html`, `collections.html`, `mini-site.html` — direct routes into the corresponding Workspace tab (thin redirect pages, documented in ARCHITECTURE.md — same underlying module, not duplicated code)
+- `customer-space.html` — AI Assistant + Message Sender tabs
+- `resources.html` — Resource Center, Filters, Onboarding, Marketing (hash-routed: `#resources` `#addons` `#customiser` `#languages` `#filters` `#onboarding` `#marketing`)
+- `addons.html`, `customiser.html`, `onboarding.html` — direct routes into `resources.html` (same pattern as above)
+- `packages.html` — full 4-tier package comparison + selection + demo order flow (newly built, not a route)
+- `settings.html` — minimal settings page
+- `mission-report.html` — 12/12 status report
+
+## Known demo limitations
+See `PRODUCTION-NEXT-STEPS.md`. Headline: ZH/RU cover navigation, headings, primary actions, and critical alerts as directed — not full long-form translation of every module's demo copy.

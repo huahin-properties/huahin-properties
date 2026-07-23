@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings — huahin.properties</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600&family=Work+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/css/app.css">
+</head>
+<body>
+<div style="max-width:600px; margin:0 auto; padding:24px 20px 60px;">
+  <h1 style="font-family:'Playfair Display',serif; font-size:20px;" data-i18n="nav.settings"></h1>
+  <div style="background:#fff; border:1px solid var(--border); border-radius:10px; padding:18px 20px; font-size:12.5px; line-height:1.9;">
+    <div><strong>@somchai</strong> · ที่ปรึกษาอสังหาริมทรัพย์</div>
+    <div style="margin-top:10px;">Language: <span id="curLang"></span> — <a href="#" onclick="document.querySelector('.app-header select').focus()">change in header 🌐</a></div>
+    <div style="margin-top:10px; color:var(--muted);">Username, notification, and account settings are demo-only in this package — see <a href="./PRODUCTION-NEXT-STEPS.md">PRODUCTION-NEXT-STEPS.md</a> for what a real Settings page will include (change username, password/email recovery, notification preferences).</div>
+  </div>
+</div>
+<script src="./assets/js/i18n.js"></script>
+<script src="./assets/js/app.js"></script>
+<script>document.addEventListener("DOMContentLoaded",()=>{document.getElementById("curLang").textContent = window.getSavedLang();});</script>
+</body></html>

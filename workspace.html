@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./assets/css/app.css">
+<script src="./assets/js/i18n.js"></script>
+<script src="./assets/js/app.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Workspace — huahin.properties</title>
+  <style>
+    body { margin: 0; background: oklch(96% 0.01 75); font-family: 'Work Sans', sans-serif; color: oklch(25% 0.02 60); }
+    a { color: oklch(35% 0.14 25); } a:hover { color: oklch(28% 0.15 25); }
+    .demo-tag { display:inline-block; font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; background:oklch(88% 0.1 80); color:oklch(35% 0.1 60); padding:2px 7px; border-radius:4px; }
+    .card { background:white; border:1px solid oklch(89% 0.01 70); border-radius:12px; }
+  </style>
+</helmet>
+
+<div style="max-width:1180px; margin:0 auto; padding:20px 20px 100px;">
+
+  <div style="background:oklch(98% 0.02 85); border:1px solid oklch(85% 0.05 70); border-radius:10px; padding:12px 16px; margin-bottom:16px; font-size:12.5px; color:oklch(40% 0.03 60);">
+    <span class="demo-tag">Frontend Demonstration</span>&nbsp; WEA v1.1 — Official Mini-Site format: <strong>huahin.properties/@username</strong>. Demo data only, no backend.
+  </div>
+
+  <div style="display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;">
+    <sc-for list="{{ navTabs }}" as="t" hint-placeholder-count="4">
+      <button onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</button>
+    </sc-for>
+    <a href="./customer-space.html" style="margin-left:auto; font-size:12.5px; align-self:center; text-decoration:none; color:oklch(35% 0.1 30);">→ Customer Space</a>
+  </div>
+
+  <!-- ============ WORKSPACE — COMMAND CENTER ============ -->
+  <sc-if value="{{ isWorkspace }}" hint-placeholder-val="{{ true }}">
+    <div style="background:linear-gradient(135deg, oklch(30% 0.08 30), oklch(22% 0.05 30)); color:oklch(97% 0.01 80); border-radius:14px; padding:26px 28px; margin-bottom:20px;">
+      <div style="font-family:'Playfair Display',serif; font-size:22px; margin-bottom:8px;">ยินดีต้อนรับกลับ คุณสมชาย</div>
+      <div style="font-size:13.5px; opacity:0.9; max-width:640px; line-height:1.7;">นี่คือพื้นที่ทำงานหลักของคุณ — เมื่อลูกค้าติดต่อเข้ามา ทุกอย่างเริ่มต้นจากที่นี่ เลือกรายการทรัพย์ สร้างชุดแนะนำ ส่ง Customer Space และติดตามการสนทนาได้ในที่เดียว</div>
+    </div>
+
+    <div class="card" style="padding:18px 20px; margin-bottom:16px;">
+      <div style="font-family:'Playfair Display',serif; font-size:16px; margin-bottom:12px;">งานวันนี้ (Today's Work)</div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px;">
+        <sc-for list="{{ todaysWork }}" as="w" hint-placeholder-count="5">
+          <div onClick="{{ w.onClick }}" style="cursor:pointer; border:1px solid oklch(90% 0.02 70); border-radius:10px; padding:12px; background:{{ w.bg }};">
+            <div style="font-size:18px; font-weight:700; color:{{ w.color }};">{{ w.count }}</div>
+            <div style="font-size:12px; color:oklch(45% 0.02 60);">{{ w.label }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div class="card" style="padding:18px 20px; margin-bottom:16px;">
+      <div style="font-family:'Playfair Display',serif; font-size:16px; margin-bottom:12px;">ลูกค้าล่าสุด (Recent Customers)</div>
+      <sc-for list="{{ recentCustomers }}" as="c" hint-placeholder-count="3">
+        <div style="display:flex; align-items:center; gap:12px; padding:11px 0; border-bottom:1px solid oklch(94% 0.01 70);">
+          <div style="width:36px; height:36px; border-radius:50%; background:oklch(90% 0.02 70); display:flex; align-items:center; justify-content:center; font-weight:600; font-size:13px; color:oklch(35% 0.08 30); flex-shrink:0;">{{ c.initial }}</div>
+          <div style="flex:1; min-width:0;">
+            <div style="font-size:13px; font-weight:600;">{{ c.name }} <span style="font-weight:400; color:oklch(50% 0.02 60); font-size:12px;">— {{ c.collection }}</span></div>
+            <div style="font-size:11.5px; color:oklch(50% 0.02 60);">{{ c.status }} · {{ c.lastActive }}</div>
+          </div>
+          <sc-if value="{{ c.unread }}" hint-placeholder-val="{{ false }}"><span style="width:8px; height:8px; border-radius:50%; background:oklch(55% 0.18 30);"></span></sc-if>
+          <a href="./customer-space.html" style="font-size:11.5px; text-decoration:none; background:oklch(96% 0.02 80); border:1px solid oklch(87% 0.03 70); border-radius:6px; padding:5px 10px; white-space:nowrap;">เปิด Customer Space</a>
+        </div>
+      </sc-for>
+    </div>
+
+    <div class="card" style="padding:18px 20px; margin-bottom:16px;">
+      <div style="font-family:'Playfair Display',serif; font-size:16px; margin-bottom:10px;">Quick Actions</div>
+      <div style="display:flex; flex-wrap:wrap; gap:8px;">
+        <sc-for list="{{ quickActions }}" as="q" hint-placeholder-count="6">
+          <button onClick="{{ q.onClick }}" style="font-size:12px; background:white; border:1px solid oklch(85% 0.02 60); border-radius:100px; padding:8px 14px; cursor:pointer;">{{ q.label }}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div class="card" style="padding:16px 18px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+        <div style="font-family:'Playfair Display',serif; font-size:15px;">Workspace Package — Professional (Tier 2)</div>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; font-size:12.5px;">
+        <div>Storage <div style="font-weight:600;">430 MB / 1 GB</div></div>
+        <div>Active Listings <div style="font-weight:600;">12 / 20</div></div>
+        <div>Customer Spaces <div style="font-weight:600;">8 / 20</div></div>
+        <div>AI Credits <div style="font-weight:600;">150 / เดือน</div></div>
+        <div>Customer Collections <div style="font-weight:600;">Unlimited</div></div>
+        <div>Mini-Site <div style="font-weight:600;">huahin.properties/@somchai</div></div>
+      </div>
+      <div style="margin-top:14px; background:oklch(97% 0.03 80); border:1px solid oklch(88% 0.05 75); border-radius:8px; padding:12px 14px; font-size:12px;">
+        <strong>ต้องการ Customer Space เพิ่มหรือไม่?</strong> แพ็กเกจปัจจุบันรองรับสูงสุด 20 Customer Space ที่ใช้งานอยู่ อัปเกรดเพื่อรองรับลูกค้าได้มากขึ้น พร้อมพื้นที่จัดเก็บ รายการทรัพย์ และ AI Credits เพิ่มเติม
+        <div style="margin-top:8px; display:flex; gap:8px;"><a href="./Lister%20Billing.dc.html" style="font-size:12px;">เปรียบเทียบแพ็กเกจ</a><span style="color:oklch(60% 0.02 60);">·</span><span style="color:oklch(55% 0.02 60); cursor:pointer;">ไม่ใช่ตอนนี้</span></div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ MY FAVORITES ============ -->
+  <sc-if value="{{ isFavorites }}" hint-placeholder-val="{{ false }}">
+    <div class="card" style="padding:18px 20px; margin-bottom:16px;">
+      <div style="font-family:'Playfair Display',serif; font-size:18px; margin-bottom:8px;">⭐ My Favorites (รายการโปรด)</div>
+      <div style="font-size:12.5px; line-height:1.8; color:oklch(40% 0.02 60);">เก็บทรัพย์ที่คุณสนใจไว้ในพื้นที่นี้ เพื่อกลับมาดูภายหลัง หรือเลือกจัดเป็นชุดแนะนำสำหรับลูกค้าแต่ละราย คุณสามารถเพิ่มหรือลบรายการโปรดได้ทุกเวลา โดยไม่กระทบชุดทรัพย์ที่ส่งให้ลูกค้าไปแล้ว รายการโปรดหนึ่งรายการสามารถนำไปใช้ในหลาย Collection และส่งให้ลูกค้าได้หลายคน</div>
+      <div style="display:flex; gap:8px; margin-top:12px;">
+        <button style="font-size:12.5px; background:white; border:1px solid oklch(85% 0.02 60); border-radius:8px; padding:8px 14px; cursor:pointer;">+ เพิ่มรายการโปรด</button>
+        <button onClick="{{ onOpenBuilder }}" style="font-size:12.5px; background:oklch(30% 0.1 30); color:white; border:none; border-radius:8px; padding:8px 14px; cursor:pointer;">+ สร้าง Collection สำหรับลูกค้า</button>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+      <sc-for list="{{ favFilters }}" as="f" hint-placeholder-count="4">
+        <span style="font-size:11.5px; background:white; border:1px solid oklch(87% 0.02 70); border-radius:100px; padding:6px 12px;">{{ f }}</span>
+      </sc-for>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:12px;">
+      <sc-for list="{{ favoriteProperties }}" as="p" hint-placeholder-count="6">
+        <div class="card" style="overflow:hidden;">
+          <div style="height:100px; background:oklch(85% 0.02 60); display:flex; align-items:center; justify-content:center; font-size:11px; color:oklch(55% 0.02 60);">[{{ p.code }}]</div>
+          <div style="padding:10px 12px;">
+            <div style="font-size:12.5px; font-weight:600;">{{ p.code }} — {{ p.title }}</div>
+            <div style="font-size:11px; color:oklch(50% 0.02 60); margin-bottom:5px;">{{ p.location }} · ฿{{ p.price }} · {{ p.status }}</div>
+            <div style="font-size:10.5px; color:oklch(50% 0.02 60);">ใช้ใน {{ p.collectionCount }} Collection: {{ p.collectionNames }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- ============ COLLECTION BUILDER + LIVE PREVIEW ============ -->
+  <sc-if value="{{ isBuilder }}" hint-placeholder-val="{{ false }}">
+    <div style="display:grid; grid-template-columns:1fr 340px; gap:18px; align-items:start;">
+      <div class="card" style="padding:20px 22px;">
+        <div style="font-family:'Playfair Display',serif; font-size:18px; margin-bottom:14px;">สร้าง Customer Collection</div>
+        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">Collection Name</div>
+        <input value="Luxury Pool Villas under 15M" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.02 60); border-radius:8px; padding:9px 11px; font-size:13px; margin-bottom:12px;"/>
+        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">Customer</div>
+        <input value="คุณกมล" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.02 60); border-radius:8px; padding:9px 11px; font-size:13px; margin-bottom:12px;"/>
+        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">Customer Requirement</div>
+        <div style="font-size:12.5px; background:oklch(97% 0.01 80); border-radius:8px; padding:9px 11px; margin-bottom:12px;">Pool villa · 3 bedrooms · Hua Hin · Budget under 15M</div>
+        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">Member Note</div>
+        <input value="เลือกจากทำเลและศักยภาพปล่อยเช่า" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.02 60); border-radius:8px; padding:9px 11px; font-size:13px; margin-bottom:14px;"/>
+        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">เลือกแล้ว — {{ builderSelectedCount }} รายการ</div>
+        <sc-for list="{{ favoriteProperties }}" as="p" hint-placeholder-count="6">
+          <label style="display:flex; align-items:center; gap:8px; font-size:12.5px; padding:6px 0; border-bottom:1px solid oklch(95% 0.01 70); cursor:pointer;">
+            <input type="checkbox" checked="{{ p.checked }}" onChange="{{ p.onToggle }}"/> {{ p.code }} — {{ p.title }}
+          </label>
+        </sc-for>
+        <div style="display:flex; gap:8px; margin-top:14px;">
+          <button style="flex:1; font-size:12.5px; background:white; border:1px solid oklch(85% 0.02 60); border-radius:8px; padding:9px; cursor:pointer;">Save as Draft</button>
+          <button onClick="{{ onOpenShareDialog }}" style="flex:1; font-size:12.5px; background:oklch(30% 0.1 30); color:white; border:none; border-radius:8px; padding:9px; cursor:pointer;">Share Customer Space →</button>
+        </div>
+      </div>
+
+      <div class="card" style="padding:16px 18px; position:sticky; top:16px;">
+        <div style="font-family:'Playfair Display',serif; font-size:15px; margin-bottom:6px;">Customer Space Preview</div>
+        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:12px;">สำหรับคุณกมล</div>
+        <div style="background:oklch(97% 0.01 80); border-radius:8px; padding:12px; font-size:12.5px; margin-bottom:12px;">
+          <div style="font-weight:600; margin-bottom:2px;">Luxury Pool Villas under 15M</div>
+          <div style="color:oklch(50% 0.02 60);">{{ builderSelectedCount }} properties · Prepared by คุณสมชาย</div>
+        </div>
+        <div style="font-size:11px; margin-bottom:10px;"><span class="demo-tag">Status: Draft</span></div>
+        <a href="./customer-space.html" style="display:block; text-align:center; text-decoration:none; font-size:12.5px; background:white; border:1px solid oklch(85% 0.02 60); border-radius:8px; padding:8px; margin-bottom:8px;">Open Full Preview</a>
+      </div>
+    </div>
+
+    <sc-if value="{{ shareDialogOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ onCloseShareDialog }}" style="position:fixed; inset:0; background:oklch(0% 0 0 / 0.4); display:flex; align-items:center; justify-content:center; z-index:80;">
+        <div onClick="{{ stopProp }}" style="background:white; border-radius:12px; padding:22px 24px; width:min(400px,90vw);">
+          <div style="font-family:'Playfair Display',serif; font-size:16px; margin-bottom:12px;">Share Customer Space</div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">https://huahin.properties/@somchai/space/kamol-01</div>
+          <div style="display:flex; gap:8px; margin-bottom:12px;">
+            <button style="font-size:12px; background:white; border:1px solid oklch(85% 0.02 60); border-radius:8px; padding:8px 12px; cursor:pointer;">Copy Link</button>
+            <button style="font-size:12px; background:white; border:1px solid oklch(85% 0.02 60); border-radius:8px; padding:8px 12px; cursor:pointer;">QR Code</button>
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <sc-for list="{{ shareChannels }}" as="c" hint-placeholder-count="7">
+              <span style="font-size:11px; background:oklch(96% 0.01 80); border:1px solid oklch(88% 0.02 70); border-radius:100px; padding:5px 11px;">{{ c }}</span>
+            </sc-for>
+          </div>
+          <button onClick="{{ onCloseShareDialog }}" style="width:100%; margin-top:14px; font-size:12.5px; background:oklch(30% 0.1 30); color:white; border:none; border-radius:8px; padding:9px; cursor:pointer;">Close</button>
+        </div>
+      </div>
+    </sc-if>
+  </sc-if>
+
+  <!-- ============ MINI SITE ============ -->
+  <sc-if value="{{ isMiniSite }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex; gap:8px; margin-bottom:16px;">
+      <button onClick="{{ onMiniSitePublic }}" style="{{ miniSitePublicStyle }}">🌐 Public View</button>
+      <button onClick="{{ onMiniSitePrivate }}" style="{{ miniSitePrivateStyle }}">🔒 Private Workspace</button>
+      <button onClick="{{ onMiniSiteUsername }}" style="{{ miniSiteUsernameStyle }}">🪪 Username Settings</button>
+    </div>
+
+    <sc-if value="{{ isMiniSitePublic }}" hint-placeholder-val="{{ true }}">
+      <div class="card" style="overflow:hidden; margin-bottom:16px;">
+        <div style="height:110px; background:linear-gradient(135deg, oklch(35% 0.06 40), oklch(25% 0.05 30));"></div>
+        <div style="padding:0 22px 20px;">
+          <div style="width:72px; height:72px; border-radius:50%; background:oklch(30% 0.08 30); color:white; display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-size:26px; border:4px solid white; margin-top:-36px;">S</div>
+          <div style="font-family:'Playfair Display',serif; font-size:20px; margin-top:8px;">คุณสมชาย <span class="demo-tag" style="background:oklch(90% 0.1 150); color:oklch(30% 0.1 150);">✓ Verified</span></div>
+          <div style="font-size:13px; color:oklch(45% 0.02 60); margin-bottom:8px;">Hua Hin Property Advisor</div>
+          <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">ไทย • English &nbsp;·&nbsp; Hua Hin • Cha-Am • Pranburi &nbsp;·&nbsp; Pool Villas • Investment • Resale</div>
+          <div style="font-size:11.5px; color:oklch(45% 0.1 150); margin-bottom:14px;">มักตอบกลับภายใน 30 นาที</div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">huahin.properties/@somchai</div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button style="font-size:12.5px; background:oklch(30% 0.1 30); color:white; border:none; border-radius:8px; padding:8px 16px; cursor:pointer;">Contact</button>
+            <button style="font-size:12.5px; background:white; border:1px solid oklch(85% 0.02 60); border-radius:8px; padding:8px 16px; cursor:pointer;">Send Enquiry</button>
+            <button onClick="{{ onOpenShareDialog }}" style="font-size:12.5px; background:white; border:1px solid oklch(85% 0.02 60); border-radius:8px; padding:8px 16px; cursor:pointer;">Share Mini-Site</button>
+          </div>
+        </div>
+      </div>
+      <div style="font-family:'Playfair Display',serif; font-size:16px; margin-bottom:10px;">Listings</div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px;">
+        <sc-for list="{{ favoriteProperties }}" as="p" hint-placeholder-count="4">
+          <div class="card" style="padding:10px 12px; font-size:12px;">{{ p.code }} — {{ p.title }}</div>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{ shareDialogOpen }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ onCloseShareDialog }}" style="position:fixed; inset:0; background:oklch(0% 0 0 / 0.4); display:flex; align-items:center; justify-content:center; z-index:80;">
+          <div onClick="{{ stopProp }}" style="background:white; border-radius:12px; padding:22px 24px; width:min(400px,90vw);">
+            <div style="font-family:'Playfair Display',serif; font-size:16px; margin-bottom:12px;">Share Mini-Site</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">https://huahin.properties/@somchai</div>
+            <div style="display:flex; gap:8px; margin-bottom:12px;">
+              <button style="font-size:12px; background:white; border:1px solid oklch(85% 0.02 60); border-radius:8px; padding:8px 12px; cursor:pointer;">Copy Link</button>
+              <button style="font-size:12px; background:white; border:1px solid oklch(85% 0.02 60); border-radius:8px; padding:8px 12px; cursor:pointer;">QR Code</button>
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <sc-for list="{{ shareChannels }}" as="c" hint-placeholder-count="7">
+                <span style="font-size:11px; background:oklch(96% 0.01 80); border:1px solid oklch(88% 0.02 70); border-radius:100px; padding:5px 11px;">{{ c }}</span>
+              </sc-for>
+            </div>
+            <button onClick="{{ onCloseShareDialog }}" style="width:100%; margin-top:14px; font-size:12.5px; background:oklch(30% 0.1 30); color:white; border:none; border-radius:8px; padding:9px; cursor:pointer;">Close</button>
+          </div>
+        </div>
+      </sc-if>
+    </sc-if>
+
+    <sc-if value="{{ isMiniSitePrivate }}" hint-placeholder-val="{{ false }}">
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px;">
+        <sc-for list="{{ privateWorkspaceLinks }}" as="w" hint-placeholder-count="6">
+          <div class="card" style="padding:14px; cursor:pointer;" onClick="{{ w.onClick }}">
+            <div style="font-size:20px; margin-bottom:6px;">{{ w.icon }}</div>
+            <div style="font-size:13px; font-weight:600;">{{ w.label }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isMiniSiteUsername }}" hint-placeholder-val="{{ false }}">
+      <div class="card" style="padding:20px 22px; max-width:480px;">
+        <div style="font-family:'Playfair Display',serif; font-size:16px; margin-bottom:10px;">My Mini-Site Address</div>
+        <div style="font-size:13px; color:oklch(35% 0.1 30); margin-bottom:14px;">huahin.properties/@{{ usernameInput }}</div>
+        <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">Username</div>
+        <input value="{{ usernameInput }}" onChange="{{ onUsernameChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.02 60); border-radius:8px; padding:9px 11px; font-size:13px; margin-bottom:8px;"/>
+        <div style="font-size:12px; margin-bottom:14px; color:{{ usernameStatusColor }};">{{ usernameStatusText }}</div>
+        <div style="font-size:11px; color:oklch(50% 0.02 60); line-height:1.7; margin-bottom:14px;">a-z, 0-9, hyphen เท่านั้น · 3-30 ตัวอักษร · ห้ามใช้ชื่อระบบสงวน (admin, workspace, member ฯลฯ)</div>
+        <button style="font-size:12.5px; background:oklch(30% 0.1 30); color:white; border:none; border-radius:8px; padding:9px 16px; cursor:pointer;">Save Username</button>
+      </div>
+    </sc-if>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    page: (typeof location !== "undefined" && ["workspace","favorites","builder","minisite"].includes(location.hash.slice(1))) ? location.hash.slice(1) : "workspace",
+    miniSite: "public", shareDialogOpen: false,
+    usernameInput: "somchai",
+    checked: { "HH-111": true, "HH-112": true, "HH-205": false, "HH-318": false, "PB-206": false, "CA-301": false },
+  };
+  favProps = [
+    { code: "HH-111", title: "Pool Villa Ready to Move", location: "Hua Hin", price: "12,500,000", status: "Available", collectionCount: 3, collectionNames: "Luxury Pool Villas, Family Homes, Investment" },
+    { code: "HH-112", title: "Modern House with Furniture", location: "Bo Fai", price: "20,000,000", status: "Available", collectionCount: 1, collectionNames: "Luxury Pool Villas" },
+    { code: "HH-205", title: "Family Home near School", location: "Hua Hin", price: "8,900,000", status: "Available", collectionCount: 2, collectionNames: "Family Homes, New Recommendations" },
+    { code: "HH-318", title: "Golf View Villa", location: "Hua Hin", price: "15,200,000", status: "Reserved", collectionCount: 1, collectionNames: "Luxury Pool Villas" },
+    { code: "PB-206", title: "Beachfront House for Rent", location: "Pranburi", price: "28,000/mo", status: "Available", collectionCount: 2, collectionNames: "Beach Villas, Investment" },
+    { code: "CA-301", title: "Sea-view Condo", location: "Cha-am", price: "3,900,000", status: "Available", collectionCount: 1, collectionNames: "Investment" },
+  ];
+  usernameStatus(name) {
+    if (name.length < 3) return { color: "oklch(50% 0.15 30)", text: "❌ Too short — minimum 3 characters" };
+    if (["admin", "workspace", "member", "home"].includes(name)) return { color: "oklch(50% 0.15 30)", text: "❌ Reserved system name" };
+    if (name === "somchai") return { color: "oklch(45% 0.12 150)", text: "✓ This is your current username" };
+    return { color: "oklch(45% 0.12 150)", text: "✓ This username is available" };
+  }
+  renderVals() {
+    const s = this.state;
+    const tabStyle = (active) => `font-size:12.5px; padding:9px 16px; border-radius:100px; cursor:pointer; border:1px solid oklch(85% 0.02 60); background:${active ? "oklch(30% 0.1 30)" : "white"}; color:${active ? "#fff" : "oklch(30% 0.02 60)"};`;
+    const us = this.usernameStatus(s.usernameInput);
+    return {
+      navTabs: [
+        { label: "🏢 Workspace", onClick: () => this.setState({ page: "workspace" }), style: tabStyle(s.page === "workspace") },
+        { label: "⭐ My Favorites", onClick: () => this.setState({ page: "favorites" }), style: tabStyle(s.page === "favorites") },
+        { label: "🧩 Collection Builder", onClick: () => this.setState({ page: "builder" }), style: tabStyle(s.page === "builder") },
+        { label: "🌐 Mini-Site", onClick: () => this.setState({ page: "minisite" }), style: tabStyle(s.page === "minisite") },
+      ],
+      isWorkspace: s.page === "workspace", isFavorites: s.page === "favorites", isBuilder: s.page === "builder", isMiniSite: s.page === "minisite",
+      todaysWork: [
+        { count: 2, label: "ลูกค้ารอการตอบกลับ", bg: "oklch(97% 0.03 30)", color: "oklch(45% 0.15 30)", onClick: () => {} },
+        { count: 3, label: "Collections ต้องติดตาม", bg: "oklch(98% 0.02 85)", color: "oklch(35% 0.1 30)", onClick: () => this.setState({ page: "builder" }) },
+        { count: 5, label: "ข้อความยังไม่ได้อ่าน", bg: "oklch(98% 0.02 85)", color: "oklch(35% 0.1 30)", onClick: () => {} },
+        { count: 2, label: "รายการทรัพย์ใกล้หมดอายุ", bg: "oklch(97% 0.05 80)", color: "oklch(45% 0.1 60)", onClick: () => this.setState({ page: "minisite" }) },
+        { count: 1, label: "แจ้งเตือนการใช้งานแพ็กเกจ", bg: "oklch(98% 0.01 80)", color: "oklch(45% 0.02 60)", onClick: () => {} },
+      ],
+      recentCustomers: [
+        { initial: "ก", name: "คุณกมล", collection: "Luxury Pool Villas", status: "รอการตอบกลับ", lastActive: "10 นาทีที่แล้ว", unread: true },
+        { initial: "J", name: "John Smith", collection: "Sea View Condominium", status: "ดู Collection แล้ว", lastActive: "2 ชั่วโมงก่อน", unread: false },
+        { initial: "M", name: "Michael Brown", collection: "Investment Property", status: "สอบถามใหม่", lastActive: "เมื่อวาน", unread: true },
+      ],
+      quickActions: [
+        { label: "+ เพิ่มทรัพย์ใน My Favorites", onClick: () => this.setState({ page: "favorites" }) },
+        { label: "+ สร้าง Customer Collection", onClick: () => this.setState({ page: "builder" }) },
+        { label: "📥 เปิด Inbox", onClick: () => {} },
+        { label: "🏠 เพิ่มรายการทรัพย์", onClick: () => {} },
+        { label: "👥 ดูลูกค้าทั้งหมด", onClick: () => {} },
+        { label: "🌐 ดู Mini-Site ของฉัน", onClick: () => this.setState({ page: "minisite" }) },
+      ],
+      favFilters: ["ค้นหา", "พื้นที่", "ช่วงราคา", "ประเภททรัพย์", "Collection", "สถานะ"],
+      favoriteProperties: this.favProps.map((p) => ({ ...p, checked: !!s.checked[p.code], onToggle: () => this.setState((st) => ({ checked: { ...st.checked, [p.code]: !st.checked[p.code] } })) })),
+      onOpenBuilder: () => this.setState({ page: "builder" }),
+      builderSelectedCount: Object.values(s.checked).filter(Boolean).length,
+      shareDialogOpen: s.shareDialogOpen, onOpenShareDialog: () => this.setState({ shareDialogOpen: true }), onCloseShareDialog: () => this.setState({ shareDialogOpen: false }),
+      stopProp: (e) => e.stopPropagation(),
+      isMiniSitePublic: s.miniSite === "public", isMiniSitePrivate: s.miniSite === "private", isMiniSiteUsername: s.miniSite === "username",
+      onMiniSitePublic: () => this.setState({ miniSite: "public" }), onMiniSitePrivate: () => this.setState({ miniSite: "private" }), onMiniSiteUsername: () => this.setState({ miniSite: "username" }),
+      miniSitePublicStyle: tabStyle(s.miniSite === "public"), miniSitePrivateStyle: tabStyle(s.miniSite === "private"), miniSiteUsernameStyle: tabStyle(s.miniSite === "username"),
+      shareChannels: ["LINE", "Facebook", "Messenger", "WhatsApp", "Telegram", "Email", "QR Code"],
+      privateWorkspaceLinks: [
+        { icon: "👥", label: "Customers", onClick: () => {} }, { icon: "⭐", label: "Favorites", onClick: () => this.setState({ page: "favorites" }) },
+        { icon: "🧩", label: "Collections", onClick: () => this.setState({ page: "builder" }) }, { icon: "🤖", label: "AI", onClick: () => {} },
+        { icon: "💬", label: "Messages", onClick: () => {} }, { icon: "📊", label: "Activity", onClick: () => this.setState({ page: "workspace" }) },
+      ],
+      usernameInput: s.usernameInput, onUsernameChange: (e) => this.setState({ usernameInput: e.target.value.toLowerCase() }),
+      usernameStatusColor: us.color, usernameStatusText: us.text,
+    };
+  }
+}
+</script>
+</body>
+</html>

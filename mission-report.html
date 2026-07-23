@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phase 2 — Mission 1 Report (Final)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600&family=Work+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/css/app.css">
+<style>
+  .wrap{max-width:960px;margin:0 auto;padding:24px 20px 60px;}
+  table{width:100%;border-collapse:collapse;font-size:12px;background:#fff;border-radius:10px;overflow:hidden;}
+  th{text-align:left;font-size:11px;text-transform:uppercase;color:var(--muted);border-bottom:2px solid oklch(88% 0.01 70);padding:8px 10px;background:oklch(97% 0.01 80);}
+  td{padding:9px 10px;border-bottom:1px solid oklch(93% 0.01 70);vertical-align:top;}
+  .card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:14px;}
+</style>
+</head>
+<body><div class="wrap">
+  <h1 style="font-family:'Playfair Display',serif;font-size:22px;margin:10px 0 4px;">Phase 2 — Mission 1 Report (Final)</h1>
+  <div style="font-size:12.5px;color:var(--muted);margin-bottom:16px;">Revision: P2-M1 Final Fix 1 · 22 ก.ค. 2569</div>
+  <div class="card">
+    <strong>Overall: 12 / 12 Frontend Steps Complete</strong> (10 🟢 Frontend Complete, 2 🟡 Frontend Complete — Production Backend/QA-follow-up Pending). Production Backend: Pending Future Mission.
+  </div>
+  <table>
+    <thead><tr><th>Step</th><th>Status</th><th>Frontend Work Completed</th><th>Module</th><th>Production Pending</th></tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+</div>
+<script src="./assets/js/i18n.js"></script>
+<script src="./assets/js/app.js"></script>
+<script>
+const rows = [
+[1,"Workspace Command Center","🟢","Hero, Today's Work, Recent Customers, Quick Actions, Package summary","workspace.html","Real backend data"],
+[2,"My Favorites","🟢","Mindset box, cards, collection-usage tags, real page + routes to Workspace tab","favorites.html","Real persistence/search"],
+[3,"Collection Builder","🟢","Fields, checkbox picker, live count, Share dialog, live preview","collections.html","Real draft persistence, real share links"],
+[4,"Customer Space","🟢","Mindset box, AI tab, Sender tab, property context","customer-space.html","Real multi-customer isolation, real AI/messaging"],
+[5,"Mini-Site + @username","🟢","Public header, Username Settings validation states","mini-site.html","Real global uniqueness check, DNS"],
+[6,"Workspace Economy","🟢","6 resource meters, 8 switchable AI states, usage history","resources.html","Real usage metering"],
+[7,"Packages and Add-ons","🟢","New packages.html: 4-tier comparison, selection flow, demo order/confirm, Add-on relationship explained","packages.html","Real Stripe checkout wiring, final quantities"],
+[8,"Mini-Site Customiser","🟢","7 themes, colours, section visibility/order, live preview","customiser.html","Persistence, font/hero/contact layout options"],
+[9,"Global Multi-Language System","🟡","Central i18n.js dictionary, 🌐 switcher on every page, localStorage persistence. TH/EN cover nav+headings+primary actions+alerts site-wide; ZH/RU cover nav+headings+primary buttons+critical alerts (as directed) — NOT full page-body translation of every module's demo content","all pages","Full ZH/RU coverage of long-form demo copy; server-side content translation workflow"],
+[10,"Advanced Favorites Filters","🟢","Filter sidebar, chips, Save Filter, Create Collection CTA","resources.html","Real filter query, Load Saved Filter persistence"],
+[11,"Onboarding + Marketing","🟢","6-role picker, starter checklist, TH/EN positioning drafts","onboarding.html","Marketing copy is draft only, not approved for public use"],
+[12,"Consolidation / QA / Docs / GitHub Delivery","🟡","Global header+nav+lang switcher on every page, packages.html, 6 routed module pages, all required docs incl. RESPONSIVE-QA.md and ACCESSIBILITY-QA.md","this page","Independent automated cross-browser QA outside Claude preview not performed — see RESPONSIVE-QA.md for exactly what was and wasn't verified"],
+];
+document.getElementById('rows').innerHTML = rows.map(r=>`<tr><td><strong>${r[0]}</strong></td><td>${r[2]}</td><td>${r[3]}</td><td><a href="${r[4]}">${r[4]}</a></td><td style="color:oklch(45% 0.1 30);">${r[5]}</td></tr>`).join('');
+</script>
+</body></html>

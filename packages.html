@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Packages — huahin.properties</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/css/app.css">
+<style>
+  .wrap{max-width:1100px;margin:0 auto;padding:24px 20px 60px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin:20px 0 28px;}
+  .plan{background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px 18px;position:relative;}
+  .plan.popular{border:2px solid var(--maroon);}
+  .pill{position:absolute;top:-11px;left:16px;background:var(--maroon);color:#fff;font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:100px;}
+  .price{font-family:'Playfair Display',serif;font-size:26px;margin:8px 0;}
+  .row{display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid oklch(94% 0.01 70);}
+  table{width:100%;border-collapse:collapse;font-size:12px;background:#fff;border-radius:10px;overflow:hidden;margin-top:10px;}
+  th,td{padding:8px 10px;border-bottom:1px solid oklch(93% 0.01 70);text-align:left;}
+  th{background:oklch(97% 0.01 80);font-size:11px;text-transform:uppercase;}
+  .btn{display:inline-block;width:100%;text-align:center;background:var(--maroon);color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;cursor:pointer;margin-top:10px;}
+  .btn.ghost{background:#fff;border:1px solid var(--maroon);color:var(--maroon);}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:80;}
+  .modal-bg.open{display:flex;}
+  .modal{background:#fff;border-radius:12px;padding:22px 24px;width:min(420px,90vw);}
+  .tag{display:inline-block;font-size:10px;font-weight:700;background:oklch(88% 0.1 80);color:oklch(35% 0.1 60);padding:2px 8px;border-radius:4px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="tag" data-i18n="alert.demo"></div>
+  <h1 style="font-family:'Playfair Display',serif;font-size:24px;margin:14px 0 4px;" data-i18n="packages.title"></h1>
+  <p style="font-size:13px;color:var(--muted);" data-i18n="packages.subtitle"></p>
+
+  <div class="grid">
+    <div class="plan">
+      <div style="font-size:13px;font-weight:700;">Free Trial</div>
+      <div class="price">฿0</div>
+      <div style="font-size:11.5px;color:var(--muted);">14 วัน / 14 days</div>
+      <div class="row"><span>Active Listings</span><strong>3</strong></div>
+      <div class="row"><span>Customer Spaces</span><strong>2</strong></div>
+      <div class="row"><span>Storage</span><strong>100 MB</strong></div>
+      <div class="row"><span>AI Credits</span><strong>10</strong></div>
+      <button class="btn ghost" onclick="selectPlan('Free Trial','฿0')">Start Free Trial</button>
+    </div>
+    <div class="plan">
+      <div style="font-size:13px;font-weight:700;">Package 1</div>
+      <div class="price">฿590<span style="font-size:12px;">/mo</span></div>
+      <div style="font-size:11.5px;color:var(--muted);">Provisional Resource Allowance</div>
+      <div class="row"><span>Active Listings</span><strong>8</strong></div>
+      <div class="row"><span>Customer Spaces</span><strong>10</strong></div>
+      <div class="row"><span>Storage</span><strong>500 MB</strong></div>
+      <div class="row"><span>AI Credits</span><strong>80/mo</strong></div>
+      <button class="btn ghost" onclick="selectPlan('Package 1','฿590/mo')">Choose Package 1</button>
+    </div>
+    <div class="plan popular">
+      <div class="pill" data-i18n="packages.popular"></div>
+      <div style="font-size:13px;font-weight:700;">Package 2</div>
+      <div class="price">฿1,190<span style="font-size:12px;">/mo</span></div>
+      <div style="font-size:11.5px;color:var(--muted);">Provisional Resource Allowance</div>
+      <div class="row"><span>Active Listings</span><strong>20</strong></div>
+      <div class="row"><span>Customer Spaces</span><strong>20</strong></div>
+      <div class="row"><span>Storage</span><strong>1 GB</strong></div>
+      <div class="row"><span>AI Credits</span><strong>150/mo</strong></div>
+      <button class="btn" onclick="selectPlan('Package 2','฿1,190/mo')">Choose Package 2</button>
+    </div>
+    <div class="plan">
+      <div style="font-size:13px;font-weight:700;">Package 3</div>
+      <div class="price">฿2,290<span style="font-size:12px;">/mo</span></div>
+      <div style="font-size:11.5px;color:var(--muted);">Provisional Resource Allowance</div>
+      <div class="row"><span>Active Listings</span><strong>Unlimited</strong></div>
+      <div class="row"><span>Customer Spaces</span><strong>Unlimited</strong></div>
+      <div class="row"><span>Storage</span><strong>5 GB</strong></div>
+      <div class="row"><span>AI Credits</span><strong>400/mo</strong></div>
+      <button class="btn ghost" onclick="selectPlan('Package 3','฿2,290/mo')">Choose Package 3</button>
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>Feature</th><th>Free Trial</th><th>Package 1</th><th>Package 2</th><th>Package 3</th></tr></thead>
+    <tbody>
+      <tr><td>Translation Resources</td><td>—</td><td>Basic</td><td>Standard</td><td>Advanced</td></tr>
+      <tr><td>Mini-Site (@username)</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+      <tr><td>Branding Options</td><td>—</td><td>Basic</td><td>Standard</td><td>Full</td></tr>
+      <tr><td>Social Quota</td><td>—</td><td>Limited</td><td>Standard</td><td>Unlimited</td></tr>
+      <tr><td>Mini-Site Themes</td><td>1</td><td>3</td><td>All 7</td><td>All 7</td></tr>
+      <tr><td>Team Users</td><td>1</td><td>1</td><td>2</td><td>5</td></tr>
+      <tr><td>Support Level</td><td>Community</td><td>Standard</td><td>Priority</td><td>Priority + Dedicated</td></tr>
+      <tr><td>Renewal</td><td>—</td><td>Monthly</td><td>Monthly</td><td>Monthly</td></tr>
+      <tr><td>Recommended User</td><td>Exploring</td><td>New Agent</td><td>Active Agent (demo)</td><td>Team / Business</td></tr>
+    </tbody>
+  </table>
+
+  <div style="margin-top:20px; font-size:12.5px; background:#fff; border:1px solid var(--border); border-radius:10px; padding:16px 18px;">
+    <strong>Resource Add-on</strong> — extra resources purchased only when needed. Does not replace your Membership Package.
+    <a href="./addons.html" class="btn ghost" style="display:inline-block; width:auto; margin-top:10px;" data-i18n="action.compare"></a>
+  </div>
+
+  <a href="./workspace.html" style="display:inline-block;margin-top:16px;font-size:12.5px;" data-i18n="action.back"></a>
+</div>
+
+<div class="modal-bg" id="orderModal">
+  <div class="modal">
+    <div style="font-family:'Playfair Display',serif;font-size:17px;">Order Summary</div>
+    <div class="tag" data-i18n="packages.demo" style="margin:8px 0;"></div>
+    <div id="orderDetails" style="font-size:12.5px; margin:10px 0;"></div>
+    <div style="font-size:11.5px; color:var(--muted);">Next renewal (demo): 22 Aug 2569</div>
+    <button class="btn" onclick="confirmOrder()">Confirm (Demo)</button>
+    <button class="btn ghost" onclick="closeModal()">Cancel</button>
+  </div>
+</div>
+<div class="modal-bg" id="successModal">
+  <div class="modal">
+    <div style="font-family:'Playfair Display',serif;font-size:17px;">✓ Package Updated (Demo)</div>
+    <div id="successDetails" style="font-size:12.5px;margin:10px 0;"></div>
+    <a href="./workspace.html" class="btn" style="text-decoration:none;">Return to Workspace</a>
+    <a href="./resources.html" class="btn ghost" style="text-decoration:none;">View Workspace Resources</a>
+  </div>
+</div>
+
+<script src="./assets/js/i18n.js"></script>
+<script src="./assets/js/app.js"></script>
+<script>
+  let pendingPlan = null;
+  function selectPlan(name, price) {
+    pendingPlan = { name, price };
+    document.getElementById("orderDetails").textContent = `${name} — ${price}`;
+    document.getElementById("orderModal").classList.add("open");
+  }
+  function closeModal() { document.getElementById("orderModal").classList.remove("open"); }
+  function confirmOrder() {
+    closeModal();
+    document.getElementById("successDetails").textContent = `${pendingPlan.name} (${pendingPlan.price}) — DEMO TRANSACTION, NO REAL PAYMENT`;
+    document.getElementById("successModal").classList.add("open");
+  }
+</script>
+</body></html>

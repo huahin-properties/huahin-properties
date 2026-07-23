@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<link rel="stylesheet" href="./assets/css/app.css">
+<script src="./assets/js/i18n.js"></script>
+<script src="./assets/js/app.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Customer Space — huahin.properties</title>
+  <style>
+    body { margin: 0; background: oklch(96% 0.01 75); font-family: 'Work Sans', sans-serif; color: oklch(25% 0.02 60); }
+    a { color: oklch(35% 0.14 25); }
+    a:hover { color: oklch(28% 0.15 25); }
+    .demo-tag { display:inline-block; font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; background:oklch(88% 0.1 80); color:oklch(35% 0.1 60); padding:2px 7px; border-radius:4px; }
+  </style>
+</helmet>
+
+<div style="max-width:1180px; margin:0 auto; padding:20px 20px 100px;">
+
+  <div style="background:oklch(98% 0.02 85); border:1px solid oklch(85% 0.05 70); border-radius:10px; padding:12px 16px; margin-bottom:14px; font-size:12.5px; color:oklch(40% 0.03 60);">
+    <span class="demo-tag">Frontend Demonstration</span>&nbsp; ข้อมูลตัวอย่าง (demo) ทั้งหมด — ยังไม่เชื่อม Firestore, ยังไม่มี Security Rules จริง, AI/Conversation เป็น UI จำลอง — Data/Security Model ที่ท้ายหน้า
+  </div>
+
+  <div style="display:flex; gap:8px; margin-bottom:16px;">
+    <button onClick="{{ onViewCustomer }}" style="{{ viewToggleCustomerStyle }}">👁 มุมมองลูกค้า</button>
+    <button onClick="{{ onViewMember }}" style="{{ viewToggleMemberStyle }}">🗂 มุมมอง Member (Customer Profile Snapshot)</button>
+  </div>
+
+  <!-- ============ MEMBER VIEW: Customer Profile Snapshot (not visible to customer) ============ -->
+  <sc-if value="{{ isMemberView }}" hint-placeholder-val="{{ false }}">
+    <div style="background:white; border:1px solid oklch(88% 0.01 70); border-radius:12px; padding:18px 20px; margin-bottom:16px;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+        <span style="font-family:'Playfair Display',serif; font-size:16px;">Customer Profile Snapshot</span>
+        <span class="demo-tag">Member-Only — Not shown to customer</span>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; font-size:12.5px;">
+        <div><div style="color:oklch(50% 0.02 60); font-size:11px;">Customer</div><div style="font-weight:600;">คุณกมล</div></div>
+        <div><div style="color:oklch(50% 0.02 60); font-size:11px;">Looking For</div><div style="font-weight:600;">Luxury Pool Villa</div></div>
+        <div><div style="color:oklch(50% 0.02 60); font-size:11px;">Budget</div><div style="font-weight:600;">12–15 ล้านบาท</div></div>
+        <div><div style="color:oklch(50% 0.02 60); font-size:11px;">Preferred Area</div><div style="font-weight:600;">ซอย 88</div></div>
+        <div><div style="color:oklch(50% 0.02 60); font-size:11px;">Status</div><div style="font-weight:600; color:oklch(45% 0.12 150);">Active</div></div>
+        <div><div style="color:oklch(50% 0.02 60); font-size:11px;">Last Updated</div><div style="font-weight:600;">เมื่อวาน</div></div>
+      </div>
+      <p style="font-size:11.5px; color:oklch(50% 0.02 60); margin-top:12px; margin-bottom:0;">บริบทนี้ใช้ร่วมกับ AI, Conversation, และการแนะนำทรัพย์ — ไม่ผูกกับ Collection ใดเป็นการเฉพาะ</p>
+    </div>
+  </sc-if>
+
+  <div class="card" style="background:oklch(98% 0.02 85); border:1px solid oklch(88% 0.04 75); border-radius:10px; padding:14px 18px; margin-bottom:14px; font-size:12.5px; line-height:1.8;">
+    <strong>พื้นที่ค้นหาทรัพย์สำหรับคุณ</strong><br/>คุณสมชายได้คัดเลือกทรัพย์เหล่านี้ตามความต้องการของคุณโดยเฉพาะ ภายในพื้นที่นี้คุณสามารถเปิดดูชุดทรัพย์ที่แนะนำ บันทึกทรัพย์ที่สนใจ ถามคำถามกับ AI ส่งข้อความถึงผู้แนะนำ และกลับมาเปิดดูข้อมูลได้อีกครั้ง — ชุดทรัพย์ใหม่ที่แนะนำในอนาคตจะถูกเพิ่มไว้ในพื้นที่เดียวกันนี้
+  </div>
+
+  <!-- ============ CUSTOMER SPACE HEADER ============ -->
+  <div style="background:linear-gradient(135deg, oklch(30% 0.08 30), oklch(22% 0.05 30)); color:oklch(97% 0.01 80); border-radius:14px; padding:26px 28px; margin-bottom:20px;">
+    <div style="font-size:11px; letter-spacing:.06em; text-transform:uppercase; opacity:0.7; margin-bottom:6px;">Customer Space</div>
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+      <div style="width:42px; height:42px; border-radius:50%; background:oklch(90% 0.02 70); display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-weight:700; color:oklch(30% 0.08 30); font-size:16px;">S</div>
+      <div>
+        <div style="font-size:12px; opacity:0.75;">Prepared by</div>
+        <div style="font-size:16px; font-weight:600;">คุณสมชาย · ที่ปรึกษาทรัพย์</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:22px; flex-wrap:wrap; font-size:13px;">
+      <div><span style="font-weight:700; font-size:17px;">{{ collectionCount }}</span> Collections</div>
+      <div style="opacity:0.9; cursor:pointer;" onClick="{{ onOpenAI }}">🤖 AI Assistant</div>
+      <div style="opacity:0.9; cursor:pointer;" onClick="{{ onOpenConversation }}">💬 Conversation {{ unreadBadge }}</div>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 380px; gap:20px; align-items:start;">
+    <div>
+
+      <!-- ============ COLLECTIONS LIST (hero) ============ -->
+      <sc-if value="{{ isCollectionListView }}" hint-placeholder-val="{{ true }}">
+        <div style="font-family:'Playfair Display',serif; font-size:20px; margin-bottom:12px;">Homes Selected For You</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px;">
+          <sc-for list="{{ collections }}" as="c" hint-placeholder-count="4">
+            <div onClick="{{ c.onOpen }}" style="background:white; border:1px solid oklch(89% 0.01 70); border-radius:12px; padding:16px; cursor:pointer;">
+              <div style="font-size:22px; margin-bottom:8px;">{{ c.icon }}</div>
+              <div style="font-size:14.5px; font-weight:700; margin-bottom:3px;">{{ c.title }}</div>
+              <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:6px;">{{ c.desc }}</div>
+              <div style="font-size:11.5px; color:oklch(45% 0.02 60);">{{ c.count }} properties · updated {{ c.updated }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ============ INSIDE ONE COLLECTION ============ -->
+      <sc-if value="{{ isCollectionDetailView }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ onBackToCollections }}" style="background:none; border:none; font-size:12.5px; color:oklch(35% 0.1 30); cursor:pointer; margin-bottom:10px; padding:0;">← Collections</button>
+        <div style="font-family:'Playfair Display',serif; font-size:20px; margin-bottom:12px;">{{ activeCollection.icon }} {{ activeCollection.title }}</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px;">
+          <sc-for list="{{ activeCollectionProperties }}" as="p" hint-placeholder-count="3">
+            <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:10px; overflow:hidden;">
+              <div style="height:140px; background:oklch(85% 0.02 60); display:flex; align-items:center; justify-content:center; font-size:12px; color:oklch(55% 0.02 60);">[{{ p.code }} photo]</div>
+              <div style="padding:12px 14px;">
+                <div style="font-size:13.5px; font-weight:600; margin-bottom:3px;">{{ p.title }}</div>
+                <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">{{ p.location }} · {{ p.beds }} bed · {{ p.baths }} bath · {{ p.land }} ตร.ว.</div>
+                <div style="display:flex; align-items:center; justify-content:space-between;">
+                  <div style="font-size:14.5px; font-weight:700; color:oklch(35% 0.14 25);">฿{{ p.price }}</div>
+                  <button onClick="{{ p.onAskAI }}" style="font-size:11px; background:oklch(96% 0.02 80); border:1px solid oklch(85% 0.03 70); border-radius:6px; padding:5px 9px; cursor:pointer; color:oklch(35% 0.02 60);">Ask about this →</button>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+
+    <!-- ============ CONVERSATION + AI PANEL (belongs to Space, not Collection) ============ -->
+    <div style="position:sticky; top:16px; background:white; border:1px solid oklch(88% 0.01 70); border-radius:12px; overflow:hidden;">
+      <div style="display:flex;">
+        <button onClick="{{ onTabAI }}" style="{{ tabAIStyle }}">🤖 AI Assistant</button>
+        <button onClick="{{ onTabSender }}" style="{{ tabSenderStyle }}">💬 Conversation</button>
+      </div>
+
+      <sc-if value="{{ isTabAI }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:14px; font-size:11.5px; color:oklch(45% 0.02 60); border-bottom:1px solid oklch(93% 0.01 70); background:oklch(98% 0.01 90);">กำลังคุยกับ <strong>AI ผู้ช่วยวิเคราะห์ทรัพย์</strong> — เข้าใจทุก Collection ในพื้นที่นี้</div>
+        <div style="height:300px; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:10px;">
+          <sc-for list="{{ aiMessages }}" as="m" hint-placeholder-count="2">
+            <div style="{{ m.bubbleStyle }}">{{ m.text }}</div>
+          </sc-for>
+        </div>
+        <div style="padding:10px 14px; display:flex; flex-wrap:wrap; gap:6px; border-top:1px solid oklch(93% 0.01 70);">
+          <sc-for list="{{ quickPrompts }}" as="q" hint-placeholder-count="3">
+            <button onClick="{{ q.onClick }}" style="font-size:11px; background:oklch(96% 0.02 80); border:1px solid oklch(87% 0.03 70); border-radius:100px; padding:5px 10px; cursor:pointer;">{{ q.text }}</button>
+          </sc-for>
+        </div>
+        <div style="display:flex; gap:6px; padding:10px 14px; border-top:1px solid oklch(93% 0.01 70);">
+          <input value="{{ aiInput }}" onChange="{{ onAiInputChange }}" placeholder="ถาม AI เกี่ยวกับพื้นที่นี้…" style="flex:1; border:1px solid oklch(85% 0.02 60); border-radius:8px; padding:8px 10px; font-size:12.5px;"/>
+          <button onClick="{{ onSendAI }}" style="background:oklch(30% 0.1 30); color:white; border:none; border-radius:8px; padding:8px 14px; font-size:12.5px; cursor:pointer;">Send</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isTabSender }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:14px; font-size:11.5px; color:oklch(45% 0.02 60); border-bottom:1px solid oklch(93% 0.01 70); background:oklch(98% 0.01 90);">กำลังคุยแบบส่วนตัวกับ <strong>คุณสมชาย</strong> — ที่ปรึกษาทรัพย์ <span class="demo-tag" style="margin-left:6px;">Demo Thread</span></div>
+        <div style="height:300px; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:10px;">
+          <sc-for list="{{ senderMessages }}" as="m" hint-placeholder-count="2">
+            <div style="{{ m.bubbleStyle }}">{{ m.text }}<div style="font-size:9.5px; opacity:0.6; margin-top:3px;">{{ m.time }}</div></div>
+          </sc-for>
+        </div>
+        <div style="display:flex; gap:6px; padding:10px 14px; border-top:1px solid oklch(93% 0.01 70);">
+          <input value="{{ senderInput }}" onChange="{{ onSenderInputChange }}" placeholder="พิมพ์ข้อความถึงผู้แนะนำ…" style="flex:1; border:1px solid oklch(85% 0.02 60); border-radius:8px; padding:8px 10px; font-size:12.5px;"/>
+          <button onClick="{{ onSendSender }}" style="background:oklch(30% 0.1 30); color:white; border:none; border-radius:8px; padding:8px 14px; font-size:12.5px; cursor:pointer;">Send</button>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+
+  <!-- Data model + security proposal -->
+  <div style="margin-top:36px; background:white; border:1px solid oklch(88% 0.01 70); border-radius:10px; padding:20px 22px; font-size:12.5px; line-height:1.65;">
+    <div style="font-family:'Playfair Display',serif; font-size:18px; margin-bottom:10px;">Data Model Proposal (Revision 1.1 — ยังไม่ implement จริง)</div>
+    <pre style="white-space:pre-wrap; font-family:monospace; font-size:11.5px; background:oklch(97% 0.005 80); padding:12px; border-radius:8px;">customerSpaces/{spaceId}
+  memberId, customerId|guestToken, aiThreadId, conversationId, createdAt
+
+customerCollections/{collectionId}
+  spaceId, title, icon, description, mode:"snapshot"|"live", propertyIds[], createdAt, updatedAt
+  — one spaceId may have MANY collections; a property may belong to many collections across spaces
+
+shareConversations/{spaceId}/messages/{messageId}
+  from:"customer"|"member"|"ai", text, propertyContext, createdAt, readAt
+  — one conversation per Space, shared across all its collections (not per-collection)
+
+customerProfiles/{spaceId}  (Member-only, never exposed to customer)
+  lookingFor, budgetRange, preferredArea, status, lastUpdatedAt</pre>
+    <div style="font-family:'Playfair Display',serif; font-size:18px; margin:16px 0 8px;">Security Model Proposal</div>
+    <ul style="margin:0; padding-left:18px;">
+      <li>customerProfiles readable only by the owning Member + authorized Admin — never by the customer's own session</li>
+      <li>customerCollections and shareConversations scoped by spaceId; a customer's guest token/session resolves to exactly one spaceId</li>
+      <li>Editing a Member's Favorites never writes into an already-created customerCollections doc — collections are copied at share time (Snapshot) or explicitly flagged Live</li>
+    </ul>
+    <p style="margin-top:14px; color:oklch(45% 0.02 60);"><strong>สถานะ</strong>: Demo UI + data model เท่านั้น — ยังไม่เชื่อม Firestore, ยังไม่มี Security Rules จริง, AI/Conversation เป็น demo static response ตาม Stop Condition รอ Product Owner review</p>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    view: "customer", tab: "ai", collectionView: "list", activeCollectionId: null,
+    aiInput: "", senderInput: "",
+    aiMessages: [
+      { from: "ai", text: "สวัสดีค่ะ! ดิฉันเป็น AI ผู้ช่วยวิเคราะห์ทรัพย์ของพื้นที่นี้ เข้าใจทุก Collection ที่คุณสมชายเตรียมไว้ให้ ถามได้เลยค่ะ" },
+    ],
+    senderMessages: [
+      { from: "sender", text: "สวัสดีครับ ผมจัดกลุ่มบ้านไว้หลายชุดให้ดูตามความสนใจครับ ลองดูแต่ละ Collection ได้เลยครับ", time: "10:32" },
+    ],
+  };
+  collectionsData = [
+    { id: "beach", icon: "🏖️", title: "Beach Villas", desc: "ใกล้ชายหาด เดินถึงทะเล", count: 3, updated: "2 วันก่อน" },
+    { id: "pool", icon: "🏊", title: "Luxury Pool Villas", desc: "พูลวิลล่าหรู พร้อมสระส่วนตัว", count: 2, updated: "วันนี้" },
+    { id: "invest", icon: "📈", title: "Investment", desc: "เหมาะสำหรับปล่อยเช่า/ลงทุน", count: 2, updated: "5 วันก่อน" },
+    { id: "mountain", icon: "⛰️", title: "Mountain View", desc: "วิวเขา บรรยากาศเงียบสงบ", count: 1, updated: "1 สัปดาห์ก่อน" },
+  ];
+  propsByCollection = {
+    beach: [
+      { code: "PB-206", title: "Beachfront House for Rent", location: "Pranburi", beds: 3, baths: 2, land: 100, price: "28,000/mo" },
+      { code: "HH-111", title: "Pool Villa Ready to Move", location: "Hua Hin", beds: 3, baths: 3, land: 80, price: "12,500,000" },
+      { code: "CA-301", title: "Sea-view Condo", location: "Cha-am", beds: 1, baths: 1, land: 0, price: "3,900,000" },
+    ],
+    pool: [
+      { code: "HH-111", title: "Pool Villa Ready to Move", location: "Hua Hin", beds: 3, baths: 3, land: 80, price: "12,500,000" },
+      { code: "HH-112", title: "Modern House with Furniture", location: "Bo Fai", beds: 2, baths: 2, land: 60, price: "20,000,000" },
+    ],
+    invest: [
+      { code: "HH-089", title: "Investment Townhome near Golf", location: "Hua Hin", beds: 3, baths: 2, land: 40, price: "6,800,000" },
+      { code: "PB-206", title: "Beachfront House for Rent", location: "Pranburi", beds: 3, baths: 2, land: 100, price: "28,000/mo" },
+    ],
+    mountain: [
+      { code: "HH-220", title: "Hillside Retreat", location: "Hua Hin", beds: 2, baths: 2, land: 120, price: "9,200,000" },
+    ],
+  };
+  askAboutProperty(p) {
+    this.setState((s) => ({
+      tab: "ai",
+      aiMessages: [...s.aiMessages, { from: "user", text: `ถามเกี่ยวกับ ${p.code}: ${p.title}` },
+        { from: "ai", text: `[Demo] ${p.code} อยู่ที่ ${p.location} ราคา ฿${p.price} — ต้องการเปรียบเทียบกับหลังอื่นใน Collection นี้ไหมคะ?` }],
+    }));
+  }
+  sendAI() {
+    const text = this.state.aiInput.trim(); if (!text) return;
+    this.setState((s) => ({ aiInput: "", aiMessages: [...s.aiMessages, { from: "user", text }, { from: "ai", text: "[Demo response] ยังไม่เชื่อมต่อ AI จริง — นี่คือคำตอบตัวอย่างเพื่อสาธิต UI เท่านั้น" }] }));
+  }
+  sendSender() {
+    const text = this.state.senderInput.trim(); if (!text) return;
+    this.setState((s) => ({ senderInput: "", senderMessages: [...s.senderMessages, { from: "user", text, time: "now" }] }));
+  }
+  renderVals() {
+    const s = this.state;
+    const bubble = (m) => ({ ...m, bubbleStyle: `max-width:85%; padding:9px 12px; border-radius:10px; font-size:12.5px; align-self:${m.from === "user" ? "flex-end" : "flex-start"}; background:${m.from === "user" ? "oklch(30% 0.1 30)" : "oklch(95% 0.01 80)"}; color:${m.from === "user" ? "#fff" : "oklch(25% 0.02 60)"};` });
+    const activeCollection = this.collectionsData.find((c) => c.id === s.activeCollectionId) || this.collectionsData[0];
+    return {
+      isMemberView: s.view === "member", isCustomerView: s.view === "customer",
+      viewToggleCustomerStyle: `font-size:12.5px; padding:8px 14px; border-radius:100px; cursor:pointer; border:1px solid oklch(85% 0.02 60); background:${s.view === "customer" ? "oklch(30% 0.1 30)" : "white"}; color:${s.view === "customer" ? "#fff" : "oklch(30% 0.02 60)"};`,
+      viewToggleMemberStyle: `font-size:12.5px; padding:8px 14px; border-radius:100px; cursor:pointer; border:1px solid oklch(85% 0.02 60); background:${s.view === "member" ? "oklch(30% 0.1 30)" : "white"}; color:${s.view === "member" ? "#fff" : "oklch(30% 0.02 60)"};`,
+      onViewCustomer: () => this.setState({ view: "customer" }), onViewMember: () => this.setState({ view: "member" }),
+      collectionCount: this.collectionsData.length,
+      onOpenAI: () => this.setState({ tab: "ai" }), onOpenConversation: () => this.setState({ tab: "sender" }),
+      unreadBadge: "",
+      isCollectionListView: s.collectionView === "list", isCollectionDetailView: s.collectionView === "detail",
+      collections: this.collectionsData.map((c) => ({ ...c, onOpen: () => this.setState({ collectionView: "detail", activeCollectionId: c.id }) })),
+      activeCollection, activeCollectionProperties: (this.propsByCollection[activeCollection.id] || []).map((p) => ({ ...p, onAskAI: () => this.askAboutProperty(p) })),
+      onBackToCollections: () => this.setState({ collectionView: "list" }),
+      isTabAI: s.tab === "ai", isTabSender: s.tab === "sender",
+      onTabAI: () => this.setState({ tab: "ai" }), onTabSender: () => this.setState({ tab: "sender" }),
+      tabAIStyle: `flex:1; padding:12px; font-size:12.5px; font-weight:600; border:none; cursor:pointer; background:${s.tab === "ai" ? "white" : "oklch(96% 0.01 80)"}; color:${s.tab === "ai" ? "oklch(30% 0.1 30)" : "oklch(50% 0.02 60)"}; border-bottom:2px solid ${s.tab === "ai" ? "oklch(30% 0.1 30)" : "transparent"};`,
+      tabSenderStyle: `flex:1; padding:12px; font-size:12.5px; font-weight:600; border:none; cursor:pointer; background:${s.tab === "sender" ? "white" : "oklch(96% 0.01 80)"}; color:${s.tab === "sender" ? "oklch(30% 0.1 30)" : "oklch(50% 0.02 60)"}; border-bottom:2px solid ${s.tab === "sender" ? "oklch(30% 0.1 30)" : "transparent"};`,
+      aiMessages: s.aiMessages.map(bubble), senderMessages: s.senderMessages.map(bubble),
+      quickPrompts: ["เปรียบเทียบ Collection ทั้งหมด", "หลังไหนใกล้ทะเลที่สุด", "หลังไหนคุ้มค่าที่สุด"].map((text) => ({ text, onClick: () => this.setState({ aiInput: text }) })),
+      aiInput: s.aiInput, onAiInputChange: (e) => this.setState({ aiInput: e.target.value }), onSendAI: () => this.sendAI(),
+      senderInput: s.senderInput, onSenderInputChange: (e) => this.setState({ senderInput: e.target.value }), onSendSender: () => this.sendSender(),
+    };
+  }
+}
+</script>
+</body>
+</html>
