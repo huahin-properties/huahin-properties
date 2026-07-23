@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## P2-M1 Live Deployment Repair
+Fixed a real broken link in `workspace.html` (leftover reference to a non-existent internal admin file, now points to `packages.html`). Added `?v=phase2-m1-final-2` cache-busting query params to all shared asset includes (css/js) across every page. Added `CNAME` file (`huahin.properties`) for the custom domain. Verified no absolute (`/...`) paths, no remaining `.dc.html`/Prototype links, and confirmed `support.js`'s Claude-runtime hooks are self-guarded (`if (window.parent === window) return`) so they no-op harmlessly outside the Claude preview — support.js does not block standalone loading.
+
 ## P2-M1 Final Fix 1
 Added global connected header/nav/language-switcher (i18n.js + app.js) to every page. New `packages.html` (4-tier comparison + selection + demo order flow). Split tabbed modules into real routed files (favorites/collections/mini-site/addons/customiser/onboarding.html) via `location.hash`. Removed all user-facing "Prototype"/Claude wording. Added RESPONSIVE-QA.md and ACCESSIBILITY-QA.md. Mission Report now 12/12 Frontend Steps Complete (10 🟢, 2 🟡 — no 🔵/⚪/🔴 remain).
 
