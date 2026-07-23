@@ -110,12 +110,7 @@
 
   <!-- ============ PERSISTENT CHAT BUBBLE (always visible) ============ -->
   <div style="position:fixed; right:16px; bottom:16px; z-index:70; display:flex; align-items:center; gap:10px;">
-    <sc-if value="{{ chatHintVisible }}">
-      <div onClick="{{ onOpenChat }}" style="background:#fff; color:oklch(25% 0.02 60); padding:10px 16px; border-radius:100px; font-size:14px; font-family:'Work Sans',sans-serif; box-shadow:0 4px 16px oklch(0% 0 0 / 0.15); cursor:pointer; white-space:nowrap;">{{ t.rail_chat_hint }} 👋</div>
-    </sc-if>
-    <div onClick="{{ onOpenChat }}" style="width:48px; height:48px; border-radius:50%; background:oklch(22% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 4px 16px oklch(0% 0 0 / 0.2); font-size:20px; flex-shrink:0;">
-      <span style="color:oklch(97% 0.01 80);">💬</span>
-    </div>
+    <div onClick="{{ onOpenChat }}" style="background:#fff; color:oklch(25% 0.02 60); padding:12px 18px; border-radius:100px; font-size:14px; font-family:'Work Sans',sans-serif; box-shadow:0 4px 16px oklch(0% 0 0 / 0.15); cursor:pointer; white-space:nowrap;">{{ t.rail_chat_hint }} 👋</div>
   </div>
 
   <!-- ============ AI CHAT — MINIMIZED BAR ============ -->
@@ -133,6 +128,9 @@
       <div onClick="{{ stopProp }}" style="background:oklch(99% 0.005 80); border-radius:{{ chatPanelRadius }}; width:100%; max-width:{{ chatPanelMaxWidth }}; height:{{ chatPanelHeight }}; display:flex; flex-direction:row; box-shadow:0 20px 60px oklch(0% 0 0 / 0.35); overflow:hidden; pointer-events:auto;">
 
         <!-- ===== CONVERSATION LIST (left column) — Owner Preview only. Real customers never see this list (spec: customer gets AI/Human tabs only, no inbox). ===== -->
+        <div onClick="{{ onToggleConvList }}" title="{{ t.chat_conversations_title }}" style="position:relative; z-index:2; flex-shrink:0; width:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; background:oklch(96% 0.01 75); border-right:1px solid oklch(90% 0.01 70);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="transform:{{ convListArrowRotate }};"><path d="M9 6L15 12L9 18" stroke="oklch(35% 0.02 60)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
         <sc-if value="{{ showConvList }}">
           <div style="width:{{ convListWidth }}; flex-shrink:0; border-right:1px solid oklch(90% 0.01 70); display:flex; flex-direction:column; background:oklch(98% 0.005 78);">
             <div style="padding:16px 18px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); flex-shrink:0; display:flex; align-items:center; gap:8px;">
@@ -224,9 +222,8 @@
               <input value="{{ chatInput }}" onChange="{{ onChatInput }}" onKeyDown="{{ onChatKeyDown }}" placeholder="{{ t.chat_type_or_speak }}" style="flex:1; border:1px solid oklch(85% 0.01 70); border-radius:100px; padding:10px 16px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0;" />
               <div onClick="{{ onChatSend }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; font-size:16px;">➤</div>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-shrink:0; padding:6px 12px 9px;">
+            <div style="display:flex; justify-content:flex-end; align-items:center; flex-shrink:0; padding:6px 12px 9px;">
               <div onClick="{{ onClearChat }}" style="cursor:pointer; font-size:11.5px; color:oklch(55% 0.02 60);">{{ t.chat_clear }}</div>
-              <div onClick="{{ onSelectDemoContact }}" style="cursor:pointer; font-size:12px; color:oklch(35% 0.13 25); font-weight:600;">{{ t.chat_talk_to_human }} →</div>
             </div>
           </sc-if>
         </div>
@@ -264,7 +261,6 @@
     </div>
   </sc-if>
 </div>
-
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 120, &quot;height&quot;: 400}, &quot;phone&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;+6632000000&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;lineUrl&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;https://line.me/ti/p/huahinproperties&quot;, &quot;tsType&quot;: &quot;string&quot;}}">
 const I18N_RAIL = {
@@ -304,7 +300,7 @@ class Component extends DCLogic {
     name: "", phone: "", email: "", message: "",
     lang: "th",
     chatOpen: false, chatMinimized: false, chatMessages: [], chatInput: "", chatLoading: false,
-    chatTab: "ai", chatMobileView: "list", demoNote: "",
+    chatTab: "ai", chatMobileView: "list", demoNote: "", convListCollapsed: false,
   };
 
   chatScrollRef = React.createRef();
@@ -357,10 +353,6 @@ class Component extends DCLogic {
     } catch (e) {}
   }
 
-  // Shared chat continuity across pages (AI Concierge landing page ↔ this
-  // rail's chat panel): both write/read the same localStorage key so a
-  // conversation started on one page picks up exactly where it left off on
-  // the next, surviving navigation and back/forward.
   _persistHistory(messages) {
     try {
       localStorage.setItem("hh_chat_history", JSON.stringify(messages.map((m) => ({ role: m.role, text: m.text }))));
@@ -396,12 +388,6 @@ class Component extends DCLogic {
     this.setState({ chatMessages: [] });
   }
 
-  // A member/admin shared a Collection link (?collection=ID1,ID2,...) — the
-  // recipient is a stranger who has never used this site before, so we skip
-  // the favorites-based auto-trigger entirely and greet with exactly the
-  // shared properties instead. Today the human side of this always shows as
-  // "Admin" (no signed-in member identity flows into this anonymous page
-  // yet) — real per-member attribution needs a logged-in sharer flow later.
   _maybeAutoTriggerFromCollectionLink() {
     try {
       const params = new URLSearchParams(window.location.search);
@@ -472,9 +458,6 @@ class Component extends DCLogic {
   }
 
   _navigate(href) {
-    // Desktop: open the listing in a new tab so the chat stays put. Mobile:
-    // the chat panel already covers the full screen there, so a background
-    // tab would be invisible — navigate the current tab instead.
     const isDesktop = window.matchMedia("(min-width: 768px)").matches;
     if (isDesktop) {
       window.open(href, "_blank", "noopener");
@@ -494,10 +477,6 @@ class Component extends DCLogic {
       if (p) {
         const href = "Property Details.dc.html?id=" + encodeURIComponent(code);
         const photoUrl = p.photos && p.photos[0] && p.photos[0].url;
-        // Demo/seed listings often only have a text label for each photo (no
-        // uploaded image yet) — always render a cover box either way, using
-        // the same placeholder pattern as the property cards elsewhere on
-        // the site, so the chat card never silently falls back to plain text.
         const thumbBg = photoUrl ? `url(${photoUrl}) center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 10px)";
         const priceLabel = `${(p.price || 0).toLocaleString()} ${p.currency || "THB"}`;
         const specsLabel = `${p.bedrooms || 0} bed · ${p.zone || p.area || ""}`;
@@ -516,10 +495,6 @@ class Component extends DCLogic {
     return notes.filter((n) => n.title || n.body).map((n) => `• ${n.title || "(untitled)"}: ${n.body || ""}`).join("\n");
   }
 
-  // Keeps AI cost bounded as the catalog grows — instead of dumping every
-  // listing into every chat message (fine at 20 properties, expensive at
-  // 500+), we pre-filter to what's actually relevant to the conversation
-  // and cap the total sent. Always keeps the currently-viewed property.
   _buildContext(lang, recentText) {
     const props = this._properties || (this._mod ? this._mod.PROPERTIES : []) || [];
     const currentId = this.props.currentPropertyId;
@@ -548,9 +523,6 @@ class Component extends DCLogic {
           return true;
         });
       }
-      // Not enough (or no) criteria matched — fall back to a spread sample
-      // across the catalog so the AI still has something reasonable to
-      // suggest, rather than silently sending nothing or the whole list.
       if (filtered.length < 5) {
         const step = Math.max(1, Math.floor(props.length / MAX_LISTINGS));
         filtered = props.filter((_, i) => i % step === 0);
@@ -646,9 +618,6 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       console.warn("Chat error", e);
       const t = CHAT_I18N[lang] || CHAT_I18N.en;
       const errMsg = { role: "assistant", text: "Sorry, something went wrong. Please try again or contact us directly.", links: [{ label: t.chat_contact_us || "Contact us", noThumb: true, onClick: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }) }], bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" };
-      // Don't persist the error bubble — transient local notice only, not a
-      // real reply. Persisting it would leave stale error text sitting in
-      // the shared cross-page history forever, replayed as fake context.
       this.setState({ chatMessages: [...history, errMsg], chatLoading: false });
     }
     this._scrollChat();
@@ -726,9 +695,6 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
     const whatsappNumber = phone.replace(/[^\d]/g, "");
     const lineUrl = this.props.lineUrl || "https://line.me/ti/p/huahinproperties";
     const t = I18N_RAIL[this.state.lang] || I18N_RAIL.en;
-    // Reuse the site's own full I18N dictionary for the shared field/button
-    // labels (name/phone/email/message/send/call/whatsapp/line) so all 8
-    // languages are covered consistently instead of duplicating them here.
     const fullDict = (this._mod && this._mod.I18N && this._mod.I18N[this.state.lang]) || {};
     const shared = {
       name_label: fullDict.name_label || "Name", phone_label: fullDict.phone_label || "Phone",
@@ -822,8 +788,9 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
 
       onOpenFormFromChat: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }),
 
-      // ===== Conversation list / AI-Human tab shell =====
-      showConvList: !this.state.isMobile || this.state.chatMobileView === "list",
+      showConvList: (!this.state.isMobile || this.state.chatMobileView === "list") && !this.state.convListCollapsed,
+      onToggleConvList: () => this.setState((s) => ({ convListCollapsed: !s.convListCollapsed })),
+      convListArrowRotate: this.state.convListCollapsed ? "rotate(180deg)" : "rotate(0deg)",
       showConvPane: !this.state.isMobile || this.state.chatMobileView === "conversation",
       showBackToList: this.state.isMobile,
       aiRowBg: this.state.chatTab !== "demo" ? "oklch(94% 0.025 75)" : "transparent",
