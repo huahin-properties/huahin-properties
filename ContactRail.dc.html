@@ -845,7 +845,7 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
     const text = this.state.chatInput.trim();
     if (!text || this.state.chatLoading) return;
     // Human tab = talking to the real sender, never routed through the AI.
-    if (this.state.isHumanTabActiveForSend) { this._sendHumanTurn(text); return; }
+    if (this.state.chatTab === "human") { this._sendHumanTurn(text); return; }
     const lang = this.state.lang;
     const userMsg = { role: "user", text, links: [], bubbleWrapStyle: "align-self:flex-end; max-width:85%;", bubbleStyle: "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:10px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
     const history = [...this.state.chatMessages, userMsg];
