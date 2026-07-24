@@ -228,7 +228,7 @@ service cloud.firestore {
       // never the identity fields that establish who this belongs to.
       allow update: if isAdmin() || (
         isVisitor() &&
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(["updatedAt"]) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(["updatedAt", "lastMessage", "lastMessageRole", "lastMessageAt", "unreadByOwner"]) &&
         request.resource.data.visitorId == resource.data.visitorId &&
         request.resource.data.ownerId == resource.data.ownerId
       ) || (

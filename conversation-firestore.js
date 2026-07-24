@@ -75,8 +75,9 @@ export async function sendConversationTurn({ conversationId, system, messages, c
 // visitor to write role:"customer" directly (no AI call involved here).
 export async function sendHumanMessage({ conversationId, text }) {
   const now = window.firebase.firestore.FieldValue.serverTimestamp();
+  const uid = auth().currentUser && auth().currentUser.uid;
   await db().collection("conversations").doc(conversationId).collection("messages").add({
-    role: "customer", text, createdAt: now, readByOwner: false,
+    role: "customer", senderId: uid, text, createdAt: now, readByOwner: false,
   });
   await db().collection("conversations").doc(conversationId).set({
     lastMessage: text, lastMessageRole: "customer", lastMessageAt: now, updatedAt: now, unreadByOwner: true,
