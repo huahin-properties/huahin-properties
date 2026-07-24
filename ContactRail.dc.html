@@ -631,6 +631,7 @@ class Component extends DCLogic {
   async _startFirestoreConversation(ids, propertyRefs, greetingText) {
     try {
       console.log("[CHAT-BUILD] ContactRail build 2026-07-24-name-debug-02");
+      console.log("[CHAT-INSTANCE]", this._debugInstanceId, "senderName before:", this.state.senderName);
       console.log("[CHAT-2] senderId:", this._senderId);
       console.log("[CHAT-3] calling startConversation");
       const result = await this._convFS.startConversation({ senderId: this._senderId, collectionIds: ids, propertyRefs, greetingText });
@@ -1103,7 +1104,7 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       showConvToggle: !this.state.customerMode,
       customerMode: this.state.customerMode,
       showHumanTab: true,
-      humanTabLabel: this.state.senderName || "",
+      humanTabLabel: (() => { this._debugInstanceId = this._debugInstanceId || Math.random().toString(36).slice(2, 8); console.log("[CHAT-TAB-RENDER]", this._debugInstanceId, "senderName:", this.state.senderName); return this.state.senderName || ""; })(),
       onToggleConvList: () => this.setState((s) => ({ convListCollapsed: !s.convListCollapsed })),
       convListArrowRotate: this.state.convListCollapsed ? "rotate(180deg)" : "rotate(0deg)",
       convListExpanded: !this.state.convListCollapsed,
