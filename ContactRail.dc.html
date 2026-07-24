@@ -616,7 +616,7 @@ class Component extends DCLogic {
       }));
 
       if (this._convBackend === "firestore" && this._convFS) {
-        this._startFirestoreConversation(ids, propertyRefs, greetingText);
+        this._startFirestoreConversation(ids, propertyRefs, greetingText).catch((e) => console.error("Auto-trigger startFirestoreConversation rejected:", e));
       } else if (this._convStore) {
         const ownerId = this._senderId || "admin";
         const visitorId = this._convStore.getVisitorId();
