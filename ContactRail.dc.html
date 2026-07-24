@@ -640,6 +640,7 @@ class Component extends DCLogic {
       this._resolvedOwnerId = result.ownerId;
       this.setState({ senderName: result.ownerLabel });
       console.log("[CHAT-6] senderName state requested:", result.ownerLabel);
+      if (this.forceUpdate) this.forceUpdate();
       // The greeting was written server-side before this call returned —
       // start listening for the thread now (in case the owner already
       // replied by the time this resolves, though realistically too fast).
