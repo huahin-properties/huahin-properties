@@ -19,6 +19,31 @@ const ANTHROPIC_API_KEY = defineSecret("ANTHROPIC_API_KEY");
 const STRIPE_SECRET_KEY = defineSecret("STRIPE_SECRET_KEY");
 const STRIPE_WEBHOOK_SECRET = defineSecret("STRIPE_WEBHOOK_SECRET");
 
+// ─────────────────────────────────────────────────────────────────────────
+// bootstrapAdminIdentity — TEMPORARY one-time setup endpoint.
+// Creates adminUsers/{uid} using the deployed function's own service-account
+// credentials (avoids local Codespace ADC/credential problems entirely).
+// Call once via browser or curl after deploy, then DELETE this function
+// and redeploy — it is not meant to remain in production.
+// ─────────────────────────────────────────────────────────────────────────
+exports.bootstrapAdminIdentity = onRequest(
+  { region: "asia-southeast1" },
+  async (req, res) => {
+    try {
+      const uid = "n7TZKSBscPXE1kRU8WzYpsqJh2g2";
+      const db = admin.firestore();
+      await db.collection("adminUsers").doc(uid).set(
+        { displayName: "huahin.properties", role: "owner", createdAt: admin.firestore.FieldValue.serverTimestamp() },
+        { merge: true }
+      );
+      res.json({ ok: true, message: `adminUsers/${uid} created/updated.` });
+    } catch (e) {
+      console.error("bootstrapAdminIdentity failed:", e);
+      res.status(500).json({ ok: false, error: String(e) });
+    }
+  }
+);
+
 exports.claudeComplete = onRequest(
   { secrets: [ANTHROPIC_API_KEY], cors: true, region: "asia-southeast1", timeoutSeconds: 300, memory: "512MiB" },
   async (req, res) => {
