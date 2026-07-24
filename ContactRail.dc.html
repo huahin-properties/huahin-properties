@@ -630,7 +630,9 @@ class Component extends DCLogic {
 
   async _startFirestoreConversation(ids, propertyRefs, greetingText) {
     try {
+      console.log("[debug] calling startConversation with senderId:", this._senderId);
       const result = await this._convFS.startConversation({ senderId: this._senderId, collectionIds: ids, propertyRefs, greetingText });
+      console.log("[debug] startConversation resolved:", result);
       this._conversationId = result.conversationId;
       this._resolvedOwnerId = result.ownerId;
       this.setState({ senderName: result.ownerLabel });
