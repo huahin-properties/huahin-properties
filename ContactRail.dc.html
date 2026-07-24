@@ -163,7 +163,7 @@
         <!-- ===== CURRENT CONVERSATION (right column) ===== -->
         <sc-if value="{{ showConvPane }}">
         <div style="flex:1; min-width:0; display:flex; flex-direction:column;">
-          <div style="background:oklch(99% 0.005 80); color:oklch(22% 0.02 60); padding:14px 18px 0; flex-shrink:0; border-bottom:1px solid oklch(92% 0.01 70);">
+          <div style="background:{{ convHeaderBg }}; color:oklch(22% 0.02 60); padding:14px 18px 0; flex-shrink:0; border-bottom:1px solid oklch(92% 0.01 70); transition:background .15s;">
             <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
               <sc-if value="{{ showBackToList }}">
                 <div onClick="{{ onBackToList }}" style="cursor:pointer; padding:4px; display:flex; align-items:center; color:oklch(22% 0.02 60);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -186,7 +186,7 @@
                 </div>
               </div>
             </div>
-            <div style="display:flex; gap:6px; background:oklch(94% 0.015 75); padding:4px; border-radius:10px; width:fit-content;">
+            <div style="display:flex; gap:6px; background:{{ tabBarBg }}; padding:4px; border-radius:10px; width:fit-content; transition:background .15s;">
               <div onClick="{{ onSelectAiTab }}" style="cursor:pointer; padding:7px 14px; font-size:12.5px; font-weight:600; color:{{ aiTabColor }}; background:{{ aiTabBg }}; border-radius:7px; white-space:nowrap; transition:background .15s;">🤖 {{ t.chat_tab_talk_prefix }} {{ t.chat_tab_ai }}</div>
               <sc-if value="{{ showHumanTab }}">
               <div onClick="{{ onSelectHumanTab }}" style="cursor:pointer; padding:7px 14px; font-size:12.5px; font-weight:600; color:{{ humanTabColor }}; background:{{ humanTabBg }}; border-radius:7px; white-space:nowrap; transition:background .15s;">💬 {{ t.chat_tab_talk_prefix }} {{ humanTabLabel }}</div>
@@ -199,7 +199,7 @@
           </sc-if>
 
           <sc-if value="{{ isRealConv }}">
-            <div ref="{{ ownerScrollRef }}" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px;">
+            <div ref="{{ ownerScrollRef }}" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; background:{{ msgAreaBg }};">
               <div style="align-self:center; font-size:11px; color:oklch(55% 0.02 60); background:oklch(95% 0.02 80); padding:6px 12px; border-radius:100px;">{{ t.chat_owner_context_note }}</div>
               <sc-for list="{{ realConvMessages }}" as="m" hint-placeholder-count="0">
                 <div style="{{ m.bubbleWrapStyle }}"><div style="{{ m.bubbleStyle }}">{{ m.text }}</div></div>
@@ -216,7 +216,7 @@
                the customer's separate live conversation with the real
                sender (never mixed together). -->
           <sc-if value="{{ isAiTab }}">
-            <div ref="{{ chatScrollRef }}" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px;">
+            <div ref="{{ chatScrollRef }}" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; background:{{ msgAreaBg }};">
               <sc-if value="{{ isHumanTabActive }}"><sc-if value="{{ !hasHumanMessages }}"><div style="text-align:center; padding:24px 10px; font-size:12.5px; color:oklch(55% 0.02 60);">{{ t.chat_human_empty }}</div></sc-if></sc-if>
               <sc-for list="{{ displayMessages }}" as="m" hint-placeholder-count="1">
                 <div style="{{ m.bubbleWrapStyle }}">
@@ -1112,6 +1112,9 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       isHumanTabActiveForSend: this.state.chatTab === "human",
       isAiTabActive: this.state.chatTab === "ai",
       isRealConv: typeof this.state.chatTab === "string" && this.state.chatTab.startsWith("conv:"),
+      convHeaderBg: (this.state.chatTab === "human" || (typeof this.state.chatTab === "string" && this.state.chatTab.startsWith("conv:"))) ? "oklch(96% 0.03 235)" : "oklch(99% 0.005 80)",
+      tabBarBg: (this.state.chatTab === "human" || (typeof this.state.chatTab === "string" && this.state.chatTab.startsWith("conv:"))) ? "oklch(90% 0.04 235)" : "oklch(94% 0.015 75)",
+      msgAreaBg: (this.state.chatTab === "human" || (typeof this.state.chatTab === "string" && this.state.chatTab.startsWith("conv:"))) ? "oklch(97% 0.02 235)" : "oklch(99% 0.005 80)",
       noRealConvos: (this.state.ownerConversations || []).length === 0,
       realConversations: (this.state.ownerConversations || []).map((c) => ({
         id: c.id,
@@ -1125,8 +1128,8 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       })),
       realConvMessages: (this.state.ownerOpenMessages || []).map((m) => ({
         text: m.text,
-        bubbleWrapStyle: m.role === "customer" ? "align-self:flex-end; max-width:85%;" : "align-self:flex-start; max-width:85%;",
-        bubbleStyle: m.role === "customer"
+        bubbleWrapStyle: m.role === "owner" ? "align-self:flex-end; max-width:85%;" : "align-self:flex-start; max-width:85%;",
+        bubbleStyle: m.role === "owner"
           ? "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:10px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5; white-space:pre-wrap;"
           : "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap;",
       })),
