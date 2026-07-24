@@ -211,12 +211,14 @@
             </div>
           </sc-if>
 
-          <!-- AI / HUMAN TAB — same shared conversation thread (AI, customer and
-               owner/sender messages all live together), differing only in
-               header note text and which tab is visually active. -->
+          <!-- AI / HUMAN TAB — each tab shows its OWN thread: the AI tab shows
+               the customer's conversation with the AI; the Human tab shows
+               the customer's separate live conversation with the real
+               sender (never mixed together). -->
           <sc-if value="{{ isAiTab }}">
             <div ref="{{ chatScrollRef }}" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px;">
-              <sc-for list="{{ chatMessages }}" as="m" hint-placeholder-count="1">
+              <sc-if value="{{ isHumanTabActive }}"><sc-if value="{{ !hasHumanMessages }}"><div style="text-align:center; padding:24px 10px; font-size:12.5px; color:oklch(55% 0.02 60);">{{ t.chat_human_empty }}</div></sc-if></sc-if>
+              <sc-for list="{{ displayMessages }}" as="m" hint-placeholder-count="1">
                 <div style="{{ m.bubbleWrapStyle }}">
                   <div style="{{ m.bubbleStyle }}">{{ m.text }}</div>
                   <sc-for list="{{ m.links }}" as="lnk" hint-placeholder-count="0">
@@ -236,9 +238,9 @@
                   </sc-for>
                 </div>
               </sc-for>
-              <sc-if value="{{ chatLoading }}">
+              <sc-if value="{{ isAiTabActive }}"><sc-if value="{{ chatLoading }}">
                 <div style="align-self:flex-start; background:oklch(93% 0.01 75); color:oklch(45% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px;">{{ t.chat_thinking }}</div>
-              </sc-if>
+              </sc-if></sc-if>
             </div>
             <div style="flex-shrink:0; border-top:1px solid oklch(90% 0.01 70); padding:10px 12px 4px; display:flex; gap:8px;">
               <input value="{{ chatInput }}" onChange="{{ onChatInput }}" onKeyDown="{{ onChatKeyDown }}" placeholder="{{ t.chat_type_or_speak }}" style="flex:1; border:1px solid oklch(85% 0.01 70); border-radius:100px; padding:10px 16px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0;" />
@@ -308,7 +310,7 @@ const I18N_RAIL = {
 
 const CHAT_I18N = {
   en: { chat_title: "Ask about our properties", chat_tab_talk_prefix: "Chat with", chat_human_scope_note: "Live chat with", chat_subtitle: "AI assistant · huahin.properties listings only", chat_placeholder: "e.g. Any 4-bedroom pool villas?", chat_type_or_speak: "Type or tap 🎙️ to speak", chat_thinking: "Typing…", chat_talk_to_human: "Talk to a human", chat_greeting: "Hi! Ask me anything about our listings — bedrooms, price, area, property codes, availability.", chat_view_property: "View property", chat_contact_us: "Contact us", chat_autobot_intro: "Hi! I noticed you've been looking closely at", chat_autobot_help: "Want me to help with anything specific?", chat_conversations_title: "People", chat_ai_name: "AI Assistant", chat_ai_last: "Ask about listings, prices, areas…", chat_ai_subtitle_small: "Automated AI assistant", chat_no_human_convos: "This space fills up as real people message you — each will be saved here with an editable note.", chat_tab_ai: "AI Assistant", chat_tab_human: "Human", chat_ai_scope_note: "Chatting with our AI assistant — answers based only on real listing data.", chat_human_soon_title: "Live chat with a real person is coming soon", chat_human_soon_desc: "We're preparing real human live chat. For now, reach our team directly through any of these:", chat_human_alt_title: "Contact us directly", chat_contact_form_btn: "Send us a message", chat_clear: "Clear chat", chat_demo_name: "Somchai", chat_demo_tag: "Live conversation", chat_demo_empty: "No messages yet — start typing to chat with Somchai.", chat_demo_placeholder: "Message Somchai…", chat_note_placeholder: "Add a note about this person…", chat_demo_title: "This is a simulated example", chat_demo_desc: "Shows how a real person's conversation and note will look once someone actually messages you. Not a real conversation yet." },
-  th: { chat_type_or_speak: "พิมพ์หรือกด 🎙️ เพื่อพูดก็ได้", chat_tab_talk_prefix: "คุยกับ", chat_human_scope_note: "กำลังคุยสดกับ", chat_owner_context_note: "นี่คือบทสนทนาทั้งหมดที่ AI คุยกับลูกค้ารายนี้มาก่อน — พิมพ์ด้านล่างเพื่อคุยต่อในฐานะคุณเอง", chat_title: "ถามเกี่ยวกับทรัพย์ของเรา", chat_subtitle: "ผู้ช่วย AI · ข้อมูลจากประกาศใน huahin.properties เท่านั้น", chat_placeholder: "เช่น มีพูลวิลล่า 4 ห้องนอนไหม", chat_thinking: "กำลังพิมพ์…", chat_talk_to_human: "คุยกับเจ้าหน้าที่จริง", chat_greeting: "สวัสดีค่ะ ถามอะไรก็ได้เกี่ยวกับทรัพย์ของเรา เช่น จำนวนห้องนอน ราคา โซน รหัสทรัพย์ หรือสถานะว่าง/เช่าแล้ว", chat_view_property: "ดูรายละเอียด", chat_contact_us: "ติดต่อเรา", chat_autobot_intro: "สวัสดีค่ะ เห็นว่าคุณสนใจดู", chat_autobot_help: "อยากให้ช่วยอะไรเพิ่มเติมไหมคะ?", chat_conversations_title: "ผู้คน", chat_ai_name: "AI Assistant", chat_ai_last: "ถามเกี่ยวกับทรัพย์ ราคา ทำเล…", chat_ai_subtitle_small: "ผู้ช่วย AI อัตโนมัติ", chat_no_human_convos: "พื้นที่นี้จะเต็มไปด้วยรายชื่อคนที่ทักมาคุยจริง แต่ละคนจะถูกบันทึกไว้ที่นี่พร้อมช่องบันทึกข้อความที่แก้ไขได้", chat_tab_ai: "AI Assistant", chat_tab_human: "เจ้าหน้าที่", chat_ai_scope_note: "กำลังคุยกับ AI ผู้ช่วยของ huahin.properties — ตอบจากข้อมูลทรัพย์จริงเท่านั้น", chat_human_soon_title: "ระบบแชทกับคนจริงกำลังเตรียมเปิดใช้งาน", chat_human_soon_desc: "เรากำลังเตรียมระบบแชทสดกับเจ้าหน้าที่จริง ระหว่างนี้ติดต่อทีมงานของเราได้โดยตรงผ่านช่องทางด้านล่าง", chat_human_alt_title: "ติดต่อเราโดยตรง", chat_contact_form_btn: "ส่งข้อความถึงเรา", chat_clear: "ล้างประวัติแชท", chat_demo_name: "คุณสมชาย", chat_demo_tag: "การสนทนาสด", chat_demo_empty: "ยังไม่มีข้อความ — เริ่มพิมพ์เพื่อคุยกับคุณสมชายได้เลย", chat_demo_placeholder: "พิมพ์ข้อความถึงคุณสมชาย…", chat_note_placeholder: "บันทึกข้อความเกี่ยวกับคนนี้…", chat_demo_title: "นี่คือตัวอย่างจำลอง", chat_demo_desc: "แสดงให้เห็นว่าบทสนทนาและบันทึกของคนจริงจะมีหน้าตาแบบนี้ เมื่อมีคนทักมาคุยจริง ยังไม่ใช่บทสนทนาจริง", chat_collection_greeting: "สวัสดีค่ะ นี่คือคอลเลคชั่นทรัพย์ที่ถูกแชร์มาให้คุณ:" },
+  th: { chat_type_or_speak: "พิมพ์หรือกด 🎙️ เพื่อพูดก็ได้", chat_human_empty: "ยังไม่มีข้อความ — พิมพ์ด้านล่างเพื่อคุยกับผู้ส่งได้เลย", chat_tab_talk_prefix: "คุยกับ", chat_human_scope_note: "กำลังคุยสดกับ", chat_owner_context_note: "นี่คือบทสนทนาทั้งหมดที่ AI คุยกับลูกค้ารายนี้มาก่อน — พิมพ์ด้านล่างเพื่อคุยต่อในฐานะคุณเอง", chat_title: "ถามเกี่ยวกับทรัพย์ของเรา", chat_subtitle: "ผู้ช่วย AI · ข้อมูลจากประกาศใน huahin.properties เท่านั้น", chat_placeholder: "เช่น มีพูลวิลล่า 4 ห้องนอนไหม", chat_thinking: "กำลังพิมพ์…", chat_talk_to_human: "คุยกับเจ้าหน้าที่จริง", chat_greeting: "สวัสดีค่ะ ถามอะไรก็ได้เกี่ยวกับทรัพย์ของเรา เช่น จำนวนห้องนอน ราคา โซน รหัสทรัพย์ หรือสถานะว่าง/เช่าแล้ว", chat_view_property: "ดูรายละเอียด", chat_contact_us: "ติดต่อเรา", chat_autobot_intro: "สวัสดีค่ะ เห็นว่าคุณสนใจดู", chat_autobot_help: "อยากให้ช่วยอะไรเพิ่มเติมไหมคะ?", chat_conversations_title: "ผู้คน", chat_ai_name: "AI Assistant", chat_ai_last: "ถามเกี่ยวกับทรัพย์ ราคา ทำเล…", chat_ai_subtitle_small: "ผู้ช่วย AI อัตโนมัติ", chat_no_human_convos: "พื้นที่นี้จะเต็มไปด้วยรายชื่อคนที่ทักมาคุยจริง แต่ละคนจะถูกบันทึกไว้ที่นี่พร้อมช่องบันทึกข้อความที่แก้ไขได้", chat_tab_ai: "AI Assistant", chat_tab_human: "เจ้าหน้าที่", chat_ai_scope_note: "กำลังคุยกับ AI ผู้ช่วยของ huahin.properties — ตอบจากข้อมูลทรัพย์จริงเท่านั้น", chat_human_soon_title: "ระบบแชทกับคนจริงกำลังเตรียมเปิดใช้งาน", chat_human_soon_desc: "เรากำลังเตรียมระบบแชทสดกับเจ้าหน้าที่จริง ระหว่างนี้ติดต่อทีมงานของเราได้โดยตรงผ่านช่องทางด้านล่าง", chat_human_alt_title: "ติดต่อเราโดยตรง", chat_contact_form_btn: "ส่งข้อความถึงเรา", chat_clear: "ล้างประวัติแชท", chat_demo_name: "คุณสมชาย", chat_demo_tag: "การสนทนาสด", chat_demo_empty: "ยังไม่มีข้อความ — เริ่มพิมพ์เพื่อคุยกับคุณสมชายได้เลย", chat_demo_placeholder: "พิมพ์ข้อความถึงคุณสมชาย…", chat_note_placeholder: "บันทึกข้อความเกี่ยวกับคนนี้…", chat_demo_title: "นี่คือตัวอย่างจำลอง", chat_demo_desc: "แสดงให้เห็นว่าบทสนทนาและบันทึกของคนจริงจะมีหน้าตาแบบนี้ เมื่อมีคนทักมาคุยจริง ยังไม่ใช่บทสนทนาจริง", chat_collection_greeting: "สวัสดีค่ะ นี่คือคอลเลคชั่นทรัพย์ที่ถูกแชร์มาให้คุณ:" },
   ru: { chat_title: "Спросите о наших объектах", chat_subtitle: "ИИ-ассистент · только объекты huahin.properties", chat_placeholder: "напр. Есть виллы с 4 спальнями?", chat_thinking: "Печатает…", chat_talk_to_human: "Хотите поговорить с человеком? Оставьте контакт →", chat_greeting: "Здравствуйте! Спрашивайте о наших объектах — спальни, цена, район, код объекта, наличие.", chat_view_property: "Смотреть объект", chat_contact_us: "Связаться с нами", chat_autobot_intro: "Здравствуйте! Я заметила, что вас заинтересовали", chat_autobot_help: "Могу чем-то помочь?" },
   zh: { chat_title: "咨询我们的房源", chat_subtitle: "AI 助手 · 仅限 huahin.properties 房源信息", chat_placeholder: "例如：有4卧室泳池别墅吗？", chat_thinking: "输入中…", chat_talk_to_human: "想联系真人客服？留下联系方式 →", chat_greeting: "您好！可以问我关于房源的任何问题 — 卧室数、价格、区域、房源编号或是否可租。", chat_view_property: "查看房源", chat_contact_us: "联系我们", chat_autobot_intro: "您好！我注意到您一直在关注", chat_autobot_help: "需要我帮您什么吗？" },
   de: { chat_title: "Fragen zu unseren Immobilien", chat_subtitle: "KI-Assistent · nur huahin.properties Angebote", chat_placeholder: "z.B. Poolvillen mit 4 Schlafzimmern?", chat_thinking: "Tippt…", chat_talk_to_human: "Lieber mit einem Menschen sprechen? Kontakt hinterlassen →", chat_greeting: "Hallo! Fragen Sie mich alles zu unseren Angeboten — Schlafzimmer, Preis, Gebiet, Objektcode oder Verfügbarkeit.", chat_view_property: "Immobilie ansehen", chat_contact_us: "Kontaktieren Sie uns", chat_autobot_intro: "Hallo! Mir ist aufgefallen, dass Sie sich für", chat_autobot_help: "interessieren. Kann ich Ihnen bei etwas Bestimmtem helfen?" },
@@ -341,7 +343,7 @@ class Component extends DCLogic {
     name: "", phone: "", email: "", message: "",
     lang: "th",
     chatOpen: false, chatMinimized: false, chatMessages: [], chatInput: "", chatLoading: false,
-    chatTab: "ai", chatMobileView: "conversation", convListCollapsed: true, customerMode: false, senderName: "", ownerConversations: [], ownerOpenMessages: [], ownerReplyInput: "",
+    chatTab: "ai", chatMobileView: "conversation", convListCollapsed: true, customerMode: false, senderName: "", ownerConversations: [], ownerOpenMessages: [], ownerReplyInput: "", humanMessages: [],
   };
 
   chatScrollRef = React.createRef();
@@ -449,18 +451,18 @@ class Component extends DCLogic {
   _onCustomerMessagesSnapshot(msgs, err) {
     if (err) { console.warn("Firestore message listener error:", err); return; }
     if (!msgs) return;
-    // Merge in any "owner" message the customer hasn't seen yet — AI
-    // messages the customer sent themselves are already in chatMessages
-    // from sendChat()'s own optimistic update, so only owner replies need
-    // to be appended here.
+    // Owner replies belong ONLY to the Human-tab thread — never mixed into
+    // the AI tab's conversation (each tab is a separate thread from the
+    // customer's point of view, even though both live in one Firestore
+    // conversation doc for the Owner's benefit).
     const ownerMsgs = msgs.filter((m) => m.role === "owner");
     const knownCount = this._knownOwnerReplyCount || 0;
     if (ownerMsgs.length > knownCount) {
       this._knownOwnerReplyCount = ownerMsgs.length;
       const newOnes = ownerMsgs.slice(knownCount).map((m) => this._buildBubble("assistant", m.text));
-      const next = [...this.state.chatMessages, ...newOnes];
-      this.setState({ chatMessages: next });
-      this._persistHistory(next);
+      const next = [...this.state.humanMessages, ...newOnes];
+      this.setState({ humanMessages: next });
+      this._persistHumanHistory(next);
       this._scrollChat();
     }
   }
@@ -497,9 +499,9 @@ class Component extends DCLogic {
         if (ownerMsgs.length > knownCount) {
           this._knownOwnerReplyCount = ownerMsgs.length;
           const newOnes = ownerMsgs.slice(knownCount).map((m) => this._buildBubble("assistant", m.text));
-          const next = [...this.state.chatMessages, ...newOnes];
-          this.setState({ chatMessages: next });
-          this._persistHistory(next);
+          const next = [...this.state.humanMessages, ...newOnes];
+          this.setState({ humanMessages: next });
+          this._persistHumanHistory(next);
           this._scrollChat();
         }
       }
@@ -525,6 +527,12 @@ class Component extends DCLogic {
   _persistHistory(messages) {
     try {
       localStorage.setItem("hh_chat_history", JSON.stringify(messages.map((m) => ({ role: m.role, text: m.text }))));
+    } catch (e) {}
+  }
+
+  _persistHumanHistory(messages) {
+    try {
+      localStorage.setItem("hh_human_chat_history", JSON.stringify(messages.map((m) => ({ role: m.role, text: m.text }))));
     } catch (e) {}
   }
 
@@ -612,6 +620,7 @@ class Component extends DCLogic {
         const visitorId = this._convStore.getVisitorId();
         this._convStore.ensureConversation(ownerId, visitorId, { ownerLabel: ownerId, collectionIds: ids, propertySnapshots: propertyRefs });
         this._convStore.appendMessage(ownerId, visitorId, "ai", greetingText);
+        this.setState({ senderName: ownerId });
       }
       return true;
     } catch (e) { console.warn("Collection-link auto-trigger failed:", e); return false; }
@@ -628,7 +637,13 @@ class Component extends DCLogic {
       // replied by the time this resolves, though realistically too fast).
       if (this._unsubMessages) this._unsubMessages();
       this._unsubMessages = this._convFS.listenMessages(this._conversationId, (msgs, err) => this._onCustomerMessagesSnapshot(msgs, err));
-    } catch (e) { console.warn("startConversation Callable failed:", e); }
+    } catch (e) {
+      console.warn("startConversation Callable failed:", e);
+      // Never leave the header/subtitle blank — fall back to a sender
+      // identity the customer can still see even if the backend call
+      // itself failed.
+      this.setState({ senderName: this._senderId || "Admin" });
+    }
   }
 
   // (getIdToken helper removed — Callable Functions attach the caller's
@@ -811,9 +826,9 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
 
   async _sendHumanTurn(text) {
     const userMsg = { role: "user", text, links: [], bubbleWrapStyle: "align-self:flex-end; max-width:85%;", bubbleStyle: "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:10px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
-    const history = [...this.state.chatMessages, userMsg];
-    this.setState({ chatMessages: history, chatInput: "" });
-    this._persistHistory(history);
+    const history = [...this.state.humanMessages, userMsg];
+    this.setState({ humanMessages: history, chatInput: "" });
+    this._persistHumanHistory(history);
     this._scrollChat();
     try {
       if (this._convBackend === "firestore" && this._conversationId && this._convFS) {
@@ -1028,6 +1043,8 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       onClearChat: () => this.clearChatHistory(),
       onExpandChat: () => this.setState({ chatMinimized: false }),
       chatMessages: this.state.chatMessages,
+      displayMessages: this.state.chatTab === "human" ? this.state.humanMessages : this.state.chatMessages,
+      hasHumanMessages: (this.state.humanMessages || []).length > 0,
       chatLoading: this.state.chatLoading,
       chatInput: this.state.chatInput,
       chatScrollRef: this.chatScrollRef,
