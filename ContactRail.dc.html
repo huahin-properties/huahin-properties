@@ -630,12 +630,16 @@ class Component extends DCLogic {
 
   async _startFirestoreConversation(ids, propertyRefs, greetingText) {
     try {
-      console.log("[debug] calling startConversation with senderId:", this._senderId);
+      console.log("[CHAT-BUILD] ContactRail build 2026-07-24-name-debug-02");
+      console.log("[CHAT-2] senderId:", this._senderId);
+      console.log("[CHAT-3] calling startConversation");
       const result = await this._convFS.startConversation({ senderId: this._senderId, collectionIds: ids, propertyRefs, greetingText });
-      console.log("[debug] startConversation resolved:", result);
+      console.log("[CHAT-4] startConversation result:", JSON.stringify(result));
+      console.log("[CHAT-5] ownerLabel:", result && result.ownerLabel);
       this._conversationId = result.conversationId;
       this._resolvedOwnerId = result.ownerId;
       this.setState({ senderName: result.ownerLabel });
+      console.log("[CHAT-6] senderName state requested:", result.ownerLabel);
       // The greeting was written server-side before this call returned —
       // start listening for the thread now (in case the owner already
       // replied by the time this resolves, though realistically too fast).
