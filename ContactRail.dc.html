@@ -404,11 +404,11 @@ class Component extends DCLogic {
       const fb = await import("./firebase-client.js");
       const user = await fb.onAdminAuthReady().catch(() => null);
       if (!user) return "admin";
-      if (fb.isAdminAuthed && fb.isAdminAuthed()) return user.uid;
-      try {
-        const lister = await fb.fetchMyListerDoc();
-        if (lister) return lister.id;
-      } catch (e) {}
+      // IMPORTANT: Firestore rules check request.auth.uid == ownerId, so
+      // this must always be the real Firebase Auth UID — never a separate
+      // Firestore document id (e.g. a listers/{id} doc whose id could
+      // differ from the signed-in uid), or every conversation this
+      // identity owns would silently fail every rules check.
       return user.uid;
     } catch (e) {
       return "admin";
