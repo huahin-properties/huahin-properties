@@ -9,6 +9,10 @@
 <x-dc>
 <div style="position:fixed; top:0; left:0; width:0; height:0; z-index:9999;">
   <!-- ============ COLLAPSIBLE SIDE RAIL ============ -->
+  <!-- Always visible — this is the WEBSITE's own general contact channel
+       (huahin.properties LINE/WhatsApp/phone), unrelated to who shared a
+       Collection link. Any visitor, including a Collection-link
+       recipient, may still contact the site directly through it. -->
   <!-- Toggle arrow stays pinned at the edge always (never slides away) so a
        collapsed rail can still be reopened. Only the 3 tabs below it slide. -->
   <div style="position:fixed; top:50%; right:0; transform:translateY(-160px); z-index:61;">
@@ -130,12 +134,7 @@
     <div style="position:fixed; inset:0; z-index:85; display:flex; align-items:flex-end; justify-content:flex-end; padding:{{ chatOverlayPadding }}; pointer-events:none;">
       <div onClick="{{ stopProp }}" style="background:oklch(99% 0.005 80); border-radius:{{ chatPanelRadius }}; width:100%; max-width:{{ chatPanelMaxWidth }}; height:{{ chatPanelHeight }}; display:flex; flex-direction:row; box-shadow:0 20px 60px oklch(0% 0 0 / 0.35); overflow:hidden; pointer-events:auto;">
 
-        <!-- ===== CONVERSATION LIST toggle (left column) — Owner Mode only. Customers who arrive via a shared Collection link never see this (no sidebar, no other customers, no Owner CRM). ===== -->
-        <sc-if value="{{ showConvToggle }}">
-        <div onClick="{{ onToggleConvList }}" title="{{ t.chat_conversations_title }}" style="position:relative; z-index:2; flex-shrink:0; width:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; background:oklch(96% 0.01 75); border-right:1px solid oklch(90% 0.01 70);">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="transform:{{ convListArrowRotate }};"><path d="M9 6L15 12L9 18" stroke="oklch(35% 0.02 60)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-        </sc-if>
+        <!-- ===== CONVERSATION LIST toggle (left column) — Owner Mode only. Customers who arrive via a shared Collection link never see this (no sidebar, no other customers, no Owner CRM). Distinct open/closed icon + label so it's unmistakably a toggle button, not decoration. ===== -->
         <sc-if value="{{ showConvList }}">
           <div style="width:{{ convListWidth }}; flex-shrink:0; border-right:1px solid oklch(90% 0.01 70); display:flex; flex-direction:column; background:oklch(98% 0.005 78);">
             <div style="padding:16px 18px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); flex-shrink:0; display:flex; align-items:center; gap:8px;">
@@ -143,16 +142,20 @@
               <div style="font-family:'Work Sans',sans-serif; font-size:12.5px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase;">{{ t.chat_conversations_title }}</div>
             </div>
             <div style="flex:1; overflow-y:auto; background:oklch(99% 0.005 80);">
-              <div onClick="{{ onSelectDemoContact }}" style="cursor:pointer; padding:6px 16px 8px; border-bottom:1px solid oklch(92% 0.01 70); background:{{ demoRowBg }};">
-                <div style="display:flex; align-items:flex-start; gap:8px;">
-                  <div style="width:28px; height:28px; border-radius:50%; background:oklch(58% 0.11 210); color:white; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; font-weight:700;">คส</div>
-                  <div style="min-width:0; flex:1;">
-                    <div style="font-size:12px; font-weight:600; color:oklch(20% 0.02 60); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; line-height:1.3; margin-bottom:2px;">{{ t.chat_demo_name }}</div>
-                    <input value="{{ demoNote }}" onChange="{{ onDemoNoteChange }}" onClick="{{ stopProp }}" placeholder="{{ t.chat_note_placeholder }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:5px; padding:3px 7px; font-size:10.5px; font-family:inherit; box-sizing:border-box; background:oklch(99% 0.005 80); line-height:1.4;" />
+              <sc-for list="{{ realConversations }}" as="rc" hint-placeholder-count="0">
+                <div onClick="{{ rc.onSelect }}" style="cursor:pointer; padding:6px 16px 8px; border-bottom:1px solid oklch(92% 0.01 70); background:{{ rc.rowBg }}; position:relative;">
+                  <div style="display:flex; align-items:flex-start; gap:8px;">
+                    <div style="width:28px; height:28px; border-radius:50%; background:oklch(45% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; font-weight:700;">{{ rc.initials }}</div>
+                    <div style="min-width:0; flex:1;">
+                      <div style="font-size:12px; font-weight:600; color:oklch(20% 0.02 60); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; line-height:1.3; margin-bottom:2px;">{{ rc.label }}</div>
+                      <div style="font-size:10.5px; color:oklch(55% 0.02 60); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-bottom:3px;">{{ rc.lastMessage }}</div>
+                      <input value="{{ rc.note }}" onChange="{{ rc.onNoteChange }}" onClick="{{ stopProp }}" placeholder="{{ t.chat_note_placeholder }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:5px; padding:3px 7px; font-size:10.5px; font-family:inherit; box-sizing:border-box; background:oklch(99% 0.005 80); line-height:1.4;" />
+                    </div>
+                    <sc-if value="{{ rc.unread }}"><div style="width:8px; height:8px; border-radius:50%; background:oklch(55% 0.2 25); flex-shrink:0; margin-top:4px;"></div></sc-if>
                   </div>
                 </div>
-              </div>
-              <div style="padding:16px 16px; text-align:center; font-size:11.5px; color:oklch(58% 0.02 60); line-height:1.6;">{{ t.chat_no_human_convos }}</div>
+              </sc-for>
+              <sc-if value="{{ noRealConvos }}"><div style="padding:16px 16px; text-align:center; font-size:11.5px; color:oklch(58% 0.02 60); line-height:1.6;">{{ t.chat_no_human_convos }}</div></sc-if>
             </div>
           </div>
         </sc-if>
@@ -171,34 +174,46 @@
                 <div style="font-size:11px; color:oklch(55% 0.02 60); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ convHeaderSubtitle }}</div>
               </div>
               <div style="display:flex; align-items:center; gap:4px;">
+                <sc-if value="{{ showConvToggle }}">
+                <div onClick="{{ onToggleConvList }}" title="{{ t.chat_conversations_title }}" style="cursor:pointer; padding:7px 10px; border-radius:8px; display:flex; align-items:center; gap:5px; color:oklch(35% 0.13 25); background:oklch(96% 0.02 75);" style-hover="background:oklch(92% 0.03 75);">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="8" r="3" stroke="oklch(35% 0.13 25)" stroke-width="1.8"/><circle cx="17" cy="9" r="2.4" stroke="oklch(35% 0.13 25)" stroke-width="1.8"/><path d="M2.5 19c.7-3.2 3-5 5.5-5s4.8 1.8 5.5 5" stroke="oklch(35% 0.13 25)" stroke-width="1.8" stroke-linecap="round"/><path d="M14.5 14.3c2.1.2 3.7 1.7 4.2 4.2" stroke="oklch(35% 0.13 25)" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  <sc-if value="{{ convListCollapsed }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M15 6L9 12L15 18" stroke="oklch(35% 0.13 25)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></sc-if>
+                  <sc-if value="{{ convListExpanded }}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M9 6L15 12L9 18" stroke="oklch(35% 0.13 25)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></sc-if>
+                </div>
+                </sc-if>
                 <div onClick="{{ onMinimizeChat }}" title="ย่อหน้าต่างแชท" style="cursor:pointer; padding:8px; border-radius:8px; display:flex; align-items:center; justify-content:center; color:oklch(40% 0.02 60);" style-hover="background:oklch(93% 0.01 75);">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </div>
               </div>
             </div>
-            <div style="display:flex;">
-              <div onClick="{{ onSelectAiTab }}" style="cursor:pointer; padding:8px 4px 10px; margin-right:22px; font-size:12.5px; font-weight:600; color:{{ aiTabColor }}; border-bottom:2px solid {{ aiTabBorder }}; white-space:nowrap;">🤖 {{ t.chat_tab_ai }}</div>
+            <div style="display:flex; gap:6px; background:oklch(94% 0.015 75); padding:4px; border-radius:10px; width:fit-content;">
+              <div onClick="{{ onSelectAiTab }}" style="cursor:pointer; padding:7px 14px; font-size:12.5px; font-weight:600; color:{{ aiTabColor }}; background:{{ aiTabBg }}; border-radius:7px; white-space:nowrap; transition:background .15s;">🤖 {{ t.chat_tab_talk_prefix }} {{ t.chat_tab_ai }}</div>
               <sc-if value="{{ showHumanTab }}">
-              <div onClick="{{ onSelectDemoContact }}" style="cursor:pointer; padding:8px 4px 10px; font-size:12.5px; font-weight:600; color:{{ humanTabColor }}; border-bottom:2px solid {{ humanTabBorder }}; white-space:nowrap;">💬 {{ humanTabLabel }}</div>
+              <div onClick="{{ onSelectHumanTab }}" style="cursor:pointer; padding:7px 14px; font-size:12.5px; font-weight:600; color:{{ humanTabColor }}; background:{{ humanTabBg }}; border-radius:7px; white-space:nowrap; transition:background .15s;">💬 {{ t.chat_tab_talk_prefix }} {{ humanTabLabel }}</div>
               </sc-if>
             </div>
           </div>
-          <sc-if value="{{ isAiTab }}"><div style="flex-shrink:0; background:oklch(97% 0.03 80); color:oklch(45% 0.03 60); font-size:11.5px; padding:8px 18px;">{{ t.chat_ai_scope_note }}</div></sc-if>
+          <sc-if value="{{ isAiTab }}">
+            <sc-if value="{{ isAiTabActive }}"><div style="flex-shrink:0; background:oklch(97% 0.03 80); color:oklch(45% 0.03 60); font-size:11.5px; padding:8px 18px;">{{ t.chat_ai_scope_note }}</div></sc-if>
+            <sc-if value="{{ isHumanTabActive }}"><div style="flex-shrink:0; background:oklch(94% 0.03 220); color:oklch(35% 0.05 240); font-size:11.5px; padding:8px 18px;">{{ t.chat_human_scope_note }} {{ humanTabLabel }}</div></sc-if>
+          </sc-if>
 
-          <sc-if value="{{ isDemoContact }}">
-            <div ref="{{ demoScrollRef }}" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px;">
-              <sc-if value="{{ !hasDemoMessages }}"><div style="text-align:center; padding:24px 10px; font-size:12.5px; color:oklch(55% 0.02 60);">{{ t.chat_demo_empty }}</div></sc-if>
-              <sc-for list="{{ demoMessages }}" as="m" hint-placeholder-count="0">
+          <sc-if value="{{ isRealConv }}">
+            <div ref="{{ ownerScrollRef }}" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px;">
+              <div style="align-self:center; font-size:11px; color:oklch(55% 0.02 60); background:oklch(95% 0.02 80); padding:6px 12px; border-radius:100px;">{{ t.chat_owner_context_note }}</div>
+              <sc-for list="{{ realConvMessages }}" as="m" hint-placeholder-count="0">
                 <div style="{{ m.bubbleWrapStyle }}"><div style="{{ m.bubbleStyle }}">{{ m.text }}</div></div>
               </sc-for>
             </div>
             <div style="flex-shrink:0; border-top:1px solid oklch(90% 0.01 70); padding:10px 12px 12px; display:flex; gap:8px;">
-              <input value="{{ demoInput }}" onChange="{{ onDemoInput }}" onKeyDown="{{ onDemoKeyDown }}" placeholder="{{ t.chat_demo_placeholder }}" style="flex:1; border:1px solid oklch(85% 0.01 70); border-radius:100px; padding:10px 16px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0;" />
-              <div onClick="{{ onDemoSend }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; font-size:16px;">➤</div>
+              <input value="{{ ownerReplyInput }}" onChange="{{ onOwnerReplyInput }}" onKeyDown="{{ onOwnerReplyKeyDown }}" placeholder="{{ t.chat_demo_placeholder }}" style="flex:1; border:1px solid oklch(85% 0.01 70); border-radius:100px; padding:10px 16px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0;" />
+              <div onClick="{{ onOwnerReplySend }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; font-size:16px;">➤</div>
             </div>
           </sc-if>
 
-          <!-- AI TAB -->
+          <!-- AI / HUMAN TAB — same shared conversation thread (AI, customer and
+               owner/sender messages all live together), differing only in
+               header note text and which tab is visually active. -->
           <sc-if value="{{ isAiTab }}">
             <div ref="{{ chatScrollRef }}" style="flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px;">
               <sc-for list="{{ chatMessages }}" as="m" hint-placeholder-count="1">
@@ -231,6 +246,16 @@
             </div>
             <div style="display:flex; justify-content:flex-end; align-items:center; flex-shrink:0; padding:6px 12px 9px;">
               <div onClick="{{ onClearChat }}" style="cursor:pointer; font-size:11.5px; color:oklch(55% 0.02 60);">{{ t.chat_clear }}</div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ customerMode }}">
+            <div style="flex-shrink:0; text-align:center; padding:14px 16px 16px; border-top:1px solid oklch(92% 0.01 70); background:oklch(99% 0.005 80);">
+              <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:4px;">
+                <span style="font-size:18px;">🏠</span>
+                <span style="font-family:'Playfair Display',serif; font-size:14px; font-weight:700; color:oklch(22% 0.02 60);">หัวหิน . พร็อพเพอร์ตี้</span>
+              </div>
+              <div style="font-size:11px; color:oklch(55% 0.02 60); margin-bottom:8px;">แพลตฟอร์มอสังหาริมทรัพย์อัจฉริยะแห่งหัวหิน</div>
+              <a href="./Home.dc.html" style="font-size:11px; color:oklch(40% 0.13 25); text-decoration:none; font-weight:600;">เข้าสู่เว็บไซต์หลัก →</a>
             </div>
           </sc-if>
         </div>
@@ -282,8 +307,8 @@ const I18N_RAIL = {
 };
 
 const CHAT_I18N = {
-  en: { chat_title: "Ask about our properties", chat_subtitle: "AI assistant · huahin.properties listings only", chat_placeholder: "e.g. Any 4-bedroom pool villas?", chat_type_or_speak: "Type or tap 🎙️ to speak", chat_thinking: "Typing…", chat_talk_to_human: "Talk to a human", chat_greeting: "Hi! Ask me anything about our listings — bedrooms, price, area, property codes, availability.", chat_view_property: "View property", chat_contact_us: "Contact us", chat_autobot_intro: "Hi! I noticed you've been looking closely at", chat_autobot_help: "Want me to help with anything specific?", chat_conversations_title: "People", chat_ai_name: "AI Assistant", chat_ai_last: "Ask about listings, prices, areas…", chat_ai_subtitle_small: "Automated AI assistant", chat_no_human_convos: "This space fills up as real people message you — each will be saved here with an editable note.", chat_tab_ai: "AI Assistant", chat_tab_human: "Human", chat_ai_scope_note: "Chatting with our AI assistant — answers based only on real listing data.", chat_human_soon_title: "Live chat with a real person is coming soon", chat_human_soon_desc: "We're preparing real human live chat. For now, reach our team directly through any of these:", chat_human_alt_title: "Contact us directly", chat_contact_form_btn: "Send us a message", chat_clear: "Clear chat", chat_demo_name: "Somchai", chat_demo_tag: "Live conversation", chat_demo_empty: "No messages yet — start typing to chat with Somchai.", chat_demo_placeholder: "Message Somchai…", chat_note_placeholder: "Add a note about this person…", chat_demo_title: "This is a simulated example", chat_demo_desc: "Shows how a real person's conversation and note will look once someone actually messages you. Not a real conversation yet." },
-  th: { chat_type_or_speak: "พิมพ์หรือกด 🎙️ เพื่อพูดก็ได้", chat_title: "ถามเกี่ยวกับทรัพย์ของเรา", chat_subtitle: "ผู้ช่วย AI · ข้อมูลจากประกาศใน huahin.properties เท่านั้น", chat_placeholder: "เช่น มีพูลวิลล่า 4 ห้องนอนไหม", chat_thinking: "กำลังพิมพ์…", chat_talk_to_human: "คุยกับเจ้าหน้าที่จริง", chat_greeting: "สวัสดีค่ะ ถามอะไรก็ได้เกี่ยวกับทรัพย์ของเรา เช่น จำนวนห้องนอน ราคา โซน รหัสทรัพย์ หรือสถานะว่าง/เช่าแล้ว", chat_view_property: "ดูรายละเอียด", chat_contact_us: "ติดต่อเรา", chat_autobot_intro: "สวัสดีค่ะ เห็นว่าคุณสนใจดู", chat_autobot_help: "อยากให้ช่วยอะไรเพิ่มเติมไหมคะ?", chat_conversations_title: "ผู้คน", chat_ai_name: "AI Assistant", chat_ai_last: "ถามเกี่ยวกับทรัพย์ ราคา ทำเล…", chat_ai_subtitle_small: "ผู้ช่วย AI อัตโนมัติ", chat_no_human_convos: "พื้นที่นี้จะเต็มไปด้วยรายชื่อคนที่ทักมาคุยจริง แต่ละคนจะถูกบันทึกไว้ที่นี่พร้อมช่องบันทึกข้อความที่แก้ไขได้", chat_tab_ai: "AI Assistant", chat_tab_human: "เจ้าหน้าที่", chat_ai_scope_note: "กำลังคุยกับ AI ผู้ช่วยของ huahin.properties — ตอบจากข้อมูลทรัพย์จริงเท่านั้น", chat_human_soon_title: "ระบบแชทกับคนจริงกำลังเตรียมเปิดใช้งาน", chat_human_soon_desc: "เรากำลังเตรียมระบบแชทสดกับเจ้าหน้าที่จริง ระหว่างนี้ติดต่อทีมงานของเราได้โดยตรงผ่านช่องทางด้านล่าง", chat_human_alt_title: "ติดต่อเราโดยตรง", chat_contact_form_btn: "ส่งข้อความถึงเรา", chat_clear: "ล้างประวัติแชท", chat_demo_name: "คุณสมชาย", chat_demo_tag: "การสนทนาสด", chat_demo_empty: "ยังไม่มีข้อความ — เริ่มพิมพ์เพื่อคุยกับคุณสมชายได้เลย", chat_demo_placeholder: "พิมพ์ข้อความถึงคุณสมชาย…", chat_note_placeholder: "บันทึกข้อความเกี่ยวกับคนนี้…", chat_demo_title: "นี่คือตัวอย่างจำลอง", chat_demo_desc: "แสดงให้เห็นว่าบทสนทนาและบันทึกของคนจริงจะมีหน้าตาแบบนี้ เมื่อมีคนทักมาคุยจริง ยังไม่ใช่บทสนทนาจริง", chat_collection_greeting: "สวัสดีค่ะ นี่คือคอลเลคชั่นทรัพย์ที่ถูกแชร์มาให้คุณ:" },
+  en: { chat_title: "Ask about our properties", chat_tab_talk_prefix: "Chat with", chat_human_scope_note: "Live chat with", chat_subtitle: "AI assistant · huahin.properties listings only", chat_placeholder: "e.g. Any 4-bedroom pool villas?", chat_type_or_speak: "Type or tap 🎙️ to speak", chat_thinking: "Typing…", chat_talk_to_human: "Talk to a human", chat_greeting: "Hi! Ask me anything about our listings — bedrooms, price, area, property codes, availability.", chat_view_property: "View property", chat_contact_us: "Contact us", chat_autobot_intro: "Hi! I noticed you've been looking closely at", chat_autobot_help: "Want me to help with anything specific?", chat_conversations_title: "People", chat_ai_name: "AI Assistant", chat_ai_last: "Ask about listings, prices, areas…", chat_ai_subtitle_small: "Automated AI assistant", chat_no_human_convos: "This space fills up as real people message you — each will be saved here with an editable note.", chat_tab_ai: "AI Assistant", chat_tab_human: "Human", chat_ai_scope_note: "Chatting with our AI assistant — answers based only on real listing data.", chat_human_soon_title: "Live chat with a real person is coming soon", chat_human_soon_desc: "We're preparing real human live chat. For now, reach our team directly through any of these:", chat_human_alt_title: "Contact us directly", chat_contact_form_btn: "Send us a message", chat_clear: "Clear chat", chat_demo_name: "Somchai", chat_demo_tag: "Live conversation", chat_demo_empty: "No messages yet — start typing to chat with Somchai.", chat_demo_placeholder: "Message Somchai…", chat_note_placeholder: "Add a note about this person…", chat_demo_title: "This is a simulated example", chat_demo_desc: "Shows how a real person's conversation and note will look once someone actually messages you. Not a real conversation yet." },
+  th: { chat_type_or_speak: "พิมพ์หรือกด 🎙️ เพื่อพูดก็ได้", chat_tab_talk_prefix: "คุยกับ", chat_human_scope_note: "กำลังคุยสดกับ", chat_owner_context_note: "นี่คือบทสนทนาทั้งหมดที่ AI คุยกับลูกค้ารายนี้มาก่อน — พิมพ์ด้านล่างเพื่อคุยต่อในฐานะคุณเอง", chat_title: "ถามเกี่ยวกับทรัพย์ของเรา", chat_subtitle: "ผู้ช่วย AI · ข้อมูลจากประกาศใน huahin.properties เท่านั้น", chat_placeholder: "เช่น มีพูลวิลล่า 4 ห้องนอนไหม", chat_thinking: "กำลังพิมพ์…", chat_talk_to_human: "คุยกับเจ้าหน้าที่จริง", chat_greeting: "สวัสดีค่ะ ถามอะไรก็ได้เกี่ยวกับทรัพย์ของเรา เช่น จำนวนห้องนอน ราคา โซน รหัสทรัพย์ หรือสถานะว่าง/เช่าแล้ว", chat_view_property: "ดูรายละเอียด", chat_contact_us: "ติดต่อเรา", chat_autobot_intro: "สวัสดีค่ะ เห็นว่าคุณสนใจดู", chat_autobot_help: "อยากให้ช่วยอะไรเพิ่มเติมไหมคะ?", chat_conversations_title: "ผู้คน", chat_ai_name: "AI Assistant", chat_ai_last: "ถามเกี่ยวกับทรัพย์ ราคา ทำเล…", chat_ai_subtitle_small: "ผู้ช่วย AI อัตโนมัติ", chat_no_human_convos: "พื้นที่นี้จะเต็มไปด้วยรายชื่อคนที่ทักมาคุยจริง แต่ละคนจะถูกบันทึกไว้ที่นี่พร้อมช่องบันทึกข้อความที่แก้ไขได้", chat_tab_ai: "AI Assistant", chat_tab_human: "เจ้าหน้าที่", chat_ai_scope_note: "กำลังคุยกับ AI ผู้ช่วยของ huahin.properties — ตอบจากข้อมูลทรัพย์จริงเท่านั้น", chat_human_soon_title: "ระบบแชทกับคนจริงกำลังเตรียมเปิดใช้งาน", chat_human_soon_desc: "เรากำลังเตรียมระบบแชทสดกับเจ้าหน้าที่จริง ระหว่างนี้ติดต่อทีมงานของเราได้โดยตรงผ่านช่องทางด้านล่าง", chat_human_alt_title: "ติดต่อเราโดยตรง", chat_contact_form_btn: "ส่งข้อความถึงเรา", chat_clear: "ล้างประวัติแชท", chat_demo_name: "คุณสมชาย", chat_demo_tag: "การสนทนาสด", chat_demo_empty: "ยังไม่มีข้อความ — เริ่มพิมพ์เพื่อคุยกับคุณสมชายได้เลย", chat_demo_placeholder: "พิมพ์ข้อความถึงคุณสมชาย…", chat_note_placeholder: "บันทึกข้อความเกี่ยวกับคนนี้…", chat_demo_title: "นี่คือตัวอย่างจำลอง", chat_demo_desc: "แสดงให้เห็นว่าบทสนทนาและบันทึกของคนจริงจะมีหน้าตาแบบนี้ เมื่อมีคนทักมาคุยจริง ยังไม่ใช่บทสนทนาจริง", chat_collection_greeting: "สวัสดีค่ะ นี่คือคอลเลคชั่นทรัพย์ที่ถูกแชร์มาให้คุณ:" },
   ru: { chat_title: "Спросите о наших объектах", chat_subtitle: "ИИ-ассистент · только объекты huahin.properties", chat_placeholder: "напр. Есть виллы с 4 спальнями?", chat_thinking: "Печатает…", chat_talk_to_human: "Хотите поговорить с человеком? Оставьте контакт →", chat_greeting: "Здравствуйте! Спрашивайте о наших объектах — спальни, цена, район, код объекта, наличие.", chat_view_property: "Смотреть объект", chat_contact_us: "Связаться с нами", chat_autobot_intro: "Здравствуйте! Я заметила, что вас заинтересовали", chat_autobot_help: "Могу чем-то помочь?" },
   zh: { chat_title: "咨询我们的房源", chat_subtitle: "AI 助手 · 仅限 huahin.properties 房源信息", chat_placeholder: "例如：有4卧室泳池别墅吗？", chat_thinking: "输入中…", chat_talk_to_human: "想联系真人客服？留下联系方式 →", chat_greeting: "您好！可以问我关于房源的任何问题 — 卧室数、价格、区域、房源编号或是否可租。", chat_view_property: "查看房源", chat_contact_us: "联系我们", chat_autobot_intro: "您好！我注意到您一直在关注", chat_autobot_help: "需要我帮您什么吗？" },
   de: { chat_title: "Fragen zu unseren Immobilien", chat_subtitle: "KI-Assistent · nur huahin.properties Angebote", chat_placeholder: "z.B. Poolvillen mit 4 Schlafzimmern?", chat_thinking: "Tippt…", chat_talk_to_human: "Lieber mit einem Menschen sprechen? Kontakt hinterlassen →", chat_greeting: "Hallo! Fragen Sie mich alles zu unseren Angeboten — Schlafzimmer, Preis, Gebiet, Objektcode oder Verfügbarkeit.", chat_view_property: "Immobilie ansehen", chat_contact_us: "Kontaktieren Sie uns", chat_autobot_intro: "Hallo! Mir ist aufgefallen, dass Sie sich für", chat_autobot_help: "interessieren. Kann ich Ihnen bei etwas Bestimmtem helfen?" },
@@ -299,6 +324,15 @@ const FAV_SHARE_BTN = { en: "Share this Collection", th: "แชร์คอล�
 const FAV_SHARE_COPIED = { en: "Link copied — send it to your customer", th: "คัดลอกลิงก์แล้ว — ส่งให้ลูกค้าได้เลย", ru: "Ссылка скопирована", zh: "链接已复制", de: "Link kopiert", no: "Lenke kopiert", fr: "Lien copié", it: "Link copiato" };
 const FAV_COPY_LINK = { en: "Copy Link", th: "คัดลอกลิงก์ (Copy Link)", ru: "Копировать ссылку", zh: "复制链接", de: "Link kopieren", no: "Kopier lenke", fr: "Copier le lien", it: "Copia link" };
 
+// claudeComplete's Cloud Function URL (used by the ordinary, non-Customer-
+// Mode AI chat everywhere on the site — unrelated to Conversation
+// Ownership, which uses the startConversation / sendConversationTurn
+// Callable Functions instead, invoked by name via the Firebase Functions
+// SDK — no URL needed for those).
+const CLOUD_FN = {
+  claudeComplete: "https://claudecomplete-3j4ldf4pja-as.a.run.app",
+};
+
 class Component extends DCLogic {
   state = {
     isMobile: (typeof window !== "undefined" && window.innerWidth < 640),
@@ -307,19 +341,11 @@ class Component extends DCLogic {
     name: "", phone: "", email: "", message: "",
     lang: "th",
     chatOpen: false, chatMinimized: false, chatMessages: [], chatInput: "", chatLoading: false,
-    chatTab: "ai", chatMobileView: "conversation", demoNote: "", convListCollapsed: true,
+    chatTab: "ai", chatMobileView: "conversation", convListCollapsed: true, customerMode: false, senderName: "", ownerConversations: [], ownerOpenMessages: [], ownerReplyInput: "",
   };
 
   chatScrollRef = React.createRef();
-  demoScrollRef = React.createRef();
-
-  sendDemoMessage() {
-    const text = (this.state.demoInput || "").trim();
-    if (!text) return;
-    const msg = { text, bubbleWrapStyle: "align-self:flex-end; max-width:85%;", bubbleStyle: "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:10px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
-    this.setState((s) => ({ demoMessages: [...(s.demoMessages || []), msg], demoInput: "" }));
-    setTimeout(() => { if (this.demoScrollRef.current) this.demoScrollRef.current.scrollTop = this.demoScrollRef.current.scrollHeight; }, 60);
-  }
+  ownerScrollRef = React.createRef();
 
   async componentDidMount() {
     try {
@@ -344,12 +370,144 @@ class Component extends DCLogic {
     window.addEventListener("storage", this._onStorage);
     window.addEventListener("langchange", this._onStorage);
     await this._loadProperties();
+    // Real conversation ownership must be initialized BEFORE building any
+    // greeting, so the customer's Anonymous Auth uid / conversationId
+    // already exist when the first message is written. Firestore is the
+    // cross-device Source of Truth (Technical Plan, approved); if
+    // Firebase Auth/Firestore is unreachable, this falls back to the
+    // localStorage prototype so chat never breaks outright — see
+    // conversation-store.js header for the honest same-device-only scope.
+    this._parseCollectionParams();
+    await this._initConversationBackend();
     const restored = this._restoreHistory();
-    if (!restored) this._maybeAutoTriggerFromCollectionLink() || this._maybeAutoTrigger();
+    if (!restored) await (this._maybeAutoTriggerFromCollectionLink() || this._maybeAutoTrigger());
     this._refreshFavIds();
     this._onFavChange = () => this._refreshFavIds();
     window.addEventListener("hh_favorites_changed", this._onFavChange);
     window.addEventListener("storage", this._onFavChange);
+  }
+
+  // Resolves the CURRENTLY SIGNED-IN identity to a real ownerId (never a
+  // hardcoded string) — an Admin, a real Lister/Agent account, or "admin"
+  // as the last-resort default if nobody is signed in (matches the
+  // server's own resolveSenderIdentity fallback in functions/index.js).
+  // Used both for the Owner-side inbox listener and for stamping the
+  // sender ID onto every link this identity shares.
+  async _resolveMyOwnerId() {
+    try {
+      const fb = await import("./firebase-client.js");
+      const user = await fb.onAdminAuthReady().catch(() => null);
+      if (!user) return "admin";
+      if (fb.isAdminAuthed && fb.isAdminAuthed()) return user.uid;
+      try {
+        const lister = await fb.fetchMyListerDoc();
+        if (lister) return lister.id;
+      } catch (e) {}
+      return user.uid;
+    } catch (e) {
+      return "admin";
+    }
+  }
+
+  async _initConversationBackend() {
+    try {
+      await import("./firebase-client.js"); // ensures the Firebase app is initialized first
+      const fs = await import("./conversation-firestore.js");
+      this._convFS = fs;
+      if (this.state.customerMode) {
+        await fs.getVisitorId(); // Anonymous Auth sign-in happens here; the
+        // conversationId itself is only known once startConversation
+        // resolves the real ownerId server-side — that call (and its
+        // listenMessages subscription) happens in
+        // _startFirestoreConversation, invoked from
+        // _maybeAutoTriggerFromCollectionLink() right after this.
+      } else {
+        // Owner side: listen using the REAL signed-in identity (whoever
+        // has this site open — Admin or a Lister/Agent), never a
+        // hardcoded id, so every member's own shared links reach THEIR
+        // own inbox, not a shared "admin" one.
+        const myOwnerId = await this._resolveMyOwnerId();
+        this._myOwnerId = myOwnerId;
+        this._unsubOwnerInbox = fs.listenOwnerInbox(myOwnerId, (rows, err) => this._onOwnerInboxSnapshot(rows, err));
+      }
+      this._convBackend = "firestore";
+    } catch (e) {
+      console.warn("Firestore conversation backend unavailable — falling back to local (same-device only):", e);
+      this._convBackend = "local";
+      this._convStore = await import("./conversation-store.js");
+      this._unsubConv = this._convStore.subscribe(() => this._onConversationsChangedLocal());
+      this._onConversationsChangedLocal();
+    }
+  }
+
+  // ── Firestore realtime callbacks ────────────────────────────────────
+
+  _onCustomerMessagesSnapshot(msgs, err) {
+    if (err) { console.warn("Firestore message listener error:", err); return; }
+    if (!msgs) return;
+    // Merge in any "owner" message the customer hasn't seen yet — AI
+    // messages the customer sent themselves are already in chatMessages
+    // from sendChat()'s own optimistic update, so only owner replies need
+    // to be appended here.
+    const ownerMsgs = msgs.filter((m) => m.role === "owner");
+    const knownCount = this._knownOwnerReplyCount || 0;
+    if (ownerMsgs.length > knownCount) {
+      this._knownOwnerReplyCount = ownerMsgs.length;
+      const newOnes = ownerMsgs.slice(knownCount).map((m) => this._buildBubble("assistant", m.text));
+      const next = [...this.state.chatMessages, ...newOnes];
+      this.setState({ chatMessages: next });
+      this._persistHistory(next);
+      this._scrollChat();
+    }
+  }
+
+  _onOwnerInboxSnapshot(rows, err) {
+    if (err) { console.warn("Firestore owner inbox listener error:", err); return; }
+    if (!rows) return;
+    this.setState({ ownerConversations: rows });
+  }
+
+  _openOwnerConversation(convId, ownerId, visitorId) {
+    this.setState({ chatTab: "conv:" + convId, chatMobileView: "conversation", ownerOpenMessages: [] });
+    if (this._unsubOwnerOpenMessages) { this._unsubOwnerOpenMessages(); this._unsubOwnerOpenMessages = null; }
+    if (this._convBackend === "firestore" && this._convFS) {
+      this._convFS.markReadByOwner(convId).catch(() => {});
+      this._unsubOwnerOpenMessages = this._convFS.listenMessages(convId, (msgs, e) => {
+        if (e) { console.warn("Firestore thread listener error:", e); return; }
+        this.setState({ ownerOpenMessages: msgs || [] });
+      });
+    } else if (this._convStore) {
+      this._convStore.markReadByOwner(ownerId, visitorId);
+      const conv = this._convStore.getConversation(ownerId, visitorId);
+      this.setState({ ownerOpenMessages: (conv && conv.messages) || [] });
+    }
+  }
+
+  _onConversationsChangedLocal() {
+    if (!this._convStore) return;
+    if (this.state.customerMode) {
+      const conv = this._convStore.getConversation(this.state.senderName, this._convStore.getVisitorId());
+      if (conv && conv.messages) {
+        const ownerMsgs = conv.messages.filter((m) => m.role === "owner");
+        const knownCount = this._knownOwnerReplyCount || 0;
+        if (ownerMsgs.length > knownCount) {
+          this._knownOwnerReplyCount = ownerMsgs.length;
+          const newOnes = ownerMsgs.slice(knownCount).map((m) => this._buildBubble("assistant", m.text));
+          const next = [...this.state.chatMessages, ...newOnes];
+          this.setState({ chatMessages: next });
+          this._persistHistory(next);
+          this._scrollChat();
+        }
+      }
+      return;
+    }
+    const rows = this._convStore.listConversations("admin");
+    this.setState({ ownerConversations: rows });
+    if (this.state.chatTab && this.state.chatTab.startsWith("conv:")) {
+      const id = this.state.chatTab.slice(5);
+      const row = rows.find((r) => r.id === id);
+      if (row) this.setState({ ownerOpenMessages: row.messages || [] });
+    }
   }
 
   async _refreshFavIds() {
@@ -395,31 +553,79 @@ class Component extends DCLogic {
     this.setState({ chatMessages: [] });
   }
 
-  _maybeAutoTriggerFromCollectionLink() {
+  _parseCollectionParams() {
     try {
       const params = new URLSearchParams(window.location.search);
       const raw = params.get("collection");
-      if (!raw) return false;
-      const senderName = params.get("sender") || params.get("agent") || "Admin";
-      this.setState({ customerMode: true, convListCollapsed: true, senderName });
+      if (!raw) return;
+      // senderId identifies a real listers/{id} or adminUsers/{id} account
+      // — resolved and verified server-side (startConversation Callable).
+      // The display name is NEVER taken from this URL string directly.
+      const senderId = params.get("sender") || params.get("agent") || "";
       const ids = raw.split(",").map((s) => s.trim()).filter(Boolean);
-      if (!ids.length) return false;
+      this.setState({ customerMode: true, convListCollapsed: true });
+      this._senderId = senderId;
+      this._collectionIds = ids;
+    } catch (e) { console.warn("Failed to parse collection link params:", e); }
+  }
+
+  _maybeAutoTriggerFromCollectionLink() {
+    try {
+      const ids = this._collectionIds;
+      if (!this.state.customerMode || !ids || !ids.length) return false;
       const props = this._properties || (this._mod ? this._mod.PROPERTIES : []) || [];
       const lang = this.state.lang;
       const matched = ids.map((id) => props.find((p) => p.id === id)).filter(Boolean);
       const t = CHAT_I18N[lang] || CHAT_I18N.en;
-      const titles = matched.slice(0, 5).map((p) => (p.title && (p.title[lang] || p.title.en)) || p.id);
       const greetingText = matched.length
         ? (t.chat_collection_greeting || "Hi! Here's the collection of properties shared with you:") + " " + matched.map((p) => p.id).join(", ")
         : t.chat_greeting;
       const bubbleStyle = "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;";
       const greetMsg = { role: "assistant", text: greetingText, links: this._extractLinks(matched.map((p) => p.id).join(" "), lang), bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle };
-      this.setState({ chatOpen: true, chatMinimized: false, chatMessages: [greetMsg], chatMobileView: "conversation", chatTab: "ai" });
+      this.setState({ chatOpen: true, chatMinimized: false, chatMessages: [greetMsg], chatMobileView: "conversation", convListCollapsed: true, chatTab: "ai", favoritesOpen: false });
       this._persistHistory([greetMsg]);
       this._scrollChat();
+      this._knownOwnerReplyCount = 0;
+
+      // Lightweight property refs (per approved scope §10) — just enough
+      // for the Owner to see which properties the customer is asking
+      // about; not a full point-in-time snapshot.
+      const propertyRefs = matched.map((p) => ({
+        propertyId: p.id,
+        title: (p.title && (p.title[lang] || p.title.en)) || p.id,
+        price: p.price || 0,
+        thumbnailUrl: (p.photos && p.photos[0] && p.photos[0].url) || "",
+      }));
+
+      if (this._convBackend === "firestore" && this._convFS) {
+        this._startFirestoreConversation(ids, propertyRefs, greetingText);
+      } else if (this._convStore) {
+        const ownerId = this._senderId || "admin";
+        const visitorId = this._convStore.getVisitorId();
+        this._convStore.ensureConversation(ownerId, visitorId, { ownerLabel: ownerId, collectionIds: ids, propertySnapshots: propertyRefs });
+        this._convStore.appendMessage(ownerId, visitorId, "ai", greetingText);
+      }
       return true;
     } catch (e) { console.warn("Collection-link auto-trigger failed:", e); return false; }
   }
+
+  async _startFirestoreConversation(ids, propertyRefs, greetingText) {
+    try {
+      const result = await this._convFS.startConversation({ senderId: this._senderId, collectionIds: ids, propertyRefs, greetingText });
+      this._conversationId = result.conversationId;
+      this._resolvedOwnerId = result.ownerId;
+      this.setState({ senderName: result.ownerLabel });
+      // The greeting was written server-side before this call returned —
+      // start listening for the thread now (in case the owner already
+      // replied by the time this resolves, though realistically too fast).
+      if (this._unsubMessages) this._unsubMessages();
+      this._unsubMessages = this._convFS.listenMessages(this._conversationId, (msgs, err) => this._onCustomerMessagesSnapshot(msgs, err));
+    } catch (e) { console.warn("startConversation Callable failed:", e); }
+  }
+
+  // (getIdToken helper removed — Callable Functions attach the caller's
+  // Auth token automatically; only claudeComplete, a plain HTTP function
+  // unrelated to Conversation Ownership, is called via fetch().)
 
   async _maybeAutoTrigger() {
     try {
@@ -577,20 +783,11 @@ class Component extends DCLogic {
     rec.start();
   }
 
-  async sendChat() {
-    const text = this.state.chatInput.trim();
-    if (!text || this.state.chatLoading) return;
-    const lang = this.state.lang;
-    const userMsg = { role: "user", text, links: [], bubbleWrapStyle: "align-self:flex-end; max-width:85%;", bubbleStyle: "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:10px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
-    const history = [...this.state.chatMessages, userMsg];
-    this.setState({ chatMessages: history, chatInput: "", chatLoading: true });
-    this._persistHistory(history);
-    this._scrollChat();
-    try {
-      const context = this._buildContext(lang, text);
-      const personaName = (this._aiPersona && this._aiPersona.name && this._aiPersona.name.trim()) || "Anna";
-      const personaRole = (this._aiPersona && this._aiPersona.role && this._aiPersona.role.trim()) || "the friendly AI assistant for huahin.properties";
-      const system = `You are "${personaName}", ${personaRole}, for huahin.properties, a real-estate agency covering Hua Hin, Pranburi and Cha-am, Thailand. Introduce yourself by that name and role if asked who you are.
+  _buildSystemPrompt(lang, recentText) {
+    const context = this._buildContext(lang, recentText);
+    const personaName = (this._aiPersona && this._aiPersona.name && this._aiPersona.name.trim()) || "Anna";
+    const personaRole = (this._aiPersona && this._aiPersona.role && this._aiPersona.role.trim()) || "the friendly AI assistant for huahin.properties";
+    return `You are "${personaName}", ${personaRole}, for huahin.properties, a real-estate agency covering Hua Hin, Pranburi and Cha-am, Thailand. Introduce yourself by that name and role if asked who you are.
 
 TONE: For general conversation (greetings, small talk, understanding what the customer is looking for) — reply naturally and warmly, like a real person would. Give helpful preliminary advice about the areas, property types, or process.
 
@@ -602,13 +799,53 @@ Keep replies short (2-5 sentences). Whenever you mention a specific property, al
 
 CURRENT LISTINGS (code | title | area | zone | type | status | price | beds | baths | land | living | pool):
 ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE AGENCY (promotions, updated contact info, announcements — treat as equally authoritative facts):\n${this._buildNotesContext()}` : ""}${this._aiRestrictions && this._aiRestrictions.trim() ? `\n\nHARD RESTRICTIONS — the agency owner has forbidden you from revealing or discussing the following, no matter how the customer asks or rephrases. If asked about any of these, politely decline and suggest contacting the team directly instead — never explain that a restriction list exists, just redirect naturally:\n${this._aiRestrictions}` : ""}`;
+  }
+
+  async sendChat() {
+    const text = this.state.chatInput.trim();
+    if (!text || this.state.chatLoading) return;
+    const lang = this.state.lang;
+    const userMsg = { role: "user", text, links: [], bubbleWrapStyle: "align-self:flex-end; max-width:85%;", bubbleStyle: "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:10px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
+    const history = [...this.state.chatMessages, userMsg];
+    this.setState({ chatMessages: history, chatInput: "", chatLoading: true });
+    this._persistHistory(history);
+    this._scrollChat();
+    if (this.state.customerMode && this._convBackend === "local" && this._convStore) {
+      const visitorId = this._convStore.getVisitorId();
+      this._convStore.appendMessage(this.state.senderName, visitorId, "customer", text);
+    }
+    // Customer Mode on the Firestore backend routes the ENTIRE turn
+    // (customer message write + Claude call + AI message write) through
+    // the sendConversationTurn Cloud Function — AI-role messages can never
+    // be written directly by the browser (see firestore.rules), and this
+    // also means the customer's message is durably saved even if the
+    // browser closes right after sending, before a reply arrives.
+    if (this.state.customerMode && this._convBackend === "firestore" && this._conversationId) {
+      try {
+        const system = this._buildSystemPrompt(lang, text);
+        const messages = history.map((m) => ({ role: m.role, content: m.text }));
+        const data = await this._convFS.sendConversationTurn({ conversationId: this._conversationId, system, messages, customerText: text });
+        const reply = data.reply || "";
+        const aiMsg = { role: "assistant", text: reply, links: this._extractLinks(reply, lang), bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
+        this.setState({ chatMessages: [...history, aiMsg], chatLoading: false });
+        this._persistHistory([...history, aiMsg]);
+      } catch (e) {
+        console.warn("sendConversationTurn failed:", e);
+        const t = CHAT_I18N[lang] || CHAT_I18N.en;
+        const errMsg = { role: "assistant", text: "Sorry, something went wrong. Please try again or contact us directly.", links: [{ label: t.chat_contact_us || "Contact us", noThumb: true, onClick: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }) }], bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" };
+        this.setState({ chatMessages: [...history, errMsg], chatLoading: false });
+      }
+      this._scrollChat();
+      return;
+    }
+    try {
+      const system = this._buildSystemPrompt(lang, text);
       const messages = history.map((m) => ({ role: m.role, content: m.text }));
       let reply;
       if (window.claude && window.claude.complete) {
         reply = await window.claude.complete({ system, messages, model: "claude-haiku-4-5", max_tokens: 500 });
       } else {
-        const CLOUD_FUNCTION_URL = "https://claudecomplete-3j4ldf4pja-as.a.run.app";
-        const res = await fetch(CLOUD_FUNCTION_URL, {
+        const res = await fetch(CLOUD_FN.claudeComplete, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ system, messages }),
@@ -623,6 +860,10 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       const aiMsg = { role: "assistant", text: reply, links: this._extractLinks(reply, lang), bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
       this.setState({ chatMessages: [...history, aiMsg], chatLoading: false });
       this._persistHistory([...history, aiMsg]);
+      if (this.state.customerMode && this._convBackend === "local" && this._convStore) {
+        const visitorId = this._convStore.getVisitorId();
+        this._convStore.appendMessage(this.state.senderName, visitorId, "ai", reply);
+      }
     } catch (e) {
       console.warn("Chat error", e);
       const t = CHAT_I18N[lang] || CHAT_I18N.en;
@@ -660,6 +901,10 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       window.removeEventListener("hh_favorites_changed", this._onFavChange);
       window.removeEventListener("storage", this._onFavChange);
     }
+    if (this._unsubConv) this._unsubConv();
+    if (this._unsubMessages) this._unsubMessages();
+    if (this._unsubOwnerInbox) this._unsubOwnerInbox();
+    if (this._unsubOwnerOpenMessages) this._unsubOwnerOpenMessages();
   }
 
   removeFavorite(id) {
@@ -670,7 +915,9 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
   async shareCollection() {
     const ids = this.state.favIds;
     if (!ids.length) return;
-    const url = `${window.location.origin}${window.location.pathname}?collection=${ids.map(encodeURIComponent).join(",")}`;
+    const myOwnerId = this._myOwnerId || (await this._resolveMyOwnerId());
+    this._myOwnerId = myOwnerId;
+    const url = `${window.location.origin}${window.location.pathname}?collection=${ids.map(encodeURIComponent).join(",")}&sender=${encodeURIComponent(myOwnerId)}`;
     try {
       await navigator.clipboard.writeText(url);
       this.setState({ shareCopied: true, shareMenuOpen: false });
@@ -714,7 +961,7 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
 
     const chatT = CHAT_I18N[this.state.lang] || CHAT_I18N.en;
     const favExtra = { fav_subtitle: FAV_SUBTITLE[this.state.lang] || FAV_SUBTITLE.en, fav_share_btn: FAV_SHARE_BTN[this.state.lang] || FAV_SHARE_BTN.en, fav_share_copied: FAV_SHARE_COPIED[this.state.lang] || FAV_SHARE_COPIED.en, fav_copy_link: FAV_COPY_LINK[this.state.lang] || FAV_COPY_LINK.en };
-    const collectionUrl = `${window.location.origin}${window.location.pathname}?collection=${this.state.favIds.map(encodeURIComponent).join(",")}`;
+    const collectionUrl = `${window.location.origin}${window.location.pathname}?collection=${this.state.favIds.map(encodeURIComponent).join(",")}${this._myOwnerId ? "&sender=" + encodeURIComponent(this._myOwnerId) : ""}`;
 
     return {
       t: { ...t, ...shared, ...chatT, ...favExtra },
@@ -744,10 +991,10 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       chatBarBottom: this.state.isMobile ? "16px" : "20px",
       chatBarRight: this.state.isMobile ? "16px" : "20px",
       chatBarLeft: "auto",
-      chatOverlayPadding: this.state.isMobile ? "0" : "20px",
-      chatPanelRadius: this.state.isMobile ? "0" : "10px",
-      chatPanelMaxWidth: this.state.isMobile ? "100%" : "520px",
-      chatPanelHeight: this.state.isMobile ? "100dvh" : "min(560px, 80vh)",
+      chatOverlayPadding: (this.state.isMobile || this.state.customerMode) ? "0" : "20px",
+      chatPanelRadius: (this.state.isMobile || this.state.customerMode) ? "0" : "10px",
+      chatPanelMaxWidth: (this.state.isMobile || this.state.customerMode) ? "100%" : "520px",
+      chatPanelHeight: (this.state.isMobile || this.state.customerMode) ? "100dvh" : "min(560px, 80vh)",
       chatBarOpen: this.state.chatOpen && this.state.chatMinimized,
       chatBarMaxWidth: this.state.isMobile ? "52px" : "260px",
       onMinimizeChat: () => this.setState({ chatMinimized: true }),
@@ -801,35 +1048,70 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
 
       showConvList: !this.state.customerMode && (!this.state.isMobile || this.state.chatMobileView === "list") && !this.state.convListCollapsed,
       showConvToggle: !this.state.customerMode,
-      showHumanTab: !this.state.customerMode,
-      humanTabLabel: this.state.senderName,
+      customerMode: this.state.customerMode,
+      showHumanTab: true,
+      humanTabLabel: this.state.senderName || "",
       onToggleConvList: () => this.setState((s) => ({ convListCollapsed: !s.convListCollapsed })),
       convListArrowRotate: this.state.convListCollapsed ? "rotate(180deg)" : "rotate(0deg)",
+      convListExpanded: !this.state.convListCollapsed,
       showConvPane: !this.state.isMobile || this.state.chatMobileView === "conversation",
       showBackToList: this.state.isMobile,
-      aiRowBg: this.state.chatTab !== "demo" ? "oklch(94% 0.025 75)" : "transparent",
-      demoRowBg: this.state.chatTab === "demo" ? "oklch(94% 0.03 220)" : "transparent",
-      aiTabColor: this.state.chatTab === "ai" ? "oklch(22% 0.02 60)" : "oklch(60% 0.02 70)",
+      aiRowBg: "oklch(94% 0.025 75)",
+      aiTabColor: this.state.chatTab === "ai" ? "oklch(20% 0.02 60)" : "oklch(55% 0.02 70)",
+      aiTabBg: this.state.chatTab === "ai" ? "oklch(99% 0.005 80)" : "transparent",
       aiTabBorder: this.state.chatTab === "ai" ? "oklch(40% 0.13 25)" : "transparent",
-      humanTabColor: this.state.chatTab === "demo" ? "oklch(22% 0.02 60)" : "oklch(60% 0.02 70)",
-      humanTabBorder: this.state.chatTab === "demo" ? "oklch(40% 0.13 25)" : "transparent",
-      isAiTab: this.state.chatTab === "ai",
-      isDemoContact: this.state.chatTab === "demo",
-      demoMessages: this.state.demoMessages || [],
-      hasDemoMessages: (this.state.demoMessages || []).length > 0,
-      demoInput: this.state.demoInput || "",
-      demoScrollRef: this.demoScrollRef,
-      onDemoInput: (e) => this.setState({ demoInput: e.target.value }),
-      onDemoKeyDown: (e) => { if (e.key === "Enter") { e.preventDefault(); this.sendDemoMessage(); } },
-      onDemoSend: () => this.sendDemoMessage(),
-      convHeaderAvatar: this.state.chatTab === "demo" ? "คส" : "🤖",
-      convHeaderAvatarBg: this.state.chatTab === "demo" ? "oklch(58% 0.11 210)" : "oklch(55% 0.14 300)",
-      convHeaderName: this.state.chatTab === "demo" ? this.state.senderName : chatT.chat_ai_name,
-      convHeaderSubtitle: this.state.chatTab === "demo" ? chatT.chat_demo_tag : chatT.chat_ai_subtitle_small,
-      demoNote: this.state.demoNote,
-      onDemoNoteChange: (e) => this.setState({ demoNote: e.target.value }),
+      humanTabColor: this.state.chatTab === "human" ? "oklch(20% 0.02 60)" : "oklch(55% 0.02 70)",
+      humanTabBg: this.state.chatTab === "human" ? "oklch(99% 0.005 80)" : "transparent",
+      humanTabBorder: this.state.chatTab === "human" ? "oklch(40% 0.13 25)" : "transparent",
+      isAiTab: this.state.chatTab === "ai" || this.state.chatTab === "human",
+      isHumanTabActive: this.state.chatTab === "human",
+      isAiTabActive: this.state.chatTab === "ai",
+      isRealConv: typeof this.state.chatTab === "string" && this.state.chatTab.startsWith("conv:"),
+      noRealConvos: (this.state.ownerConversations || []).length === 0,
+      realConversations: (this.state.ownerConversations || []).map((c) => ({
+        id: c.id,
+        label: c.visitorLabel,
+        lastMessage: c.lastMessage || "",
+        note: c.ownerNote || "",
+        unread: !!c.unreadByOwner,
+        initials: (c.visitorLabel || "?").replace(/[^ก-๙a-zA-Z]/g, "").slice(0, 2) || "?",
+        rowBg: this.state.chatTab === ("conv:" + c.id) ? "oklch(94% 0.03 220)" : "transparent",
+        onSelect: () => this._openOwnerConversation(c.id, c.ownerId, c.visitorId),
+      })),
+      realConvMessages: (this.state.ownerOpenMessages || []).map((m) => ({
+        text: m.text,
+        bubbleWrapStyle: m.role === "customer" ? "align-self:flex-end; max-width:85%;" : "align-self:flex-start; max-width:85%;",
+        bubbleStyle: m.role === "customer"
+          ? "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:10px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5; white-space:pre-wrap;"
+          : "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:10px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap;",
+      })),
+      onOwnerReplySend: () => {
+        const id = (this.state.chatTab || "").slice(5);
+        const c = (this.state.ownerConversations || []).find((x) => x.id === id);
+        const text = (this.state.ownerReplyInput || "").trim();
+        if (!c || !text) return;
+        this.setState({ ownerReplyInput: "" });
+        if (this._convBackend === "firestore" && this._convFS) this._convFS.appendOwnerMessage(c.id, c.ownerId, text).catch((e) => console.warn("Owner reply failed:", e));
+        else if (this._convStore) this._convStore.appendMessage(c.ownerId, c.visitorId, "owner", text);
+      },
+      onOwnerReplyInput: (e) => this.setState({ ownerReplyInput: e.target.value }),
+      ownerReplyInput: this.state.ownerReplyInput || "",
+      onOwnerReplyKeyDown: (e) => {
+        if (e.key !== "Enter") return;
+        e.preventDefault();
+        const id = (this.state.chatTab || "").slice(5);
+        const c = (this.state.ownerConversations || []).find((x) => x.id === id);
+        const text = (this.state.ownerReplyInput || "").trim();
+        if (!c || !text) return;
+        this.setState({ ownerReplyInput: "" });
+        if (this._convBackend === "firestore" && this._convFS) this._convFS.appendOwnerMessage(c.id, c.ownerId, text).catch((err) => console.warn("Owner reply failed:", err));
+        else if (this._convStore) this._convStore.appendMessage(c.ownerId, c.visitorId, "owner", text);
+      },
+      convHeaderAvatar: "🤖",
+      convHeaderAvatarBg: "oklch(55% 0.14 300)",
+      convHeaderName: chatT.chat_ai_name,
+      convHeaderSubtitle: chatT.chat_ai_subtitle_small,
       onSelectAiConversation: () => this.setState({ chatTab: "ai", chatMobileView: "conversation" }),
-      onSelectDemoContact: () => this.setState({ chatTab: "demo", chatMobileView: "conversation" }),
       onSelectAiTab: () => this.setState({ chatTab: "ai" }),
       onSelectHumanTab: () => this.setState({ chatTab: "human" }),
       onBackToList: () => this.setState({ chatMobileView: "list" }),
