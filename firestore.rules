@@ -199,6 +199,72 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
+    // ── Conversation Ownership (Firestore Realtime chat) — every
+    // conversation belongs to a real owner (resolved server-side from a
+    // real member/admin account, never a client-editable URL string).
+    // Customers are Firebase Anonymous Auth users; visitorId is ALWAYS
+    // request.auth.uid, never a client-supplied string. Conversation docs
+    // and AI-role messages are created ONLY by the startConversation /
+    // sendConversationTurn Callable Functions (Admin SDK bypasses these
+    // rules entirely) — no rule below ever grants a client permission to
+    // create a conversation directly or write role == "ai".
+    match /conversations/{conversationId} {
+      function isVisitor() {
+        return request.auth != null && request.auth.uid == resource.data.visitorId;
+      }
+      function isConvOwner() {
+        return isAdmin() || (request.auth != null && request.auth.uid == resource.data.ownerId);
+      }
+      // Firestore evaluates a `list` query per-candidate-document against
+      // this SAME `read` rule (get + list share `allow read`) — a query
+      // that isn't scoped by ownerId/visitorId simply returns zero
+      // documents. The client must always query
+      // `where("ownerId","==",myUid)` (or visitorId) for this to return
+      // anything at all.
+      allow read: if isAdmin() || isVisitor() || isConvOwner();
+      allow create: if false;
+      // Visitor may only ever touch updatedAt (a read-receipt timestamp).
+      // Owner may update ownerNote/status/visitorLabel/unreadByOwner but
+      // never the identity fields that establish who this belongs to.
+      allow update: if isAdmin() || (
+        isVisitor() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(["updatedAt"]) &&
+        request.resource.data.visitorId == resource.data.visitorId &&
+        request.resource.data.ownerId == resource.data.ownerId
+      ) || (
+        isConvOwner() &&
+        request.resource.data.visitorId == resource.data.visitorId &&
+        request.resource.data.ownerId == resource.data.ownerId
+      );
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        function convData() {
+          return get(/databases/$(database)/documents/conversations/$(conversationId)).data;
+        }
+        function isConvVisitor() {
+          return request.auth != null && request.auth.uid == convData().visitorId;
+        }
+        function isConvOwnerOrAdmin() {
+          return isAdmin() || (request.auth != null && request.auth.uid == convData().ownerId);
+        }
+        allow read: if isAdmin() || isConvVisitor() || isConvOwnerOrAdmin();
+        // Direct client writes are allowed ONLY for role "customer" (by
+        // the conversation's own visitor) or role "owner" (by the owner).
+        // "ai" role can never be written by a client — only the
+        // sendConversationTurn Cloud Function (Admin SDK) writes it.
+        allow create: if (
+          request.resource.data.role == "customer" &&
+          isConvVisitor() &&
+          request.resource.data.senderId == request.auth.uid
+        ) || (
+          request.resource.data.role == "owner" &&
+          isConvOwnerOrAdmin()
+        );
+        allow update, delete: if false;
+      }
+    }
+
     // Default deny for anything not explicitly listed above.
     match /{document=**} { allow read, write: if false; }
   }
