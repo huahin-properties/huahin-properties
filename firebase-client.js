@@ -20,6 +20,11 @@ const firebaseConfig = {
   appId: "1:264933237376:web:61a10aa59d523934af3c65",
 };
 
+// Initialize immediately on import — other modules (e.g. conversation-firestore.js)
+// only import this file to guarantee the app exists first, they never call an
+// exported function here, so lazy init-on-first-call is too late for them.
+if (window.firebase && !window.firebase.apps.length) window.firebase.initializeApp(firebaseConfig);
+
 let _app = null;
 function getApp() {
   if (!_app) {
