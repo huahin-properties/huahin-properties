@@ -78,7 +78,7 @@
     <details style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:14px 18px; margin-bottom:14px;">
       <summary style="cursor:pointer; font-weight:700; font-size:14px; color:oklch(25% 0.02 60);">② Release &amp; Transition Workflow</summary>
       <div style="margin-top:12px; display:flex; flex-direction:column; gap:6px;">
-        <sc-for list="{{ transitionSteps }}" as="step" hint-placeholder-count="9">
+        <sc-for list="{{ transitionSteps }}" as="step" hint-placeholder-count="6">
           <div style="display:flex; align-items:flex-start; gap:10px; font-size:13px; padding:6px 8px; border-radius:6px; background:{{ step.bg }};">
             <span style="{{ step.badgeStyle }}">{{ step.badgeLabel }}</span>
             <div>
@@ -94,7 +94,7 @@
     <details open style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:14px 18px; margin-bottom:14px;">
       <summary style="cursor:pointer; font-weight:700; font-size:14px; color:oklch(25% 0.02 60);">③ Current Stage</summary>
       <div style="margin-top:12px; display:flex; flex-direction:column; gap:5px;">
-        <sc-for list="{{ currentStageRows }}" as="row" hint-placeholder-count="9">
+        <sc-for list="{{ currentStageRows }}" as="row" hint-placeholder-count="6">
           <div style="font-size:13px; color:oklch(30% 0.02 60);">{{ row.icon }} {{ row.label }} <span style="color:oklch(55% 0.02 60); font-size:11.5px;">— {{ row.th }}</span></div>
         </sc-for>
       </div>
@@ -682,19 +682,19 @@ class Component extends DCLogic {
     // not a forecast. Each step is completed/current/pending. Reset to step 1
     // "current" whenever a new Mission/Sprint/Phase/Release begins (do not
     // carry over green state from a previous release).
-    releaseWorkflowStep: 6, // 1-indexed: which step is "current" right now (1-9). Bump forward only on confirmed real events; reset to 1 for a new Mission/Sprint/Phase/Release.
+    releaseWorkflowStep: 7, // 1-indexed, out of 6 real steps: 7 = past the last step, so all 6 render green (Workflow ends at Snapshot). Reset to 1 for a new Mission/Sprint/Phase/Release.
   };
 
+  // Release & Transition Workflow ends at Snapshot (6 steps). Opening a new
+  // chat / using the Bootstrap Prompt is CEO usage via Quick Actions, not
+  // part of this Release Workflow (Product Owner decision, 25 ก.ค. 2569).
   static RELEASE_WORKFLOW_STEPS = [
     { n: 1, label: "Claude สร้าง Documentation และ Handoff Package", sub: "จัดทำเอกสารและชุดส่งมอบงานให้ครบ" },
     { n: 2, label: "Product Owner ตรวจและอนุมัติ", sub: "ตรวจสอบความถูกต้องก่อนดำเนินการต่อ" },
     { n: 3, label: "Claude สร้าง Download Package", sub: "รวมไฟล์เป็นชุดพร้อมดาวน์โหลด" },
     { n: 4, label: "CEO Upload GitHub", sub: "CEO นำไฟล์ขึ้น GitHub ด้วยตนเอง" },
     { n: 5, label: "Claude Verify Upload", sub: "ตรวจ Commit/Branch/GitHub Actions/GitHub Pages/เว็บไซต์ใช้งานได้จริง" },
-    { n: 6, label: "Claude สร้าง Project Snapshot (อ้างอิง Repository ล่าสุดหลัง Upload)", sub: "สรุปสถานะโครงการล่าสุดหลังอัปโหลด" },
-    { n: 7, label: "CEO เปิด ChatGPT ห้องใหม่", sub: "เริ่มห้องแชทใหม่เมื่อพร้อม" },
-    { n: 8, label: "ใช้ Bootstrap Prompt พร้อม Project Snapshot", sub: "แนบข้อความเริ่มต้นพร้อมสถานะล่าสุด" },
-    { n: 9, label: "ผู้ช่วย CEO รายใหม่เริ่มทำงานต่อได้ทันที", sub: "ทำงานต่อได้โดยไม่ต้องอ่านแชตเก่า" },
+    { n: 6, label: "Claude สร้าง Project Snapshot (อ้างอิง Repository ล่าสุดหลัง Upload)", sub: "สรุปสถานะโครงการล่าสุดหลังอัปโหลด — Release Workflow จบที่ขั้นนี้" },
   ];
 
   static HANDOFF_PROMPT = `# งาน: Project Documentation Update และ CEO Assistant Handoff Package
@@ -845,8 +845,7 @@ class Component extends DCLogic {
       { icon: curStep > 2 ? "✅" : "⬜", label: "Validation", th: curStep > 2 ? "ตรวจสอบผ่านแล้ว" : "ยังไม่ตรวจสอบ" },
       { icon: stageIcon(4), label: curStep > 4 ? "Upload Completed" : "Upload", th: curStep > 4 ? "อัปโหลดขึ้น GitHub สำเร็จ" : curStep === 4 ? "รอ CEO อัปโหลดขึ้น GitHub" : "ยังไม่ถึงขั้นนี้" },
       { icon: stageIcon(5), label: curStep > 5 ? "Verification Passed" : "Verification", th: curStep > 5 ? "ตรวจสอบ Commit/Actions/Pages ผ่านแล้ว" : curStep === 5 ? "กำลังตรวจสอบ" : "ยังไม่ถึงขั้นนี้" },
-      { icon: stageIcon(6), label: "Snapshot", th: curStep > 6 ? "สร้าง Project Snapshot จาก Repository ล่าสุดแล้ว" : curStep === 6 ? "กำลังสร้าง" : "ยังไม่สร้าง — รอหลัง Upload" },
-      { icon: stageIcon(7), label: "New Chat", th: curStep > 7 ? "เปิดห้องแชทใหม่แล้ว" : "ยังไม่เริ่มห้องแชทใหม่" },
+      { icon: stageIcon(6), label: "Snapshot", th: curStep > 6 ? "สร้าง Project Snapshot จาก Repository ล่าสุดแล้ว — Release เสร็จสมบูรณ์" : curStep === 6 ? "กำลังสร้าง" : "ยังไม่สร้าง — รอหลัง Upload" },
     ];
     const dependedOnByMap = this.computeDependedOnBy();
     const byId = {};
