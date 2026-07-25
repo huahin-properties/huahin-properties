@@ -78,7 +78,7 @@
     <details style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:14px 18px; margin-bottom:14px;">
       <summary style="cursor:pointer; font-weight:700; font-size:14px; color:oklch(25% 0.02 60);">② Release &amp; Transition Workflow</summary>
       <div style="margin-top:12px; display:flex; flex-direction:column; gap:6px;">
-        <sc-for list="{{ transitionSteps }}" as="step" hint-placeholder-count="6">
+        <sc-for list="{{ transitionSteps }}" as="step" hint-placeholder-count="7">
           <div style="display:flex; align-items:flex-start; gap:10px; font-size:13px; padding:6px 8px; border-radius:6px; background:{{ step.bg }};">
             <span style="{{ step.badgeStyle }}">{{ step.badgeLabel }}</span>
             <div>
@@ -94,8 +94,35 @@
     <details open style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:14px 18px; margin-bottom:14px;">
       <summary style="cursor:pointer; font-weight:700; font-size:14px; color:oklch(25% 0.02 60);">③ Current Stage</summary>
       <div style="margin-top:12px; display:flex; flex-direction:column; gap:5px;">
-        <sc-for list="{{ currentStageRows }}" as="row" hint-placeholder-count="6">
+        <sc-for list="{{ currentStageRows }}" as="row" hint-placeholder-count="7">
           <div style="font-size:13px; color:oklch(30% 0.02 60);">{{ row.icon }} {{ row.label }} <span style="color:oklch(55% 0.02 60); font-size:11.5px;">— {{ row.th }}</span></div>
+        </sc-for>
+      </div>
+    </details>
+
+    <!-- Release Information -->
+    <details style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:14px 18px; margin-bottom:14px;">
+      <summary style="cursor:pointer; font-weight:700; font-size:14px; color:oklch(25% 0.02 60);">📦 Release Information</summary>
+      <div style="margin-top:10px; display:grid; grid-template-columns:auto 1fr; gap:5px 14px; font-size:12.5px;">
+        <div style="color:oklch(55% 0.02 60);">Version</div><div style="color:oklch(28% 0.02 60); font-weight:600;">{{ releaseInfo.version }}</div>
+        <div style="color:oklch(55% 0.02 60);">Snapshot</div><div style="color:oklch(28% 0.02 60);">{{ releaseInfo.snapshotName }}</div>
+        <div style="color:oklch(55% 0.02 60);">Snapshot Created</div><div style="color:oklch(28% 0.02 60);">{{ releaseInfo.snapshotCreated }}</div>
+        <div style="color:oklch(55% 0.02 60);">Package</div><div style="color:oklch(28% 0.02 60);">{{ releaseInfo.packageName }}</div>
+        <div style="color:oklch(55% 0.02 60);">Last Updated</div><div style="color:oklch(28% 0.02 60);">{{ releaseInfo.lastUpdated }}</div>
+        <div style="color:oklch(55% 0.02 60);">GitHub Status</div><div style="color:oklch(28% 0.02 60); font-weight:600;">{{ releaseInfo.githubStatus }}</div>
+        <div style="color:oklch(55% 0.02 60);">Verified By</div><div style="color:oklch(28% 0.02 60);">{{ releaseInfo.verifiedBy }}</div>
+      </div>
+    </details>
+
+    <!-- Release Integrity Checklist (display-only, no buttons) -->
+    <details open style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:14px 18px; margin-bottom:14px;">
+      <summary style="cursor:pointer; font-weight:700; font-size:14px; color:oklch(25% 0.02 60);">🔒 Release Integrity</summary>
+      <div style="margin-top:10px; display:flex; flex-direction:column; gap:4px;">
+        <sc-for list="{{ integrityChecklist }}" as="item" hint-placeholder-count="10">
+          <div style="display:flex; justify-content:space-between; font-size:12.5px; padding:3px 4px; color:oklch(30% 0.02 60);">
+            <span>{{ item.icon }} {{ item.label }}</span>
+            <span style="color:oklch(55% 0.02 60);">{{ item.statusText }}</span>
+          </div>
         </sc-for>
       </div>
     </details>
@@ -105,12 +132,15 @@
       <div style="font-size:12px; font-weight:600; letter-spacing:0.08em; color:oklch(35% 0.08 150); margin-bottom:10px;">④ QUICK ACTIONS</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <a href="https://chatgpt.com/" target="_blank" rel="noopener" style="font-size:12px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:7px 13px; border-radius:100px; font-weight:600;">🚀 เปิด ChatGPT ห้องใหม่</a>
-        <a href="./HANDOVER%20PROMPT.md" target="_blank" rel="noopener" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:7px 13px; border-radius:100px; font-weight:600;">📋 เปิด HANDOVER PROMPT</a>
+        <a href="./docs/ceo-handoff/NEW_CHAT_BOOTSTRAP_PROMPT.md" target="_blank" rel="noopener" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:7px 13px; border-radius:100px; font-weight:600;">📋 เปิด Bootstrap Prompt (ล่าสุด)</a>
+        <a href="./HANDOVER%20PROMPT.md" target="_blank" rel="noopener" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:7px 13px; border-radius:100px; font-weight:600;">📋 เปิด Handover Prompt</a>
+        <a href="./PROJECT_SNAPSHOT.md" target="_blank" rel="noopener" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:7px 13px; border-radius:100px; font-weight:600;">📸 Project Snapshot (ล่าสุด)</a>
+        <a href="./HUAHIN_PROPERTIES_MASTER_HANDOFF.md" target="_blank" rel="noopener" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:7px 13px; border-radius:100px; font-weight:600;">📦 Master Handoff (ล่าสุด)</a>
+        <a href="./docs/ceo-handoff/CEO_ASSISTANT_START_HERE.md" target="_blank" rel="noopener" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:7px 13px; border-radius:100px; font-weight:600;">📖 CEO Assistant Start Here</a>
         <a href="./PHS%20Document%20Center.dc.html" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:7px 13px; border-radius:100px; font-weight:600;">📂 เปิดศูนย์รวมเอกสาร PHS</a>
-        <a href="./Complete%20Snapshot.dc.html" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:7px 13px; border-radius:100px; font-weight:600;">📸 Complete Snapshot</a>
 
       </div>
-      <div style="font-size:11.5px; color:oklch(45% 0.05 150); margin-top:8px;">เปิดหน้านี้เพื่อดู เปิด หรือดาวน์โหลดเอกสารทั้งหมดที่ต้องใช้ โดยไม่ต้องค้นหาจากห้องแชทเก่า — ปุ่ม "เปิด ChatGPT ห้องใหม่" พาไปหน้า ChatGPT ยังต้องแนบไฟล์และวาง Handover Prompt เองตามหัวข้อ 4-5 ด้านล่าง</div>
+      <div style="font-size:11.5px; color:oklch(45% 0.05 150); margin-top:8px;">ปุ่มทั้งหมดชี้ไปยังไฟล์ล่าสุดของรอบปัจจุบัน (Snapshot Handoff ยืนยันแล้วว่าไม่มีลิงก์ค้างจากรอบก่อน) — เปิดหน้านี้เพื่อดู/ดาวน์โหลดเอกสารที่ต้องใช้ โดยไม่ต้องค้นหาจากห้องแชทเก่า</div>
     </div>
 
     <div style="height:1px; background:oklch(90% 0.01 70); margin:20px 0;"></div>
@@ -612,12 +642,12 @@
 
     <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">11. สรุปขั้นตอนทั้งหมด (One Page Workflow)</h2>
     <div style="font-size:14px; line-height:2; color:oklch(28% 0.02 60); background:oklch(96% 0.04 150); border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:16px 18px;">
-      <div>1. เปิด Mission Control ตรวจสอบสถานะก่อน</div>
-      <div>2. เปิดห้อง ChatGPT ใหม่ + แนบ 4 ไฟล์ (START HERE, Mission Control, Blueprint, Handover Prompt)</div>
-      <div>3. คัดลอกวางเนื้อหา HANDOVER PROMPT.md ในข้อความเดียวกับที่แนบไฟล์ แล้วกดส่งครั้งเดียว</div>
-      <div>4. ตรวจสอบ AI ผ่านเกณฑ์ 4 ข้อในหัวข้อ 6</div>
-      <div>5. สั่งงานตามที่ต้องการ</div>
-      <div>6. จบวัน (Daily Close): อัปเดต Mission Control, Blueprint และ Documentation ให้ตรงกับสถานะปัจจุบันของระบบ — หากมีการเปลี่ยนแปลง Feature, Roadmap, Architecture หรือ Workflow ต้องบันทึกลง Documentation ก่อนจบวันทุกครั้ง</div>
+      <div>1. เปิด ChatGPT ห้องใหม่ (เริ่ม Session ใหม่)</div>
+      <div>2. เปิด "CEO Assistant Start Here" — อ่านภาพรวมของระบบและกฎการทำงานก่อน</div>
+      <div>3. เปิด "Project Snapshot (ล่าสุด)" — ทราบสถานะล่าสุดของโครงการ: Current Mission, Current Scope, Known Issues, Next Action</div>
+      <div>4. เปิด "Master Handoff" — อ่านข้อมูลส่งมอบทั้งหมด เพื่อเข้าใจบริบทก่อนเริ่มงาน</div>
+      <div>5. เปิด "Bootstrap Prompt" — คัดลอก Prompt ล่าสุด ใช้เป็นข้อความแรกในห้องใหม่</div>
+      <div>6. เปิด "Handover Prompt" — ส่ง Prompt ให้ AI เพื่อให้โหลด Context และพร้อมเริ่มทำงาน</div>
       <div>7. ก่อน Upload (Release Verification): ใช้ RELEASE CHECKLIST.md ตรวจสอบครบทุกข้อ — หากมีข้อใดไม่ผ่าน ❌ ห้าม Upload ต้องแก้ไขจนผ่านทั้งหมดก่อน</div>
       <div>8. GitHub Upload: Upload ไฟล์ที่เปลี่ยนแปลงขึ้น GitHub ตามขั้นตอนของโครงการ (Add file → Upload files ผ่านหน้าเว็บ GitHub)</div>
       <div>9. GitHub Verification: หลัง Upload ตรวจสอบ ✅ Commit สำเร็จ ✅ Branch ถูกต้อง ✅ ไฟล์อัปโหลดครบ ✅ GitHub Actions ผ่าน ✅ GitHub Pages Build ผ่าน</div>
@@ -682,7 +712,7 @@ class Component extends DCLogic {
     // not a forecast. Each step is completed/current/pending. Reset to step 1
     // "current" whenever a new Mission/Sprint/Phase/Release begins (do not
     // carry over green state from a previous release).
-    releaseWorkflowStep: 7, // 1-indexed, out of 6 real steps: 7 = past the last step, so all 6 render green (Workflow ends at Snapshot). Reset to 1 for a new Mission/Sprint/Phase/Release.
+    releaseWorkflowStep: 8, // 1-indexed, out of 7 real steps: 8 = past the last step, so all 7 render green (Workflow ends at Snapshot Handoff — HANDOVER PROMPT.md now references PROJECT_SNAPSHOT.md too). Reset to 1 for a new Mission/Sprint/Phase/Release.
   };
 
   // Release & Transition Workflow ends at Snapshot (6 steps). Opening a new
@@ -694,7 +724,8 @@ class Component extends DCLogic {
     { n: 3, label: "Claude สร้าง Download Package", sub: "รวมไฟล์เป็นชุดพร้อมดาวน์โหลด" },
     { n: 4, label: "CEO Upload GitHub", sub: "CEO นำไฟล์ขึ้น GitHub ด้วยตนเอง" },
     { n: 5, label: "Claude Verify Upload", sub: "ตรวจ Commit/Branch/GitHub Actions/GitHub Pages/เว็บไซต์ใช้งานได้จริง" },
-    { n: 6, label: "Claude สร้าง Project Snapshot (อ้างอิง Repository ล่าสุดหลัง Upload)", sub: "สรุปสถานะโครงการล่าสุดหลังอัปโหลด — Release Workflow จบที่ขั้นนี้" },
+    { n: 6, label: "Claude สร้าง Project Snapshot (อ้างอิง Repository ล่าสุดหลัง Upload)", sub: "สรุปสถานะโครงการล่าสุดหลังอัปโหลด" },
+    { n: 7, label: "Snapshot Handoff Completed", sub: "เชื่อม Snapshot ล่าสุดเข้ากับ Bootstrap Prompt/Handover/Quick Actions ครบแล้ว — Release Workflow จบที่ขั้นนี้" },
   ];
 
   static HANDOFF_PROMPT = `# งาน: Project Documentation Update และ CEO Assistant Handoff Package
@@ -845,8 +876,35 @@ class Component extends DCLogic {
       { icon: curStep > 2 ? "✅" : "⬜", label: "Validation", th: curStep > 2 ? "ตรวจสอบผ่านแล้ว" : "ยังไม่ตรวจสอบ" },
       { icon: stageIcon(4), label: curStep > 4 ? "Upload Completed" : "Upload", th: curStep > 4 ? "อัปโหลดขึ้น GitHub สำเร็จ" : curStep === 4 ? "รอ CEO อัปโหลดขึ้น GitHub" : "ยังไม่ถึงขั้นนี้" },
       { icon: stageIcon(5), label: curStep > 5 ? "Verification Passed" : "Verification", th: curStep > 5 ? "ตรวจสอบ Commit/Actions/Pages ผ่านแล้ว" : curStep === 5 ? "กำลังตรวจสอบ" : "ยังไม่ถึงขั้นนี้" },
-      { icon: stageIcon(6), label: "Snapshot", th: curStep > 6 ? "สร้าง Project Snapshot จาก Repository ล่าสุดแล้ว — Release เสร็จสมบูรณ์" : curStep === 6 ? "กำลังสร้าง" : "ยังไม่สร้าง — รอหลัง Upload" },
+      { icon: stageIcon(6), label: "Snapshot Created", th: curStep > 6 ? "สร้าง Project Snapshot จาก Repository ล่าสุดแล้ว" : curStep === 6 ? "กำลังสร้าง" : "ยังไม่สร้าง — รอหลัง Upload" },
+      { icon: stageIcon(7), label: "Snapshot Handoff", th: curStep > 7 ? "เชื่อม Snapshot เข้ากับ Bootstrap/Handover/Quick Actions แล้ว — Release เสร็จสมบูรณ์" : curStep === 7 ? "กำลังเชื่อมกับชุดส่งมอบ" : "ยังไม่เริ่ม" },
     ];
+    // Release Information — metadata for the CURRENT release only, never
+    // carried over from a prior one (reset alongside releaseWorkflowStep).
+    const releaseInfo = {
+      version: "Documentation System v1.0",
+      snapshotName: "PROJECT_SNAPSHOT.md",
+      snapshotCreated: "25 กรกฎาคม 2569",
+      packageName: "Snapshot Handoff — Final Release Package",
+      lastUpdated: "25 กรกฎาคม 2569",
+      githubStatus: curStep > 5 ? "Verified" : "Pending",
+      verifiedBy: curStep > 5 ? "Product Owner" : "—",
+    };
+    // Release Integrity — display-only checklist, no buttons. Each item
+    // reflects the SAME curStep the Workflow/Stage above use, so it can
+    // never show green independently of the real workflow state.
+    const integrityChecklist = [
+      { label: "Documentation", done: curStep > 1 },
+      { label: "Validation", done: curStep > 2 },
+      { label: "Download Package", done: curStep > 3 },
+      { label: "GitHub Upload", done: curStep > 4 },
+      { label: "Verification", done: curStep > 5 },
+      { label: "Project Snapshot", done: curStep > 6 },
+      { label: "Snapshot Handoff", done: curStep > 7 },
+      { label: "Quick Actions Updated", done: curStep > 7 },
+      { label: "Bootstrap Updated", done: curStep > 7 },
+      { label: "Handover Updated", done: curStep > 7 },
+    ].map((i) => ({ label: i.label, icon: i.done ? "✅" : "🟡", statusText: i.done ? "Done" : "Pending" }));
     const dependedOnByMap = this.computeDependedOnBy();
     const byId = {};
     Component.MODULES.forEach((m) => { byId[m.id] = m; });
@@ -882,6 +940,8 @@ class Component extends DCLogic {
       toggleHandoffFull: () => this.toggleHandoffFull(),
       transitionSteps,
       currentStageRows,
+      releaseInfo,
+      integrityChecklist,
       indexRows,
       blueprintCompletenessPct: avgCoverage + "%",
       blueprintCompletenessLabel: `${avgCoverage}% — คำนวณจาก Coverage เฉลี่ยของ 17 Knowledge Modules จริง (ไม่ใช่ค่าคาดการณ์)`,
