@@ -1,5 +1,32 @@
 # PROJECT_HISTORY.md — huahin.properties
 
+## 🏁 Documentation Hotfix v1.0.1 — Closed, Baseline Locked (25 กรกฎาคม 2569)
+- **Project**: huahin.properties
+- **Phase/Feature**: Documentation System Audit & Navigation Fix (Hotfix v1.0.1)
+- **Status**: ✅ COMPLETED — Baseline Locked
+- **Root Cause**: ไม่ใช่ Broken Link ในโค้ด — ไฟล์ `.md` ทั้งหมดและโฟลเดอร์ `docs/ceo-handoff/` ยังไม่เคยถูก upload ขึ้น GitHub (มีแต่หน้า `.dc.html` ที่ live) จึงทำให้ลิงก์ทั้งหมดที่ชี้ไปยังไฟล์เหล่านั้นขึ้น 404 บนเว็บไซต์จริง
+- **Fix Delivered**: ตรวจสอบ `export-for-github/` ครบทุกไฟล์ที่อ้างอิง (root `.md` ทั้งหมด + `docs/ceo-handoff/` 10 ไฟล์), เพิ่ม `GITHUB_UPLOAD_GUIDE.md` (step-by-step + checklist + คำเตือนเรื่องลากทั้งโฟลเดอร์), ยืนยัน Quick Actions/CEO Guide/PHS Document Center อ้างอิงชื่อไฟล์ตรงกันทั้งหมด ไม่มีชื่อเก่า/ลิงก์เก่า
+- **Approved By**: Product Owner — PASS ครบ 5 หัวข้อ (Documentation Audit, Upload Guide, Navigation, Quick Actions Consistency, Ready for Production)
+- **Policy**: Documentation System v1.0.1 ถือเป็น Baseline ใหม่ — Freeze โครงสร้าง ห้ามแก้ไขเพิ่มเว้นแต่ Workflow เปลี่ยน/เพิ่ม Feature ใหม่/เปลี่ยน Architecture และได้รับอนุมัติจาก Product Owน
+- **Next Phase**: เริ่ม Feature Development / Business Logic / UX-UI / Performance / Security / AI Features ได้ทันที โดยใช้ v1.0.1 เป็นมาตรฐานอ้างอิง
+
+## 🏁 Documentation System v1.0 — Final Sign-Off (25 กรกฎาคม 2569)
+- **Project**: huahin.properties
+- **Status**: ✅ PASS — Baseline Locked
+- **Approved By**: Product Owner (ตรวจครบทุกส่วน: CEO Operating Console, Documentation & Handoff, Release Workflow, Snapshot Handoff, Current Stage, Release Information, Release Integrity, Quick Actions, One Page Workflow, Project Knowledge & Handover Center, Troubleshooting, Definition of Done, Production Website)
+- **Summary**: Documentation System v1.0 ถือเป็น Baseline — ห้ามแก้ไฟล์ใน Release นี้เพิ่มเติมอีก ข้อเสนอแนะที่เหลือย้ายเข้า Backlog ของ v1.1 (ดู `docs/ceo-handoff/KNOWN_ISSUES.md`)
+- **Next Phase**: เริ่มงาน Feature/Project ถัดไปได้ทันที — Documentation System v1.0 ปิดสมบูรณ์
+
+## 🏁 Official Completion Notice — Documentation System v1.0 (25 กรกฎาคม 2569)
+- **Project**: huahin.properties
+- **Phase/Feature**: Documentation System v1.0 — Project Handoff System + CEO Operating Console
+- **Status**: ✅ COMPLETED
+- **Approved By**: Product Owner (ยืนยันจาก Preview และเว็บไซต์จริง `https://huahin.properties/CEO%20Guide.dc.html` — ทั้ง 6 ขั้นตอนของ Release & Transition Workflow เป็นสีเขียวครบ, Current Stage สอดคล้องกัน)
+- **Completion Date**: 25 กรกฎาคม 2569
+- **Summary**: สร้างและ Upload สำเร็จ — Documentation Audit, File Mapping, Source of Truth Matrix, ชุด CEO Handoff Package 10 ไฟล์, Master Handoff, Documentation Validation Report, Repository Structure, PROJECT_SNAPSHOT.md, และ CEO Guide.dc.html ยกระดับเป็น CEO Operating Console (state-driven Workflow ①②③④) ยืนยันบน GitHub + เว็บไซต์จริงแล้วครบทั้ง 6 ขั้น
+- **Superseded By**: —
+- **Next Phase**: การเปิดห้องแชทใหม่/ใช้ Bootstrap Prompt เป็นการใช้งานของ CEO ผ่าน Quick Actions (ไม่ใช่ส่วนหนึ่งของ Release Workflow อีกต่อไป); Backlog Documentation System v1.1 (UX improvements) รอดำเนินการในรอบถัดไป
+
 ## 🏁 Milestone — Documentation System v1.0 (25 กรกฎาคม 2569)
 - **Project**: huahin.properties
 - **Work**: สร้าง "Project Handoff System" + "CEO Operating Console" ครบชุด — Documentation Audit, File Mapping, Source of Truth Matrix, ชุด CEO Handoff Package (10 ไฟล์ใน `docs/ceo-handoff/`), Master Handoff (single-file snapshot), Documentation Validation Report (Broken Reference/Reading Flow/Single Source/Repository Structure ผ่านครบ), `REPOSITORY_STRUCTURE.md`, และ `CEO Guide.dc.html` ยกระดับเป็น CEO Operating Console (①Documentation & Handoff ②Release & Transition Workflow ③Current Stage ④Quick Actions) พร้อม `PROJECT_SNAPSHOT.md` (template รอเติมหลัง Upload จริง)
