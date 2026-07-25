@@ -1,5 +1,15 @@
 # PROJECT_HISTORY.md — huahin.properties
 
+## 🏁 Milestone — Documentation System v1.0 (25 กรกฎาคม 2569)
+- **Project**: huahin.properties
+- **Work**: สร้าง "Project Handoff System" + "CEO Operating Console" ครบชุด — Documentation Audit, File Mapping, Source of Truth Matrix, ชุด CEO Handoff Package (10 ไฟล์ใน `docs/ceo-handoff/`), Master Handoff (single-file snapshot), Documentation Validation Report (Broken Reference/Reading Flow/Single Source/Repository Structure ผ่านครบ), `REPOSITORY_STRUCTURE.md`, และ `CEO Guide.dc.html` ยกระดับเป็น CEO Operating Console (①Documentation & Handoff ②Release & Transition Workflow ③Current Stage ④Quick Actions) พร้อม `PROJECT_SNAPSHOT.md` (template รอเติมหลัง Upload จริง)
+- **Status**: ✅ Documentation System พร้อมใช้งาน — ⏳ รอ GitHub Upload จริงก่อนถือว่า Release & Transition Workflow เสร็จสมบูรณ์
+- **Approved By**: Product Owner (ตรวจและอนุมัติเป็นขั้นๆ ตลอดกระบวนการ)
+- **Summary**: ระบบนี้ทำให้เปลี่ยนห้องแชท/ผู้ช่วย/ทีมได้โดยไม่สูญเสียความต่อเนื่องของโครงการ — Workflow เดียวใช้ซ้ำได้ทุก Mission/Sprint/Phase/Release
+- **Superseded By**: —
+- **Next Phase**: CEO Upload GitHub → Claude Verify → สร้าง Project Snapshot จริง → เปิดห้องแชทใหม่ทดสอบ Bootstrap Prompt
+
+
 Permanent record of completed Features, Sprints, Phases, and Releases. Updated every time work is officially closed (per CEO Guide §11 Official Completion / §12 Completion History). Newest entry first.
 
 ---
@@ -79,7 +89,23 @@ Permanent record of completed Features, Sprints, Phases, and Releases. Updated e
 - **Superseded By**: —
 - **Next Phase**: Product Owner reviews wireframes/tokens/Compare+AI Wizard designs and issues explicit 🟢 APPROVED before Step 3 (Mobile Customer Journey) begins.
 
-## Mission 01 — Step 3 v2.0 Upgraded to Final Product Guide Level (23 กรกฎาคม 2569)
+## Home.dc.html — Visual Revision: Real Hero, Area Images, Share System, Contact Redesign (23 กรกฎาคม 2569)
+- **Date**: 23 กรกฎาคม 2569
+- **Project**: huahin.properties
+- **Work**: Product Owner required visible completion beyond added sections. Replaced diagonal placeholder patterns with real `<image-slot>` components (drag-and-drop, user-fillable, persists across reloads) for Hero and all 3 Area Discovery cards — clearly labeled temporary state (\"วางภาพ Hero จริง: Hua Hin Railway Station / ชายหาดหัวหิน\" etc.), no more fake diagonal-stripe or bracketed-text placeholders shown to public users. Added functional Share system: Header Share icon (desktop + mobile) using Web Share API with a real fallback modal (Facebook/LINE/WhatsApp/Copy Link, Clipboard API, 2s copied confirmation) — no dead/decorative icons. Added real per-property Share action to PropertyCard (Web Share API + clipboard fallback with inline checkmark feedback); Compare intentionally NOT added (no persistent store or destination page exists yet — flagged as gap, not faked). Redesigned ContactRail's floating LINE/WhatsApp blocks into one compact unified icon rail (3 equal 44×44px circles: LINE, WhatsApp with real brand glyph, Phone) replacing the two oversized competing floating shapes.
+- **Status**: 🟡 IN PROGRESS — awaiting CEO/Product Owner visual review (Home.dc.html only; Search Results/Property Details/Step 4 untouched)
+- **Approved By**: Pending
+- **Summary**: Verified live — hero and area cards show real drop targets, header/PropertyCard Share buttons render and are wired to navigator.share/clipboard, ContactRail icons render at equal size. One known limitation: OG image metadata still points at logo.png (Task 5) — a Hua-Hin-specific OG image needs a real asset, not yet supplied.
+- **Superseded By**: —
+- **Next Phase**: CEO/Product Owner visual review → asset supply (real Hero + area photos, OG image) → continue to other pages
+- **Date**: 23 กรกฎาคม 2569
+- **Project**: huahin.properties
+- **Work**: Product Owner corrected priority — real website changes over documentation. Redesigned actual Home.dc.html (not a doc/wireframe): added Hua Hin station-maroon+cream accent stripe under header and hero, Quick Discovery Categories section (6 real filter chips: Pool Villa/Condo/House/Land/Rent/Commercial, using existing TYPES/status — no invented filters), neighborhood tags on the Hua Hin area card (Khao Takiab/Soi 88/Bor Fai, descriptive only, not fake links), new Trust/Service section (4 items), new Final CTA banner (maroon), expanded Footer (nav columns + contact + tagline). Added 5 new i18n keys × 8 languages (final_cta_title, footer_tagline/explore/company/contact) and 8 trust_* keys × 8 languages to data.js. Also fixed ContactRail collapse toggle touch target (26px→44px, Step 1 audit finding) as the first real code change this session.
+- **Status**: 🟡 IN PROGRESS — awaiting CEO/Product Owner visual review (Stop Condition: Home.dc.html only, not moving to Search Results/Property Details/Step 4 yet)
+- **Approved By**: Pending
+- **Summary**: Verified live in preview across desktop scroll positions and mobile width (390px) — all new sections render correctly with real Thai i18n data, no console errors introduced.
+- **Superseded By**: —
+- **Next Phase**: CEO/Product Owner visual review of Home.dc.html → approval to continue to other pages
 - **Date**: 23 กรกฎาคม 2569
 - **Project**: huahin.properties
 - **Work**: Product Owner requested Step 3 go beyond tables to Final Product Guide level. Added: (1) Journey Map — single-glance vertical flow diagrams for Buyer (Google→Homepage→Search→Detail→Compare→Contact→Lead→Follow-up→Deal→After Sales) and Seller (separate end state — closing/renewing vs buying); (2) Stage Detail Matrix covering all 6 stages with Screen-to-Screen Flow (button→destination→back behavior→Bottom Sheet/Dialog/Loading/Empty/Error states), Success KPI, Friction+UX Solution, Micro-interaction (animation/skeleton/toast/haptic), and Accessibility notes (contrast/touch target/screen reader/keyboard/landscape); (3) ASCII wireframes added for Agent (Dashboard-first, recurring daily use) and Administrator (Queue-driven, not goal-driven) journeys, alongside the existing Buyer wireframe.

@@ -59,8 +59,50 @@
       <div>Final ZIP: <code>huahin-properties-PHS-Version-1-FINAL-GitHub-Upload</code></div>
     </div>
 
+    <div style="font-size:12px; font-weight:700; letter-spacing:0.08em; color:oklch(35% 0.09 25); margin:4px 0 14px;">CEO OPERATING CONSOLE</div>
+
+    <!-- ① Documentation & Handoff -->
+    <details style="border:1px solid oklch(80% 0.09 25); border-radius:8px; padding:14px 18px; margin-bottom:14px; background:oklch(97% 0.02 25);">
+      <summary style="cursor:pointer; font-weight:700; font-size:14px; color:oklch(30% 0.08 25);">① Documentation &amp; Handoff <span style="font-weight:400; font-size:11.5px; color:oklch(50% 0.04 25);">— นี่คือขั้นตอนแรกของการปิดงานและส่งต่อโครงการ</span></summary>
+      <div style="margin-top:12px; font-size:13px; line-height:1.7; color:oklch(30% 0.02 60);">
+        <div style="margin-bottom:8px;">ใช้ทุกครั้งที่: จบวัน · จบ Sprint · จบ Mission · จบ Phase · ก่อนเปลี่ยนห้องแชท · ก่อนเปลี่ยนผู้ช่วย · ก่อนส่งมอบโครงการ</div>
+        <div style="display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
+          <button onClick="{{ toggleHandoffFull }}" style="font-size:12px; cursor:pointer; background:white; border:1px solid oklch(80% 0.08 25); color:oklch(35% 0.08 25); padding:6px 12px; border-radius:100px; font-weight:600;">{{ handoffFullLabel }}</button>
+          <button onClick="{{ copyHandoffPrompt }}" style="font-size:12px; cursor:pointer; background:oklch(35% 0.09 25); border:none; color:white; padding:6px 12px; border-radius:100px; font-weight:600;">{{ handoffCopyLabel }}</button>
+        </div>
+        <div style="{{ handoffPromptBoxStyle }}"><pre style="white-space:pre-wrap; font-family:inherit; font-size:12px; margin:0; color:oklch(25% 0.02 60);">{{ handoffPromptText }}</pre></div>
+      </div>
+    </details>
+
+    <!-- ② Release & Transition Workflow -->
+    <details style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:14px 18px; margin-bottom:14px;">
+      <summary style="cursor:pointer; font-weight:700; font-size:14px; color:oklch(25% 0.02 60);">② Release &amp; Transition Workflow</summary>
+      <div style="margin-top:12px; display:flex; flex-direction:column; gap:6px;">
+        <sc-for list="{{ transitionSteps }}" as="step" hint-placeholder-count="9">
+          <div style="display:flex; align-items:flex-start; gap:10px; font-size:13px; padding:6px 8px; border-radius:6px; background:{{ step.bg }};">
+            <span style="{{ step.badgeStyle }}">{{ step.badgeLabel }}</span>
+            <div>
+              <div style="color:oklch(28% 0.02 60);">{{ step.n }}. {{ step.label }}</div>
+              <div style="color:oklch(55% 0.02 60); font-size:11.5px; margin-top:1px;">{{ step.sub }}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </details>
+
+    <!-- ③ Current Stage -->
+    <details open style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:14px 18px; margin-bottom:14px;">
+      <summary style="cursor:pointer; font-weight:700; font-size:14px; color:oklch(25% 0.02 60);">③ Current Stage</summary>
+      <div style="margin-top:12px; display:flex; flex-direction:column; gap:5px;">
+        <sc-for list="{{ currentStageRows }}" as="row" hint-placeholder-count="9">
+          <div style="font-size:13px; color:oklch(30% 0.02 60);">{{ row.icon }} {{ row.label }} <span style="color:oklch(55% 0.02 60); font-size:11.5px;">— {{ row.th }}</span></div>
+        </sc-for>
+      </div>
+    </details>
+
+    <!-- ④ Quick Actions -->
     <div style="background:oklch(96% 0.04 150); border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:16px 18px; margin-bottom:24px;">
-      <div style="font-size:12px; font-weight:600; letter-spacing:0.08em; color:oklch(35% 0.08 150); margin-bottom:10px;">QUICK ACTIONS</div>
+      <div style="font-size:12px; font-weight:600; letter-spacing:0.08em; color:oklch(35% 0.08 150); margin-bottom:10px;">④ QUICK ACTIONS</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <a href="https://chatgpt.com/" target="_blank" rel="noopener" style="font-size:12px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:7px 13px; border-radius:100px; font-weight:600;">🚀 เปิด ChatGPT ห้องใหม่</a>
         <a href="./HANDOVER%20PROMPT.md" target="_blank" rel="noopener" style="font-size:12px; text-decoration:none; background:white; border:1px solid oklch(80% 0.08 150); color:oklch(30% 0.06 150); padding:7px 13px; border-radius:100px; font-weight:600;">📋 เปิด HANDOVER PROMPT</a>
@@ -634,7 +676,33 @@
 // once, and Index + Copy + Relationships update automatically.
 // ============================================================
 class Component extends DCLogic {
-  state = { copyStatus: {}, selectedModuleId: "KM-08" };
+  state = { copyStatus: {}, selectedModuleId: "KM-08", handoffFullOpen: false, handoffCopyLabel: "📋 Copy Prompt" };
+
+  static HANDOFF_PROMPT = `# งาน: Project Documentation Update และ CEO Assistant Handoff Package
+โครงการ: huahin.properties
+
+เป้าหมาย: จัดระเบียบและอัปเดตเอกสารโครงการทั้งหมดให้ตรงสถานะจริงล่าสุด เพื่อให้ผู้ช่วย CEO รายใหม่เริ่มงานต่อได้ทันทีโดยไม่ต้องอ่านแชตเก่า
+
+ขั้นตอน:
+1. ตรวจสอบ Repository และไฟล์ที่เกี่ยวข้องทั้งหมด (README, Mission Control, Blueprint, Documentation, Release Checklist, Project History ฯลฯ)
+2. ตรวจสอบสถานะจริงของระบบเทียบกับ Documentation
+3. อัปเดต/สร้าง PROJECT_OPERATING_STANDARD.md (กฎ Workflow กลาง)
+4. สร้างชุด CEO Handoff Package ใน docs/ceo-handoff/ (START_HERE, CONTEXT_SNAPSHOT, PHASE_STATUS, WORKING_GUIDE ฯลฯ)
+5. อัปเดตเอกสารหลักของ Repository ตามความจำเป็น (ไม่สร้างซ้ำโดยไม่จำเป็น)
+6. สร้างไฟล์ดาวน์โหลด (แยกไฟล์ + ZIP + Master Combined File)
+7. สร้าง Change Summary / Documentation Update Report
+8. ตรวจสอบความถูกต้องก่อนส่ง (Broken Reference, Reading Flow, Single Source Validation)
+9. เตรียมสำหรับ Upload GitHub — รอ Product Owner อนุมัติก่อน Upload จริง
+
+ห้ามพัฒนาฟีเจอร์ใหม่ ห้ามแก้ Production Code โดยไม่จำเป็น ห้ามประกาศ Phase เสร็จเอง — รอ Product Owner ตรวจและอนุมัติทุกขั้นตอนก่อนไป Upload GitHub`;
+
+  toggleHandoffFull() { this.setState((s) => ({ handoffFullOpen: !s.handoffFullOpen })); }
+  copyHandoffPrompt() {
+    navigator.clipboard.writeText(Component.HANDOFF_PROMPT).then(() => {
+      this.setState({ handoffCopyLabel: "✓ คัดลอกแล้ว" });
+      setTimeout(() => this.setState({ handoffCopyLabel: "📋 Copy Prompt" }), 2000);
+    }).catch(() => this.setState({ handoffCopyLabel: "คัดลอกไม่สำเร็จ" }));
+  }
 
   static STATUS_STYLE = {
   verified: "display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:100px;border:1px solid oklch(75% 0.1 150);background:oklch(94% 0.08 150);color:oklch(30% 0.1 150);",
@@ -738,6 +806,31 @@ class Component extends DCLogic {
 
   renderVals() {
     const st = this.state.copyStatus;
+    const handoffFullOpen = this.state.handoffFullOpen;
+    const transitionStepsData = [
+      { n: 1, label: "Claude สร้าง Documentation และ Handoff Package", sub: "จัดทำเอกสารและชุดส่งมอบงานให้ครบ", status: "completed" },
+      { n: 2, label: "Product Owner ตรวจและอนุมัติ", sub: "ตรวจสอบความถูกต้องก่อนดำเนินการต่อ", status: "completed" },
+      { n: 3, label: "Claude สร้าง Download Package", sub: "รวมไฟล์เป็นชุดพร้อมดาวน์โหลด", status: "current" },
+      { n: 4, label: "CEO Upload GitHub", sub: "CEO นำไฟล์ขึ้น GitHub ด้วยตนเอง", status: "pending" },
+      { n: 5, label: "Claude Verify Upload", sub: "ตรวจสอบว่าอัปโหลดสำเร็จและครบถ้วน", status: "pending" },
+      { n: 6, label: "Claude สร้าง Project Snapshot (อ้างอิง Repository ล่าสุดหลัง Upload)", sub: "สรุปสถานะโครงการล่าสุดหลังอัปโหลด", status: "pending" },
+      { n: 7, label: "CEO เปิด ChatGPT ห้องใหม่", sub: "เริ่มห้องแชทใหม่เมื่อพร้อม", status: "pending" },
+      { n: 8, label: "ใช้ Bootstrap Prompt พร้อม Project Snapshot", sub: "แนบข้อความเริ่มต้นพร้อมสถานะล่าสุด", status: "pending" },
+      { n: 9, label: "ผู้ช่วย CEO รายใหม่เริ่มทำงานต่อได้ทันที", sub: "ทำงานต่อได้โดยไม่ต้องอ่านแชตเก่า", status: "pending" },
+    ];
+    const stepStyle = {
+      completed: { bg: "oklch(96% 0.04 150)", badgeStyle: "font-size:10px; font-weight:700; color:oklch(35% 0.1 150); background:oklch(90% 0.06 150); padding:2px 7px; border-radius:100px;", badgeLabel: "✅" },
+      current: { bg: "oklch(97% 0.06 85)", badgeStyle: "font-size:10px; font-weight:700; color:oklch(40% 0.1 85); background:oklch(90% 0.09 85); padding:2px 7px; border-radius:100px;", badgeLabel: "🟡" },
+      pending: { bg: "transparent", badgeStyle: "font-size:10px; font-weight:700; color:oklch(55% 0.02 60); background:oklch(93% 0.01 70); padding:2px 7px; border-radius:100px;", badgeLabel: "⬜" },
+    };
+    const transitionSteps = transitionStepsData.map((s) => ({ n: s.n, label: s.label, sub: s.sub, bg: stepStyle[s.status].bg, badgeStyle: stepStyle[s.status].badgeStyle, badgeLabel: stepStyle[s.status].badgeLabel }));
+    const currentStageRows = [
+      { icon: "✅", label: "Documentation", th: "เอกสารครบแล้ว" },
+      { icon: "✅", label: "Validation", th: "ตรวจสอบผ่านแล้ว" },
+      { icon: "🟡", label: "Upload Pending", th: "รอ CEO อัปโหลดขึ้น GitHub" },
+      { icon: "⬜", label: "Snapshot", th: "ยังไม่สร้าง — รอหลัง Upload" },
+      { icon: "⬜", label: "New Chat", th: "ยังไม่เริ่มห้องแชทใหม่" },
+    ];
     const dependedOnByMap = this.computeDependedOnBy();
     const byId = {};
     Component.MODULES.forEach((m) => { byId[m.id] = m; });
@@ -763,6 +856,16 @@ class Component extends DCLogic {
     const projectDNA = "huahin.properties — เว็บลงประกาศขาย/เช่าอสังหาริมทรัพย์ หัวหิน/ปราณบุรี/ชะอำ. Stack: Design Component (.dc.html) ต่อหน้า + Firebase (Firestore/Auth/Storage/Cloud Functions) + Stripe. Governance: CEO ตัดสินใจสูงสุด → Product Owner ควบคุม Workflow/PASS → Lead Developer พัฒนา. Knowledge Engine เดียวขับเคลื่อนทั้ง Index/Copy/Relationships ของ 17 Knowledge Modules.";
 
     return {
+      handoffPromptText: Component.HANDOFF_PROMPT,
+      handoffFullLabel: handoffFullOpen ? "🗕 Collapse" : "⛶ Full Screen",
+      handoffPromptBoxStyle: handoffFullOpen
+        ? "position:fixed; inset:20px; z-index:9999; background:white; border:1px solid oklch(80% 0.08 25); border-radius:8px; padding:16px; overflow:auto; box-shadow:0 20px 60px rgba(0,0,0,0.3);"
+        : "background:oklch(98% 0.01 25); border:1px solid oklch(88% 0.03 25); border-radius:8px; padding:12px; max-height:180px; overflow:auto;",
+      handoffCopyLabel: this.state.handoffCopyLabel,
+      copyHandoffPrompt: () => this.copyHandoffPrompt(),
+      toggleHandoffFull: () => this.toggleHandoffFull(),
+      transitionSteps,
+      currentStageRows,
       indexRows,
       blueprintCompletenessPct: avgCoverage + "%",
       blueprintCompletenessLabel: `${avgCoverage}% — คำนวณจาก Coverage เฉลี่ยของ 17 Knowledge Modules จริง (ไม่ใช่ค่าคาดการณ์)`,
