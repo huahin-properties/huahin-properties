@@ -682,7 +682,7 @@ class Component extends DCLogic {
     // not a forecast. Each step is completed/current/pending. Reset to step 1
     // "current" whenever a new Mission/Sprint/Phase/Release begins (do not
     // carry over green state from a previous release).
-    releaseWorkflowStep: 4, // 1-indexed: which step is "current" right now (1-9). Bump forward only on confirmed real events; reset to 1 for a new Mission/Sprint/Phase/Release.
+    releaseWorkflowStep: 6, // 1-indexed: which step is "current" right now (1-9). Bump forward only on confirmed real events; reset to 1 for a new Mission/Sprint/Phase/Release.
   };
 
   static RELEASE_WORKFLOW_STEPS = [
