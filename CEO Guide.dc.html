@@ -694,6 +694,35 @@
     </div>
     <div style="font-size:13px; color:oklch(45% 0.02 60); margin-bottom:14px;">รวมทุกไฟล์ที่ต้องใช้ส่งต่องานให้ผู้พัฒนาใหม่หรือ AI ห้องใหม่ ไว้ในที่เดียว — กด 📥 ที่ไฟล์ใดก็ดาวน์โหลดไฟล์นั้นทันที หรือกด "ดาวน์โหลดทั้งหมด" ด้านล่างเพื่อได้ ZIP รวมทุกไฟล์ในชุดนี้ แถบสีเขียว = ยืนยันแล้วว่าไฟล์อัปเดตล่าสุดและพร้อมส่งต่อ (หากมีการอัปเดตเนื้อหาไฟล์ใด ต้องมาติ๊กสถานะที่หน้านี้ให้ตรงก่อนส่งทุกครั้ง)</div>
 
+    <!-- 🚀 Quick Start New Chat — 3 steps + verification -->
+    <div style="background:oklch(96% 0.04 150); border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:16px 18px; margin-bottom:20px;">
+      <div style="font-size:12px; font-weight:600; letter-spacing:0.08em; color:oklch(35% 0.08 150); margin-bottom:12px;">🚀 เริ่มห้องแชทใหม่ — 3 ขั้นตอน</div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <div style="display:flex; align-items:center; gap:12px; background:white; border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:10px 14px;">
+          <div style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:oklch(35% 0.09 25); color:white; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">1</div>
+          <div style="flex:1; font-size:13px; color:oklch(25% 0.02 60);">เปิด ChatGPT ห้องใหม่</div>
+          <a href="https://chatgpt.com/" target="_blank" rel="noopener" style="flex-shrink:0; font-size:12px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">เปิด ChatGPT →</a>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; background:white; border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:10px 14px;">
+          <div style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:oklch(35% 0.09 25); color:white; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">2</div>
+          <div style="flex:1; font-size:13px; color:oklch(25% 0.02 60);">ดาวน์โหลดไฟล์แนบทั้ง 8 ไฟล์ (ZIP) แตกไฟล์แล้วแนบทั้งหมดในห้องแชทใหม่</div>
+          <div onclick="{{ downloadBootstrapZip }}" style="cursor:pointer; flex-shrink:0; font-size:12px; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">📦 ดาวน์โหลด 8 ไฟล์</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; background:white; border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:10px 14px;">
+          <div style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:oklch(35% 0.09 25); color:white; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">3</div>
+          <div style="flex:1; font-size:13px; color:oklch(25% 0.02 60);">คัดลอกข้อความเปิดห้อง แล้ววางพร้อมไฟล์แนบ ส่งครั้งเดียว</div>
+          <div onclick="{{ copyBootstrapPrompt }}" style="cursor:pointer; flex-shrink:0; font-size:12px; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">{{ copyPromptLabel }}</div>
+        </div>
+      </div>
+      <div style="margin-top:14px; padding-top:12px; border-top:1px dashed oklch(80% 0.08 150); font-size:12.5px; color:oklch(30% 0.04 150); line-height:1.7;">
+        <div><strong>อ่านคำตอบแรกของ ChatGPT</strong> — ต้องสรุป Current Phase ถูกต้อง และบอกว่าตัวเองเป็น Product Owner/CEO Assistant (ไม่ใช่เริ่มทำงานทันที)</div>
+        <div style="margin-top:6px;">ถ้าคำตอบถูกต้อง → ให้คำสั่งงานต่อได้เลย ถ้าคำตอบผิด/ถามซ้ำสิ่งที่ไฟล์บอกไว้แล้ว → เช็คว่าไฟล์แนบครบหรือไม่ก่อนแก้ไขอะไรอื่น</div>
+        <div style="margin-top:10px; padding-top:10px; border-top:1px dashed oklch(80% 0.08 150);"><strong>8 ไฟล์ (Bootstrap)</strong> มีประโยชน์มากกว่าสำหรับเปิดห้องแชทใหม่โดยเฉพาะ — คัดสรรมาแล้วให้ตรงกับสิ่งที่ AI ต้องอ่านก่อนตอบ (สถานะปัจจุบัน + กติกาทำงาน) ไม่พ่วงของที่ไม่จำเป็น ทำให้ AI โฟกัสอ่านครบทุกไฟล์จริง ไม่เสี่ยงถูกจำกัดจำนวนไฟล์แนบ</div>
+        <div style="margin-top:8px;"><strong>23 ไฟล์ (ทั้งหมด)</strong> เหมาะกับกรณี "ส่งมอบโครงการทั้งหมด" ให้ผู้พัฒนาใหม่ศึกษาเชิงลึกทีละไฟล์ ไม่ใช่ใช้เปิดห้องแชทหน้าแรก — ถ้าแนบทั้ง 23 ไฟล์เป็นข้อความแรก มีความเสี่ยง 2 อย่าง: (1) หลายแพลตฟอร์ม AI จำกัดจำนวน/ขนาดไฟล์แนบต่อข้อความ (2) แม้แนบได้ครบ AI มักอ่านแบบผิวเผินเมื่อไฟล์มากเกินจำเป็น ทำให้สรุปผิดหรือพลาดรายละเอียด</div>
+        <div style="margin-top:8px;"><strong>สรุป</strong>: เปิดห้องใหม่ทุกครั้ง → ใช้ 8 ไฟล์ (Bootstrap) เท่านั้น พอ AI เข้าใจภาพรวมแล้วค่อยส่งไฟล์อื่นในชุด 23 ไฟล์เพิ่มทีละไฟล์ตามหัวข้อที่คุยกันจริง</div>
+      </div>
+    </div>
+
     <sc-for list="{{ handoffCategories }}" as="cat" hint-placeholder-count="4">
       <div style="margin-bottom:16px;">
         <div style="font-size:12px; font-weight:600; letter-spacing:0.04em; color:oklch(35% 0.08 25); margin-bottom:6px;">{{ cat.title }}</div>
@@ -816,7 +845,7 @@ class Component extends DCLogic {
   ];
 
   state = {
-    expandedCard: null, bannerOpen: false,
+    expandedCard: null, bannerOpen: false, copyPromptLabel: "📋 คัดลอกข้อความ", bootstrapZipStatus: "",
     downloadAllStatus: "", copyStatus: {}, selectedModuleId: "KM-08", handoffFullOpen: false, handoffCopyLabel: "📋 Copy Prompt",
     // State-driven Release & Transition Workflow — reflects REAL project state,
     // not a forecast. Each step is completed/current/pending. Reset to step 1
@@ -964,6 +993,50 @@ class Component extends DCLogic {
     });
   }
 
+  static BOOTSTRAP_FILES = [
+    { file: "CEO_ASSISTANT_START_HERE.md", path: "./docs/ceo-handoff/CEO_ASSISTANT_START_HERE.md" },
+    { file: "PROJECT_CONTEXT_SNAPSHOT.md", path: "./docs/ceo-handoff/PROJECT_CONTEXT_SNAPSHOT.md" },
+    { file: "CURRENT_PHASE_STATUS.md", path: "./docs/ceo-handoff/CURRENT_PHASE_STATUS.md" },
+    { file: "PROJECT_OPERATING_STANDARD.md", path: "./docs/ceo-handoff/PROJECT_OPERATING_STANDARD.md" },
+    { file: "PROJECT_SNAPSHOT.md", path: "./PROJECT_SNAPSHOT.md" },
+    { file: "PROJECT_HISTORY.md", path: "./PROJECT_HISTORY.md" },
+    { file: "KNOWN_ISSUES.md", path: "./docs/ceo-handoff/KNOWN_ISSUES.md" },
+    { file: "HUAHIN_PROPERTIES_MASTER_HANDOFF.md", path: "./HUAHIN_PROPERTIES_MASTER_HANDOFF.md" },
+  ];
+
+  static BOOTSTRAP_PROMPT_TEXT = `นี่คือชุดเอกสารล่าสุดของโครงการ huahin.properties กรุณาอ่านไฟล์ที่แนบทั้งหมดก่อนตอบ โดยให้ใช้ PROJECT_CONTEXT_SNAPSHOT.md, CURRENT_PHASE_STATUS.md, PROJECT_SNAPSHOT.md (สถานะ Repository ล่าสุดหลัง Upload) และ PROJECT_OPERATING_STANDARD.md เป็นข้อมูลหลัก หากข้อมูลเก่าจากความจำหรือแชตก่อนหน้าขัดแย้งกับเอกสารชุดนี้ ให้ใช้เอกสารชุดนี้เป็นหลักเสมอ
+
+คุณมีหน้าที่เป็น Product Owner / CEO Assistant ของโครงการนี้ ต้องรักษา Scope ตรวจงานที่ Claude (Lead Developer) ส่งมา บอกขั้นตอนถัดไปให้ฉันอย่างชัดเจนทีละขั้น และห้ามประกาศว่างานใดเสร็จสมบูรณ์ก่อนผ่าน Definition of Done ที่ระบุไว้ใน PROJECT_OPERATING_STANDARD.md
+
+กรุณาสรุปความเข้าใจของคุณเกี่ยวกับ Current Phase และบอกฉันว่าขั้นตอนถัดไปที่ฉัน (CEO) ต้องทำคืออะไร`;
+
+  downloadBootstrapZip = async () => {
+    this.setState({ bootstrapZipStatus: "กำลังเตรียมไฟล์…" });
+    try {
+      const zip = new JSZip();
+      for (const doc of Component.BOOTSTRAP_FILES) {
+        const res = await fetch(doc.path);
+        if (!res.ok) throw new Error(doc.file + " โหลดไม่สำเร็จ");
+        zip.file(doc.file, await res.blob());
+      }
+      const blob = await zip.generateAsync({ type: "blob" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "New-Chat-Bootstrap-Files.zip";
+      a.click();
+      this.setState({ bootstrapZipStatus: "" });
+    } catch (e) {
+      this.setState({ bootstrapZipStatus: "❌ " + e.message });
+    }
+  };
+
+  copyBootstrapPrompt = () => {
+    navigator.clipboard.writeText(Component.BOOTSTRAP_PROMPT_TEXT).then(() => {
+      this.setState({ copyPromptLabel: "✓ คัดลอกแล้ว" });
+      setTimeout(() => this.setState({ copyPromptLabel: "📋 คัดลอกข้อความ" }), 2000);
+    });
+  };
+
   toggleBanner = () => this.setState(s => ({ bannerOpen: !s.bannerOpen }));
 
   toggleCard = (file) => {
@@ -1090,6 +1163,7 @@ class Component extends DCLogic {
 
     return {
       handoffCategories, downloadAll, downloadAllStatus, toggleBanner, bannerCaret, bannerWrapStyle,
+      downloadBootstrapZip: this.downloadBootstrapZip, copyBootstrapPrompt: this.copyBootstrapPrompt, copyPromptLabel: this.state.copyPromptLabel,
       handoffPromptText: Component.HANDOFF_PROMPT,
       handoffFullLabel: handoffFullOpen ? "🗕 Collapse" : "⛶ Full Screen",
       handoffPromptBoxStyle: handoffFullOpen
