@@ -237,6 +237,60 @@
         </sc-if>
       </sc-if>
 
+      <sc-if value="{{ showList }}">
+      <div style="background:white; border-radius:8px; padding:20px 22px; margin-bottom:22px;">
+        <div onClick="{{ onToggleColBuilder }}" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+          <div style="font-size:14px; font-weight:600; color:oklch(25% 0.02 60);">📁 คอลเลคชั่นสำหรับลูกค้า ({{ colCount }})</div>
+          <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ colBuilderToggleLabel }}</div>
+        </div>
+        <sc-if value="{{ showColBuilder }}">
+          <div style="margin-top:18px; display:flex; flex-direction:column; gap:18px;">
+            <div style="font-size:12px; color:oklch(50% 0.02 60); line-height:1.6;">กรองทรัพย์ที่ต้องการ แล้วบันทึกเป็นคอลเลคชั่น ตั้งชื่อได้เอง (เช่น "คุณเจน") จากนั้นแชร์ลิงก์ให้ลูกค้าดูได้เลยโดยไม่ต้องล็อกอิน — หรือกดดาว ♥ ที่ทรัพย์แต่ละรายการเพื่อเก็บทีละหลังแทน</div>
+
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(30% 0.02 60); cursor:pointer;">
+              <input type="checkbox" checked="{{ colScopeAll }}" onChange="{{ onToggleColScope }}" style="width:16px; height:16px; accent-color:oklch(40% 0.13 25);" />
+              รวมทรัพย์ทั้งหมดในเว็บ (ไม่ใช่แค่ของฉัน)
+            </label>
+
+            <div style="border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:18px;">
+              <dc-import name="SearchFilters" f="{{ colFilterVals }}" hint-size="100%,auto"></dc-import>
+            </div>
+
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; background:oklch(97% 0.02 75); border-radius:8px; padding:14px 16px;">
+              <div style="font-size:13.5px; color:oklch(30% 0.02 60);">พบ <strong>{{ colResultCount }}</strong> รายการตามตัวกรองนี้</div>
+              <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <input value="{{ colName }}" onChange="{{ onColName }}" placeholder="ชื่อคอลเลคชั่น เช่น คุณเจน" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 12px; font-size:13px; font-family:inherit; min-width:180px;" />
+                <div onClick="{{ onSaveCollection }}" style="background:oklch(40% 0.13 25); color:white; padding:10px 18px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;">💾 บันทึกเป็นคอลเลคชั่น</div>
+              </div>
+            </div>
+            <sc-if value="{{ colMsg }}"><div style="font-size:12.5px; color:oklch(40% 0.13 145);">{{ colMsg }}</div></sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ hasCollections }}">
+          <div style="display:flex; flex-direction:column; gap:8px; margin-top:16px;">
+            <sc-for list="{{ collectionRows }}" as="c" hint-placeholder-count="0">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; border:1px solid oklch(92% 0.01 70); border-radius:6px; padding:12px 14px;">
+                <sc-if value="{{ c.isEditing }}">
+                  <input value="{{ c.editName }}" onChange="{{ c.onEditNameChange }}" style="flex:1; min-width:140px; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 10px; font-size:13px; font-family:inherit;" />
+                  <div onClick="{{ c.onSaveRename }}" style="font-size:12.5px; color:oklch(40% 0.13 145); cursor:pointer; font-weight:600;">✓ บันทึก</div>
+                </sc-if>
+                <sc-if value="{{ c.isNotEditing }}">
+                  <div style="flex:1; min-width:140px;">
+                    <div style="font-size:13.5px; font-weight:600; color:oklch(25% 0.02 60);">{{ c.name }}</div>
+                    <div style="font-size:11.5px; color:oklch(55% 0.02 60);">{{ c.countLabel }}</div>
+                  </div>
+                  <div onClick="{{ c.onRename }}" style="font-size:12.5px; color:oklch(35% 0.02 60); cursor:pointer;">✏️ เปลี่ยนชื่อ</div>
+                </sc-if>
+                <div onClick="{{ c.onShare }}" style="font-size:12.5px; color:oklch(40% 0.13 25); cursor:pointer; font-weight:600;">🔗 แชร์</div>
+                <div onClick="{{ c.onDelete }}" style="font-size:12.5px; color:oklch(50% 0.18 30); cursor:pointer;">🗑️ ลบ</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+      </sc-if>
+
       <!-- Sprint 01 Phase 4: Website Settings — moved below the property list, collapsed by default -->
       <sc-if value="{{ showList }}">
       <div style="background:white; border-radius:8px; padding:20px 22px; margin-bottom:22px;">
@@ -343,7 +397,7 @@
             <div>
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">📝 ข้อความแนะนำตัว (โชว์บนเว็บไซต์ส่วนตัวของคุณ)</div>
               <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:8px; line-height:1.6;">เขียนสั้นๆ ให้ลูกค้าอ่านแล้วรู้จักคุณทันที — ใครก็ได้ ไม่ต้องเก่งเขียน แค่ตอบ 3 อย่าง: คุณเป็นใคร/ทำมากี่ปี, ถนัดโซนไหน/ทรัพย์แบบไหน, จุดเด่นที่ทำให้ลูกค้าเลือกคุณ</div>
-              <textarea rows="3" value="{{ ps_bioText }}" onChange="{{ onPsBioText }}" placeholder="ตัวอย่าง: สวัสดีค่ะ ดิฉันปิ่ม ตัวแทนอสังหาริมทรัพย์มืออาชีพในหัวหินมา 8 ปี ถนัดพูลวิลล่าและคอนโดโซนเขาเต่า-หัวหินใต้ เคยดูแลลูกค้าต่างชาติมามากกว่า 50 ครอบครัว พร้อมช่วยตั้งแต่หาบ้าน เจรจาราคา ไปจนถึงจดทะเบียนโอนกรรมสิทธิ์ให้ครบจบในที่เดียว" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical;"></textarea>
+              <textarea rows="3" value="{{ ps_bioText }}" onChange="{{ onPsBioText }}" placeholder="ตัวอย่าง: สวัสดีค่ะ ฉันชื่อปิ่ม ตัวแทนอสังหาริมทรัพย์มืออาชีพในหัวหินมา 8 ปี ถนัดพูลวิลล่าและคอนโดโซนเขาเต่า-หัวหินใต้ เคยดูแลลูกค้าต่างชาติมามากกว่า 50 ครอบครัว พร้อมช่วยตั้งแต่หาบ้าน เจรจาราคา ไปจนถึงจดทะเบียนโอนกรรมสิทธิ์ให้ครบจบในที่เดียว" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical;"></textarea>
             </div>
             <div>
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">🤖 บุคลิก AI ผู้ช่วยของคุณ</div>
@@ -572,6 +626,9 @@ class Component extends DCLogic {
     savedId: "", savedPayload: null, ns_assistedSale: false, ns_commissionPct: "5",
     nudgeSaving: false, nudgeSavedMsg: "", copyLabel: "คัดลอกข้อความ",
     shareId: "", shareUrl: "", shareCopyLabel: "คัดลอกลิงก์", quotaMsg: "", listLayout: "list",
+    collections: [], showColBuilder: false, colScopeAll: false,
+    colFilters: { keyword: "", status: "", area: "", type: "", bedroomsMin: "", bathroomsMin: "", priceMax: "", features: [] },
+    colName: "", colMsg: "", colEditingId: "", colEditingName: "",
     showDeleteConfirm: false, deleteTargetId: "", deleting: false,
     showBuyerModal: false, buyerTargetId: "", buyer_name: "", buyer_phone: "", buyer_email: "", buyerMsg: "", buyerIsError: false, buyerSaving: false,
     showProfileSettings: false, ps_displayName: "", ps_profilePhotoUrl: "", ps_coverPhotoUrl: "",
@@ -611,6 +668,9 @@ class Component extends DCLogic {
         const { expiredCount } = await fb.runExpirySweep(properties);
         if (expiredCount > 0) properties = await this.loadPropertiesWithCovers(lister.id);
       } catch (e) { console.warn("expiry sweep failed:", e); }
+      fb.fetchCollectionsByOwner("lister", lister.id).then((cols) => {
+        this.setState({ collections: cols.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)) });
+      }).catch((e) => console.warn("loadCollections failed:", e));
       this.setState({
         loaded: true, signedIn: true, lister, properties,
         ps_displayName: lister.displayName || lister.name || "",
@@ -1100,6 +1160,82 @@ class Component extends DCLogic {
     this.setState({ shareId: "เว็บไซต์ของฉัน", shareUrl: url, shareCopyLabel: "คัดลอกลิงก์", showShareFlag: true });
   }
 
+  async loadCollections() {
+    try {
+      const cols = await this._fb.fetchCollectionsByOwner("lister", this.state.lister.id);
+      this.setState({ collections: cols.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)) });
+    } catch (e) { console.warn("loadCollections failed:", e); }
+  }
+
+  setColFilter(key, value) {
+    this.setState((s) => ({ colFilters: { ...s.colFilters, [key]: value } }));
+  }
+
+  toggleColFeature(fid) {
+    this.setState((s) => {
+      const has = s.colFilters.features.includes(fid);
+      const features = has ? s.colFilters.features.filter((x) => x !== fid) : [...s.colFilters.features, fid];
+      return { colFilters: { ...s.colFilters, features } };
+    });
+  }
+
+  colFilteredProperties() {
+    const mod = this._mod;
+    if (!mod) return [];
+    const source = this.state.colScopeAll ? (mod.PROPERTIES || []) : (this.state.properties || []);
+    const f = this.state.colFilters;
+    return source.filter((p) => {
+      if (f.area && p.area !== f.area) return false;
+      if (f.type && p.type !== f.type) return false;
+      if (f.status && p.status !== f.status) return false;
+      if (f.bedroomsMin && Number(p.bedrooms || 0) < Number(f.bedroomsMin)) return false;
+      if (f.bathroomsMin && Number(p.bathrooms || 0) < Number(f.bathroomsMin)) return false;
+      if (f.priceMax && Number(p.price || 0) > Number(f.priceMax)) return false;
+      if (f.keyword && f.keyword.trim()) {
+        const kw = f.keyword.trim().toLowerCase();
+        const haystack = [p.id, p.zone, p.description].filter(Boolean).join(" ").toLowerCase();
+        if (!kw.split(/\s+/).filter(Boolean).every((w) => haystack.includes(w))) return false;
+      }
+      if (f.features && f.features.length && !f.features.every((feat) => (p.features || []).includes(feat))) return false;
+      return true;
+    });
+  }
+
+  async saveCollectionNow() {
+    const name = (this.state.colName || "").trim();
+    if (!name) { this.setState({ colMsg: "กรุณาตั้งชื่อคอลเลคชั่นก่อนบันทึก" }); return; }
+    const ids = this.colFilteredProperties().map((p) => p.id);
+    if (!ids.length) { this.setState({ colMsg: "ไม่มีทรัพย์ตรงกับตัวกรองนี้" }); return; }
+    const lister = this.state.lister;
+    await this._fb.saveCollection({ ownerType: "lister", ownerId: lister.id, ownerLabel: lister.displayName || lister.name || lister.email || "", name, propertyIds: ids });
+    this.setState({ colName: "", colMsg: "บันทึกแล้ว ✓" });
+    await this.loadCollections();
+    setTimeout(() => this.setState({ colMsg: "" }), 2500);
+  }
+
+  shareCollection(col) {
+    const url = `${window.location.origin}/Collection View.dc.html?id=${col.id}`;
+    this.setState({ shareId: col.name, shareUrl: url, shareCopyLabel: "คัดลอกลิงก์", showShareFlag: true });
+  }
+
+  startRenameCollection(col) {
+    this.setState({ colEditingId: col.id, colEditingName: col.name });
+  }
+
+  async saveRenameCollection() {
+    const name = (this.state.colEditingName || "").trim();
+    if (!name) return;
+    await this._fb.renameCollection(this.state.colEditingId, name);
+    this.setState({ colEditingId: "", colEditingName: "" });
+    await this.loadCollections();
+  }
+
+  async deleteCollection(id) {
+    if (!window.confirm("ลบคอลเลคชั่นนี้?")) return;
+    await this._fb.deleteCollectionDoc(id);
+    await this.loadCollections();
+  }
+
   copyShareLink() {
     if (navigator.clipboard) navigator.clipboard.writeText(this.state.shareUrl).catch(() => {});
     this.setState({ shareCopyLabel: "คัดลอกแล้ว ✓" });
@@ -1328,6 +1464,56 @@ class Component extends DCLogic {
       onCloseShare: () => this.setState({ showShareFlag: false }),
       stopProp: (e) => e.stopPropagation(),
       onCopyShareLink: () => this.copyShareLink(),
+      onToggleColBuilder: () => this.setState((s) => ({ showColBuilder: !s.showColBuilder })),
+      showColBuilder: this.state.showColBuilder,
+      colBuilderToggleLabel: this.state.showColBuilder ? "\u0e22\u0e48\u0e2d\u2013" : "\u0e40\u0e1b\u0e34\u0e14+",
+      colCount: (this.state.collections || []).length,
+      colScopeAll: this.state.colScopeAll,
+      onToggleColScope: () => this.setState((s) => ({ colScopeAll: !s.colScopeAll })),
+      colName: this.state.colName, onColName: (e) => this.setState({ colName: e.target.value }),
+      onSaveCollection: () => this.saveCollectionNow(),
+      colMsg: this.state.colMsg,
+      colResultCount: this.colFilteredProperties().length,
+      colFilterVals: mod ? {
+        t: {
+          filters: "\u0e15\u0e31\u0e27\u0e01\u0e23\u0e2d\u0e07", clear_filters: "\u0e25\u0e49\u0e32\u0e07\u0e15\u0e31\u0e27\u0e01\u0e23\u0e2d\u0e07",
+          keyword_label: "\u0e04\u0e49\u0e19\u0e2b\u0e32", keyword_placeholder: "\u0e23\u0e2b\u0e31\u0e2a\u0e17\u0e23\u0e31\u0e1e\u0e22\u0e4c / \u0e0b\u0e2d\u0e22",
+          status_label: "\u0e1b\u0e23\u0e30\u0e40\u0e20\u0e17\u0e23\u0e32\u0e22\u0e01\u0e32\u0e23", any: "\u0e17\u0e31\u0e49\u0e07\u0e2b\u0e21\u0e14", buy: "\u0e02\u0e32\u0e22", rent: "\u0e40\u0e0a\u0e48\u0e32",
+          location_label: "\u0e42\u0e0b\u0e19", all_zones: "\u0e17\u0e38\u0e01\u0e42\u0e0b\u0e19",
+          type_label: "\u0e1b\u0e23\u0e30\u0e40\u0e20\u0e17\u0e17\u0e23\u0e31\u0e1e\u0e22\u0e4c", any_type: "\u0e17\u0e38\u0e01\u0e1b\u0e23\u0e30\u0e40\u0e20\u0e17",
+          bedrooms_label: "\u0e2b\u0e49\u0e2d\u0e07\u0e19\u0e2d\u0e19", bathrooms_label: "\u0e2b\u0e49\u0e2d\u0e07\u0e19\u0e49\u0e33",
+          budget_label: "\u0e07\u0e1a\u0e1b\u0e23\u0e30\u0e21\u0e32\u0e13", any_price: "\u0e44\u0e21\u0e48\u0e08\u0e33\u0e01\u0e31\u0e14",
+          features_label: "\u0e2a\u0e34\u0e48\u0e07\u0e2d\u0e33\u0e19\u0e27\u0e22\u0e04\u0e27\u0e32\u0e21\u0e2a\u0e30\u0e14\u0e27\u0e01",
+        },
+        areas: mod.AREAS.map((a) => ({ id: a.id, label: a.label.th })),
+        types: mod.TYPES.map((ty) => ({ id: ty.id, label: ty.label.th })),
+        features: Object.keys(mod.FEATURES).map((k) => ({ id: k, label: mod.FEATURES[k].th })),
+        area: this.state.colFilters.area, type: this.state.colFilters.type, status: this.state.colFilters.status,
+        bedroomsMin: this.state.colFilters.bedroomsMin, bathroomsMin: this.state.colFilters.bathroomsMin,
+        priceMax: this.state.colFilters.priceMax, selectedFeatures: this.state.colFilters.features,
+        keyword: this.state.colFilters.keyword || "",
+        onKeyword: (e) => this.setColFilter("keyword", e.target.value),
+        onStatus: (e) => this.setColFilter("status", e.target.value),
+        onArea: (e) => this.setColFilter("area", e.target.value),
+        onType: (e) => this.setColFilter("type", e.target.value),
+        onBedrooms: (e) => this.setColFilter("bedroomsMin", e.target.value),
+        onBathrooms: (e) => this.setColFilter("bathroomsMin", e.target.value),
+        onPriceMax: (e) => this.setColFilter("priceMax", e.target.value),
+        onToggleFeature: (fid) => this.toggleColFeature(fid),
+        onClear: () => this.setState({ colFilters: { keyword: "", status: "", area: "", type: "", bedroomsMin: "", bathroomsMin: "", priceMax: "", features: [] } }),
+      } : {},
+      hasCollections: (this.state.collections || []).length > 0,
+      collectionRows: (this.state.collections || []).map((c) => ({
+        id: c.id, name: c.name,
+        countLabel: `${(c.propertyIds || []).length} \u0e23\u0e32\u0e22\u0e01\u0e32\u0e23`,
+        isEditing: this.state.colEditingId === c.id, isNotEditing: this.state.colEditingId !== c.id,
+        editName: this.state.colEditingName,
+        onEditNameChange: (e) => this.setState({ colEditingName: e.target.value }),
+        onRename: () => this.startRenameCollection(c),
+        onSaveRename: () => this.saveRenameCollection(),
+        onShare: () => this.shareCollection(c),
+        onDelete: () => this.deleteCollection(c.id),
+      })),
       showBuyerModal: this.state.showBuyerModal, buyerTargetId: this.state.buyerTargetId,
       buyer_name: this.state.buyer_name, onBuyerName: (e) => this.setState({ buyer_name: e.target.value }),
       buyer_phone: this.state.buyer_phone, onBuyerPhone: (e) => this.setState({ buyer_phone: e.target.value }),

@@ -651,6 +651,40 @@ export async function fetchAllProfilePhotos() {
   return fetchCollection("profilePhotos");
 }
 
+// ── Property Collections (agent/admin curated shareable sets) ───────────
+// A named, shareable list of property IDs an admin or agent builds by
+// filtering their own (or all) listings — sent to a specific client as a
+// public link, no login required to view (Collection View.dc.html).
+export async function saveCollection({ ownerType, ownerId, ownerLabel, name, propertyIds }) {
+  const id = "col-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+  await setDoc("propertyCollections", id, {
+    ownerType, ownerId, ownerLabel: ownerLabel || "", name, propertyIds: propertyIds || [],
+    createdAt: Date.now(), updatedAt: Date.now(),
+  });
+  return id;
+}
+
+export async function fetchCollectionsByOwner(ownerType, ownerId) {
+  const all = await fetchWhere("propertyCollections", "ownerId", ownerId);
+  return all.filter((c) => c.ownerType === ownerType);
+}
+
+export async function fetchCollectionById(id) {
+  return fetchDocById("propertyCollections", id);
+}
+
+export async function renameCollection(id, name) {
+  await updateDocFields("propertyCollections", id, { name, updatedAt: Date.now() });
+}
+
+export async function updateCollectionProperties(id, propertyIds) {
+  await updateDocFields("propertyCollections", id, { propertyIds, updatedAt: Date.now() });
+}
+
+export async function deleteCollectionDoc(id) {
+  await deleteDocById("propertyCollections", id);
+}
+
 // ── Stripe (subscriptions for Agents/homeowners) ──────────────────────────
 // Same Cloud Functions project/region as the Claude proxy above — the URL
 // hash is fixed per-project, only the function name segment changes. After

@@ -47,67 +47,106 @@
   </sc-if>
 
   <sc-if value="{{ favoritesOpen }}">
-    <div onClick="{{ onCloseFavorites }}" style="position:fixed; inset:0; background:oklch(15% 0.01 60 / 0.5); z-index:86; display:flex; align-items:flex-end; justify-content:flex-start; padding:20px;">
-      <div onClick="{{ stopProp }}" style="background:oklch(99% 0.005 80); border-radius:10px; width:100%; max-width:360px; max-height:70vh; display:flex; flex-direction:column; box-shadow:0 20px 60px oklch(0% 0 0 / 0.35); overflow:hidden;">
+    <div onClick="{{ onCloseFavorites }}" style="position:fixed; inset:0; z-index:86; background:oklch(15% 0.01 60 / 0.5); display:flex; align-items:flex-end; justify-content:flex-start; padding:{{ favOverlayPadding }};">
+      <div onClick="{{ stopProp }}" style="background:oklch(99% 0.005 80); border-radius:{{ favPanelRadius }}; width:100%; max-width:{{ favPanelMaxWidth }}; height:{{ favPanelHeight }}; display:flex; flex-direction:column; box-shadow:0 20px 60px oklch(0% 0 0 / 0.35); overflow:hidden;">
         <div style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:16px 18px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
           <div>
             <div style="font-family:'Playfair Display',serif; font-size:16px;">⭐ {{ favButtonLabel }}</div>
             <div style="font-size:11px; color:oklch(80% 0.02 75); margin-top:2px;">{{ t.fav_subtitle }}</div>
           </div>
-          <div onClick="{{ onCloseFavorites }}" style="cursor:pointer; padding:6px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+          <div style="display:flex; align-items:center; gap:4px;">
+            <div onClick="{{ onMinimizeFavorites }}" title="ย่อหน้าต่างรายการโปรด" style="cursor:pointer; padding:8px; border-radius:8px; display:flex; align-items:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 9L12 15L18 9" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div onClick="{{ onCloseFavorites }}" style="cursor:pointer; padding:6px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></div>
+          </div>
         </div>
+        <div style="flex-shrink:0; display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:4px; padding:12px 12px 0;">
+          <select value="{{ favFilterStatus }}" onChange="{{ onFavFilterStatus }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:7px 2px; font-size:10.5px; font-family:inherit; background:white; color:oklch(30% 0.02 60);">
+            <option value="">{{ t.fav_filter_status_any }}</option>
+            <option value="sale">{{ t.fav_filter_buy }}</option>
+            <option value="rent">{{ t.fav_filter_rent }}</option>
+          </select>
+          <select value="{{ favFilterBedrooms }}" onChange="{{ onFavFilterBedrooms }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:7px 2px; font-size:10.5px; font-family:inherit; background:white; color:oklch(30% 0.02 60);">
+            <option value="">{{ t.fav_filter_beds_any }}</option>
+            <option value="1">1+</option>
+            <option value="2">2+</option>
+            <option value="3">3+</option>
+            <option value="4">4+</option>
+          </select>
+          <select value="{{ favFilterArea }}" onChange="{{ onFavFilterArea }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:7px 2px; font-size:10.5px; font-family:inherit; background:white; color:oklch(30% 0.02 60);">
+            <option value="">{{ t.fav_filter_district_any }}</option>
+            <option value="hua-hin">หัวหิน</option>
+            <option value="pranburi">ปราณบุรี</option>
+            <option value="cha-am">ชะอำ</option>
+          </select>
+          <select value="{{ favFilterZone }}" onChange="{{ onFavFilterZone }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:7px 2px; font-size:10.5px; font-family:inherit; background:white; color:oklch(30% 0.02 60);">
+            <option value="">{{ t.fav_filter_zone_any }}</option>
+            <sc-for list="{{ favZoneOptions }}" as="zo" hint-placeholder-count="0"><option value="{{ zo }}">{{ zo }}</option></sc-for>
+          </select>
+          <select value="{{ favFilterPriceMax }}" onChange="{{ onFavFilterPriceMax }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:7px 2px; font-size:10.5px; font-family:inherit; background:white; color:oklch(30% 0.02 60);">
+            <option value="">{{ t.fav_filter_price_any }}</option>
+            <option value="5000000">฿5M</option>
+            <option value="10000000">฿10M</option>
+            <option value="20000000">฿20M</option>
+            <option value="50000000">฿50M</option>
+            <option value="100000">฿100K/mo</option>
+          </select>
+        </div>
+        <div style="flex-shrink:0; display:flex; flex-direction:column; gap:6px; padding:10px 12px 0;">
+          <div style="display:flex; gap:6px; align-items:center;">
+            <div style="flex:1; display:flex; gap:10px; overflow-x:auto;">
+              <sc-for list="{{ favCollectionTabs }}" as="ct" hint-placeholder-count="1">
+                <div onClick="{{ ct.onSelect }}" style="flex-shrink:0; padding:7px 4px; font-size:{{ ct.nameFontSize }}; font-weight:700; white-space:nowrap; cursor:pointer; color:{{ ct.nameColor }};">{{ ct.name }}</div>
+              </sc-for>
+            </div>
+            <div onClick="{{ onSaveFilteredToCollection }}" style="flex-shrink:0; padding:6px 14px; border:1px solid oklch(40% 0.13 25); color:oklch(40% 0.13 25); border-radius:100px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap;">{{ t.fav_save_btn }}</div>
+          </div>
+          <sc-if value="{{ isCollectionTab }}">
+            <div style="display:flex; gap:16px; padding:2px 4px 4px;">
+              <div onClick="{{ onEditActiveCollection }}" style="font-size:14px; cursor:pointer;">✏️</div>
+              <div onClick="{{ onToggleShareMenu }}" style="font-size:14px; cursor:pointer; position:relative;">🔗</div>
+              <div onClick="{{ onDeleteActiveCollection }}" style="font-size:14px; color:oklch(50% 0.18 30); cursor:pointer;">🗑️</div>
+            </div>
+          </sc-if>
+        </div>
+        <sc-if value="{{ saveMsg }}"><div style="flex-shrink:0; padding:4px 12px 0; font-size:11px; color:oklch(40% 0.13 145);">{{ saveMsg }}</div></sc-if>
+        <sc-if value="{{ shareMenuOpen }}">
+          <div style="flex-shrink:0; margin:8px 12px 0; background:oklch(99% 0.005 80); border:1px solid oklch(88% 0.01 70); border-radius:10px; box-shadow:0 8px 28px oklch(0% 0 0 / 0.18); overflow:hidden;">
+            <a href="{{ lineShareUrl }}" target="_blank" rel="noopener" onClick="{{ onCloseShareMenu }}" style="display:flex; align-items:center; gap:10px; padding:11px 14px; text-decoration:none; border-bottom:1px solid oklch(93% 0.01 70);" style-hover="background:oklch(96% 0.01 75);">
+              <div style="width:26px; height:26px; border-radius:50%; background:#06C755; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><span style="color:#fff; font-size:8.5px; font-weight:700; font-family:'Work Sans',sans-serif;">LINE</span></div>
+              <div style="font-size:13px; color:oklch(25% 0.02 60); font-weight:500;">LINE</div>
+            </a>
+            <a href="{{ facebookShareUrl }}" target="_blank" rel="noopener" onClick="{{ onCloseShareMenu }}" style="display:flex; align-items:center; gap:10px; padding:11px 14px; text-decoration:none; border-bottom:1px solid oklch(93% 0.01 70);" style-hover="background:oklch(96% 0.01 75);">
+              <div style="width:26px; height:26px; border-radius:50%; background:#1877F2; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><span style="color:#fff; font-size:14px; font-weight:700; font-family:serif;">f</span></div>
+              <div style="font-size:13px; color:oklch(25% 0.02 60); font-weight:500;">Facebook</div>
+            </a>
+            <a href="{{ whatsappShareUrl }}" target="_blank" rel="noopener" onClick="{{ onCloseShareMenu }}" style="display:flex; align-items:center; gap:10px; padding:11px 14px; text-decoration:none; border-bottom:1px solid oklch(93% 0.01 70);" style-hover="background:oklch(96% 0.01 75);">
+              <div style="width:26px; height:26px; border-radius:50%; background:#25D366; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.06-1.33A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2Zm0 2c4.42 0 8 3.58 8 8s-3.58 8-8 8a7.95 7.95 0 0 1-4.06-1.11l-.29-.17-3 .79.8-2.93-.19-.3A7.95 7.95 0 0 1 4 12c0-4.42 3.58-8 8-8Z"/></svg></div>
+              <div style="font-size:13px; color:oklch(25% 0.02 60); font-weight:500;">WhatsApp</div>
+            </a>
+            <div onClick="{{ onCopyShareLink }}" style="display:flex; align-items:center; gap:10px; padding:11px 14px; cursor:pointer;" style-hover="background:oklch(96% 0.01 75);">
+              <div style="width:26px; height:26px; border-radius:50%; background:oklch(88% 0.01 70); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="12" height="12" rx="2" stroke="oklch(35% 0.02 60)" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="oklch(35% 0.02 60)" stroke-width="1.8"/></svg></div>
+              <div style="font-size:13px; color:oklch(25% 0.02 60); font-weight:500;">{{ t.fav_copy_link }}</div>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ shareCopied }}"><div style="flex-shrink:0; text-align:center; font-size:11.5px; color:oklch(45% 0.15 150); padding:4px 12px 0;">{{ t.fav_share_copied }}</div></sc-if>
         <div style="flex:1; overflow-y:auto; padding:12px;">
-          <sc-for list="{{ favoriteRows }}" as="fr" hint-placeholder-count="1">
-            <a href="{{ fr.href }}" style="display:flex; gap:10px; align-items:flex-start; padding:10px; border-radius:8px; text-decoration:none; margin-bottom:6px;" style-hover="background:oklch(96% 0.01 75);">
+          <div style="display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); column-gap:8px; row-gap:14px;">
+          <sc-for list="{{ favoriteRows }}" as="fr" hint-placeholder-count="2">
+            <a href="{{ fr.href }}" style="display:flex; flex-direction:row; align-items:center; gap:8px; padding:4px; border-radius:8px; text-decoration:none; position:relative; min-width:0; background:{{ fr.rowBg }};">
               <div style="{{ fr.thumbStyle }}"></div>
-              <div style="flex:1; min-width:0;">
-                <div style="font-size:13px; color:oklch(25% 0.02 60); font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ fr.title }}</div>
-                <div style="font-size:12.5px; color:oklch(35% 0.13 25); font-weight:600; margin-top:2px;">{{ fr.priceLabel }}</div>
-                <sc-if value="{{ fr.locationLabel }}"><div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📍 {{ fr.locationLabel }}</div></sc-if>
-                <sc-if value="{{ fr.specsLabel }}"><div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-top:1px;">{{ fr.specsLabel }}</div></sc-if>
+              <div style="min-width:0; flex:1; padding-right:22px;">
+                <div style="font-size:12px; color:oklch(25% 0.02 60); font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ fr.title }}</div>
+                <div style="font-size:11.5px; color:oklch(35% 0.13 25); font-weight:600; margin-top:2px;">{{ fr.priceLabel }}</div>
+                <sc-if value="{{ fr.locationLabel }}"><div style="font-size:10.5px; color:oklch(50% 0.02 60); margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">📍 {{ fr.locationLabel }}</div></sc-if>
+                <sc-if value="{{ fr.specsLabel }}"><div style="font-size:10.5px; color:oklch(50% 0.02 60); margin-top:1px;">{{ fr.specsLabel }}</div></sc-if>
               </div>
-              <div onClick="{{ fr.onRemove }}" style="font-size:11px; color:oklch(50% 0.15 30); cursor:pointer; padding:6px; flex-shrink:0;">✕</div>
+              <div onClick="{{ fr.onToggle }}" style="position:absolute; top:6px; right:6px; width:22px; height:22px; border-radius:50%; background:{{ fr.toggleBg }}; display:flex; align-items:center; justify-content:center; font-size:12px; color:{{ fr.toggleColor }}; font-weight:700;">{{ fr.toggleIcon }}</div>
             </a>
           </sc-for>
+          </div>
           <sc-if value="{{ noFavorites }}"><div style="text-align:center; padding:30px 10px; font-size:13px; color:oklch(55% 0.02 60);">{{ noFavoritesLabel }}</div></sc-if>
         </div>
-        <sc-if value="{{ hasFavCount }}">
-          <div style="flex-shrink:0; padding:12px; border-top:1px solid oklch(90% 0.01 70); position:relative;">
-            <div onClick="{{ onToggleShareMenu }}" style="cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:11px; border-radius:100px; font-size:13px; font-weight:600;">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5" r="3" stroke="currentColor" stroke-width="1.8"/><circle cx="6" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="19" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M8.6 10.6L15.4 6.4M8.6 13.4L15.4 17.6" stroke="currentColor" stroke-width="1.8"/></svg>
-              {{ t.fav_share_btn }}
-            </div>
-            <sc-if value="{{ shareMenuOpen }}">
-              <div style="position:absolute; left:12px; right:12px; bottom:100%; margin-bottom:8px; background:oklch(99% 0.005 80); border:1px solid oklch(88% 0.01 70); border-radius:10px; box-shadow:0 8px 28px oklch(0% 0 0 / 0.18); overflow:hidden;">
-                <a href="{{ lineShareUrl }}" target="_blank" rel="noopener" onClick="{{ onCloseShareMenu }}" style="display:flex; align-items:center; gap:10px; padding:11px 14px; text-decoration:none; border-bottom:1px solid oklch(93% 0.01 70);" style-hover="background:oklch(96% 0.01 75);">
-                  <div style="width:26px; height:26px; border-radius:50%; background:#06C755; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><span style="color:#fff; font-size:8.5px; font-weight:700; font-family:'Work Sans',sans-serif;">LINE</span></div>
-                  <div style="font-size:13px; color:oklch(25% 0.02 60); font-weight:500;">LINE</div>
-                </a>
-                <a href="{{ facebookShareUrl }}" target="_blank" rel="noopener" onClick="{{ onCloseShareMenu }}" style="display:flex; align-items:center; gap:10px; padding:11px 14px; text-decoration:none; border-bottom:1px solid oklch(93% 0.01 70);" style-hover="background:oklch(96% 0.01 75);">
-                  <div style="width:26px; height:26px; border-radius:50%; background:#1877F2; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><span style="color:#fff; font-size:14px; font-weight:700; font-family:serif;">f</span></div>
-                  <div style="font-size:13px; color:oklch(25% 0.02 60); font-weight:500;">Facebook</div>
-                </a>
-                <a href="{{ whatsappShareUrl }}" target="_blank" rel="noopener" onClick="{{ onCloseShareMenu }}" style="display:flex; align-items:center; gap:10px; padding:11px 14px; text-decoration:none; border-bottom:1px solid oklch(93% 0.01 70);" style-hover="background:oklch(96% 0.01 75);">
-                  <div style="width:26px; height:26px; border-radius:50%; background:#25D366; display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="#fff"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.06-1.33A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2Zm0 2c4.42 0 8 3.58 8 8s-3.58 8-8 8a7.95 7.95 0 0 1-4.06-1.11l-.29-.17-3 .79.8-2.93-.19-.3A7.95 7.95 0 0 1 4 12c0-4.42 3.58-8 8-8Z"/></svg></div>
-                  <div style="font-size:13px; color:oklch(25% 0.02 60); font-weight:500;">WhatsApp</div>
-                </a>
-                <div onClick="{{ onCopyShareLink }}" style="display:flex; align-items:center; gap:10px; padding:11px 14px; cursor:pointer;" style-hover="background:oklch(96% 0.01 75);">
-                  <div style="width:26px; height:26px; border-radius:50%; background:oklch(88% 0.01 70); display:flex; align-items:center; justify-content:center; flex-shrink:0;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="12" height="12" rx="2" stroke="oklch(35% 0.02 60)" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="oklch(35% 0.02 60)" stroke-width="1.8"/></svg></div>
-                  <div style="font-size:13px; color:oklch(25% 0.02 60); font-weight:500;">{{ t.fav_copy_link }}</div>
-                </div>
-              </div>
-            </sc-if>
-            <sc-if value="{{ shareCopied }}"><div style="text-align:center; font-size:11.5px; color:oklch(45% 0.15 150); margin-top:6px;">{{ t.fav_share_copied }}</div></sc-if>
-          </div>
-        </sc-if>
-        <sc-if value="{{ hasFavCount }}">
-          <div style="flex-shrink:0; padding:0 12px 12px;">
-            <div onClick="{{ onCopyShareLink }}" style="cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; background:oklch(96% 0.01 75); border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:10px; border-radius:100px; font-size:12.5px; font-weight:600;">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5a2 2 0 0 1 2-2h10" stroke="currentColor" stroke-width="1.8"/></svg>
-              {{ t.fav_copy_link }}
-            </div>
-          </div>
-        </sc-if>
       </div>
     </div>
   </sc-if>
@@ -124,7 +163,7 @@
   <sc-if value="{{ chatBarOpen }}">
     <div onClick="{{ onExpandChat }}" style="position:fixed; bottom:{{ chatBarBottom }}; right:{{ chatBarRight }}; z-index:85; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); border-radius:100px; padding:12px 18px; display:flex; align-items:center; gap:8px; cursor:pointer; box-shadow:0 12px 32px oklch(0% 0 0 / 0.25); max-width:{{ chatBarMaxWidth }};">
       <span style="font-size:15px; flex-shrink:0;">💬</span>
-      <sc-if value="{{ showFavLabel }}"><span style="font-family:'Playfair Display',serif; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.chat_title }}</span></sc-if>
+      <sc-if value="{{ showFavLabel }}"><span style="font-family:'Playfair Display',serif; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.rail_chat_hint }}</span></sc-if>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;"><path d="M6 15L12 9L18 15" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
   </sc-if>
@@ -321,11 +360,19 @@ const CHAT_I18N = {
   it: { chat_title: "Chiedi sui nostri immobili", chat_subtitle: "Assistente IA · solo annunci huahin.properties", chat_placeholder: "es. Ville con piscina 4 camere?", chat_thinking: "Sta scrivendo…", chat_talk_to_human: "Preferisci parlare con una persona? Lascia i tuoi contatti →", chat_greeting: "Ciao! Chiedimi qualsiasi cosa sui nostri annunci — camere, prezzo, zona, codice immobile o disponibilità.", chat_view_property: "Vedi immobile", chat_contact_us: "Contattaci", chat_autobot_intro: "Ciao! Ho notato che ti interessano", chat_autobot_help: "Posso aiutarti con qualcosa di specifico?" },
 };
 
-const FAV_PANEL_LABELS = { en: "My Favorites", th: "รายการโปรดของฉัน", ru: "Избранное", zh: "我的收藏", de: "Meine Favoriten", no: "Mine favoritter", fr: "Mes favoris", it: "I miei preferiti" };
+const FAV_PANEL_LABELS = { en: "Collection", th: "คอลเลคชั่น", ru: "Коллекция", zh: "收藏集", de: "Kollektion", no: "Kolleksjon", fr: "Collection", it: "Collezione" };
 const FAV_EMPTY_LABELS = { en: "No saved favorites yet — tap the star on any listing.", th: "ยังไม่มีรายการโปรด — กดดาวที่ประกาศที่สนใจได้เลย", ru: "Пока нет избранного — нажмите звезду на объекте.", zh: "暂无收藏 — 点击房源上的星标即可收藏", de: "Noch keine Favoriten — tippen Sie auf den Stern bei einem Angebot.", no: "Ingen favoritter ennå — trykk på stjernen på en oppføring.", fr: "Aucun favori pour l'instant — appuyez sur l'étoile d'une annonce.", it: "Nessun preferito ancora — tocca la stella su un annuncio." };
 const FAV_SUBTITLE = { en: "Save properties, come back later, or share this collection", th: "บันทึกทรัพย์ที่สนใจไว้ดูภายหลัง หรือแชร์เป็นคอลเลคชั่นให้ลูกค้า", ru: "Сохраняйте объекты или поделитесь подборкой", zh: "保存房源，稍后查看，或分享此收藏", de: "Objekte speichern oder diese Auswahl teilen", no: "Lagre eiendommer eller del denne samlingen", fr: "Enregistrez des biens ou partagez cette sélection", it: "Salva immobili o condividi questa selezione" };
 const FAV_SHARE_BTN = { en: "Share this Collection", th: "แชร์คอลเลคชั่นนี้", ru: "Поделиться подборкой", zh: "分享此收藏", de: "Auswahl teilen", no: "Del samlingen", fr: "Partager la sélection", it: "Condividi la selezione" };
 const FAV_SHARE_COPIED = { en: "Link copied — send it to your customer", th: "คัดลอกลิงก์แล้ว — ส่งให้ลูกค้าได้เลย", ru: "Ссылка скопирована", zh: "链接已复制", de: "Link kopiert", no: "Lenke kopiert", fr: "Lien copié", it: "Link copiato" };
+const FAV_FILTER_STATUS_ANY = { en: "Buy or Rent", th: "ซื้อหรือเช่า", ru: "Купить/Аренда", zh: "买或租", de: "Kaufen/Mieten", no: "Kjøp/Leie", fr: "Achat/Location", it: "Acquisto/Affitto" };
+const FAV_FILTER_BUY = { en: "For Sale", th: "ประกาศขาย", ru: "Продажа", zh: "出售", de: "Zu verkaufen", no: "Til salgs", fr: "À vendre", it: "In vendita" };
+const FAV_FILTER_RENT = { en: "For Rent", th: "ประกาศเช่า", ru: "Аренда", zh: "出租", de: "Zu vermieten", no: "Til leie", fr: "À louer", it: "In affitto" };
+const FAV_FILTER_BEDS_ANY = { en: "Any Bedrooms", th: "ห้องนอนทุกขนาด", ru: "Любые спальни", zh: "任意卧室", de: "Alle Schlafzimmer", no: "Alle soverom", fr: "Toutes chambres", it: "Tutte le camere" };
+const FAV_FILTER_ZONE_ANY = { en: "All Zones", th: "ทุกโซน", ru: "Все зоны", zh: "所有区域", de: "Alle Zonen", no: "Alle soner", fr: "Toutes zones", it: "Tutte le zone" };
+const FAV_FILTER_DISTRICT_ANY = { en: "All Districts", th: "ทุกอำเภอ", ru: "Все районы", zh: "所有区", de: "Alle Bezirke", no: "Alle distrikter", fr: "Tous quartiers", it: "Tutti i distretti" };
+const FAV_FILTER_PRICE_ANY = { en: "Any Price", th: "ราคาทุกช่วง", ru: "Любая цена", zh: "任意价格", de: "Jeder Preis", no: "Alle priser", fr: "Tout prix", it: "Qualsiasi prezzo" };
+const FAV_SAVE_BTN = { en: "Save", th: "บันทึก", ru: "Сохранить", zh: "保存", de: "Speichern", no: "Lagre", fr: "Enregistrer", it: "Salva" };
 const FAV_COPY_LINK = { en: "Copy Link", th: "คัดลอกลิงก์ (Copy Link)", ru: "Копировать ссылку", zh: "复制链接", de: "Link kopieren", no: "Kopier lenke", fr: "Copier le lien", it: "Copia link" };
 
 // claudeComplete's Cloud Function URL (used by the ordinary, non-Customer-
@@ -342,6 +389,8 @@ class Component extends DCLogic {
     isMobile: (typeof window !== "undefined" && window.innerWidth < 640),
     ownerPreview: false,
     railOpen: true, formOpen: false, submitted: false, favoritesOpen: false, favIds: [],
+    favFilterStatus: "", favFilterBedrooms: "", favFilterZone: "", favFilterArea: "", favFilterPriceMax: "", saveMsg: "",
+    favCollections: [], favActiveCollection: "", favPendingIds: [], showAddToCollectionFor: "", favMinimized: false,
     name: "", phone: "", email: "", message: "",
     lang: "th",
     chatOpen: false, chatMinimized: false, chatMessages: [], chatInput: "", chatLoading: false,
@@ -522,7 +571,7 @@ class Component extends DCLogic {
     try {
       const favs = this._favs || (await import("./favorites.js"));
       this._favs = favs;
-      this.setState({ favIds: favs.getFavoritedIds() });
+      this.setState({ favIds: favs.getFavoritedIds(), favCollections: favs.getCollections() });
     } catch (e) {}
   }
 
@@ -964,6 +1013,89 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
     this._refreshFavIds();
   }
 
+  resetDraftCollection() {
+    this.setState({
+      favActiveCollection: "", favFilterStatus: "", favFilterBedrooms: "", favFilterArea: "", favFilterZone: "", favFilterPriceMax: "",
+      favPendingIds: this._poolIdsForFilters({}),
+    });
+  }
+
+  selectCollectionTab(c) {
+    const members = this._favs ? this._favs.getCollectionPropertyIds(c.id) : [];
+    this.setState({
+      favActiveCollection: c.id, favPendingIds: [...members],
+      favFilterStatus: "", favFilterBedrooms: "", favFilterArea: "", favFilterZone: "", favFilterPriceMax: "",
+    });
+  }
+
+  toggleDraftProperty(id) {
+    this.setState((s) => {
+      const has = s.favPendingIds.includes(id);
+      return { favPendingIds: has ? s.favPendingIds.filter((x) => x !== id) : [...s.favPendingIds, id] };
+    });
+  }
+
+  editActiveCollection() {
+    if (!this._favs || !this.state.favActiveCollection) return;
+    const current = (this.state.favCollections.find((c) => c.id === this.state.favActiveCollection) || {}).name || "";
+    const name = window.prompt("แก้ไขชื่อคอลเลคชั่น", current);
+    if (!name || !name.trim()) return;
+    this._favs.renameCollection(this.state.favActiveCollection, name.trim());
+    this._refreshFavIds();
+  }
+
+  deleteActiveCollection() {
+    if (!this._favs || !this.state.favActiveCollection) return;
+    if (!window.confirm("ลบคอลเลคชั่นนี้?")) return;
+    this._favs.deleteCollection(this.state.favActiveCollection);
+    this.setState({ favActiveCollection: "", favPendingIds: [] });
+    this._refreshFavIds();
+  }
+
+  _poolIdsForFilters(filters) {
+    const props = this._properties || (this._mod ? this._mod.PROPERTIES : []) || [];
+    return props.filter((p) => {
+      if (filters.status && p.status !== filters.status) return false;
+      if (filters.bedrooms && Number(p.bedrooms || 0) < Number(filters.bedrooms)) return false;
+      if (filters.area && p.area !== filters.area) return false;
+      if (filters.zone && p.zone !== filters.zone) return false;
+      if (filters.priceMax && Number(p.price || 0) > Number(filters.priceMax)) return false;
+      return true;
+    }).map((p) => p.id);
+  }
+
+  _setFilterAndAutoSelect(key, value) {
+    const filters = {
+      status: this.state.favFilterStatus, bedrooms: this.state.favFilterBedrooms, area: this.state.favFilterArea,
+      zone: this.state.favFilterZone, priceMax: this.state.favFilterPriceMax, [key]: value,
+    };
+    this.setState({ ["favFilter" + key.charAt(0).toUpperCase() + key.slice(1)]: value, favActiveCollection: "", favPendingIds: this._poolIdsForFilters(filters) });
+  }
+
+  _poolProperties() {
+    const props = this._properties || (this._mod ? this._mod.PROPERTIES : []) || [];
+    return props.filter((p) => this.state.favPendingIds.includes(p.id));
+  }
+
+  saveDraftCollection() {
+    if (!this._favs) return;
+    if (!this.state.favPendingIds.length) { this.setState({ saveMsg: "ยังไม่ได้เลือกทรัพย์ใดๆ" }); setTimeout(() => this.setState({ saveMsg: "" }), 2200); return; }
+    let targetId = this.state.favActiveCollection;
+    if (!targetId) {
+      const name = window.prompt("ตั้งชื่อคอลเลคชั่นใหม่ (เช่น คุณเจน)", "");
+      if (!name || !name.trim()) return;
+      targetId = this._favs.createCollection(name.trim());
+    }
+    this._favs.setCollectionMembers(targetId, this.state.favPendingIds);
+    this.setState({
+      favActiveCollection: "", saveMsg: "บันทึกแล้ว ✓",
+      favFilterStatus: "", favFilterBedrooms: "", favFilterArea: "", favFilterZone: "", favFilterPriceMax: "",
+      favPendingIds: this._poolIdsForFilters({}),
+    });
+    this._refreshFavIds();
+    setTimeout(() => this.setState({ saveMsg: "" }), 2200);
+  }
+
   async shareCollection() {
     const ids = this.state.favIds;
     if (!ids.length) return;
@@ -1012,8 +1144,9 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
     };
 
     const chatT = CHAT_I18N[this.state.lang] || CHAT_I18N.en;
-    const favExtra = { fav_subtitle: FAV_SUBTITLE[this.state.lang] || FAV_SUBTITLE.en, fav_share_btn: FAV_SHARE_BTN[this.state.lang] || FAV_SHARE_BTN.en, fav_share_copied: FAV_SHARE_COPIED[this.state.lang] || FAV_SHARE_COPIED.en, fav_copy_link: FAV_COPY_LINK[this.state.lang] || FAV_COPY_LINK.en };
-    const collectionUrl = `${window.location.origin}${window.location.pathname}?collection=${this.state.favIds.map(encodeURIComponent).join(",")}${this._myOwnerId ? "&sender=" + encodeURIComponent(this._myOwnerId) : ""}`;
+    const favExtra = { fav_filter_district_any: FAV_FILTER_DISTRICT_ANY[this.state.lang] || FAV_FILTER_DISTRICT_ANY.en, fav_filter_price_any: FAV_FILTER_PRICE_ANY[this.state.lang] || FAV_FILTER_PRICE_ANY.en, fav_save_btn: FAV_SAVE_BTN[this.state.lang] || FAV_SAVE_BTN.en, fav_filter_status_any: FAV_FILTER_STATUS_ANY[this.state.lang] || FAV_FILTER_STATUS_ANY.en, fav_filter_buy: FAV_FILTER_BUY[this.state.lang] || FAV_FILTER_BUY.en, fav_filter_rent: FAV_FILTER_RENT[this.state.lang] || FAV_FILTER_RENT.en, fav_filter_beds_any: FAV_FILTER_BEDS_ANY[this.state.lang] || FAV_FILTER_BEDS_ANY.en, fav_filter_zone_any: FAV_FILTER_ZONE_ANY[this.state.lang] || FAV_FILTER_ZONE_ANY.en, fav_subtitle: FAV_SUBTITLE[this.state.lang] || FAV_SUBTITLE.en, fav_share_btn: FAV_SHARE_BTN[this.state.lang] || FAV_SHARE_BTN.en, fav_share_copied: FAV_SHARE_COPIED[this.state.lang] || FAV_SHARE_COPIED.en, fav_copy_link: FAV_COPY_LINK[this.state.lang] || FAV_COPY_LINK.en };
+    const shareIds = this.state.favActiveCollection ? (this._favs ? this._favs.getCollectionPropertyIds(this.state.favActiveCollection) : []) : this.state.favIds;
+    const collectionUrl = `${window.location.origin}${window.location.pathname}?collection=${shareIds.map(encodeURIComponent).join(",")}${this._myOwnerId ? "&sender=" + encodeURIComponent(this._myOwnerId) : ""}`;
 
     return {
       t: { ...t, ...shared, ...chatT, ...favExtra },
@@ -1065,9 +1198,35 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       favButtonPadding: this.state.isMobile ? "12px" : "12px 18px",
       favButtonLabel: FAV_PANEL_LABELS[this.state.lang] || FAV_PANEL_LABELS.en,
       favCount: this.state.favIds.length,
-      hasFavCount: this.state.favIds.length > 0,
-      onOpenFavorites: () => this.setState({ favoritesOpen: true, chatOpen: false }),
-      onCloseFavorites: () => this.setState({ favoritesOpen: false }),
+      hasFavCount: shareIds.length > 0,
+      onOpenFavorites: () => this.setState({ favoritesOpen: true, favMinimized: false, chatOpen: false, favPendingIds: (this.state.favActiveCollection || this.state.favPendingIds.length) ? this.state.favPendingIds : this._poolIdsForFilters({}) }),
+      onCloseFavorites: () => this.setState({ favoritesOpen: false, favMinimized: false }),
+      onMinimizeFavorites: () => this.setState({ favMinimized: true }),
+      onExpandFavorites: () => this.setState({ favMinimized: false }),
+      favBarOpen: this.state.favoritesOpen && this.state.favMinimized,
+      favBarBottom: this.state.isMobile ? "16px" : "20px",
+      favBarLeft: "16px",
+      favFilterStatus: this.state.favFilterStatus,
+      favFilterBedrooms: this.state.favFilterBedrooms,
+      favFilterZone: this.state.favFilterZone,
+      favFilterArea: this.state.favFilterArea,
+      favFilterPriceMax: this.state.favFilterPriceMax,
+      onFavFilterStatus: (e) => this._setFilterAndAutoSelect("status", e.target.value),
+      onFavFilterBedrooms: (e) => this._setFilterAndAutoSelect("bedrooms", e.target.value),
+      onFavFilterZone: (e) => this._setFilterAndAutoSelect("zone", e.target.value),
+      onFavFilterArea: (e) => this._setFilterAndAutoSelect("area", e.target.value),
+      onFavFilterPriceMax: (e) => this._setFilterAndAutoSelect("priceMax", e.target.value),
+      favZoneOptions: (() => {
+        const props = this._properties || (this._mod ? this._mod.PROPERTIES : []) || [];
+        const zones = new Set(this.state.favIds.map((id) => { const p = props.find((pr) => pr.id === id); return p && p.zone; }).filter(Boolean));
+        return Array.from(zones);
+      })(),
+      onSaveFilteredToCollection: () => this.saveDraftCollection(),
+      saveMsg: this.state.saveMsg,
+      favOverlayPadding: (this.state.isMobile || this.state.customerMode) ? "0" : "20px",
+      favPanelRadius: (this.state.isMobile || this.state.customerMode) ? "0" : "10px",
+      favPanelMaxWidth: (this.state.isMobile || this.state.customerMode) ? "100%" : "520px",
+      favPanelHeight: (this.state.isMobile || this.state.customerMode) ? "100dvh" : "min(560px, 80vh)",
       onToggleShareMenu: () => this.setState((s) => ({ shareMenuOpen: !s.shareMenuOpen })),
       onCloseShareMenu: () => this.setState({ shareMenuOpen: false }),
       onCopyShareLink: () => this.shareCollection(),
@@ -1076,22 +1235,38 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       facebookShareUrl: "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(collectionUrl),
       whatsappShareUrl: "https://wa.me/?text=" + encodeURIComponent(collectionUrl),
       shareCopied: this.state.shareCopied,
-      favoritesOpen: this.state.favoritesOpen,
+      favoritesOpen: this.state.favoritesOpen && !this.state.favMinimized,
       noFavoritesLabel: FAV_EMPTY_LABELS[this.state.lang] || FAV_EMPTY_LABELS.en,
-      noFavorites: this.state.favIds.length === 0,
-      favoriteRows: this.state.favIds.map((id) => {
-        const props = this._properties || (this._mod ? this._mod.PROPERTIES : []) || [];
-        const p = props.find((pr) => pr.id === id);
-        const title = p ? ((p.title && (p.title[this.state.lang] || p.title.en)) || p.id) : id;
-        const cover = p && p.photos && p.photos[0] && p.photos[0].url;
+      noFavorites: this._poolProperties().length === 0,
+      favCollectionTabs: this.state.favCollections.map((c) => {
+        const active = this.state.favActiveCollection === c.id;
+        return {
+          id: c.id, name: c.name, isActive: active, onSelect: () => this.selectCollectionTab(c),
+          nameFontSize: active ? "15px" : "12px",
+          nameColor: active ? "oklch(50% 0.18 25)" : "oklch(35% 0.02 60)",
+        };
+      }),
+      isCollectionTab: !!this.state.favActiveCollection,
+      onDeleteActiveCollection: () => this.deleteActiveCollection(),
+      onEditActiveCollection: () => this.editActiveCollection(),
+      onToggleNewCollectionInput: () => this.resetDraftCollection(),
+      favoriteRows: this._poolProperties().map((p) => {
+        const id = p.id;
+        const title = (p.title && (p.title[this.state.lang] || p.title.en)) || p.id;
+        const cover = p.photos && p.photos[0] && p.photos[0].url;
+        const selected = true;
         return {
           href: `Property Details.dc.html?id=${encodeURIComponent(id)}`,
           title,
-          priceLabel: p ? `${(p.price || 0).toLocaleString()} ${p.currency || "THB"}` : "",
-          locationLabel: p ? [p.zone, p.area].filter(Boolean).join(", ") : "",
-          specsLabel: p ? [p.bedrooms ? `${p.bedrooms} ${this.state.lang === "th" ? "ห้องนอน" : "bed"}` : null, p.bathrooms ? `${p.bathrooms} ${this.state.lang === "th" ? "ห้องน้ำ" : "bath"}` : null].filter(Boolean).join(" · ") : "",
+          priceLabel: `${(p.price || 0).toLocaleString()} ${p.currency || "THB"}`,
+          locationLabel: [p.zone, p.area].filter(Boolean).join(", "),
+          specsLabel: [p.bedrooms ? `${p.bedrooms} ${this.state.lang === "th" ? "ห้องนอน" : "bed"}` : null, p.bathrooms ? `${p.bathrooms} ${this.state.lang === "th" ? "ห้องน้ำ" : "bath"}` : null].filter(Boolean).join(" · "),
           thumbStyle: `width:64px; height:64px; border-radius:6px; flex-shrink:0; background:${cover ? `url(${cover}) center/cover` : "oklch(90% 0.01 70)"};`,
-          onRemove: (e) => { e.preventDefault(); e.stopPropagation(); this.removeFavorite(id); },
+          rowBg: "transparent",
+          toggleIcon: "✕",
+          toggleBg: "oklch(99% 0.005 80 / 0.9)",
+          toggleColor: "oklch(50% 0.15 30)",
+          onToggle: (e) => { e.preventDefault(); e.stopPropagation(); this.toggleDraftProperty(id); },
         };
       }),
       onChatInput: (e) => this.setState({ chatInput: e.target.value }),

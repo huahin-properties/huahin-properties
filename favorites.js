@@ -133,3 +133,76 @@ export function getFavoritedIds() {
     .sort((a, b) => b[1].addedAt - a[1].addedAt)
     .map(([id]) => id);
 }
+
+// ── Named Collections (client-side, no login) ────────────────────────────
+// Any visitor can group their favorites into named sets ("Collection A",
+// "คุณเจน", etc) to keep buyers' shortlists separate — same idea as the
+// agent-side Firestore collections in Lister Dashboard, but local-only
+// here since an anonymous visitor has no account to sync to.
+const COLLECTIONS_KEY = "hh_fav_collections";        // [{ id, name, createdAt }]
+const COLLECTION_MEMBERS_KEY = "hh_fav_collection_members"; // { [collectionId]: [propertyId,...] }
+
+export function getCollections() {
+  return readJSON(COLLECTIONS_KEY, []);
+}
+
+function getCollectionMembers() {
+  return readJSON(COLLECTION_MEMBERS_KEY, {});
+}
+
+export function getCollectionPropertyIds(collectionId) {
+  const members = getCollectionMembers();
+  return members[collectionId] || [];
+}
+
+export function createCollection(name) {
+  const id = "c" + Date.now() + Math.random().toString(36).slice(2, 6);
+  const cols = getCollections();
+  cols.push({ id, name: name || "Collection " + (cols.length + 1), createdAt: Date.now() });
+  writeJSON(COLLECTIONS_KEY, cols);
+  try { window.dispatchEvent(new CustomEvent("hh_favorites_changed")); } catch (e) {}
+  return id;
+}
+
+export function renameCollection(id, name) {
+  const cols = getCollections().map((c) => (c.id === id ? { ...c, name } : c));
+  writeJSON(COLLECTIONS_KEY, cols);
+  try { window.dispatchEvent(new CustomEvent("hh_favorites_changed")); } catch (e) {}
+}
+
+export function deleteCollection(id) {
+  writeJSON(COLLECTIONS_KEY, getCollections().filter((c) => c.id !== id));
+  const members = getCollectionMembers();
+  delete members[id];
+  writeJSON(COLLECTION_MEMBERS_KEY, members);
+  try { window.dispatchEvent(new CustomEvent("hh_favorites_changed")); } catch (e) {}
+}
+
+export function addToCollection(collectionId, propertyId) {
+  const members = getCollectionMembers();
+  const list = members[collectionId] || [];
+  if (!list.includes(propertyId)) {
+    members[collectionId] = [...list, propertyId];
+    writeJSON(COLLECTION_MEMBERS_KEY, members);
+  }
+  // Being in any collection implies favorited, so it also shows in "All".
+  if (!isFavorited(propertyId)) toggleFavorite(propertyId);
+  try { window.dispatchEvent(new CustomEvent("hh_favorites_changed")); } catch (e) {}
+}
+
+// Overwrites a collection's full membership list at once — used when
+// saving a draft selection (Save button), since the draft already holds
+// the complete desired set rather than an incremental add/remove.
+export function setCollectionMembers(collectionId, propertyIds) {
+  const members = getCollectionMembers();
+  members[collectionId] = [...propertyIds];
+  writeJSON(COLLECTION_MEMBERS_KEY, members);
+  try { window.dispatchEvent(new CustomEvent("hh_favorites_changed")); } catch (e) {}
+}
+
+export function removeFromCollection(collectionId, propertyId) {
+  const members = getCollectionMembers();
+  members[collectionId] = (members[collectionId] || []).filter((x) => x !== propertyId);
+  writeJSON(COLLECTION_MEMBERS_KEY, members);
+  try { window.dispatchEvent(new CustomEvent("hh_favorites_changed")); } catch (e) {}
+}
