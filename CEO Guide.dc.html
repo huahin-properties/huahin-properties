@@ -809,6 +809,10 @@ class Component extends DCLogic {
       { file: "GITHUB_UPLOAD_GUIDE.md", path: "./GITHUB_UPLOAD_GUIDE.md", desc: "ขั้นตอน Upload ขึ้น GitHub ทีละสเต็ป + Checklist",
         detail: "📄 คืออะไร: คู่มือ Upload ไฟล์ขึ้น GitHub แบบทีละสเต็ป เขียนขึ้นเพื่อแก้ปัญหา 404 จาก Hotfix v1.0.1 โดยเฉพาะ\n📂 ประกอบด้วย: ขั้นตอน Upload ไฟล์ root, วิธี Upload โฟลเดอร์ docs/ceo-handoff (จุดพลาดบ่อย), checklist ก่อนปิดงาน\n🔗 เชื่อมกับ: RELEASE CHECKLIST.md (ใช้ต่อกัน)\n🕓 อัปเดตล่าสุด: 25 ก.ค. 2569 — สร้างระหว่าง Hotfix v1.0.1\n✅ สถานะ: ใช้งานจริงทุกครั้งก่อน Upload" },
     ]},
+    { title: "⑤ สิทธิ์เข้าถึงที่ต้องส่งมอบ (Access Handoff)", items: [
+      { file: "ACCESS_HANDOFF_CHECKLIST.md", path: "./ACCESS_HANDOFF_CHECKLIST.md", desc: "Checklist สิทธิ์เข้าระบบจริงที่ต้องมอบให้ผู้พัฒนาใหม่ (GitHub/Firebase/Stripe ฯลฯ)",
+        detail: "📄 คืออะไร: แยกจากเอกสาร 22 ไฟล์ที่อธิบาย \"โครงการคืออะไร\" — ไฟล์นี้คือ checklist ว่าต้อง **ให้สิทธิ์เข้าระบบจริง** อะไรบ้าง ผู้พัฒนาใหม่อ่านเอกสารเข้าใจแล้วแต่ยังทำงานจริงไม่ได้ถ้าไม่มีสิทธิ์เข้าระบบ\n📂 ประกอบด้วย: GitHub Collaborator, Firebase Console Member, Stripe Team, Anthropic API key (อยู่ใน Firebase Secret ไม่ต้องส่งตรง), Domain/DNS ผู้ดูแล, GitHub Codespaces\n🔗 เชื่อมกับ: HANDOFF_CHECKLIST.md (ก่อนส่งต่อ), CLAUDE.md (deployment workflow)\n🕓 อัปเดตล่าสุด: 27 ก.ค. 2569 — สร้างใหม่\n✅ สถานะ: ใช้งานจริง ติ๊กครบก่อนปิดงานส่งมอบทุกครั้ง" },
+    ]},
   ];
 
   state = {
