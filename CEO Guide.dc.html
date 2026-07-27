@@ -10,6 +10,7 @@
 <helmet>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <title>CEO Guide — huahin.properties</title>
   <meta name="robots" content="noindex, nofollow">
   <style>
@@ -675,6 +676,52 @@
       <p><strong>ตรวจพบว่าแนบไฟล์ไม่ครบ</strong><br/>→ AI ควรหยุดและบอกชื่อไฟล์ที่หายไปตามกติกาใน HANDOVER PROMPT.md ถ้า AI ไม่ทำเช่นนั้น ให้แนบไฟล์ที่ขาดแล้วย้ำกติกานี้อีกครั้ง</p>
     </div>
 
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">14. 📦 ชุดเอกสารส่งต่องาน (Handoff Package)</h2>
+    <div onclick="{{ toggleBanner }}" style="cursor:pointer; display:flex; align-items:center; gap:12px; background:oklch(35% 0.09 25); color:white; border-radius:8px; padding:14px 18px; margin-bottom:10px;">
+      <div style="font-size:22px;">📦</div>
+      <div style="flex:1;">
+        <div style="font-weight:700; font-size:14px;">ศูนย์เอกสารส่งต่องาน — คู่มือใช้ชุดนี้</div>
+        <div style="font-size:11.5px; opacity:0.85;">คลิกเพื่ออ่านว่าเอกสารชุดนี้คืออะไร ใช้ทำอะไร และประโยชน์ต่อ CEO</div>
+      </div>
+      <div style="font-size:13px; font-weight:600;">{{ bannerCaret }}</div>
+    </div>
+    <div style="{{ bannerWrapStyle }}">
+      <div><strong>คืออะไร</strong>: รวมไฟล์ทั้งหมด 22 ไฟล์ที่ใช้ "ส่งต่อความรู้เรื่องโครงการ" ให้คนใหม่หรือ AI ห้องใหม่ — แทนที่การอธิบายปากเปล่าทุกครั้ง</div>
+      <div style="margin-top:8px;"><strong>ใช้ทำอะไร/เมื่อไหร่</strong>: 3 สถานการณ์หลัก — (1) เปิดห้องแชต AI ใหม่เพื่อทำงานต่อ (2) เปลี่ยนผู้ช่วย CEO/Product Owner คนใหม่ (3) ส่งมอบทั้งโครงการให้ผู้พัฒนาใหม่จริงๆ</div>
+      <div style="margin-top:8px;"><strong>ทำไมต้องมีหลายไฟล์ ไม่รวมเป็นไฟล์เดียว</strong>: แต่ละไฟล์มีจุดประสงค์ต่างกัน (กติกา/สถานะปัจจุบัน/ประวัติ/ขั้นตอนทำงาน) แยกไว้เพื่ออ่านเฉพาะส่วนที่จำเป็น ไม่ต้องอ่านทั้งหมดทุกครั้ง — มี <code>HUAHIN_PROPERTIES_MASTER_HANDOFF.md</code> เป็นทางลัด "ไฟล์เดียวจบ" ไว้กรณีฉุกเฉิน</div>
+      <div style="margin-top:8px;"><strong>วิธีใช้จริง</strong>: ดูตาราง 4 หมวดด้านล่าง แต่ละการ์ดกด "ดูรายละเอียด" เพื่อรู้ว่าไฟล์นั้นคืออะไรก่อนเปิด แล้วกด 📥 ดาวน์โหลดเฉพาะไฟล์ที่ต้องใช้ หรือกด "ดาวน์โหลดทั้งหมด" ถ้าต้องส่งมอบทั้งชุด</div>
+      <div style="margin-top:8px;"><strong>ประโยชน์</strong>: CEO ไม่ต้องจำเองว่าไฟล์ไหนอยู่ตรงไหน ทำหน้าที่อะไร — เปิดหน้านี้ครั้งเดียวเจอครบ พร้อมอธิบายให้คนอื่นฟังต่อได้ทันที</div>
+    </div>
+    <div style="font-size:13px; color:oklch(45% 0.02 60); margin-bottom:14px;">รวมทุกไฟล์ที่ต้องใช้ส่งต่องานให้ผู้พัฒนาใหม่หรือ AI ห้องใหม่ ไว้ในที่เดียว — กด 📥 ที่ไฟล์ใดก็ดาวน์โหลดไฟล์นั้นทันที หรือกด "ดาวน์โหลดทั้งหมด" ด้านล่างเพื่อได้ ZIP รวมทุกไฟล์ในชุดนี้ แถบสีเขียว = ยืนยันแล้วว่าไฟล์อัปเดตล่าสุดและพร้อมส่งต่อ (หากมีการอัปเดตเนื้อหาไฟล์ใด ต้องมาติ๊กสถานะที่หน้านี้ให้ตรงก่อนส่งทุกครั้ง)</div>
+
+    <sc-for list="{{ handoffCategories }}" as="cat" hint-placeholder-count="4">
+      <div style="margin-bottom:16px;">
+        <div style="font-size:12px; font-weight:600; letter-spacing:0.04em; color:oklch(35% 0.08 25); margin-bottom:6px;">{{ cat.title }}</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:8px;">
+          <sc-for list="{{ cat.items }}" as="doc" hint-placeholder-count="3">
+            <div style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:10px 12px; display:flex; flex-direction:column; gap:6px; background:oklch(99% 0.005 70);">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                <code style="font-size:11.5px; font-weight:600; word-break:break-all;">{{ doc.file }}</code>
+                <span style="flex-shrink:0; font-size:10px; font-weight:700; padding:2px 7px; border-radius:100px; background:oklch(94% 0.08 150); color:oklch(30% 0.1 150); border:1px solid oklch(75% 0.1 150);">✓ พร้อม</span>
+              </div>
+              <div style="font-size:11.5px; color:oklch(45% 0.02 60); line-height:1.5;">{{ doc.desc }}</div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <a href="{{ doc.path }}" download style="font-size:11px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:4px 10px; border-radius:100px; font-weight:600;">📥 ดาวน์โหลด</a>
+                <div onclick="{{ doc.toggle }}" style="cursor:pointer; font-size:11px; color:oklch(45% 0.09 25); font-weight:600;">{{ doc.caret }}</div>
+              </div>
+              <div style="{{ doc.detailWrapStyle }}">{{ doc.detail }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+
+    <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
+      <div onclick="{{ downloadAll }}" style="cursor:pointer; font-size:13px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:9px 18px; border-radius:100px; font-weight:600;">⬇️ ดาวน์โหลดทั้งหมด (ZIP)</div>
+      <div style="font-size:11.5px; color:oklch(55% 0.02 60);">{{ downloadAllStatus }}</div>
+    </div>
+    <div style="font-size:11px; color:oklch(60% 0.01 70); margin-top:8px;">หมายเหตุ: มีไฟล์ .md เก่า/ซ้ำซ้อนอีกจำนวนหนึ่งอยู่ในโปรเจกต์ (เช่น release-notes เวอร์ชันย่อย, changelog รุ่นก่อนหน้า) ที่ไม่ได้รวมในชุดนี้เพราะล้าสมัยแล้ว — ชุดนี้คือไฟล์ปัจจุบันที่ใช้งานจริงเท่านั้น</div>
+
     <div style="margin-top:32px; font-size:12px; color:oklch(55% 0.02 60); text-align:center;">อ้างอิงจาก CEO GUIDE.md — หน้านี้อัปเดตพร้อมกันทุกครั้งที่เนื้อหาคู่มือเปลี่ยน</div>
 
   </div>
@@ -706,8 +753,67 @@
 // once, and Index + Copy + Relationships update automatically.
 // ============================================================
 class Component extends DCLogic {
+  // Handoff Package — single source of truth for the "send to new dev/AI" file
+  // list. All entries are currently verified up to date (25 ก.ค. 2569). When a
+  // file's content changes, keep it listed here — this IS the update record.
+  static HANDOFF_CATEGORIES = [
+    { title: "① เอกสารหลักระบบ (Core Blueprint)", items: [
+      { file: "CLAUDE.md", path: "./CLAUDE.md", desc: "บลูปรินต์เทคนิคหลัก: โครงสร้างทุกหน้า, Firebase, AI Chatbot, ระบบสมาชิก",
+        detail: "📄 คืออะไร: บลูปรินต์เทคนิคหลักของทั้งเว็บไซต์ — สรุปว่า \"ตอนนี้เว็บมีอะไรอยู่แล้วบ้าง\" (ตรงข้ามกับ BLUEPRINT.md ที่อธิบาย \"ทำไม/ประวัติ\")\n📂 ประกอบด้วย: แบรนด์/โทน, ระบบ 8 ภาษา, รายชื่อทุกหน้าเว็บ+หน้าที่, ระบบแชทบอท AI, Firebase/ฐานข้อมูล, ขั้นตอน deploy ของเจ้าของเว็บ, ปัญหาที่รู้อยู่แล้ว\n🔗 เชื่อมกับ: BLUEPRINT.md (อ่านคู่กันเสมอ), PROJECT_HISTORY.md\n🕓 อัปเดตล่าสุด: 22 ก.ค. 2569 — แก้บันทึกเรื่อง Firestore Security Rules ให้ตรงความจริง (ล็อกแล้ว ไม่ใช่เปิดโล่ง)\n✅ สถานะ: ใช้งานจริง เป็นไฟล์อ้างอิงหลัก" },
+      { file: "BLUEPRINT.md", path: "./BLUEPRINT.md", desc: "รายละเอียดเชิงลึกเสริมจาก CLAUDE.md",
+        detail: "📄 คืออะไร: แผนธุรกิจ+สถาปัตยกรรมฉบับเต็ม อธิบาย \"ทำไมถึงตัดสินใจแบบนี้\" และงานที่ยังไม่ได้สร้าง\n📂 ประกอบด้วย: สถานะสิ่งที่สร้างเสร็จแล้ว, แผน Workspace Economy, ราคาแพ็กเกจ, กติกาตั้งชื่อ Mini-Site, ลำดับงานถัดไป (หมวด 11 เป็นต้นไป)\n🔗 เชื่อมกับ: CLAUDE.md (คู่กันเสมอ), PROJECT_HISTORY.md\n🕓 อัปเดตล่าสุด: 22 ก.ค. 2569 — เพิ่มหมวด Workspace Economy v1\n✅ สถานะ: เอกสารมีชีวิต อัปเดตทุกครั้งที่มีการตัดสินใจใหม่ (ไฟล์ยาว 1300+ บรรทัด อ่านเฉพาะหมวดที่เกี่ยวข้อง)" },
+      { file: "PROJECT_HISTORY.md", path: "./PROJECT_HISTORY.md", desc: "ประวัติ/ไทม์ไลน์งานที่ปิดแล้วทั้งหมด พร้อมผู้อนุมัติ",
+        detail: "📄 คืออะไร: \"ประวัติศาสตร์\" ของโครงการ — บันทึกทุกงาน/เฟสที่ปิดแล้ว พร้อมวันที่และผู้อนุมัติ (เส้นทางที่งานเดินผ่านมา ไม่ใช่แผนอนาคต)\n📂 ประกอบด้วย: แต่ละ entry มี Project, งานที่ทำ, สถานะ, ผู้อนุมัติ, สรุป, ขั้นต่อไป — เรียงล่าสุดบนสุด\n🔗 เชื่อมกับ: ทุกไฟล์ที่ต้องเช็คว่า \"งานนี้ปิดแล้วหรือยัง\"\n🕓 อัปเดตล่าสุด: 25 ก.ค. 2569 — เพิ่ม entry ปิดงาน Documentation Hotfix v1.0.1\n✅ สถานะ: บันทึกถาวร ห้ามลบของเก่า มีแต่เพิ่มรายการใหม่ด้านบน" },
+    ]},
+    { title: "② ชุดส่งต่อ CEO/ทีมใหม่ (Handoff Kit)", items: [
+      { file: "START HERE.md", path: "./START%20HERE.md", desc: "จุดเริ่มต้นอ่านสำหรับคนที่เพิ่งเข้ามาดูโครงการ",
+        detail: "📄 คืออะไร: ไฟล์แรกที่ AI ทุกตัวต้องอ่านก่อนเริ่มงานทุกครั้งที่เปิดห้องแชตใหม่ — บอกกฎพื้นฐาน+ใครเป็นใคร\n📂 ประกอบด้วย: บทบาท 3 ฝ่าย (CEO/Product Owner/Lead Developer), ลำดับการอ่านไฟล์, กติกาห้ามทำ\n🔗 เชื่อมกับ: อ่านคู่กับ Mission Control.dc.html และ BLUEPRINT.md เสมอ\n🕓 อัปเดตล่าสุด: กติกาพื้นฐาน ไม่ค่อยเปลี่ยนบ่อย\n✅ สถานะ: ใช้งานจริง 1 ใน 4 ไฟล์บังคับแนบทุกครั้ง" },
+      { file: "HANDOVER PROMPT.md", path: "./HANDOVER%20PROMPT.md", desc: "ข้อความสำหรับส่งให้ AI ห้องใหม่ ใช้เริ่มงานต่อ",
+        detail: "📄 คืออะไร: \"ข้อความสำเร็จรูป\" คัดลอกวางเป็นข้อความแรกในห้องแชตใหม่ หลังแนบไฟล์ครบ — ทำให้ AI เข้าใจบทบาทตัวเองทันที\n📂 ประกอบด้วย: คำสั่งให้อ่านไฟล์ตามลำดับ, กติกาห้ามขยาย scope, คำสั่งให้สรุปแล้วรอคำสั่งต่อ\n🔗 เชื่อมกับ: START HERE.md, Mission Control.dc.html, BLUEPRINT.md, PROJECT_SNAPSHOT.md\n🕓 อัปเดตล่าสุด: ปรับให้ตรงกับไฟล์ที่ต้องแนบล่าสุด\n✅ สถานะ: ใช้งานจริงทุกครั้งที่เปิดห้องใหม่" },
+      { file: "PROJECT_SNAPSHOT.md", path: "./PROJECT_SNAPSHOT.md", desc: "สถานะโครงการล่าสุด ณ วันที่ export",
+        detail: "📄 คืออะไร: \"ภาพนิ่ง\" ของสถานะโครงการ ณ วินาทีล่าสุดหลังอัปโหลดขึ้น GitHub สำเร็จ — ให้ห้องใหม่รู้ว่า production จริงอยู่ตรงไหน โดยไม่ต้องไล่อ่านแชตเก่า\n📂 ประกอบด้วย: Current Phase, Scope รอบนี้, งานเสร็จแล้ว, งานที่กำลังทำ, ปัญหาที่รู้แล้ว, ขั้นตอนถัดไป\n🔗 เชื่อมกับ: docs/ceo-handoff/CURRENT_PHASE_STATUS.md, PROJECT_HISTORY.md, HUAHIN_PROPERTIES_MASTER_HANDOFF.md\n🕓 อัปเดตล่าสุด: 25 ก.ค. 2569 — หลัง Product Owner ยืนยัน Upload+Verification ผ่าน\n✅ สถานะ: ต้องสร้างใหม่ทุกครั้งหลัง Upload+Verify ผ่าน (ไม่ใช่ไฟล์นิ่ง)" },
+      { file: "HUAHIN_PROPERTIES_MASTER_HANDOFF.md", path: "./HUAHIN_PROPERTIES_MASTER_HANDOFF.md", desc: "เอกสารส่งมอบฉบับเต็ม",
+        detail: "📄 คืออะไร: \"ไฟล์เดียวจบ\" รวมทุกอย่างที่ต้องรู้ ใช้ตอนแนบไฟล์ได้แค่ไฟล์เดียว\n📂 ประกอบด้วย: ภาพรวมโครงการ, สถานะปัจจุบัน, สถาปัตยกรรม, Workflow, บทบาททีม, กติกา Scope, ปัญหาที่รู้แล้ว, ขั้นตอนถัดไป\n🔗 เชื่อมกับ: สรุปจากทุกไฟล์ — ถ้าขัดแย้งกับต้นทาง (Mission Control/Blueprint/PROJECT_HISTORY) ยึดต้นทางเป็นหลัก\n🕓 อัปเดตล่าสุด: 25 ก.ค. 2569\n✅ สถานะ: แผนสำรอง ไม่ใช่ไฟล์หลักที่ใช้ทุกวัน" },
+      { file: "CEO GUIDE.md", path: "./CEO%20GUIDE.md", desc: "คู่มือ CEO ฉบับ markdown คู่กับหน้านี้",
+        detail: "📄 คืออะไร: คู่มือ markdown เวอร์ชันข้อความล้วนของหน้า CEO Guide.dc.html นี้ — แนบไปกับ AI แชทได้ (หน้าเว็บ .dc.html แนบตรงไม่ได้)\n📂 ประกอบด้วย: ขั้นตอนเปิดห้องใหม่, checklist ก่อนเริ่มงาน, วิธีคัดลอก Handover Prompt, วิธีตรวจ AI ตอบถูกไหม\n🔗 เชื่อมกับ: START HERE.md, HANDOVER PROMPT.md — ชุดไฟล์แนบมาตรฐาน\n🕓 อัปเดตล่าสุด: ต้องอัปเดตพร้อมหน้า CEO Guide.dc.html ทุกครั้งที่เนื้อหาเปลี่ยน\n✅ สถานะ: ใช้งานจริง" },
+      { file: "RELEASE CHECKLIST.md", path: "./RELEASE%20CHECKLIST.md", desc: "เช็คลิสต์ต้องผ่านครบก่อน Upload ทุกครั้ง",
+        detail: "📄 คืออะไร: เช็คลิสต์บังคับก่อน Upload ขึ้น GitHub ทุกครั้ง — กันอัปโหลดไฟล์เก่า/ไม่ครบ\n📂 ประกอบด้วย: เช็ค Documentation, เช็ค export-for-github มีไฟล์ล่าสุดครบ, เช็ค Repository ไม่มีไฟล์ค้าง, อนุมัติ Product Owner+CEO\n🔗 เชื่อมกับ: GITHUB_UPLOAD_GUIDE.md (ใช้ต่อกัน), PROJECT_HISTORY.md\n🕓 อัปเดตล่าสุด: ออกแบบให้ใช้ซ้ำได้ทุกรอบ ไม่ผูกเวอร์ชันเดียว\n✅ สถานะ: ใช้งานจริงก่อน Upload ทุกครั้ง" },
+      { file: "OPERATION MANUAL.md", path: "./OPERATION%20MANUAL.md", desc: "คู่มือการทำงานประจำวัน",
+        detail: "📄 คืออะไร: อธิบายว่า \"ระบบส่งต่องาน (PHS)\" คืออะไร ทำไมต้องใช้ ทำอย่างไร — ให้ CEO เข้าใจภาพรวมทั้งระบบ ไม่ใช่แค่ทำตามขั้นตอน\n📂 ประกอบด้วย: จุดประสงค์ PHS, เมื่อไหร่ต้องใช้, ไฟล์ที่ต้องแนบ, พฤติกรรมที่คาดหวังจาก AI, วิธีแก้ปัญหาเบื้องต้น\n🔗 เชื่อมกับ: START HERE.md, HANDOVER PROMPT.md, HANDOVER TEST PROCEDURE.md\n🕓 อัปเดตล่าสุด: คู่กับตอนออกแบบระบบ PHS v1\n✅ สถานะ: ใช้งานจริง" },
+      { file: "HANDOVER TEST PROCEDURE.md", path: "./HANDOVER%20TEST%20PROCEDURE.md", desc: "ขั้นตอนทดสอบหลังส่งมอบงาน",
+        detail: "📄 คืออะไร: ขั้นตอน \"ทดสอบ\" ว่าระบบส่งต่องาน (PHS) ยังทำงานถูกต้องอยู่ไหม — ใช้ตรวจเป็นระยะ ไม่ใช่ทุกครั้งที่เปิดห้องใหม่\n📂 ประกอบด้วย: วิธีทดสอบทีละขั้น, เกณฑ์ผ่าน (PASS), เกณฑ์ไม่ผ่าน (FAIL)\n🔗 เชื่อมกับ: OPERATION MANUAL.md, HANDOVER PROMPT.md\n🕓 อัปเดตล่าสุด: คู่กับตอนออกแบบ PHS v1\n✅ สถานะ: ใช้เป็นระยะเพื่อตรวจสุขภาพระบบ" },
+    ]},
+    { title: "③ ชุดสำหรับ AI ห้องใหม่ (docs/ceo-handoff)", items: [
+      { file: "CEO_ASSISTANT_START_HERE.md", path: "./docs/ceo-handoff/CEO_ASSISTANT_START_HERE.md", desc: "สรุปกติกา + ภาพรวมระบบให้ AI อ่านก่อนเริ่ม",
+        detail: "📄 คืออะไร: ไฟล์แรกที่ \"ผู้ช่วย CEO/Product Owner\" ตัวใหม่ต้องอ่าน — คนละบทบาทกับ START HERE.md (อันนั้นสำหรับทุกคน อันนี้เจาะจงผู้ช่วยวางแผน)\n📂 ประกอบด้วย: โครงการนี้คืออะไร, CEO ต้องการทำงานแบบไหน, บทบาทแต่ละฝ่าย, ลำดับอ่านไฟล์ต่อ (บังคับ), กติกาห้ามทำ\n🔗 เชื่อมกับ: PROJECT_CONTEXT_SNAPSHOT.md, CURRENT_PHASE_STATUS.md, PROJECT_OPERATING_STANDARD.md\n🕓 อัปเดตล่าสุด: 25 ก.ค. 2569\n✅ สถานะ: ใช้งานจริง ไฟล์แรกในชุด AI ห้องใหม่" },
+      { file: "NEW_CHAT_BOOTSTRAP_PROMPT.md", path: "./docs/ceo-handoff/NEW_CHAT_BOOTSTRAP_PROMPT.md", desc: "Prompt แรกที่ใช้เปิดห้องแชทใหม่",
+        detail: "📄 คืออะไร: ข้อความสำเร็จรูปเปิดห้องกับ \"ผู้ช่วย CEO\" — คนละชุดกับ HANDOVER PROMPT.md (อันนั้นสำหรับ Claude นักพัฒนา)\n📂 ประกอบด้วย: รายชื่อไฟล์ที่ต้องแนบ 8 ไฟล์, ข้อความให้คัดลอกวาง\n🔗 เชื่อมกับ: CEO_ASSISTANT_START_HERE.md, DOCUMENT_INDEX.md\n🕓 อัปเดตล่าสุด: 25 ก.ค. 2569\n✅ สถานะ: ใช้งานจริง" },
+      { file: "CEO_WORKING_GUIDE.md", path: "./docs/ceo-handoff/CEO_WORKING_GUIDE.md", desc: "แนวทางทำงานร่วมกับ CEO",
+        detail: "📄 คืออะไร: คู่มือ \"วิธีคุยกับ CEO\" สำหรับผู้ช่วย AI ตัวใหม่ — คู่มือพฤติกรรม ไม่ใช่สถานะโครงการ\n📂 ประกอบด้วย: ต้องตอบภาษาไทย, แบ่งงานทีละขั้น, บอกชัดว่าใครทำอะไร, ห้ามส่งคำสั่งเทคนิคโดยไม่อธิบาย\n🔗 เชื่อมกับ: CEO_ASSISTANT_START_HERE.md, CLAUDE_WORKING_GUIDE.md\n🕓 อัปเดตล่าสุด: 25 ก.ค. 2569\n✅ สถานะ: ใช้งานจริง" },
+      { file: "CLAUDE_WORKING_GUIDE.md", path: "./docs/ceo-handoff/CLAUDE_WORKING_GUIDE.md", desc: "แนวทางที่ AI ต้องทำตามเมื่อทำงานในโครงการนี้",
+        detail: "📄 คืออะไร: คู่มือบอกผู้ช่วย CEO ว่า \"Claude ควรทำงานแบบไหน\" ใช้ตรวจว่า Claude ทำถูกวิธีหรือไม่\n📂 ประกอบด้วย: สิ่งที่ Claude ต้องอ่านก่อนเริ่มงาน, วิธีรายงานการเปลี่ยนแปลง, ห้ามเดาสาเหตุบั๊กโดยไม่มีหลักฐาน\n🔗 เชื่อมกับ: CEO_ASSISTANT_START_HERE.md, PROJECT_OPERATING_STANDARD.md, CLAUDE.md\n🕓 อัปเดตล่าสุด: 25 ก.ค. 2569\n✅ สถานะ: ใช้งานจริง" },
+      { file: "CURRENT_PHASE_STATUS.md", path: "./docs/ceo-handoff/CURRENT_PHASE_STATUS.md", desc: "สถานะเฟสปัจจุบันของโครงการ",
+        detail: "📄 คืออะไร: สถานะ \"เฟสปัจจุบัน\" แบบละเอียด อ่านง่ายกว่า Mission Control.dc.html แต่ไม่ใช่ต้นทางจริง (ถ้าขัดกัน Mission Control ชนะ)\n📂 ประกอบด้วย: ชื่อ Phase, เป้าหมาย Phase, สิ่งที่เสร็จแล้ว, สิ่งที่ค้าง/บั๊ก\n🔗 เชื่อมกับ: Mission Control.dc.html (ต้นทางจริง), PROJECT_CONTEXT_SNAPSHOT.md\n🕓 อัปเดตล่าสุด: 25 ก.ค. 2569 — เฟสล่าสุดคือระบบแชท Realtime กำลัง stabilize\n✅ สถานะ: ใช้งานจริง ต้องอัปเดตทุกครั้งที่ Phase เปลี่ยน" },
+      { file: "DOCUMENT_INDEX.md", path: "./docs/ceo-handoff/DOCUMENT_INDEX.md", desc: "ดัชนีเอกสารทั้งหมดในชุดนี้",
+        detail: "📄 คืออะไร: \"สารบัญ\" เอกสารทั้งหมดในโครงการ บอกว่าไฟล์ไหนใครต้องอ่าน อ่านเมื่อไหร่ — meta-index ไม่ใช่เนื้อหาโครงการเอง\n📂 ประกอบด้วย: ตารางไฟล์ทั้งหมด พร้อมคอลัมน์ หน้าที่/ใครอ่าน/อ่านเมื่อไหร่/ประเภท\n🔗 เชื่อมกับ: SOURCE_OF_TRUTH_MATRIX.md, FILE_MAPPING.md\n🕓 อัปเดตล่าสุด: 25 ก.ค. 2569\n✅ สถานะ: ใช้งานจริง เป็นแผนที่รวมของทุกไฟล์" },
+      { file: "HANDOFF_CHECKLIST.md", path: "./docs/ceo-handoff/HANDOFF_CHECKLIST.md", desc: "เช็คลิสต์ก่อนส่งต่องาน",
+        detail: "📄 คืออะไร: เช็คลิสต์ก่อน \"เปลี่ยนห้องแชตหรือเปลี่ยนผู้ช่วย CEO\" — คนละอันกับ RELEASE CHECKLIST.md (อันนั้นก่อน Upload โค้ด)\n📂 ประกอบด้วย: เช็คไฟล์อัปเดตครบก่อนส่งมอบ, รายชื่อไฟล์ที่ต้องส่งให้ผู้ช่วยใหม่\n🔗 เชื่อมกับ: CEO_ASSISTANT_START_HERE.md, DOCUMENT_INDEX.md\n🕓 อัปเดตล่าสุด: 25 ก.ค. 2569\n✅ สถานะ: ใช้งานจริง" },
+      { file: "KNOWN_ISSUES.md", path: "./docs/ceo-handoff/KNOWN_ISSUES.md", desc: "บั๊ก/ช่องโหว่ที่รู้แล้วแต่ยังไม่แก้",
+        detail: "📄 คืออะไร: \"รวมศูนย์\" บั๊ก/ข้อจำกัดที่รู้แล้วทั้งหมด สรุปจาก PROJECT_HISTORY.md ให้อ่านง่ายกว่า\n📂 ประกอบด้วย: 🔴 ปัญหาเปิดอยู่ (เช่น Favorites หายหลัง login ซ้ำ), 🟡 ข้อจำกัดที่ยอมรับแล้ว (password type=text), 📌 Backlog ที่ยังไม่ทำ\n🔗 เชื่อมกับ: PROJECT_HISTORY.md (ต้นทาง), CURRENT_PHASE_STATUS.md\n🕓 อัปเดตล่าสุด: 25 ก.ค. 2569\n✅ สถานะ: ใช้งานจริง อ่านก่อนเริ่มงานใหม่ทุกครั้งกันแก้ปัญหาเดิมซ้ำ" },
+      { file: "PROJECT_CONTEXT_SNAPSHOT.md", path: "./docs/ceo-handoff/PROJECT_CONTEXT_SNAPSHOT.md", desc: "บริบทโครงการแบบสรุปย่อ",
+        detail: "📄 คืออะไร: \"ภาพรวมทั้งหมด\" ของโครงการ ณ วันที่จัดทำ อ่านจบเข้าใจภาพรวมได้โดยไม่ต้องไล่อ่านแชตเก่า — กว้างกว่า PROJECT_SNAPSHOT.md (อันนั้นเน้นหลัง Upload ล่าสุดเท่านั้น)\n📂 ประกอบด้วย: ชื่อโครงการ/โดเมน/วิสัยทัศน์, โมเดลธุรกิจ, กลุ่มผู้ใช้, สถาปัตยกรรมปัจจุบัน, ฟีเจอร์ที่เสร็จแล้ว\n🔗 เชื่อมกับ: BLUEPRINT.md, Mission Control.dc.html\n🕓 อัปเดตล่าสุด: 25 ก.ค. 2569\n✅ สถานะ: ใช้งานจริง" },
+      { file: "PROJECT_OPERATING_STANDARD.md", path: "./docs/ceo-handoff/PROJECT_OPERATING_STANDARD.md", desc: "มาตรฐานการทำงานของโครงการ",
+        detail: "📄 คืออะไร: \"กฎการทำงาน\" หลักของทั้งทีม — Single Source of Truth ด้าน Workflow\n📂 ประกอบด้วย: บทบาท 3 ฝ่ายละเอียด, Source of Truth Matrix ย่อ, ขั้นตอน Start of Work, Scope Control, Definition of Done\n🔗 เชื่อมกับ: CEO GUIDE.md, START HERE.md, RELEASE CHECKLIST.md, PROJECT_HISTORY.md\n🕓 อัปเดตล่าสุด: 25 ก.ค. 2569\n✅ สถานะ: ใช้งานจริง เป็นไฟล์กติกาหลัก" },
+    ]},
+    { title: "④ คู่มืออัปโหลด (Upload Guide)", items: [
+      { file: "GITHUB_UPLOAD_GUIDE.md", path: "./GITHUB_UPLOAD_GUIDE.md", desc: "ขั้นตอน Upload ขึ้น GitHub ทีละสเต็ป + Checklist",
+        detail: "📄 คืออะไร: คู่มือ Upload ไฟล์ขึ้น GitHub แบบทีละสเต็ป เขียนขึ้นเพื่อแก้ปัญหา 404 จาก Hotfix v1.0.1 โดยเฉพาะ\n📂 ประกอบด้วย: ขั้นตอน Upload ไฟล์ root, วิธี Upload โฟลเดอร์ docs/ceo-handoff (จุดพลาดบ่อย), checklist ก่อนปิดงาน\n🔗 เชื่อมกับ: RELEASE CHECKLIST.md (ใช้ต่อกัน)\n🕓 อัปเดตล่าสุด: 25 ก.ค. 2569 — สร้างระหว่าง Hotfix v1.0.1\n✅ สถานะ: ใช้งานจริงทุกครั้งก่อน Upload" },
+    ]},
+  ];
+
   state = {
-    copyStatus: {}, selectedModuleId: "KM-08", handoffFullOpen: false, handoffCopyLabel: "📋 Copy Prompt",
+    expandedCard: null, bannerOpen: false,
+    downloadAllStatus: "", copyStatus: {}, selectedModuleId: "KM-08", handoffFullOpen: false, handoffCopyLabel: "📋 Copy Prompt",
     // State-driven Release & Transition Workflow — reflects REAL project state,
     // not a forecast. Each step is completed/current/pending. Reset to step 1
     // "current" whenever a new Mission/Sprint/Phase/Release begins (do not
@@ -854,6 +960,33 @@ class Component extends DCLogic {
     });
   }
 
+  toggleBanner = () => this.setState(s => ({ bannerOpen: !s.bannerOpen }));
+
+  toggleCard = (file) => {
+    this.setState(s => ({ expandedCard: s.expandedCard === file ? null : file }));
+  };
+
+  downloadAll = async () => {
+    this.setState({ downloadAllStatus: "กำลังเตรียมไฟล์…" });
+    try {
+      const zip = new JSZip();
+      const all = Component.HANDOFF_CATEGORIES.flatMap(c => c.items);
+      for (const doc of all) {
+        const res = await fetch(doc.path);
+        if (!res.ok) throw new Error(doc.file + " โหลดไม่สำเร็จ");
+        zip.file(doc.file, await res.blob());
+      }
+      const blob = await zip.generateAsync({ type: "blob" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "Handoff-Package.zip";
+      a.click();
+      this.setState({ downloadAllStatus: "✓ ดาวน์โหลดสำเร็จ (" + all.length + " ไฟล์)" });
+    } catch (e) {
+      this.setState({ downloadAllStatus: "❌ ผิดพลาด: " + e.message });
+    }
+  };
+
   renderVals() {
     const st = this.state.copyStatus;
     const handoffFullOpen = this.state.handoffFullOpen;
@@ -879,6 +1012,28 @@ class Component extends DCLogic {
       { icon: stageIcon(6), label: "Snapshot Created", th: curStep > 6 ? "สร้าง Project Snapshot จาก Repository ล่าสุดแล้ว" : curStep === 6 ? "กำลังสร้าง" : "ยังไม่สร้าง — รอหลัง Upload" },
       { icon: stageIcon(7), label: "Snapshot Handoff", th: curStep > 7 ? "เชื่อม Snapshot เข้ากับ Bootstrap/Handover/Quick Actions แล้ว — Release เสร็จสมบูรณ์" : curStep === 7 ? "กำลังเชื่อมกับชุดส่งมอบ" : "ยังไม่เริ่ม" },
     ];
+    const expandedCard = this.state.expandedCard;
+    const toggleBanner = this.toggleBanner;
+    const bannerCaret = this.state.bannerOpen ? "▲ ปิด" : "▼ เปิดอ่าน";
+    const bannerWrapStyle = this.state.bannerOpen
+      ? "font-size:12.5px; color:oklch(30% 0.02 60); line-height:1.7; background:oklch(96% 0.03 60); border:1px solid oklch(85% 0.03 60); border-radius:8px; padding:14px 18px; margin-bottom:14px;"
+      : "display:none;";
+    const handoffCategories = Component.HANDOFF_CATEGORIES.map(cat => ({
+      ...cat,
+      items: cat.items.map(it => {
+        const isOpen = expandedCard === it.file;
+        return {
+          ...it,
+          toggle: () => this.toggleCard(it.file),
+          caret: isOpen ? "▲ ซ่อนรายละเอียด" : "▼ ดูรายละเอียด",
+          detailWrapStyle: isOpen
+            ? "margin-top:6px; padding-top:8px; border-top:1px dashed oklch(85% 0.01 70); font-size:11.5px; color:oklch(35% 0.02 60); line-height:1.7; white-space:pre-line;"
+            : "display:none;",
+        };
+      }),
+    }));
+    const downloadAll = this.downloadAll;
+    const downloadAllStatus = this.state.downloadAllStatus;
     // Release Information — metadata for the CURRENT release only, never
     // carried over from a prior one (reset alongside releaseWorkflowStep).
     const releaseInfo = {
@@ -930,6 +1085,7 @@ class Component extends DCLogic {
     const projectDNA = "huahin.properties — เว็บลงประกาศขาย/เช่าอสังหาริมทรัพย์ หัวหิน/ปราณบุรี/ชะอำ. Stack: Design Component (.dc.html) ต่อหน้า + Firebase (Firestore/Auth/Storage/Cloud Functions) + Stripe. Governance: CEO ตัดสินใจสูงสุด → Product Owner ควบคุม Workflow/PASS → Lead Developer พัฒนา. Knowledge Engine เดียวขับเคลื่อนทั้ง Index/Copy/Relationships ของ 17 Knowledge Modules.";
 
     return {
+      handoffCategories, downloadAll, downloadAllStatus, toggleBanner, bannerCaret, bannerWrapStyle,
       handoffPromptText: Component.HANDOFF_PROMPT,
       handoffFullLabel: handoffFullOpen ? "🗕 Collapse" : "⛶ Full Screen",
       handoffPromptBoxStyle: handoffFullOpen
