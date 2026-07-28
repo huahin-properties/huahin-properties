@@ -78,7 +78,7 @@
           </div>
         </sc-for>
         <div style="margin-top:24px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.15); font-size:11px; opacity:0.7;">
-          🔒 SAFE MODE — Read-only Phase
+          🔒 SAFE MODE — Read-only, except Full Reset (real delete)
         </div>
         <a href="./Admin%20Dashboard.dc.html" style="display:block; margin-top:14px; font-size:12px; color:rgba(255,255,255,0.8); text-decoration:none;">← กลับ Admin Dashboard</a>
       </div>
@@ -95,7 +95,7 @@
         </div>
 
         <div style="background:oklch(93% 0.1 75); border:1px solid oklch(78% 0.13 75); border-radius:8px; padding:10px 14px; margin-bottom:20px; font-size:12.5px; color:oklch(32% 0.1 50);">
-          🔒 <strong>SAFE MODE</strong> — Read-only Phase. Delete/Cleanup/Reset/Generate modules are disabled in this phase and cannot be enabled from this page.
+          🔒 <strong>SAFE MODE</strong> — Read-only Phase. Cleanup/Generate modules are disabled in this phase and cannot be enabled from this page. Exception: the "Full Reset (Real Delete)" tab performs REAL, permanent deletion when confirmed — it is not part of this Safe Mode lock.
         </div>
 
         <!-- TAB: SYSTEM OVERVIEW -->
@@ -374,6 +374,45 @@
           </div>
         </sc-if>
 
+<!-- TAB: FULL RESET (real delete, separate from the locked simulation engine above) -->
+        <sc-if value="{{ tabFullReset }}" hint-placeholder-val="{{ false }}">
+          <div style="background:oklch(93% 0.1 25); border:1px solid oklch(78% 0.13 25); border-radius:8px; padding:10px 14px; margin-bottom:18px; font-size:12.5px; color:oklch(32% 0.1 25);">
+            🗑️ <strong>Real deletion.</strong> This permanently deletes all documents in listers, properties, propertyPhotos, profilePhotos, owners, tenants, conversations, listerLeads, leads, propertyCollections. Site settings (siteContent, aiNotes, banners, adminUsers) are NOT touched. Firebase Authentication accounts must still be deleted manually in the Firebase Console.
+          </div>
+
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <h3 style="font-size:14px; color:oklch(25% 0.02 60);">Current record counts</h3>
+<div onClick="{{ onScanResetCounts }}" style="background:oklch(95% 0.01 70); color:oklch(30% 0.02 60); padding:6px 14px; border-radius:100px; font-size:12.5px; font-weight:600; cursor:pointer;">Scan counts</div>
+          </div>
+          <div style="background:white; border:1px solid oklch(88% 0.01 70); border-radius:8px; margin-bottom:20px; overflow:hidden;">
+            <sc-for list="{{ resetCountsRows }}" as="r" hint-placeholder-count="9">
+              <div style="display:flex; justify-content:space-between; padding:8px 14px; border-bottom:1px solid oklch(95% 0.01 70); font-size:13px;">
+                <span style="color:oklch(30% 0.02 60);">{{ r.name }}</span>
+                <span style="font-weight:600; color:oklch(30% 0.02 60);">{{ r.countLabel }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <h3 style="font-size:14px; color:oklch(25% 0.02 60); margin-bottom:8px;">Confirm and delete</h3>
+          <div style="background:white; border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:16px; margin-bottom:20px;">
+            <div style="font-size:12.5px; color:oklch(35% 0.02 60); margin-bottom:10px;">Type <strong>DELETE ALL</strong> to enable the button below.</div>
+            <input type="text" value="{{ resetConfirmText }}" onChange="{{ onResetConfirmTextChange }}" placeholder="DELETE ALL" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid oklch(85% 0.02 60); border-radius:6px; font-size:14px; margin-bottom:14px;" />
+            <sc-if value="{{ resetConfirmValid }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ onRunFullReset }}" style="background:oklch(45% 0.15 25); color:white; text-align:center; padding:12px; border-radius:8px; font-size:14px; font-weight:700; cursor:pointer;">Delete all test data now</div>
+            </sc-if>
+          </div>
+
+          <h3 style="font-size:14px; color:oklch(25% 0.02 60); margin-bottom:8px;">Log</h3>
+          <div style="background:white; border:1px solid oklch(88% 0.01 70); border-radius:8px; max-height:280px; overflow-y:auto;">
+            <sc-for list="{{ resetLogRows }}" as="l" hint-placeholder-count="0">
+              <div style="padding:8px 14px; border-bottom:1px solid oklch(95% 0.01 70); font-size:12px; display:flex; gap:10px;">
+                <span style="color:oklch(55% 0.02 60); flex-shrink:0;">{{ l.time }}</span>
+                <span style="color:oklch(30% 0.02 60);">{{ l.text }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
         <!-- TAB: DISABLED PLACEHOLDER -->
         <sc-if value="{{ tabDisabled }}" hint-placeholder-val="{{ false }}">
           <div style="background:white; border:1px dashed oklch(80% 0.02 60); border-radius:8px; padding:40px; text-align:center; color:oklch(55% 0.02 60); font-size:14px;">
@@ -474,7 +513,54 @@ class Component extends DCLogic {
     auditLog: [], scanStage: "", scanDurationMs: null,
     cleanupCandidates: [], cleanupLoading: false, cleanupScanned: null, cleanupNotStarted: true, cleanupDurationMs: null,
     executionQueue: [], executionConfirmId: null, executionLog: [], confirmChecked: false,
+    resetCounts: null, resetCountsLoading: false, resetConfirmText: "", resetRunning: false, resetLog: [], resetDone: false,
   };
+
+  // Collections wiped by Full Reset — everything an Agent/lister or Admin
+  // creates while testing. Site-level config (adminUsers, siteContent,
+  // aiNotes, banners, settings) is intentionally left untouched.
+  static RESET_COLLECTIONS = ["listers", "properties", "propertyPhotos", "profilePhotos", "owners", "tenants", "conversations", "listerLeads", "leads", "propertyCollections"];
+
+  async scanResetCounts() {
+    if (this.state.authPhase === "preview") return;
+    this.setState({ resetCountsLoading: true });
+    const fb = this._fb;
+    const counts = {};
+    for (const name of Component.RESET_COLLECTIONS) {
+      try { counts[name] = (await fb.fetchCollectionCount(name)).count ?? 0; }
+      catch (e) { counts[name] = null; }
+    }
+    this.setState({ resetCounts: counts, resetCountsLoading: false });
+  }
+
+  onResetConfirmTextChange(e) { this.setState({ resetConfirmText: e.target.value }); }
+
+  logReset(text) {
+    this.setState({ resetLog: [{ id: Math.random().toString(36).slice(2), time: new Date().toLocaleTimeString(), text }, ...this.state.resetLog] });
+  }
+
+  async runFullReset() {
+    if (this.state.resetConfirmText.trim().toUpperCase() !== "DELETE ALL") return;
+    if (this.state.resetRunning) return;
+    this.setState({ resetRunning: true, resetLog: [], resetDone: false });
+    const fb = this._fb;
+    let totalDeleted = 0;
+    for (const name of Component.RESET_COLLECTIONS) {
+      try {
+        const docs = await fb.fetchCollection(name);
+        for (const d of docs) {
+          try { await fb.deleteDocById(name, d.id); totalDeleted++; }
+          catch (e) { this.logReset(`⚠️ Failed to delete ${name}/${d.id}: ${e.message}`); }
+        }
+        this.logReset(`✅ ${name}: deleted ${docs.length} document(s)`);
+      } catch (e) {
+        this.logReset(`⚠️ Could not read ${name}: ${e.message}`);
+      }
+    }
+    this.logReset(`Done — ${totalDeleted} total documents deleted. Now go delete the Auth accounts manually in Firebase Console → Authentication (keep only the admin/owner login).`);
+    this.setState({ resetRunning: false, resetDone: true, resetConfirmText: "" });
+    await this.scanResetCounts();
+  }
 
   logAudit(text, level) {
     const entry = { id: Math.random().toString(36).slice(2), time: Date.now(), text, level: level || "info" };
@@ -745,6 +831,7 @@ class Component extends DCLogic {
       { key: "auditLog", label: "📜 Audit Log" },
       { key: "cleanupPreview", label: "🧹 Cleanup Preview" },
       { key: "cleanupExec", label: "⚙️ Cleanup Execution" },
+      { key: "fullReset", label: "🗑️ Full Reset (Real Delete)" },
       { key: "verification", label: "✅ Verification", disabled: true },
       { key: "golden", label: "🌱 Golden Dataset Generator", disabled: true },
       { key: "export", label: "📤 Export Center", disabled: true },
@@ -760,7 +847,7 @@ class Component extends DCLogic {
     const titles = {
       overview: "System Overview", auth: "Authentication Inventory", firestore: "Firestore Inventory",
       storage: "Storage Inventory", dependency: "Dependency Checker", cleanupPreview: "Cleanup Preview",
-      cleanupExec: "Cleanup Execution", verification: "Verification", golden: "Golden Dataset Generator",
+      cleanupExec: "Cleanup Execution", fullReset: "Full Reset (Real Delete)", verification: "Verification", golden: "Golden Dataset Generator",
       export: "Export Center", auditLog: "Audit Log", docs: "Documentation",
     };
 
@@ -877,7 +964,7 @@ class Component extends DCLogic {
       { label: "Authentication", value: isPreview ? "Not used" : ({ loadingFirebase: "Loading...", checkingAuth: "Checking...", checkingAdmin: "Checking Admin...", granted: "Ready", denied: "Ready (not Admin)", notSignedIn: "Not signed in", error: "Error" }[s.authPhase] || "Unknown") },
       { label: "Current User", value: isPreview ? "N/A (Preview Viewer)" : ((s.currentUser && s.currentUser.email) || "None") },
       { label: "Admin Check Status", value: isPreview ? "N/A" : ({ granted: "Admin verified", denied: "Not Admin", notSignedIn: "Pending sign-in", checkingAdmin: "Checking...", error: "Error" }[s.authPhase] || "Pending") },
-      { label: "SAFE MODE", value: "Locked" },
+      { label: "SAFE MODE", value: "Locked (except Full Reset — real delete)" },
       { label: "Data Source", value: isPreview ? "Sample Data" : "Firebase (live)" },
       { label: "Last Status Update", value: s.lastRefresh ? new Date(s.lastRefresh).toLocaleString() : "Never" },
     ];
@@ -896,6 +983,17 @@ class Component extends DCLogic {
       cleanupRows, cleanupSummaryText,
       onRunCleanupScan: () => this.scanCleanupCandidates(),
       tabCleanupExec: s.activeTab === "cleanupExec",
+      tabFullReset: s.activeTab === "fullReset",
+      resetCountsRows: Component.RESET_COLLECTIONS.map((name) => ({
+        name, countLabel: !s.resetCounts ? "—" : (s.resetCounts[name] === null ? "error" : String(s.resetCounts[name])),
+      })),
+      resetCountsLoaded: !!s.resetCounts, resetCountsLoading: s.resetCountsLoading,
+      onScanResetCounts: () => this.scanResetCounts(),
+      resetConfirmText: s.resetConfirmText, onResetConfirmTextChange: (e) => this.onResetConfirmTextChange(e),
+      resetConfirmValid: s.resetConfirmText.trim().toUpperCase() === "DELETE ALL",
+      resetRunning: s.resetRunning, resetDone: s.resetDone,
+      onRunFullReset: () => this.runFullReset(),
+      resetLogRows: s.resetLog,
       executionQueue: s.executionQueue, hasExecutionQueue: s.executionQueue.length > 0,
       executionQueueRows, executionLogRows,
       showConfirmDialog: !!confirmCandidate,
