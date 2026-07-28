@@ -189,20 +189,27 @@ class Component extends DCLogic {
       const params = new URLSearchParams(window.location.search);
       if (params.get("tab") === "login") this.setState({ tab: "login" });
     } catch (e) {}
+    let fb;
     try {
-      const fb = await import("./firebase-client.js");
-      const [settings, count] = await Promise.all([fb.fetchFoundingAgentSettings(), fb.countFoundingAgents()]);
-      this.setState({ foundingLimit: settings.limit || 0, foundingNote: settings.note || "", foundingCount: count });
-      // Pick up the result of a signInWithGoogleRedirect/signInWithFacebookRedirect
-      // that just navigated back to this page (redirect flow, not popup —
-      // far more reliable across browsers than the popup-based sign-in).
+      fb = await import("./firebase-client.js");
+    } catch (e) { return; }
+    // Pick up the result of a signInWithGoogleRedirect/signInWithFacebookRedirect
+    // that just navigated back to this page (redirect flow, not popup —
+    // far more reliable across browsers than the popup-based sign-in).
+    // This runs in its own try/catch, independent of the founding-agent
+    // fetch below, so a failure there can never mask a real sign-in result.
+    try {
       this.setState({ socialBusy: true });
       const uid = await fb.getRedirectSignInResult();
       if (uid) { await this.completeSocialSignIn(uid, fb); return; }
       this.setState({ socialBusy: false });
     } catch (e) {
-      this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบไม่สำเร็จ ลองใหม่อีกครั้ง" });
+      this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบไม่สำเร็จ: " + (e && (e.code || e.message) || "unknown error") });
     }
+    try {
+      const [settings, count] = await Promise.all([fb.fetchFoundingAgentSettings(), fb.countFoundingAgents()]);
+      this.setState({ foundingLimit: settings.limit || 0, foundingNote: settings.note || "", foundingCount: count });
+    } catch (e) {}
   }
 
   async completeSocialSignIn(uid, fb) {
