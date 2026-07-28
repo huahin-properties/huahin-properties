@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <title>Member Management — huahin.properties Admin</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    body { margin: 0; background: oklch(97% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    a { color: oklch(42% 0.12 25); }
+    a:hover { color: oklch(35% 0.14 25); }
+  </style>
+</helmet>
+
+<div style="min-height:100vh;">
+  <div style="background:oklch(22% 0.02 60); padding:16px clamp(16px,3vw,40px); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+    <a href="Admin Dashboard.dc.html" style="display:flex; align-items:center; gap:9px; text-decoration:none;">
+      <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
+      <span style="font-family:'Playfair Display',serif; font-size:19px; color:white;">huahin . properties</span>
+      <span style="color:oklch(70% 0.02 70); font-size:14px;">| Member Management</span>
+    </a>
+    <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; font-size:13px;">
+      <a href="Owners.dc.html" style="color:oklch(90% 0.02 70); text-decoration:none;">👤 Owner Directory (แก้ไขละเอียด)</a>
+      <a href="Property Map.dc.html" style="color:oklch(90% 0.02 70); text-decoration:none;">🗺️ Property Map</a>
+      <a href="Admin Dashboard.dc.html" style="color:oklch(85% 0.02 70); text-decoration:none;">← กลับแดชบอร์ด</a>
+    </div>
+  </div>
+
+  <div style="max-width:1100px; margin:0 auto; padding:clamp(20px,4vw,40px);">
+    <div style="font-family:'Playfair Display',serif; font-size:26px; color:oklch(20% 0.02 60); margin-bottom:6px;">ศูนย์จัดการผู้ใช้งานทั้งหมด</div>
+    <div style="font-size:14px; color:oklch(50% 0.02 60); margin-bottom:24px;">Agent · เจ้าของทรัพย์ที่ฝากขาย/เช่า · ผู้เช่า · ผู้มุ่งหวังซื้อ/หาเช่า — ดูรวมในหน้าเดียว ไม่ต้องเข้า Firebase Console</div>
+
+    <div style="display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; border-bottom:1px solid oklch(90% 0.01 70); padding-bottom:12px;">
+      <div onClick="{{ onTabAgent }}" style="{{ tabAgentStyle }}">🧑‍💼 Agent ({{ countAgent }})</div>
+      <div onClick="{{ onTabOwner }}" style="{{ tabOwnerStyle }}">🏠 ผู้ฝากขาย/เช่า ({{ countOwner }})</div>
+      <div onClick="{{ onTabTenant }}" style="{{ tabTenantStyle }}">🔑 ผู้เช่า ({{ countTenant }})</div>
+      <div onClick="{{ onTabBuyer }}" style="{{ tabBuyerStyle }}">🔍 ผู้มุ่งหวังซื้อ/หาเช่า ({{ countBuyer }})</div>
+    </div>
+
+    <!-- AGENT TAB -->
+    <sc-if value="{{ isAgentTab }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+        <div onClick="{{ onFilterAll }}" style="{{ statusAllStyle }}">ทั้งหมด ({{ countAll }})</div>
+        <div onClick="{{ onFilterPending }}" style="{{ statusPendingStyle }}">รออนุมัติ ({{ countPending }})</div>
+        <div onClick="{{ onFilterApproved }}" style="{{ statusApprovedStyle }}">อนุมัติแล้ว ({{ countApproved }})</div>
+        <div onClick="{{ onFilterRejected }}" style="{{ statusRejectedStyle }}">ปฏิเสธ ({{ countRejected }})</div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <sc-for list="{{ agentRows }}" as="r" hint-placeholder-count="2">
+          <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:16px 20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+            <div style="width:38px; height:38px; border-radius:50%; background:{{ r.avatarBg }}; color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px; flex-shrink:0;">{{ r.initial }}</div>
+            <div style="flex:1; min-width:220px;">
+              <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60);">{{ r.name }} <span style="font-weight:400; color:oklch(55% 0.02 60); font-size:13px;">— {{ r.tierLabel }}</span></div>
+              <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ r.email }} · {{ r.phone }}</div>
+              <div style="font-size:12px; color:oklch(60% 0.02 60); margin-top:2px;">สมัครเมื่อ {{ r.dateLabel }} · {{ r.propertyCountLabel }}</div>
+            </div>
+            <div style="font-size:12px; font-weight:600; padding:5px 12px; border-radius:100px; background:{{ r.statusBg }}; color:{{ r.statusColor }}; white-space:nowrap;">{{ r.statusLabel }}</div>
+            <div style="display:flex; gap:8px;">
+              <sc-if value="{{ r.showApprove }}">
+                <div onClick="{{ r.onApprove }}" style="background:oklch(40% 0.13 150); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">✓ อนุมัติ</div>
+              </sc-if>
+              <sc-if value="{{ r.showReject }}">
+                <div onClick="{{ r.onReject }}" style="background:oklch(95% 0.02 30); color:oklch(45% 0.15 30); padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">✕ ปฏิเสธ</div>
+              </sc-if>
+              <sc-if value="{{ r.showReinstate }}">
+                <div onClick="{{ r.onReinstate }}" style="background:oklch(93% 0.02 60); color:oklch(35% 0.02 60); padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">↺ คืนสถานะ</div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noAgentRows }}">
+          <div style="text-align:center; padding:40px; color:oklch(55% 0.02 60); font-size:14px;">ไม่มีรายการในหมวดนี้</div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- OWNER TAB -->
+    <sc-if value="{{ isOwnerTab }}" hint-placeholder-val="{{ false }}">
+      <div style="font-size:12.5px; color:oklch(55% 0.02 60); margin-bottom:14px;">ดูภาพรวมที่นี่ — แก้ไขข้อมูลละเอียด/รูป/ลิงก์แผนที่ได้ที่ <a href="Owners.dc.html">Owner Directory →</a></div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <sc-for list="{{ ownerRows }}" as="o" hint-placeholder-count="2">
+          <a href="Owners.dc.html" style="text-decoration:none; display:block;">
+            <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:16px 20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+              <div style="flex:1; min-width:220px;">
+                <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60);">{{ o.name }}</div>
+                <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ o.phone }} · {{ o.email }}</div>
+              </div>
+              <div style="font-size:12px; color:oklch(45% 0.02 60); background:oklch(95% 0.02 60); padding:5px 12px; border-radius:100px; white-space:nowrap;">คอมมิชชั่น {{ o.commissionLabel }}</div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); white-space:nowrap;">{{ o.propertyCountLabel }}</div>
+            </div>
+          </a>
+        </sc-for>
+        <sc-if value="{{ noOwnerRows }}">
+          <div style="text-align:center; padding:40px; color:oklch(55% 0.02 60); font-size:14px;">ยังไม่มีเจ้าของทรัพย์ในระบบ</div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- TENANT TAB -->
+    <sc-if value="{{ isTenantTab }}" hint-placeholder-val="{{ false }}">
+      <div style="font-size:12.5px; color:oklch(55% 0.02 60); margin-bottom:14px;">ดูภาพรวมที่นี่ — แก้ไขข้อมูลละเอียดได้ที่ <a href="Owners.dc.html">Owner Directory →</a></div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <sc-for list="{{ tenantRows }}" as="tn" hint-placeholder-count="2">
+          <a href="Owners.dc.html" style="text-decoration:none; display:block;">
+            <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:16px 20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+              <div style="flex:1; min-width:220px;">
+                <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60);">{{ tn.name }}</div>
+                <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ tn.phone }} · {{ tn.email }}</div>
+              </div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); white-space:nowrap;">{{ tn.propertyCountLabel }}</div>
+            </div>
+          </a>
+        </sc-for>
+        <sc-if value="{{ noTenantRows }}">
+          <div style="text-align:center; padding:40px; color:oklch(55% 0.02 60); font-size:14px;">ยังไม่มีผู้เช่าในระบบ</div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- BUYER TAB -->
+    <sc-if value="{{ isBuyerTab }}" hint-placeholder-val="{{ false }}">
+      <div style="font-size:12.5px; color:oklch(55% 0.02 60); margin-bottom:14px;">ผู้มุ่งหวังที่ทิ้งข้อมูลไว้ (จากแบบฟอร์มสอบถาม/แชท) — ยังไม่มีหน้ากรอกข้อมูลเฉพาะ จะเก็บอัตโนมัติเมื่อมีการเชื่อมระบบลีดในอนาคต</div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <sc-for list="{{ buyerRows }}" as="b" hint-placeholder-count="0">
+          <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:16px 20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:220px;">
+              <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60);">{{ b.name }}</div>
+              <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ b.phone }} · {{ b.email }}</div>
+            </div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); white-space:nowrap;">{{ b.criteriaLabel }}</div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noBuyerRows }}">
+          <div style="text-align:center; padding:50px 20px; color:oklch(55% 0.02 60); font-size:14px; border:1px dashed oklch(85% 0.01 70); border-radius:8px;">
+            ยังไม่มีข้อมูลผู้มุ่งหวังในระบบ — ส่วนนี้จะเริ่มเก็บอัตโนมัติเมื่อเปิดใช้แบบฟอร์ม "ฝากความต้องการซื้อ/เช่า" หรือลีดจากแชท AI
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+
+function tierLabelOf(tier) {
+  const map = { trial: "ทดลองใช้ฟรี", level1: "แพ็กเกจ 1", level2: "แพ็กเกจ 2", level3: "แพ็กเกจ 3", pro: "แพ็กเกจ Pro" };
+  return map[tier] || (tier || "ไม่ระบุแพ็กเกจ");
+}
+function formatDateTH(ts) {
+  if (!ts) return "-";
+  try { return new Date(ts).toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" }); }
+  catch (e) { return "-"; }
+}
+
+class Component extends DCLogic {
+  state = { activeTab: "agent", statusFilter: "pending", listers: [], owners: [], tenants: [], buyers: [], properties: [], loaded: false };
+
+  async componentDidMount() {
+    const fb = await import("./firebase-client.js");
+    this._fb = fb;
+    await fb.onAdminAuthReady();
+    if (!fb.isAdminAuthed()) { window.location.href = "Admin Login.dc.html"; return; }
+    try {
+      const [listers, owners, tenants, properties] = await Promise.all([
+        fb.fetchCollection("listers"),
+        fb.fetchCollection("owners"),
+        fb.fetchCollection("tenants"),
+        fb.fetchCollection("properties").catch(() => []),
+      ]);
+      let buyers = [];
+      try { buyers = await fb.fetchCollection("buyerRegistrations"); } catch (e) { buyers = []; }
+      this.setState({ listers, owners, tenants, properties, buyers, loaded: true });
+    } catch (e) {
+      console.warn("Member Management: fetch failed", e);
+      this.setState({ loaded: true });
+    }
+  }
+
+  async setListerStatus(id, status) {
+    this.setState((s) => ({ listers: s.listers.map((l) => (l.id === id ? { ...l, status } : l)) }));
+    try { await this._fb.updateDocFields("listers", id, { status }); } catch (e) { console.warn("setListerStatus failed:", e); }
+  }
+
+  setTab(tab) { this.setState({ activeTab: tab }); }
+  setStatusFilter(f) { this.setState({ statusFilter: f }); }
+
+  renderVals() {
+    const s = this.state;
+    const tabBtn = (active) => `padding:8px 16px; border-radius:100px; font-size:13.5px; font-weight:600; cursor:pointer; white-space:nowrap; background:${active ? "oklch(40% 0.13 25)" : "oklch(95% 0.01 70)"}; color:${active ? "white" : "oklch(35% 0.02 60)"};`;
+    const filterBtn = (active) => `padding:7px 14px; border-radius:100px; font-size:12.5px; cursor:pointer; white-space:nowrap; background:${active ? "oklch(30% 0.05 250)" : "oklch(95% 0.01 70)"}; color:${active ? "white" : "oklch(40% 0.02 60)"};`;
+
+    const propCountByLister = {};
+    (s.properties || []).forEach((p) => { const k = p.listerId || p.ownerId; if (k) propCountByLister[k] = (propCountByLister[k] || 0) + 1; });
+    const propCountByOwnerName = {};
+    (s.properties || []).forEach((p) => { if (p.ownerName) propCountByOwnerName[p.ownerName] = (propCountByOwnerName[p.ownerName] || 0) + 1; });
+
+    const listers = s.listers || [];
+    const countAll = listers.length;
+    const countPending = listers.filter((l) => l.status === "pending").length;
+    const countApproved = listers.filter((l) => l.status === "approved").length;
+    const countRejected = listers.filter((l) => l.status === "rejected").length;
+    const filteredListers = s.statusFilter === "all" ? listers : listers.filter((l) => l.status === s.statusFilter);
+    const statusBgOf = (st) => st === "approved" ? "oklch(93% 0.1 150)" : st === "rejected" ? "oklch(93% 0.1 25)" : "oklch(93% 0.1 75)";
+    const statusColorOf = (st) => st === "approved" ? "oklch(40% 0.13 150)" : st === "rejected" ? "oklch(45% 0.15 25)" : "oklch(50% 0.13 75)";
+    const statusLabelOf = (st) => st === "approved" ? "อนุมัติแล้ว" : st === "rejected" ? "ปฏิเสธ" : "รออนุมัติ";
+
+    const agentRows = filteredListers.map((l) => {
+      const propCount = propCountByLister[l.id] || 0;
+      return {
+        initial: (l.displayName || l.name || l.email || "?").charAt(0).toUpperCase(),
+        avatarBg: "oklch(45% 0.13 25)",
+        name: l.displayName || l.name || "(ไม่ระบุชื่อ)",
+        tierLabel: tierLabelOf(l.tier),
+        email: l.email || "-", phone: l.phone || "-",
+        dateLabel: formatDateTH(l.createdAt),
+        propertyCountLabel: `${propCount} ทรัพย์`,
+        statusBg: statusBgOf(l.status), statusColor: statusColorOf(l.status), statusLabel: statusLabelOf(l.status),
+        showApprove: l.status !== "approved", showReject: l.status !== "rejected" && l.status !== "approved",
+        showReinstate: l.status === "rejected",
+        onApprove: () => this.setListerStatus(l.id, "approved"),
+        onReject: () => this.setListerStatus(l.id, "rejected"),
+        onReinstate: () => this.setListerStatus(l.id, "pending"),
+      };
+    });
+
+    const ownerRows = (s.owners || []).map((o) => ({
+      name: o.name || "(ไม่ระบุชื่อ)", phone: o.phone || "-", email: o.email || "-",
+      commissionLabel: o.commissionPercent ? `${o.commissionPercent}%` : "ยังไม่ระบุ",
+      propertyCountLabel: `${propCountByOwnerName[o.name] || 0} ทรัพย์`,
+    }));
+
+    const tenantRows = (s.tenants || []).map((tn) => ({
+      name: tn.name || "(ไม่ระบุชื่อ)", phone: tn.phone || "-", email: tn.email || "-",
+      propertyCountLabel: `${propCountByOwnerName[tn.name] || 0} ที่เช่าอยู่`,
+    }));
+
+    const buyerRows = (s.buyers || []).map((b) => ({
+      name: b.name || "(ไม่ระบุชื่อ)", phone: b.phone || "-", email: b.email || "-",
+      criteriaLabel: [b.area, b.type, b.budget].filter(Boolean).join(" · ") || "-",
+    }));
+
+    return {
+      isAgentTab: s.activeTab === "agent", isOwnerTab: s.activeTab === "owner", isTenantTab: s.activeTab === "tenant", isBuyerTab: s.activeTab === "buyer",
+      tabAgentStyle: tabBtn(s.activeTab === "agent"), tabOwnerStyle: tabBtn(s.activeTab === "owner"),
+      tabTenantStyle: tabBtn(s.activeTab === "tenant"), tabBuyerStyle: tabBtn(s.activeTab === "buyer"),
+      onTabAgent: () => this.setTab("agent"), onTabOwner: () => this.setTab("owner"),
+      onTabTenant: () => this.setTab("tenant"), onTabBuyer: () => this.setTab("buyer"),
+      countAgent: listers.length, countOwner: (s.owners || []).length, countTenant: (s.tenants || []).length, countBuyer: (s.buyers || []).length,
+      countAll, countPending, countApproved, countRejected,
+      statusAllStyle: filterBtn(s.statusFilter === "all"), statusPendingStyle: filterBtn(s.statusFilter === "pending"),
+      statusApprovedStyle: filterBtn(s.statusFilter === "approved"), statusRejectedStyle: filterBtn(s.statusFilter === "rejected"),
+      onFilterAll: () => this.setStatusFilter("all"), onFilterPending: () => this.setStatusFilter("pending"),
+      onFilterApproved: () => this.setStatusFilter("approved"), onFilterRejected: () => this.setStatusFilter("rejected"),
+      agentRows, noAgentRows: agentRows.length === 0,
+      ownerRows, noOwnerRows: ownerRows.length === 0,
+      tenantRows, noTenantRows: tenantRows.length === 0,
+      buyerRows, noBuyerRows: buyerRows.length === 0,
+    };
+  }
+}
+
+</script>
+</body>
+</html>
