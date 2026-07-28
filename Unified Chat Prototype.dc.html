@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>Unified Chat System v2 — Prototype</title>
+  <style>
+    body { margin: 0; background: oklch(96% 0.01 75); font-family: 'Work Sans', sans-serif; color: oklch(25% 0.02 60); }
+    .demo-tag { display:inline-block; font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; background:oklch(88% 0.1 80); color:oklch(35% 0.1 60); padding:2px 7px; border-radius:4px; }
+    .conv-item { cursor:pointer; }
+    .conv-item:hover { filter:brightness(0.98); }
+  </style>
+</helmet>
+
+<div style="max-width:1240px; margin:0 auto; padding:20px 20px 80px;">
+
+  <div style="background:oklch(98% 0.02 85); border:1px solid oklch(85% 0.05 70); border-radius:10px; padding:12px 16px; margin-bottom:18px; font-size:12.5px; color:oklch(40% 0.03 60);">
+    <span class="demo-tag">Prototype v2 — Not Production</span>&nbsp; ทุก conversation คือ 1 customer ↔ 1 member/admin เท่านั้น — ไม่มี group chat ระหว่าง customer ยังไม่เชื่อม Firestore/AI จริง
+  </div>
+
+  <div style="font-family:'Playfair Display',serif; font-size:22px; margin-bottom:4px;">Unified Chat Design System v2</div>
+  <div style="font-size:12.5px; color:oklch(50% 0.02 60); margin-bottom:12px;">1 reusable component · 3 contexts (Customer Shared Link / Member Inbox / Admin Inbox) · always-private 1:1 threads</div>
+
+  <div style="display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+    <sc-for list="{{ viewSwitcher }}" as="v" hint-placeholder-count="4">
+      <button onClick="{{ v.onSelect }}" style="{{ v.style }}">{{ v.label }}</button>
+    </sc-for>
+  </div>
+  <div style="font-size:12px; font-weight:600; color:oklch(35% 0.1 30); margin-bottom:18px;">Now viewing: {{ currentViewLabel }} — {{ currentViewKind }}</div>
+
+  <div style="display:grid; grid-template-columns:{{ gridColumns }}; gap:18px; align-items:start; background:{{ shellBg }}; border-radius:14px; padding:14px;">
+
+    <!-- Sidebar: Member Inbox or Admin Inbox ONLY — never on a Customer Shared Link -->
+    <sc-if value="{{ showSidebar }}" hint-placeholder-val="{{ false }}">
+      <div style="background:{{ sidebarBg }}; border:1px solid {{ sidebarBorder }}; border-radius:12px; overflow:hidden;">
+        <div style="padding:12px 14px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:{{ sidebarHeaderColor }}; border-bottom:1px solid {{ sidebarBorder }};">{{ sidebarTitle }}</div>
+        <sc-for list="{{ conversationList }}" as="c" hint-placeholder-count="3">
+          <div onClick="{{ c.onSelect }}" class="conv-item" style="{{ c.rowStyle }}">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div style="width:34px; height:34px; border-radius:50%; background:{{ c.avatarBg }}; display:flex; align-items:center; justify-content:center; color:{{ c.avatarColor }}; font-weight:700; font-size:13px; flex-shrink:0;">{{ c.avatarLetter }}</div>
+              <div style="flex:1; min-width:0;">
+                <div style="font-size:12.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ c.name }}</div>
+                <div style="font-size:11px; color:oklch(50% 0.02 60); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ c.lastLabel }}</div>
+              </div>
+              <sc-if value="{{ c.unread }}" hint-placeholder-val="{{ false }}"><div style="width:8px; height:8px; border-radius:50%; background:oklch(55% 0.18 30);"></div></sc-if>
+            </div>
+          </div>
+        </sc-for>
+        <div style="padding:10px 14px; border-top:1px solid {{ sidebarBorder }}; font-size:10.5px; color:oklch(55% 0.02 60);">{{ sidebarFootnote }}</div>
+      </div>
+    </sc-if>
+
+    <!-- Unified Chat Shell -->
+    <div style="background:white; border:1px solid oklch(88% 0.01 70); border-radius:12px; overflow:hidden;">
+      <div style="padding:12px 16px; display:flex; align-items:center; gap:10px; border-bottom:1px solid oklch(93% 0.01 70); background:{{ headerBg }}; color:{{ headerColor }};">
+        <div style="width:36px; height:36px; border-radius:50%; background:{{ active.avatarBg }}; display:flex; align-items:center; justify-content:center; color:{{ active.avatarColor }}; font-weight:700;">{{ active.avatarLetter }}</div>
+        <div>
+          <div style="font-size:13.5px; font-weight:600;">{{ active.name }}</div>
+          <div style="font-size:11px; opacity:0.75;">1:1 conversation · customer: {{ active.customerId }} · member: {{ active.memberId }}</div>
+        </div>
+      </div>
+
+      <div style="display:flex;">
+        <button onClick="{{ onTabAI }}" style="{{ tabAIStyle }}">🤖 {{ active.aiTabLabel }}</button>
+        <button onClick="{{ onTabHuman }}" style="{{ tabHumanStyle }}">💬 {{ active.humanTabLabel }}</button>
+      </div>
+
+      <div style="padding:10px 16px; font-size:11.5px; color:oklch(45% 0.02 60); background:oklch(98% 0.01 90); border-bottom:1px solid oklch(93% 0.01 70);">{{ contextBanner }}</div>
+
+      <sc-if value="{{ hasPropertyContext }}" hint-placeholder-val="{{ false }}">
+        <div style="margin:10px 16px; display:flex; gap:10px; align-items:center; background:oklch(97% 0.01 80); border:1px solid oklch(88% 0.02 70); border-radius:8px; padding:8px 10px;">
+          <div style="width:44px; height:44px; background:oklch(85% 0.02 60); border-radius:6px; flex-shrink:0;"></div>
+          <div style="font-size:11.5px;"><strong>{{ propertyContext.code }}</strong> — {{ propertyContext.title }}<br/>฿{{ propertyContext.price }}</div>
+        </div>
+      </sc-if>
+
+      <div style="height:260px; overflow-y:auto; padding:14px 16px; display:flex; flex-direction:column; gap:10px;">
+        <sc-for list="{{ activeMessages }}" as="m" hint-placeholder-count="2">
+          <div style="{{ m.bubbleStyle }}">{{ m.text }}</div>
+        </sc-for>
+        <sc-if value="{{ showHandoff }}" hint-placeholder-val="{{ false }}">
+          <div style="align-self:flex-start; background:oklch(97% 0.03 85); border:1px solid oklch(88% 0.05 75); border-radius:10px; padding:10px 12px; font-size:12px; max-width:85%;">
+            ต้องการให้ฉันส่งคำถามนี้ให้ {{ active.memberName }} หรือไม่?
+            <div style="display:flex; gap:6px; margin-top:8px;">
+              <button onClick="{{ onConfirmHandoff }}" style="font-size:11px; background:oklch(30% 0.1 30); color:white; border:none; border-radius:6px; padding:5px 10px; cursor:pointer;">ส่งให้ {{ active.memberName }}</button>
+              <button onClick="{{ onDismissHandoff }}" style="font-size:11px; background:white; border:1px solid oklch(85% 0.02 60); border-radius:6px; padding:5px 10px; cursor:pointer;">ถาม AI ต่อ</button>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+
+      <div style="display:flex; gap:6px; padding:10px 16px; border-top:1px solid oklch(93% 0.01 70);">
+        <input value="{{ input }}" onChange="{{ onInputChange }}" placeholder="{{ inputPlaceholder }}" style="flex:1; border:1px solid oklch(85% 0.02 60); border-radius:8px; padding:8px 10px; font-size:12.5px;"/>
+        <button onClick="{{ onSend }}" style="background:{{ accentColor }}; color:white; border:none; border-radius:8px; padding:8px 14px; font-size:12.5px; cursor:pointer;">Send</button>
+      </div>
+
+      <sc-if value="{{ isCustomerContext }}" hint-placeholder-val="{{ false }}">
+        <div style="position:sticky; bottom:0; display:flex; gap:8px; padding:10px 16px; border-top:1px solid oklch(93% 0.01 70); background:oklch(98% 0.005 80);">
+          <button onClick="{{ onTabAI }}" style="flex:1; background:{{ accentColor }}; color:white; border:none; border-radius:8px; padding:10px; font-size:12.5px; cursor:pointer;">Ask AI</button>
+          <button onClick="{{ onTabHuman }}" style="flex:1; background:white; border:1px solid {{ accentColor }}; color:{{ accentColor }}; border-radius:8px; padding:10px; font-size:12.5px; cursor:pointer;">{{ active.humanTabLabel }}</button>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+
+  <!-- No data bleed callout -->
+  <div style="margin-top:16px; background:white; border:1px solid oklch(88% 0.01 70); border-radius:10px; padding:14px 18px; font-size:12px; color:oklch(45% 0.02 60);">
+    <strong>No data bleed check</strong>: Customer A's thread with Somchai and Customer B's thread with Somchai are separate rows (conversationId differs by customerId). Selecting Customer A in Member Inbox never renders Customer B's messages, and vice versa. Admin Inbox lists both plus Member Ratchanee's customers — Somchai's own inbox (Member Inbox view) does not.
+  </div>
+
+  <!-- Design rationale -->
+  <div style="margin-top:16px; background:white; border:1px solid oklch(88% 0.01 70); border-radius:10px; padding:20px 22px; font-size:12.5px; line-height:1.65;">
+    <div style="font-family:'Playfair Display',serif; font-size:18px; margin-bottom:8px;">Design Decision</div>
+    <p><strong>Design Inspiration</strong>: Intercom/Front-style inbox shell, re-skinned per role (neutral/warm/professional) while keeping one structural layout.</p>
+    <p><strong>Why This Design</strong>: One component reused across Customer/Member/Admin — same bubble system, same input, same states — with only the sidebar visibility and accent color changing per context. Bugs get fixed once; roles stay instantly recognizable by color during testing.</p>
+    <p><strong>Why Not Separate UI Designs</strong>: Divergent chat UIs per role would drift over time and tempt building permission logic into the UI layer instead of the backend query/security layer — the actual place data isolation must live.</p>
+    <p><strong>Trade-offs</strong>: Less per-role visual freedom in exchange for one shared, auditable design surface.</p>
+    <p><strong>Expected Business Outcome</strong>: instant role recognition while testing, clear 1:1 lead ownership per conversation, no risk of cross-customer visibility, consistent training/onboarding.</p>
+  </div>
+
+  <!-- Data + Security model -->
+  <div style="margin-top:16px; background:white; border:1px solid oklch(88% 0.01 70); border-radius:10px; padding:20px 22px; font-size:12.5px; line-height:1.65;">
+    <div style="font-family:'Playfair Display',serif; font-size:18px; margin-bottom:8px;">Data Model &amp; Security Proposal (ยังไม่ implement)</div>
+    <pre style="white-space:pre-wrap; font-family:monospace; font-size:11.5px; background:oklch(97% 0.005 80); padding:12px; border-radius:8px;">conversations/{conversationId}
+  customerId, memberId, aiThreadEnabled, humanThreadEnabled
+  source, collectionId, propertyIds[], projectId
+  status, unreadByMember, unreadByCustomer, createdAt, updatedAt, lastMessageAt
+
+messages/{messageId}
+  conversationId, senderType:"customer"|"member"|"admin"|"ai"
+  senderId, text, propertyContext, createdAt, readAt, moderationStatus
+
+adminAccessLog/{logId}
+  adminId, conversationId, reason, timestamp, action</pre>
+    <ul style="margin:10px 0 0; padding-left:18px;">
+      <li>Rules: exactly one customerId + one memberId per conversation — never a 3rd participant added to an existing thread</li>
+      <li>Member reads/writes only where memberId == auth.uid; Customer A cannot query Customer B's conversation even though both talk to the same member</li>
+      <li>Admin Inbox query spans all conversations by role permission — Member Inbox query is always scoped to memberId == auth.uid, never platform-wide</li>
+      <li>Any admin read of a private conversation is written to adminAccessLog</li>
+    </ul>
+    <p style="margin-top:12px; color:oklch(45% 0.02 60);"><strong>สถานะ</strong>: Prototype เท่านั้น — ยังไม่เชื่อม Firestore, ยังไม่มี realtime, รอ Product Owner review ก่อนเริ่ม implementation จริง</p>
+  </div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { viewId: "custA", activeConvId: "somchai_custA", tab: "ai", input: "", handoffShown: {} };
+
+  members = {
+    somchai: { id: "somchai", name: "คุณสมชาย", role: "ที่ปรึกษาอสังหาริมทรัพย์", avatarLetter: "S", avatarBg: "oklch(45% 0.1 260)" },
+    ratchanee: { id: "ratchanee", name: "คุณรัชนี", role: "Project ABC", avatarLetter: "R", avatarBg: "oklch(50% 0.13 145)" },
+  };
+  customers = {
+    custA: { id: "custA", name: "คุณกมล", avatarLetter: "A", avatarBg: "oklch(55% 0.14 30)" },
+    custB: { id: "custB", name: "คุณนภา", avatarLetter: "B", avatarBg: "oklch(55% 0.12 200)" },
+    custC: { id: "custC", name: "คุณวิชัย", avatarLetter: "C", avatarBg: "oklch(55% 0.1 90)" },
+    custD: { id: "custD", name: "คุณอรุณี", avatarLetter: "D", avatarBg: "oklch(55% 0.12 320)" },
+  };
+  // conversations: 1 customer <-> 1 member, keyed by "{memberId}_{customerId}"
+  conversations = {
+    somchai_custA: { memberId: "somchai", customerId: "custA", hasProperty: true, propertyContext: { code: "HH-111", title: "Pool Villa Ready to Move", price: "12,500,000" },
+      aiMsgs: ["สวัสดีค่ะ! ฉันเป็น AI ผู้ช่วยของคุณสมชาย ถามเกี่ยวกับทรัพย์ที่แชร์ไว้ได้เลยค่ะ"], humanMsgs: ["คุณสมชาย: สวัสดีค่ะ คัด 5 หลังนี้ไว้ให้ดูก่อนค่ะ"] },
+    somchai_custB: { memberId: "somchai", customerId: "custB", hasProperty: false,
+      aiMsgs: ["สวัสดีค่ะ! มีคำถามเกี่ยวกับทรัพย์ที่คุณสมชายแนะนำไหมคะ"], humanMsgs: ["คุณสมชาย: สวัสดีค่ะ สนใจนัดดูบ้านไหมคะ"] },
+    somchai_custC: { memberId: "somchai", customerId: "custC", hasProperty: false, aiMsgs: [], humanMsgs: [] },
+    ratchanee_custD: { memberId: "ratchanee", customerId: "custD", hasProperty: false,
+      aiMsgs: ["สวัสดีค่ะ! ถามเกี่ยวกับ Project ABC ได้เลยค่ะ"], humanMsgs: ["คุณรัชนี: สวัสดีค่ะ สนใจยูนิตไหนคะ"] },
+  };
+
+  views = [
+    { id: "custA", label: "Customer A — Shared Link", context: "customerShare", convId: "somchai_custA" },
+    { id: "custB", label: "Customer B — Shared Link", context: "customerShare", convId: "somchai_custB" },
+    { id: "memberInbox", label: "Member Inbox (คุณสมชาย)", context: "member", convId: "somchai_custA" },
+    { id: "adminInbox", label: "Admin Inbox", context: "admin", convId: "somchai_custA" },
+  ];
+
+  theme = {
+    customerShare: { shellBg: "oklch(97% 0.01 80)", headerBg: "white", headerColor: "oklch(25% 0.02 60)", accent: "oklch(35% 0.08 40)" },
+    member: { shellBg: "oklch(97% 0.04 70)", headerBg: "oklch(30% 0.1 30)", headerColor: "white", accent: "oklch(30% 0.1 30)" },
+    admin: { shellBg: "oklch(94% 0.01 260)", headerBg: "oklch(22% 0.03 260)", headerColor: "white", accent: "oklch(35% 0.09 25)" },
+  };
+
+  selectView(v) { this.setState({ viewId: v.id, activeConvId: v.convId, tab: "ai", input: "", handoffShown: {} }); }
+  selectConv(id) { this.setState({ activeConvId: id, tab: "ai", input: "", handoffShown: {} }); }
+
+  send() {
+    const text = this.state.input.trim(); if (!text) return;
+    const convId = this.state.activeConvId, tab = this.state.tab, conv = this.conversations[convId];
+    this.setState({ input: "" });
+    conv[tab === "ai" ? "aiMsgs" : "humanMsgs"] = [...conv[tab === "ai" ? "aiMsgs" : "humanMsgs"], `คุณ: ${text}`];
+    if (tab === "ai") {
+      setTimeout(() => {
+        conv.aiMsgs = [...conv.aiMsgs, "[Demo] คำตอบตัวอย่าง — ยังไม่เชื่อม AI จริง"];
+        this.setState((s) => ({ handoffShown: { ...s.handoffShown, [convId]: true } }));
+      }, 500);
+    } else this.forceUpdate();
+  }
+
+  renderVals() {
+    const s = this.state;
+    const currentView = this.views.find((v) => v.id === s.viewId);
+    const conv = this.conversations[s.activeConvId];
+    const member = this.members[conv.memberId], customer = this.customers[conv.customerId];
+    const t = this.theme[currentView.context];
+    const isCustomerContext = currentView.context === "customerShare";
+    const bubble = (text) => ({
+      text, bubbleStyle: `max-width:85%; padding:9px 12px; border-radius:10px; font-size:12.5px; align-self:${text.startsWith("คุณ:") ? "flex-end" : "flex-start"}; background:${text.startsWith("คุณ:") ? t.accent : "oklch(95% 0.01 80)"}; color:${text.startsWith("คุณ:") ? "#fff" : "oklch(25% 0.02 60)"};`,
+    });
+
+    // sidebar contents differ by context
+    let sidebarConvs = [];
+    if (currentView.context === "member") {
+      sidebarConvs = Object.values(this.conversations).filter((c) => c.memberId === "somchai");
+    } else if (currentView.context === "admin") {
+      sidebarConvs = Object.values(this.conversations);
+    }
+    const conversationList = sidebarConvs.map((c) => {
+      const cust = this.customers[c.customerId], mem = this.members[c.memberId];
+      return {
+        name: currentView.context === "admin" ? `${cust.name} ↔ ${mem.name}` : cust.name,
+        lastLabel: (c.humanMsgs[c.humanMsgs.length - 1] || c.aiMsgs[c.aiMsgs.length - 1] || "ไม่มีข้อความ").slice(0, 30),
+        unread: c !== conv, avatarLetter: cust.avatarLetter, avatarBg: cust.avatarBg, avatarColor: "#fff",
+        onSelect: () => this.selectConv(`${c.memberId}_${c.customerId}`),
+        rowStyle: `padding:10px 14px; border-bottom:1px solid oklch(95% 0.01 70); background:${c === conv ? "oklch(97% 0.03 70)" : "white"};`,
+      };
+    });
+
+    return {
+      viewSwitcher: this.views.map((v) => ({
+        label: v.label, onSelect: () => this.selectView(v),
+        style: `text-align:left; padding:9px 12px; font-size:12px; border:none; cursor:pointer; border-radius:8px; background:${v.id === s.viewId ? "oklch(30% 0.1 30)" : "white"}; color:${v.id === s.viewId ? "#fff" : "oklch(30% 0.02 60)"}; border:1px solid ${v.id === s.viewId ? "oklch(30% 0.1 30)" : "oklch(88% 0.01 70)"};`,
+      })),
+      currentViewLabel: currentView.label,
+      currentViewKind: currentView.context === "customerShare" ? "🔗 Customer Shared Link (no sidebar, one conversation only)"
+        : currentView.context === "member" ? "🏠 Member Inbox (warm theme, own customers only)" : "🛡️ Admin Inbox (navy theme, platform-wide)",
+      showSidebar: !isCustomerContext, gridColumns: isCustomerContext ? "1fr" : "260px 1fr",
+      shellBg: t.shellBg, headerBg: t.headerBg, headerColor: t.headerColor, accentColor: t.accent,
+      sidebarBg: currentView.context === "admin" ? "oklch(20% 0.02 260)" : "white",
+      sidebarBorder: currentView.context === "admin" ? "oklch(30% 0.02 260)" : "oklch(88% 0.01 70)",
+      sidebarHeaderColor: currentView.context === "admin" ? "oklch(80% 0.02 260)" : "oklch(45% 0.02 60)",
+      sidebarTitle: currentView.context === "member" ? "ลูกค้าของฉัน" : "Inbox (All Members)",
+      sidebarFootnote: currentView.context === "member" ? "Query: memberId == 'somchai' — เห็นเฉพาะลูกค้าของคุณสมชายเท่านั้น" : "Query: platform role permission — ครอบคลุมทุก member",
+      conversationList: currentView.context === "admin" ? conversationList.map((c) => ({ ...c, name: c.name, avatarColor: "#fff" })) : conversationList,
+      isCustomerContext,
+      active: { name: isCustomerContext ? member.name : customer.name, avatarLetter: isCustomerContext ? member.avatarLetter : customer.avatarLetter,
+        avatarBg: isCustomerContext ? member.avatarBg : customer.avatarBg, avatarColor: "#fff",
+        customerId: customer.id, memberId: member.id, memberName: member.name,
+        aiTabLabel: isCustomerContext ? `AI ของ${member.name}` : "AI Assistant",
+        humanTabLabel: isCustomerContext ? `คุยกับ${member.name}` : `คุยกับ${customer.name}` },
+      onTabAI: () => this.setState({ tab: "ai" }), onTabHuman: () => this.setState({ tab: "human" }),
+      tabAIStyle: `flex:1; padding:12px; font-size:12.5px; font-weight:600; border:none; cursor:pointer; background:${s.tab === "ai" ? "white" : "oklch(96% 0.01 80)"}; color:${s.tab === "ai" ? t.accent : "oklch(50% 0.02 60)"}; border-bottom:2px solid ${s.tab === "ai" ? t.accent : "transparent"};`,
+      tabHumanStyle: `flex:1; padding:12px; font-size:12.5px; font-weight:600; border:none; cursor:pointer; background:${s.tab === "human" ? "white" : "oklch(96% 0.01 80)"}; color:${s.tab === "human" ? t.accent : "oklch(50% 0.02 60)"}; border-bottom:2px solid ${s.tab === "human" ? t.accent : "transparent"};`,
+      contextBanner: s.tab === "ai" ? `กำลังคุยกับ AI ผู้ช่วยของ${member.name} — ขอบเขตข้อมูล: ทรัพย์ของ${member.name}เท่านั้น` : `กำลังคุยแบบส่วนตัวกับ${member.name} — ${member.role}`,
+      hasPropertyContext: s.tab === "ai" && conv.hasProperty, propertyContext: conv.propertyContext || {},
+      activeMessages: (s.tab === "ai" ? conv.aiMsgs : conv.humanMsgs).map(bubble),
+      showHandoff: s.tab === "ai" && !!s.handoffShown[s.activeConvId],
+      onConfirmHandoff: () => this.setState((st) => ({ tab: "human", handoffShown: { ...st.handoffShown, [s.activeConvId]: false } })),
+      onDismissHandoff: () => this.setState((st) => ({ handoffShown: { ...st.handoffShown, [s.activeConvId]: false } })),
+      input: s.input, onInputChange: (e) => this.setState({ input: e.target.value }),
+      inputPlaceholder: s.tab === "ai" ? "ถาม AI…" : `พิมพ์ข้อความถึง${member.name}…`,
+      onSend: () => this.send(),
+    };
+  }
+}
+</script>
+</body>
+</html>

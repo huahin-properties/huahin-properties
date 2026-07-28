@@ -548,11 +548,13 @@ class Component extends DCLogic {
     for (const name of Component.RESET_COLLECTIONS) {
       try {
         const docs = await fb.fetchCollection(name);
+        let ok = 0, failed = 0;
         for (const d of docs) {
-          try { await fb.deleteDocById(name, d.id); totalDeleted++; }
-          catch (e) { this.logReset(`⚠️ Failed to delete ${name}/${d.id}: ${e.message}`); }
+          try { await fb.deleteDocById(name, d.id); totalDeleted++; ok++; }
+          catch (e) { failed++; this.logReset(`⚠️ Failed to delete ${name}/${d.id}: ${e.message}`); }
         }
-        this.logReset(`✅ ${name}: deleted ${docs.length} document(s)`);
+        if (failed === 0) this.logReset(`✅ ${name}: deleted ${ok} document(s)`);
+        else this.logReset(`⚠️ ${name}: deleted ${ok}, FAILED ${failed} (permission denied — delete these manually in Firebase Console)`);
       } catch (e) {
         this.logReset(`⚠️ Could not read ${name}: ${e.message}`);
       }

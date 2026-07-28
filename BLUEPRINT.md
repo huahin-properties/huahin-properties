@@ -38,6 +38,74 @@ ContactRail (แถบข้าง + แชทบอท)
 
 ---
 
+## 25.2 Workspace Economy — WEM v1 (22 ก.ค. 2569, Architecture Approved for Prototype Refinement, builds on WEA v1.1)
+
+**Resource Philosophy**: Members do not buy raw storage, AI tokens, or infrastructure. They purchase a managed Workspace service that includes platform operation, development, support, security, and continued improvement. Every upgrade should feel like expanding a digital office, not paying to remove a limitation.
+
+**Workspace Resources** (prototype: `Workspace Economy Prototype.dc.html`): AI Credits, Storage, Active Listings, Customer Spaces, Translation Credits, Team Members, Customer Collections, Brand Assets — each with Healthy/Getting Busy/Nearly Full/Action Required states, never framed with alarming red unless genuinely at risk.
+
+**AI Usage States** (8, all prototyped): Normal → Approaching → Reached → Temporary Grace → Add-on Available → Upgrade Recommended → Paused for Resource Protection → Restored. Fair-use protection with transparent usage history, never silent blocking.
+
+**Add-ons**: demo-priced packs (AI Credit Small/Medium/Large, Translation, Image Processing, Storage) each showing use case, validity, rollover policy — clearly labeled Demo Pricing — Not Final, no real payment connected. Add-on vs Upgrade comparison guides Members to the economical option rather than upselling by default.
+
+**Internal Pricing (ADMINISTRATOR CONFIDENTIAL — see `Internal Pricing Model — CONFIDENTIAL.md`)**: never shown in customer-facing UI or this public Blueprint section.
+
+**Mini-Site Customisation**: configurable Theme (Classic/Modern/Luxury/Minimal/Coastal/Professional/Dark demo set), primary/accent colour, section visibility+order, with live preview. Platform retains control boundaries — Members cannot remove platform identity, safety/report links, legal notices, or core navigation, and cannot apply misleading/impersonating designs.
+
+**Multi-Language & Translation**: Mini-Site primary + additional languages (checkbox set), translation method (AI-assisted vs own text), and a 4-state translation-status vocabulary — Original / AI Translated / Reviewed / Needs Review — applied consistently instead of silently trusting AI translation.
+
+**Property Library Filters**: advanced My Favorites filter set (keyword, sale/rent, area, type, price, beds, baths, land, pool, view, furnished, availability, collection usage, shared status, etc.), Save Filter action, and an explicit Filter → Select → Create Collection → Choose Customer → Preview → Share workflow. Source labels (My Listing / Platform Listing / Team Listing / Project Listing / Saved from Search) prevent implying false exclusive representation.
+
+**Brand Positioning**: huahin.properties positioned as a Real Estate Workspace Platform (Digital Office + Mini-Site + Property Library + Customer Collections + Customer Space + AI + multi-language), for existing/new agents, property owners, project teams, and people entering the profession — not a listing-only site. Draft TH/EN messaging directions captured in the prototype's Marketing tab, not finalized for public use.
+
+**New Member Onboarding**: role-picker (agent / owner / project manager / new business / buyer-renter / exploring) driving a tailored starter checklist (choose Mini-Site name → profile/service area → first Favorite → first Collection → share Mini-Site).
+
+**Not implemented** (explicitly out of scope this phase): real payments, real AI/storage/translation metering or billing, production package enforcement, Firebase resource accounting, tax/invoice generation, production theme persistence, production analytics, automatic credit replenishment.
+
+## 25.1 Workspace Experience Architecture — WEA v1.1 (22 ก.ค. 2569, Architecture Approved for Prototype Refinement)
+
+huahin.properties is not only a property listing website. It is a Real Estate Workspace Platform where every Member owns a Digital Office, every Customer receives a personalised property space, and every interaction strengthens a long-term relationship.
+
+**Member Identity**: every Member owns a permanent digital identity through their Mini-Site at `huahin.properties/@username` (official format — supersedes any earlier `/username` or subdomain reference). The Mini-Site serves as public professional identity, digital office, personal property storefront, customer enquiry gateway, and entry point to long-term customer relationships.
+
+**Username rules**: a-z, 0-9, hyphen only; 3-30 characters; globally unique; reserved system names blocked (admin, app, api, account, about, agent, blog, buy, contact, customer, dashboard, help, home, inbox, login, logout, map, member, messages, profile, property, rent, search, sell, settings, support, workspace, www). Redirect-on-change is a future consideration, not implemented.
+
+**Workspace mindset**: when a customer contacts a Member, the Member should immediately think "I will open my Workspace" — not "I will search the website." The Workspace is the Member's operational centre for customers, properties, Collections, messages, AI, listings, and Mini-Site management, organized around Today's Work and Recent Customers rather than generic statistics.
+
+**Core Design Principle**: every screen must answer *"How does this help the Member or Customer continue their journey?"* — if a screen cannot answer this, it should be redesigned.
+
+**Data relationships**: Member → Username → Mini-Site; Member → Workspace → Customers → Customer Space; Member → My Favorites → Customer Collection → Customer Space. One Member has one active username, one Mini-Site, one private Workspace, many customers, many Favorites, many Collections. One Customer has one persistent Customer Space per Member relationship, may receive many Collections, and has one conversation within that relationship.
+
+**Prototype**: `Member Workspace Prototype.dc.html` (Workspace/Today's Work/Recent Customers/Quick Actions/Package usage, My Favorites with collection-usage tags, Collection Builder with live Customer Space Preview + Share dialog, Mini-Site Public/Private/Username Settings). `Shared Favorites Prototype.dc.html` carries the Customer Space Mindset Box. Prototype/UX only — no Firebase Auth, Firestore, security rules, real username reservation, QR generation, social integration, payments, quotas, or notifications implemented.
+
+## 25. Customer Space Philosophy — Core Product Principle (Permanent, 23 ก.ค. 2569, Product Owner Approved)
+
+**สถานะ**: หลักการถาวร — ผูกพันทุก UX/UI/AI/Messaging/CRM/Customer Space feature ในอนาคตทั้งหมด ไม่ใช่แค่คำแนะนำ
+
+**หลักการหลัก**: huahin.properties ไม่ได้สร้างระบบแชตอีกตัวหนึ่ง (ไม่แข่งกับ LINE/Messenger/WhatsApp ซึ่งทำหน้าที่นั้นได้ดีอยู่แล้ว) แต่สร้าง **Customer Space** — พื้นที่ส่วนตัวเฉพาะเรื่องอสังหาริมทรัพย์ของลูกค้าแต่ละคน โดยมี Chat เป็นเพียงเครื่องมือหนึ่งข้างในนั้น
+
+**ความรู้สึกที่ต้องการ**: ลูกค้าควรรู้สึกว่า "นี่คือพื้นที่ทำงานส่วนตัวเรื่องอสังหาฯ ของฉัน" ไม่ใช่ "Support ticket" หรือ "แอปแชตทั่วไป" — เมื่อเปิด Share Link ต้องรู้สึกว่ากำลัง "กลับมาที่ Customer Space ของตัวเอง" ไม่ใช่ "เปิดแชตใหม่"
+
+**องค์ประกอบภายใน 1 Customer Space**: Curated Property Collection, Property Details, AI Property Assistant, Private Conversation, Member Information, Conversation History, Activity Timeline (future), AI Summary (future) — ทั้งหมดนี้เป็นประสบการณ์เดียวกัน ไม่ใช่ฟีเจอร์แยกกัน
+
+**Messaging Philosophy**: Chat ไม่ใช่ปลายทาง แต่สนับสนุน buying journey — ลูกค้าไม่ควรรู้สึกว่า "เปิดแชต" แต่รู้สึกว่า "กลับมาที่ Customer Space ของตัวเอง"
+
+**Multilingual**: ทุก Customer Space มี Language Context ของตัวเอง — ตรวจจับตามลำดับ (1) ภาษาที่ Member กำหนดไว้ล่วงหน้า (ถ้ามี) (2) ภาษา browser (3) ภูมิภาค (4) ค่า default ของแพลตฟอร์ม แล้วจดจำไว้ใช้ต่อทุกครั้งที่กลับมา; AI ทักทายและตอบด้วยภาษานั้นเสมอ, ตามลูกค้าอัตโนมัติถ้าลูกค้าเปลี่ยนภาษาเอง; Member สามารถแปลข้อความเป็นภาษาของตัวเองได้โดยไม่กระทบประสบการณ์ฝั่งลูกค้า; ภาษาที่รองรับอิงตามชุดภาษาของเว็บไซต์ (8 ภาษา)
+
+**AI Philosophy**: AI คือ Property Assistant ไม่ใช่ chatbot ทั่วไป — ลำดับความสำคัญ (1) ตอบจาก platform knowledge โดยตรงก่อน (2) ใช้ AI reasoning เฉพาะเมื่อจำเป็น (3) ส่งต่อ (escalate) ให้ Member ที่เกี่ยวข้องอย่างเป็นธรรมชาติ — เป้าหมายคือลดภาระงาน ไม่ใช่แทนที่ Member (สอดคล้องกับ Escalation Ladder ที่กำหนดไว้แล้วใน `CUSTOMER SPACE PLATFORM RULES.md` §3)
+
+**Resource Philosophy**: Chat รองรับข้อความตัวอักษรเท่านั้น — ไม่รองรับรูปภาพ/วิดีโอ/เสียง/ไฟล์แนบ การแชร์สื่อให้ใช้ LINE/WhatsApp/Messenger/Email แทน เพื่อรักษาต้นทุนโครงสร้างพื้นฐานให้ต่ำ ลดภาระ moderation และรองรับการเติบโตระยะยาว
+
+**Platform Integration**: ช่องทางภายนอก (LINE, Facebook, Messenger, WhatsApp, Email, Social Media) ทำหน้าที่เป็นช่องทาง**นำลูกค้าเข้ามา**เท่านั้น — เมื่อเข้ามาแล้ว Customer Space คือที่ที่ real estate journey ดำเนินต่อ
+
+**Design Decision Rule**: ทุกฟีเจอร์ใหม่ในอนาคตต้องตอบคำถามนี้ก่อนเสมอ — "สิ่งนี้ทำให้ Customer Space มีคุณค่ามากขึ้นหรือไม่" ถ้าไม่ใช่ ห้ามเพิ่ม (ป้องกัน feature creep, รักษาความเรียบง่าย ประสิทธิภาพ และต้นทุนดำเนินงาน)
+
+**เอกสารที่เกี่ยวข้อง**: รายละเอียดกฎเชิงปฏิบัติ (Lifecycle, Share Link resolution, AI escalation ladder, Privacy Model, Platform Limits, Phase 1-3) อยู่ใน `CUSTOMER SPACE PLATFORM RULES.md` — เอกสารนี้ (§25) คือหลักปรัชญาระดับ Blueprint ที่ผูกพันถาวร ส่วนไฟล์นั้นคือ Business Rule Book ที่ขยายความ
+
+**สถานะการ implement**: ยังไม่มีการเขียนโค้ดใดๆ ในขั้นนี้ — เป็นการอนุมัติหลักการเท่านั้น ตาม Product Owner directive (23 ก.ค. 2569)
+
+**Revision 1 (23 ก.ค. 2569, Product Owner Master Directive)**: หลักการนี้ได้รับการ refine (ไม่ใช่แทนที่) ด้วยสถาปัตยกรรมเพิ่มเติมใน `CUSTOMER SPACE REVISION 1.md` ได้แก่ Chat Architecture ที่ชัดเจนขึ้น (Customer→Private Conversation→Member→Admin, ไม่มี inbox ฝั่ง customer), Favorites Workspace (สองวัตถุประสงค์: personal bookmark + collection building), และแก้ไขโมเดล Collection ที่สำคัญ — **ไม่ใช่** `Favorites → Share` แต่เป็น `Property → Favorites Workspace → Customer Collection → Customer Space` (Favorites เป็นของ Member, แก้ไขได้ตลอด; Collection เป็นของแต่ละ Customer Space, คงที่หลัง share แล้วไม่ถูกเขียนทับ) พร้อม Growth Components/Matrix (contextual, ไม่ใช่โฆษณา, ต้องมีปุ่ม "Later"/"Don't show again today" เสมอ) — ดูรายละเอียดเต็มที่ไฟล์นั้น
+
 ## 1. รูปแบบธุรกิจ & ทีมงาน
 
 - **นิติบุคคล**: ทำในนามบุคคลธรรมดา/อิสระได้ ไม่ต้องเปิดบริษัทตอนนี้ Stripe รับเงินให้บุคคลธรรมดาได้ปกติ
