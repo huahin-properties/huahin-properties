@@ -312,6 +312,39 @@ export async function signInWithGoogle() {
   return cred.user.uid;
 }
 
+// Popup-based sign-in (signInWithPopup, above) is unreliable in some
+// browsers/networks — third-party-cookie restrictions, popup blockers, or
+// the popup silently losing its opener reference all cause an intermittent
+// generic failure with no useful error, even though the same account signs
+// in fine moments later. signInWithRedirect avoids all of that (a full-page
+// navigation to Google and back, no popup/third-party-cookie dependency) and
+// is Firebase's own recommended fix for this exact flakiness. The page must
+// call getRedirectSignInResult() on load to pick up the result afterwards.
+export async function signInWithGoogleRedirect() {
+  const a = authApp();
+  if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
+  const provider = new window.firebase.auth.GoogleAuthProvider();
+  await a.signInWithRedirect(provider);
+}
+
+export async function signInWithFacebookRedirect() {
+  const a = authApp();
+  if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
+  const provider = new window.firebase.auth.FacebookAuthProvider();
+  await a.signInWithRedirect(provider);
+}
+
+// Call once on page load (componentDidMount) on any page that offers
+// signInWithGoogleRedirect/signInWithFacebookRedirect — resolves to the
+// signed-in uid if the page was just reached via a redirect-based sign-in,
+// or null on an ordinary page load.
+export async function getRedirectSignInResult() {
+  const a = authApp();
+  if (!a) return null;
+  const result = await a.getRedirectResult();
+  return result && result.user ? result.user.uid : null;
+}
+
 export async function signInWithFacebook() {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");

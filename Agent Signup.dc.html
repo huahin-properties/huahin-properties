@@ -193,7 +193,16 @@ class Component extends DCLogic {
       const fb = await import("./firebase-client.js");
       const [settings, count] = await Promise.all([fb.fetchFoundingAgentSettings(), fb.countFoundingAgents()]);
       this.setState({ foundingLimit: settings.limit || 0, foundingNote: settings.note || "", foundingCount: count });
-    } catch (e) {}
+      // Pick up the result of a signInWithGoogleRedirect/signInWithFacebookRedirect
+      // that just navigated back to this page (redirect flow, not popup —
+      // far more reliable across browsers than the popup-based sign-in).
+      this.setState({ socialBusy: true });
+      const uid = await fb.getRedirectSignInResult();
+      if (uid) { await this.completeSocialSignIn(uid, fb); return; }
+      this.setState({ socialBusy: false });
+    } catch (e) {
+      this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบไม่สำเร็จ ลองใหม่อีกครั้ง" });
+    }
   }
 
   async completeSocialSignIn(uid, fb) {
@@ -221,8 +230,9 @@ class Component extends DCLogic {
     this.setState({ socialBusy: true, socialError: "" });
     try {
       const fb = await import("./firebase-client.js");
-      const uid = await fb.signInWithGoogle();
-      await this.completeSocialSignIn(uid, fb);
+      await fb.signInWithGoogleRedirect();
+      // Browser navigates away to Google here; componentDidMount's
+      // getRedirectSignInResult() picks up the result when it comes back.
     } catch (e) {
       this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย Google ไม่สำเร็จ ลองใหม่อีกครั้ง" });
     }
@@ -233,8 +243,7 @@ class Component extends DCLogic {
     this.setState({ socialBusy: true, socialError: "" });
     try {
       const fb = await import("./firebase-client.js");
-      const uid = await fb.signInWithFacebook();
-      await this.completeSocialSignIn(uid, fb);
+      await fb.signInWithFacebookRedirect();
     } catch (e) {
       this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย Facebook ไม่สำเร็จ (อาจยังไม่เปิดใช้งาน — แจ้งแอดมิน)" });
     }
