@@ -176,6 +176,10 @@ class Component extends DCLogic {
       this.setState({ lang: mod.getLang() });
     } catch (e) {}
     try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("tab") === "login") this.setState({ tab: "login" });
+    } catch (e) {}
+    try {
       const fb = await import("./firebase-client.js");
       const [settings, count] = await Promise.all([fb.fetchFoundingAgentSettings(), fb.countFoundingAgents()]);
       this.setState({ foundingLimit: settings.limit || 0, foundingNote: settings.note || "", foundingCount: count });
