@@ -75,7 +75,12 @@
         <div style="width:1px; height:20px; background:oklch(80% 0.02 70); margin:0 4px;"></div>
         <div onClick="{{ onShareOpen }}" title="{{ t.share_site }}" style="width:38px; height:38px; border-radius:50%; background:oklch(90% 0.005 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 8a3 3 0 1 0-2.83-4H15a3 3 0 0 0 .09 3.26L8.9 10.7a3 3 0 1 0 0 2.6l6.2 3.44A3 3 0 1 0 16 15l-6.2-3.44a3 3 0 0 0 0-1.12L16 7a3 3 0 0 0 2 1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
         <a href="{{ personHref }}" title="Login" style="font-size:16px; text-decoration:none; color:oklch(40% 0.02 60);">👤</a>
-        <a href="Agent Signup.dc.html" title="Sign up Free" style="font-size:13px; font-weight:600; text-decoration:none; color:white; background:oklch(62% 0.19 45); padding:6px 12px; border-radius:100px; white-space:nowrap;">Sign up Free</a>
+        <sc-if value="{{ isLoggedIn }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ onLogout }}" style="font-size:13px; font-weight:600; color:oklch(45% 0.15 25); cursor:pointer; white-space:nowrap;">ออกจากระบบ</div>
+        </sc-if>
+        <sc-if value="{{ showSignupBtn }}" hint-placeholder-val="{{ true }}">
+          <a href="Agent Signup.dc.html" title="Sign up Free" style="font-size:13px; font-weight:600; text-decoration:none; color:white; background:oklch(62% 0.19 45); padding:6px 12px; border-radius:100px; white-space:nowrap;">Sign up Free</a>
+        </sc-if>
         <a href="Admin Login.dc.html" style="font-size:13px; color:oklch(40% 0.02 60); text-decoration:none;">{{ t.nav_admin }}</a>
       </div>
     </sc-if>
@@ -512,6 +517,7 @@ class Component extends DCLogic {
   state = {
     lang: "en",
     personHref: "Agent Signup.dc.html?tab=login",
+    isLoggedIn: false,
     page: 1,
     isMobile: (typeof window !== "undefined" && window.innerWidth < 900),
     mobileMenuOpen: false,
@@ -534,7 +540,7 @@ class Component extends DCLogic {
     this._fb = fb0;
     try {
       const u = fb0.getCurrentAuthUser();
-      if (u) this.setState({ personHref: "Lister Dashboard.dc.html" });
+      if (u) this.setState({ personHref: "Lister Dashboard.dc.html", isLoggedIn: true });
     } catch (e) {}
     if (!fb0.hasSiteBypass() && !fb0.isAdminAuthed()) {
       try {
@@ -755,6 +761,9 @@ class Component extends DCLogic {
       t: tMerged,
       lang,
       personHref: this.state.personHref,
+      isLoggedIn: this.state.isLoggedIn,
+      showSignupBtn: !this.state.isLoggedIn,
+      onLogout: () => { this._fb.logoutAdmin(); window.location.reload(); },
       isDesktopNav: !this.state.isMobile,
       isMobileNav: this.state.isMobile,
       mobileMenuOpen: this.state.isMobile && this.state.mobileMenuOpen,
