@@ -9,6 +9,7 @@
 // window.claude.complete when running outside the Claude.ai preview.
 
 const { onRequest, onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onDocumentCreated } = require("firebase-functions/v2/firestore");
 const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
 const Stripe = require("stripe");
@@ -18,6 +19,50 @@ if (!admin.apps.length) admin.initializeApp();
 const ANTHROPIC_API_KEY = defineSecret("ANTHROPIC_API_KEY");
 const STRIPE_SECRET_KEY = defineSecret("STRIPE_SECRET_KEY");
 const STRIPE_WEBHOOK_SECRET = defineSecret("STRIPE_WEBHOOK_SECRET");
+const RESEND_API_KEY = defineSecret("RESEND_API_KEY");
+
+// Fires whenever ContactRail (or any other caller) writes a new lead —
+// looks up which lister owns the property the enquiry is about, and emails
+// that lister so they don't have to keep the Dashboard open to notice new
+// customer messages. Uses Resend (https://resend.com) — a REST email API,
+// no SMTP setup needed; RESEND_API_KEY is a Firebase secret, never in
+// client code. Silently no-ops (logs only) if the property/lister/email
+// can't be resolved or the secret isn't set yet — never blocks the lead
+// from saving, since the write already happened by the time this runs.
+exports.notifyNewLead = onDocumentCreated(
+  { document: "leads/{leadId}", region: "asia-southeast1", secrets: [RESEND_API_KEY] },
+  async (event) => {
+    const lead = event.data && event.data.data();
+    if (!lead || !lead.propertyId) { console.log("notifyNewLead: no propertyId on lead, skipping"); return; }
+    try {
+      const propSnap = await admin.firestore().collection("properties").doc(lead.propertyId).get();
+      const prop = propSnap.exists ? propSnap.data() : null;
+      const listerId = prop && prop.listerId;
+      if (!listerId) { console.log("notifyNewLead: property has no listerId, skipping"); return; }
+      const listerSnap = await admin.firestore().collection("listers").doc(listerId).get();
+      const lister = listerSnap.exists ? listerSnap.data() : null;
+      const toEmail = lister && lister.email;
+      if (!toEmail) { console.log("notifyNewLead: lister has no email, skipping"); return; }
+      const apiKey = RESEND_API_KEY.value();
+      if (!apiKey) { console.log("notifyNewLead: RESEND_API_KEY not set, skipping"); return; }
+      const title = (prop.title && (prop.title.th || prop.title.en)) || lead.propertyId;
+      const res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { "content-type": "application/json", authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          from: "huahin.properties <notify@huahin.properties>",
+          to: [toEmail],
+          subject: `มีลูกค้าติดต่อเข้ามาใหม่ — ${title}`,
+          html: `<p>มีลูกค้าทักเข้ามาเกี่ยวกับทรัพย์: <b>${title}</b></p>
+                 <p>ชื่อ: ${lead.name || "-"}<br/>โทร: ${lead.phone || "-"}<br/>อีเมล: ${lead.email || "-"}</p>
+                 <p>ข้อความ: ${lead.message || "-"}</p>
+                 <p><a href="https://huahin.properties/Lister%20Dashboard.dc.html">เปิด Dashboard เพื่อตอบกลับ →</a></p>`,
+        }),
+      });
+      if (!res.ok) console.warn("notifyNewLead: Resend API error", res.status, await res.text());
+    } catch (e) { console.warn("notifyNewLead failed:", e); }
+  }
+);
 
 exports.claudeComplete = onRequest(
   { secrets: [ANTHROPIC_API_KEY], cors: true, region: "asia-southeast1", timeoutSeconds: 300, memory: "512MiB" },
