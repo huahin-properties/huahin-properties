@@ -54,6 +54,7 @@
       <div onClick="{{ onTabLogin }}" style="padding:10px 20px; font-size:14px; font-weight:600; cursor:pointer; border-bottom:2px solid {{ loginTabColor }}; color:{{ loginTabColor }};">Login</div>
     </div>
 
+
     <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:20px clamp(24px,4vw,36px); margin-bottom:16px;">
       <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:12px;">เข้าสู่ระบบ/สมัครแบบเร็ว — ไม่ต้องพิมพ์อีเมล/รหัสผ่าน</div>
       <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
@@ -139,7 +140,7 @@
         <div style="font-size:34px; margin-bottom:12px;">✅</div>
         <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(20% 0.02 60); margin-bottom:8px;">สมัครสำเร็จ — ใช้งานได้ทันที</div>
         <div style="font-size:14px; color:oklch(50% 0.02 60); max-width:420px; margin:0 auto; line-height:1.7;">เราส่งอีเมลยืนยันตัวตนไปที่กล่องจดหมายของคุณแล้ว — กดลิงก์ในอีเมลเพื่อยืนยัน จากนี้เราจะส่งข่าวสาร/สิทธิประโยชน์ใหม่ๆ ให้คุณทางอีเมลนี้ด้วย</div>
-        <a href="Lister Dashboard.dc.html" style="display:inline-block; margin-top:18px; font-size:13px; color:oklch(42% 0.12 25);">ไปที่หน้าทำงานของฉัน →</a>
+        <a href="Lister Billing.dc.html" style="display:inline-block; margin-top:18px; font-size:13px; color:oklch(42% 0.12 25);">ไปที่หน้าเลือกแพ็กเกจ →</a>
       </div>
     </sc-if>
 
@@ -229,6 +230,13 @@ class Component extends DCLogic {
     } catch (e) {}
   }
 
+  // New signup or returning login with no package chosen yet → the package
+  // page (4-column ladder) first; once a tier is set, straight to the
+  // workspace. Shared by social sign-in, email/password signup, and login.
+  goToWorkspaceOrPackages(doc) {
+    window.location.href = (doc && (doc.tier || doc.vipTier)) ? "Lister Dashboard.dc.html" : "Lister Billing.dc.html";
+  }
+
   async completeSocialSignIn(uid, fb) {
     try {
       const doc = await fb.fetchMyListerDoc();
@@ -243,7 +251,7 @@ class Component extends DCLogic {
           status: "approved", createdAt: Date.now(), foundingAgent: isFounding,
         });
       }
-      window.location.href = "Lister Dashboard.dc.html";
+      this.goToWorkspaceOrPackages(doc);
     } catch (e) {
       this.setState({ socialBusy: false, socialError: "เกิดข้อผิดพลาด ลองใหม่อีกครั้ง" });
     }
@@ -330,7 +338,8 @@ class Component extends DCLogic {
     try {
       const fb = await import("./firebase-client.js");
       await fb.adminSignIn(this.state.loginEmail.trim(), this.state.loginPassword);
-      window.location.href = "Lister Dashboard.dc.html";
+      const doc = await fb.fetchMyListerDoc().catch(() => null);
+      this.goToWorkspaceOrPackages(doc);
     } catch (e) {
       this.setState({ loginBusy: false, loginError: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
     }
@@ -359,7 +368,8 @@ class Component extends DCLogic {
         foundingAgent: isFounding,
       });
       this.setState({ submitted: true, submitting: false });
-      setTimeout(() => { window.location.href = "Lister Dashboard.dc.html"; }, 1400);
+      // Brand-new signup never has a tier yet — package page next, always.
+      setTimeout(() => { window.location.href = "Lister Billing.dc.html"; }, 1400);
     } catch (e) {
       const msg = (e && e.code === "auth/email-already-in-use")
         ? "อีเมลนี้เคยสมัครไว้แล้ว"

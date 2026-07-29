@@ -34,6 +34,10 @@
     <div onClick="{{ onLogout }}" style="font-size:13px; color:oklch(75% 0.02 70); cursor:pointer;">ออกจากระบบ</div>
   </div>
 
+  <sc-if value="{{ showFab }}">
+    <div onClick="{{ onNewProperty }}" style="position:fixed; bottom:22px; right:22px; z-index:50; width:56px; height:56px; border-radius:50%; background:oklch(40% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-size:28px; box-shadow:0 4px 14px rgba(0,0,0,0.25); cursor:pointer;">+</div>
+  </sc-if>
+
   <div style="max-width:1080px; margin:0 auto; padding:clamp(20px,4vw,40px);">
 
     <sc-if value="{{ notSignedIn }}">
@@ -48,18 +52,36 @@
       <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:22px;">{{ listerEmail }}</div>
 
       <div style="background:white; border-radius:8px; padding:20px 22px; margin-bottom:22px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
-        <div>
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">แพ็กเกจปัจจุบันของคุณ</div>
-          <div style="font-size:16px; font-weight:600; color:oklch(25% 0.02 60);">{{ tierLabel }}</div>
-          <sc-if value="{{ agentCodeLabel }}"><div style="font-size:12px; color:oklch(45% 0.13 250); margin-top:4px;">{{ agentCodeLabel }}</div></sc-if>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">แพ็กเกจปัจจุบันของคุณ</div>
+            <div style="font-size:16px; font-weight:600; color:oklch(25% 0.02 60);">{{ tierLabel }}</div>
+            <sc-if value="{{ agentCodeLabel }}"><div style="font-size:12px; color:oklch(45% 0.13 250); margin-top:4px;">{{ agentCodeLabel }}</div></sc-if>
+          </div>
+          <sc-if value="{{ showPremiumBadge }}"><div style="background:linear-gradient(135deg, oklch(55% 0.15 75), oklch(45% 0.15 40)); color:white; font-size:11px; font-weight:700; padding:5px 12px; border-radius:100px; white-space:nowrap; letter-spacing:0.3px;">⭐ {{ premiumBadgeLabel }}</div></sc-if>
         </div>
-        <!-- Sprint 01 Phase 3: Upgrade is the primary (business-priority) action here; Owner Website/Share demoted to lighter ghost buttons, same handlers as before -->
+        <!-- Sprint 01 Phase 3: Upgrade is the primary (business-priority) action here; Website+Share merged into one grouped control (was 2 separate buttons) -->
         <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-          <div onClick="{{ onOpenMySite }}" style="background:transparent; color:oklch(50% 0.02 60); padding:8px 4px; font-size:12.5px; font-weight:500; cursor:pointer; white-space:nowrap; text-decoration:underline;">🌐 เว็บไซต์ของฉัน</div>
-          <div onClick="{{ onShareMySite }}" style="{{ shareMySiteStyle }}">🔗 แชร์เว็บไซต์</div>
-          <a href="Lister Billing.dc.html" style="{{ upgradeTopBarStyle }}">📦 ดู/อัปเกรดแพ็กเกจ</a>
+          <div style="display:flex; align-items:center; border:1px solid oklch(88% 0.01 70); border-radius:100px; overflow:hidden;">
+            <div onClick="{{ onOpenMySite }}" style="padding:8px 14px; font-size:12.5px; font-weight:500; color:oklch(45% 0.02 60); cursor:pointer; white-space:nowrap;">🌐 เว็บไซต์ของฉัน</div>
+            <div onClick="{{ onShareMySite }}" style="{{ shareMySiteStyle }}">🔗</div>
+          </div>
+          <a href="Lister Billing.dc.html" style="{{ upgradeTopBarStyle }}">🎁 เลือก Package</a>
         </div>
       </div>
+
+      <sc-if value="{{ showProfileChecklist }}">
+        <div style="background:white; border-radius:8px; padding:16px 22px; margin-bottom:22px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; gap:10px; flex-wrap:wrap;">
+            <div style="font-size:13px; color:oklch(35% 0.02 60); font-weight:600;">โปรไฟล์ของคุณสมบูรณ์ {{ profileCompletePct }}%</div>
+            <div onClick="{{ onToggleProfileSettings }}" style="font-size:12px; color:oklch(40% 0.13 25); cursor:pointer; font-weight:600;">แก้ไขโปรไฟล์ →</div>
+          </div>
+          <div style="background:oklch(93% 0.005 70); border-radius:100px; height:6px; overflow:hidden;">
+            <div style="background:oklch(45% 0.13 25); height:100%; width:{{ profileCompletePct }}%; border-radius:100px;"></div>
+          </div>
+          <sc-if value="{{ profileMissingText }}"><div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-top:6px;">ยังขาด: {{ profileMissingText }}</div></sc-if>
+        </div>
+      </sc-if>
 
       <sc-if value="{{ showKpiStrip }}">
         <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:22px;">
@@ -1242,6 +1264,18 @@ class Component extends DCLogic {
     setTimeout(() => this.setState({ shareCopyLabel: "คัดลอกลิงก์" }), 2000);
   }
 
+  profileCompleteness(lister) {
+    const checks = [
+      { ok: !!(lister.name || lister.displayName), label: "ชื่อที่แสดง" },
+      { ok: !!lister.phone, label: "เบอร์โทร" },
+      { ok: !!lister.profilePhotoUrl, label: "รูปโปรไฟล์" },
+      { ok: !!(lister.bioText && (typeof lister.bioText === "string" ? lister.bioText.trim() : lister.bioText.th || lister.bioText.en)), label: "ข้อความแนะนำตัว" },
+      { ok: !!(lister.socialLinks && Object.values(lister.socialLinks).some((v) => v)), label: "ลิงก์โซเชียลอย่างน้อย 1 ช่องทาง" },
+    ];
+    const done = checks.filter((c) => c.ok).length;
+    return { pct: Math.round((done / checks.length) * 100), missing: checks.filter((c) => !c.ok).map((c) => c.label) };
+  }
+
   renderVals() {
     const mod = this._mod;
     const tierLabels = { trial: "🎁 ทดลองใช้ฟรี", basic: "① ฟรี", pro: "② ระดับ 1", agency: "② ระดับ 1", level3: "③ ระดับ 2", level4: "④ ระดับ 3", silver: "🥈 VIP เงิน", gold: "🥇 VIP ทอง", diamond: "💎 VIP เพชร" };
@@ -1353,6 +1387,11 @@ class Component extends DCLogic {
       loaded: this.state.loaded, signedIn: this.state.signedIn, notSignedIn: this.state.loaded && !this.state.signedIn,
       listerName: lister.name ? " " + lister.name : "", listerEmail: lister.email || "",
       tierLabel: tierLabels[lister.tier] || tierLabels[lister.vipTier] || (lister.tier ? lister.tier : "ยังไม่ได้เลือกแพ็กเกจ"),
+      showPremiumBadge: !!(lister.tier === "level4" || lister.vipTier),
+      premiumBadgeLabel: lister.vipTier ? "VIP" : "พรีเมียม",
+      showProfileChecklist: this.state.signedIn && !!lister.id,
+      profileCompletePct: this.profileCompleteness(lister).pct,
+      profileMissingText: this.profileCompleteness(lister).missing.join(" · "),
       agentCodeLabel: lister.agentCode ? `รหัส Agent: ${lister.agentCode}` : "",
       showTrialOffer: !lister.tier && !lister.trialUsed,
       trialStartLabel: this.state.trialStarting ? "กำลังเริ่ม…" : "เริ่มทดลองใช้ฟรี",
@@ -1380,9 +1419,10 @@ class Component extends DCLogic {
       // Top-bar Upgrade button visual weight follows ctaState: tertiary at
       // State 1 (nothing to upgrade FOR yet), secondary at State 2/3,
       // primary only at State 4 (quota genuinely full).
-      upgradeTopBarStyle: ctaState === 4
-        ? "display:inline-block; background:oklch(40% 0.13 25); color:white; padding:12px 26px; border-radius:100px; font-size:14px; font-weight:700; text-decoration:none; white-space:nowrap;"
-        : "display:inline-block; background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:10px 20px; border-radius:100px; font-size:13px; font-weight:600; text-decoration:none; white-space:nowrap;",
+      // Always bold/colorful (same maroon as the "start free trial" banner
+      // button) so it reads at a glance as the other big choice a new user
+      // makes — not a quiet secondary link — no matter their current state.
+      upgradeTopBarStyle: "display:inline-block; background:oklch(40% 0.13 25); color:white; padding:12px 26px; border-radius:100px; font-size:14px; font-weight:700; text-decoration:none; white-space:nowrap;",
       newPropertyBtnStyle: quotaFull
         ? "background:oklch(90% 0.01 70); color:oklch(55% 0.02 60); padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;"
         : "background:oklch(22% 0.02 60); color:white; padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;",
@@ -1396,6 +1436,7 @@ class Component extends DCLogic {
       // Sprint 01 Phase 2: first-time empty state gets one unmissable
       // primary CTA instead of the old small centered text.
       showFirstTimeCta: properties.length === 0,
+      showFab: this.state.signedIn && properties.length > 0,
       properties,
       onNewProperty: () => this.startNew(),
       onBackToList: () => this.goBackToList(),
@@ -1537,8 +1578,8 @@ class Component extends DCLogic {
       // Share is greyed out (shown, non-functional) during trial — per the
       // trial spec: demonstrate the feature exists, unlock on upgrade.
       shareMySiteStyle: isTrial
-        ? "background:oklch(93% 0.005 70); border:1px solid oklch(88% 0.01 70); color:oklch(65% 0.01 70); padding:11px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:not-allowed; white-space:nowrap;"
-        : "background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:11px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;",
+        ? "padding:8px 12px; font-size:13px; color:oklch(70% 0.01 70); cursor:not-allowed; border-left:1px solid oklch(88% 0.01 70);"
+        : "padding:8px 12px; font-size:13px; color:oklch(35% 0.02 60); cursor:pointer; border-left:1px solid oklch(88% 0.01 70);",
       onShareMySite: () => isTrial ? window.alert("ฟีเจอร์แชร์เว็บไซต์ใช้งานได้ตั้งแต่แพ็กเกจ 1 ขึ้นไป — อัปเกรดแพ็กเกจเพื่อใช้งาน") : this.shareMySite(),
       showProfileSettings: this.state.showProfileSettings,
       profileSettingsToggleLabel: this.state.showProfileSettings ? "ซ่อน ▲" : "แก้ไข ▼",

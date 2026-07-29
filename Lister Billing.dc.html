@@ -221,6 +221,7 @@ class Component extends DCLogic {
       if (rolloutLevel >= 4) {
         fb.fetchVipPoolStats().then((vipStats) => this.setState({ vipStats })).catch(() => {});
       }
+
     } catch (e) {
       console.warn("Failed to load billing info:", e);
       this.setState({ loaded: true, error: "โหลดข้อมูลไม่สำเร็จ" });
