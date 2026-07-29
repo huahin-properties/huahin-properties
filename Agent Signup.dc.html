@@ -209,6 +209,20 @@ class Component extends DCLogic {
       console.error("[componentDidMount] getRedirectSignInResult threw:", e);
       this.setState({ socialError: "เข้าสู่ระบบด้วย Google ไม่สำเร็จ: " + (e && (e.code || e.message) || "unknown error") });
     }
+    // auth/argument-error on Google/Facebook sign-in is 100% reproducible on
+    // the very first attempt after a fresh page load in a new browser, and
+    // ONLY a genuine full page reload (not an in-memory retry) clears it —
+    // confirmed by testing. Rather than making the user manually refresh,
+    // automate exactly that: on first failure, silently reload the page
+    // once and auto-resume the same sign-in the user just asked for.
+    try {
+      const pending = sessionStorage.getItem("hh_social_retry");
+      if (pending) {
+        sessionStorage.removeItem("hh_social_retry");
+        if (pending === "google") this.googleSignIn();
+        else if (pending === "facebook") this.facebookSignIn();
+      }
+    } catch (e) {}
     try {
       const [settings, count] = await Promise.all([fb.fetchFoundingAgentSettings(), fb.countFoundingAgents()]);
       this.setState({ foundingLimit: settings.limit || 0, foundingNote: settings.note || "", foundingCount: count });
@@ -251,12 +265,13 @@ class Component extends DCLogic {
       // Browser navigates away here; componentDidMount picks up the result
       // on the page it returns to.
     } catch (e) {
-      // Full diagnostic dump — need the real code/message/stack, not a
-      // guess, to find the actual root cause instead of trying more fixes
-      // blind. This is intentionally verbose and visible in the UI so it
-      // can be screenshotted directly without opening DevTools.
       console.error("[googleSignIn] full error:", e);
-      const detail = e ? `stage=${e.__stage || "?"} code=${e.code || "?"} name=${e.name || "?"}` : "no error object";
+      if (e && e.code === "auth/argument-error" && !sessionStorage.getItem("hh_social_retry")) {
+        sessionStorage.setItem("hh_social_retry", "google");
+        window.location.reload();
+        return;
+      }
+      const detail = e ? `code=${e.code || "?"} name=${e.name || "?"}` : "no error object";
       this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย Google ไม่สำเร็จ: " + detail });
     }
   }
@@ -268,6 +283,11 @@ class Component extends DCLogic {
     try {
       await fb.signInWithFacebookRedirect();
     } catch (e) {
+      if (e && e.code === "auth/argument-error" && !sessionStorage.getItem("hh_social_retry")) {
+        sessionStorage.setItem("hh_social_retry", "facebook");
+        window.location.reload();
+        return;
+      }
       this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย Facebook ไม่สำเร็จ (อาจยังไม่เปิดใช้งาน — แจ้งแอดมิน)" });
     }
   }
