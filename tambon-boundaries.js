@@ -120,3 +120,47 @@ export function smoothRing(path, iterations) {
   }
   return pts;
 }
+
+function hashSeedStr(s) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
+  return h;
+}
+function mulberry32(seed) {
+  return function () {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// Generates a smooth, irregular "blob" boundary — deterministic per listing
+// (same seed always yields the same shape/offset, so the public page and the
+// lister's own preview always match, and reloading never changes it) — used
+// to highlight a general area without a perfect circle (hard to eyeball a
+// center point) and without the pin sitting dead-center every time.
+// baseRadiusM ~ how large the highlighted area is. Returns [ [lat,lng], ... ].
+export function generateAreaBlob(centerLat, centerLng, seedStr, baseRadiusM, sides) {
+  sides = sides || 56;
+  const rand = mulberry32(hashSeedStr(String(seedStr)));
+  const origin = toXY(centerLat, centerLng, centerLat); // [0,0] by construction
+  // Offset the blob's own center away from the real pin (15%-45% of radius,
+  // random direction) so the pin is never exactly in the middle of the shape.
+  const offAngle = rand() * 2 * Math.PI;
+  const offDist = (0.15 + rand() * 0.30) * baseRadiusM;
+  const centerX = origin[0] + offDist * Math.cos(offAngle);
+  const centerY = origin[1] + offDist * Math.sin(offAngle);
+  // A few random smooth harmonics distort the radius per angle so the edge
+  // waves in and out organically instead of tracing a perfect circle.
+  const harmonics = [1, 2, 3, 4].map((k) => ({ k, amp: (0.05 + rand() * 0.10) / k, phase: rand() * 2 * Math.PI }));
+  const pts = [];
+  for (let i = 0; i < sides; i++) {
+    const theta = (i / sides) * 2 * Math.PI;
+    let rFactor = 1;
+    for (const h of harmonics) rFactor += h.amp * Math.cos(h.k * theta + h.phase);
+    const r = baseRadiusM * Math.max(0.45, rFactor);
+    pts.push(toLatLngXY(centerX + r * Math.cos(theta), centerY + r * Math.sin(theta), centerLat));
+  }
+  return pts;
+}
