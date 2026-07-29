@@ -1560,8 +1560,8 @@ class Component extends DCLogic {
       if (!this._previewMapEl) return;
       if (!this._previewMap) {
         this._previewMap = new google.maps.Map(this._previewMapEl, {
-          center: coords, zoom: mode === "exact" ? 15 : 13, disableDefaultUI: true,
-          gestureHandling: "none", draggable: false, keyboardShortcuts: false, clickableIcons: false,
+          center: coords, zoom: mode === "exact" ? 15 : 13, disableDefaultUI: true, zoomControl: true,
+          gestureHandling: "greedy", keyboardShortcuts: false, clickableIcons: false,
         });
       } else {
         this._previewMap.setCenter(coords);
@@ -1575,7 +1575,8 @@ class Component extends DCLogic {
         this._previewMarker = new google.maps.Marker({ position: coords, map: this._previewMap });
       } else if (tambon) {
         const clipped = tambonMod.clipTambonToRadius(tambon, coords.lat, coords.lng, 2200) || tambon.path;
-        const path = clipped.map(([lat, lng]) => ({ lat, lng }));
+        const smoothed = tambonMod.smoothRing(clipped, 2);
+        const path = smoothed.map(([lat, lng]) => ({ lat, lng }));
         this._previewPolygon = new google.maps.Polygon({
           map: this._previewMap, paths: path,
           fillColor: "#7a2331", fillOpacity: 0.18, strokeOpacity: 0, clickable: false,

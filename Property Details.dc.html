@@ -610,8 +610,8 @@ class Component extends DCLogic {
       const center = exactCoords || mod.ZONE_COORDS[zone] || { lat: 12.55, lng: 99.96 };
       if (!this._zoneMap) {
         this._zoneMap = new google.maps.Map(this._zoneMapEl, {
-          center, zoom: 13, disableDefaultUI: true, gestureHandling: "none",
-          draggable: false, keyboardShortcuts: false, clickableIcons: false,
+          center, zoom: 13, disableDefaultUI: true, zoomControl: true, gestureHandling: "greedy",
+          keyboardShortcuts: false, clickableIcons: false,
         });
       } else {
         this._zoneMap.setCenter(center);
@@ -628,7 +628,8 @@ class Component extends DCLogic {
         // (hidden) pin — keeps the real, irregular edge shape rather than a
         // perfect circle, but avoids highlighting an entire huge subdistrict.
         const clipped = this._tambonMod.clipTambonToRadius(tambon, exactCoords.lat, exactCoords.lng, 2200) || tambon.path;
-        const path = clipped.map(([lat, lng]) => ({ lat, lng }));
+        const smoothed = this._tambonMod.smoothRing(clipped, 2);
+        const path = smoothed.map(([lat, lng]) => ({ lat, lng }));
         this._zonePolygon = new google.maps.Polygon({
           map: this._zoneMap, paths: path,
           fillColor: "#7a2331", fillOpacity: 0.18, strokeOpacity: 0, clickable: false,

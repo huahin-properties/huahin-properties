@@ -101,3 +101,22 @@ export function clipTambonToRadius(tambon, centerLat, centerLng, radiusMeters, s
   if (!clipped.length) return null;
   return clipped.map(([x, y]) => toLatLngXY(x, y, centerLat));
 }
+
+// Chaikin corner-cutting smoothing on a closed ring of [lat,lng] points — turns
+// the hard-edged clip (circle arc meeting a straight tambon edge, i.e. a
+// "pac-man" wedge) into a soft, organic blob outline. Cyclic (wraps around).
+export function smoothRing(path, iterations) {
+  iterations = iterations || 2;
+  let pts = path.slice();
+  for (let iter = 0; iter < iterations; iter++) {
+    const next = [];
+    const n = pts.length;
+    for (let i = 0; i < n; i++) {
+      const p0 = pts[i], p1 = pts[(i + 1) % n];
+      next.push([p0[0] * 0.75 + p1[0] * 0.25, p0[1] * 0.75 + p1[1] * 0.25]);
+      next.push([p0[0] * 0.25 + p1[0] * 0.75, p0[1] * 0.25 + p1[1] * 0.75]);
+    }
+    pts = next;
+  }
+  return pts;
+}
