@@ -370,8 +370,14 @@ export async function signInWithGoogleRedirect() {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
   const provider = new window.firebase.auth.GoogleAuthProvider();
-  const cred = await withAuthRetry(() => a.signInWithPopup(provider));
-  return cred.user.uid;
+  console.log("[signInWithGoogleRedirect] calling signInWithPopup, auth app name:", a.app && a.app.name, "authDomain:", a.app && a.app.options && a.app.options.authDomain);
+  try {
+    const cred = await a.signInWithPopup(provider);
+    return cred.user.uid;
+  } catch (e) {
+    console.error("[signInWithGoogleRedirect] signInWithPopup threw:", e, "code:", e && e.code, "message:", e && e.message);
+    throw e;
+  }
 }
 
 export async function signInWithFacebookRedirect() {
