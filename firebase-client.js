@@ -320,18 +320,37 @@ export async function signInWithGoogle() {
 // navigation to Google and back, no popup/third-party-cookie dependency) and
 // is Firebase's own recommended fix for this exact flakiness. The page must
 // call getRedirectSignInResult() on load to pick up the result afterwards.
+// In a browser that has never visited this site before, the Auth SDK's
+// local persistence layer (IndexedDB) can still be opening when the user
+// clicks Sign in on the very first page load — signInWithRedirect then
+// throws "auth/argument-error" once, even though the exact same call
+// succeeds a second later. Retrying once after a short pause papers over
+// that startup race instead of showing the user a scary red error.
+async function withAuthRetry(fn) {
+  try {
+    await fn();
+  } catch (e) {
+    if (e && e.code === "auth/argument-error") {
+      await new Promise((r) => setTimeout(r, 400));
+      await fn();
+    } else {
+      throw e;
+    }
+  }
+}
+
 export async function signInWithGoogleRedirect() {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
   const provider = new window.firebase.auth.GoogleAuthProvider();
-  await a.signInWithRedirect(provider);
+  await withAuthRetry(() => a.signInWithRedirect(provider));
 }
 
 export async function signInWithFacebookRedirect() {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
   const provider = new window.firebase.auth.FacebookAuthProvider();
-  await a.signInWithRedirect(provider);
+  await withAuthRetry(() => a.signInWithRedirect(provider));
 }
 
 // Call once on page load (componentDidMount) on any page that offers
