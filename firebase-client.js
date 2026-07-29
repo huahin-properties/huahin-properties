@@ -373,51 +373,33 @@ export async function warmUpAuthPersistence() {
   });
 }
 
+// Redirect-based sign-in — a full-page navigation to Google and back, not
+// a popup. This avoids all popup/user-gesture browser quirks entirely
+// (popups intermittently failed to open or got auto-closed on the very
+// first attempt in a fresh browser — a fundamentally popup-specific
+// problem, confirmed by testing). huahin.properties is now an authorized
+// JavaScript origin in Google Cloud Console (it was not, during earlier
+// redirect testing) — that was the real gap, not the redirect mechanism.
 export async function signInWithGoogleRedirect() {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
-  const attempt = async () => {
-    const provider = new window.firebase.auth.GoogleAuthProvider();
-    const cred = await a.signInWithPopup(provider);
-    return cred.user.uid;
-  };
-  try {
-    return await attempt();
-  } catch (e) {
-    // Empirically: the very first signInWithPopup call in a brand-new
-    // browser session fails with auth/argument-error, and previously the
-    // only known fix was a full page reload. Untested until now: whether a
-    // second in-place attempt (no reload) also recovers — if the SDK's
-    // internal one-time lazy init just needs to finish, a retry after a
-    // short pause should succeed exactly like a reload does, without
-    // forcing the user to actually refresh the page themselves.
-    if (e && e.code === "auth/argument-error") {
-      console.warn("[signInWithGoogleRedirect] first attempt hit argument-error, retrying in-place once…");
-      await new Promise((r) => setTimeout(r, 800));
-      return await attempt();
-    }
-    console.error("[signInWithGoogleRedirect] signInWithPopup threw. Full object:", e, "code:", e && e.code, "message:", e && e.message, "stack:", e && e.stack, "customData:", e && e.customData);
-    e.__stage = "signInWithPopup";
-    throw e;
-  }
+  const provider = new window.firebase.auth.GoogleAuthProvider();
+  await a.signInWithRedirect(provider);
+  // Browser navigates away here; getRedirectSignInResult() on the next
+  // page load picks up the result.
 }
 
 export async function signInWithFacebookRedirect() {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
   const provider = new window.firebase.auth.FacebookAuthProvider();
-  const cred = await withAuthRetry(() => a.signInWithPopup(provider));
-  return cred.user.uid;
+  await a.signInWithRedirect(provider);
 }
 
-// Call once on page load (componentDidMount) on any page that offers
-// signInWithGoogleRedirect/signInWithFacebookRedirect — resolves to the
-// signed-in uid if the page was just reached via a redirect-based sign-in,
-// or null on an ordinary page load.
 export async function getRedirectSignInResult() {
   const a = authApp();
   if (!a) return null;
-  const result = await withAuthRetry(() => a.getRedirectResult());
+  const result = await a.getRedirectResult();
   return result && result.user ? result.user.uid : null;
 }
 

@@ -200,7 +200,15 @@ class Component extends DCLogic {
     // (not inside the click handler) gives it the whole rest of page load
     // to finish before the user can possibly click.
     this._fb = fb;
-    await fb.warmUpAuthPersistence().catch(() => {});
+    // Redirect flow: pick up the result if this page load is the browser
+    // navigating back from Google/Facebook after signInWithRedirect().
+    try {
+      const uid = await fb.getRedirectSignInResult();
+      if (uid) { await this.completeSocialSignIn(uid, fb); return; }
+    } catch (e) {
+      console.error("[componentDidMount] getRedirectSignInResult threw:", e);
+      this.setState({ socialError: "เข้าสู่ระบบด้วย Google ไม่สำเร็จ: " + (e && (e.code || e.message) || "unknown error") });
+    }
     try {
       const [settings, count] = await Promise.all([fb.fetchFoundingAgentSettings(), fb.countFoundingAgents()]);
       this.setState({ foundingLimit: settings.limit || 0, foundingNote: settings.note || "", foundingCount: count });
@@ -239,8 +247,9 @@ class Component extends DCLogic {
     this.setState({ socialBusy: true, socialError: "" });
     const fb = this._fb;
     try {
-      const uid = await fb.signInWithGoogleRedirect();
-      await this.completeSocialSignIn(uid, fb);
+      await fb.signInWithGoogleRedirect();
+      // Browser navigates away here; componentDidMount picks up the result
+      // on the page it returns to.
     } catch (e) {
       // Full diagnostic dump — need the real code/message/stack, not a
       // guess, to find the actual root cause instead of trying more fixes
@@ -257,8 +266,7 @@ class Component extends DCLogic {
     this.setState({ socialBusy: true, socialError: "" });
     const fb = this._fb;
     try {
-      const uid = await fb.signInWithFacebookRedirect();
-      await this.completeSocialSignIn(uid, fb);
+      await fb.signInWithFacebookRedirect();
     } catch (e) {
       this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย Facebook ไม่สำเร็จ (อาจยังไม่เปิดใช้งาน — แจ้งแอดมิน)" });
     }
