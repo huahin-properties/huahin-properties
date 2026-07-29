@@ -351,7 +351,7 @@
             <div style="border:1px solid oklch(88% 0.03 250); background:oklch(98% 0.015 250); border-radius:8px; padding:16px;">
               <div style="font-size:13px; font-weight:700; color:oklch(35% 0.1 250); margin-bottom:2px;">📩 ลูกค้าจองเข้ามา ({{ customerApptCount }})</div>
               <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:12px;">เกิดขึ้นอัตโนมัติเมื่อลูกค้ากด "นัดชมทรัพย์" จากเว็บไซต์ของคุณ</div>
-              <sc-if value="{{ hasNoCustomerAppts }}"><div style="font-size:13px; color:oklch(55% 0.02 60);">ยังไม่มีลูกค้าจองเข้ามา</div></sc-if>
+              <sc-if value="{{ hasNoCustomerAppts }}"><div style="font-size:13px; color:oklch(55% 0.02 60); line-height:1.6;">ยังไม่มีลูกค้าจองเข้ามา — เมื่อลูกค้ากด "นัดชมทรัพย์" จากเว็บไซต์ของคุณ รายการจะขึ้นที่นี่อัตโนมัติพร้อมชื่อ/เบอร์โทร ไม่ต้องคอยเช็คแชทเอง</div></sc-if>
               <div style="display:flex; flex-direction:column; gap:10px;">
                 <sc-for list="{{ customerApptRows }}" as="a" hint-placeholder-count="0">
                   <div style="border:1px solid oklch(85% 0.03 250); border-radius:8px; padding:12px 14px; background:white; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
@@ -383,7 +383,7 @@
                 <input value="{{ apptNote }}" onChange="{{ onApptNote }}" placeholder="หมายเหตุ (ถ้ามี)" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 9px; font-size:13px; font-family:inherit;" />
                 <div onClick="{{ onSaveAppt }}" style="align-self:flex-start; background:oklch(40% 0.13 25); color:white; padding:8px 16px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">+ เพิ่มนัดหมาย</div>
               </div>
-              <sc-if value="{{ hasNoOwnAppts }}"><div style="font-size:13px; color:oklch(55% 0.02 60);">ยังไม่มีนัดหมาย</div></sc-if>
+              <sc-if value="{{ hasNoOwnAppts }}"><div style="font-size:13px; color:oklch(55% 0.02 60); line-height:1.6;">ยังไม่มีนัดหมาย — ลองบันทึกนัดชมแรกของคุณ หรือใช้เป็นตารางงานส่วนตัวก็ได้ (เช่น "โทรหาลูกค้า HH-101 บ่าย 3 โมง")</div></sc-if>
               <div style="display:flex; flex-direction:column; gap:10px;">
                 <sc-for list="{{ ownApptRows }}" as="a" hint-placeholder-count="0">
                   <div style="border:1px solid oklch(92% 0.01 70); border-radius:8px; padding:12px 14px; background:{{ a.bg }}; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
