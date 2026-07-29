@@ -619,15 +619,23 @@ class Component extends DCLogic {
       if (this._zoneCircle) { this._zoneCircle.setMap(null); this._zoneCircle = null; }
       if (this._zoneMarker) { this._zoneMarker.setMap(null); this._zoneMarker = null; }
       if (this._zonePolygon) { this._zonePolygon.setMap(null); this._zonePolygon = null; }
+      if (this._zoneOutline) { this._zoneOutline.setMap(null); this._zoneOutline = null; }
       if (showExact) {
         this._zoneMap.setZoom(15);
         this._zoneMarker = new google.maps.Marker({ position: center, map: this._zoneMap });
       } else if (tambon) {
-        const path = tambon.path.map(([lat, lng]) => ({ lat, lng }));
+        // Narrow an oversized tambon down to the portion within ~2.2km of the
+        // (hidden) pin — keeps the real, irregular edge shape rather than a
+        // perfect circle, but avoids highlighting an entire huge subdistrict.
+        const clipped = this._tambonMod.clipTambonToRadius(tambon, exactCoords.lat, exactCoords.lng, 2200) || tambon.path;
+        const path = clipped.map(([lat, lng]) => ({ lat, lng }));
         this._zonePolygon = new google.maps.Polygon({
           map: this._zoneMap, paths: path,
-          fillColor: "#7a2331", fillOpacity: 0.18,
-          strokeColor: "#7a2331", strokeOpacity: 0.6, strokeWeight: 2, clickable: false,
+          fillColor: "#7a2331", fillOpacity: 0.18, strokeOpacity: 0, clickable: false,
+        });
+        this._zoneOutline = new google.maps.Polyline({
+          map: this._zoneMap, path: [...path, path[0]], strokeOpacity: 0,
+          icons: [{ icon: { path: "M 0,-1 0,1", strokeOpacity: 0.75, strokeColor: "#7a2331", strokeWeight: 1.5, scale: 3 }, offset: "0", repeat: "12px" }],
         });
         const bounds = new google.maps.LatLngBounds();
         path.forEach((p) => bounds.extend(p));

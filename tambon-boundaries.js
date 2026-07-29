@@ -47,3 +47,57 @@ export function findTambonFor(lat, lng) {
   if (typeof lat !== "number" || typeof lng !== "number") return null;
   return TAMBON_BOUNDARIES.find((t) => pointInRing(lat, lng, t.path)) || null;
 }
+function toXY(lat, lng, originLat) {
+  const R = 111320;
+  return [lng * R * Math.cos(originLat * Math.PI / 180), lat * R];
+}
+function toLatLngXY(x, y, originLat) {
+  const R = 111320;
+  return [y / R, x / (R * Math.cos(originLat * Math.PI / 180))];
+}
+function clipConvexXY(subject, clip) {
+  let output = subject;
+  const n = clip.length;
+  for (let i = 0; i < n; i++) {
+    if (output.length === 0) break;
+    const input = output;
+    output = [];
+    const A = clip[i], B = clip[(i + 1) % n];
+    const edgeX = B[0] - A[0], edgeY = B[1] - A[1];
+    const side = (p) => edgeX * (p[1] - A[1]) - edgeY * (p[0] - A[0]);
+    for (let j = 0; j < input.length; j++) {
+      const cur = input[j], prev = input[(j - 1 + input.length) % input.length];
+      const curIn = side(cur) >= 0, prevIn = side(prev) >= 0;
+      if (curIn) {
+        if (!prevIn) {
+          const t = side(prev) / (side(prev) - side(cur));
+          output.push([prev[0] + t * (cur[0] - prev[0]), prev[1] + t * (cur[1] - prev[1])]);
+        }
+        output.push(cur);
+      } else if (prevIn) {
+        const t = side(prev) / (side(prev) - side(cur));
+        output.push([prev[0] + t * (cur[0] - prev[0]), prev[1] + t * (cur[1] - prev[1])]);
+      }
+    }
+  }
+  return output;
+}
+
+// Clips a tambon's real boundary down to only the portion within radiusMeters of
+// (centerLat, centerLng) — keeps the true, irregular tambon edge shape (not a
+// perfect circle) while narrowing an oversized tambon down around the hidden
+// pin. Returns [ [lat,lng], ... ] (open ring), or null if the tambon has no
+// overlap with the circle (shouldn't normally happen since the pin is inside it).
+export function clipTambonToRadius(tambon, centerLat, centerLng, radiusMeters, sides) {
+  sides = sides || 64;
+  const subjectXY = tambon.path.map(([lat, lng]) => toXY(lat, lng, centerLat));
+  const clipXY = [];
+  for (let i = 0; i < sides; i++) {
+    const a = (i / sides) * 2 * Math.PI;
+    const [cx, cy] = toXY(centerLat, centerLng, centerLat);
+    clipXY.push([cx + radiusMeters * Math.cos(a), cy + radiusMeters * Math.sin(a)]);
+  }
+  const clipped = clipConvexXY(subjectXY, clipXY);
+  if (!clipped.length) return null;
+  return clipped.map(([x, y]) => toLatLngXY(x, y, centerLat));
+}

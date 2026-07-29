@@ -1570,14 +1570,19 @@ class Component extends DCLogic {
       if (this._previewCircle) { this._previewCircle.setMap(null); this._previewCircle = null; }
       if (this._previewMarker) { this._previewMarker.setMap(null); this._previewMarker = null; }
       if (this._previewPolygon) { this._previewPolygon.setMap(null); this._previewPolygon = null; }
+      if (this._previewOutline) { this._previewOutline.setMap(null); this._previewOutline = null; }
       if (mode === "exact") {
         this._previewMarker = new google.maps.Marker({ position: coords, map: this._previewMap });
       } else if (tambon) {
-        const path = tambon.path.map(([lat, lng]) => ({ lat, lng }));
+        const clipped = tambonMod.clipTambonToRadius(tambon, coords.lat, coords.lng, 2200) || tambon.path;
+        const path = clipped.map(([lat, lng]) => ({ lat, lng }));
         this._previewPolygon = new google.maps.Polygon({
           map: this._previewMap, paths: path,
-          fillColor: "#7a2331", fillOpacity: 0.18,
-          strokeColor: "#7a2331", strokeOpacity: 0.6, strokeWeight: 2, clickable: false,
+          fillColor: "#7a2331", fillOpacity: 0.18, strokeOpacity: 0, clickable: false,
+        });
+        this._previewOutline = new google.maps.Polyline({
+          map: this._previewMap, path: [...path, path[0]], strokeOpacity: 0,
+          icons: [{ icon: { path: "M 0,-1 0,1", strokeOpacity: 0.75, strokeColor: "#7a2331", strokeWeight: 1.5, scale: 3 }, offset: "0", repeat: "12px" }],
         });
         const bounds = new google.maps.LatLngBounds();
         path.forEach((p) => bounds.extend(p));
