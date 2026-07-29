@@ -360,7 +360,20 @@ export async function signInWithFacebookRedirect() {
 export async function getRedirectSignInResult() {
   const a = authApp();
   if (!a) return null;
-  const result = await a.getRedirectResult();
+  let result;
+  try {
+    result = await a.getRedirectResult();
+  } catch (e) {
+    if (e && e.code === "auth/argument-error") {
+      // Same brand-new-browser startup race as signInWithRedirect: the
+      // Auth SDK's IndexedDB persistence layer can still be opening when
+      // this runs on first page load. Retry once instead of surfacing it.
+      await new Promise((r) => setTimeout(r, 400));
+      result = await a.getRedirectResult();
+    } else {
+      throw e;
+    }
+  }
   return result && result.user ? result.user.uid : null;
 }
 
