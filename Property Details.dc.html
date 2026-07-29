@@ -437,6 +437,7 @@ class Component extends DCLogic {
   async componentDidMount() {
     import("./property-business-logic.js").then((biz) => { this._biz = biz; this.setState({ bizLoaded: true }); });
     import("./property-adapter.js").then((adapter) => { this._adapter = adapter; this._maybeFetchMedia(); });
+    import("./tambon-boundaries.js").then((tb) => { this._tambonMod = tb; this.forceUpdate(); });
     const fb0 = await import("./firebase-client.js");
     this._fb = fb0;
     if (!fb0.hasSiteBypass() && !fb0.isAdminAuthed()) {
@@ -588,37 +589,51 @@ class Component extends DCLogic {
   };
 
   // Public map respects the lister's own per-listing choice: "area" (default)
-  // shows only a highlighted circle over the zone/subdistrict centroid;
-  // "exact" shows the precise pin the lister opted to publish. Admin's
-  // internal tools always show the exact pin regardless of this setting.
-  // Idempotent: safe to call on every render, only rebuilds when inputs change.
+  // highlights the REAL administrative subdistrict (tambon) boundary that the
+  // pin falls within — not just a generic radius — so a visitor learns the
+  // neighborhood but never the exact house. "exact" shows the precise pin the
+  // lister opted to publish. Admin's internal tools always show the exact pin
+  // regardless of this setting. Idempotent: rebuilds only when inputs change.
   async _tryInitZoneMap(raw, mod) {
     if (!raw || !mod || !this._zoneMapEl || this._zoneMapBusy) return;
     const mode = raw.mapDisplayMode === "exact" ? "exact" : "area";
-    const exactCoords = mode === "exact" ? parseLatLngHH(raw.mapLink) : null;
+    const exactCoords = parseLatLngHH(raw.mapLink);
     const zone = raw.zone;
-    const key = mode + "|" + zone + "|" + (exactCoords ? exactCoords.lat + "," + exactCoords.lng : "");
+    const tambon = (mode === "area" && exactCoords && this._tambonMod) ? this._tambonMod.findTambonFor(exactCoords.lat, exactCoords.lng) : null;
+    const key = mode + "|" + zone + "|" + (exactCoords ? exactCoords.lat + "," + exactCoords.lng : "") + "|" + (tambon ? tambon.nameEn : "");
     if (this._zoneMapKey === key && this._zoneMap) return;
     this._zoneMapBusy = true;
     try {
       await waitForGoogleMapsHH();
       if (!this._zoneMapEl) return;
+      const showExact = mode === "exact" && exactCoords;
       const center = exactCoords || mod.ZONE_COORDS[zone] || { lat: 12.55, lng: 99.96 };
-      const zoom = exactCoords ? 15 : 13;
       if (!this._zoneMap) {
         this._zoneMap = new google.maps.Map(this._zoneMapEl, {
-          center, zoom, disableDefaultUI: true, gestureHandling: "none",
+          center, zoom: 13, disableDefaultUI: true, gestureHandling: "none",
           draggable: false, keyboardShortcuts: false, clickableIcons: false,
         });
       } else {
         this._zoneMap.setCenter(center);
-        this._zoneMap.setZoom(zoom);
       }
       if (this._zoneCircle) { this._zoneCircle.setMap(null); this._zoneCircle = null; }
       if (this._zoneMarker) { this._zoneMarker.setMap(null); this._zoneMarker = null; }
-      if (exactCoords) {
+      if (this._zonePolygon) { this._zonePolygon.setMap(null); this._zonePolygon = null; }
+      if (showExact) {
+        this._zoneMap.setZoom(15);
         this._zoneMarker = new google.maps.Marker({ position: center, map: this._zoneMap });
+      } else if (tambon) {
+        const path = tambon.path.map(([lat, lng]) => ({ lat, lng }));
+        this._zonePolygon = new google.maps.Polygon({
+          map: this._zoneMap, paths: path,
+          fillColor: "#7a2331", fillOpacity: 0.18,
+          strokeColor: "#7a2331", strokeOpacity: 0.6, strokeWeight: 2, clickable: false,
+        });
+        const bounds = new google.maps.LatLngBounds();
+        path.forEach((p) => bounds.extend(p));
+        this._zoneMap.fitBounds(bounds, 12);
       } else {
+        this._zoneMap.setZoom(13);
         this._zoneCircle = new google.maps.Circle({
           map: this._zoneMap, center, radius: 1400,
           fillColor: "#7a2331", fillOpacity: 0.16,
@@ -761,9 +776,12 @@ class Component extends DCLogic {
       features: raw.features.map((f) => mod.FEATURES[f][lang]),
       distanceBeachLabel: `${raw.distanceBeach} km ${t.beach ? "to " + t.beach : ""}`,
       distanceTownLabel: `${raw.distanceTown} km to ${t.town}`,
-      locationBadgeLabel: raw.mapDisplayMode === "exact" && parseLatLngHH(raw.mapLink)
-        ? `${areaLabelOf(raw.area)} · ${raw.zone}`
-        : `${t.property_general_area} · ${raw.zone}`,
+      locationBadgeLabel: (() => {
+        const exact = parseLatLngHH(raw.mapLink);
+        if (raw.mapDisplayMode === "exact" && exact) return `${areaLabelOf(raw.area)} · ${raw.zone}`;
+        const tambon = (exact && this._tambonMod) ? this._tambonMod.findTambonFor(exact.lat, exact.lng) : null;
+        return tambon ? `${t.property_general_area} · ตำบล${tambon.nameTh}` : `${t.property_general_area} · ${raw.zone}`;
+      })(),
     };
 
     const specs = [

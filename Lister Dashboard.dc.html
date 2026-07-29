@@ -1535,17 +1535,24 @@ class Component extends DCLogic {
     this._previewMapEl = el;
   };
 
+  async _loadTambonMod() {
+    if (!this._tambonMod) this._tambonMod = await import("./tambon-boundaries.js");
+    return this._tambonMod;
+  }
+
   // Preview map on the edit form mirrors exactly what the PUBLIC site will
-  // show for this listing: a circle over the zone when "area" mode is
-  // selected, or a precise marker when the lister opts into "exact" mode.
-  // Re-runs (cheaply, idempotent) on every render so it reacts live to the
-  // link/radio inputs. Admin's own tools always show the exact pin
-  // regardless of this per-listing choice.
+  // show for this listing: the real subdistrict (tambon) boundary the pin
+  // falls within when "area" mode is selected, or a precise marker when the
+  // lister opts into "exact" mode. Re-runs (cheaply, idempotent) on every
+  // render so it reacts live to the link/radio inputs. Admin's own tools
+  // always show the exact pin regardless of this per-listing choice.
   async _syncPreviewMap() {
     const coords = parseLatLngHH(this.state.f_mapsLink);
-    if (!coords || !this._previewMapEl) { this._previewMapZone = null; return; }
+    if (!coords || !this._previewMapEl) { this._previewMapKey = null; return; }
     const mode = this.state.f_mapDisplay === "exact" ? "exact" : "area";
-    const key = coords.lat + "," + coords.lng + "|" + mode;
+    const tambonMod = mode === "area" ? await this._loadTambonMod() : null;
+    const tambon = tambonMod ? tambonMod.findTambonFor(coords.lat, coords.lng) : null;
+    const key = coords.lat + "," + coords.lng + "|" + mode + "|" + (tambon ? tambon.nameEn : "");
     if (this._previewMapKey === key || this._previewMapBusy) return;
     this._previewMapBusy = true;
     try {
@@ -1562,8 +1569,19 @@ class Component extends DCLogic {
       }
       if (this._previewCircle) { this._previewCircle.setMap(null); this._previewCircle = null; }
       if (this._previewMarker) { this._previewMarker.setMap(null); this._previewMarker = null; }
+      if (this._previewPolygon) { this._previewPolygon.setMap(null); this._previewPolygon = null; }
       if (mode === "exact") {
         this._previewMarker = new google.maps.Marker({ position: coords, map: this._previewMap });
+      } else if (tambon) {
+        const path = tambon.path.map(([lat, lng]) => ({ lat, lng }));
+        this._previewPolygon = new google.maps.Polygon({
+          map: this._previewMap, paths: path,
+          fillColor: "#7a2331", fillOpacity: 0.18,
+          strokeColor: "#7a2331", strokeOpacity: 0.6, strokeWeight: 2, clickable: false,
+        });
+        const bounds = new google.maps.LatLngBounds();
+        path.forEach((p) => bounds.extend(p));
+        this._previewMap.fitBounds(bounds, 12);
       } else {
         this._previewCircle = new google.maps.Circle({
           map: this._previewMap, center: coords, radius: 1400,
