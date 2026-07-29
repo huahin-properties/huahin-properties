@@ -1620,6 +1620,7 @@ class Component extends DCLogic {
       onOpenAddHome: () => this.setState({ showAddHomeModal: true }),
       onCloseAddHome: () => this.setState({ showAddHomeModal: false }),
       renderVals_true_placeholder_unused: true,
+      showApptBody: this.state.showApptBody,
       apptCount: (this.state.appointments || []).length,
       apptDate: this.state.apptDate, onApptDate: (e) => this.setState({ apptDate: e.target.value }),
       apptTime: this.state.apptTime, onApptTime: (e) => this.setState({ apptTime: e.target.value }),
