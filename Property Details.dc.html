@@ -585,7 +585,9 @@ class Component extends DCLogic {
   }
 
   _zoneMapRefCb = (el) => {
+    const justMounted = !!el && !this._zoneMapEl;
     this._zoneMapEl = el;
+    if (justMounted && this._lastZoneMapRaw) this._tryInitZoneMap(this._lastZoneMapRaw, this._lastZoneMapMod);
   };
 
   // Public map respects the lister's own per-listing choice: "area" (default)
@@ -595,7 +597,9 @@ class Component extends DCLogic {
   // lister opted to publish. Admin's internal tools always show the exact pin
   // regardless of this setting. Idempotent: rebuilds only when inputs change.
   async _tryInitZoneMap(raw, mod) {
-    if (!raw || !mod || !this._zoneMapEl || this._zoneMapBusy) return;
+    if (!raw || !mod) return;
+    this._lastZoneMapRaw = raw; this._lastZoneMapMod = mod;
+    if (!this._zoneMapEl || this._zoneMapBusy) return;
     const mode = raw.mapDisplayMode === "exact" ? "exact" : "area";
     const exactCoords = parseLatLngHH(raw.mapLink);
     const zone = raw.zone;
