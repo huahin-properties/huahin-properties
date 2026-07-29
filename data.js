@@ -57,6 +57,30 @@ export const FEATURES = {
 export const PROPERTIES = [
 ];
 
+// Approximate centroid per zone/subdistrict — used to show a general-area
+// highlight (not the exact house) on the public Property Details map, so
+// browsing the site never reveals a precise pin buyers could use to bypass
+// the agent. Admin's internal Property Map still plots exact-ish pins.
+export const ZONE_COORDS = {
+  "Khao Tao": { lat: 12.4805, lng: 99.9713 },
+  "Hin Lek Fai": { lat: 12.5935, lng: 99.9430 },
+  "Khao Takiab": { lat: 12.5095, lng: 99.9805 },
+  "Thap Tai": { lat: 12.6010, lng: 99.9605 },
+  "Soi 88": { lat: 12.5760, lng: 99.9605 },
+  "Hua Hin Town": { lat: 12.5684, lng: 99.9578 },
+  "Dolphin Bay": { lat: 12.2495, lng: 99.9705 },
+  "Pak Nam Pran": { lat: 12.3300, lng: 99.9595 },
+  "Wang Phong": { lat: 12.4205, lng: 99.9295 },
+  "Pranburi Forest": { lat: 12.3605, lng: 99.9095 },
+  "Sam Roi Yot": { lat: 12.2010, lng: 99.9605 },
+  "Nong Chumsaeng": { lat: 12.4005, lng: 99.8895 },
+  "Pranburi Beach": { lat: 12.3905, lng: 99.9655 },
+  "Cha-am Beach": { lat: 12.8050, lng: 99.9700 },
+  "Nong Kae": { lat: 12.7300, lng: 99.9605 },
+  "Cha-am Hillside": { lat: 12.7900, lng: 99.9400 },
+  "Cha-am Town": { lat: 12.8000, lng: 99.9650 },
+};
+
 export const I18N = {
   en: {
     site_name: "huahin.properties",
@@ -96,7 +120,7 @@ export const I18N = {
     sqm: "sqm", per_month: "/ month",
     beach: "beach", town: "town",
     gallery_photo: "Photo",
-    property_overview: "Overview", property_description: "Property Description", no_description: "No description provided yet.", property_features: "Features & Amenities", property_location: "Location", similar_properties: "Similar Properties",
+    property_overview: "Overview", property_description: "Property Description", no_description: "No description provided yet.", property_features: "Features & Amenities", property_location: "Location", property_general_area: "General area", similar_properties: "Similar Properties",
     contact_agent: "Contact an Agent", enquiry_form: "Send an Enquiry", name_label: "Name", email_label: "Email", phone_label: "Phone", message_label: "Message", send: "Send Enquiry",
     call: "Call", whatsapp: "WhatsApp", line_app: "Line", email_cta: "Email",
     sell_title: "List Your Property", sell_sub: "Tell us about your property — for sale or for rent — and our team will get in touch within 24 hours.",
@@ -171,7 +195,7 @@ export const I18N = {
     sqm: "ตร.ม.", per_month: "/ เดือน",
     beach: "ชายหาด", town: "ตัวเมือง",
     gallery_photo: "รูปภาพ",
-    property_overview: "รายละเอียดสรุป", property_description: "รายละเอียดประกาศ", no_description: "ยังไม่มีรายละเอียด", property_features: "คุณสมบัติและสิ่งอำนวยความสะดวก", property_location: "ทำเล", similar_properties: "ทรัพย์ใกล้เคียง",
+    property_overview: "รายละเอียดสรุป", property_description: "รายละเอียดประกาศ", no_description: "ยังไม่มีรายละเอียด", property_features: "คุณสมบัติและสิ่งอำนวยความสะดวก", property_location: "ทำเล", property_general_area: "บริเวณโดยประมาณ", similar_properties: "ทรัพย์ใกล้เคียง",
     contact_agent: "ติดต่อเอเจนต์", enquiry_form: "ส่งข้อความสอบถาม", name_label: "ชื่อ", email_label: "อีเมล", phone_label: "เบอร์โทร", message_label: "ข้อความ", send: "ส่งข้อความ",
     call: "โทร", whatsapp: "WhatsApp", line_app: "Line", email_cta: "อีเมล",
     sell_title: "ฝากขาย / ฝากให้เช่าทรัพย์", sell_sub: "บอกรายละเอียดทรัพย์ของคุณ ทั้งขายหรือเช่า ทีมงานจะติดต่อกลับภายใน 24 ชั่วโมง",
@@ -246,7 +270,7 @@ export const I18N = {
     sqm: "кв.м", per_month: "/ месяц",
     beach: "пляж", town: "город",
     gallery_photo: "Фото",
-    property_overview: "Обзор", property_description: "Описание", no_description: "Описание пока не добавлено.", property_features: "Особенности и удобства", property_location: "Расположение", similar_properties: "Похожие объекты",
+    property_overview: "Обзор", property_description: "Описание", no_description: "Описание пока не добавлено.", property_features: "Особенности и удобства", property_location: "Расположение", property_general_area: "Примерный район", similar_properties: "Похожие объекты",
     contact_agent: "Связаться с агентом", enquiry_form: "Отправить запрос", name_label: "Имя", email_label: "Email", phone_label: "Телефон", message_label: "Сообщение", send: "Отправить запрос",
     call: "Позвонить", whatsapp: "WhatsApp", line_app: "Line", email_cta: "Email",
     sell_title: "Разместить объект", sell_sub: "Расскажите нам о вашей недвижимости — на продажу или в аренду — и наша команда свяжется с вами в течение 24 часов.",
@@ -321,7 +345,7 @@ export const I18N = {
     sqm: "kvm", per_month: "/ måned",
     beach: "strand", town: "by",
     gallery_photo: "Bilde",
-    property_overview: "Oversikt", property_description: "Beskrivelse", no_description: "Ingen beskrivelse ennå.", property_features: "Fasiliteter", property_location: "Beliggenhet", similar_properties: "Lignende eiendommer",
+    property_overview: "Oversikt", property_description: "Beskrivelse", no_description: "Ingen beskrivelse ennå.", property_features: "Fasiliteter", property_location: "Beliggenhet", property_general_area: "Omtrentlig område", similar_properties: "Lignende eiendommer",
     contact_agent: "Kontakt megler", enquiry_form: "Send en forespørsel", name_label: "Navn", email_label: "E-post", phone_label: "Telefon", message_label: "Melding", send: "Send forespørsel",
     call: "Ring", whatsapp: "WhatsApp", line_app: "Line", email_cta: "E-post",
     sell_title: "Legg ut din eiendom", sell_sub: "Fortell oss om eiendommen din — til salgs eller utleie — så tar teamet vårt kontakt innen 24 timer.",
@@ -396,7 +420,7 @@ export const I18N = {
     sqm: "m²", per_month: "/ Monat",
     beach: "Strand", town: "Stadt",
     gallery_photo: "Foto",
-    property_overview: "Übersicht", property_description: "Beschreibung", no_description: "Noch keine Beschreibung vorhanden.", property_features: "Ausstattung & Annehmlichkeiten", property_location: "Lage", similar_properties: "Ähnliche Immobilien",
+    property_overview: "Übersicht", property_description: "Beschreibung", no_description: "Noch keine Beschreibung vorhanden.", property_features: "Ausstattung & Annehmlichkeiten", property_location: "Lage", property_general_area: "Ungefähre Lage", similar_properties: "Ähnliche Immobilien",
     contact_agent: "Makler kontaktieren", enquiry_form: "Anfrage senden", name_label: "Name", email_label: "E-Mail", phone_label: "Telefon", message_label: "Nachricht", send: "Anfrage senden",
     call: "Anrufen", whatsapp: "WhatsApp", line_app: "Line", email_cta: "E-Mail",
     sell_title: "Immobilie inserieren", sell_sub: "Erzählen Sie uns von Ihrer Immobilie — zum Verkauf oder zur Miete — und unser Team meldet sich innerhalb von 24 Stunden.",
@@ -471,7 +495,7 @@ export const I18N = {
     sqm: "平方米", per_month: "/ 月",
     beach: "海滩", town: "市中心",
     gallery_photo: "照片",
-    property_overview: "概览", property_description: "详细描述", no_description: "暂无描述。", property_features: "特色与设施", property_location: "位置", similar_properties: "相似房源",
+    property_overview: "概览", property_description: "详细描述", no_description: "暂无描述。", property_features: "特色与设施", property_location: "位置", property_general_area: "大致区域", similar_properties: "相似房源",
     contact_agent: "联系经纪人", enquiry_form: "发送咨询", name_label: "姓名", email_label: "邮箱", phone_label: "电话", message_label: "留言", send: "发送咨询",
     call: "致电", whatsapp: "WhatsApp", line_app: "Line", email_cta: "邮箱",
     sell_title: "委托出售/出租房产", sell_sub: "告诉我们您的房产信息——出售或出租——我们的团队将在24小时内与您联系。",
@@ -546,7 +570,7 @@ export const I18N = {
     sqm: "m²", per_month: "/ mois",
     beach: "Plage", town: "Ville",
     gallery_photo: "Photo",
-    property_overview: "Aperçu", property_description: "Description", no_description: "Aucune description pour le moment.", property_features: "Équipements & prestations", property_location: "Emplacement", similar_properties: "Biens similaires",
+    property_overview: "Aperçu", property_description: "Description", no_description: "Aucune description pour le moment.", property_features: "Équipements & prestations", property_location: "Emplacement", property_general_area: "Zone approximative", similar_properties: "Biens similaires",
     contact_agent: "Contacter un agent", enquiry_form: "Envoyer une demande", name_label: "Nom", email_label: "E-mail", phone_label: "Téléphone", message_label: "Message", send: "Envoyer la demande",
     call: "Appeler", whatsapp: "WhatsApp", line_app: "Line", email_cta: "E-mail",
     sell_title: "Confier un bien", sell_sub: "Parlez-nous de votre bien — à vendre ou à louer — et notre équipe vous contactera sous 24 heures.",
@@ -621,7 +645,7 @@ export const I18N = {
     sqm: "m²", per_month: "/ mese",
     beach: "Spiaggia", town: "Città",
     gallery_photo: "Foto",
-    property_overview: "Panoramica", property_description: "Descrizione", no_description: "Nessuna descrizione ancora disponibile.", property_features: "Caratteristiche e servizi", property_location: "Posizione", similar_properties: "Immobili simili",
+    property_overview: "Panoramica", property_description: "Descrizione", no_description: "Nessuna descrizione ancora disponibile.", property_features: "Caratteristiche e servizi", property_location: "Posizione", property_general_area: "Zona approssimativa", similar_properties: "Immobili simili",
     contact_agent: "Contatta un agente", enquiry_form: "Invia una richiesta", name_label: "Nome", email_label: "E-mail", phone_label: "Telefono", message_label: "Messaggio", send: "Invia richiesta",
     call: "Chiama", whatsapp: "WhatsApp", line_app: "Line", email_cta: "E-mail",
     sell_title: "Affida un immobile", sell_sub: "Raccontaci del tuo immobile — in vendita o in affitto — e il nostro team ti contatterà entro 24 ore.",

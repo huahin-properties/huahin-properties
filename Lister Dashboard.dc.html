@@ -631,6 +631,25 @@
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ชื่อทำเล/ซอย</div>
               <input value="{{ f_zone }}" onChange="{{ onFZone }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
             </div>
+            <div style="grid-column:1/-1;">
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">📍 พิกัดบ้าน (ลิงก์ Google Maps)</div>
+              <input value="{{ f_mapsLink }}" onChange="{{ onFMapsLink }}" placeholder="https://maps.google.com/... หรือ 12.558940,99.909039" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; margin-bottom:12px;" />
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">การแสดงผลตำแหน่งต่อสาธารณะ (แอดมินจะเห็นพิกัดจริงเสมอ ไม่ว่าจะเลือกแบบไหน)</div>
+              <div style="display:flex; gap:16px; margin-bottom:12px; flex-wrap:wrap;">
+                <label style="display:flex; align-items:center; gap:6px; font-size:13.5px; color:oklch(30% 0.02 60); cursor:pointer;">
+                  <input type="radio" name="mapDisplay" value="area" checked="{{ isAreaMode }}" onChange="{{ onFMapDisplayArea }}" />คลุมพื้นที่ (แนะนำ)
+                </label>
+                <label style="display:flex; align-items:center; gap:6px; font-size:13.5px; color:oklch(30% 0.02 60); cursor:pointer;">
+                  <input type="radio" name="mapDisplay" value="exact" checked="{{ isExactMode }}" onChange="{{ onFMapDisplayExact }}" />ระบุพิกัดชัดเจน
+                </label>
+              </div>
+              <sc-if value="{{ hasMapPreview }}" hint-placeholder-val="{{ false }}">
+                <div style="aspect-ratio:16/6; border-radius:6px; overflow:hidden; position:relative; background:oklch(93% 0.015 75);">
+                  <div ref="{{ privateMapRef }}" style="width:100%; height:100%;"></div>
+                  <div style="position:absolute; top:10px; left:10px; background:oklch(99% 0.005 80 / 0.92); border-radius:4px; padding:5px 10px; font-size:11.5px; color:oklch(30% 0.02 60);">👁 ตัวอย่างที่ผู้เข้าชมเว็บจะเห็น</div>
+                </div>
+              </sc-if>
+            </div>
             <div>
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">สถานะ</div>
               <select value="{{ f_status }}" onChange="{{ onFStatus }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white;">
@@ -789,11 +808,55 @@
 
 </x-dc>
 <script type="text/x-dc" data-dc-script>
+const HH_GOOGLE_MAPS_KEY = "AIzaSyAEkTsWJ83cot_Hwfe0dsx1Nqg0bIw2YP4";
+function loadGoogleMapsHH() {
+  if (window.google && window.google.maps) return Promise.resolve();
+  if (window.__hhGoogleMapsLoading) return window.__hhGoogleMapsLoading;
+  window.__hhGoogleMapsLoading = new Promise((resolve, reject) => {
+    const existing = document.querySelector('script[data-hh-gmaps="1"]');
+    if (existing) {
+      existing.addEventListener("load", () => resolve());
+      existing.addEventListener("error", reject);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://maps.googleapis.com/maps/api/js?key=" + HH_GOOGLE_MAPS_KEY + "&libraries=marker";
+    script.async = true;
+    script.defer = true;
+    script.setAttribute("data-hh-gmaps", "1");
+    script.onload = () => resolve();
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+  return window.__hhGoogleMapsLoading;
+}
+function waitForGoogleMapsHH() {
+  return loadGoogleMapsHH().then(() => new Promise((resolve) => {
+    if (window.google && window.google.maps) { resolve(); return; }
+    const check = setInterval(() => {
+      if (window.google && window.google.maps) { clearInterval(check); resolve(); }
+    }, 50);
+  }));
+}
+function parseLatLngHH(input) {
+  const s = (input || "").trim();
+  if (!s) return null;
+  let m = s.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+  m = s.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+  m = s.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+  m = s.match(/^(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)$/);
+  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+  return null;
+}
+
 class Component extends DCLogic {
   state = {
     loaded: false, signedIn: false, lister: null, properties: [], view: "list", dashTab: "settings",
     editingId: null, f_type: "villa", f_area: "hua-hin", f_zone: "", f_status: "sale",
-    f_price: "", f_bedrooms: "", f_bathrooms: "", f_livingArea: "", f_landSize: "",
+    f_price: "", f_bedrooms: "", f_bathrooms: "", f_livingArea: "", f_landSize: "", f_mapsLink: "", f_mapDisplay: "area",
     f_description: "", f_features: [], saveError: "", saving: false,
     existingPhotos: [], newPhotos: [],
     savedId: "", savedPayload: null, ns_assistedSale: false, ns_commissionPct: "5",
@@ -953,7 +1016,7 @@ class Component extends DCLogic {
     this.setState({
       view: "edit", editingId: null, f_type: "villa", f_area: "hua-hin", f_zone: "",
       f_status: "sale", f_price: "", f_bedrooms: "", f_bathrooms: "", f_livingArea: "",
-      f_landSize: "", f_description: "", f_features: [], saveError: "", existingPhotos: [], newPhotos: [], quotaMsg: "",
+      f_landSize: "", f_mapsLink: "", f_mapDisplay: "area", f_description: "", f_features: [], saveError: "", existingPhotos: [], newPhotos: [], quotaMsg: "",
       openMenuId: "",
     });
   }
@@ -971,7 +1034,7 @@ class Component extends DCLogic {
       f_zone: p.zone || "", f_status: p.status === "rent" ? "rent" : "sale",
       f_price: p.price != null ? String(p.price) : "", f_bedrooms: p.bedrooms != null ? String(p.bedrooms) : "",
       f_bathrooms: p.bathrooms != null ? String(p.bathrooms) : "", f_livingArea: p.livingArea != null ? String(p.livingArea) : "",
-      f_landSize: p.landSize != null ? String(p.landSize) : "", f_description: (p.description && typeof p.description === "object") ? (p.description.th || p.description.en || "") : (p.description || ""),
+      f_landSize: p.landSize != null ? String(p.landSize) : "", f_mapsLink: p.mapLink || "", f_mapDisplay: p.mapDisplayMode || "area", f_description: (p.description && typeof p.description === "object") ? (p.description.th || p.description.en || "") : (p.description || ""),
       f_features: p.features || [],
       saveError: "", existingPhotos: [], newPhotos: [], quotaMsg: "", openMenuId: "",
     });
@@ -1046,7 +1109,7 @@ class Component extends DCLogic {
       bathrooms: this.state.f_bathrooms ? Number(this.state.f_bathrooms) : null,
       livingArea: this.state.f_livingArea ? Number(this.state.f_livingArea) : null,
       landSize: this.state.f_landSize ? Number(this.state.f_landSize) : null,
-      description: descriptionValue, features: this.state.f_features,
+      description: descriptionValue, features: this.state.f_features, mapLink: this.state.f_mapsLink.trim(), mapDisplayMode: this.state.f_mapDisplay,
       currency: "THB", updatedAt: Date.now(), isDraft: previousIsDraft === undefined ? true : previousIsDraft,
       photos: allPhotoUrls.map(() => ({ label: "" })),
     };
@@ -1468,7 +1531,54 @@ class Component extends DCLogic {
     return { pct: Math.round((done / checks.length) * 100), missing: checks.filter((c) => !c.ok).map((c) => c.label) };
   }
 
+  _privateMapRefCb = (el) => {
+    this._previewMapEl = el;
+  };
+
+  // Preview map on the edit form mirrors exactly what the PUBLIC site will
+  // show for this listing: a circle over the zone when "area" mode is
+  // selected, or a precise marker when the lister opts into "exact" mode.
+  // Re-runs (cheaply, idempotent) on every render so it reacts live to the
+  // link/radio inputs. Admin's own tools always show the exact pin
+  // regardless of this per-listing choice.
+  async _syncPreviewMap() {
+    const coords = parseLatLngHH(this.state.f_mapsLink);
+    if (!coords || !this._previewMapEl) { this._previewMapZone = null; return; }
+    const mode = this.state.f_mapDisplay === "exact" ? "exact" : "area";
+    const key = coords.lat + "," + coords.lng + "|" + mode;
+    if (this._previewMapKey === key || this._previewMapBusy) return;
+    this._previewMapBusy = true;
+    try {
+      await waitForGoogleMapsHH();
+      if (!this._previewMapEl) return;
+      if (!this._previewMap) {
+        this._previewMap = new google.maps.Map(this._previewMapEl, {
+          center: coords, zoom: mode === "exact" ? 15 : 13, disableDefaultUI: true,
+          gestureHandling: "none", draggable: false, keyboardShortcuts: false, clickableIcons: false,
+        });
+      } else {
+        this._previewMap.setCenter(coords);
+        this._previewMap.setZoom(mode === "exact" ? 15 : 13);
+      }
+      if (this._previewCircle) { this._previewCircle.setMap(null); this._previewCircle = null; }
+      if (this._previewMarker) { this._previewMarker.setMap(null); this._previewMarker = null; }
+      if (mode === "exact") {
+        this._previewMarker = new google.maps.Marker({ position: coords, map: this._previewMap });
+      } else {
+        this._previewCircle = new google.maps.Circle({
+          map: this._previewMap, center: coords, radius: 1400,
+          fillColor: "#7a2331", fillOpacity: 0.16,
+          strokeColor: "#7a2331", strokeOpacity: 0.55, strokeWeight: 2, clickable: false,
+        });
+      }
+      this._previewMapKey = key;
+    } finally {
+      this._previewMapBusy = false;
+    }
+  }
+
   renderVals() {
+    this._syncPreviewMap();
     const mod = this._mod;
     const apptRowsAll = (this.state.appointments || []).slice().sort((a, b) => (a.when || 0) - (b.when || 0)).map((a) => ({
       id: a.id,
@@ -1660,6 +1770,12 @@ class Component extends DCLogic {
       f_type: this.state.f_type, onFType: (e) => this.setState({ f_type: e.target.value }),
       f_area: this.state.f_area, onFArea: (e) => this.setState({ f_area: e.target.value }),
       f_zone: this.state.f_zone, onFZone: (e) => this.setState({ f_zone: e.target.value }),
+      f_mapsLink: this.state.f_mapsLink, onFMapsLink: (e) => this.setState({ f_mapsLink: e.target.value }),
+      isAreaMode: this.state.f_mapDisplay !== "exact", isExactMode: this.state.f_mapDisplay === "exact",
+      onFMapDisplayArea: () => this.setState({ f_mapDisplay: "area" }),
+      onFMapDisplayExact: () => this.setState({ f_mapDisplay: "exact" }),
+      hasMapPreview: !!parseLatLngHH(this.state.f_mapsLink),
+      privateMapRef: this._privateMapRefCb,
       f_status: this.state.f_status, onFStatus: (e) => this.setState({ f_status: e.target.value }),
       f_price: this.state.f_price, onFPrice: (e) => this.setState({ f_price: e.target.value }),
       f_bedrooms: this.state.f_bedrooms, onFBedrooms: (e) => this.setState({ f_bedrooms: e.target.value }),

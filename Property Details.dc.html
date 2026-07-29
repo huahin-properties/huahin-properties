@@ -206,7 +206,10 @@
 
         <div>
           <div style="font-family:'Playfair Display',serif; font-size:21px; color:oklch(20% 0.02 60); margin-bottom:14px;">{{ t.property_location }}</div>
-          <div style="aspect-ratio:16/7; border-radius:6px; background:oklch(93% 0.015 75); display:flex; align-items:center; justify-content:center; font-family:monospace; font-size:13px; color:oklch(45% 0.02 60);">[Google Map embed — {{ p.zone }}, {{ p.areaLabel }}]</div>
+          <div style="aspect-ratio:16/7; border-radius:6px; overflow:hidden; position:relative; background:oklch(93% 0.015 75);">
+            <div ref="{{ zoneMapRef }}" style="width:100%; height:100%;"></div>
+            <div style="position:absolute; top:12px; left:12px; background:oklch(99% 0.005 80 / 0.92); border-radius:4px; padding:6px 12px; font-size:12px; color:oklch(30% 0.02 60);">{{ p.locationBadgeLabel }}</div>
+          </div>
           <div style="display:flex; gap:24px; margin-top:12px; font-size:13px; color:oklch(45% 0.02 60);">
             <div>{{ p.distanceBeachLabel }}</div>
             <div>{{ p.distanceTownLabel }}</div>
@@ -362,6 +365,50 @@
 
 </x-dc>
 <script type="text/x-dc" data-dc-script>
+const HH_GOOGLE_MAPS_KEY = "AIzaSyAEkTsWJ83cot_Hwfe0dsx1Nqg0bIw2YP4";
+function loadGoogleMapsHH() {
+  if (window.google && window.google.maps) return Promise.resolve();
+  if (window.__hhGoogleMapsLoading) return window.__hhGoogleMapsLoading;
+  window.__hhGoogleMapsLoading = new Promise((resolve, reject) => {
+    const existing = document.querySelector('script[data-hh-gmaps="1"]');
+    if (existing) {
+      existing.addEventListener("load", () => resolve());
+      existing.addEventListener("error", reject);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://maps.googleapis.com/maps/api/js?key=" + HH_GOOGLE_MAPS_KEY + "&libraries=marker";
+    script.async = true;
+    script.defer = true;
+    script.setAttribute("data-hh-gmaps", "1");
+    script.onload = () => resolve();
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+  return window.__hhGoogleMapsLoading;
+}
+function waitForGoogleMapsHH() {
+  return loadGoogleMapsHH().then(() => new Promise((resolve) => {
+    if (window.google && window.google.maps) { resolve(); return; }
+    const check = setInterval(() => {
+      if (window.google && window.google.maps) { clearInterval(check); resolve(); }
+    }, 50);
+  }));
+}
+function parseLatLngHH(input) {
+  const s = (input || "").trim();
+  if (!s) return null;
+  let m = s.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+  m = s.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+  m = s.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+  m = s.match(/^(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)$/);
+  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+  return null;
+}
+
 class Component extends DCLogic {
   state = {
     lang: "en",
@@ -536,6 +583,55 @@ class Component extends DCLogic {
     this.setState({ lang: l, mobileMenuOpen: false });
   }
 
+  _zoneMapRefCb = (el) => {
+    this._zoneMapEl = el;
+  };
+
+  // Public map respects the lister's own per-listing choice: "area" (default)
+  // shows only a highlighted circle over the zone/subdistrict centroid;
+  // "exact" shows the precise pin the lister opted to publish. Admin's
+  // internal tools always show the exact pin regardless of this setting.
+  // Idempotent: safe to call on every render, only rebuilds when inputs change.
+  async _tryInitZoneMap(raw, mod) {
+    if (!raw || !mod || !this._zoneMapEl || this._zoneMapBusy) return;
+    const mode = raw.mapDisplayMode === "exact" ? "exact" : "area";
+    const exactCoords = mode === "exact" ? parseLatLngHH(raw.mapLink) : null;
+    const zone = raw.zone;
+    const key = mode + "|" + zone + "|" + (exactCoords ? exactCoords.lat + "," + exactCoords.lng : "");
+    if (this._zoneMapKey === key && this._zoneMap) return;
+    this._zoneMapBusy = true;
+    try {
+      await waitForGoogleMapsHH();
+      if (!this._zoneMapEl) return;
+      const center = exactCoords || mod.ZONE_COORDS[zone] || { lat: 12.55, lng: 99.96 };
+      const zoom = exactCoords ? 15 : 13;
+      if (!this._zoneMap) {
+        this._zoneMap = new google.maps.Map(this._zoneMapEl, {
+          center, zoom, disableDefaultUI: true, gestureHandling: "none",
+          draggable: false, keyboardShortcuts: false, clickableIcons: false,
+        });
+      } else {
+        this._zoneMap.setCenter(center);
+        this._zoneMap.setZoom(zoom);
+      }
+      if (this._zoneCircle) { this._zoneCircle.setMap(null); this._zoneCircle = null; }
+      if (this._zoneMarker) { this._zoneMarker.setMap(null); this._zoneMarker = null; }
+      if (exactCoords) {
+        this._zoneMarker = new google.maps.Marker({ position: center, map: this._zoneMap });
+      } else {
+        this._zoneCircle = new google.maps.Circle({
+          map: this._zoneMap, center, radius: 1400,
+          fillColor: "#7a2331", fillOpacity: 0.16,
+          strokeColor: "#7a2331", strokeOpacity: 0.55, strokeWeight: 2,
+          clickable: false,
+        });
+      }
+      this._zoneMapKey = key;
+    } finally {
+      this._zoneMapBusy = false;
+    }
+  }
+
   _bannerImgRefCb = (el) => {
     this._bannerImgEl = el;
     this._syncBannerImgSrc();
@@ -576,6 +672,7 @@ class Component extends DCLogic {
         return url;
       })(),
       bannerImgRef: this._bannerImgRefCb,
+      zoneMapRef: this._zoneMapRefCb,
       topBannerLink: (() => {
         const now = Date.now();
         const active = (this.state.banners || []).filter((b) => b.page === "property" && b.position === "top" && b.active !== false && !!b.imageUrl && (!b.expiresAt || b.expiresAt > now));
@@ -602,6 +699,7 @@ class Component extends DCLogic {
 
     const propsList = this.state.effProps || mod.PROPERTIES;
     const raw = propsList.find((x) => x.id === this._id);
+    if (raw) this._tryInitZoneMap(raw, mod);
     // Normalized model (Step 2.2C): single safe read-through for identity/
     // price/facts/photos. Gallery index math and SEO tag injection below
     // still read `raw` directly (already defensively guarded, untouched to
@@ -663,6 +761,9 @@ class Component extends DCLogic {
       features: raw.features.map((f) => mod.FEATURES[f][lang]),
       distanceBeachLabel: `${raw.distanceBeach} km ${t.beach ? "to " + t.beach : ""}`,
       distanceTownLabel: `${raw.distanceTown} km to ${t.town}`,
+      locationBadgeLabel: raw.mapDisplayMode === "exact" && parseLatLngHH(raw.mapLink)
+        ? `${areaLabelOf(raw.area)} · ${raw.zone}`
+        : `${t.property_general_area} · ${raw.zone}`,
     };
 
     const specs = [
