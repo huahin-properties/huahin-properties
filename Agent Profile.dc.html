@@ -465,9 +465,16 @@ class Component extends DCLogic {
     const mpStatus = mp ? (statusMap[mp.status] || statusMap.sale) : null;
     return {
       notFound: false, hasLister: true,
-      coverStyle: {
+      coverStyle: (canCustomCover && lister.coverPhotoUrl) ? {
+        // A cover photo used to hide the member's theme color entirely — layer a
+        // themed diagonal-stripe pattern + a solid accent edge on top of/around
+        // the photo so the chosen color still reads even with a photo set.
         height: "220px", width: "100%",
-        background: (canCustomCover && lister.coverPhotoUrl) ? `url('${lister.coverPhotoUrl}') center/cover` : `linear-gradient(135deg, ${theme}, oklch(65% 0.08 60))`,
+        background: `repeating-linear-gradient(135deg, color-mix(in oklch, ${theme} 35%, transparent) 0px, color-mix(in oklch, ${theme} 35%, transparent) 3px, transparent 3px, transparent 26px), url('${lister.coverPhotoUrl}') center/cover`,
+        borderBottom: `5px solid ${theme}`, boxSizing: "border-box",
+      } : {
+        height: "220px", width: "100%",
+        background: `linear-gradient(135deg, ${theme}, oklch(65% 0.08 60))`,
       },
       avatarStyle: {
         width: "96px", height: "96px", borderRadius: "50%", border: "4px solid white",

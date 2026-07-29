@@ -31,11 +31,36 @@
       <span style="font-family:'Playfair Display',serif; font-size:19px; color:white;">huahin . properties</span>
       <span style="color:oklch(70% 0.02 70); font-size:14px;">| หน้าทำงานของฉัน</span>
     </div>
-    <div onClick="{{ onLogout }}" style="font-size:13px; color:oklch(75% 0.02 70); cursor:pointer;">ออกจากระบบ</div>
+    <div style="display:flex; align-items:center; gap:16px;">
+      <div onClick="{{ onOpenInbox }}" style="position:relative; cursor:pointer; font-size:18px;">🔔<sc-if value="{{ hasUnreadLeads }}"><span style="position:absolute; top:-6px; right:-8px; background:oklch(55% 0.2 25); color:white; font-size:10px; font-weight:700; border-radius:100px; padding:1px 5px; min-width:16px; text-align:center;">{{ unreadLeadCount }}</span></sc-if></div>
+      <div onClick="{{ onLogout }}" style="font-size:13px; color:oklch(75% 0.02 70); cursor:pointer;">ออกจากระบบ</div>
+    </div>
   </div>
 
   <sc-if value="{{ showFab }}">
     <div onClick="{{ onNewProperty }}" style="position:fixed; bottom:22px; right:22px; z-index:50; width:56px; height:56px; border-radius:50%; background:oklch(40% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-size:28px; box-shadow:0 4px 14px rgba(0,0,0,0.25); cursor:pointer;">+</div>
+  </sc-if>
+
+  <div onClick="{{ onOpenAddHome }}" style="position:fixed; bottom:{{ addHomeBottom }}; right:22px; z-index:50; display:flex; align-items:center; gap:8px; background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:10px 16px; border-radius:100px; font-size:12.5px; font-weight:600; box-shadow:0 4px 14px rgba(0,0,0,0.15); cursor:pointer; white-space:nowrap;">📲 บันทึกไว้หน้าจอมือถือ</div>
+
+  <sc-if value="{{ showAddHomeModal }}">
+    <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:100;" onClick="{{ onCloseAddHome }}">
+      <div style="background:white; border-radius:12px; padding:26px 24px; width:min(380px,90vw); max-height:80vh; overflow:auto;" onClick="{{ stopProp }}">
+        <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:6px;">📲 บันทึกหน้านี้ไว้บนมือถือ</div>
+        <div style="font-size:13px; color:oklch(45% 0.02 60); margin-bottom:16px; line-height:1.6;">เพิ่มไอคอนไว้หน้าจอหลัก เปิดเข้าทำงานได้ทันทีเหมือนแอป ไม่ต้องเปิดเบราว์เซอร์หาลิงก์ทุกครั้ง</div>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div style="border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:14px 16px;">
+            <div style="font-size:13.5px; font-weight:700; color:oklch(25% 0.02 60); margin-bottom:6px;">📱 iPhone (Safari)</div>
+            <div style="font-size:12.5px; color:oklch(40% 0.02 60); line-height:1.8;">1. แตะปุ่มแชร์ <span style="font-weight:700;">⬆️</span> ด้านล่างจอ<br/>2. เลื่อนหาแล้วแตะ "เพิ่มไปยังหน้าจอโฮม"<br/>3. แตะ "เพิ่ม" มุมขวาบน</div>
+          </div>
+          <div style="border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:14px 16px;">
+            <div style="font-size:13.5px; font-weight:700; color:oklch(25% 0.02 60); margin-bottom:6px;">🤖 Android (Chrome)</div>
+            <div style="font-size:12.5px; color:oklch(40% 0.02 60); line-height:1.8;">1. แตะเมนู <span style="font-weight:700;">⋮</span> มุมขวาบน<br/>2. เลือก "เพิ่มไปยังหน้าจอโฮม" หรือ "ติดตั้งแอป"<br/>3. แตะ "เพิ่ม" / "ติดตั้ง"</div>
+          </div>
+        </div>
+        <div onClick="{{ onCloseAddHome }}" style="margin-top:18px; text-align:center; background:oklch(22% 0.02 60); color:white; padding:12px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">เข้าใจแล้ว</div>
+      </div>
+    </div>
   </sc-if>
 
   <div style="max-width:1080px; margin:0 auto; padding:clamp(20px,4vw,40px);">
@@ -68,6 +93,7 @@
         <div onClick="{{ onSetSettingsTab }}" style="flex:1; text-align:center; padding:12px; font-size:13.5px; font-weight:600; cursor:pointer; color:{{ settingsTabColor }}; border-bottom:2px solid {{ settingsTabColor }}; margin-bottom:-2px;">① ⚙️ ตั้งค่าระบบ</div>
         <div onClick="{{ onSetListTab }}" style="flex:1; text-align:center; padding:12px; font-size:13.5px; font-weight:600; cursor:pointer; color:{{ listTabColor }}; border-bottom:2px solid {{ listTabColor }}; margin-bottom:-2px;">② 📋 รายการทรัพย์</div>
         <div onClick="{{ onSetCollectionsTab }}" style="flex:1; text-align:center; padding:12px; font-size:13.5px; font-weight:600; cursor:pointer; color:{{ collectionsTabColor }}; border-bottom:2px solid {{ collectionsTabColor }}; margin-bottom:-2px;">③ 📁 คอลเลกชัน</div>
+        <div onClick="{{ onSetApptTab }}" style="flex:1; text-align:center; padding:12px; font-size:13.5px; font-weight:600; cursor:pointer; color:{{ apptTabColor }}; border-bottom:2px solid {{ apptTabColor }}; margin-bottom:-2px;">④ 📅 นัดหมาย</div>
       </div>
 
       <sc-if value="{{ isSettingsTab }}"><div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:18px; line-height:1.6;">เติมข้อมูลตรงนี้ครั้งเดียว ระบบจะดึงไปใช้ซ้ำอัตโนมัติทุกประกาศ — ให้เว็บไซต์และโปรไฟล์ของคุณดูมืออาชีพตั้งแต่วินาทีแรกที่ลูกค้าเห็น</div></sc-if>
@@ -313,7 +339,75 @@
 
       </sc-if>
 
+      <sc-if value="{{ isApptTab }}">
+      <div style="background:white; border-radius:8px; padding:20px 22px; margin-bottom:22px;">
+        <div onClick="{{ onToggleAppts }}" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+          <div style="font-size:14px; font-weight:600; color:oklch(25% 0.02 60);">📅 ตารางนัดหมาย ({{ apptCount }})</div>
+          <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ apptToggleLabel }}</div>
+        </div>
+        <sc-if value="{{ showApptBody }}">
+          <div style="margin-top:14px; display:flex; flex-direction:column; gap:14px;">
+            <div style="border:1px dashed oklch(82% 0.02 60); border-radius:8px; padding:14px 16px; display:flex; flex-direction:column; gap:10px;">
+              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <input type="date" value="{{ apptDate }}" onChange="{{ onApptDate }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 10px; font-size:13px; font-family:inherit;" />
+                <input type="time" value="{{ apptTime }}" onChange="{{ onApptTime }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 10px; font-size:13px; font-family:inherit;" />
+                <input value="{{ apptPropertyId }}" onChange="{{ onApptPropertyId }}" placeholder="รหัสทรัพย์ (เช่น HH-101)" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 10px; font-size:13px; font-family:inherit; width:160px;" />
+              </div>
+              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <input value="{{ apptCustomerName }}" onChange="{{ onApptCustomerName }}" placeholder="ชื่อลูกค้า" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 10px; font-size:13px; font-family:inherit; flex:1; min-width:140px;" />
+                <input value="{{ apptCustomerPhone }}" onChange="{{ onApptCustomerPhone }}" placeholder="เบอร์โทรลูกค้า" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 10px; font-size:13px; font-family:inherit; flex:1; min-width:140px;" />
+              </div>
+              <input value="{{ apptNote }}" onChange="{{ onApptNote }}" placeholder="หมายเหตุ (ถ้ามี)" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 10px; font-size:13px; font-family:inherit;" />
+              <div onClick="{{ onSaveAppt }}" style="align-self:flex-start; background:oklch(40% 0.13 25); color:white; padding:9px 18px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">+ เพิ่มนัดหมาย</div>
+            </div>
+
+            <sc-if value="{{ hasNoAppts }}"><div style="font-size:13px; color:oklch(55% 0.02 60);">ยังไม่มีนัดหมาย</div></sc-if>
+            <sc-for list="{{ apptRows }}" as="a" hint-placeholder-count="0">
+              <div style="border:1px solid oklch(92% 0.01 70); border-radius:8px; padding:14px 16px; background:{{ a.bg }}; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                <div>
+                  <div style="font-size:13.5px; font-weight:600; color:oklch(25% 0.02 60);">{{ a.whenLabel }} — {{ a.propertyId }}</div>
+                  <div style="font-size:12.5px; color:oklch(45% 0.02 60); margin-top:2px;">{{ a.customerName }} <sc-if value="{{ a.hasPhone }}">· 📞 {{ a.customerPhone }}</sc-if></div>
+                  <sc-if value="{{ a.hasNote }}"><div style="font-size:12px; color:oklch(55% 0.02 60); margin-top:2px;">{{ a.note }}</div></sc-if>
+                </div>
+                <div style="display:flex; gap:12px; align-items:center;">
+                  <sc-if value="{{ a.isUpcoming }}"><div onClick="{{ a.onMarkDone }}" style="font-size:12px; color:oklch(45% 0.13 145); cursor:pointer; font-weight:600;">✓ เสร็จแล้ว</div></sc-if>
+                  <div onClick="{{ a.onDelete }}" style="font-size:12px; color:oklch(50% 0.18 30); cursor:pointer;">🗑️ ลบ</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+      </div>
+      </sc-if>
+
       <sc-if value="{{ isListTab }}">
+
+      <sc-if value="{{ showLeadsInbox }}">
+        <div style="background:white; border-radius:8px; padding:20px 22px; margin-bottom:22px;">
+          <div onClick="{{ onToggleInbox }}" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+            <div style="font-size:14px; font-weight:600; color:oklch(25% 0.02 60);">💬 ข้อความจากลูกค้า ({{ leadCount }})<sc-if value="{{ hasUnreadLeads }}"> · <span style="color:oklch(55% 0.2 25);">{{ unreadLeadCount }} ใหม่</span></sc-if></div>
+            <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ inboxToggleLabel }}</div>
+          </div>
+          <sc-if value="{{ showInboxBody }}">
+            <div style="margin-top:14px; display:flex; flex-direction:column; gap:10px;">
+              <sc-if value="{{ hasNoLeads }}"><div style="font-size:13px; color:oklch(55% 0.02 60);">ยังไม่มีลูกค้าทักเข้ามา</div></sc-if>
+              <sc-for list="{{ leadRows }}" as="l" hint-placeholder-count="0">
+                <div style="border:1px solid oklch(92% 0.01 70); border-radius:8px; padding:14px 16px; background:{{ l.bg }};">
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                    <div style="font-size:13.5px; font-weight:600; color:oklch(25% 0.02 60);">{{ l.name }} <span style="font-weight:400; color:oklch(55% 0.02 60); font-size:12px;">— {{ l.propertyId }}</span></div>
+                    <div style="font-size:11px; color:oklch(55% 0.02 60);">{{ l.dateLabel }}</div>
+                  </div>
+                  <div style="font-size:13px; color:oklch(35% 0.02 60); margin-top:6px;">{{ l.message }}</div>
+                  <div style="display:flex; gap:14px; margin-top:8px; align-items:center;">
+                    <sc-if value="{{ l.hasPhone }}"><a href="{{ l.telHref }}" style="font-size:12.5px; color:oklch(40% 0.13 25); text-decoration:none; font-weight:600;">📞 {{ l.phone }}</a></sc-if>
+                    <sc-if value="{{ l.showMarkDone }}"><div onClick="{{ l.onMarkContacted }}" style="font-size:12px; color:oklch(50% 0.02 60); cursor:pointer;">✓ ทำเครื่องหมายว่าติดต่อแล้ว</div></sc-if>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
 
       <sc-if value="{{ showTrialOffer }}">
         <div style="background:oklch(97% 0.05 60); border:1px solid oklch(85% 0.08 60); border-radius:8px; padding:18px 22px; margin-bottom:22px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
@@ -673,7 +767,7 @@
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = {
-    loaded: false, signedIn: false, lister: null, properties: [], view: "list", dashTab: "list",
+    loaded: false, signedIn: false, lister: null, properties: [], view: "list", dashTab: "settings",
     editingId: null, f_type: "villa", f_area: "hua-hin", f_zone: "", f_status: "sale",
     f_price: "", f_bedrooms: "", f_bathrooms: "", f_livingArea: "", f_landSize: "",
     f_description: "", f_features: [], saveError: "", saving: false,
@@ -682,6 +776,9 @@ class Component extends DCLogic {
     nudgeSaving: false, nudgeSavedMsg: "", copyLabel: "คัดลอกข้อความ",
     shareId: "", shareUrl: "", shareCopyLabel: "คัดลอกลิงก์", quotaMsg: "", listLayout: "list",
     collections: [], showColBuilder: false, colScopeAll: false,
+    leads: [], showInboxBody: false,
+    appointments: [], showApptBody: true,
+    apptDate: "", apptTime: "", apptPropertyId: "", apptCustomerName: "", apptCustomerPhone: "", apptNote: "",
     colFilters: { keyword: "", status: "", area: "", type: "", bedroomsMin: "", bathroomsMin: "", priceMax: "", features: [] },
     colName: "", colMsg: "", colEditingId: "", colEditingName: "",
     showDeleteConfirm: false, deleteTargetId: "", deleting: false,
@@ -727,6 +824,12 @@ class Component extends DCLogic {
       fb.fetchCollectionsByOwner("lister", lister.id).then((cols) => {
         this.setState({ collections: cols.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)) });
       }).catch((e) => console.warn("loadCollections failed:", e));
+      fb.fetchLeadsForProperties(properties.map((p) => p.id)).then((leads) => {
+        this.setState({ leads });
+      }).catch((e) => console.warn("loadLeads failed:", e));
+      fb.fetchAppointments(lister.id).then((appointments) => {
+        this.setState({ appointments });
+      }).catch((e) => console.warn("loadAppointments failed:", e));
       this.setState({
         loaded: true, signedIn: true, lister, properties,
         ps_displayName: lister.displayName || lister.name || "",
@@ -1275,6 +1378,43 @@ class Component extends DCLogic {
     });
   }
 
+  async markLeadAsContacted(leadId) {
+    try {
+      await this._fb.markLeadContacted(leadId);
+      this.setState((s) => ({ leads: s.leads.map((l) => (l.id === leadId ? { ...l, contacted: true } : l)) }));
+    } catch (e) { console.warn("markLeadAsContacted failed:", e); }
+  }
+
+  async saveAppointmentNow() {
+    if (!this.state.apptDate || !this.state.apptTime) return;
+    const when = new Date(`${this.state.apptDate}T${this.state.apptTime}`).getTime();
+    const appt = {
+      when, propertyId: this.state.apptPropertyId || "", customerName: this.state.apptCustomerName || "",
+      customerPhone: this.state.apptCustomerPhone || "", note: this.state.apptNote || "",
+    };
+    try {
+      const id = await this._fb.saveAppointment(this.state.lister.id, appt);
+      this.setState((s) => ({
+        appointments: [...s.appointments, { id, ...appt, status: "upcoming", listerId: s.lister.id }].sort((a, b) => (a.when || 0) - (b.when || 0)),
+        apptDate: "", apptTime: "", apptPropertyId: "", apptCustomerName: "", apptCustomerPhone: "", apptNote: "",
+      }));
+    } catch (e) { console.warn("saveAppointment failed:", e); }
+  }
+
+  async markApptDone(id) {
+    try {
+      await this._fb.updateAppointmentStatus(id, "done");
+      this.setState((s) => ({ appointments: s.appointments.map((a) => (a.id === id ? { ...a, status: "done" } : a)) }));
+    } catch (e) { console.warn("markApptDone failed:", e); }
+  }
+
+  async deleteApptNow(id) {
+    try {
+      await this._fb.deleteAppointment(id);
+      this.setState((s) => ({ appointments: s.appointments.filter((a) => a.id !== id) }));
+    } catch (e) { console.warn("deleteAppointment failed:", e); }
+  }
+
   async saveCollectionNow() {
     const name = (this.state.colName || "").trim();
     if (!name) { this.setState({ colMsg: "กรุณาตั้งชื่อคอลเลกชันก่อนบันทึก" }); return; }
@@ -1449,12 +1589,15 @@ class Component extends DCLogic {
       isListTab: this.state.dashTab === "list",
       isSettingsTab: this.state.dashTab === "settings",
       isCollectionsTab: this.state.dashTab === "collections",
+      isApptTab: this.state.dashTab === "appt",
       onSetListTab: () => this.setState({ dashTab: "list" }),
       onSetSettingsTab: () => this.setState({ dashTab: "settings" }),
       onSetCollectionsTab: () => this.setState({ dashTab: "collections" }),
+      onSetApptTab: () => this.setState({ dashTab: "appt" }),
       listTabColor: this.state.dashTab === "list" ? "oklch(40% 0.13 25)" : "oklch(70% 0.01 70)",
       settingsTabColor: this.state.dashTab === "settings" ? "oklch(40% 0.13 25)" : "oklch(70% 0.01 70)",
       collectionsTabColor: this.state.dashTab === "collections" ? "oklch(40% 0.13 25)" : "oklch(70% 0.01 70)",
+      apptTabColor: this.state.dashTab === "appt" ? "oklch(40% 0.13 25)" : "oklch(70% 0.01 70)",
       showProfileChecklist: this.state.signedIn && !!lister.id,
       profileCompletePct: this.profileCompleteness(lister, tier2Plus).pct,
       profileMissingText: this.profileCompleteness(lister, tier2Plus).missing.join(" · "),
@@ -1503,6 +1646,10 @@ class Component extends DCLogic {
       // primary CTA instead of the old small centered text.
       showFirstTimeCta: properties.length === 0,
       showFab: this.state.signedIn && properties.length > 0,
+      addHomeBottom: (this.state.signedIn && properties.length > 0) ? "90px" : "22px",
+      showAddHomeModal: this.state.showAddHomeModal,
+      onOpenAddHome: () => this.setState({ showAddHomeModal: true }),
+      onCloseAddHome: () => this.setState({ showAddHomeModal: false }),
       properties,
       onNewProperty: () => this.startNew(),
       onBackToList: () => this.goBackToList(),
