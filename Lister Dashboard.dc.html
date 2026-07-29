@@ -1576,9 +1576,7 @@ class Component extends DCLogic {
       if (mode === "exact") {
         this._previewMarker = new google.maps.Marker({ position: coords, map: this._previewMap });
       } else if (tambon) {
-        const clipped = tambonMod.clipTambonToRadius(tambon, coords.lat, coords.lng, 5000) || tambon.path;
-        const smoothed = tambonMod.smoothRing(clipped, 2);
-        const path = smoothed.map(([lat, lng]) => ({ lat, lng }));
+        const path = tambon.path.map(([lat, lng]) => ({ lat, lng }));
         this._previewPolygon = new google.maps.Polygon({
           map: this._previewMap, paths: path,
           fillColor: "#7a2331", fillOpacity: 0.18, strokeOpacity: 0, clickable: false,

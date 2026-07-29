@@ -628,13 +628,9 @@ class Component extends DCLogic {
         this._zoneMap.setZoom(15);
         this._zoneMarker = new google.maps.Marker({ position: center, map: this._zoneMap });
       } else if (tambon) {
-        // Real tambon boundary narrowed to the portion within ~5km of the
-        // (hidden) pin — keeps the true, irregular administrative edge shape
-        // rather than a perfect circle, but avoids highlighting an entire
-        // huge subdistrict.
-        const clipped = this._tambonMod.clipTambonToRadius(tambon, exactCoords.lat, exactCoords.lng, 5000) || tambon.path;
-        const smoothed = this._tambonMod.smoothRing(clipped, 2);
-        const path = smoothed.map(([lat, lng]) => ({ lat, lng }));
+        // Full real tambon (subdistrict) boundary — no radius clipping, no
+        // smoothing distortion — pulled directly from official GIS data.
+        const path = tambon.path.map(([lat, lng]) => ({ lat, lng }));
         this._zonePolygon = new google.maps.Polygon({
           map: this._zoneMap, paths: path,
           fillColor: "#7a2331", fillOpacity: 0.18, strokeOpacity: 0, clickable: false,
