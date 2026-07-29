@@ -199,7 +199,8 @@ class Component extends DCLogic {
     // brand-new browser, throwing auth/argument-error once. Firing it here
     // (not inside the click handler) gives it the whole rest of page load
     // to finish before the user can possibly click.
-    try { await fb.warmUpAuthPersistence(); } catch (e) {}
+    this._authReadyPromise = fb.warmUpAuthPersistence().catch(() => {});
+    await this._authReadyPromise;
     try {
       const [settings, count] = await Promise.all([fb.fetchFoundingAgentSettings(), fb.countFoundingAgents()]);
       this.setState({ foundingLimit: settings.limit || 0, foundingNote: settings.note || "", foundingCount: count });
@@ -230,6 +231,7 @@ class Component extends DCLogic {
     if (this.state.socialBusy) return;
     this.setState({ socialBusy: true, socialError: "" });
     try {
+      if (this._authReadyPromise) await this._authReadyPromise;
       const fb = await import("./firebase-client.js");
       const uid = await fb.signInWithGoogleRedirect();
       await this.completeSocialSignIn(uid, fb);

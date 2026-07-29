@@ -357,13 +357,20 @@ async function withAuthRetry(fn) {
 // simplest reliable path for a site not hosted on Firebase Hosting itself.
 
 // Call as early as possible on page load (componentDidMount), well before
-// the user can click Google/Facebook — forces the Auth SDK's IndexedDB
-// persistence layer to finish opening ahead of time, which is what causes
-// the one-time auth/argument-error on a click in a brand-new browser.
+// the user can click Google/Facebook — waits for Firebase Auth's own
+// "ready" signal (onAuthStateChanged fires exactly once after the SDK's
+// internal init, including its popup/redirect resolver, is fully settled)
+// instead of guessing a fixed delay. This is what actually explained the
+// "works after a full page refresh, never on the very first load" pattern:
+// a timer-based delay could be too short; this waits for the real event.
 export async function warmUpAuthPersistence() {
   const a = authApp();
   if (!a) return;
   try { await a.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
+  await new Promise((resolve) => {
+    const unsub = a.onAuthStateChanged(() => { unsub(); resolve(); });
+    setTimeout(resolve, 4000); // safety cap so a broken listener never hangs the page
+  });
 }
 
 export async function signInWithGoogleRedirect() {
