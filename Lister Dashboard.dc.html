@@ -347,35 +347,61 @@
           <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ apptToggleLabel }}</div>
         </div>
         <sc-if value="{{ showApptBody }}" hint-placeholder-val="{{ true }}">
-          <div style="margin-top:14px; display:flex; flex-direction:column; gap:14px;">
-            <div style="border:1px dashed oklch(82% 0.02 60); border-radius:8px; padding:14px 16px; display:flex; flex-direction:column; gap:10px;">
-              <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                <input type="date" value="{{ apptDate }}" onChange="{{ onApptDate }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 10px; font-size:13px; font-family:inherit;" />
-                <input type="time" value="{{ apptTime }}" onChange="{{ onApptTime }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 10px; font-size:13px; font-family:inherit;" />
-                <input value="{{ apptPropertyId }}" onChange="{{ onApptPropertyId }}" placeholder="รหัสทรัพย์ (เช่น HH-101)" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 10px; font-size:13px; font-family:inherit; width:160px;" />
+          <div style="margin-top:14px; display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:16px;">
+
+            <div style="border:1px solid oklch(88% 0.03 250); background:oklch(98% 0.015 250); border-radius:8px; padding:16px;">
+              <div style="font-size:13px; font-weight:700; color:oklch(35% 0.1 250); margin-bottom:2px;">📩 ลูกค้าจองเข้ามา ({{ customerApptCount }})</div>
+              <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:12px;">เกิดขึ้นอัตโนมัติเมื่อลูกค้ากด "นัดชมทรัพย์" จากเว็บไซต์ของคุณ</div>
+              <sc-if value="{{ hasNoCustomerAppts }}"><div style="font-size:13px; color:oklch(55% 0.02 60);">ยังไม่มีลูกค้าจองเข้ามา</div></sc-if>
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <sc-for list="{{ customerApptRows }}" as="a" hint-placeholder-count="0">
+                  <div style="border:1px solid oklch(85% 0.03 250); border-radius:8px; padding:12px 14px; background:white; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                    <div>
+                      <div style="font-size:13.5px; font-weight:600; color:oklch(25% 0.02 60);">{{ a.whenLabel }} — {{ a.propertyId }}</div>
+                      <div style="font-size:12.5px; color:oklch(45% 0.02 60); margin-top:2px;">{{ a.customerName }} <sc-if value="{{ a.hasPhone }}">· 📞 {{ a.customerPhone }}</sc-if></div>
+                      <sc-if value="{{ a.hasNote }}"><div style="font-size:12px; color:oklch(55% 0.02 60); margin-top:2px;">{{ a.note }}</div></sc-if>
+                    </div>
+                    <div style="display:flex; gap:12px; align-items:center;">
+                      <sc-if value="{{ a.isUpcoming }}"><div onClick="{{ a.onMarkDone }}" style="font-size:12px; color:oklch(45% 0.13 145); cursor:pointer; font-weight:600;">✓ เสร็จแล้ว</div></sc-if>
+                      <div onClick="{{ a.onDelete }}" style="font-size:12px; color:oklch(50% 0.18 30); cursor:pointer;">🗑️</div>
+                    </div>
+                  </div>
+                </sc-for>
               </div>
-              <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                <input value="{{ apptCustomerName }}" onChange="{{ onApptCustomerName }}" placeholder="ชื่อลูกค้า" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 10px; font-size:13px; font-family:inherit; flex:1; min-width:140px;" />
-                <input value="{{ apptCustomerPhone }}" onChange="{{ onApptCustomerPhone }}" placeholder="เบอร์โทรลูกค้า" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 10px; font-size:13px; font-family:inherit; flex:1; min-width:140px;" />
-              </div>
-              <input value="{{ apptNote }}" onChange="{{ onApptNote }}" placeholder="หมายเหตุ (ถ้ามี)" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:9px 10px; font-size:13px; font-family:inherit;" />
-              <div onClick="{{ onSaveAppt }}" style="align-self:flex-start; background:oklch(40% 0.13 25); color:white; padding:9px 18px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">+ เพิ่มนัดหมาย</div>
             </div>
 
-            <sc-if value="{{ hasNoAppts }}"><div style="font-size:13px; color:oklch(55% 0.02 60);">ยังไม่มีนัดหมาย</div></sc-if>
-            <sc-for list="{{ apptRows }}" as="a" hint-placeholder-count="0">
-              <div style="border:1px solid oklch(92% 0.01 70); border-radius:8px; padding:14px 16px; background:{{ a.bg }}; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-                <div>
-                  <div style="font-size:13.5px; font-weight:600; color:oklch(25% 0.02 60);">{{ a.whenLabel }} — {{ a.propertyId }} <sc-if value="{{ a.isFromCustomer }}"><span style="font-size:10.5px; font-weight:700; background:oklch(50% 0.13 250); color:white; padding:2px 8px; border-radius:100px; vertical-align:middle;">📩 ลูกค้าจองเอง</span></sc-if></div>
-                  <div style="font-size:12.5px; color:oklch(45% 0.02 60); margin-top:2px;">{{ a.customerName }} <sc-if value="{{ a.hasPhone }}">· 📞 {{ a.customerPhone }}</sc-if></div>
-                  <sc-if value="{{ a.hasNote }}"><div style="font-size:12px; color:oklch(55% 0.02 60); margin-top:2px;">{{ a.note }}</div></sc-if>
+            <div style="border:1px dashed oklch(82% 0.02 60); border-radius:8px; padding:16px;">
+              <div style="font-size:13px; font-weight:700; color:oklch(25% 0.02 60); margin-bottom:2px;">🗓️ นัดหมายของฉัน ({{ ownApptCount }})</div>
+              <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:12px;">บันทึกนัดชมที่คุณตกลงกับลูกค้าเองได้ที่นี่</div>
+              <div style="border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:12px 14px; display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                  <input type="date" value="{{ apptDate }}" onChange="{{ onApptDate }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 9px; font-size:13px; font-family:inherit; flex:1; min-width:120px;" />
+                  <input type="time" value="{{ apptTime }}" onChange="{{ onApptTime }}" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 9px; font-size:13px; font-family:inherit; flex:1; min-width:100px;" />
                 </div>
-                <div style="display:flex; gap:12px; align-items:center;">
-                  <sc-if value="{{ a.isUpcoming }}"><div onClick="{{ a.onMarkDone }}" style="font-size:12px; color:oklch(45% 0.13 145); cursor:pointer; font-weight:600;">✓ เสร็จแล้ว</div></sc-if>
-                  <div onClick="{{ a.onDelete }}" style="font-size:12px; color:oklch(50% 0.18 30); cursor:pointer;">🗑️ ลบ</div>
-                </div>
+                <input value="{{ apptPropertyId }}" onChange="{{ onApptPropertyId }}" placeholder="รหัสทรัพย์ (เช่น HH-101)" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 9px; font-size:13px; font-family:inherit;" />
+                <input value="{{ apptCustomerName }}" onChange="{{ onApptCustomerName }}" placeholder="ชื่อลูกค้า" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 9px; font-size:13px; font-family:inherit;" />
+                <input value="{{ apptCustomerPhone }}" onChange="{{ onApptCustomerPhone }}" placeholder="เบอร์โทรลูกค้า" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 9px; font-size:13px; font-family:inherit;" />
+                <input value="{{ apptNote }}" onChange="{{ onApptNote }}" placeholder="หมายเหตุ (ถ้ามี)" style="border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:8px 9px; font-size:13px; font-family:inherit;" />
+                <div onClick="{{ onSaveAppt }}" style="align-self:flex-start; background:oklch(40% 0.13 25); color:white; padding:8px 16px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">+ เพิ่มนัดหมาย</div>
               </div>
-            </sc-for>
+              <sc-if value="{{ hasNoOwnAppts }}"><div style="font-size:13px; color:oklch(55% 0.02 60);">ยังไม่มีนัดหมาย</div></sc-if>
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <sc-for list="{{ ownApptRows }}" as="a" hint-placeholder-count="0">
+                  <div style="border:1px solid oklch(92% 0.01 70); border-radius:8px; padding:12px 14px; background:{{ a.bg }}; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                    <div>
+                      <div style="font-size:13.5px; font-weight:600; color:oklch(25% 0.02 60);">{{ a.whenLabel }} — {{ a.propertyId }}</div>
+                      <div style="font-size:12.5px; color:oklch(45% 0.02 60); margin-top:2px;">{{ a.customerName }} <sc-if value="{{ a.hasPhone }}">· 📞 {{ a.customerPhone }}</sc-if></div>
+                      <sc-if value="{{ a.hasNote }}"><div style="font-size:12px; color:oklch(55% 0.02 60); margin-top:2px;">{{ a.note }}</div></sc-if>
+                    </div>
+                    <div style="display:flex; gap:12px; align-items:center;">
+                      <sc-if value="{{ a.isUpcoming }}"><div onClick="{{ a.onMarkDone }}" style="font-size:12px; color:oklch(45% 0.13 145); cursor:pointer; font-weight:600;">✓ เสร็จแล้ว</div></sc-if>
+                      <div onClick="{{ a.onDelete }}" style="font-size:12px; color:oklch(50% 0.18 30); cursor:pointer;">🗑️</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
           </div>
         </sc-if>
       </div>
@@ -1419,19 +1445,37 @@ class Component extends DCLogic {
   }
 
   profileCompleteness(lister, tier2Plus) {
+    // Fixed checklist regardless of tier — so 100% is only reachable on a
+    // fully-paid package. Free/trial accounts see a lower % even with every
+    // free-tier field filled, since paid-only items (cover photo, social
+    // links) stay unchecked for them — showing what upgrading unlocks,
+    // rather than silently excluding those items from the denominator.
     const checks = [
       { ok: !!(lister.name || lister.displayName), label: "ชื่อที่แสดง" },
       { ok: !!lister.phone, label: "เบอร์โทร" },
       { ok: !!lister.profilePhotoUrl, label: "รูปโปรไฟล์" },
       { ok: !!(lister.bioText && (typeof lister.bioText === "string" ? lister.bioText.trim() : lister.bioText.th || lister.bioText.en)), label: "ข้อความแนะนำตัว" },
+      { ok: !!lister.coverPhotoUrl, label: "ภาพปก (เฉพาะแพ็กเกจที่ชำระเงิน)" },
+      { ok: !!(lister.socialLinks && Object.values(lister.socialLinks).some((v) => v)), label: "ลิงก์โซเชียลอย่างน้อย 1 ช่องทาง (แพ็กเกจ 1 ขึ้นไป)" },
     ];
-    if (tier2Plus) checks.push({ ok: !!(lister.socialLinks && Object.values(lister.socialLinks).some((v) => v)), label: "ลิงก์โซเชียลอย่างน้อย 1 ช่องทาง" });
     const done = checks.filter((c) => c.ok).length;
     return { pct: Math.round((done / checks.length) * 100), missing: checks.filter((c) => !c.ok).map((c) => c.label) };
   }
 
   renderVals() {
     const mod = this._mod;
+    const apptRowsAll = (this.state.appointments || []).slice().sort((a, b) => (a.when || 0) - (b.when || 0)).map((a) => ({
+      id: a.id,
+      whenLabel: a.when ? new Date(a.when).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "-",
+      propertyId: a.propertyId || "-", customerName: a.customerName || "ไม่ระบุชื่อ",
+      hasPhone: !!a.customerPhone, customerPhone: a.customerPhone || "",
+      hasNote: !!a.note, note: a.note || "",
+      isUpcoming: a.status !== "done",
+      isFromCustomer: a.source === "customer",
+      bg: a.status === "done" ? "oklch(97% 0.01 145)" : (a.source === "customer" ? "oklch(97% 0.03 250)" : "white"),
+      onMarkDone: () => this.markApptDone(a.id),
+      onDelete: () => this.deleteApptNow(a.id),
+    }));
     const tierLabels = { trial: "🎁 ทดลองใช้ฟรี", basic: "① ฟรี", pro: "② ระดับ 1", agency: "② ระดับ 1", level3: "③ ระดับ 2", level4: "④ ระดับ 3", silver: "🥈 VIP เงิน", gold: "🥇 VIP ทอง", diamond: "💎 VIP เพชร" };
     const lister = this.state.lister || {};
     const isTrial = lister.tier === "trial";
@@ -1580,18 +1624,13 @@ class Component extends DCLogic {
       apptNote: this.state.apptNote, onApptNote: (e) => this.setState({ apptNote: e.target.value }),
       onSaveAppt: () => this.saveAppointmentNow(),
       hasNoAppts: (this.state.appointments || []).length === 0,
-      apptRows: (this.state.appointments || []).slice().sort((a, b) => (a.when || 0) - (b.when || 0)).map((a) => ({
-        id: a.id,
-        whenLabel: a.when ? new Date(a.when).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "-",
-        propertyId: a.propertyId || "-", customerName: a.customerName || "ไม่ระบุชื่อ",
-        hasPhone: !!a.customerPhone, customerPhone: a.customerPhone || "",
-        hasNote: !!a.note, note: a.note || "",
-        isUpcoming: a.status !== "done",
-        isFromCustomer: a.source === "customer",
-        bg: a.status === "done" ? "oklch(97% 0.01 145)" : (a.source === "customer" ? "oklch(97% 0.03 250)" : "white"),
-        onMarkDone: () => this.markApptDone(a.id),
-        onDelete: () => this.deleteApptNow(a.id),
-      })),
+      apptRows: apptRowsAll,
+      customerApptRows: apptRowsAll.filter((a) => a.isFromCustomer),
+      ownApptRows: apptRowsAll.filter((a) => !a.isFromCustomer),
+      customerApptCount: apptRowsAll.filter((a) => a.isFromCustomer).length,
+      ownApptCount: apptRowsAll.filter((a) => !a.isFromCustomer).length,
+      hasNoCustomerAppts: apptRowsAll.filter((a) => a.isFromCustomer).length === 0,
+      hasNoOwnAppts: apptRowsAll.filter((a) => !a.isFromCustomer).length === 0,
       properties,
       onNewProperty: () => this.startNew(),
       onBackToList: () => this.goBackToList(),
