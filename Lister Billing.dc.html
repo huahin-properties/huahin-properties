@@ -206,11 +206,15 @@ class Component extends DCLogic {
       const mod = await import("./data.js");
       this.setState({ lang: mod.getLang() });
     } catch (e) {}
-    await fb.onAdminAuthReady().catch(() => {});
+    const authedUser = await fb.onAdminAuthReady().catch(() => null);
     // Pricing/packages are always public — anyone can see what each level
     // costs and unlocks before signing up. Only the "upgrade" action itself
     // requires a signed-in lister account (redirects to signup if not).
-    const signedIn = fb.isAdminAuthed();
+    // NOTE: isAdminAuthed() checks membership in the adminUsers collection —
+    // wrong check here, it made every genuinely signed-in agent/lister read
+    // as "not signed in" (only real admin accounts passed). Use the same
+    // onAdminAuthReady() Firebase Auth user check Lister Dashboard uses.
+    const signedIn = !!authedUser;
     try {
       const [lister, prices, vipPrices, rolloutLevel] = await Promise.all([
         signedIn ? fb.fetchMyListerDoc() : Promise.resolve(null),
