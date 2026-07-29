@@ -13,16 +13,16 @@
 
 const firebaseConfig = {
   apiKey: "AIzaSyCTfx0ucOxEvfcP15Gf-SJEXRS-_-F1oWQ",
-  // Firebase's own default authDomain (*.firebaseapp.com) — always warmed
-  // up and reliably serves the __/auth/handler and __/auth/iframe helper
-  // pages Firebase Auth needs. We tried the custom auth.huahin.properties
-  // domain to keep the redirect same-site, but it kept failing on the
-  // very first sign-in attempt in a fresh browser (succeeding only after
-  // a manual refresh) — consistent with that custom domain's auth helper
-  // pages not being fully warmed/verified. huahin.properties is already an
-  // authorized JS origin in Google Cloud Console, so popup/redirect sign-in
-  // works fine against the default domain too.
-  authDomain: "huahin-properties-5f1b5.firebaseapp.com",
+  // Same-site custom authDomain (a subdomain of huahin.properties itself,
+  // now confirmed "Connected" in Firebase Hosting). The previous default
+  // *.firebaseapp.com authDomain is a totally different site from
+  // huahin.properties — browsers that block third-party cookies (Chrome's
+  // current default) silently drop the sign-in result crossing that
+  // cross-site boundary: Google shows success, the redirect lands back on
+  // Agent Signup with no error and no signed-in user — exactly what was
+  // reported. auth.huahin.properties is same-site (same huahin.properties
+  // eTLD+1), so that storage/cookie relay isn't blocked.
+  authDomain: "auth.huahin.properties",
   projectId: "huahin-properties-5f1b5",
   storageBucket: "huahin-properties-5f1b5.firebasestorage.app",
   messagingSenderId: "264933237376",
