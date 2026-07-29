@@ -461,12 +461,49 @@ export async function saveLead(lead) {
   return id;
 }
 
+// ── Lister inbox (Phase 1 of the "real workspace" push) ───────────────────
+// Reuses the existing "leads" collection (general contact-form inquiries,
+// already tagged with propertyId) — just filtered down to the properties a
+// given lister owns, so their Dashboard can show "customers contacted me"
+// without a new collection or schema migration.
+export async function fetchLeadsForProperties(propertyIds) {
+  if (!propertyIds || !propertyIds.length) return [];
+  const all = await fetchCollection("leads");
+  const idSet = new Set(propertyIds);
+  return all.filter((l) => idSet.has(l.propertyId)).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+}
+
+// ── Lister appointments (Phase 3) ──────────────────────────────────────────
+// Simple manual CRUD list, scoped to the lister's own uid. Not yet wired to
+// the public "Schedule Viewing" button on Property Details (that request
+// flow is mock-backed per property-repositories.js) — a real customer-side
+// booking would need that button to call saveAppointment too; flagged as a
+// follow-up, not done here.
+export async function fetchAppointments(listerId) {
+  const rows = await fetchWhere("appointments", "listerId", listerId);
+  return rows.sort((a, b) => (a.when || 0) - (b.when || 0));
+}
+
+export async function saveAppointment(listerId, appt) {
+  const id = "appt-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+  await setDoc("appointments", id, { ...appt, listerId, status: "upcoming", createdAt: Date.now() });
+  return id;
+}
+
+export async function updateAppointmentStatus(id, status) {
+  await updateDocFields("appointments", id, { status });
+}
+
+export async function deleteAppointment(id) {
+  await deleteDocById("appointments", id);
+}
+
 export async function fetchLeads() {
   const leads = await fetchCollection("leads");
   return leads.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 }
 
-export async function markLeadContacted(id, contacted) {
+export async function markLeadContacted(id, contacted = true) {
   await updateDocFields("leads", id, { contacted });
 }
 

@@ -99,6 +99,7 @@
       <sc-if value="{{ isSettingsTab }}"><div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:18px; line-height:1.6;">เติมข้อมูลตรงนี้ครั้งเดียว ระบบจะดึงไปใช้ซ้ำอัตโนมัติทุกประกาศ — ให้เว็บไซต์และโปรไฟล์ของคุณดูมืออาชีพตั้งแต่วินาทีแรกที่ลูกค้าเห็น</div></sc-if>
       <sc-if value="{{ isListTab }}"><div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:18px; line-height:1.6;">ไม่ต้องนั่งเขียนเอง — เพิ่มทรัพย์แล้วปล่อยให้ AI ร่างประกาศขายให้ครบ 8 ภาษาในไม่กี่วินาที พร้อมโพสต์ได้ทันที</div></sc-if>
       <sc-if value="{{ isCollectionsTab }}"><div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:18px; line-height:1.6;">คัดทรัพย์ที่ใช่ส่งให้ลูกค้าคนนั้นด้วยลิงก์เดียว — ดูเป็นมืออาชีพ ปิดการขายไวขึ้น ไม่ต้องส่งทีละลิงก์ให้ลูกค้าไล่หาเอง</div></sc-if>
+      <sc-if value="{{ isApptTab }}"><div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:18px; line-height:1.6;">นัดชมทรัพย์กับลูกค้า ไม่พลาดคิวนัด — เพิ่ม แก้ไข และทำเครื่องหมายเสร็จได้ในที่เดียว</div></sc-if>
 
       <sc-if value="{{ isSettingsTab }}">
 
@@ -138,7 +139,7 @@
             <div style="display:flex; gap:24px; flex-wrap:wrap; max-width:600px;">
               <div style="flex:1; min-width:220px;">
                 <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">อีเมลที่ใช้สมัคร (แก้ไขไม่ได้)</div>
-                <input value="{{ ps_email }}" disabled="{{ true }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit; background:oklch(95% 0.005 70); color:oklch(55% 0.02 60);" />
+                <input value="{{ ps_email }}" placeholder="ไม่มีอีเมลบันทึกไว้" disabled="{{ true }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit; background:oklch(95% 0.005 70); color:oklch(55% 0.02 60);" />
               </div>
               <div style="flex:1; min-width:220px;">
                 <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ตั้งรหัสผ่านใหม่</div>
@@ -164,41 +165,37 @@
                   </div>
                 </div>
 
-                <sc-if value="{{ canCustomCover }}">
-                  <div>
-                    <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ภาพปก (เหมือน Facebook cover)</div>
-                    <div style="display:flex; align-items:center; gap:10px;">
-                      <label style="display:inline-flex; align-items:center; gap:8px; border:1px dashed oklch(80% 0.02 60); border-radius:6px; padding:9px 14px; cursor:pointer; font-size:13px; color:oklch(45% 0.02 60);">
-                        <input type="file" accept="image/*" onChange="{{ onPsCoverPhoto }}" style="display:none;" />
-                        🖼️ {{ ps_coverPhotoLabel }}
-                      </label>
-                      <sc-if value="{{ ps_coverPhotoUrl }}"><div style="{{ psCoverThumbStyle }}"></div></sc-if>
-                    </div>
+                <div>
+                  <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ภาพปก (เหมือน Facebook cover)</div>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <label style="{{ coverPickerStyle }}">
+                      <input type="file" accept="image/*" onChange="{{ onPsCoverPhoto }}" disabled="{{ cannotCustomCover }}" style="display:none;" />
+                      🖼️ {{ ps_coverPhotoLabel }}
+                    </label>
+                    <sc-if value="{{ ps_coverPhotoUrl }}"><div style="{{ psCoverThumbStyle }}"></div></sc-if>
                   </div>
-                </sc-if>
-                <sc-if value="{{ cannotCustomCover }}">
-                  <div style="font-size:11.5px; color:oklch(55% 0.02 60);">🔒 เปลี่ยนภาพปกได้ตั้งแต่แพ็กเกจ 1 ขึ้นไป — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a></div>
-                </sc-if>
+                  <sc-if value="{{ cannotCustomCover }}">
+                    <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-top:5px;">🔒 เปลี่ยนภาพปกได้ตั้งแต่แพ็กเกจ 1 ขึ้นไป — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a></div>
+                  </sc-if>
+                </div>
 
-                <sc-if value="{{ canCustomTheme }}">
-                  <div>
-                    <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">สีธีมเว็บไซต์ของคุณ</div>
-                    <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
-                      <div style="display:flex; gap:10px;">
-                        <sc-for list="{{ themeOptions }}" as="c" hint-placeholder-count="4">
-                          <div onClick="{{ c.onSelect }}" style="{{ c.swatchStyle }}"></div>
-                        </sc-for>
-                      </div>
-                      <div style="display:flex; align-items:center; gap:8px;">
-                        <input type="color" value="{{ ps_themeColorHex }}" onChange="{{ onPsThemeColorPicker }}" style="width:38px; height:38px; border:none; border-radius:8px; padding:0; cursor:pointer; background:none;" />
-                        <span style="font-size:11px; color:oklch(55% 0.02 60);">กำหนดเอง</span>
-                      </div>
+                <div>
+                  <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">สีธีมเว็บไซต์ของคุณ</div>
+                  <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+                    <div style="display:flex; gap:10px;">
+                      <sc-for list="{{ themeOptions }}" as="c" hint-placeholder-count="4">
+                        <div onClick="{{ c.onSelect }}" style="{{ c.swatchStyle }}"></div>
+                      </sc-for>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <input type="color" value="{{ ps_themeColorHex }}" onChange="{{ onPsThemeColorPicker }}" disabled="{{ cannotCustomTheme }}" style="{{ themeColorPickerStyle }}" />
+                      <span style="font-size:11px; color:oklch(55% 0.02 60);">กำหนดเอง</span>
                     </div>
                   </div>
-                </sc-if>
-                <sc-if value="{{ cannotCustomTheme }}">
-                  <div style="font-size:11.5px; color:oklch(55% 0.02 60);">🔒 เปลี่ยนสีธีมได้ในแพ็กเกจ 3 — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a></div>
-                </sc-if>
+                  <sc-if value="{{ cannotCustomTheme }}">
+                    <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-top:5px;">🔒 เปลี่ยนสีธีมได้ในแพ็กเกจ 3 — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a></div>
+                  </sc-if>
+                </div>
               </div>
 
               <div style="width:280px; flex-shrink:0;">
@@ -345,7 +342,7 @@
           <div style="font-size:14px; font-weight:600; color:oklch(25% 0.02 60);">📅 ตารางนัดหมาย ({{ apptCount }})</div>
           <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ apptToggleLabel }}</div>
         </div>
-        <sc-if value="{{ showApptBody }}">
+        <sc-if value="{{ showApptBody }}" hint-placeholder-val="{{ true }}">
           <div style="margin-top:14px; display:flex; flex-direction:column; gap:14px;">
             <div style="border:1px dashed oklch(82% 0.02 60); border-radius:8px; padding:14px 16px; display:flex; flex-direction:column; gap:10px;">
               <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -444,14 +441,12 @@
           </div>
         </div>
 
-        <!-- CTA State 4: quota genuinely full — proactive banner, Upgrade is now the primary contextual action -->
         <sc-if value="{{ showProactiveQuotaFull }}">
           <div style="background:oklch(96% 0.06 60); border:2px solid oklch(75% 0.13 60); border-radius:8px; padding:16px 18px; margin-bottom:16px; font-size:14px; color:oklch(30% 0.12 40); display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;">
             <span style="font-weight:600;">⚠️ {{ quotaFullBannerMsg }}</span>
             <a href="Lister Billing.dc.html" style="background:oklch(40% 0.13 25); color:white; padding:11px 22px; border-radius:100px; font-size:13.5px; font-weight:700; text-decoration:none; white-space:nowrap;">อัปเกรดแพ็กเกจ →</a>
           </div>
         </sc-if>
-        <!-- CTA State 3: near quota — contextual note only, "+เพิ่มทรัพย์ใหม่" stays primary and enabled -->
         <sc-if value="{{ showQuotaNearNote }}">
           <div style="background:oklch(97% 0.03 75); border:1px solid oklch(85% 0.06 75); border-radius:6px; padding:10px 14px; margin-bottom:14px; font-size:12.5px; color:oklch(40% 0.1 60);">💡 {{ quotaNearNoteMsg }}</div>
         </sc-if>
@@ -788,7 +783,8 @@ class Component extends DCLogic {
     ps_aiPersonaText: "", ps_themeColor: "", ps_bioText: "", ps_saving: false, ps_saveMsg: "",
     ps_fb: "", ps_tiktok: "", ps_youtube: "", ps_instagram: "",
     trialStarting: false, trialError: "",
-    openMenuId: "", // Sprint 01 Phase 5: per-card overflow menu (AI post/Share/Delete)
+    openMenuId: "",
+    showAddHomeModal: false,
   };
 
   THEME_COLORS = ["#7A2E22", "#2F6B3A", "#1F4E8C", "#B8860B"];
@@ -798,14 +794,6 @@ class Component extends DCLogic {
     this._fb = fb;
     const mod = await import("./data.js");
     this._mod = mod;
-    // BUG FIX (18/07/2569): this used to check fb.isAdminAuthed(), which
-    // only returns true for a verified Admin (adminUsers/{uid} doc match) —
-    // a real, correctly-signed-in Lister/trial user always failed that
-    // check and got bounced back to Login even though Firebase Auth signed
-    // them in successfully. isAdminAuthed()/onAdminAuthReady() were
-    // repurposed for the Admin-only-page bypass fix; this page is a
-    // Lister page, not an admin-only one, so it must only check "is ANY
-    // Firebase user signed in" via the resolved user from onAuthReady().
     const authedUser = await fb.onAdminAuthReady().catch(() => null);
     const signedIn = !!authedUser;
     if (!signedIn) { this.setState({ loaded: true, signedIn: false }); return; }
@@ -813,10 +801,6 @@ class Component extends DCLogic {
       const lister = await fb.fetchMyListerDoc();
       if (!lister) { this.setState({ loaded: true, signedIn: false }); return; }
       let properties = await this.loadPropertiesWithCovers(lister.id);
-      // Client-side expiry sweep (no server cron in this project — same
-      // pattern as the admin's archival sweep): flips any of MY listings
-      // whose 30-day clock ran out to "expired", and purges photos on
-      // listings expired 90+ days. Only fires while I have this page open.
       try {
         const { expiredCount } = await fb.runExpirySweep(properties);
         if (expiredCount > 0) properties = await this.loadPropertiesWithCovers(lister.id);
@@ -858,8 +842,6 @@ class Component extends DCLogic {
     window.removeEventListener("popstate", this._onPopState);
   }
 
-  // Push a history entry whenever we leave the list — so the browser/phone
-  // back gesture returns to the list instead of leaving the whole page.
   pushViewHistory() {
     try { window.history.pushState({ dcView: true }, "", window.location.href); } catch (e) {}
   }
@@ -869,15 +851,10 @@ class Component extends DCLogic {
     else this.setState({ view: "list", quotaMsg: "" });
   }
 
-  // CAT-012 fix (Sprint 01 Code Freeze) — Build: SPRINT01-CAT012-20260718
   tierLimit(tier) {
     return { trial: 5, basic: 5, pro: 5, agency: 12, level3: 25, level4: 25 }[tier] || 5;
   }
 
-  // Trial gets full personal-website customization (cover/theme, see
-  // renderVals) but photo count + AI-gen count are capped like the
-  // lightest tier — per the finalized trial spec (impress with the
-  // visibility boost + full site customization, not raw quota).
   photoLimit(tier) {
     return { trial: 8, basic: 10, pro: 15, agency: 15, level3: 20 }[tier] || 10;
   }
@@ -915,8 +892,6 @@ class Component extends DCLogic {
     }
   }
 
-  // Replaces the old instant isDraft toggle — a brand-new/edited listing
-  // goes into the admin approval queue instead of publishing immediately.
   async submitListing(p) {
     const merged = { ...p }; delete merged.coverUrl;
     try {
@@ -926,8 +901,6 @@ class Component extends DCLogic {
   }
 
   async renewListing(p) {
-    // Guarded client-side (real enforcement is the Firestore rule) — trial/
-    // no-package listers get sent to upgrade instead of a silent failure.
     if (!this._fb.hasActivePaidPackage(this.state.lister)) {
       window.location.href = "Lister Billing.dc.html";
       return;
@@ -1017,9 +990,6 @@ class Component extends DCLogic {
     this.setState({ saving: true, saveError: "" });
     const id = this.state.editingId || this.genCode(this.state.f_area);
     const allPhotoUrls = [...this.state.existingPhotos.map((p) => p.url), ...this.state.newPhotos.map((p) => p.url)].slice(0, this.myPhotoLimit());
-    // Auto-translate the description into all 8 site languages on every
-    // save — no separate "translate" button, same as the main site's AI
-    // Quick Add (one AI call now, never a live per-view translation later).
     let descriptionValue = this.state.f_description;
     if (this.state.f_description && this.state.f_description.trim()) {
       try {
@@ -1028,21 +998,12 @@ class Component extends DCLogic {
       } catch (e) { console.warn("Auto-translate failed, saving original text only:", e); }
     }
     const isEditingExisting = !!this.state.editingId;
-    // Fresh read right before merging — NOT this.state.properties (a cache
-    // from page-load/last-refresh). If an admin approved/rejected/expired
-    // this listing after this tab loaded but before this save, using the
-    // cache here would silently overwrite that status change back to
-    // whatever it was on load (verified reproducible during audit).
     let existing = {};
     if (isEditingExisting) {
       try { existing = (await this._fb.fetchDocById("properties", id)) || {}; }
       catch (e) { existing = this.state.properties.find((p) => p.id === id) || {}; }
     }
     const previousIsDraft = isEditingExisting ? existing.isDraft : true;
-    // setDoc() below is a plain .set() (full overwrite, no merge) — must
-    // carry forward every listing-lifecycle field (status/dates/view count)
-    // explicitly on every edit-save, or an unrelated field edit would wipe
-    // out an already-live/pending/expired listing's status silently.
     const payload = {
       listerId: this.state.lister.id,
       listingStatus: existing.listingStatus || null, submittedAt: existing.submittedAt || null,
@@ -1057,34 +1018,17 @@ class Component extends DCLogic {
       livingArea: this.state.f_livingArea ? Number(this.state.f_livingArea) : null,
       landSize: this.state.f_landSize ? Number(this.state.f_landSize) : null,
       description: descriptionValue, features: this.state.f_features,
-      // Only brand-new listings start as a draft — editing an already-
-      // published property must NOT silently un-publish it (this was a real
-      // bug: isDraft was hardcoded true on every save, pulling live listings
-      // back off the public site the moment an agent edited them).
       currency: "THB", updatedAt: Date.now(), isDraft: previousIsDraft === undefined ? true : previousIsDraft,
       photos: allPhotoUrls.map(() => ({ label: "" })),
     };
     try {
       await this._fb.setDoc("properties", id, payload);
-      // Renumber all photos contiguously (0..n-1) every save. savePhoto()
-      // (firebase-client.js) only re-uploads bytes for brand-new "data:"
-      // URLs; for an existing photo whose URL is already an https Storage
-      // link it just re-points the Firestore doc at that same URL with no
-      // fetch/upload — re-fetching an already-hosted Storage URL from JS
-      // hits a CORS error (a plain <img> tag can show it with no CORS
-      // involved, but fetch() of the same URL is a real cross-origin
-      // request the default Storage bucket rejects).
       await Promise.all(allPhotoUrls.map((url, i) => this._fb.savePhoto(id, i, url)));
       for (let i = allPhotoUrls.length; i < 20; i++) {
         try { await this._fb.deleteDocById("propertyPhotos", `${id}-${i}`); } catch (e) {}
       }
       await this.refreshProperties();
       this.setState({ saving: false });
-      // Sprint 01 Phase 6 (Product Owner approved): a brand-new listing now
-      // flows straight into the AI-post screen instead of back to the list
-      // — same openPostView()/generatePostText() functions as before, only
-      // the navigation target changed. Editing an EXISTING listing still
-      // returns to the list as before (no surprise redirect on a routine edit).
       if (!isEditingExisting) {
         const saved = this.state.properties.find((p) => p.id === id);
         if (saved) { this.openPostView(saved); return; }
@@ -1160,9 +1104,6 @@ class Component extends DCLogic {
     lines.push(`รหัสทรัพย์: ${this.state.savedId}`);
     lines.push(`ดูรายละเอียดเพิ่มเติม 👉 ${window.location.origin}/Property Details.dc.html?id=${this.state.savedId}`);
     lines.push("");
-    // Contact block is the LISTER's own info (not the site's admin contact) —
-    // each self-serve listing should point buyers to whoever actually
-    // listed it.
     const lister = this.state.lister || {};
     lines.push("‼️ ติดต่อผู้ลงประกาศ");
     if (lister.name) lines.push(`👤 ${lister.name}`);
@@ -1258,7 +1199,7 @@ class Component extends DCLogic {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     const dataUrl = await this._fb.fileToDataUrl(file, 500);
-    this.setState({ ps_profilePhotoUrl: dataUrl, ps_saveMsg: "กำลังอัปโหลด…" }); // instant preview
+    this.setState({ ps_profilePhotoUrl: dataUrl, ps_saveMsg: "กำลังอัปโหลด…" });
     const slotId = "lister-avatar-" + this.state.lister.id;
     try {
       const url = await this._fb.saveProfilePhoto(slotId, dataUrl);
@@ -1270,6 +1211,7 @@ class Component extends DCLogic {
   }
 
   async onPsCoverPhoto(e) {
+    if (this._lockedCoverBlocked()) return;
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     const dataUrl = await this._fb.fileToDataUrl(file, 1400);
@@ -1282,6 +1224,13 @@ class Component extends DCLogic {
       console.warn("Failed to save cover photo:", e2);
       this.setState({ ps_saveMsg: "อัปโหลดรูปไม่สำเร็จ ลองใหม่อีกครั้ง" });
     }
+  }
+
+  _lockedCoverBlocked() {
+    const lister = this.state.lister || {};
+    const isTrial = lister.tier === "trial";
+    const tier2Plus = lister.tier === "pro" || lister.tier === "agency" || lister.tier === "level3" || lister.tier === "level4" || isTrial;
+    return !tier2Plus;
   }
 
   async changePassword() {
@@ -1304,9 +1253,6 @@ class Component extends DCLogic {
   async saveProfileSettings() {
     if (this.state.ps_saving) return;
     this.setState({ ps_saving: true, ps_saveMsg: "" });
-    // Auto-translate the bio into all 8 site languages on every save — same
-    // one-shot AI call approach as property descriptions, no separate
-    // "translate" button.
     let bioValue = this.state.ps_bioText;
     if (this.state.ps_bioText && this.state.ps_bioText.trim()) {
       try {
@@ -1463,11 +1409,6 @@ class Component extends DCLogic {
       { ok: !!lister.profilePhotoUrl, label: "รูปโปรไฟล์" },
       { ok: !!(lister.bioText && (typeof lister.bioText === "string" ? lister.bioText.trim() : lister.bioText.th || lister.bioText.en)), label: "ข้อความแนะนำตัว" },
     ];
-    // Social links only unlock from a paid tier up — on the free/no-tier
-    // account this check can never be satisfied, so counting it against the
-    // % would cap a genuinely-complete free profile below 100% forever.
-    // Only include it in the checklist (and the 100% denominator) once the
-    // account actually has access to the feature.
     if (tier2Plus) checks.push({ ok: !!(lister.socialLinks && Object.values(lister.socialLinks).some((v) => v)), label: "ลิงก์โซเชียลอย่างน้อย 1 ช่องทาง" });
     const done = checks.filter((c) => c.ok).length;
     return { pct: Math.round((done / checks.length) * 100), missing: checks.filter((c) => !c.ok).map((c) => c.label) };
@@ -1477,15 +1418,9 @@ class Component extends DCLogic {
     const mod = this._mod;
     const tierLabels = { trial: "🎁 ทดลองใช้ฟรี", basic: "① ฟรี", pro: "② ระดับ 1", agency: "② ระดับ 1", level3: "③ ระดับ 2", level4: "④ ระดับ 3", silver: "🥈 VIP เงิน", gold: "🥇 VIP ทอง", diamond: "💎 VIP เพชร" };
     const lister = this.state.lister || {};
-    // Trial unlocks FULL site customization (cover photo + theme color) —
-    // same as the top paid tier — but NOT social links (locked/greyed,
-    // shown to demonstrate the feature exists, per the trial design.
     const isTrial = lister.tier === "trial";
     const tier2Plus = lister.tier === "pro" || lister.tier === "agency" || lister.tier === "level3" || lister.tier === "level4" || isTrial;
-    const tier3 = lister.tier === "level4" || isTrial; // cover+theme unlock
-    // Social links quota scales with paid tier — Package 1: 1 link,
-    // Package 2: 2 links, Package 3: 4 links (all). Trial: 0 (greyed,
-    // shown to demonstrate the feature, unlock on upgrade).
+    const tier3 = lister.tier === "level4" || isTrial;
     const socialLimit = { pro: 1, agency: 1, level3: 2, level4: 4 }[lister.tier] || 0;
     const canSocial = socialLimit > 0;
     const areaLabels = { "hua-hin": "หัวหิน", "pranburi": "ปราณบุรี", "cha-am": "ชะอำ" };
@@ -1498,9 +1433,6 @@ class Component extends DCLogic {
       rented: { label: "เช่าแล้ว", bg: "oklch(90% 0.01 70)", color: "oklch(45% 0.02 60)" },
     };
     const now = Date.now();
-    // Lifecycle status shown on the card — independent from the sale/rent
-    // status badge above it (statusMap). See firebase-client.js "Listing
-    // lifecycle v2" for the state machine this reflects.
     const lifecycleMap = {
       draft: { label: "📝 ร่าง", bg: "oklch(90% 0.01 70)", color: "oklch(35% 0.02 60)" },
       pending: { label: "⏳ รออนุมัติ", bg: "oklch(95% 0.06 75)", color: "oklch(45% 0.13 75)" },
@@ -1551,29 +1483,17 @@ class Component extends DCLogic {
         onDeleteClick: () => this.requestDelete(p),
         isVip: !!lister.vipTier,
         onOpenBuyer: () => this.openBuyerModal(p),
-        // Sprint 01 Phase 5: Edit + Publish/status stay always-visible
-        // (primary); AI post/Share/Delete move into a per-card "⋮" overflow
-        // menu — same click handlers as before, just regrouped visually.
         menuOpen: this.state.openMenuId === p.id,
         onToggleMenu: () => this.toggleCardMenu(p.id),
         onCloseMenu: () => this.closeCardMenu(),
       };
     });
     const trial = this._fb ? this._fb.trialStatus(lister) : null;
-    // Sprint 01 Phase 1 KPI strip — uses data already fetched with the
-    // property list (viewCount, listingStatus/isDraft), no new Firestore
-    // reads or schema. Leads KPI deferred (Future Backlog) pending a
-    // listerId-on-leads schema check per the approved Design Proposal.
-    // Product Review fix: guard against non-numeric/null viewCount so a
-    // corrupted or legacy record can't produce NaN in the KPI strip.
     const totalViews = (this.state.properties || []).reduce((sum, p) => {
       const v = Number(p.viewCount);
       return sum + (Number.isFinite(v) ? v : 0);
     }, 0);
     const activeListingsCount = (this.state.properties || []).filter((p) => !p.isDraft && p.listingStatus === "live").length;
-    // Product Review — CTA State Hierarchy (Section A). Computed purely
-    // from data already loaded (propCount vs. existing tierLimit()) — no
-    // new Business Logic or quota rule, just which CTA is visually primary.
     const propCountNow = (this.state.properties || []).length;
     const tierLimitNow = this.tierLimit(lister.tier);
     const quotaFull = propCountNow >= tierLimitNow;
@@ -1606,31 +1526,16 @@ class Component extends DCLogic {
       trialStartLabel: this.state.trialStarting ? "กำลังเริ่ม…" : "เริ่มทดลองใช้ฟรี",
       trialError: this.state.trialError,
       onStartTrial: () => this.startTrialNow(),
-      // Sprint 01 Phase 1: KPI strip. Only shown once the user has at least
-      // one property (an all-zero strip on a brand-new account adds noise
-      // instead of clarity — Phase 2 empty-state takes over before this).
-      // Product Review: only render once data has actually loaded, so an
-      // in-flight fetch never flashes a false "0" before real numbers arrive.
       showKpiStrip: this.state.loaded && (this.state.properties || []).length > 0,
       kpiTotalViews: totalViews,
       kpiActiveListings: activeListingsCount,
-      // Trial-days KPI only for an ACTUAL trial account with days remaining
-      // (never negative, never shown for a paid tier — trialStatus() from
-      // firebase-client.js already returns ended:true past expiry).
       showKpiTrialDays: isTrial && !!trial && !trial.ended && trial.daysLeft > 0,
       kpiTrialDaysLabel: trial && trial.daysLeft > 0 ? `${trial.daysLeft} วัน` : "",
-      // CTA State Hierarchy (Product Review Section A)
       ctaState,
       showProactiveQuotaFull: quotaFull,
       quotaFullBannerMsg: `คุณใช้โควตาแพ็กเกจปัจจุบันครบแล้ว (${propCountNow}/${tierLimitNow} รายการ) — ไม่สามารถเพิ่มประกาศใหม่ได้จนกว่าจะอัปเกรดแพ็กเกจ`,
       showQuotaNearNote: quotaNear,
       quotaNearNoteMsg: `ใกล้เต็มโควตาแล้ว (${propCountNow}/${tierLimitNow} รายการ)`,
-      // Top-bar Upgrade button visual weight follows ctaState: tertiary at
-      // State 1 (nothing to upgrade FOR yet), secondary at State 2/3,
-      // primary only at State 4 (quota genuinely full).
-      // Always bold/colorful (same maroon as the "start free trial" banner
-      // button) so it reads at a glance as the other big choice a new user
-      // makes — not a quiet secondary link — no matter their current state.
       upgradeTopBarStyle: "display:inline-block; background:oklch(40% 0.13 25); color:white; padding:12px 26px; border-radius:100px; font-size:14px; font-weight:700; text-decoration:none; white-space:nowrap;",
       newPropertyBtnStyle: quotaFull
         ? "background:oklch(90% 0.01 70); color:oklch(55% 0.02 60); padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;"
@@ -1642,14 +1547,34 @@ class Component extends DCLogic {
       onLogout: () => this.onLogout(),
       showList: this.state.view === "list", showEdit: this.state.view === "edit", showSaved: this.state.view === "saved",
       propCount: properties.length, hasNoProps: properties.length === 0,
-      // Sprint 01 Phase 2: first-time empty state gets one unmissable
-      // primary CTA instead of the old small centered text.
       showFirstTimeCta: properties.length === 0,
       showFab: this.state.signedIn && properties.length > 0,
       addHomeBottom: (this.state.signedIn && properties.length > 0) ? "90px" : "22px",
       showAddHomeModal: this.state.showAddHomeModal,
       onOpenAddHome: () => this.setState({ showAddHomeModal: true }),
       onCloseAddHome: () => this.setState({ showAddHomeModal: false }),
+      onToggleAppts: () => this.setState((s) => ({ showApptBody: !s.showApptBody })),
+      apptToggleLabel: this.state.showApptBody ? "ซ่อน ▲" : "แสดง ▼",
+      apptCount: (this.state.appointments || []).length,
+      apptDate: this.state.apptDate, onApptDate: (e) => this.setState({ apptDate: e.target.value }),
+      apptTime: this.state.apptTime, onApptTime: (e) => this.setState({ apptTime: e.target.value }),
+      apptPropertyId: this.state.apptPropertyId, onApptPropertyId: (e) => this.setState({ apptPropertyId: e.target.value }),
+      apptCustomerName: this.state.apptCustomerName, onApptCustomerName: (e) => this.setState({ apptCustomerName: e.target.value }),
+      apptCustomerPhone: this.state.apptCustomerPhone, onApptCustomerPhone: (e) => this.setState({ apptCustomerPhone: e.target.value }),
+      apptNote: this.state.apptNote, onApptNote: (e) => this.setState({ apptNote: e.target.value }),
+      onSaveAppt: () => this.saveAppointmentNow(),
+      hasNoAppts: (this.state.appointments || []).length === 0,
+      apptRows: (this.state.appointments || []).slice().sort((a, b) => (a.when || 0) - (b.when || 0)).map((a) => ({
+        id: a.id,
+        whenLabel: a.when ? new Date(a.when).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "-",
+        propertyId: a.propertyId || "-", customerName: a.customerName || "ไม่ระบุชื่อ",
+        hasPhone: !!a.customerPhone, customerPhone: a.customerPhone || "",
+        hasNote: !!a.note, note: a.note || "",
+        isUpcoming: a.status !== "done",
+        bg: a.status === "done" ? "oklch(97% 0.01 145)" : "white",
+        onMarkDone: () => this.markApptDone(a.id),
+        onDelete: () => this.deleteApptNow(a.id),
+      })),
       properties,
       onNewProperty: () => this.startNew(),
       onBackToList: () => this.goBackToList(),
@@ -1788,8 +1713,6 @@ class Component extends DCLogic {
       previewInitial: (this.state.ps_displayName || lister.name || "?").slice(0, 1).toUpperCase(),
       previewName: this.state.ps_displayName || lister.name || "ชื่อของคุณ",
       onOpenMySite: () => this.openMySite(),
-      // Share is greyed out (shown, non-functional) during trial — per the
-      // trial spec: demonstrate the feature exists, unlock on upgrade.
       shareMySiteStyle: isTrial
         ? "padding:8px 12px; font-size:13px; color:oklch(70% 0.01 70); cursor:not-allowed; border-left:1px solid oklch(88% 0.01 70);"
         : "padding:8px 12px; font-size:13px; color:oklch(35% 0.02 60); cursor:pointer; border-left:1px solid oklch(88% 0.01 70);",
@@ -1810,8 +1733,14 @@ class Component extends DCLogic {
       ps_aiPersonaText: this.state.ps_aiPersonaText, onPsAiPersonaText: (e) => this.setState({ ps_aiPersonaText: e.target.value }),
       ps_bioText: this.state.ps_bioText, onPsBioText: (e) => this.setState({ ps_bioText: e.target.value }),
       canCustomCover: tier2Plus, cannotCustomCover: !tier2Plus,
+      coverPickerStyle: tier2Plus
+        ? "display:inline-flex; align-items:center; gap:8px; border:1px dashed oklch(80% 0.02 60); border-radius:6px; padding:9px 14px; cursor:pointer; font-size:13px; color:oklch(45% 0.02 60);"
+        : "display:inline-flex; align-items:center; gap:8px; border:1px dashed oklch(88% 0.01 70); border-radius:6px; padding:9px 14px; cursor:not-allowed; font-size:13px; color:oklch(70% 0.01 70); background:oklch(97% 0.005 70);",
       ps_coverPhotoLabel: this.state.ps_coverPhotoUrl ? "เปลี่ยนภาพปก" : "เลือกภาพปก",
       onPsCoverPhoto: (e) => this.onPsCoverPhoto(e),
+      themeColorPickerStyle: tier3
+        ? "width:38px; height:38px; border:none; border-radius:8px; padding:0; cursor:pointer; background:none;"
+        : "width:38px; height:38px; border:none; border-radius:8px; padding:0; cursor:not-allowed; opacity:0.4; filter:grayscale(1);",
       canCustomSocial: canSocial, cannotCustomSocial: !canSocial,
       socialLockNote: !canSocial
         ? (isTrial ? "🔒 ใส่ลิงก์ได้จริงตั้งแต่แพ็กเกจ 1 ขึ้นไป — ตอนนี้แสดงเป็นตัวอย่างเฉยๆ" : "🔒 เพิ่มลิงก์โซเชียลได้ตั้งแต่แพ็กเกจ 1 ขึ้นไป")
@@ -1820,7 +1749,7 @@ class Component extends DCLogic {
       psCoverThumbStyle: { width: "90px", height: "56px", borderRadius: "8px", background: `url('${this.state.ps_coverPhotoUrl}') center/cover`, border: "1px solid oklch(88% 0.01 70)", flexShrink: 0 },
       selectedThemeChipStyle: { width: "32px", height: "32px", borderRadius: "8px", background: this.state.ps_themeColor || "transparent", border: this.state.ps_themeColor ? "1px solid oklch(85% 0.01 70)" : "1px dashed oklch(80% 0.01 70)" },
       ps_themeColorHex: this.state.ps_themeColor || "#7A2E22",
-      onPsThemeColorPicker: (e) => this.setState({ ps_themeColor: e.target.value }),
+      onPsThemeColorPicker: (e) => { if (tier3) this.setState({ ps_themeColor: e.target.value }); },
       hasThemeColor: !!this.state.ps_themeColor,
       socialSectionStyle: {},
       socialFields: [
@@ -1836,8 +1765,8 @@ class Component extends DCLogic {
       }),
       canCustomTheme: tier3, cannotCustomTheme: !tier3,
       themeOptions: this.THEME_COLORS.map((c) => ({
-        swatchStyle: { width: "32px", height: "32px", borderRadius: "50%", background: c, cursor: "pointer", border: this.state.ps_themeColor === c ? "3px solid oklch(20% 0.02 60)" : "3px solid white", boxShadow: "0 0 0 1px oklch(85% 0.01 70)" },
-        onSelect: () => this.setState({ ps_themeColor: c }),
+        swatchStyle: { width: "32px", height: "32px", borderRadius: "50%", background: c, cursor: tier3 ? "pointer" : "not-allowed", opacity: tier3 ? 1 : 0.4, filter: tier3 ? "none" : "grayscale(0.5)", border: this.state.ps_themeColor === c ? "3px solid oklch(20% 0.02 60)" : "3px solid white", boxShadow: "0 0 0 1px oklch(85% 0.01 70)" },
+        onSelect: () => { if (tier3) this.setState({ ps_themeColor: c }); },
       })),
       onSaveProfileSettings: () => this.saveProfileSettings(),
       ps_saveLabel: this.state.ps_saving ? "กำลังบันทึก…" : "บันทึกการตั้งค่า",
@@ -1845,7 +1774,6 @@ class Component extends DCLogic {
     };
   }
 }
-
 </script>
 </body>
 </html>
