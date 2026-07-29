@@ -178,6 +178,7 @@ const SIGNUP_I18N = {
 };
 
 class Component extends DCLogic {
+  authReadyPromise = new Promise((resolve) => { this._resolveAuthReady = resolve; });
   state = { tab: "signup", name: "", phone: "", email: "", password: "", submitted: false, submitting: false, error: "", loginEmail: "", loginPassword: "", loginBusy: false, loginError: "", packageChoice: null, lang: "th", foundingLimit: 0, foundingCount: 0, foundingNote: "", phoneOtp: "", otpCode: "", otpSent: false, socialBusy: false, socialError: "" };
 
   async componentDidMount() {
@@ -201,10 +202,14 @@ class Component extends DCLogic {
     try {
       this.setState({ socialBusy: true });
       const uid = await fb.getRedirectSignInResult();
+      this.setState({ authReady: true });
+      this._resolveAuthReady && this._resolveAuthReady();
       if (uid) { await this.completeSocialSignIn(uid, fb); return; }
       this.setState({ socialBusy: false });
     } catch (e) {
-      this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบไม่สำเร็จ: " + (e && (e.code || e.message) || "unknown error") });
+      this.setState({ socialBusy: false, authReady: true });
+      this._resolveAuthReady && this._resolveAuthReady();
+      this.setState({ socialError: "เข้าสู่ระบบไม่สำเร็จ: " + (e && (e.code || e.message) || "unknown error") });
     }
     try {
       const [settings, count] = await Promise.all([fb.fetchFoundingAgentSettings(), fb.countFoundingAgents()]);
@@ -233,6 +238,13 @@ class Component extends DCLogic {
   }
 
   async googleSignIn() {
+    // authReady guards against a real race: componentDidMount's
+    // getRedirectSignInResult() must finish initializing the Auth SDK's
+    // internal redirect-event manager before signInWithRedirect is called,
+    // or the SDK throws auth/argument-error. On a brand-new browser this
+    // check can still be running when the user clicks immediately — wait
+    // for it instead of surfacing the race as an error.
+    if (!this.state.authReady) { await this.authReadyPromise; }
     if (this.state.socialBusy) return;
     this.setState({ socialBusy: true, socialError: "" });
     try {
@@ -246,6 +258,7 @@ class Component extends DCLogic {
   }
 
   async facebookSignIn() {
+    if (!this.state.authReady) { await this.authReadyPromise; }
     if (this.state.socialBusy) return;
     this.setState({ socialBusy: true, socialError: "" });
     try {
