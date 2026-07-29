@@ -628,13 +628,12 @@ class Component extends DCLogic {
         this._zoneMap.setZoom(15);
         this._zoneMarker = new google.maps.Marker({ position: center, map: this._zoneMap });
       } else if (tambon) {
-        // Organic, irregular "blob" highlight — deterministic per listing (so
-        // it's stable across reloads and identical between this preview and
-        // the public page), ~5km influence radius, with the pin deliberately
-        // off-center so its position within the shape can't be guessed.
-        const seed = raw.id + "|" + exactCoords.lat + "," + exactCoords.lng;
-        const blob = this._tambonMod.generateAreaBlob(exactCoords.lat, exactCoords.lng, seed, 5000);
-        const smoothed = this._tambonMod.smoothRing(blob, 1);
+        // Real tambon boundary narrowed to the portion within ~5km of the
+        // (hidden) pin — keeps the true, irregular administrative edge shape
+        // rather than a perfect circle, but avoids highlighting an entire
+        // huge subdistrict.
+        const clipped = this._tambonMod.clipTambonToRadius(tambon, exactCoords.lat, exactCoords.lng, 5000) || tambon.path;
+        const smoothed = this._tambonMod.smoothRing(clipped, 2);
         const path = smoothed.map(([lat, lng]) => ({ lat, lng }));
         this._zonePolygon = new google.maps.Polygon({
           map: this._zoneMap, paths: path,
