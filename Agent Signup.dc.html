@@ -199,8 +199,8 @@ class Component extends DCLogic {
     // brand-new browser, throwing auth/argument-error once. Firing it here
     // (not inside the click handler) gives it the whole rest of page load
     // to finish before the user can possibly click.
-    this._authReadyPromise = fb.warmUpAuthPersistence().catch(() => {});
-    await this._authReadyPromise;
+    this._fb = fb;
+    await fb.warmUpAuthPersistence().catch(() => {});
     try {
       const [settings, count] = await Promise.all([fb.fetchFoundingAgentSettings(), fb.countFoundingAgents()]);
       this.setState({ foundingLimit: settings.limit || 0, foundingNote: settings.note || "", foundingCount: count });
@@ -228,11 +228,17 @@ class Component extends DCLogic {
   }
 
   async googleSignIn() {
-    if (this.state.socialBusy) return;
+    // Everything (firebase-client.js module, Auth SDK readiness) is
+    // pre-loaded and cached in componentDidMount specifically so this
+    // handler can call signInWithPopup with NO prior await — an await
+    // before opening the popup breaks the browser's "this click directly
+    // opened a popup" user-gesture tracking, which is what was causing the
+    // popup to intermittently fail to open (or get silently closed) even
+    // though the click definitely happened. This is the real fix.
+    if (this.state.socialBusy || !this._fb) return;
     this.setState({ socialBusy: true, socialError: "" });
+    const fb = this._fb;
     try {
-      if (this._authReadyPromise) await this._authReadyPromise;
-      const fb = await import("./firebase-client.js");
       const uid = await fb.signInWithGoogleRedirect();
       await this.completeSocialSignIn(uid, fb);
     } catch (e) {
@@ -247,10 +253,10 @@ class Component extends DCLogic {
   }
 
   async facebookSignIn() {
-    if (this.state.socialBusy) return;
+    if (this.state.socialBusy || !this._fb) return;
     this.setState({ socialBusy: true, socialError: "" });
+    const fb = this._fb;
     try {
-      const fb = await import("./firebase-client.js");
       const uid = await fb.signInWithFacebookRedirect();
       await this.completeSocialSignIn(uid, fb);
     } catch (e) {
