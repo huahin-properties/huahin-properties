@@ -13,15 +13,16 @@
 
 const firebaseConfig = {
   apiKey: "AIzaSyCTfx0ucOxEvfcP15Gf-SJEXRS-_-F1oWQ",
-  // Custom auth domain (auth.huahin.properties) instead of the default
-  // *.firebaseapp.com — keeps the Google/Facebook sign-in redirect's
-  // storage-relay same-site with huahin.properties. With the default
-  // firebaseapp.com domain, browsers that partition/block third-party
-  // storage between huahin.properties and firebaseapp.com intermittently
-  // fail the redirect relay with auth/argument-error on the very first
-  // attempt in a fresh browser (then "work" on retry only because some
-  // state got cached) — this was the real root cause of that flakiness.
-  authDomain: "auth.huahin.properties",
+  // Firebase's own default authDomain (*.firebaseapp.com) — always warmed
+  // up and reliably serves the __/auth/handler and __/auth/iframe helper
+  // pages Firebase Auth needs. We tried the custom auth.huahin.properties
+  // domain to keep the redirect same-site, but it kept failing on the
+  // very first sign-in attempt in a fresh browser (succeeding only after
+  // a manual refresh) — consistent with that custom domain's auth helper
+  // pages not being fully warmed/verified. huahin.properties is already an
+  // authorized JS origin in Google Cloud Console, so popup/redirect sign-in
+  // works fine against the default domain too.
+  authDomain: "huahin-properties-5f1b5.firebaseapp.com",
   projectId: "huahin-properties-5f1b5",
   storageBucket: "huahin-properties-5f1b5.firebasestorage.app",
   messagingSenderId: "264933237376",
