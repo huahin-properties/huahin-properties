@@ -383,17 +383,42 @@ export async function warmUpAuthPersistence() {
 export async function signInWithGoogleRedirect() {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
-  const provider = new window.firebase.auth.GoogleAuthProvider();
-  await a.signInWithRedirect(provider);
-  // Browser navigates away here; getRedirectSignInResult() on the next
-  // page load picks up the result.
+  const attempt = async () => {
+    const provider = new window.firebase.auth.GoogleAuthProvider();
+    await a.signInWithRedirect(provider);
+  };
+  try {
+    await attempt();
+  } catch (e) {
+    // signInWithRedirect (a plain location change, not a popup) still hit
+    // auth/argument-error on the very first call in a fresh browser — same
+    // as signInWithPopup did. Since this isn't popup/gesture-sensitive,
+    // retrying immediately (no delay) is safe and doesn't have the
+    // gesture-timing problem the popup retry had.
+    if (e && e.code === "auth/argument-error") {
+      await attempt();
+      return;
+    }
+    throw e;
+  }
 }
 
 export async function signInWithFacebookRedirect() {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
-  const provider = new window.firebase.auth.FacebookAuthProvider();
-  await a.signInWithRedirect(provider);
+  const attempt = async () => {
+    const provider = new window.firebase.auth.FacebookAuthProvider();
+    await a.signInWithRedirect(provider);
+  };
+  try {
+    await attempt();
+  } catch (e) {
+    if (e && e.code === "auth/argument-error") {
+      await attempt();
+      return;
+    }
+    throw e;
+  }
 }
 
 export async function getRedirectSignInResult() {
