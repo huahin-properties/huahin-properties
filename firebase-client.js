@@ -376,19 +376,26 @@ export async function warmUpAuthPersistence() {
 export async function signInWithGoogleRedirect() {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
-  let provider;
-  try {
-    provider = new window.firebase.auth.GoogleAuthProvider();
-  } catch (e) {
-    console.error("[signInWithGoogleRedirect] GoogleAuthProvider() constructor threw:", e);
-    e.__stage = "provider-construct";
-    throw e;
-  }
-  console.log("[signInWithGoogleRedirect] provider ok. auth app name:", a.app && a.app.name, "authDomain:", a.app && a.app.options && a.app.options.authDomain, "currentUser:", a.currentUser);
-  try {
+  const attempt = async () => {
+    const provider = new window.firebase.auth.GoogleAuthProvider();
     const cred = await a.signInWithPopup(provider);
     return cred.user.uid;
+  };
+  try {
+    return await attempt();
   } catch (e) {
+    // Empirically: the very first signInWithPopup call in a brand-new
+    // browser session fails with auth/argument-error, and previously the
+    // only known fix was a full page reload. Untested until now: whether a
+    // second in-place attempt (no reload) also recovers — if the SDK's
+    // internal one-time lazy init just needs to finish, a retry after a
+    // short pause should succeed exactly like a reload does, without
+    // forcing the user to actually refresh the page themselves.
+    if (e && e.code === "auth/argument-error") {
+      console.warn("[signInWithGoogleRedirect] first attempt hit argument-error, retrying in-place once…");
+      await new Promise((r) => setTimeout(r, 800));
+      return await attempt();
+    }
     console.error("[signInWithGoogleRedirect] signInWithPopup threw. Full object:", e, "code:", e && e.code, "message:", e && e.message, "stack:", e && e.stack, "customData:", e && e.customData);
     e.__stage = "signInWithPopup";
     throw e;
