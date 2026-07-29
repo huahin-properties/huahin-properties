@@ -104,6 +104,27 @@
               <input value="{{ ps_displayName }}" onChange="{{ onPsDisplayName }}" style="width:100%; max-width:360px; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
             </div>
 
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">เบอร์โทร (แสดงพร้อมไอคอนโทรศัพท์บนเว็บไซต์ของคุณ)</div>
+              <input value="{{ ps_phone }}" onChange="{{ onPsPhone }}" placeholder="เช่น 081-234-5678" style="width:100%; max-width:360px; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+            </div>
+
+            <div style="display:flex; gap:24px; flex-wrap:wrap; max-width:600px;">
+              <div style="flex:1; min-width:220px;">
+                <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">อีเมลที่ใช้สมัคร (แก้ไขไม่ได้)</div>
+                <input value="{{ ps_email }}" disabled="{{ true }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit; background:oklch(95% 0.005 70); color:oklch(55% 0.02 60);" />
+              </div>
+              <div style="flex:1; min-width:220px;">
+                <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ตั้งรหัสผ่านใหม่</div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                  <input type="password" value="{{ ps_newPassword }}" onChange="{{ onPsNewPassword }}" placeholder="รหัสผ่านใหม่" style="flex:1; min-width:120px; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+                  <input type="password" value="{{ ps_confirmPassword }}" onChange="{{ onPsConfirmPassword }}" placeholder="ยืนยันรหัสผ่าน" style="flex:1; min-width:120px; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+                  <div onClick="{{ onChangePassword }}" style="background:oklch(93% 0.005 70); color:oklch(30% 0.02 60); padding:10px 16px; border-radius:4px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;">{{ pwSaveLabel }}</div>
+                </div>
+                <sc-if value="{{ ps_pwMsg }}"><div style="font-size:12px; color:oklch(45% 0.13 145); margin-top:6px;">{{ ps_pwMsg }}</div></sc-if>
+              </div>
+            </div>
+
             <div style="display:flex; gap:24px; flex-wrap:wrap-reverse; align-items:flex-start;">
               <div style="flex:1; min-width:280px; display:flex; flex-direction:column; gap:16px;">
                 <div>
@@ -665,7 +686,8 @@ class Component extends DCLogic {
     colName: "", colMsg: "", colEditingId: "", colEditingName: "",
     showDeleteConfirm: false, deleteTargetId: "", deleting: false,
     showBuyerModal: false, buyerTargetId: "", buyer_name: "", buyer_phone: "", buyer_email: "", buyerMsg: "", buyerIsError: false, buyerSaving: false,
-    showProfileSettings: false, ps_displayName: "", ps_profilePhotoUrl: "", ps_coverPhotoUrl: "",
+    showProfileSettings: false, ps_displayName: "", ps_profilePhotoUrl: "", ps_coverPhotoUrl: "", ps_phone: "", ps_email: "",
+    ps_newPassword: "", ps_confirmPassword: "", ps_pwSaving: false, ps_pwMsg: "",
     ps_aiPersonaText: "", ps_themeColor: "", ps_bioText: "", ps_saving: false, ps_saveMsg: "",
     ps_fb: "", ps_tiktok: "", ps_youtube: "", ps_instagram: "",
     trialStarting: false, trialError: "",
@@ -708,6 +730,7 @@ class Component extends DCLogic {
       this.setState({
         loaded: true, signedIn: true, lister, properties,
         ps_displayName: lister.displayName || lister.name || "",
+        ps_phone: lister.phone || "", ps_email: lister.email || "",
         ps_profilePhotoUrl: lister.profilePhotoUrl || "", ps_coverPhotoUrl: lister.coverPhotoUrl || "",
         ps_aiPersonaText: lister.aiPersonaText || "", ps_themeColor: lister.themeColor || "",
         ps_bioText: (lister.bioText && typeof lister.bioText === "object") ? (lister.bioText.th || lister.bioText.en || "") : (lister.bioText || ""),
@@ -1158,6 +1181,23 @@ class Component extends DCLogic {
     }
   }
 
+  async changePassword() {
+    if (this.state.ps_pwSaving) return;
+    if (!this.state.ps_newPassword || this.state.ps_newPassword.length < 6) {
+      this.setState({ ps_pwMsg: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร" }); return;
+    }
+    if (this.state.ps_newPassword !== this.state.ps_confirmPassword) {
+      this.setState({ ps_pwMsg: "รหัสผ่านทั้งสองช่องไม่ตรงกัน" }); return;
+    }
+    this.setState({ ps_pwSaving: true, ps_pwMsg: "" });
+    try {
+      await this._fb.updateAdminPassword(this.state.ps_newPassword);
+      this.setState({ ps_pwSaving: false, ps_pwMsg: "เปลี่ยนรหัสผ่านสำเร็จ", ps_newPassword: "", ps_confirmPassword: "" });
+    } catch (e) {
+      this.setState({ ps_pwSaving: false, ps_pwMsg: "เปลี่ยนไม่สำเร็จ — ลองออกจากระบบแล้วเข้าใหม่ก่อนลองอีกครั้ง" });
+    }
+  }
+
   async saveProfileSettings() {
     if (this.state.ps_saving) return;
     this.setState({ ps_saving: true, ps_saveMsg: "" });
@@ -1175,7 +1215,7 @@ class Component extends DCLogic {
       ...this.state.lister,
       displayName: this.state.ps_displayName, profilePhotoUrl: this.state.ps_profilePhotoUrl,
       coverPhotoUrl: this.state.ps_coverPhotoUrl, aiPersonaText: this.state.ps_aiPersonaText,
-      themeColor: this.state.ps_themeColor, bioText: bioValue,
+      themeColor: this.state.ps_themeColor, bioText: bioValue, phone: this.state.ps_phone,
       socialLinks: { facebook: this.state.ps_fb, tiktok: this.state.ps_tiktok, youtube: this.state.ps_youtube, instagram: this.state.ps_instagram },
     };
     try {
@@ -1611,6 +1651,13 @@ class Component extends DCLogic {
       profileSettingsToggleLabel: this.state.showProfileSettings ? "ซ่อน ▲" : "แก้ไข ▼",
       onToggleProfileSettings: () => this.setState((s) => ({ showProfileSettings: !s.showProfileSettings })),
       ps_displayName: this.state.ps_displayName, onPsDisplayName: (e) => this.setState({ ps_displayName: e.target.value }),
+      ps_phone: this.state.ps_phone, onPsPhone: (e) => this.setState({ ps_phone: e.target.value }),
+      ps_email: this.state.ps_email,
+      ps_newPassword: this.state.ps_newPassword, onPsNewPassword: (e) => this.setState({ ps_newPassword: e.target.value }),
+      ps_confirmPassword: this.state.ps_confirmPassword, onPsConfirmPassword: (e) => this.setState({ ps_confirmPassword: e.target.value }),
+      pwSaveLabel: this.state.ps_pwSaving ? "กำลังบันทึก…" : "เปลี่ยนรหัสผ่าน",
+      ps_pwMsg: this.state.ps_pwMsg,
+      onChangePassword: () => this.changePassword(),
       ps_profilePhotoLabel: this.state.ps_profilePhotoUrl ? "เปลี่ยนรูป" : "เลือกรูป",
       onPsProfilePhoto: (e) => this.onPsProfilePhoto(e),
       ps_aiPersonaText: this.state.ps_aiPersonaText, onPsAiPersonaText: (e) => this.setState({ ps_aiPersonaText: e.target.value }),
