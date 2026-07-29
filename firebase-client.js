@@ -369,13 +369,21 @@ export async function warmUpAuthPersistence() {
 export async function signInWithGoogleRedirect() {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
-  const provider = new window.firebase.auth.GoogleAuthProvider();
-  console.log("[signInWithGoogleRedirect] calling signInWithPopup, auth app name:", a.app && a.app.name, "authDomain:", a.app && a.app.options && a.app.options.authDomain);
+  let provider;
+  try {
+    provider = new window.firebase.auth.GoogleAuthProvider();
+  } catch (e) {
+    console.error("[signInWithGoogleRedirect] GoogleAuthProvider() constructor threw:", e);
+    e.__stage = "provider-construct";
+    throw e;
+  }
+  console.log("[signInWithGoogleRedirect] provider ok. auth app name:", a.app && a.app.name, "authDomain:", a.app && a.app.options && a.app.options.authDomain, "currentUser:", a.currentUser);
   try {
     const cred = await a.signInWithPopup(provider);
     return cred.user.uid;
   } catch (e) {
-    console.error("[signInWithGoogleRedirect] signInWithPopup threw:", e, "code:", e && e.code, "message:", e && e.message);
+    console.error("[signInWithGoogleRedirect] signInWithPopup threw. Full object:", e, "code:", e && e.code, "message:", e && e.message, "stack:", e && e.stack, "customData:", e && e.customData);
+    e.__stage = "signInWithPopup";
     throw e;
   }
 }

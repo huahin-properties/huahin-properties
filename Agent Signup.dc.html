@@ -239,7 +239,7 @@ class Component extends DCLogic {
       // blind. This is intentionally verbose and visible in the UI so it
       // can be screenshotted directly without opening DevTools.
       console.error("[googleSignIn] full error:", e);
-      const detail = e ? `code=${e.code || "?"} message=${e.message || "?"} name=${e.name || "?"}` : "no error object";
+      const detail = e ? `stage=${e.__stage || "?"} code=${e.code || "?"} name=${e.name || "?"}` : "no error object";
       this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย Google ไม่สำเร็จ: " + detail });
     }
   }
