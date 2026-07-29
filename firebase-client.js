@@ -13,7 +13,15 @@
 
 const firebaseConfig = {
   apiKey: "AIzaSyCTfx0ucOxEvfcP15Gf-SJEXRS-_-F1oWQ",
-  authDomain: "huahin-properties-5f1b5.firebaseapp.com",
+  // Custom auth domain (auth.huahin.properties) instead of the default
+  // *.firebaseapp.com — keeps the Google/Facebook sign-in redirect's
+  // storage-relay same-site with huahin.properties. With the default
+  // firebaseapp.com domain, browsers that partition/block third-party
+  // storage between huahin.properties and firebaseapp.com intermittently
+  // fail the redirect relay with auth/argument-error on the very first
+  // attempt in a fresh browser (then "work" on retry only because some
+  // state got cached) — this was the real root cause of that flakiness.
+  authDomain: "auth.huahin.properties",
   projectId: "huahin-properties-5f1b5",
   storageBucket: "huahin-properties-5f1b5.firebasestorage.app",
   messagingSenderId: "264933237376",
