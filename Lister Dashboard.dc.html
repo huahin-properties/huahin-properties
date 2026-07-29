@@ -63,11 +63,16 @@
         <a href="Lister Billing.dc.html" style="{{ upgradeTopBarStyle }} flex-shrink:0;">🎁 เลือก Package</a>
       </div>
 
-      <div style="display:flex; gap:0; margin-bottom:22px; border-bottom:2px solid oklch(90% 0.01 70);">
-        <div onClick="{{ onSetListTab }}" style="flex:1; text-align:center; padding:12px; font-size:13.5px; font-weight:600; cursor:pointer; color:{{ listTabColor }}; border-bottom:2px solid {{ listTabColor }}; margin-bottom:-2px;">📋 รายการทรัพย์</div>
-        <div onClick="{{ onSetCollectionsTab }}" style="flex:1; text-align:center; padding:12px; font-size:13.5px; font-weight:600; cursor:pointer; color:{{ collectionsTabColor }}; border-bottom:2px solid {{ collectionsTabColor }}; margin-bottom:-2px;">📁 คอลเลกชัน</div>
-        <div onClick="{{ onSetSettingsTab }}" style="flex:1; text-align:center; padding:12px; font-size:13.5px; font-weight:600; cursor:pointer; color:{{ settingsTabColor }}; border-bottom:2px solid {{ settingsTabColor }}; margin-bottom:-2px;">⚙️ ตั้งค่าระบบ</div>
+      <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:8px; text-align:center;">💡 แนะนำให้ทำตามลำดับ ① ➜ ② ➜ ③ เพื่อให้ประกาศของคุณพร้อมและดูมืออาชีพที่สุด</div>
+      <div style="display:flex; gap:0; margin-bottom:8px; border-bottom:2px solid oklch(90% 0.01 70);">
+        <div onClick="{{ onSetSettingsTab }}" style="flex:1; text-align:center; padding:12px; font-size:13.5px; font-weight:600; cursor:pointer; color:{{ settingsTabColor }}; border-bottom:2px solid {{ settingsTabColor }}; margin-bottom:-2px;">① ⚙️ ตั้งค่าระบบ</div>
+        <div onClick="{{ onSetListTab }}" style="flex:1; text-align:center; padding:12px; font-size:13.5px; font-weight:600; cursor:pointer; color:{{ listTabColor }}; border-bottom:2px solid {{ listTabColor }}; margin-bottom:-2px;">② 📋 รายการทรัพย์</div>
+        <div onClick="{{ onSetCollectionsTab }}" style="flex:1; text-align:center; padding:12px; font-size:13.5px; font-weight:600; cursor:pointer; color:{{ collectionsTabColor }}; border-bottom:2px solid {{ collectionsTabColor }}; margin-bottom:-2px;">③ 📁 คอลเลกชัน</div>
       </div>
+
+      <sc-if value="{{ isSettingsTab }}"><div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:18px; line-height:1.6;">เติมข้อมูลตรงนี้ครั้งเดียว ระบบจะดึงไปใช้ซ้ำอัตโนมัติทุกประกาศ — ให้เว็บไซต์และโปรไฟล์ของคุณดูมืออาชีพตั้งแต่วินาทีแรกที่ลูกค้าเห็น</div></sc-if>
+      <sc-if value="{{ isListTab }}"><div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:18px; line-height:1.6;">ไม่ต้องนั่งเขียนเอง — เพิ่มทรัพย์แล้วปล่อยให้ AI ร่างประกาศขายให้ครบ 8 ภาษาในไม่กี่วินาที พร้อมโพสต์ได้ทันที</div></sc-if>
+      <sc-if value="{{ isCollectionsTab }}"><div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:18px; line-height:1.6;">คัดทรัพย์ที่ใช่ส่งให้ลูกค้าคนนั้นด้วยลิงก์เดียว — ดูเป็นมืออาชีพ ปิดการขายไวขึ้น ไม่ต้องส่งทีละลิงก์ให้ลูกค้าไล่หาเอง</div></sc-if>
 
       <sc-if value="{{ isSettingsTab }}">
 
