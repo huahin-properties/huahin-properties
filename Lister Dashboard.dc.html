@@ -48,24 +48,27 @@
     </sc-if>
 
     <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
-      <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:2px;">สวัสดีคุณ{{ listerName }}</div>
+      <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:2px;">สวัสดีคุณ{{ listerName }} <sc-if value="{{ showTrialActive }}"><span style="font-size:13px; font-weight:400; color:oklch(45% 0.1 250); vertical-align:middle;">🎁 กำลังทดลองใช้ฟรี — {{ trialDaysLeftLabel }}</span></sc-if></div>
       <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:22px;">{{ listerEmail }}</div>
 
-      <div style="background:white; border-radius:8px; padding:20px 22px; margin-bottom:22px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <div>
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:4px;">แพ็กเกจปัจจุบันของคุณ</div>
-            <div style="font-size:16px; font-weight:600; color:oklch(25% 0.02 60);">{{ tierLabel }}</div>
-            <sc-if value="{{ agentCodeLabel }}"><div style="font-size:12px; color:oklch(45% 0.13 250); margin-top:4px;">{{ agentCodeLabel }}</div></sc-if>
+      <div style="background:white; border-radius:8px; padding:16px 18px; margin-bottom:22px; display:flex; align-items:center; gap:14px; flex-wrap:nowrap; overflow-x:auto;">
+        <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
+          <div style="flex-shrink:0;">
+            <div style="font-size:11px; color:oklch(50% 0.02 60); white-space:nowrap;">แพ็กเกจปัจจุบัน</div>
+            <div style="font-size:14px; font-weight:600; color:oklch(25% 0.02 60); white-space:nowrap;">{{ tierLabel }}</div>
           </div>
-          <sc-if value="{{ showPremiumBadge }}"><div style="background:linear-gradient(135deg, oklch(55% 0.15 75), oklch(45% 0.15 40)); color:white; font-size:11px; font-weight:700; padding:5px 12px; border-radius:100px; white-space:nowrap; letter-spacing:0.3px;">⭐ {{ premiumBadgeLabel }}</div></sc-if>
+          <sc-if value="{{ showPremiumBadge }}"><div style="background:linear-gradient(135deg, oklch(55% 0.15 75), oklch(45% 0.15 40)); color:white; font-size:10px; font-weight:700; padding:4px 10px; border-radius:100px; white-space:nowrap; letter-spacing:0.3px; flex-shrink:0;">⭐ {{ premiumBadgeLabel }}</div></sc-if>
         </div>
-        <!-- Sprint 01 Phase 3: Upgrade is the primary (business-priority) action here; Website+Share merged into one grouped control (was 2 separate buttons) -->
-        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-          <div onClick="{{ onOpenMySite }}" style="border:1px solid oklch(88% 0.01 70); border-radius:100px; padding:8px 16px; font-size:12.5px; font-weight:500; color:oklch(45% 0.02 60); cursor:pointer; white-space:nowrap;">🌐 เว็บไซต์ของฉัน</div>
-          <a href="Lister Billing.dc.html" style="{{ upgradeTopBarStyle }}">🎁 เลือก Package</a>
-        </div>
+        <div onClick="{{ onOpenMySite }}" style="border:1px solid oklch(88% 0.01 70); border-radius:100px; padding:7px 14px; font-size:12px; font-weight:500; color:oklch(45% 0.02 60); cursor:pointer; white-space:nowrap; flex-shrink:0;">🌐 เว็บไซต์ของฉัน</div>
+        <a href="Lister Billing.dc.html" style="{{ upgradeTopBarStyle }} flex-shrink:0;">🎁 เลือก Package</a>
       </div>
+
+      <div style="display:flex; gap:0; margin-bottom:22px; border-bottom:2px solid oklch(90% 0.01 70);">
+        <div onClick="{{ onSetListTab }}" style="flex:1; text-align:center; padding:12px; font-size:13.5px; font-weight:600; cursor:pointer; color:{{ listTabColor }}; border-bottom:2px solid {{ listTabColor }}; margin-bottom:-2px;">📋 รายการทรัพย์</div>
+        <div onClick="{{ onSetSettingsTab }}" style="flex:1; text-align:center; padding:12px; font-size:13.5px; font-weight:600; cursor:pointer; color:{{ settingsTabColor }}; border-bottom:2px solid {{ settingsTabColor }}; margin-bottom:-2px;">⚙️ ตั้งค่าระบบ</div>
+      </div>
+
+      <sc-if value="{{ isSettingsTab }}">
 
       <sc-if value="{{ showProfileChecklist }}">
         <div style="background:white; border-radius:8px; padding:16px 22px; margin-bottom:22px;">
@@ -79,7 +82,7 @@
         </div>
       </sc-if>
 
-      <!-- Sprint 01 Phase 4: Website Settings — moved below the property list, collapsed by default -->
+      <!-- Sprint 01 Phase 4: Website Settings -->
       <sc-if value="{{ showList }}">
       <div style="background:white; border-radius:8px; padding:20px 22px; margin-bottom:22px;">
         <div onClick="{{ onToggleProfileSettings }}" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
@@ -275,6 +278,10 @@
       </div>
       </sc-if>
 
+      </sc-if>
+
+      <sc-if value="{{ isListTab }}">
+
       <sc-if value="{{ showTrialOffer }}">
         <div style="background:oklch(97% 0.05 60); border:1px solid oklch(85% 0.08 60); border-radius:8px; padding:18px 22px; margin-bottom:22px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
           <div>
@@ -286,13 +293,8 @@
         </div>
       </sc-if>
 
-      <sc-if value="{{ showTrialActive }}">
-        <div style="background:oklch(97% 0.02 250); border:1px solid oklch(88% 0.04 250); border-radius:8px; padding:16px 22px; margin-bottom:22px;">
-          <div style="font-size:13px; color:oklch(30% 0.1 250);">🎁 คุณกำลังทดลองใช้ฟรี — {{ trialDaysLeftLabel }}</div>
-          <sc-if value="{{ showTrialUpsell }}">
-            <div style="margin-top:8px; font-size:12.5px; color:oklch(40% 0.06 60); line-height:1.6;">{{ trialUpsellViewsLabel }}<br/>แพ็กเกจ 1 ใช้งานต่อได้ทุกฟีเจอร์พื้นฐาน แต่ป้ายแนะนำและตำแหน่งหน้าแรกที่คุณใช้อยู่ตอนนี้เป็นสิทธิ์ของแพ็กเกจ 3 เท่านั้น — <a href="Lister Billing.dc.html">ดูแพ็กเกจ</a></div>
-          </sc-if>
-        </div>
+      <sc-if value="{{ showTrialUpsell }}">
+        <div style="background:oklch(97% 0.02 250); border:1px solid oklch(88% 0.04 250); border-radius:8px; padding:14px 22px; margin-bottom:22px; font-size:12.5px; color:oklch(40% 0.06 60); line-height:1.6;">{{ trialUpsellViewsLabel }}<br/>แพ็กเกจ 1 ใช้งานต่อได้ทุกฟีเจอร์พื้นฐาน แต่ป้ายแนะนำและตำแหน่งหน้าแรกที่คุณใช้อยู่ตอนนี้เป็นสิทธิ์ของแพ็กเกจ 3 เท่านั้น — <a href="Lister Billing.dc.html">ดูแพ็กเกจ</a></div>
       </sc-if>
 
       <sc-if value="{{ showFirstTimeCta }}">
@@ -582,6 +584,8 @@
         </div>
       </sc-if>
 
+      </sc-if>
+
       <sc-if value="{{ showShare }}">
         <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:100;" onClick="{{ onCloseShare }}">
           <div style="background:white; border-radius:10px; padding:24px; width:min(360px,90vw);" onClick="{{ stopProp }}">
@@ -636,7 +640,7 @@
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   state = {
-    loaded: false, signedIn: false, lister: null, properties: [], view: "list",
+    loaded: false, signedIn: false, lister: null, properties: [], view: "list", dashTab: "list",
     editingId: null, f_type: "villa", f_area: "hua-hin", f_zone: "", f_status: "sale",
     f_price: "", f_bedrooms: "", f_bathrooms: "", f_livingArea: "", f_landSize: "",
     f_description: "", f_features: [], saveError: "", saving: false,
@@ -1390,6 +1394,12 @@ class Component extends DCLogic {
       tierLabel: tierLabels[lister.tier] || tierLabels[lister.vipTier] || (lister.tier ? lister.tier : "ยังไม่ได้เลือกแพ็กเกจ"),
       showPremiumBadge: !!(lister.tier === "level4" || lister.vipTier),
       premiumBadgeLabel: lister.vipTier ? "VIP" : "พรีเมียม",
+      isListTab: this.state.dashTab !== "settings",
+      isSettingsTab: this.state.dashTab === "settings",
+      onSetListTab: () => this.setState({ dashTab: "list" }),
+      onSetSettingsTab: () => this.setState({ dashTab: "settings" }),
+      listTabColor: this.state.dashTab !== "settings" ? "oklch(40% 0.13 25)" : "oklch(70% 0.01 70)",
+      settingsTabColor: this.state.dashTab === "settings" ? "oklch(40% 0.13 25)" : "oklch(70% 0.01 70)",
       showProfileChecklist: this.state.signedIn && !!lister.id,
       profileCompletePct: this.profileCompleteness(lister, tier2Plus).pct,
       profileMissingText: this.profileCompleteness(lister, tier2Plus).missing.join(" · "),
