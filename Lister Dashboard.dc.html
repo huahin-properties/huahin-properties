@@ -342,9 +342,8 @@
 
       <sc-if value="{{ isApptTab }}">
       <div style="background:white; border-radius:8px; padding:20px 22px; margin-bottom:22px;">
-        <div onClick="{{ onToggleAppts }}" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+        <div style="display:flex; align-items:center; justify-content:space-between;">
           <div style="font-size:14px; font-weight:600; color:oklch(25% 0.02 60);">📅 ตารางนัดหมาย ({{ apptCount }})</div>
-          <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ apptToggleLabel }}</div>
         </div>
         <sc-if value="{{ showApptBody }}" hint-placeholder-val="{{ true }}">
           <div style="margin-top:14px; display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:16px;">
@@ -1446,17 +1445,24 @@ class Component extends DCLogic {
 
   profileCompleteness(lister, tier2Plus) {
     // Fixed checklist regardless of tier — so 100% is only reachable on a
-    // fully-paid package. Free/trial accounts see a lower % even with every
-    // free-tier field filled, since paid-only items (cover photo, social
-    // links) stay unchecked for them — showing what upgrading unlocks,
-    // rather than silently excluding those items from the denominator.
+    // fully-paid package. Social links split into their real 5 channels
+    // (Facebook/TikTok/YouTube/Instagram + the share button) per
+    // 2026-07-29 request — a free/trial account with none of them set up
+    // is missing all 5, not a vague "1 channel".
+    const isTrial = lister.tier === "trial";
+    const shareEnabled = !isTrial && lister.tier;
+    const sl = lister.socialLinks || {};
     const checks = [
       { ok: !!(lister.name || lister.displayName), label: "ชื่อที่แสดง" },
       { ok: !!lister.phone, label: "เบอร์โทร" },
       { ok: !!lister.profilePhotoUrl, label: "รูปโปรไฟล์" },
       { ok: !!(lister.bioText && (typeof lister.bioText === "string" ? lister.bioText.trim() : lister.bioText.th || lister.bioText.en)), label: "ข้อความแนะนำตัว" },
       { ok: !!lister.coverPhotoUrl, label: "ภาพปก (เฉพาะแพ็กเกจที่ชำระเงิน)" },
-      { ok: !!(lister.socialLinks && Object.values(lister.socialLinks).some((v) => v)), label: "ลิงก์โซเชียลอย่างน้อย 1 ช่องทาง (แพ็กเกจ 1 ขึ้นไป)" },
+      { ok: !!sl.facebook, label: "ลิงก์ Facebook" },
+      { ok: !!sl.tiktok, label: "ลิงก์ TikTok" },
+      { ok: !!sl.youtube, label: "ลิงก์ YouTube" },
+      { ok: !!sl.instagram, label: "ลิงก์ Instagram" },
+      { ok: !!shareEnabled, label: "ปุ่มแชร์เว็บไซต์ (แพ็กเกจที่ชำระเงิน)" },
     ];
     const done = checks.filter((c) => c.ok).length;
     return { pct: Math.round((done / checks.length) * 100), missing: checks.filter((c) => !c.ok).map((c) => c.label) };
@@ -1613,8 +1619,7 @@ class Component extends DCLogic {
       showAddHomeModal: this.state.showAddHomeModal,
       onOpenAddHome: () => this.setState({ showAddHomeModal: true }),
       onCloseAddHome: () => this.setState({ showAddHomeModal: false }),
-      onToggleAppts: () => this.setState((s) => ({ showApptBody: !s.showApptBody })),
-      apptToggleLabel: this.state.showApptBody ? "ซ่อน ▲" : "แสดง ▼",
+      renderVals_true_placeholder_unused: true,
       apptCount: (this.state.appointments || []).length,
       apptDate: this.state.apptDate, onApptDate: (e) => this.setState({ apptDate: e.target.value }),
       apptTime: this.state.apptTime, onApptTime: (e) => this.setState({ apptTime: e.target.value }),
