@@ -32,10 +32,10 @@
       <span style="color:oklch(70% 0.02 70); font-size:14px;">| หน้าทำงานของฉัน</span>
     </div>
     <div style="display:flex; align-items:center; gap:16px;">
-      <div onClick="{{ onOpenInbox }}" style="position:relative; cursor:pointer; font-size:18px;">🔔<sc-if value="{{ hasUnreadLeads }}"><span style="position:absolute; top:-6px; right:-8px; background:oklch(55% 0.2 25); color:white; font-size:10px; font-weight:700; border-radius:100px; padding:1px 5px; min-width:16px; text-align:center;">{{ unreadLeadCount }}</span></sc-if></div>
       <div onClick="{{ onLogout }}" style="font-size:13px; color:oklch(75% 0.02 70); cursor:pointer;">ออกจากระบบ</div>
     </div>
   </div>
+
 
   <sc-if value="{{ showFab }}">
     <div onClick="{{ onNewProperty }}" style="position:fixed; bottom:22px; right:22px; z-index:50; width:56px; height:56px; border-radius:50%; background:oklch(40% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-size:28px; box-shadow:0 4px 14px rgba(0,0,0,0.25); cursor:pointer;">+</div>
@@ -73,7 +73,10 @@
     </sc-if>
 
     <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
-      <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:2px;">สวัสดีคุณ{{ listerName }} <sc-if value="{{ showTrialActive }}"><span style="font-size:13px; font-weight:400; color:oklch(45% 0.1 250); vertical-align:middle;">🎁 กำลังทดลองใช้ฟรี — {{ trialDaysLeftLabel }}</span></sc-if></div>
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:2px; flex-wrap:wrap;">
+        <div onClick="{{ onOpenInbox }}" style="position:relative; cursor:pointer; font-size:20px;">🔔<sc-if value="{{ hasUnreadLeads }}"><span style="position:absolute; top:-6px; right:-8px; background:oklch(55% 0.2 25); color:white; font-size:10px; font-weight:700; border-radius:100px; padding:1px 5px; min-width:16px; text-align:center;">{{ unreadLeadCount }}</span></sc-if></div>
+      <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60);">สวัสดีคุณ{{ listerName }} <sc-if value="{{ showTrialActive }}"><span style="font-size:13px; font-weight:400; color:oklch(45% 0.1 250); vertical-align:middle;">🎁 กำลังทดลองใช้ฟรี — {{ trialDaysLeftLabel }}</span></sc-if></div>
+      </div>
       <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:22px;">{{ listerEmail }}</div>
 
       <div style="background:white; border-radius:8px; padding:16px 18px; margin-bottom:22px; display:flex; align-items:center; gap:14px; flex-wrap:nowrap; overflow-x:auto;">
@@ -363,7 +366,7 @@
             <sc-for list="{{ apptRows }}" as="a" hint-placeholder-count="0">
               <div style="border:1px solid oklch(92% 0.01 70); border-radius:8px; padding:14px 16px; background:{{ a.bg }}; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
                 <div>
-                  <div style="font-size:13.5px; font-weight:600; color:oklch(25% 0.02 60);">{{ a.whenLabel }} — {{ a.propertyId }}</div>
+                  <div style="font-size:13.5px; font-weight:600; color:oklch(25% 0.02 60);">{{ a.whenLabel }} — {{ a.propertyId }} <sc-if value="{{ a.isFromCustomer }}"><span style="font-size:10.5px; font-weight:700; background:oklch(50% 0.13 250); color:white; padding:2px 8px; border-radius:100px; vertical-align:middle;">📩 ลูกค้าจองเอง</span></sc-if></div>
                   <div style="font-size:12.5px; color:oklch(45% 0.02 60); margin-top:2px;">{{ a.customerName }} <sc-if value="{{ a.hasPhone }}">· 📞 {{ a.customerPhone }}</sc-if></div>
                   <sc-if value="{{ a.hasNote }}"><div style="font-size:12px; color:oklch(55% 0.02 60); margin-top:2px;">{{ a.note }}</div></sc-if>
                 </div>
@@ -1584,7 +1587,8 @@ class Component extends DCLogic {
         hasPhone: !!a.customerPhone, customerPhone: a.customerPhone || "",
         hasNote: !!a.note, note: a.note || "",
         isUpcoming: a.status !== "done",
-        bg: a.status === "done" ? "oklch(97% 0.01 145)" : "white",
+        isFromCustomer: a.source === "customer",
+        bg: a.status === "done" ? "oklch(97% 0.01 145)" : (a.source === "customer" ? "oklch(97% 0.03 250)" : "white"),
         onMarkDone: () => this.markApptDone(a.id),
         onDelete: () => this.deleteApptNow(a.id),
       })),

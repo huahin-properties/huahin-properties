@@ -43,10 +43,23 @@ export async function fetchReviews(propertyId) {
  * only change needed later — no UI rewrite. */
 export async function submitViewingRequest(payload) {
   try {
-    // Mock persistence only — never touches Firestore. Errors are still
-    // caught and surfaced through the same {state, ok} shape a real write
-    // would use, so error/permission-denied handling is exercised now.
-    return { state: DATA_STATE.LOADED, ok: true, mock: true, payload };
+    // Was mock-only (never touched Firestore) — this is the fix for the gap
+    // flagged 2026-07-29: a customer's "Schedule Viewing" request never
+    // reached the lister's Dashboard appointment calendar at all. Now
+    // writes a real appointment doc via firebase-client's saveAppointment,
+    // tagged source:"customer" so the Dashboard can visually distinguish it
+    // from appointments the lister created themselves.
+    const fb = await import("./firebase-client.js");
+    const prop = await fb.fetchDocById("properties", payload.propertyId);
+    const listerId = prop && prop.listerId;
+    if (listerId) {
+      const when = payload.date ? new Date(payload.date + "T10:00").getTime() : null;
+      await fb.saveAppointment(listerId, {
+        when, propertyId: payload.propertyId, customerName: payload.name || "",
+        customerPhone: payload.phone || "", note: "ลูกค้าจองนัดชมผ่านเว็บไซต์", source: "customer",
+      });
+    }
+    return { state: DATA_STATE.LOADED, ok: true, mock: false, payload };
   } catch (e) {
     return { state: DATA_STATE.ERROR, ok: false, error: e, payload };
   }
