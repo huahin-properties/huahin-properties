@@ -350,20 +350,24 @@ async function withAuthRetry(fn) {
   return await fn();
 }
 
+// Popup-based sign-in — avoids the cross-domain redirect relay entirely
+// (no getRedirectResult() needed on page load, no dependency on
+// auth.huahin.properties DNS/SSL being perfectly warmed up). This is the
+// simplest reliable path for a site not hosted on Firebase Hosting itself.
 export async function signInWithGoogleRedirect() {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
-  try { await a.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
   const provider = new window.firebase.auth.GoogleAuthProvider();
-  await withAuthRetry(() => a.signInWithRedirect(provider));
+  const cred = await a.signInWithPopup(provider);
+  return cred.user.uid;
 }
 
 export async function signInWithFacebookRedirect() {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
-  try { await a.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
   const provider = new window.firebase.auth.FacebookAuthProvider();
-  await withAuthRetry(() => a.signInWithRedirect(provider));
+  const cred = await a.signInWithPopup(provider);
+  return cred.user.uid;
 }
 
 // Call once on page load (componentDidMount) on any page that offers
