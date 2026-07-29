@@ -431,7 +431,9 @@ class Component extends DCLogic {
     // it was missing here, which is why an uploaded cover photo silently
     // never showed for a trial account (canCustomCover was false for them).
     const isTrial = tier === "trial";
-    const canCustomCover = isTrial || tier === "pro" || tier === "agency" || tier === "level3" || tier === "level4";
+    // Cover photo requires a real paid tier — trial does NOT unlock it (see
+    // Lister Dashboard's _lockedCoverBlocked, kept in sync with this).
+    const canCustomCover = tier === "pro" || tier === "agency" || tier === "level3" || tier === "level4";
     const canCustomTheme = isTrial || tier === "level4";
     const canSocialLinks = isTrial || tier === "pro" || tier === "agency" || tier === "level3" || tier === "level4";
     const brandColor = "oklch(40% 0.13 25)";
