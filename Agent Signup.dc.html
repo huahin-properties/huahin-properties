@@ -193,6 +193,13 @@ class Component extends DCLogic {
     try {
       fb = await import("./firebase-client.js");
     } catch (e) { return; }
+    // Warm up the Auth SDK's persistence layer (IndexedDB) as early as
+    // possible on page load — this is what was intermittently still
+    // initializing the very first time a user clicked Google/Facebook in a
+    // brand-new browser, throwing auth/argument-error once. Firing it here
+    // (not inside the click handler) gives it the whole rest of page load
+    // to finish before the user can possibly click.
+    try { await fb.warmUpAuthPersistence(); } catch (e) {}
     try {
       const [settings, count] = await Promise.all([fb.fetchFoundingAgentSettings(), fb.countFoundingAgents()]);
       this.setState({ foundingLimit: settings.limit || 0, foundingNote: settings.note || "", foundingCount: count });

@@ -354,6 +354,17 @@ async function withAuthRetry(fn) {
 // (no getRedirectResult() needed on page load, no dependency on
 // auth.huahin.properties DNS/SSL being perfectly warmed up). This is the
 // simplest reliable path for a site not hosted on Firebase Hosting itself.
+
+// Call as early as possible on page load (componentDidMount), well before
+// the user can click Google/Facebook — forces the Auth SDK's IndexedDB
+// persistence layer to finish opening ahead of time, which is what causes
+// the one-time auth/argument-error on a click in a brand-new browser.
+export async function warmUpAuthPersistence() {
+  const a = authApp();
+  if (!a) return;
+  try { await a.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
+}
+
 export async function signInWithGoogleRedirect() {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
