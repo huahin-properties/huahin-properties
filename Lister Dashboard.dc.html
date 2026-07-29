@@ -62,10 +62,7 @@
         </div>
         <!-- Sprint 01 Phase 3: Upgrade is the primary (business-priority) action here; Website+Share merged into one grouped control (was 2 separate buttons) -->
         <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
-          <div style="display:flex; align-items:center; border:1px solid oklch(88% 0.01 70); border-radius:100px; overflow:hidden;">
-            <div onClick="{{ onOpenMySite }}" style="padding:8px 14px; font-size:12.5px; font-weight:500; color:oklch(45% 0.02 60); cursor:pointer; white-space:nowrap;">🌐 เว็บไซต์ของฉัน</div>
-            <div onClick="{{ onShareMySite }}" style="{{ shareMySiteStyle }}">🔗</div>
-          </div>
+          <div onClick="{{ onOpenMySite }}" style="border:1px solid oklch(88% 0.01 70); border-radius:100px; padding:8px 16px; font-size:12.5px; font-weight:500; color:oklch(45% 0.02 60); cursor:pointer; white-space:nowrap;">🌐 เว็บไซต์ของฉัน</div>
           <a href="Lister Billing.dc.html" style="{{ upgradeTopBarStyle }}">🎁 เลือก Package</a>
         </div>
       </div>
@@ -81,6 +78,129 @@
           </div>
           <sc-if value="{{ profileMissingText }}"><div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-top:6px;">ยังขาด: {{ profileMissingText }}</div></sc-if>
         </div>
+      </sc-if>
+
+      <!-- Sprint 01 Phase 4: Website Settings — moved below the property list, collapsed by default -->
+      <sc-if value="{{ showList }}">
+      <div style="background:white; border-radius:8px; padding:20px 22px; margin-bottom:22px;">
+        <div onClick="{{ onToggleProfileSettings }}" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+          <div style="font-size:14px; font-weight:600; color:oklch(25% 0.02 60);">⚙️ ตั้งค่าเว็บไซต์ส่วนตัวของฉัน</div>
+          <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ profileSettingsToggleLabel }}</div>
+        </div>
+        <sc-if value="{{ showProfileSettings }}">
+          <div style="margin-top:18px; display:flex; flex-direction:column; gap:20px;">
+            <div style="font-size:12px; color:oklch(50% 0.02 60); line-height:1.6;">ตั้งค่านี้ใช้กับเว็บไซต์ส่วนตัวของคุณเท่านั้น (หน้าที่รวมทรัพย์ทั้งหมดของคุณ แชร์ให้ลูกค้าดูได้) ไม่กระทบประกาศในเว็บหลัก</div>
+
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ชื่อที่แสดงให้ลูกค้าเห็น</div>
+              <input value="{{ ps_displayName }}" onChange="{{ onPsDisplayName }}" style="width:100%; max-width:360px; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+            </div>
+
+            <div style="display:flex; gap:24px; flex-wrap:wrap-reverse; align-items:flex-start;">
+              <div style="flex:1; min-width:280px; display:flex; flex-direction:column; gap:16px;">
+                <div>
+                  <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รูปโปรไฟล์ (โลโก้/รูปของคุณ)</div>
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <label style="display:inline-flex; align-items:center; gap:8px; border:1px dashed oklch(80% 0.02 60); border-radius:6px; padding:9px 14px; cursor:pointer; font-size:13px; color:oklch(45% 0.02 60);">
+                      <input type="file" accept="image/*" onChange="{{ onPsProfilePhoto }}" style="display:none;" />
+                      📷 {{ ps_profilePhotoLabel }}
+                    </label>
+                    <sc-if value="{{ ps_profilePhotoUrl }}"><div style="{{ psPhotoThumbStyle }}"></div></sc-if>
+                  </div>
+                </div>
+
+                <sc-if value="{{ canCustomCover }}">
+                  <div>
+                    <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ภาพปก (เหมือน Facebook cover)</div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                      <label style="display:inline-flex; align-items:center; gap:8px; border:1px dashed oklch(80% 0.02 60); border-radius:6px; padding:9px 14px; cursor:pointer; font-size:13px; color:oklch(45% 0.02 60);">
+                        <input type="file" accept="image/*" onChange="{{ onPsCoverPhoto }}" style="display:none;" />
+                        🖼️ {{ ps_coverPhotoLabel }}
+                      </label>
+                      <sc-if value="{{ ps_coverPhotoUrl }}"><div style="{{ psCoverThumbStyle }}"></div></sc-if>
+                    </div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ cannotCustomCover }}">
+                  <div style="font-size:11.5px; color:oklch(55% 0.02 60);">🔒 เปลี่ยนภาพปกได้ตั้งแต่แพ็กเกจ 1 ขึ้นไป — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a></div>
+                </sc-if>
+
+                <sc-if value="{{ canCustomTheme }}">
+                  <div>
+                    <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">สีธีมเว็บไซต์ของคุณ</div>
+                    <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+                      <div style="display:flex; gap:10px;">
+                        <sc-for list="{{ themeOptions }}" as="c" hint-placeholder-count="4">
+                          <div onClick="{{ c.onSelect }}" style="{{ c.swatchStyle }}"></div>
+                        </sc-for>
+                      </div>
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="color" value="{{ ps_themeColorHex }}" onChange="{{ onPsThemeColorPicker }}" style="width:38px; height:38px; border:none; border-radius:8px; padding:0; cursor:pointer; background:none;" />
+                        <span style="font-size:11px; color:oklch(55% 0.02 60);">กำหนดเอง</span>
+                      </div>
+                    </div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ cannotCustomTheme }}">
+                  <div style="font-size:11.5px; color:oklch(55% 0.02 60);">🔒 เปลี่ยนสีธีมได้ในแพ็กเกจ 3 — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a></div>
+                </sc-if>
+              </div>
+
+              <div style="width:280px; flex-shrink:0;">
+                <div style="font-size:11px; color:oklch(50% 0.02 60); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.03em;">👁️ ตัวอย่างสด</div>
+                <div style="border:1px solid oklch(90% 0.01 70); border-radius:10px; overflow:hidden; background:white;">
+                  <div style="{{ previewCoverStyle }}"></div>
+                  <div style="padding:0 16px 18px; margin-top:-36px;">
+                    <div style="{{ previewAvatarStyle }}">
+                      <sc-if value="{{ previewNoAvatar }}"><span>{{ previewInitial }}</span></sc-if>
+                    </div>
+                    <div style="font-size:16px; font-weight:600; color:oklch(20% 0.02 60); margin-top:8px;">{{ previewName }}</div>
+                    <div style="font-size:12px; color:oklch(55% 0.02 60); margin-bottom:8px;">{{ propCount }} รายการทรัพย์</div>
+                    <sc-if value="{{ hasThemeColor }}">
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="{{ selectedThemeChipStyle }}"></div>
+                        <span style="font-size:10.5px; color:oklch(55% 0.02 60);">สีธีมที่เลือก — {{ ps_themeColorHex }}</span>
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">🔗 ลิงก์โซเชียลมีเดีย (โชว์เป็นไอคอนบนเว็บไซต์ของคุณ)</div>
+              <div style="{{ socialSectionStyle }}">
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                  <sc-for list="{{ socialFields }}" as="s" hint-placeholder-count="4">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <div style="{{ s.iconStyle }}">{{ s.iconChar }}</div>
+                      <input value="{{ s.value }}" onChange="{{ s.onChange }}" placeholder="{{ s.placeholder }}" disabled="{{ s.disabled }}" style="{{ s.inputStyle }}" />
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <sc-if value="{{ socialLockNote }}">
+                <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-top:6px;">{{ socialLockNote }} — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a></div>
+              </sc-if>
+            </div>
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">📝 ข้อความแนะนำตัว (โชว์บนเว็บไซต์ส่วนตัวของคุณ)</div>
+              <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:8px; line-height:1.6;">เขียนสั้นๆ ให้ลูกค้าอ่านแล้วรู้จักคุณทันที — ใครก็ได้ ไม่ต้องเก่งเขียน แค่ตอบ 3 อย่าง: คุณเป็นใคร/ทำมากี่ปี, ถนัดโซนไหน/ทรัพย์แบบไหน, จุดเด่นที่ทำให้ลูกค้าเลือกคุณ</div>
+              <textarea rows="3" value="{{ ps_bioText }}" onChange="{{ onPsBioText }}" placeholder="ตัวอย่าง: สวัสดีค่ะ ฉันชื่อปิ่ม ตัวแทนอสังหาริมทรัพย์มืออาชีพในหัวหินมา 8 ปี ถนัดพูลวิลล่าและคอนโดโซนเขาเต่า-หัวหินใต้ เคยดูแลลูกค้าต่างชาติมามากกว่า 50 ครอบครัว พร้อมช่วยตั้งแต่หาบ้าน เจรจาราคา ไปจนถึงจดทะเบียนโอนกรรมสิทธิ์ให้ครบจบในที่เดียว" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical;"></textarea>
+            </div>
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">🤖 บุคลิก AI ผู้ช่วยของคุณ</div>
+              <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:8px; line-height:1.6;">สิ่งที่คุณกรอกตรงนี้ AI จะนำไปใช้ตอบลูกค้าที่ทักเข้ามาในเว็บไซต์ส่วนตัวของคุณ ให้ AI "เป็นคุณ" ได้จริง เขียนแบบเล่าให้เพื่อนฟัง — บอกว่าคุณเป็นใคร (ชื่อ/เพศ/นิสัย), พูดจาแบบไหน, ทักทายลูกค้ายังไงเป็นประโยคแรก, เชี่ยวชาญโซน/ทรัพย์แบบไหนเป็นพิเศษ ถ้าไม่กรอก AI จะใช้ชื่อ+เบอร์ติดต่อของคุณจากตอนสมัครแทน</div>
+              <textarea rows="6" value="{{ ps_aiPersonaText }}" onChange="{{ onPsAiPersonaText }}" placeholder="ตัวอย่าง: ฉันชื่อปิ่ม เป็นผู้หญิงค่ะ นิสัยเป็นกันเอง พูดจาสุภาพอบอุ่นเหมือนคุยกับเพื่อน ทักทายลูกค้าคนแรกด้วยประโยค &quot;สวัสดีค่ะ สนใจบ้านหลังไหนเป็นพิเศษไหมคะ ยินดีช่วยแนะนำเลยค่ะ&quot; ฉันเชี่ยวชาญพูลวิลล่าราคา 5-15 ล้านบาทโซนเขาเต่าและหัวหินใต้ รู้จักทำเลดีในปราณบุรีด้วย ติดต่อได้ทุกวัน 9:00-20:00 ถ้าลูกค้าถามราคาต่อรองได้ ให้บอกว่าคุยกับเจ้าของบ้านให้ได้ก่อนนัดดูจริง" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical;"></textarea>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div onClick="{{ onSaveProfileSettings }}" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:10px 22px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">{{ ps_saveLabel }}</div>
+              <sc-if value="{{ ps_saveMsg }}"><div style="font-size:12px; color:oklch(45% 0.13 145);">{{ ps_saveMsg }}</div></sc-if>
+            </div>
+          </div>
+        </sc-if>
+      </div>
       </sc-if>
 
       <sc-if value="{{ showKpiStrip }}">
@@ -313,128 +433,7 @@
       </div>
       </sc-if>
 
-      <!-- Sprint 01 Phase 4: Website Settings — moved below the property list, collapsed by default -->
-      <sc-if value="{{ showList }}">
-      <div style="background:white; border-radius:8px; padding:20px 22px; margin-bottom:22px;">
-        <div onClick="{{ onToggleProfileSettings }}" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
-          <div style="font-size:14px; font-weight:600; color:oklch(25% 0.02 60);">⚙️ ตั้งค่าเว็บไซต์ส่วนตัวของฉัน</div>
-          <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ profileSettingsToggleLabel }}</div>
-        </div>
-        <sc-if value="{{ showProfileSettings }}">
-          <div style="margin-top:18px; display:flex; flex-direction:column; gap:20px;">
-            <div style="font-size:12px; color:oklch(50% 0.02 60); line-height:1.6;">ตั้งค่านี้ใช้กับเว็บไซต์ส่วนตัวของคุณเท่านั้น (หน้าที่รวมทรัพย์ทั้งหมดของคุณ แชร์ให้ลูกค้าดูได้) ไม่กระทบประกาศในเว็บหลัก</div>
 
-            <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ชื่อที่แสดงให้ลูกค้าเห็น</div>
-              <input value="{{ ps_displayName }}" onChange="{{ onPsDisplayName }}" style="width:100%; max-width:360px; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
-            </div>
-
-            <div style="display:flex; gap:24px; flex-wrap:wrap-reverse; align-items:flex-start;">
-              <div style="flex:1; min-width:280px; display:flex; flex-direction:column; gap:16px;">
-                <div>
-                  <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รูปโปรไฟล์ (โลโก้/รูปของคุณ)</div>
-                  <div style="display:flex; align-items:center; gap:10px;">
-                    <label style="display:inline-flex; align-items:center; gap:8px; border:1px dashed oklch(80% 0.02 60); border-radius:6px; padding:9px 14px; cursor:pointer; font-size:13px; color:oklch(45% 0.02 60);">
-                      <input type="file" accept="image/*" onChange="{{ onPsProfilePhoto }}" style="display:none;" />
-                      📷 {{ ps_profilePhotoLabel }}
-                    </label>
-                    <sc-if value="{{ ps_profilePhotoUrl }}"><div style="{{ psPhotoThumbStyle }}"></div></sc-if>
-                  </div>
-                </div>
-
-                <sc-if value="{{ canCustomCover }}">
-                  <div>
-                    <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ภาพปก (เหมือน Facebook cover)</div>
-                    <div style="display:flex; align-items:center; gap:10px;">
-                      <label style="display:inline-flex; align-items:center; gap:8px; border:1px dashed oklch(80% 0.02 60); border-radius:6px; padding:9px 14px; cursor:pointer; font-size:13px; color:oklch(45% 0.02 60);">
-                        <input type="file" accept="image/*" onChange="{{ onPsCoverPhoto }}" style="display:none;" />
-                        🖼️ {{ ps_coverPhotoLabel }}
-                      </label>
-                      <sc-if value="{{ ps_coverPhotoUrl }}"><div style="{{ psCoverThumbStyle }}"></div></sc-if>
-                    </div>
-                  </div>
-                </sc-if>
-                <sc-if value="{{ cannotCustomCover }}">
-                  <div style="font-size:11.5px; color:oklch(55% 0.02 60);">🔒 เปลี่ยนภาพปกได้ตั้งแต่แพ็กเกจ 1 ขึ้นไป — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a></div>
-                </sc-if>
-
-                <sc-if value="{{ canCustomTheme }}">
-                  <div>
-                    <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">สีธีมเว็บไซต์ของคุณ</div>
-                    <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
-                      <div style="display:flex; gap:10px;">
-                        <sc-for list="{{ themeOptions }}" as="c" hint-placeholder-count="4">
-                          <div onClick="{{ c.onSelect }}" style="{{ c.swatchStyle }}"></div>
-                        </sc-for>
-                      </div>
-                      <div style="display:flex; align-items:center; gap:8px;">
-                        <input type="color" value="{{ ps_themeColorHex }}" onChange="{{ onPsThemeColorPicker }}" style="width:38px; height:38px; border:none; border-radius:8px; padding:0; cursor:pointer; background:none;" />
-                        <span style="font-size:11px; color:oklch(55% 0.02 60);">กำหนดเอง</span>
-                      </div>
-                    </div>
-                  </div>
-                </sc-if>
-                <sc-if value="{{ cannotCustomTheme }}">
-                  <div style="font-size:11.5px; color:oklch(55% 0.02 60);">🔒 เปลี่ยนสีธีมได้ในแพ็กเกจ 3 — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a></div>
-                </sc-if>
-              </div>
-
-              <div style="width:280px; flex-shrink:0;">
-                <div style="font-size:11px; color:oklch(50% 0.02 60); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.03em;">👁️ ตัวอย่างสด</div>
-                <div style="border:1px solid oklch(90% 0.01 70); border-radius:10px; overflow:hidden; background:white;">
-                  <div style="{{ previewCoverStyle }}"></div>
-                  <div style="padding:0 16px 18px; margin-top:-36px;">
-                    <div style="{{ previewAvatarStyle }}">
-                      <sc-if value="{{ previewNoAvatar }}"><span>{{ previewInitial }}</span></sc-if>
-                    </div>
-                    <div style="font-size:16px; font-weight:600; color:oklch(20% 0.02 60); margin-top:8px;">{{ previewName }}</div>
-                    <div style="font-size:12px; color:oklch(55% 0.02 60); margin-bottom:8px;">{{ propCount }} รายการทรัพย์</div>
-                    <sc-if value="{{ hasThemeColor }}">
-                      <div style="display:flex; align-items:center; gap:8px;">
-                        <div style="{{ selectedThemeChipStyle }}"></div>
-                        <span style="font-size:10.5px; color:oklch(55% 0.02 60);">สีธีมที่เลือก — {{ ps_themeColorHex }}</span>
-                      </div>
-                    </sc-if>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">🔗 ลิงก์โซเชียลมีเดีย (โชว์เป็นไอคอนบนเว็บไซต์ของคุณ)</div>
-              <div style="{{ socialSectionStyle }}">
-                <div style="display:flex; flex-direction:column; gap:8px;">
-                  <sc-for list="{{ socialFields }}" as="s" hint-placeholder-count="4">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                      <div style="{{ s.iconStyle }}">{{ s.iconChar }}</div>
-                      <input value="{{ s.value }}" onChange="{{ s.onChange }}" placeholder="{{ s.placeholder }}" disabled="{{ s.disabled }}" style="{{ s.inputStyle }}" />
-                    </div>
-                  </sc-for>
-                </div>
-              </div>
-              <sc-if value="{{ socialLockNote }}">
-                <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-top:6px;">{{ socialLockNote }} — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a></div>
-              </sc-if>
-            </div>
-            <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">📝 ข้อความแนะนำตัว (โชว์บนเว็บไซต์ส่วนตัวของคุณ)</div>
-              <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:8px; line-height:1.6;">เขียนสั้นๆ ให้ลูกค้าอ่านแล้วรู้จักคุณทันที — ใครก็ได้ ไม่ต้องเก่งเขียน แค่ตอบ 3 อย่าง: คุณเป็นใคร/ทำมากี่ปี, ถนัดโซนไหน/ทรัพย์แบบไหน, จุดเด่นที่ทำให้ลูกค้าเลือกคุณ</div>
-              <textarea rows="3" value="{{ ps_bioText }}" onChange="{{ onPsBioText }}" placeholder="ตัวอย่าง: สวัสดีค่ะ ฉันชื่อปิ่ม ตัวแทนอสังหาริมทรัพย์มืออาชีพในหัวหินมา 8 ปี ถนัดพูลวิลล่าและคอนโดโซนเขาเต่า-หัวหินใต้ เคยดูแลลูกค้าต่างชาติมามากกว่า 50 ครอบครัว พร้อมช่วยตั้งแต่หาบ้าน เจรจาราคา ไปจนถึงจดทะเบียนโอนกรรมสิทธิ์ให้ครบจบในที่เดียว" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical;"></textarea>
-            </div>
-            <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">🤖 บุคลิก AI ผู้ช่วยของคุณ</div>
-              <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:8px; line-height:1.6;">สิ่งที่คุณกรอกตรงนี้ AI จะนำไปใช้ตอบลูกค้าที่ทักเข้ามาในเว็บไซต์ส่วนตัวของคุณ ให้ AI "เป็นคุณ" ได้จริง เขียนแบบเล่าให้เพื่อนฟัง — บอกว่าคุณเป็นใคร (ชื่อ/เพศ/นิสัย), พูดจาแบบไหน, ทักทายลูกค้ายังไงเป็นประโยคแรก, เชี่ยวชาญโซน/ทรัพย์แบบไหนเป็นพิเศษ ถ้าไม่กรอก AI จะใช้ชื่อ+เบอร์ติดต่อของคุณจากตอนสมัครแทน</div>
-              <textarea rows="6" value="{{ ps_aiPersonaText }}" onChange="{{ onPsAiPersonaText }}" placeholder="ตัวอย่าง: ฉันชื่อปิ่ม เป็นผู้หญิงค่ะ นิสัยเป็นกันเอง พูดจาสุภาพอบอุ่นเหมือนคุยกับเพื่อน ทักทายลูกค้าคนแรกด้วยประโยค &quot;สวัสดีค่ะ สนใจบ้านหลังไหนเป็นพิเศษไหมคะ ยินดีช่วยแนะนำเลยค่ะ&quot; ฉันเชี่ยวชาญพูลวิลล่าราคา 5-15 ล้านบาทโซนเขาเต่าและหัวหินใต้ รู้จักทำเลดีในปราณบุรีด้วย ติดต่อได้ทุกวัน 9:00-20:00 ถ้าลูกค้าถามราคาต่อรองได้ ให้บอกว่าคุยกับเจ้าของบ้านให้ได้ก่อนนัดดูจริง" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical;"></textarea>
-            </div>
-
-            <div style="display:flex; align-items:center; gap:12px;">
-              <div onClick="{{ onSaveProfileSettings }}" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:10px 22px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">{{ ps_saveLabel }}</div>
-              <sc-if value="{{ ps_saveMsg }}"><div style="font-size:12px; color:oklch(45% 0.13 145);">{{ ps_saveMsg }}</div></sc-if>
-            </div>
-          </div>
-        </sc-if>
-      </div>
-      </sc-if>
 
       <sc-if value="{{ showEdit }}">
         <div style="background:white; border-radius:8px; padding:clamp(20px,4vw,30px);">
