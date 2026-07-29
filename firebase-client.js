@@ -327,21 +327,25 @@ export async function signInWithGoogle() {
 // succeeds a second later. Retrying once after a short pause papers over
 // that startup race instead of showing the user a scary red error.
 async function withAuthRetry(fn) {
-  try {
-    await fn();
-  } catch (e) {
-    if (e && e.code === "auth/argument-error") {
-      await new Promise((r) => setTimeout(r, 400));
-      await fn();
-    } else {
+  const delays = [300, 600, 1000, 1500];
+  for (let i = 0; i < delays.length; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      if (e && e.code === "auth/argument-error") {
+        await new Promise((r) => setTimeout(r, delays[i]));
+        continue;
+      }
       throw e;
     }
   }
+  return await fn();
 }
 
 export async function signInWithGoogleRedirect() {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
+  try { await a.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
   const provider = new window.firebase.auth.GoogleAuthProvider();
   await withAuthRetry(() => a.signInWithRedirect(provider));
 }
@@ -349,6 +353,7 @@ export async function signInWithGoogleRedirect() {
 export async function signInWithFacebookRedirect() {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
+  try { await a.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
   const provider = new window.firebase.auth.FacebookAuthProvider();
   await withAuthRetry(() => a.signInWithRedirect(provider));
 }
@@ -360,20 +365,7 @@ export async function signInWithFacebookRedirect() {
 export async function getRedirectSignInResult() {
   const a = authApp();
   if (!a) return null;
-  let result;
-  try {
-    result = await a.getRedirectResult();
-  } catch (e) {
-    if (e && e.code === "auth/argument-error") {
-      // Same brand-new-browser startup race as signInWithRedirect: the
-      // Auth SDK's IndexedDB persistence layer can still be opening when
-      // this runs on first page load. Retry once instead of surfacing it.
-      await new Promise((r) => setTimeout(r, 400));
-      result = await a.getRedirectResult();
-    } else {
-      throw e;
-    }
-  }
+  const result = await withAuthRetry(() => a.getRedirectResult());
   return result && result.user ? result.user.uid : null;
 }
 
