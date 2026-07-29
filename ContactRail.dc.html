@@ -1122,9 +1122,16 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       const [fb, favs] = await Promise.all([import("./firebase-client.js"), import("./favorites.js")]);
       const favIds = favs.getFavoritedIds();
       const score = favs.getIntentScore();
+      // propertyId is what Lister Dashboard's inbox actually filters leads
+      // by (fetchLeadsForProperties matches l.propertyId against the
+      // lister's own property ids) — this was previously never set, so no
+      // enquiry from this form ever reached any lister's inbox. Falls back
+      // to the first favorited property when the form wasn't opened from a
+      // specific listing page.
+      const propertyId = this.props.currentPropertyId || (favIds && favIds[0]) || null;
       await fb.saveLead({
         name: this.state.name, phone: this.state.phone, email: this.state.email, message: this.state.message,
-        favoritedPropertyIds: favIds, intentScore: score, hot: score >= 10,
+        propertyId, favoritedPropertyIds: favIds, intentScore: score, hot: score >= 10,
       });
     } catch (e) { console.warn("Lead save failed:", e); }
     setTimeout(() => this.setState({ formOpen: false, submitted: false, name: "", phone: "", email: "", message: "" }), 2200);
