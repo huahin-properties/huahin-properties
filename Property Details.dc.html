@@ -116,6 +116,7 @@
       <div style="position:relative;">
         <sc-if value="{{ showPhotoGallery }}" hint-placeholder-val="{{ true }}">
         <div style="{{ heroPhotoStyle }}">
+          <sc-if value="{{ activePhotoUrl }}"><img src="{{ activePhotoUrl }}" alt="{{ activePhotoLabel }}" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" /></sc-if>
           <div style="position:absolute; bottom:14px; right:14px; font-family:monospace; font-size:11px; font-weight:600; letter-spacing:0.02em; color:oklch(20% 0.02 60); background:rgba(255,255,255,0.8); padding:4px 10px; border-radius:100px; pointer-events:none;">{{ p.propertyId }}</div>
           <sc-if value="{{ activePhotoNoPhoto }}">
             <div style="position:absolute; bottom:14px; left:14px; font-family:monospace; font-size:12px; color:oklch(20% 0.02 60 / 0.8); background:rgba(255,255,255,0.7); padding:5px 10px; border-radius:4px; pointer-events:none;">[{{ activePhotoLabel }}]</div>
@@ -127,6 +128,7 @@
         <div style="display:flex; gap:10px; margin-top:10px; overflow-x:auto; padding-bottom:4px;">
           <sc-for list="{{ photos }}" as="ph" hint-placeholder-count="6">
             <div onClick="{{ ph.select }}" style="{{ ph.thumbStyle }}">
+              <sc-if value="{{ ph.url }}"><img src="{{ ph.url }}" alt="{{ ph.label }}" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" /></sc-if>
               <div style="position:absolute; inset:0; opacity:{{ ph.dim }}; background:oklch(20% 0.02 60); pointer-events:none;"></div>
             </div>
           </sc-for>
@@ -287,7 +289,7 @@
       <div style="font-family:'Playfair Display',serif; font-size:clamp(22px,2.8vw,28px); color:oklch(20% 0.02 60); margin-bottom:24px;">{{ t.similar_properties }}</div>
       <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:22px;">
         <sc-for list="{{ similar }}" as="sp" hint-placeholder-count="3">
-          <dc-import name="PropertyCard" href="{{ sp.href }}" status-color="{{ sp.statusColor }}" status-label="{{ sp.statusLabel }}" cover-photo-label="{{ sp.coverPhotoLabel }}" cover-photo-bg="{{ sp.coverPhotoBg }}" no-photo="{{ sp.noPhoto }}" property-id="{{ sp.propertyId }}" zone="{{ sp.zone }}" area-label="{{ sp.areaLabel }}" title="{{ sp.title }}" type-label="{{ sp.typeLabel }}" has-bedrooms="{{ sp.hasBedrooms }}" bedrooms="{{ sp.bedrooms }}" has-bathrooms="{{ sp.hasBathrooms }}" bathrooms="{{ sp.bathrooms }}" has-living-area="{{ sp.hasLivingArea }}" living-area="{{ sp.livingArea }}" sqm-label="{{ sp.sqmLabel }}" price-label="{{ sp.priceLabel }}" view-details-label="{{ sp.viewDetailsLabel }}" hint-size="100%,380px"></dc-import>
+          <dc-import name="PropertyCard" href="{{ sp.href }}" status-color="{{ sp.statusColor }}" status-label="{{ sp.statusLabel }}" cover-photo-label="{{ sp.coverPhotoLabel }}" cover-photo-bg="{{ sp.coverPhotoBg }}" cover-photo-url="{{ sp.coverPhotoUrl }}" no-photo="{{ sp.noPhoto }}" property-id="{{ sp.propertyId }}" zone="{{ sp.zone }}" area-label="{{ sp.areaLabel }}" title="{{ sp.title }}" type-label="{{ sp.typeLabel }}" has-bedrooms="{{ sp.hasBedrooms }}" bedrooms="{{ sp.bedrooms }}" has-bathrooms="{{ sp.hasBathrooms }}" bathrooms="{{ sp.bathrooms }}" has-living-area="{{ sp.hasLivingArea }}" living-area="{{ sp.livingArea }}" sqm-label="{{ sp.sqmLabel }}" price-label="{{ sp.priceLabel }}" view-details-label="{{ sp.viewDetailsLabel }}" hint-size="100%,380px"></dc-import>
         </sc-for>
       </div>
     </div>
@@ -617,6 +619,7 @@ class Component extends DCLogic {
       statusLabel: mod.STATUS[pr.status][lang],
       coverPhotoLabel: (pr.photos[0] && pr.photos[0].label) || pr.photos[0] || "photo",
       coverPhotoBg: (pr.photos[0] && pr.photos[0].url) ? `url('${pr.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
+      coverPhotoUrl: (pr.photos[0] && pr.photos[0].url) || "",
       noPhoto: !(pr.photos[0] && pr.photos[0].url),
       zone: pr.zone,
       propertyId: pr.id,
@@ -690,7 +693,8 @@ class Component extends DCLogic {
 
     const photos = effectiveIndices.map((i, pos) => ({
       label: photosSrc[i].label,
-      thumbStyle: { flexShrink: 0, width: "100px", height: "72px", borderRadius: "4px", overflow: "hidden", cursor: "pointer", boxShadow: (i === activeIndex ? "0 0 0 2px oklch(40% 0.13 25)" : "none"), background: bgOf(i), position: "relative" },
+      url: photosSrc[i].url || "",
+      thumbStyle: { flexShrink: 0, width: "100px", height: "72px", borderRadius: "4px", overflow: "hidden", cursor: "pointer", boxShadow: (i === activeIndex ? "0 0 0 2px oklch(40% 0.13 25)" : "none"), background: photosSrc[i].url ? undefined : bgOf(i), position: "relative" },
       noPhoto: !photosSrc[i].url,
       select: () => this.setState({ activePhoto: i }),
       ring: i === activeIndex ? "0 0 0 2px oklch(40% 0.13 25)" : "none",
@@ -705,6 +709,7 @@ class Component extends DCLogic {
         priceLabel: n.priceValid ? (mod.formatPrice(n.price, n.currency, lang) + (n.status === "rent" ? t.per_month : "")) : base.priceLabel,
         coverPhotoLabel: (n.photos[0] && n.photos[0].label) || base.coverPhotoLabel,
         coverPhotoBg: n.photos[0] && n.photos[0].url ? `url('${n.photos[0].url}') center/cover` : base.coverPhotoBg,
+        coverPhotoUrl: (n.photos[0] && n.photos[0].url) || "",
         noPhoto: !(n.photos[0] && n.photos[0].url) };
     });
 
@@ -773,7 +778,8 @@ class Component extends DCLogic {
       photoCount: effectiveIndices.length,
       activePhotoNum: activePos + 1,
       activePhotoBg: bgOf(activeIndex),
-      heroPhotoStyle: { position: "relative", aspectRatio: "16/9", maxHeight: "560px", borderRadius: "6px", overflow: "hidden", background: bgOf(activeIndex) },
+      heroPhotoStyle: { position: "relative", aspectRatio: "16/9", maxHeight: "560px", borderRadius: "6px", overflow: "hidden", background: (photosSrc[activeIndex] && photosSrc[activeIndex].url) ? undefined : bgOf(activeIndex) },
+      activePhotoUrl: (photosSrc[activeIndex] && photosSrc[activeIndex].url) || "",
       activePhotoLabel: photosSrc[activeIndex] ? photosSrc[activeIndex].label : "",
       activePhotoNoPhoto: !(photosSrc[activeIndex] && photosSrc[activeIndex].url),
       prevPhoto: () => this.setState(() => ({ activePhoto: effectiveIndices[(activePos - 1 + effectiveIndices.length) % effectiveIndices.length] })),
