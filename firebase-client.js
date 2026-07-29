@@ -350,22 +350,6 @@ async function withAuthRetry(fn) {
   return await fn();
 }
 
-async function withAuthRetry(fn) {
-  const delays = [300, 600, 1000, 1500];
-  for (let i = 0; i < delays.length; i++) {
-    try {
-      return await fn();
-    } catch (e) {
-      if (e && e.code === "auth/argument-error") {
-        await new Promise((r) => setTimeout(r, delays[i]));
-        continue;
-      }
-      throw e;
-    }
-  }
-  return await fn();
-}
-
 // Popup-based sign-in — avoids the cross-domain redirect relay entirely
 // (no getRedirectResult() needed on page load, no dependency on
 // auth.huahin.properties DNS/SSL being perfectly warmed up). This is the
