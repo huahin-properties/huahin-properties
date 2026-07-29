@@ -630,6 +630,16 @@ export function isAdminAuthed() {
   return !!(a && a.currentUser && _verifiedAdminUid === a.currentUser.uid);
 }
 
+// Real signed-in email, straight from Firebase Auth — used as the
+// authoritative source for "email you signed up with" displays and as a
+// fallback for older lister docs that were saved with email: "" (a bug in
+// the social sign-in path that hardcoded an empty string instead of
+// reading the real email off the Google/Facebook account).
+export function currentAuthEmail() {
+  const a = authApp();
+  return (a && a.currentUser && a.currentUser.email) || "";
+}
+
 export function logoutAdmin() {
   const a = authApp();
   if (a) a.signOut().catch(() => {});

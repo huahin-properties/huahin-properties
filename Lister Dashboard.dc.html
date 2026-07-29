@@ -730,7 +730,7 @@ class Component extends DCLogic {
       this.setState({
         loaded: true, signedIn: true, lister, properties,
         ps_displayName: lister.displayName || lister.name || "",
-        ps_phone: lister.phone || "", ps_email: lister.email || "",
+        ps_phone: lister.phone || "", ps_email: lister.email || fb.currentAuthEmail(),
         ps_profilePhotoUrl: lister.profilePhotoUrl || "", ps_coverPhotoUrl: lister.coverPhotoUrl || "",
         ps_aiPersonaText: lister.aiPersonaText || "", ps_themeColor: lister.themeColor || "",
         ps_bioText: (lister.bioText && typeof lister.bioText === "object") ? (lister.bioText.th || lister.bioText.en || "") : (lister.bioText || ""),

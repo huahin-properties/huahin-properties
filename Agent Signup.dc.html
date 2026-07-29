@@ -247,7 +247,7 @@ class Component extends DCLogic {
         // trial" offer shows immediately. Do not default to "basic" here
         // (that was the old permanent-free-tier model, replaced by trial).
         await fb.setDoc("listers", uid, {
-          name: "", role: "lister", phone: "", email: "",
+          name: "", role: "lister", phone: "", email: fb.currentAuthEmail(),
           status: "approved", createdAt: Date.now(), foundingAgent: isFounding,
         });
       }
