@@ -350,6 +350,22 @@ async function withAuthRetry(fn) {
   return await fn();
 }
 
+async function withAuthRetry(fn) {
+  const delays = [300, 600, 1000, 1500];
+  for (let i = 0; i < delays.length; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      if (e && e.code === "auth/argument-error") {
+        await new Promise((r) => setTimeout(r, delays[i]));
+        continue;
+      }
+      throw e;
+    }
+  }
+  return await fn();
+}
+
 // Popup-based sign-in — avoids the cross-domain redirect relay entirely
 // (no getRedirectResult() needed on page load, no dependency on
 // auth.huahin.properties DNS/SSL being perfectly warmed up). This is the
@@ -358,7 +374,7 @@ export async function signInWithGoogleRedirect() {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
   const provider = new window.firebase.auth.GoogleAuthProvider();
-  const cred = await a.signInWithPopup(provider);
+  const cred = await withAuthRetry(() => a.signInWithPopup(provider));
   return cred.user.uid;
 }
 
@@ -366,7 +382,7 @@ export async function signInWithFacebookRedirect() {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
   const provider = new window.firebase.auth.FacebookAuthProvider();
-  const cred = await a.signInWithPopup(provider);
+  const cred = await withAuthRetry(() => a.signInWithPopup(provider));
   return cred.user.uid;
 }
 
