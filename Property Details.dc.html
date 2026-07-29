@@ -633,11 +633,11 @@ class Component extends DCLogic {
         const path = tambon.path.map(([lat, lng]) => ({ lat, lng }));
         this._zonePolygon = new google.maps.Polygon({
           map: this._zoneMap, paths: path,
-          fillColor: "#7a2331", fillOpacity: 0.18, strokeOpacity: 0, clickable: false,
+          fillColor: "#EA4335", fillOpacity: 0.08, strokeOpacity: 0, clickable: false,
         });
         this._zoneOutline = new google.maps.Polyline({
           map: this._zoneMap, path: [...path, path[0]], strokeOpacity: 0,
-          icons: [{ icon: { path: "M 0,-1 0,1", strokeOpacity: 0.75, strokeColor: "#7a2331", strokeWeight: 1.5, scale: 3 }, offset: "0", repeat: "12px" }],
+          icons: [{ icon: { path: "M 0,-1 0,1", strokeOpacity: 0.9, strokeColor: "#EA4335", strokeWeight: 1.5, scale: 2 }, offset: "0", repeat: "10px" }],
         });
         const bounds = new google.maps.LatLngBounds();
         path.forEach((p) => bounds.extend(p));
