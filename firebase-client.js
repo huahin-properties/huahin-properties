@@ -1049,7 +1049,7 @@ export async function saveProjectDashboard(data, updatedByLabel) {
 
 export async function fetchStripePrices() {
   const doc = await db().collection("siteContent").doc("stripePrices").get();
-  return doc.exists ? doc.data() : { pro: "", agency: "", level3: "", level4: "" };
+  return doc.exists ? doc.data() : { pro: "", agency: "", level3: "", level4: "", proAnnual: "", level3Annual: "", level4Annual: "" };
 }
 
 export async function saveStripePrices(prices) {
@@ -1314,7 +1314,7 @@ const PHOTO_PURGE_DAYS_AFTER_EXPIRY = 90;
 // Listing quota per tier — trial shares Level 1's cap (5) per the "no
 // downgrade shock" design: trial → Level 1 keeps the same 5-listing room.
 export function tierQuota(tier) {
-  return { trial: 5, pro: 5, level3: 12, level4: 25 }[tier] || 0;
+  return { trial: 5, pro: 5, level3: 15, level4: 25 }[tier] || 0;
 }
 
 export async function isTrialEligible(listerId) {
