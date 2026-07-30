@@ -105,6 +105,7 @@
         </sc-if>
       </div>
 
+      <sc-if value="{{ hasSecurityCalendar }}">
       <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.04em; color:oklch(50% 0.02 60); margin-bottom:8px;">ปฏิทินความปลอดภัย</div>
       <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:22px;">
         <sc-for list="{{ securityCalendar }}" as="sc" hint-placeholder-count="1">
@@ -116,6 +117,7 @@
           </div>
         </sc-for>
       </div>
+      </sc-if>
 
       <div style="font-size:12px; text-transform:uppercase; letter-spacing:0.04em; color:oklch(50% 0.02 60); margin-bottom:8px;">📅 บริการ/ค่าใช้จ่ายภายนอกที่ต้องต่ออายุ (โดเมน ฯลฯ — เพิ่มเองได้)</div>
       <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:16px;">
@@ -1050,7 +1052,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const mod = this.state.data;
-    if (!mod || !this.state.properties) return { t: {}, stats: [], rows: [], modalOpen: false, areaOptions: [], typeOptions: [], securityCalendar: [], svcRows: [], svcForm: { name: "", expiry: "", cost: "", link: "" } };
+    if (!mod || !this.state.properties) return { t: {}, stats: [], rows: [], modalOpen: false, areaOptions: [], typeOptions: [], securityCalendar: [], hasSecurityCalendar: false, svcRows: [], svcForm: { name: "", expiry: "", cost: "", link: "" } };
 
     const lang = this.state.lang;
     const t = mod.I18N[lang];
@@ -1230,9 +1232,7 @@ class Component extends DCLogic {
     // ── สถานะระบบ & สิ่งที่ต้องทำ ──────────────────────────────────────────
     const daysUntilDate = (isoDate) => Math.ceil((new Date(isoDate) - new Date()) / 86400000);
     const urgencyOf = (days) => (days <= 14 ? "oklch(50% 0.18 30)" : days <= 30 ? "oklch(55% 0.14 70)" : "oklch(45% 0.1 145)");
-    const securityCalendarRaw = [
-      { label: "Firestore Security Rules ชั่วคราวหมดอายุ — ต้องล็อกก่อนวันนี้", date: "2026-08-08" },
-    ];
+    const securityCalendarRaw = [];
     const securityCalendar = securityCalendarRaw.map((it) => {
       const days = daysUntilDate(it.date);
       return {
@@ -1280,7 +1280,7 @@ class Component extends DCLogic {
       onLogout: (e) => { e.preventDefault(); this._fb.logoutAdmin(); window.location.href = "Admin Login.dc.html"; },
       leadRows, noLeadRows: leadRows.length === 0,
       archivedThisSession: this.state.archivedThisSession || 0,
-      securityCalendar, svcRows, hasSvcRows: svcRows.length > 0, noSvcRows: svcRows.length === 0,
+      securityCalendar, hasSecurityCalendar: securityCalendar.length > 0, svcRows, hasSvcRows: svcRows.length > 0, noSvcRows: svcRows.length === 0,
       svcForm: this.state.svcForm,
       onSvcName: (e) => this.onSvcField("name", e.target.value),
       onSvcExpiry: (e) => this.onSvcField("expiry", e.target.value),
