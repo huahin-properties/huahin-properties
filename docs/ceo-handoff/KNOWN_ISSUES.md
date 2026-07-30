@@ -4,14 +4,23 @@ Purpose: บั๊ก/ข้อจำกัดที่รู้อยู่แ�
 Status: Active
 Owner: Product Owner / CEO Assistant
 Source of Truth: ไฟล์นี้ (สรุป) — รายละเอียดต้นทางดู ../../PROJECT_HISTORY.md
-Last Updated: 25 กรกฎาคม 2569
+Last Updated: 30 กรกฎาคม 2569
 Related Documents: CURRENT_PHASE_STATUS.md, ../../PROJECT_HISTORY.md
 ---
 
 # Known Issues
 
+## ✅ Resolved (30 กรกฎาคม 2569)
+- **Agent Signup redirect flash**: หน้า `Agent Signup.dc.html` เคยกะพริบกลับไปที่ฟอร์ม login/signup ระหว่างรอผล Google/Facebook redirect — แก้แล้ว (เพิ่ม loading overlay)
+- **Firestore lister ซ้ำซ้อน**: อีเมลเดียวกันสร้าง 2 บัญชี (2 UID) เพราะ Firebase Auth ตั้ง "สร้างหลายบัญชีต่อ 1 identity provider" — เปลี่ยนเป็น "Link accounts by email" แล้ว
+- **โควตาแพ็กเกจไม่ตรงกับโฆษณา**: `tierQuota`/`tierLimit`/`photoLimit`/`aiGenLimit` ไม่ตรงกับที่เว็บโฆษณาไว้ (ระดับ 2 โฆษณา 15 หลัง แต่โค้ดจำกัดไว้ 25, ระดับ 3/พรีเมียมไม่มี AI quota เลย ตกไปใช้ค่า default 1) — แก้ให้ตรงกันหมดแล้ว (ดู PROJECT_HISTORY.md รายละเอียด)
+- **Rollout Level ชนกับชื่อแพ็กเกจ**: เปลี่ยนชื่อเป็น "ระยะการเปิดตัว (Rollout Stage)" แล้ว ไม่ซ้ำกับ "ระดับ 1/2/3" ของแพ็กเกจอีกต่อไป
+- **Firestore Security Rules เตือนหมดอายุค้าง**: ยืนยันแล้วว่ากฎจริงถูก publish ใช้งานแล้ว — ลบเช็คลิสต์เตือนที่ค้างใน Admin Dashboard ออกแล้ว
+- **ข้อมูลตัวอย่างค้างใน data.js**: ลบ OWNERS/TENANTS อีเมลปลอม (@example.com) ที่เคยโชว์เป็น fallback ในหน้า Owners ออกแล้ว
+
 ## 🔴 Open — ต้องตรวจสอบ
-1. **Login/Session persistence**: ผู้ใช้รายงานว่าหลัง login ไม่มีปุ่ม "ออกจากระบบ" ที่ชัดเจน และเมื่อ login ซ้ำ ข้อมูล "รายการโปรด" (My Favorites) หายไปต้องสร้างใหม่ทุกครั้ง — ยังไม่ได้ตรวจสาเหตุ (สงสัยเรื่อง session/localStorage vs Firestore persistence)
+0. **Stripe ยังไม่ได้ต่อ Live mode**: เว็บตอนนี้ชี้ไปที่ Stripe Sandbox (โหมดทดสอบ) เท่านั้น — มีบัญชี Stripe Live จริง (huahin-property.ai) แล้วแต่ยังไม่ได้เชื่อมต่อกับ production — ห้ามรับเงินจริงจนกว่าจะสลับเป็น Live คีย์เสร็จ
+1. **Login/Session persistence**: ผู้ใช้รายงานว่าหลัง login ไม่มีปุ่ม "ออกจากระบบ" ที่ชัดเจน และเมื่อ login ซ้ำ ข้อมูล "รายการโปรด" (My Favorites) หายไปต้องสร้างใหม่ทุกครั้ง — ยังไม่ได้ตรวจสาเหตุ
 2. **Realtime Conversation ownership**: กำลังยืนยันว่า fix ล่าสุด (sender identity resolution, ownerId ผูก Firebase UID จริง) แก้ปัญหาชื่อผู้ส่งไม่ขึ้น/ข้อความไม่ถึง Owner ได้จริงหรือไม่ — ดู `CURRENT_PHASE_STATUS.md`
 
 ## 🟡 Known Limitation (ยอมรับแล้ว ไม่ใช่บั๊ก)
