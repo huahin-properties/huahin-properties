@@ -686,26 +686,9 @@ export const I18N = {
 
 
 export const TENANTS = [
-  { id: "TEN-001", name: "Mr. David Cohen", phone: "+66 65 112 3344", email: "david.cohen@example.com", line: "davidc_hh", notes: "Long-term remote worker, renews annually. Pays on the 1st of each month.", photo1: "", photo2: "" },
-  { id: "TEN-002", name: "Khun Nattaya & family", phone: "+66 81 776 5544", email: "nattaya.fam@example.com", line: "nattayafam", notes: "Family of 4, two school-age children at Cha-am international school.", photo1: "", photo2: "" },
 ];
 
 export const OWNERS = [
-  { id: "OWN-001", name: "Khun Somchai Ruangrit", phone: "+66 81 234 5678", email: "somchai.r@example.com", line: "somchai_hh", notes: "Prefers contact after 6pm. Flexible on price if paid in full within 30 days.", photo1: "", photo2: "" },
-  { id: "OWN-002", name: "Khun Ariya Boonmee", phone: "+66 89 555 1122", email: "ariya.b@example.com", line: "ariyab", notes: "Owner relocating to Bangkok end of quarter; motivated to close.", photo1: "", photo2: "" },
-  { id: "OWN-003", name: "Khun Piyaporn Sae-lee", phone: "+66 92 345 6789", email: "piyaporn.s@example.com", line: "piyapornsl", notes: "Owner lives in Bangkok, manages via property manager Khun Toon (+66 87 111 2233).", photo1: "", photo2: "" },
-  { id: "OWN-004", name: "Mr. James Whitfield", phone: "+66 81 999 4433", email: "j.whitfield@example.com", line: "jwhitfield", notes: "UK-based, communicates by email only. Agent has sole mandate through Dec 2026.", photo1: "", photo2: "" },
-  { id: "OWN-005", name: "Khun Suda Thongdee", phone: "+66 86 444 9900", email: "suda.t@example.com", line: "sudatd", notes: "Sale completed 2026-05-14 via cash transfer. Keep listing for referral/testimonial.", photo1: "", photo2: "" },
-  { id: "OWN-006", name: "Khun Ladda Sirichai", phone: "+66 84 678 2200", email: "ladda.s@example.com", line: "laddasc", notes: "Selling to fund a larger purchase; open to keeping rental bookings honored post-sale.", photo1: "", photo2: "" },
-  { id: "OWN-007", name: "Khun Pornthip Wattana", phone: "+66 88 321 6540", email: "pornthip.w@example.com", line: "pornthipw", notes: "Requires 2-month deposit, prefers tenants with school-age children references.", photo1: "", photo2: "" },
-  { id: "OWN-008", name: "Khun Wichai Promsri", phone: "+66 87 909 3344", email: "wichai.p@example.com", line: "wichaip", notes: "Reserved by returning tenant; contract signing scheduled 2026-07-20.", photo1: "", photo2: "" },
-  { id: "OWN-009", name: "Khun Kritsada Boonrueang", phone: "+66 89 111 7788", email: "kritsada.b@example.com", line: "kritsadab", notes: "Developer of the Hin Lek Fai gated project; sells direct.", photo1: "", photo2: "" },
-  { id: "OWN-010", name: "Khun Rungnapha Srisai", phone: "+66 85 222 3399", email: "rungnapha.s@example.com", line: "rungnapha_s", notes: "Inherited land, lives in Bangkok, flexible on viewing times.", photo1: "", photo2: "" },
-  { id: "OWN-011", name: "Khun Anucha Thepwong", phone: "+66 86 333 4477", email: "anucha.t@example.com", line: "anuchat", notes: "Owns several rental units in Cha-am town; quick to respond.", photo1: "", photo2: "" },
-  { id: "OWN-012", name: "Khun Somsak Landbroker", phone: "+66 81 456 7890", email: "somsak.land@example.com", line: "somsakland", notes: "Local land broker with several adjacent Hin Lek Fai plots.", photo1: "", photo2: "" },
-  { id: "OWN-013", name: "Thongdee Family Estate", phone: "+66 89 234 5566", email: "thongdee.estate@example.com", line: "thongdeeestate", notes: "Multiple siblings co-own; allow extra time for paperwork and signatures.", photo1: "", photo2: "" },
-  { id: "OWN-014", name: "Khun Chalermchai Suk", phone: "+66 84 678 1122", email: "chalermchai.s@example.com", line: "chalermchais", notes: "Village HOA board member; can coordinate approvals directly.", photo1: "", photo2: "" },
-  { id: "OWN-015", name: "Khun Preecha Kanjanapas", phone: "+66 81 999 2233", email: "preecha.k@example.com", line: "preechak", notes: "Owns commercial buildings in both Hua Hin and Cha-am town centres.", photo1: "", photo2: "" },
 ];
 
 export function formatPrice(price, currency, lang) {
