@@ -30,8 +30,17 @@
   <style>
     body { margin: 0; background: oklch(96% 0.015 75); font-family: 'Work Sans', sans-serif; }
     a { color: oklch(42% 0.12 25); }
+    a:hover { color: oklch(32% 0.13 25); }
+    @keyframes hh-spin { to { transform: rotate(360deg); } }
   </style>
 </helmet>
+
+<sc-if value="{{ showRedirectLoading }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed; inset:0; z-index:999; background:oklch(96% 0.015 75); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;">
+    <div style="width:40px; height:40px; border-radius:50%; border:3px solid oklch(88% 0.02 70); border-top-color:oklch(40% 0.13 25); animation:hh-spin 0.8s linear infinite;"></div>
+    <div style="font-size:14px; color:oklch(40% 0.02 60);">กำลังเข้าสู่ระบบ…</div>
+  </div>
+</sc-if>
 
 <div style="min-height:100vh;">
   <div style="display:flex; align-items:center; justify-content:space-between; padding:20px clamp(20px,4vw,56px); border-bottom:1px solid oklch(90% 0.01 70);">
@@ -179,7 +188,11 @@ const SIGNUP_I18N = {
 };
 
 class Component extends DCLogic {
-  state = { tab: "signup", name: "", phone: "", email: "", password: "", submitted: false, submitting: false, error: "", loginEmail: "", loginPassword: "", loginBusy: false, loginError: "", packageChoice: null, lang: "th", foundingLimit: 0, foundingCount: 0, foundingNote: "", phoneOtp: "", otpCode: "", otpSent: false, socialBusy: false, socialError: "" };
+  state = { tab: "signup", name: "", phone: "", email: "", password: "", submitted: false, submitting: false, error: "", loginEmail: "", loginPassword: "", loginBusy: false, loginError: "", packageChoice: null, lang: "th", foundingLimit: 0, foundingCount: 0, foundingNote: "", phoneOtp: "", otpCode: "", otpSent: false, socialBusy: false, socialError: "",
+    // True the instant this page loads back from a Google/Facebook redirect —
+    // read synchronously (before any await) so the very first render already
+    // shows the loading overlay instead of flashing the login/signup form.
+    redirectPending: (() => { try { return sessionStorage.getItem("hh_auth_redirect_pending") === "1"; } catch (e) { return false; } })() };
 
   async componentDidMount() {
     try {
@@ -210,6 +223,10 @@ class Component extends DCLogic {
       console.error("[componentDidMount] getRedirectSignInResult threw:", e);
       this.setState({ socialError: "เข้าสู่ระบบด้วย Google ไม่สำเร็จ: " + (e && (e.code || e.message) || "unknown error") });
     }
+    // No redirect result (either a plain page load, or the redirect result
+    // just failed above) — drop the loading overlay and reveal the form.
+    try { sessionStorage.removeItem("hh_auth_redirect_pending"); } catch (e) {}
+    if (this.state.redirectPending) this.setState({ redirectPending: false });
     // auth/argument-error on Google/Facebook sign-in is 100% reproducible on
     // the very first attempt after a fresh page load in a new browser, and
     // ONLY a genuine full page reload (not an in-memory retry) clears it —
@@ -234,6 +251,7 @@ class Component extends DCLogic {
   // page (4-column ladder) first; once a tier is set, straight to the
   // workspace. Shared by social sign-in, email/password signup, and login.
   goToWorkspaceOrPackages(doc) {
+    try { sessionStorage.removeItem("hh_auth_redirect_pending"); } catch (e) {}
     window.location.href = (doc && (doc.tier || doc.vipTier)) ? "Lister Dashboard.dc.html" : "Lister Billing.dc.html";
   }
 
@@ -269,6 +287,7 @@ class Component extends DCLogic {
     this.setState({ socialBusy: true, socialError: "" });
     const fb = this._fb;
     try {
+      sessionStorage.setItem("hh_auth_redirect_pending", "1");
       await fb.signInWithGoogleRedirect();
       // Browser navigates away here; componentDidMount picks up the result
       // on the page it returns to.
@@ -280,6 +299,7 @@ class Component extends DCLogic {
         return;
       }
       const detail = e ? `code=${e.code || "?"} name=${e.name || "?"}` : "no error object";
+      try { sessionStorage.removeItem("hh_auth_redirect_pending"); } catch (e2) {}
       this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย Google ไม่สำเร็จ: " + detail });
     }
   }
@@ -289,6 +309,7 @@ class Component extends DCLogic {
     this.setState({ socialBusy: true, socialError: "" });
     const fb = this._fb;
     try {
+      sessionStorage.setItem("hh_auth_redirect_pending", "1");
       await fb.signInWithFacebookRedirect();
     } catch (e) {
       if (e && e.code === "auth/argument-error" && !sessionStorage.getItem("hh_social_retry")) {
@@ -296,6 +317,7 @@ class Component extends DCLogic {
         window.location.reload();
         return;
       }
+      try { sessionStorage.removeItem("hh_auth_redirect_pending"); } catch (e2) {}
       this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย Facebook ไม่สำเร็จ (อาจยังไม่เปิดใช้งาน — แจ้งแอดมิน)" });
     }
   }
@@ -414,6 +436,7 @@ class Component extends DCLogic {
           : "")
         : "",
       foundingFinePrint: this.state.foundingNote || "ช่วงนี้ฟรีชั่วคราวสำหรับผู้สมัครกลุ่มแรก — จะแจ้งล่วงหน้าก่อนเริ่มเก็บค่าบริการในอนาคต",
+      showRedirectLoading: this.state.redirectPending,
     };
   }
 }
