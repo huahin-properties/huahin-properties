@@ -4,7 +4,7 @@ Purpose: สถานะ Phase ปัจจุบันแบบละเอี�
 Status: Active
 Owner: Product Owner / CEO Assistant
 Source of Truth: ../../Mission Control.dc.html (สถานะดำเนินงาน) — ไฟล์นี้เป็นสรุปที่อ่านง่ายกว่า ไม่ใช่แหล่งข้อมูลหลักแทน
-Last Updated: 25 กรกฎาคม 2569
+Last Updated: 30 กรกฎาคม 2569
 Related Documents: PROJECT_CONTEXT_SNAPSHOT.md, ../../PROJECT_HISTORY.md, ../../Mission Control.dc.html
 ---
 
@@ -60,3 +60,7 @@ Realtime Conversation System (Firestore-backed Customer↔Owner chat) — Bug-fi
 
 ## เอกสารคู่ขนานที่เพิ่งจัดทำ (Documentation Phase — แยกจาก Phase ข้างต้น)
 กำลังดำเนินการสร้างชุด CEO Handoff Package (เอกสารนี้เป็นส่วนหนึ่งของงานนั้น) — ไม่กระทบ Production Code
+
+## 🔧 สตรีมงานแยก (ไม่เกี่ยวกับ Realtime Conversation Phase ข้างต้น) — 30 กรกฎาคม 2569
+ทำงาน Membership Package (ระดับ 1/2/3) + Stripe Sandbox setup + แก้บั๊กโควตา/การตั้งชื่อที่ไม่ตรงกัน — ดูรายละเอียดเต็มใน `../../PROJECT_HISTORY.md` หัวข้อ "Session Update — 3-Tier Package Pricing" สถานะล่าสุด: ตั้งค่า Stripe เสร็จในโหมดทดสอบ รอทดสอบ end-to-end แล้วค่อยสลับเป็น Live mode ก่อนเปิดขายจริง
+
