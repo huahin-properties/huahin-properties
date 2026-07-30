@@ -35,6 +35,25 @@
   </style>
 </helmet>
 
+<sc-if value="{{ inAppBrowserWarning }}" hint-placeholder-val="{{ false }}">
+  <div style="position:sticky; top:0; z-index:997; background:oklch(28% 0.02 60); color:white; padding:11px 16px; font-size:13px; text-align:center; line-height:1.6; display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;">
+    <span>เข้าสู่ระบบด้วย Google/Facebook อาจใช้ไม่ได้ในเบราว์เซอร์นี้ — แตะ ⋮ หรือ ••• มุมขวาบน แล้วเลือก "เปิดในเบราว์เซอร์" เพื่อสมัครให้สำเร็จ (หรือใช้ OTP เบอร์โทรด้านล่างแทนได้เลย)</span>
+    <span onClick="{{ onDismissInAppWarning }}" style="cursor:pointer; opacity:0.7; flex-shrink:0;">✕</span>
+  </div>
+</sc-if>
+
+<sc-if value="{{ needManualEmail }}">
+  <div style="position:fixed; inset:0; z-index:998; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:white; border-radius:10px; padding:28px 26px; max-width:380px; width:100%;">
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:8px;">ขออีเมลของคุณ</div>
+      <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:16px; line-height:1.6;">บัญชีนี้ไม่ได้ส่งอีเมลมาให้ — กรอกอีเมลที่ติดต่อได้จริง เพื่อใช้เข้าสู่ระบบครั้งต่อไปและรับข่าวสาร</div>
+      <input type="email" value="{{ manualEmail }}" onChange="{{ onManualEmail }}" placeholder="you@example.com" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit; margin-bottom:10px;" />
+      <sc-if value="{{ manualEmailError }}"><div style="font-size:12.5px; color:oklch(50% 0.18 30); margin-bottom:10px;">{{ manualEmailError }}</div></sc-if>
+      <div onClick="{{ onSubmitManualEmail }}" style="background:oklch(22% 0.02 60); color:white; text-align:center; padding:12px; border-radius:6px; font-size:14px; font-weight:600; cursor:pointer;">ดำเนินการต่อ</div>
+    </div>
+  </div>
+</sc-if>
+
 <sc-if value="{{ showRedirectLoading }}" hint-placeholder-val="{{ false }}">
   <div style="position:fixed; inset:0; z-index:999; background:oklch(96% 0.015 75); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;">
     <div style="width:40px; height:40px; border-radius:50%; border:3px solid oklch(88% 0.02 70); border-top-color:oklch(40% 0.13 25); animation:hh-spin 0.8s linear infinite;"></div>
@@ -117,7 +136,10 @@
           </div>
           <div>
             <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ตั้งรหัสผ่าน</div>
-            <input type="text" value="{{ password }}" onChange="{{ onPassword }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;" />
+            <div style="position:relative;">
+              <input type="{{ signupPasswordType }}" value="{{ password }}" onChange="{{ onPassword }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 40px 11px 13px; font-size:14px; font-family:inherit;" />
+              <div onClick="{{ onToggleSignupPassword }}" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:15px; opacity:0.6;">{{ signupPasswordEyeLabel }}</div>
+            </div>
           </div>
         </div>
         <div onClick="{{ onSubmit }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:600; cursor:pointer;">{{ submitLabel }}</div>
@@ -136,7 +158,10 @@
           </div>
           <div>
             <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รหัสผ่าน</div>
-            <input type="text" value="{{ loginPassword }}" onChange="{{ onLoginPassword }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 13px; font-size:14px; font-family:inherit;" />
+            <div style="position:relative;">
+              <input type="{{ loginPasswordType }}" value="{{ loginPassword }}" onChange="{{ onLoginPassword }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 40px 11px 13px; font-size:14px; font-family:inherit;" />
+              <div onClick="{{ onToggleLoginPassword }}" style="position:absolute; right:10px; top:50%; transform:translateY(-50%); cursor:pointer; font-size:15px; opacity:0.6;">{{ loginPasswordEyeLabel }}</div>
+            </div>
           </div>
         </div>
         <div onClick="{{ onLoginSubmit }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:600; cursor:pointer; max-width:360px;">{{ loginSubmitLabel }}</div>
@@ -188,13 +213,29 @@ const SIGNUP_I18N = {
 };
 
 class Component extends DCLogic {
-  state = { tab: "signup", name: "", phone: "", email: "", password: "", submitted: false, submitting: false, error: "", loginEmail: "", loginPassword: "", loginBusy: false, loginError: "", packageChoice: null, lang: "th", foundingLimit: 0, foundingCount: 0, foundingNote: "", phoneOtp: "", otpCode: "", otpSent: false, socialBusy: false, socialError: "",
+  state = { tab: "signup", name: "", phone: "", email: "", password: "", submitted: false, submitting: false, error: "", loginEmail: "", loginPassword: "", loginBusy: false, loginError: "", packageChoice: null, lang: "th", foundingLimit: 0, foundingCount: 0, foundingNote: "", phoneOtp: "", otpCode: "", otpSent: false, socialBusy: false, socialError: "", needManualEmail: false, manualEmail: "", manualEmailError: "", pendingSocialUid: null, showSignupPassword: false, showLoginPassword: false,
     // True the instant this page loads back from a Google/Facebook redirect —
     // read synchronously (before any await) so the very first render already
     // shows the loading overlay instead of flashing the login/signup form.
     redirectPending: (() => { try { return sessionStorage.getItem("hh_auth_redirect_pending") === "1"; } catch (e) { return false; } })() };
 
   async componentDidMount() {
+    // In-app browsers (LINE, Facebook, Instagram) block or break Google/
+    // Facebook sign-in. LINE's own webview honors a special query param
+    // that makes it silently hand the page off to the phone's real browser
+    // (Safari/Chrome) — do that automatically, once, before anything else.
+    try {
+      const ua = navigator.userAgent || "";
+      const isLine = /\bLine\//i.test(ua);
+      const alreadyEscaped = /[?&]openExternalBrowser=1\b/.test(window.location.href);
+      if (isLine && !alreadyEscaped) {
+        const sep = window.location.href.includes("?") ? "&" : "?";
+        window.location.href = window.location.href + sep + "openExternalBrowser=1";
+        return;
+      }
+      const isFbIg = /FBAN|FBAV|Instagram/i.test(ua);
+      if (isFbIg) this.setState({ inAppBrowserWarning: true });
+    } catch (e) {}
     try {
       const mod = await import("./data.js");
       this.setState({ lang: mod.getLang() });
@@ -258,6 +299,15 @@ class Component extends DCLogic {
   async completeSocialSignIn(uid, fb) {
     try {
       const doc = await fb.fetchMyListerDoc();
+      const authEmail = fb.currentAuthEmail();
+      // Facebook (and some OIDC providers like LINE) don't always share a
+      // verified email — without one, account-linking-by-email can't work
+      // and this becomes an orphaned duplicate account next time the same
+      // person signs in another way. Ask for it once instead of guessing.
+      if (!doc && !authEmail) {
+        this.setState({ socialBusy: false, pendingSocialUid: uid, needManualEmail: true, socialError: "" });
+        return;
+      }
       if (!doc) {
         const isFounding = this.state.foundingLimit > 0 && this.state.foundingCount < this.state.foundingLimit;
         // No default tier — membership v2 (BLUEPRINT.md §2.3): new accounts
@@ -265,13 +315,32 @@ class Component extends DCLogic {
         // trial" offer shows immediately. Do not default to "basic" here
         // (that was the old permanent-free-tier model, replaced by trial).
         await fb.setDoc("listers", uid, {
-          name: "", role: "lister", phone: "", email: fb.currentAuthEmail(),
+          name: "", role: "lister", phone: "", email: authEmail,
           status: "approved", createdAt: Date.now(), foundingAgent: isFounding,
         });
       }
       this.goToWorkspaceOrPackages(doc);
     } catch (e) {
       this.setState({ socialBusy: false, socialError: "เกิดข้อผิดพลาด ลองใหม่อีกครั้ง" });
+    }
+  }
+
+  async submitManualEmail() {
+    const email = (this.state.manualEmail || "").trim();
+    if (!email || !email.includes("@")) { this.setState({ manualEmailError: "กรอกอีเมลให้ถูกต้อง" }); return; }
+    this.setState({ socialBusy: true, manualEmailError: "" });
+    try {
+      const fb = this._fb;
+      const uid = this.state.pendingSocialUid;
+      const isFounding = this.state.foundingLimit > 0 && this.state.foundingCount < this.state.foundingLimit;
+      await fb.setDoc("listers", uid, {
+        name: "", role: "lister", phone: "", email,
+        status: "approved", createdAt: Date.now(), foundingAgent: isFounding,
+      });
+      this.setState({ needManualEmail: false });
+      this.goToWorkspaceOrPackages(null);
+    } catch (e) {
+      this.setState({ socialBusy: false, manualEmailError: "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง" });
     }
   }
 
@@ -323,7 +392,16 @@ class Component extends DCLogic {
   }
 
   async onLineSignIn() {
-    this.setState({ socialError: "เข้าสู่ระบบด้วย LINE ยังไม่เปิดใช้งาน — รอเชื่อมต่อ LINE Developers Console" });
+    if (this.state.socialBusy || !this._fb) return;
+    this.setState({ socialBusy: true, socialError: "" });
+    const fb = this._fb;
+    try {
+      sessionStorage.setItem("hh_auth_redirect_pending", "1");
+      await fb.signInWithLineRedirect();
+    } catch (e) {
+      try { sessionStorage.removeItem("hh_auth_redirect_pending"); } catch (e2) {}
+      this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย LINE ไม่สำเร็จ — ตรวจสอบการตั้งค่า LINE Login channel ใน Firebase" });
+    }
   }
 
   async otpAction() {
@@ -424,6 +502,18 @@ class Component extends DCLogic {
       onGoogleSignIn: () => this.googleSignIn(),
       onFacebookSignIn: () => this.facebookSignIn(),
       onLineSignIn: () => this.onLineSignIn(),
+      inAppBrowserWarning: this.state.inAppBrowserWarning,
+      onDismissInAppWarning: () => this.setState({ inAppBrowserWarning: false }),
+      needManualEmail: this.state.needManualEmail,
+      manualEmail: this.state.manualEmail, onManualEmail: (e) => this.setState({ manualEmail: e.target.value }),
+      manualEmailError: this.state.manualEmailError,
+      onSubmitManualEmail: () => this.submitManualEmail(),
+      signupPasswordType: this.state.showSignupPassword ? "text" : "password",
+      onToggleSignupPassword: () => this.setState((s) => ({ showSignupPassword: !s.showSignupPassword })),
+      signupPasswordEyeLabel: this.state.showSignupPassword ? "🙈" : "👁️",
+      loginPasswordType: this.state.showLoginPassword ? "text" : "password",
+      onToggleLoginPassword: () => this.setState((s) => ({ showLoginPassword: !s.showLoginPassword })),
+      loginPasswordEyeLabel: this.state.showLoginPassword ? "🙈" : "👁️",
       phoneOtp: this.state.phoneOtp, onPhoneOtp: (e) => this.setState({ phoneOtp: e.target.value }),
       otpCode: this.state.otpCode, onOtpCode: (e) => this.setState({ otpCode: e.target.value }),
       showOtpCodeInput: this.state.otpSent,
