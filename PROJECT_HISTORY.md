@@ -1,5 +1,24 @@
 # PROJECT_HISTORY.md — huahin.properties
 
+## 🔧 Session Update — 3-Tier Package Pricing (Stripe Sandbox) + Bug Fixes (30 กรกฎาคม 2569)
+- **Project**: huahin.properties
+- **Phase/Feature**: Membership Package Setup (ระดับ 1/2/3) + Cross-System Consistency Fixes
+- **Status**: 🟡 In Progress — Stripe ตั้งค่าเสร็จในโหมด**ทดสอบ (Sandbox)** เท่านั้น ยังไม่ได้ต่อ Live/production
+- **Work Completed**:
+  - แก้บั๊ก UX: หน้า `Agent Signup.dc.html` เคยกะพริบกลับไปที่ฟอร์ม login/signup ระหว่างรอผล redirect ของ Google/Facebook sign-in — เพิ่ม loading overlay คลุมจนกว่าจะรู้ผล
+  - พบและแก้บัญชี lister ซ้ำซ้อนใน Firestore (อีเมลเดียวกัน สอง UID) — สาเหตุคือ Firebase Authentication ตั้งค่า "Create multiple accounts for each identity provider"; เปลี่ยนเป็น "Link accounts that use the same email" แล้ว ลบบัญชีซ้ำที่ไม่ได้ใช้งานออก
+  - ยืนยันว่า Firestore Security Rules ที่ล็อกไว้ (deny-by-default) ถูก publish ใช้งานจริงแล้ว (เวอร์ชันล่าสุด 24 ก.ค. 2569) — ลบเช็คลิสต์เตือน "หมดอายุ 8 ส.ค." ที่ค้างอยู่ใน `Admin Dashboard.dc.html` ออก (stale, ไม่ใช่ความเสี่ยงจริงแล้ว)
+  - ตั้งชื่อแพ็กเกจสมาชิกใหม่ให้สอดคล้องกันทั้งระบบ: **ระดับ 1 (5 หลัง) — เริ่มต้น / ระดับ 2 (15 หลัง) — มืออาชีพ / ระดับ 3 (25 หลัง) — พรีเมียม** — แก้ใน `Lister Billing.dc.html`, `Site Content.dc.html`
+  - เพิ่มตัวเลือกชำระเงิน **รายเดือน/รายปี** (ลด 2 เดือนเมื่อจ่ายรายปี) ในหน้า `Lister Billing.dc.html` + ช่องกรอก Price ID รายปีแยกใน `Site Content.dc.html`
+  - สร้าง Product + Price (รายเดือน+รายปี, รวม 6 Price ID) ใน **Stripe Sandbox** ให้ตรงชื่อ/ราคากับเว็บ 100%
+  - พบและแก้บั๊กสำคัญ: โควตาจริงในโค้ด (`tierQuota` ใน `firebase-client.js`, `tierLimit`/`photoLimit`/`aiGenLimit` ใน `Lister Dashboard.dc.html`) ไม่ตรงกับที่โฆษณาไว้บนเว็บ — เช่น ระดับ 2 โฆษณา 15 หลังแต่โค้ดจำกัดไว้ 25 หลัง, ระดับ 3 (พรีเมียม) เคยได้ใช้ AI แค่ 1 ครั้งเท่าทดลองฟรี (ไม่มี case ในโค้ดเลย) — แก้ให้ตรงกันหมดแล้ว: โควตาโพสต์ 5/15/25, รูป 15/18/20, AI 5/8/10
+  - เปลี่ยนชื่อสวิตช์ "ระดับการเปิดตัว (Rollout Level)" เป็น "ระยะการเปิดตัว (Rollout Stage)" ใน `Site Content.dc.html` เพื่อไม่ให้ปนกับชื่อแพ็กเกจ "ระดับ 1/2/3" ที่ตั้งใหม่
+  - ลบข้อมูลตัวอย่าง/ปลอม (OWNERS, TENANTS ใน `data.js` — อีเมล @example.com) ที่ค้างเป็น fallback แสดงในหน้า Owners เมื่อ Firestore จริงว่างเปล่า
+  - เคลียร์โฟลเดอร์ export-for-github เวอร์ชันเก่า (v2–v9) ที่ค้างจากรอบก่อนหน้า
+- **Known Open Item**: บัญชี Stripe จริง (Live mode, "huahin-property.ai") มีอยู่แล้วและแก้บัญชีธนาคารสำหรับรับเงินเสร็จแล้ว แต่**ยังไม่ได้เชื่อมกับเว็บ production** — เว็บตอนนี้ชี้ไปที่ Stripe Sandbox (`STRIPE_SECRET_KEY` เป็น `sk_test_...`) เท่านั้น ต้องสร้าง Product/Price ชุดเดียวกันในโหมด Live แล้วสลับ secret/webhook ก่อนเปิดขายจริง
+- **Approved By**: —（รอทดสอบ end-to-end ก่อนปิดงาน）
+- **Next Phase**: ทดสอบ signup→เลือกแพ็กเกจ→จ่ายเงิน (บัตรทดสอบ) → ยืนยันปลดล็อกฟีเจอร์ถูกต้องตาม tier ครบ 3 ระดับ x 2 รอบบิล แล้วจึงเปลี่ยนเป็น Stripe Live mode ก่อนเปิดขายจริง
+
 ## 🏁 Documentation Hotfix v1.0.1 — Closed, Baseline Locked (25 กรกฎาคม 2569)
 - **Project**: huahin.properties
 - **Phase/Feature**: Documentation System Audit & Navigation Fix (Hotfix v1.0.1)
