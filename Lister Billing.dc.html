@@ -61,6 +61,10 @@
 
       <div style="font-size:13px; font-weight:600; color:oklch(45% 0.02 60); margin-bottom:4px;">{{ t.ladderTitle }}</div>
       <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:16px;">{{ t.ladderSub }}</div>
+      <div style="display:flex; justify-content:center; gap:6px; margin-bottom:20px; background:oklch(95% 0.01 75); border-radius:100px; padding:4px; width:fit-content; margin-left:auto; margin-right:auto;">
+        <div onClick="{{ onCycleMonthly }}" style="{{ cycleMonthlyStyle }}">รายเดือน</div>
+        <div onClick="{{ onCycleAnnual }}" style="{{ cycleAnnualStyle }}">รายปี — ประหยัด 2 เดือน</div>
+      </div>
       <div style="display:flex; flex-direction:column; gap:14px;">
         <sc-for list="{{ tierCards }}" as="c" hint-placeholder-count="4">
           <div style="background:{{ c.bg }}; padding:26px 22px; border-radius:10px; box-shadow:0 1px 6px rgba(0,0,0,0.06); position:relative;">
@@ -148,7 +152,7 @@ const BILLING_I18N = {
     contactDesc: ["Custom listing volume", "Dedicated support", "Custom terms"],
     perMonth: "/month", billedMonthly: "Billed monthly", currentlyFree: "You're using this for free", startFree: "Current plan", upgrade: "Upgrade", current: "Current plan", contactUs: "Contact us" },
   th: { ladderTitle: "บันไดสมาชิก", ladderSub: "ไต่ระดับขึ้นทีละขั้น — ระดับสูงกว่าได้ทุกสิทธิ์จากระดับล่างกว่าด้วย",
-    free: "ฟรี", tier2: "แพ็กเกจ 1 — เริ่มต้น", tier3: "แพ็กเกจ 2 — มืออาชีพ", tier4: "แพ็กเกจ 3 — พรีเมียม", contact: "ติดต่อเรา",
+    free: "ฟรี", tier2: "ระดับ 1 (5 หลัง) — เริ่มต้น", tier3: "ระดับ 2 (15 หลัง) — มืออาชีพ", tier4: "ระดับ 3 (25 หลัง) — พรีเมียม", contact: "ติดต่อเรา",
     freeDesc: ["โพสต์ได้ 1 หลัง", "ระบบแปลอัตโนมัติ 8 ภาษา", "เว็บไซต์ส่วนตัว (ดีไซน์สำเร็จรูป)", "📷 อัปโหลดรูปได้สูงสุด 10 รูป/หลัง", "🤖 AI ช่วยร่างข้อความโพสต์ 1 ครั้ง/รายการ", "ซัพพอร์ตพื้นฐาน"],
     trialName: "🎁 ทดลองใช้ฟรี", trialSubActive: "วันที่เหลือ", trialSubUsed: "ใช้สิทธิ์ไปแล้ว", trialSubUnused: "ใช้ได้ครั้งเดียว ไม่ต่ออายุอัตโนมัติ",
     trialDesc: ["โพสต์ได้ 5 หลัง", "ระบบแปลอัตโนมัติ 8 ภาษา", "แก้ไขโปรไฟล์ได้ ปรับแต่งเว็บไซต์ได้เต็มรูปแบบ (ภาพปก+สีธีม) เหมือนแพ็กเกจสูงสุด", "ป้ายแนะนำ + หน้าแรก ทุกประกาศ (เทียบเท่าแพ็กเกจ 3)", "📷 อัปโหลดรูปได้สูงสุด 8 รูป/หลัง", "🤖 AI ช่วยร่างข้อความโพสต์ 1 ครั้ง/รายการ", "ใช้ได้ครั้งเดียวต่อคน นาน 30 วัน"],
@@ -197,7 +201,7 @@ const BILLING_I18N = {
 };
 
 class Component extends DCLogic {
-  state = { lister: null, prices: { pro: "", agency: "", level3: "" }, vipPrices: { silver: "", gold: "", diamond: "" }, rolloutLevel: 1, loaded: false, notSignedIn: false, error: "", busyTier: null, vipStats: null, lang: "th" };
+  state = { lister: null, prices: { pro: "", agency: "", level3: "" }, vipPrices: { silver: "", gold: "", diamond: "" }, rolloutLevel: 1, loaded: false, notSignedIn: false, error: "", busyTier: null, vipStats: null, lang: "th", billingCycle: "monthly" };
 
   async componentDidMount() {
     const fb = await import("./firebase-client.js");
@@ -234,9 +238,10 @@ class Component extends DCLogic {
 
   async upgrade(tier) {
     if (!this.state.lister) { window.location.href = "Agent Signup.dc.html"; return; }
-    const priceId = this.state.prices[tier];
+    const isAnnual = this.state.billingCycle === "annual";
+    const priceId = this.state.prices[isAnnual ? tier + "Annual" : tier];
     if (!priceId) {
-      this.setState({ error: "แอดมินยังไม่ได้ตั้งราคาแพ็กเกจนี้ — ติดต่อแอดมิน" });
+      this.setState({ error: isAnnual ? "แอดมินยังไม่ได้ตั้งราคารายปีของแพ็กเกจนี้ — ติดต่อแอดมิน" : "แอดมินยังไม่ได้ตั้งราคาแพ็กเกจนี้ — ติดต่อแอดมิน" });
       return;
     }
     this.setState({ busyTier: tier, error: "" });
@@ -328,8 +333,19 @@ class Component extends DCLogic {
       diamondTeaser: this.teaserFor("diamond", lister.vipTier),
       error: this.state.error,
       t,
+      billingCycle: this.state.billingCycle,
+      isMonthly: this.state.billingCycle === "monthly",
+      isAnnual: this.state.billingCycle === "annual",
+      onCycleMonthly: () => this.setState({ billingCycle: "monthly" }),
+      onCycleAnnual: () => this.setState({ billingCycle: "annual" }),
+      cycleMonthlyStyle: this.cycleBtnStyle(this.state.billingCycle === "monthly"),
+      cycleAnnualStyle: this.cycleBtnStyle(this.state.billingCycle === "annual"),
       tierCards: this.buildTierCards(t, lister),
     };
+  }
+
+  cycleBtnStyle(active) {
+    return `padding:8px 20px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer; ${active ? "background:oklch(22% 0.02 60); color:white;" : "background:transparent; color:oklch(45% 0.02 60); border:1px solid oklch(85% 0.01 70);"}`;
   }
 
   // Trial card replaces the old permanent-free tier — a one-time 30-day
@@ -399,20 +415,22 @@ class Component extends DCLogic {
     const cards = [this.trialCard(t, lister)];
     // Package 1-3 (pro/level3/level4) are always shown — only the higher VIP
     // tiers (rollout 4-5) are gated behind rolloutLevel. See BLUEPRINT.md §2 ทาง 2.
+    const isAnnual = this.state.billingCycle === "annual";
+    const priceFor = (m, a) => isAnnual ? { price: "฿" + a.toLocaleString(), priceSub: `฿${Math.round(a / 12).toLocaleString()}${t.perMonth} · ประหยัด 2 เดือน` } : { price: "฿" + m.toLocaleString(), priceSub: t.perMonth + " · " + t.billedMonthly };
     cards.push({ key: "pro", bg: "white", accentColor: "oklch(40% 0.13 25)", textColor: "oklch(25% 0.02 60)", subTextColor: "oklch(55% 0.02 60)",
-      name: t.tier2, price: "฿390", priceSub: t.perMonth + " · " + t.billedMonthly, features: t.tier2Desc,
+      name: t.tier2, ...priceFor(390, 3900), features: t.tier2Desc,
       socialIcons: this.socialIconsFor(1, false), socialIconsNote: "1/4 ลิงก์โซเชียล", linkGlyphStyle: this.linkGlyphStyle(1, false),
       isPaid: true, badge: "",
       buttonLabel: this.state.busyTier === "pro" ? "…" : (lister.tier === "pro" || lister.tier === "agency" || lister.tier === "level3" || lister.tier === "level4" ? t.current : t.upgrade),
       onClick: () => this.upgrade("pro") });
     cards.push({ key: "level3", bg: "white", accentColor: "oklch(40% 0.13 25)", textColor: "oklch(25% 0.02 60)", subTextColor: "oklch(55% 0.02 60)",
-      name: t.tier3, price: "฿990", priceSub: t.perMonth + " · " + t.billedMonthly, features: t.tier3Desc,
+      name: t.tier3, ...priceFor(990, 9900), features: t.tier3Desc,
       socialIcons: this.socialIconsFor(2, false), socialIconsNote: "2/4 ลิงก์โซเชียล", linkGlyphStyle: this.linkGlyphStyle(2, false),
       isPaid: true, badge: "Most popular",
       buttonLabel: this.state.busyTier === "level3" ? "…" : (lister.tier === "level3" || lister.tier === "level4" ? t.current : t.upgrade),
       onClick: () => this.upgrade("level3") });
     cards.push({ key: "level4", bg: "oklch(20% 0.02 60)", accentColor: "oklch(75% 0.1 25)", textColor: "white", subTextColor: "oklch(75% 0.01 70)",
-      name: t.tier4, price: "฿1,990", priceSub: t.perMonth + " · " + t.billedMonthly, features: t.tier4Desc,
+      name: t.tier4, ...priceFor(1990, 19900), features: t.tier4Desc,
       socialIcons: this.socialIconsFor(4, true), socialIconsNote: "4/4 ครบทุกช่องทาง", linkGlyphStyle: this.linkGlyphStyle(4, true),
       isPaid: true, badge: "",
       buttonLabel: this.state.busyTier === "level4" ? "…" : (lister.tier === "level4" ? t.current : t.upgrade),
