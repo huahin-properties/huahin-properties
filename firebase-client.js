@@ -408,6 +408,30 @@ export async function signInWithFacebookRedirect() {
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
   const attempt = async () => {
     const provider = new window.firebase.auth.FacebookAuthProvider();
+    provider.addScope("email");
+    await a.signInWithRedirect(provider);
+  };
+  try {
+    await attempt();
+  } catch (e) {
+    if (e && e.code === "auth/argument-error") {
+      await attempt();
+      return;
+    }
+    throw e;
+  }
+}
+
+// LINE Login — Firebase has no built-in LINE provider, but LINE Login v2.1's
+// OIDC endpoint plugs straight into Firebase's generic OpenID Connect
+// provider (configured in Firebase Console → Authentication → Sign-in
+// method → Add provider → OpenID Connect, provider ID "oidc.line", using the
+// LINE Login channel's Channel ID/Secret). Same redirect flow as Google/FB.
+export async function signInWithLineRedirect() {
+  const a = authApp();
+  if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
+  const attempt = async () => {
+    const provider = new window.firebase.auth.OAuthProvider("oidc.line");
     await a.signInWithRedirect(provider);
   };
   try {
