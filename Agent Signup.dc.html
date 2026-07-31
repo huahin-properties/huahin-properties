@@ -520,7 +520,7 @@ class Component extends DCLogic {
           : "")
         : "",
       foundingFinePrint: this.state.foundingNote || "ช่วงนี้ฟรีชั่วคราวสำหรับผู้สมัครกลุ่มแรก — จะแจ้งล่วงหน้าก่อนเริ่มเก็บค่าบริการในอนาคต",
-      showRedirectLoading: this.state.redirectPending,
+      showRedirectLoading: this.state.redirectPending || this.state.socialBusy,
     };
   }
 }
