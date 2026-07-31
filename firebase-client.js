@@ -22,16 +22,7 @@ const firebaseConfig = {
   // Agent Signup with no error and no signed-in user — exactly what was
   // reported. auth.huahin.properties is same-site (same huahin.properties
   // eTLD+1), so that storage/cookie relay isn't blocked.
-  // Switched from the custom "auth.huahin.properties" subdomain back to
-  // Firebase's own default authDomain: now that Google/Facebook/LINE all
-  // use signInWithPopup (not redirect), the popup's internal iframe talks
-  // to whatever authDomain is configured here — a custom subdomain adds a
-  // DNS/TLS handshake to *our* infrastructure before that iframe is ready,
-  // which was the real source of the repeating auth/argument-error (not a
-  // timing race in the browser, as first suspected). Firebase's own
-  // *.firebaseapp.com domain is already warm/fast and already in the
-  // Authorized domains list, so this needs no Firebase Console change.
-  authDomain: "huahin-properties-5f1b5.firebaseapp.com",
+  authDomain: "auth.huahin.properties",
   projectId: "huahin-properties-5f1b5",
   storageBucket: "huahin-properties-5f1b5.firebasestorage.app",
   messagingSenderId: "264933237376",
