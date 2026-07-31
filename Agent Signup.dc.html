@@ -268,6 +268,30 @@ class Component extends DCLogic {
       const params = new URLSearchParams(window.location.search);
       if (params.get("tab") === "login") this.setState({ tab: "login" });
     } catch (e) {}
+    // LINE server-side login (functions/index.js lineAuthCallback) lands
+    // back here with ?lineExchange=<code> on success or ?lineError=<msg>
+    // on failure — pick either up before anything else on this page load.
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const lineError = params.get("lineError");
+      const lineExchange = params.get("lineExchange");
+      if (lineError) {
+        this.setState({ socialError: decodeURIComponent(lineError) });
+        window.history.replaceState({}, "", window.location.pathname);
+      } else if (lineExchange) {
+        this.setState({ redirectPending: true, socialBusy: true });
+        window.history.replaceState({}, "", window.location.pathname);
+        const fbMod = await import("./firebase-client.js");
+        try {
+          const uid = await fbMod.completeLineLogin(lineExchange);
+          this._fb = fbMod;
+          await this.completeSocialSignIn(uid, fbMod);
+          return;
+        } catch (e) {
+          this.setState({ redirectPending: false, socialBusy: false, socialError: "เข้าสู่ระบบด้วย LINE ไม่สำเร็จ ลองใหม่อีกครั้ง" });
+        }
+      }
+    } catch (e) {}
     let fb;
     try {
       fb = await import("./firebase-client.js");
@@ -428,25 +452,14 @@ class Component extends DCLogic {
     }
   }
 
-  async onLineSignIn() {
-    if (this.state.socialBusy || !this._fb) return;
-    this.setState({ socialBusy: true, socialError: "" });
-    const fb = this._fb;
-    // Popup instead of redirect: ... (see above)
-    // Give the browser one paint frame to actually show the "signing in"
-    // overlay BEFORE the popup opens and backgrounds this tab — Chrome
-    // throttles/holds repaints on backgrounded tabs, so without this the
-    // popup closing and refocusing this tab could briefly flash the last
-    // frame painted before the click (the plain form) instead of the
-    // overlay, right before the final navigation.
-    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
-    try {
-      const uid = await fb.signInWithLine();
-      await this.completeSocialSignIn(uid, fb);
-    } catch (e) {
-      if (e && e.code === "auth/popup-closed-by-user") { this.setState({ socialBusy: false }); return; }
-      this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย LINE ไม่สำเร็จ: " + (e && (e.code || e.message) || "unknown error") });
-    }
+  onLineSignIn() {
+    // Server-side OAuth now (functions/index.js: lineAuthStart) — a plain
+    // full-page navigation, not a Firebase popup/redirect call. Avoids the
+    // "missing initial state" failures that were unreliable across mobile
+    // browsers/WebViews. The page picks the flow back up in
+    // componentDidMount via the ?lineExchange= it returns with.
+    if (this._fb) this._fb.goToLineLogin();
+    else window.location.href = "https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/lineAuthStart";
   }
 
   async otpAction() {

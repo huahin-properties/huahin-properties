@@ -514,6 +514,36 @@ export async function signInWithLine() {
   }
 }
 
+// LINE Login v2 — server-side OAuth (see functions/index.js: lineAuthStart /
+// lineAuthCallback / lineAuthExchange). Replaces the Firebase-popup/redirect
+// path above for the actual LINE button click; signInWithLine() above is
+// left in place unused as a documented rollback point, not called anywhere.
+const LINE_AUTH_START_URL = "https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/lineAuthStart";
+const LINE_AUTH_EXCHANGE_URL = "https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/lineAuthExchange";
+
+export function goToLineLogin() {
+  window.location.href = LINE_AUTH_START_URL;
+}
+
+// Called once on page load when the URL carries ?lineExchange=<code> (the
+// server redirected back with this after a successful LINE login). Trades
+// the short-lived one-time code for a Firebase custom token and signs in —
+// the custom token only ever exists in this HTTPS response body, never in
+// a URL, so it can't leak via browser history or server logs.
+export async function completeLineLogin(exchangeCode) {
+  const res = await fetch(LINE_AUTH_EXCHANGE_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code: exchangeCode }),
+  });
+  const json = await res.json();
+  if (!res.ok || !json.token) throw new Error(json.error || "exchange_failed");
+  const a2 = authApp();
+  if (!a2) throw new Error("Firebase Auth SDK not loaded on this page.");
+  const cred = await a2.signInWithCustomToken(json.token);
+  return cred.user.uid;
+}
+
 // Phone OTP is two steps: start (sends the SMS) then confirm (verifies the
 // code the user typed). recaptchaContainerId must be an element ID already
 // in the DOM (an invisible reCAPTCHA badge Firebase manages itself).
