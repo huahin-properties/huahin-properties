@@ -43,29 +43,6 @@ const firebaseConfig = {
 // exported function here, so lazy init-on-first-call is too late for them.
 if (window.firebase && !window.firebase.apps.length) window.firebase.initializeApp(firebaseConfig);
 
-// LINE-only secondary app instance: LINE's redirect flow needs
-// getRedirectResult() to read sessionStorage state that Firebase itself
-// writes on the authDomain's own origin partway through the redirect chain
-// (huahin.properties → LINE → authDomain → back). When authDomain is the
-// default *.firebaseapp.com (a different site from huahin.properties),
-// mobile Chrome's storage partitioning drops that state — surfacing as
-// "Unable to process request due to missing initial state." Google stays
-// on the default app/popup (untouched, confirmed working); LINE alone uses
-// a second named app pointed at the same-site auth.huahin.properties
-// subdomain, which keeps that storage first-party.
-let _lineApp = null;
-function getLineApp() {
-  if (!_lineApp) {
-    if (!window.firebase) throw new Error("Firebase SDK not loaded.");
-    const existing = window.firebase.apps.find((a) => a.name === "lineAuth");
-    _lineApp = existing || window.firebase.initializeApp(
-      { ...firebaseConfig, authDomain: "auth.huahin.properties" },
-      "lineAuth"
-    );
-  }
-  return _lineApp;
-}
-
 let _app = null;
 function getApp() {
   if (!_app) {
@@ -474,7 +451,15 @@ export async function signInWithFacebookRedirect() {
 // method → Add provider → OpenID Connect, provider ID "oidc.line", using the
 // LINE Login channel's Channel ID/Secret). Same redirect flow as Google/FB.
 export async function signInWithLineRedirect() {
-  const a = getLineApp().auth();
+  // Back on the main app (same one Google/Facebook use) — the earlier
+  // "missing initial state" error very likely came from the same
+  // duplicate-Firebase-load bug that broke Google (fixed in Agent
+  // Signup.dc.html's helmet), not from authDomain. The separate "lineAuth"
+  // app + credential-bridging approach introduced its own new failure
+  // (auth/invalid-credential) and added complexity for no proven benefit —
+  // reverting to the simple, already-working pattern.
+  const a = authApp();
+  if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
   const attempt = async () => {
     const provider = new window.firebase.auth.OAuthProvider("oidc.line");
     await a.signInWithRedirect(provider);
@@ -488,31 +473,6 @@ export async function signInWithLineRedirect() {
     }
     throw e;
   }
-}
-
-export async function getLineRedirectSignInResult() {
-  if (!window.firebase) return null;
-  // Must actually initialize (or reuse) the "lineAuth" app first — on the
-  // fresh page load this redirect lands back on, that named app instance
-  // doesn't exist yet at all, so searching window.firebase.apps for it
-  // always came up empty and silently returned null (no error, no sign-in
-  // — exactly the "bounces back to the form with nothing" symptom).
-  const a = getLineApp().auth();
-  const result = await a.getRedirectResult();
-  if (!result || !result.user) return null;
-  // The LINE sign-in happened on the separate "lineAuth" app instance —
-  // every other function in this file (fetchMyListerDoc, currentAuthEmail,
-  // etc.) reads authApp().currentUser on the MAIN app, which knows nothing
-  // about that session. Re-apply the same OAuth credential to the main app
-  // so the rest of the site sees this user as signed in, same as Google/
-  // Facebook/email sign-in do.
-  const cred = window.firebase.auth.OAuthProvider.credentialFromResult(result);
-  const mainApp = authApp();
-  if (cred && mainApp) {
-    const mainCred = await mainApp.signInWithCredential(cred);
-    return mainCred.user.uid;
-  }
-  return result.user.uid;
 }
 
 export async function getRedirectSignInResult() {

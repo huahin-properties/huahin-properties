@@ -305,7 +305,6 @@ class Component extends DCLogic {
           if (uid) break;
         }
       }
-      if (!uid) uid = await fb.getLineRedirectSignInResult();
       if (uid) { await this.completeSocialSignIn(uid, fb); return; }
     } catch (e) {
       console.error("[componentDidMount] getRedirectSignInResult threw:", e);
