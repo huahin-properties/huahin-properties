@@ -460,6 +460,22 @@ export async function signInWithFacebook() {
   return cred.user.uid;
 }
 
+// Popup version of LINE sign-in — added alongside signInWithGoogle/
+// signInWithFacebook once the redirect flow (huahin.properties →
+// auth.huahin.properties → back) proved intermittently flaky on mobile:
+// the cross-domain relay depends on getRedirectResult() reading a result
+// written by a different page load, which on some phones/networks came
+// back empty on the first try and only worked on a second attempt. Popup
+// avoids that relay entirely — the whole exchange happens without a
+// full-page navigation away from huahin.properties.
+export async function signInWithLine() {
+  const a = authApp();
+  if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
+  const provider = new window.firebase.auth.OAuthProvider("oidc.line");
+  const cred = await a.signInWithPopup(provider);
+  return cred.user.uid;
+}
+
 // Phone OTP is two steps: start (sends the SMS) then confirm (verifies the
 // code the user typed). recaptchaContainerId must be an element ID already
 // in the DOM (an invisible reCAPTCHA badge Firebase manages itself).

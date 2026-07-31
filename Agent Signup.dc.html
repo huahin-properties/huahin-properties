@@ -360,31 +360,15 @@ class Component extends DCLogic {
   }
 
   async googleSignIn() {
-    // Everything (firebase-client.js module, Auth SDK readiness) is
-    // pre-loaded and cached in componentDidMount specifically so this
-    // handler can call signInWithPopup with NO prior await — an await
-    // before opening the popup breaks the browser's "this click directly
-    // opened a popup" user-gesture tracking, which is what was causing the
-    // popup to intermittently fail to open (or get silently closed) even
-    // though the click definitely happened. This is the real fix.
     if (this.state.socialBusy || !this._fb) return;
     this.setState({ socialBusy: true, socialError: "" });
-    const fb = this._fb;
     try {
-      sessionStorage.setItem("hh_auth_redirect_pending", "1");
-      await fb.signInWithGoogleRedirect();
-      // Browser navigates away here; componentDidMount picks up the result
-      // on the page it returns to.
+      const uid = await this._fb.signInWithGoogle();
+      await this.completeSocialSignIn(uid, this._fb);
     } catch (e) {
-      console.error("[googleSignIn] full error:", e);
-      if (e && e.code === "auth/argument-error" && !sessionStorage.getItem("hh_social_retry")) {
-        sessionStorage.setItem("hh_social_retry", "google");
-        window.location.reload();
-        return;
-      }
-      const detail = e ? `code=${e.code || "?"} name=${e.name || "?"}` : "no error object";
-      try { sessionStorage.removeItem("hh_auth_redirect_pending"); } catch (e2) {}
-      this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย Google ไม่สำเร็จ: " + detail });
+      console.error("[googleSignIn:popup] full error:", e);
+      if (e && e.code === "auth/popup-closed-by-user") { this.setState({ socialBusy: false }); return; }
+      this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย Google ไม่สำเร็จ: " + (e && (e.code || e.message) || "unknown error") });
     }
   }
 
@@ -393,15 +377,10 @@ class Component extends DCLogic {
     this.setState({ socialBusy: true, socialError: "" });
     const fb = this._fb;
     try {
-      sessionStorage.setItem("hh_auth_redirect_pending", "1");
-      await fb.signInWithFacebookRedirect();
+      const uid = await fb.signInWithFacebook();
+      await this.completeSocialSignIn(uid, fb);
     } catch (e) {
-      if (e && e.code === "auth/argument-error" && !sessionStorage.getItem("hh_social_retry")) {
-        sessionStorage.setItem("hh_social_retry", "facebook");
-        window.location.reload();
-        return;
-      }
-      try { sessionStorage.removeItem("hh_auth_redirect_pending"); } catch (e2) {}
+      if (e && e.code === "auth/popup-closed-by-user") { this.setState({ socialBusy: false }); return; }
       this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย Facebook ไม่สำเร็จ (อาจยังไม่เปิดใช้งาน — แจ้งแอดมิน)" });
     }
   }
@@ -411,10 +390,10 @@ class Component extends DCLogic {
     this.setState({ socialBusy: true, socialError: "" });
     const fb = this._fb;
     try {
-      sessionStorage.setItem("hh_auth_redirect_pending", "1");
-      await fb.signInWithLineRedirect();
+      const uid = await fb.signInWithLine();
+      await this.completeSocialSignIn(uid, fb);
     } catch (e) {
-      try { sessionStorage.removeItem("hh_auth_redirect_pending"); } catch (e2) {}
+      if (e && e.code === "auth/popup-closed-by-user") { this.setState({ socialBusy: false }); return; }
       this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย LINE ไม่สำเร็จ — ตรวจสอบการตั้งค่า LINE Login channel ใน Firebase" });
     }
   }
