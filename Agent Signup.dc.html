@@ -10,9 +10,32 @@
 <helmet>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script>
+    // Guard against Firebase's compat SDK being loaded twice in this same
+    // page (confirmed via console: "Firebase is already defined in the
+    // global scope" — two copies of the SDK racing corrupts its internal
+    // registries and threw auth/argument-error intermittently on Google/
+    // Facebook/LINE sign-in). Load each script only if not already present.
+    (function () {
+      var anchor = document.currentScript;
+      var urls = [
+        "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js",
+        "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js",
+        "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"
+      ];
+      function loadNext(i) {
+        if (i >= urls.length) return;
+        var existing = document.querySelector('script[data-fb-sdk="' + i + '"]');
+        if (existing || (i === 0 && window.firebase)) { loadNext(i + 1); return; }
+        var s = document.createElement("script");
+        s.src = urls[i];
+        s.setAttribute("data-fb-sdk", String(i));
+        s.onload = function () { loadNext(i + 1); };
+        anchor.parentNode.insertBefore(s, anchor.nextSibling);
+      }
+      loadNext(0);
+    })();
+  </script>
   <title>สมัครลงประกาศ — huahin.properties</title>
   <link rel="icon" type="image/png" href="./logo.png">
   <meta name="description" content="สมัครสมาชิกเพื่อลงประกาศขาย/ให้เช่าอสังหาริมทรัพย์ในหัวหิน ปราณบุรี และชะอำ กับ huahin.properties">
