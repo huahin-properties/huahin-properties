@@ -420,11 +420,18 @@ class Component extends DCLogic {
     if (this.state.socialBusy || !this._fb) return;
     this.setState({ socialBusy: true, socialError: "" });
     const fb = this._fb;
+    // LINE (a generic OIDC provider, not a Firebase-native one like Google)
+    // hit "missing initial state" errors via popup on mobile Chrome — that
+    // browser partitions storage for the popup's auth.firebaseapp.com
+    // context, so the relay back to this page's sessionStorage gets lost.
+    // Redirect avoids that entirely (same top-level document reloads and
+    // reads its own sessionStorage) — Google/Facebook stay on popup, this
+    // is LINE-only.
     try {
-      const uid = await fb.signInWithLine();
-      await this.completeSocialSignIn(uid, fb);
+      sessionStorage.setItem("hh_auth_redirect_pending", "1");
+      await fb.signInWithLineRedirect();
     } catch (e) {
-      if (e && e.code === "auth/popup-closed-by-user") { this.setState({ socialBusy: false }); return; }
+      try { sessionStorage.removeItem("hh_auth_redirect_pending"); } catch (e2) {}
       this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย LINE ไม่สำเร็จ — ตรวจสอบการตั้งค่า LINE Login channel ใน Firebase" });
     }
   }
