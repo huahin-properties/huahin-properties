@@ -283,7 +283,19 @@ class Component extends DCLogic {
     // loaded) — clicking Google/Facebook/LINE while warmUpAuthPersistence()
     // is still resolving is exactly what threw auth/argument-error, because
     // this._fb being set is what the click handlers gate on.
-    try { await fb.warmUpAuthPersistence(); } catch (e) {}
+    try {
+      // Mobile connections can be slow/flaky enough that firebase-auth-
+      // compat.js hasn't finished attaching .auth() to the app yet even
+      // after warmUpAuthPersistence() was awaited — that swallowed the
+      // failure silently and still marked the buttons "ready", causing
+      // "getApp(...).auth is not a function" on click. Poll for the real
+      // SDK method existing (up to ~6s) before enabling anything.
+      for (let i = 0; i < 20; i++) {
+        if (window.firebase && typeof window.firebase.auth === "function" && window.firebase.apps && window.firebase.apps.length) break;
+        await new Promise((r) => setTimeout(r, 300));
+      }
+      await fb.warmUpAuthPersistence();
+    } catch (e) {}
     this._fb = fb;
     this.setState({ authReady: true });
     // Redirect flow: pick up the result if this page load is the browser
