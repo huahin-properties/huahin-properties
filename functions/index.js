@@ -20,6 +20,8 @@ const ANTHROPIC_API_KEY = defineSecret("ANTHROPIC_API_KEY");
 const STRIPE_SECRET_KEY = defineSecret("STRIPE_SECRET_KEY");
 const STRIPE_WEBHOOK_SECRET = defineSecret("STRIPE_WEBHOOK_SECRET");
 const RESEND_API_KEY = defineSecret("RESEND_API_KEY");
+const LINE_CHANNEL_SECRET = defineSecret("LINE_CHANNEL_SECRET");
+const LINE_CHANNEL_ID = defineSecret("LINE_CHANNEL_ID");
 
 // Fires whenever ContactRail (or any other caller) writes a new lead —
 // looks up which lister owns the property the enquiry is about, and emails
@@ -628,6 +630,153 @@ exports.stripeWebhook = onRequest(
     } catch (e) {
       console.error("stripeWebhook handling failed:", e);
       res.status(500).send("Webhook handler error");
+    }
+  }
+);
+
+// ── LINE Login — server-side OAuth (replaces the old client-side Firebase
+// OIDC popup/redirect for LINE only, per BLUEPRINT decision: Firebase's
+// redirect-state relay ("missing initial state") was unreliable across
+// mobile browsers/WebViews. This flow never touches Firebase's Auth
+// popup/redirect machinery — it's a plain server-mediated OAuth 2.0
+// Authorization Code exchange that works identically everywhere. Google
+// and Facebook are untouched and still use Firebase Auth directly. ──
+const LINE_REDIRECT_URI = "https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/lineAuthCallback";
+const SITE_URL = "https://huahin.properties";
+
+function randomToken(bytes) {
+  return require("crypto").randomBytes(bytes).toString("hex");
+}
+
+// 1) Browser navigates here (plain <a>/location.href, not fetch) — issues a
+// one-time, short-lived state, then 302s straight to LINE's authorize page.
+exports.lineAuthStart = onRequest(
+  { secrets: [LINE_CHANNEL_ID], region: "asia-southeast1" },
+  async (req, res) => {
+    try {
+      const state = randomToken(24);
+      await admin.firestore().collection("lineAuthStates").doc(state).set({
+        createdAt: Date.now(),
+        expiresAt: Date.now() + 5 * 60 * 1000,
+        used: false,
+      });
+      const params = new URLSearchParams({
+        response_type: "code",
+        client_id: LINE_CHANNEL_ID.value(),
+        redirect_uri: LINE_REDIRECT_URI,
+        state,
+        scope: "profile openid email",
+      });
+      res.redirect(302, `https://access.line.me/oauth2/v2.1/authorize?${params.toString()}`);
+    } catch (e) {
+      console.error("lineAuthStart failed:", e);
+      res.status(500).send("ไม่สามารถเริ่มเข้าสู่ระบบด้วย LINE ได้ ลองใหม่อีกครั้ง");
+    }
+  }
+);
+
+// 2) LINE redirects the browser back here with ?code&state. Runs entirely
+// server-to-server from here on (state check, code-for-token exchange,
+// Firestore lookup) — the browser is just carried along via 302s, never
+// holding any secret or long-lived token itself.
+exports.lineAuthCallback = onRequest(
+  { secrets: [LINE_CHANNEL_ID, LINE_CHANNEL_SECRET], region: "asia-southeast1" },
+  async (req, res) => {
+    const fail = (msg) => res.redirect(302, `${SITE_URL}/Agent%20Signup.dc.html?lineError=${encodeURIComponent(msg)}`);
+    try {
+      const { code, state, error } = req.query;
+      if (error) return fail("ยกเลิกการเข้าสู่ระบบด้วย LINE");
+      if (!code || !state) return fail("คำขอไม่ถูกต้อง");
+
+      const db = admin.firestore();
+      const stateRef = db.collection("lineAuthStates").doc(String(state));
+      const stateDoc = await stateRef.get();
+      if (!stateDoc.exists || stateDoc.data().used || stateDoc.data().expiresAt < Date.now()) {
+        return fail("เซสชันหมดอายุ กรุณาลองใหม่");
+      }
+      await stateRef.update({ used: true });
+
+      const tokenRes = await fetch("https://api.line.me/oauth2/v2.1/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          grant_type: "authorization_code",
+          code: String(code),
+          redirect_uri: LINE_REDIRECT_URI,
+          client_id: LINE_CHANNEL_ID.value(),
+          client_secret: LINE_CHANNEL_SECRET.value(),
+        }),
+      });
+      const tokenJson = await tokenRes.json();
+      if (!tokenRes.ok || !tokenJson.id_token) {
+        console.error("LINE token exchange failed:", tokenJson);
+        return fail("เข้าสู่ระบบด้วย LINE ไม่สำเร็จ");
+      }
+
+      // Decode the ID token payload (received directly from LINE's token
+      // endpoint over an authenticated HTTPS call with our Channel Secret —
+      // no separate JWKS signature check needed for this trust model) and
+      // sanity-check the standard claims.
+      const payload = JSON.parse(Buffer.from(tokenJson.id_token.split(".")[1], "base64").toString("utf8"));
+      if (payload.iss !== "https://access.line.me") return fail("ผู้ให้บริการไม่ถูกต้อง");
+      if (payload.aud !== LINE_CHANNEL_ID.value()) return fail("Channel ไม่ตรงกัน");
+      if (!payload.exp || payload.exp * 1000 < Date.now()) return fail("Token หมดอายุ");
+
+      const lineUserId = payload.sub;
+      const uid = `line_${lineUserId}`;
+      const listerRef = db.collection("listers").doc(uid);
+      const listerDoc = await listerRef.get();
+      if (!listerDoc.exists) {
+        await listerRef.set({
+          role: "lister",
+          name: payload.name || "",
+          email: payload.email || "",
+          lineUserId,
+          status: "approved",
+          createdAt: Date.now(),
+        });
+      }
+
+      const exchangeCode = randomToken(24);
+      await db.collection("lineAuthExchanges").doc(exchangeCode).set({
+        uid,
+        createdAt: Date.now(),
+        expiresAt: Date.now() + 60 * 1000,
+        used: false,
+      });
+      res.redirect(302, `${SITE_URL}/Agent%20Signup.dc.html?lineExchange=${exchangeCode}`);
+    } catch (e) {
+      console.error("lineAuthCallback failed:", e);
+      return fail("เกิดข้อผิดพลาด ลองใหม่อีกครั้ง");
+    }
+  }
+);
+
+// 3) The page (on load, seeing ?lineExchange=...) calls this once to trade
+// the short-lived one-time code for a real Firebase custom token — the
+// custom token itself never appears in a URL/history/log, only in this
+// HTTPS response body.
+exports.lineAuthExchange = onRequest(
+  { cors: true, region: "asia-southeast1" },
+  async (req, res) => {
+    res.set("Access-Control-Allow-Origin", "*");
+    if (req.method === "OPTIONS") { res.set("Access-Control-Allow-Methods", "POST, OPTIONS").set("Access-Control-Allow-Headers", "Content-Type").status(204).send(""); return; }
+    try {
+      const { code } = req.body || {};
+      if (!code) { res.status(400).json({ error: "Missing code" }); return; }
+      const db = admin.firestore();
+      const ref = db.collection("lineAuthExchanges").doc(String(code));
+      const doc = await ref.get();
+      if (!doc.exists || doc.data().used || doc.data().expiresAt < Date.now()) {
+        res.status(400).json({ error: "invalid_or_expired" });
+        return;
+      }
+      await ref.update({ used: true });
+      const token = await admin.auth().createCustomToken(doc.data().uid);
+      res.json({ token });
+    } catch (e) {
+      console.error("lineAuthExchange failed:", e);
+      res.status(500).json({ error: String(e && e.message || e) });
     }
   }
 );
