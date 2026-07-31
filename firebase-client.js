@@ -492,9 +492,13 @@ export async function signInWithLineRedirect() {
 
 export async function getLineRedirectSignInResult() {
   if (!window.firebase) return null;
-  const existing = window.firebase.apps.find((a) => a.name === "lineAuth");
-  if (!existing) return null;
-  const result = await existing.auth().getRedirectResult();
+  // Must actually initialize (or reuse) the "lineAuth" app first — on the
+  // fresh page load this redirect lands back on, that named app instance
+  // doesn't exist yet at all, so searching window.firebase.apps for it
+  // always came up empty and silently returned null (no error, no sign-in
+  // — exactly the "bounces back to the form with nothing" symptom).
+  const a = getLineApp().auth();
+  const result = await a.getRedirectResult();
   if (!result || !result.user) return null;
   // The LINE sign-in happened on the separate "lineAuth" app instance —
   // every other function in this file (fetchMyListerDoc, currentAuthEmail,
@@ -503,9 +507,9 @@ export async function getLineRedirectSignInResult() {
   // so the rest of the site sees this user as signed in, same as Google/
   // Facebook/email sign-in do.
   const cred = window.firebase.auth.OAuthProvider.credentialFromResult(result);
-  const a = authApp();
-  if (cred && a) {
-    const mainCred = await a.signInWithCredential(cred);
+  const mainApp = authApp();
+  if (cred && mainApp) {
+    const mainCred = await mainApp.signInWithCredential(cred);
     return mainCred.user.uid;
   }
   return result.user.uid;
