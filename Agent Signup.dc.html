@@ -99,6 +99,7 @@
           เข้าสู่ระบบด้วย LINE
         </div>
       </div>
+      <sc-if value="{{ authNotReady }}" hint-placeholder-val="{{ false }}"><div style="font-size:11.5px; color:oklch(60% 0.02 60); margin:-8px 0 12px;">กำลังเตรียมระบบเข้าสู่ระบบ... รอสักครู่ก่อนกด</div></sc-if>
       <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
         <div style="flex:1; min-width:180px;">
           <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">หรือใช้เบอร์โทร (OTP ผ่าน SMS)</div>
@@ -217,7 +218,7 @@ class Component extends DCLogic {
     // True the instant this page loads back from a Google/Facebook redirect —
     // read synchronously (before any await) so the very first render already
     // shows the loading overlay instead of flashing the login/signup form.
-    redirectPending: (() => { try { return sessionStorage.getItem("hh_auth_redirect_pending") === "1"; } catch (e) { return false; } })() };
+    redirectPending: (() => { try { return sessionStorage.getItem("hh_auth_redirect_pending") === "1"; } catch (e) { return false; } })(), authReady: false };
 
   async componentDidMount() {
     // In-app browsers (LINE, Facebook, Instagram) block or break Google/
@@ -254,8 +255,14 @@ class Component extends DCLogic {
     // brand-new browser, throwing auth/argument-error once. Firing it here
     // (not inside the click handler) gives it the whole rest of page load
     // to finish before the user can possibly click.
-    this._fb = fb;
+    // Only make the buttons live once the Auth SDK's persistence layer has
+    // actually finished initializing (not just once firebase-client.js has
+    // loaded) — clicking Google/Facebook/LINE while warmUpAuthPersistence()
+    // is still resolving is exactly what threw auth/argument-error, because
+    // this._fb being set is what the click handlers gate on.
     try { await fb.warmUpAuthPersistence(); } catch (e) {}
+    this._fb = fb;
+    this.setState({ authReady: true });
     // Redirect flow: pick up the result if this page load is the browser
     // navigating back from Google/Facebook after signInWithRedirect(). On a
     // fresh mobile browser the Auth SDK's IndexedDB persistence layer can
@@ -522,6 +529,7 @@ class Component extends DCLogic {
         : "",
       foundingFinePrint: this.state.foundingNote || "ช่วงนี้ฟรีชั่วคราวสำหรับผู้สมัครกลุ่มแรก — จะแจ้งล่วงหน้าก่อนเริ่มเก็บค่าบริการในอนาคต",
       showRedirectLoading: this.state.redirectPending || this.state.socialBusy,
+      authNotReady: !this.state.authReady,
     };
   }
 }
