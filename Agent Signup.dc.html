@@ -256,9 +256,24 @@ class Component extends DCLogic {
     // to finish before the user can possibly click.
     this._fb = fb;
     // Redirect flow: pick up the result if this page load is the browser
-    // navigating back from Google/Facebook after signInWithRedirect().
+    // navigating back from Google/Facebook after signInWithRedirect(). On a
+    // fresh mobile browser the Auth SDK's IndexedDB persistence layer can
+    // still be opening at this exact moment — getRedirectResult() then
+    // silently returns no user AND no error, which used to bounce straight
+    // back to the login form with nothing to show for it (confirmed: the
+    // exact same account works on the very next click, once IndexedDB has
+    // warmed up). If we know a redirect really is in flight (the pending
+    // flag), retry a few times with a short growing delay before giving up
+    // instead of accepting the first empty result.
     try {
-      const uid = await fb.getRedirectSignInResult();
+      let uid = await fb.getRedirectSignInResult();
+      if (!uid && this.state.redirectPending) {
+        for (const delay of [400, 800, 1200, 1600]) {
+          await new Promise((r) => setTimeout(r, delay));
+          uid = await fb.getRedirectSignInResult();
+          if (uid) break;
+        }
+      }
       if (uid) { await this.completeSocialSignIn(uid, fb); return; }
     } catch (e) {
       console.error("[componentDidMount] getRedirectSignInResult threw:", e);
