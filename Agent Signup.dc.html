@@ -420,19 +420,20 @@ class Component extends DCLogic {
     if (this.state.socialBusy || !this._fb) return;
     this.setState({ socialBusy: true, socialError: "" });
     const fb = this._fb;
-    // LINE (a generic OIDC provider, not a Firebase-native one like Google)
-    // hit "missing initial state" errors via popup on mobile Chrome — that
-    // browser partitions storage for the popup's auth.firebaseapp.com
-    // context, so the relay back to this page's sessionStorage gets lost.
-    // Redirect avoids that entirely (same top-level document reloads and
-    // reads its own sessionStorage) — Google/Facebook stay on popup, this
-    // is LINE-only.
+    // Popup instead of redirect: ... (see above)
+    // Give the browser one paint frame to actually show the "signing in"
+    // overlay BEFORE the popup opens and backgrounds this tab — Chrome
+    // throttles/holds repaints on backgrounded tabs, so without this the
+    // popup closing and refocusing this tab could briefly flash the last
+    // frame painted before the click (the plain form) instead of the
+    // overlay, right before the final navigation.
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
     try {
-      sessionStorage.setItem("hh_auth_redirect_pending", "1");
-      await fb.signInWithLineRedirect();
+      const uid = await fb.signInWithLine();
+      await this.completeSocialSignIn(uid, fb);
     } catch (e) {
-      try { sessionStorage.removeItem("hh_auth_redirect_pending"); } catch (e2) {}
-      this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย LINE ไม่สำเร็จ — ตรวจสอบการตั้งค่า LINE Login channel ใน Firebase" });
+      if (e && e.code === "auth/popup-closed-by-user") { this.setState({ socialBusy: false }); return; }
+      this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย LINE ไม่สำเร็จ: " + (e && (e.code || e.message) || "unknown error") });
     }
   }
 
