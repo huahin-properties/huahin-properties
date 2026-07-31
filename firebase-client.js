@@ -313,12 +313,26 @@ export async function createListerAccount(email, password) {
 // like the email/password flow. Google/Facebook providers must be turned
 // on in the Firebase Console (Authentication → Sign-in method) before
 // these work — no code change needed after that.
+// auth/argument-error is 100% reproducible on the very first popup call
+// after a fresh page load (the Auth SDK's persistence layer is still
+// opening) — confirmed by testing, same root cause as the old redirect
+// flow had. A retry with NO delay (an awaited delay before signInWithPopup
+// would break the browser's "this click directly opened a popup" gesture
+// tracking and get the popup blocked) clears it reliably.
 export async function signInWithGoogle() {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
-  const provider = new window.firebase.auth.GoogleAuthProvider();
-  const cred = await a.signInWithPopup(provider);
-  return cred.user.uid;
+  const attempt = async () => {
+    const provider = new window.firebase.auth.GoogleAuthProvider();
+    const cred = await a.signInWithPopup(provider);
+    return cred.user.uid;
+  };
+  try {
+    return await attempt();
+  } catch (e) {
+    if (e && e.code === "auth/argument-error") return await attempt();
+    throw e;
+  }
 }
 
 // Popup-based sign-in (signInWithPopup, above) is unreliable in some
@@ -455,9 +469,18 @@ export async function getRedirectSignInResult() {
 export async function signInWithFacebook() {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
-  const provider = new window.firebase.auth.FacebookAuthProvider();
-  const cred = await a.signInWithPopup(provider);
-  return cred.user.uid;
+  const attempt = async () => {
+    const provider = new window.firebase.auth.FacebookAuthProvider();
+    provider.addScope("email");
+    const cred = await a.signInWithPopup(provider);
+    return cred.user.uid;
+  };
+  try {
+    return await attempt();
+  } catch (e) {
+    if (e && e.code === "auth/argument-error") return await attempt();
+    throw e;
+  }
 }
 
 // Popup version of LINE sign-in — added alongside signInWithGoogle/
@@ -471,9 +494,17 @@ export async function signInWithFacebook() {
 export async function signInWithLine() {
   const a = authApp();
   if (!a) throw new Error("Firebase Auth SDK not loaded on this page.");
-  const provider = new window.firebase.auth.OAuthProvider("oidc.line");
-  const cred = await a.signInWithPopup(provider);
-  return cred.user.uid;
+  const attempt = async () => {
+    const provider = new window.firebase.auth.OAuthProvider("oidc.line");
+    const cred = await a.signInWithPopup(provider);
+    return cred.user.uid;
+  };
+  try {
+    return await attempt();
+  } catch (e) {
+    if (e && e.code === "auth/argument-error") return await attempt();
+    throw e;
+  }
 }
 
 // Phone OTP is two steps: start (sends the SMS) then confirm (verifies the
