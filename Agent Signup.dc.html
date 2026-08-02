@@ -448,7 +448,7 @@ class Component extends DCLogic {
       await this.completeSocialSignIn(uid, fb);
     } catch (e) {
       if (e && e.code === "auth/popup-closed-by-user") { this.setState({ socialBusy: false }); return; }
-      this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย Facebook ไม่สำเร็จ (อาจยังไม่เปิดใช้งาน — แจ้งแอดมิน)" });
+      this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย Facebook ไม่สำเร็จ: " + (e && (e.code || e.message) || "unknown error") });
     }
   }
 
