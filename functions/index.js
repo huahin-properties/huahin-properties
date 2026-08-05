@@ -717,11 +717,37 @@ function pickTextColor(bgHex) {
   }
 }
 
+// The Cloud Functions container ships no Thai-capable font by default, so
+// Thai glyphs rendered blank/boxes. Fetch a Thai webfont once per container
+// instance (memoized — warm invocations skip the download) and register it
+// with the canvas lib before drawing any text.
+let _thaiFontReady = null;
+function ensureThaiFont() {
+  if (_thaiFontReady) return _thaiFontReady;
+  _thaiFontReady = (async () => {
+    const { GlobalFonts } = require("@napi-rs/canvas");
+    const https = require("https");
+    const url = "https://cdn.jsdelivr.net/gh/google/fonts/ofl/notosansthai/NotoSansThai%5Bwdth,wght%5D.ttf";
+    const buf = await new Promise((resolve, reject) => {
+      https.get(url, (res) => {
+        if (res.statusCode !== 200) { reject(new Error("font fetch failed: " + res.statusCode)); return; }
+        const chunks = [];
+        res.on("data", (c) => chunks.push(c));
+        res.on("end", () => resolve(Buffer.concat(chunks)));
+      }).on("error", reject);
+    });
+    GlobalFonts.registerFromBuffer(buf, "NotoSansThai");
+  })().catch((e) => { console.error("Thai font load failed:", e); _thaiFontReady = null; });
+  return _thaiFontReady;
+}
+
 exports.shareCard = onRequest(
   { region: "asia-southeast1", memory: "512MiB" },
   async (req, res) => {
     try {
       const { createCanvas, loadImage } = require("@napi-rs/canvas");
+      await ensureThaiFont();
+      const FONT_FAMILY = "NotoSansThai, sans-serif";
       const id = String(req.query.id || "");
       const FALLBACK = "เจ้าของทรัพย์";
       let name = FALLBACK;
@@ -790,7 +816,7 @@ exports.shareCard = onRequest(
       }
       let nameLines = [];
       while (nameSize > 34) {
-        nameLines = wrapByWords(name, `700 ${nameSize}px sans-serif`, maxNameWidth);
+        nameLines = wrapByWords(name, `700 ${nameSize}px ${FONT_FAMILY}`, maxNameWidth);
         if (nameLines.length <= 2 && nameLines.every((l) => ctx.measureText(l).width <= maxNameWidth)) break;
         nameSize -= 4;
       }
@@ -798,7 +824,7 @@ exports.shareCard = onRequest(
       const nameBlockTop = 330;
       ctx.fillStyle = textColor;
       nameLines.forEach((line, i) => {
-        ctx.font = `700 ${nameSize}px sans-serif`;
+        ctx.font = `700 ${nameSize}px ${FONT_FAMILY}`;
         ctx.fillText(line, cx, nameBlockTop + i * nameLineHeight);
       });
       let y = nameBlockTop + nameLines.length * nameLineHeight + 8;
@@ -807,13 +833,13 @@ exports.shareCard = onRequest(
       // then description — sizes unchanged (still tied to their own text).
       const pageSize = Math.round(nameSize * 0.42);
       y += pageSize * 1.5;
-      ctx.font = `600 ${pageSize}px sans-serif`;
+      ctx.font = `600 ${pageSize}px ${FONT_FAMILY}`;
       ctx.fillStyle = subColor;
       ctx.fillText("P R O P E R T Y   P A G E", cx, y);
 
       const brandSize = Math.round(nameSize * 0.48);
       y += brandSize * 1.3;
-      ctx.font = `500 ${brandSize}px sans-serif`;
+      ctx.font = `500 ${brandSize}px ${FONT_FAMILY}`;
       ctx.fillStyle = subColor;
       ctx.fillText("by huahin.properties", cx, y);
 
@@ -821,9 +847,9 @@ exports.shareCard = onRequest(
       const descText = name === FALLBACK
         ? "ดูทรัพย์ทั้งหมด และติดต่อเจ้าของทรัพย์ได้โดยตรง"
         : `ดูทรัพย์ทั้งหมด และติดต่อ ${name} ได้โดยตรง`;
-      const descLines = wrapByWords(descText, `400 ${descSize}px sans-serif`, W - 200);
+      const descLines = wrapByWords(descText, `400 ${descSize}px ${FONT_FAMILY}`, W - 200);
       y += descSize * 1.8;
-      ctx.font = `400 ${descSize}px sans-serif`;
+      ctx.font = `400 ${descSize}px ${FONT_FAMILY}`;
       ctx.fillStyle = subColor;
       descLines.slice(0, 2).forEach((line, i) => {
         ctx.fillText(line, cx, y + i * descSize * 1.3);
