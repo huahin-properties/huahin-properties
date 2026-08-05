@@ -661,10 +661,10 @@ exports.agentProfileMeta = onRequest(
         }
       }
       const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
-      const title = `${name} — เว็บไซต์ทรัพย์ส่วนตัว`;
+      const title = name;
       const description = name === FALLBACK
-        ? "ดูรายการทรัพย์และติดต่อเจ้าของโปรไฟล์โดยตรงผ่าน huahin.properties"
-        : `ดูรายการทรัพย์และติดต่อ ${name} โดยตรงผ่าน huahin.properties`;
+        ? "Property Page — ดูทรัพย์ทั้งหมด และติดต่อเจ้าของทรัพย์ได้โดยตรง — by huahin.properties"
+        : `Property Page — ดูทรัพย์ทั้งหมด และติดต่อ ${name} ได้โดยตรง — by huahin.properties`;
       photo = `https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/shareCard?id=${encodeURIComponent(id)}&v=${cardV}`;
       const ua = String(req.headers["user-agent"] || "").toLowerCase();
       // Chat-app link-preview bots (LINE/Facebook/WhatsApp/Telegram/etc.)
@@ -727,9 +727,18 @@ function ensureThaiFont() {
   _thaiFontReady = (async () => {
     const { GlobalFonts } = require("@napi-rs/canvas");
     const https = require("https");
-    const url = "https://cdn.jsdelivr.net/gh/google/fonts/ofl/notosansthai/NotoSansThai%5Bwdth,wght%5D.ttf";
+    const url = "https://raw.githubusercontent.com/google/fonts/main/ofl/sarabun/Sarabun-Regular.ttf";
     const buf = await new Promise((resolve, reject) => {
-      https.get(url, (res) => {
+      https.get(url, { headers: { "User-Agent": "node" } }, (res) => {
+        if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+          https.get(res.headers.location, (res2) => {
+            if (res2.statusCode !== 200) { reject(new Error("font redirect fetch failed: " + res2.statusCode)); return; }
+            const chunks = [];
+            res2.on("data", (c) => chunks.push(c));
+            res2.on("end", () => resolve(Buffer.concat(chunks)));
+          }).on("error", reject);
+          return;
+        }
         if (res.statusCode !== 200) { reject(new Error("font fetch failed: " + res.statusCode)); return; }
         const chunks = [];
         res.on("data", (c) => chunks.push(c));
@@ -737,7 +746,8 @@ function ensureThaiFont() {
       }).on("error", reject);
     });
     GlobalFonts.registerFromBuffer(buf, "NotoSansThai");
-  })().catch((e) => { console.error("Thai font load failed:", e); _thaiFontReady = null; });
+    console.log("Thai font registered, bytes:", buf.length);
+  })().catch((e) => { console.error("Thai font load failed:", e); _thaiFontReady = null; throw e; });
   return _thaiFontReady;
 }
 
@@ -746,7 +756,7 @@ exports.shareCard = onRequest(
   async (req, res) => {
     try {
       const { createCanvas, loadImage } = require("@napi-rs/canvas");
-      await ensureThaiFont();
+      try { await ensureThaiFont(); } catch (e) { console.error("proceeding without Thai font:", e); }
       const FONT_FAMILY = "NotoSansThai, sans-serif";
       const id = String(req.query.id || "");
       const FALLBACK = "เจ้าของทรัพย์";
@@ -829,31 +839,34 @@ exports.shareCard = onRequest(
       });
       let y = nameBlockTop + nameLines.length * nameLineHeight + 8;
 
-      // Order per approved swap: Property Page, then by huahin.properties,
-      // then description — sizes unchanged (still tied to their own text).
+      // Order (approved): Name → Property Page → description → by huahin.properties.
+      // Consistent proportional gaps between each block for a tidier, more
+      // deliberate vertical rhythm instead of ad hoc offsets.
       const pageSize = Math.round(nameSize * 0.42);
-      y += pageSize * 1.5;
+      const brandSize = Math.round(nameSize * 0.48);
+      const descSize = Math.round(nameSize * 0.34);
+
+      y += pageSize * 1.1;
       ctx.font = `600 ${pageSize}px ${FONT_FAMILY}`;
       ctx.fillStyle = subColor;
       ctx.fillText("P R O P E R T Y   P A G E", cx, y);
 
-      const brandSize = Math.round(nameSize * 0.48);
-      y += brandSize * 1.3;
-      ctx.font = `500 ${brandSize}px ${FONT_FAMILY}`;
-      ctx.fillStyle = subColor;
-      ctx.fillText("by huahin.properties", cx, y);
-
-      const descSize = Math.round(nameSize * 0.34);
       const descText = name === FALLBACK
         ? "ดูทรัพย์ทั้งหมด และติดต่อเจ้าของทรัพย์ได้โดยตรง"
         : `ดูทรัพย์ทั้งหมด และติดต่อ ${name} ได้โดยตรง`;
-      const descLines = wrapByWords(descText, `400 ${descSize}px ${FONT_FAMILY}`, W - 200);
-      y += descSize * 1.8;
+      const descLines = wrapByWords(descText, `400 ${descSize}px ${FONT_FAMILY}`, W - 200).slice(0, 2);
+      y += pageSize * 0.9 + descSize * 1.1;
       ctx.font = `400 ${descSize}px ${FONT_FAMILY}`;
       ctx.fillStyle = subColor;
-      descLines.slice(0, 2).forEach((line, i) => {
+      descLines.forEach((line, i) => {
         ctx.fillText(line, cx, y + i * descSize * 1.3);
       });
+      y += (descLines.length - 1) * descSize * 1.3;
+
+      y += descSize * 0.9 + brandSize * 1.1;
+      ctx.font = `500 ${brandSize}px ${FONT_FAMILY}`;
+      ctx.fillStyle = subColor;
+      ctx.fillText("by huahin.properties", cx, y);
 
       const buf = await canvas.encode("png");
       res.set("Content-Type", "image/png");
