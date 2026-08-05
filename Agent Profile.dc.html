@@ -16,6 +16,10 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <title>เว็บไซต์ทรัพย์ของฉัน — huahin.properties</title>
+  <meta property="og:site_name" content="huahin.properties">
+  <meta property="og:title" content="เว็บไซต์ทรัพย์ส่วนตัว — huahin.properties">
+  <meta property="og:description" content="ดูรายการทรัพย์และติดต่อโดยตรงผ่าน huahin.properties">
+  <meta property="og:image" content="https://huahin.properties/logo.png">
   <link rel="icon" type="image/png" href="./logo.png">
   <style>
     body { margin: 0; background: white; font-family: 'Work Sans', sans-serif; }
@@ -499,7 +503,7 @@ class Component extends DCLogic {
         onOpen: () => this.openPropertyModal(p),
       };
     });
-    const shareUrl = `${window.location.origin}/Agent Profile.dc.html?id=${this._listerId}`;
+    const shareUrl = `${window.location.origin}/${encodeURIComponent("Agent Profile.dc.html")}?id=${this._listerId}`;
     const mp = this.state.modalProperty;
     const mpGallery = (mp && mp.gallery && mp.gallery.length) ? mp.gallery : [mp && mp.coverUrl].filter(Boolean);
     const mpStatus = mp ? (statusMap[mp.status] || statusMap.sale) : null;
