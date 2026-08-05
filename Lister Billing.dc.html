@@ -22,10 +22,18 @@
 </helmet>
 
 <div style="min-height:100vh;">
-  <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; gap:9px;">
-    <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
-    <span style="font-family:'Playfair Display',serif; font-size:19px; color:white;">huahin . properties</span>
-    <span style="color:oklch(70% 0.02 70); font-size:14px;">| สมาชิกของฉัน</span>
+  <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+    <div style="display:flex; align-items:center; gap:9px;">
+      <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
+      <span style="font-family:'Playfair Display',serif; font-size:19px; color:white;">huahin . properties</span>
+      <span style="color:oklch(70% 0.02 70); font-size:14px;">| สมาชิกของฉัน</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:16px;">
+      <a href="Home.dc.html" style="color:oklch(90% 0.02 70); text-decoration:none; font-size:13px; white-space:nowrap;">🏠 หน้าแรก</a>
+      <sc-if value="{{ isSignedIn }}">
+        <div onClick="{{ onLogout }}" style="font-size:13px; color:oklch(85% 0.06 70); cursor:pointer; white-space:nowrap;">ออกจากระบบ</div>
+      </sc-if>
+    </div>
   </div>
 
   <div style="max-width:1080px; margin:0 auto; padding:clamp(20px,4vw,40px);">
@@ -298,6 +306,8 @@ class Component extends DCLogic {
     const btnBusy = btnBase + "background:oklch(85% 0.01 70); color:oklch(50% 0.02 60); cursor:default;";
 
     return {
+      isSignedIn: !this.state.notSignedIn && !!this.state.lister,
+      onLogout: () => { this._fb.logoutAdmin(); window.location.href = "Home.dc.html"; },
       notSignedIn: this.state.notSignedIn,
       loaded: this.state.loaded,
       hasLister: !!this.state.lister,

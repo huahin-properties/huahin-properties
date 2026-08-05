@@ -30,7 +30,10 @@
       <span style="font-family:'Playfair Display',serif; font-size:19px; color:white;">huahin . properties</span>
       <span style="color:oklch(70% 0.02 70); font-size:14px;">| Listing Approvals</span>
     </a>
-    <a href="Admin Dashboard.dc.html" style="color:oklch(85% 0.02 70); font-size:13px; text-decoration:none;">← กลับแดชบอร์ด</a>
+    <div style="display:flex; align-items:center; gap:16px;">
+      <a href="Admin Dashboard.dc.html" style="color:oklch(85% 0.02 70); font-size:13px; text-decoration:none;">← กลับแดชบอร์ด</a>
+      <div onClick="{{ onLogout }}" style="font-size:13px; color:oklch(85% 0.06 70); cursor:pointer; white-space:nowrap;">ออกจากระบบ</div>
+    </div>
   </div>
 
   <div style="max-width:1000px; margin:0 auto; padding:clamp(20px,4vw,40px);">
@@ -160,6 +163,7 @@ class Component extends DCLogic {
       });
 
     return {
+      onLogout: () => { this._fb.logoutAdmin(); window.location.href = "Admin Login.dc.html"; },
       countAll, countPending, countLive, countExpired, countRejected,
       tabAllStyle: this.state.filter === "all" ? tabActive : tabInactive,
       tabPendingStyle: this.state.filter === "pending" ? tabActive : tabInactive,

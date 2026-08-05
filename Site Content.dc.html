@@ -26,7 +26,10 @@
   <!-- HEADER -->
   <div style="display:flex; align-items:center; justify-content:space-between; gap:10px 16px; flex-wrap:wrap; padding:16px 24px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80);">
     <a href="Admin Dashboard.dc.html" style="text-decoration:none; color:inherit; font-family:'Playfair Display',serif; font-size:19px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; min-width:0;">huahin<span style="color:oklch(75% 0.13 85);">.</span>properties <span style="font-size:12px; color:oklch(75% 0.01 70); border-left:1px solid oklch(45% 0.01 60); padding-left:14px; white-space:nowrap;">Site Content</span></a>
-    <a href="Admin Dashboard.dc.html" style="font-size:13px; color:oklch(85% 0.01 70); text-decoration:none; white-space:nowrap;">{{ t.admin_back_to_dashboard }}</a>
+    <div style="display:flex; align-items:center; gap:16px;">
+      <a href="Admin Dashboard.dc.html" style="font-size:13px; color:oklch(85% 0.01 70); text-decoration:none; white-space:nowrap;">{{ t.admin_back_to_dashboard }}</a>
+      <div onClick="{{ onLogout }}" style="font-size:13px; color:oklch(85% 0.06 70); cursor:pointer; white-space:nowrap;">ออกจากระบบ</div>
+    </div>
   </div>
 
   <div style="padding:28px 24px 64px;">
@@ -814,7 +817,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const mod = this.state.data;
-    if (!mod) return { t: {}, areas: [] };
+    if (!mod) return { t: {}, areas: [], onLogout: () => { this._fb && this._fb.logoutAdmin(); window.location.href = "Admin Login.dc.html"; } };
     const t = mod.I18N[this.state.lang];
     const heroUrl = (this.state.areaContent.hero && this.state.areaContent.hero.photoUrl) || "";
 
@@ -837,6 +840,7 @@ class Component extends DCLogic {
 
     return {
       t,
+      onLogout: () => { this._fb.logoutAdmin(); window.location.href = "Admin Login.dc.html"; },
       saveMsg: this.state.saveMsg,
       maintenanceOn: this.state.maintenanceOn,
       onToggleMaintenance: () => this.toggleMaintenance(),
