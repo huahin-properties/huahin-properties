@@ -298,8 +298,21 @@ class Component extends DCLogic {
     // site (never for visitors from a shared link) — compare the signed-in
     // uid to the profile being viewed.
     try {
-      const authUser = fb.getCurrentAuthUser();
-      this.setState({ isOwner: !!authUser && authUser.uid === this._listerId });
+      // getCurrentAuthUser() reads Firebase's *already-restored* session —
+      // but on a fresh page load Firebase Auth hasn't finished restoring
+      // that session yet at this point (it's async), so this always read
+      // null and isOwner stayed false forever, even when actually logged
+      // in as the owner. Waiting for the real auth-state event fixes it.
+      const a = fb.authApp ? fb.authApp() : null;
+      const authInstance = (window.firebase && window.firebase.apps.length) ? window.firebase.apps[0].auth() : null;
+      if (authInstance) {
+        authInstance.onAuthStateChanged((u) => {
+          this.setState({ isOwner: !!u && u.uid === this._listerId });
+        });
+      } else {
+        const authUser = fb.getCurrentAuthUser();
+        this.setState({ isOwner: !!authUser && authUser.uid === this._listerId });
+      }
     } catch (e) {}
     try {
       const lister = await fb.fetchListerById(this._listerId);
