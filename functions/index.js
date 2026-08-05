@@ -650,12 +650,14 @@ exports.agentProfileMeta = onRequest(
       const FALLBACK = "ที่ปรึกษาอสังหาริมทรัพย์";
       let name = FALLBACK;
       let photo = "https://huahin.properties/logo.png";
+      let cardV = "1";
       if (id) {
         const doc = await admin.firestore().collection("listers").doc(id).get();
         if (doc.exists) {
           const d = doc.data();
           name = d.displayName || d.fullName || d.companyName || d.name || FALLBACK;
           if (d.profilePhotoUrl) photo = d.profilePhotoUrl;
+          if (d.updatedAt) cardV = encodeURIComponent(d.updatedAt);
         }
       }
       const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
@@ -663,6 +665,7 @@ exports.agentProfileMeta = onRequest(
       const description = name === FALLBACK
         ? "ดูรายการทรัพย์และติดต่อเจ้าของโปรไฟล์โดยตรงผ่าน huahin.properties"
         : `ดูรายการทรัพย์และติดต่อ ${name} โดยตรงผ่าน huahin.properties`;
+      photo = `https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/shareCard?id=${encodeURIComponent(id)}&v=${cardV}`;
       const ua = String(req.headers["user-agent"] || "").toLowerCase();
       // Chat-app link-preview bots (LINE/Facebook/WhatsApp/Telegram/etc.)
       // read this HTML directly for the <meta og:*> tags — they do NOT
@@ -691,6 +694,148 @@ exports.agentProfileMeta = onRequest(
 </head><body></body></html>`);
     } catch (e) {
       res.redirect(302, "https://huahin.properties/Agent%20Profile.dc.html?id=" + encodeURIComponent(String(req.query.id || "")));
+    }
+  }
+);
+
+// ── Dynamic Social Share Card (Digital Property Brand Card) ──
+// Renders a 1200x630 PNG on demand: member's circular photo (or logo
+// fallback) over their Mini-Site theme color, with name + fixed brand
+// copy. Never persisted to Storage — generated fresh per request and
+// cached by the CDN/client via a long max-age since the URL is versioned
+// with the lister's updatedAt (so it only changes when their profile does).
+function pickTextColor(bgHex) {
+  try {
+    const hex = bgHex.replace("#", "");
+    const r = parseInt(hex.substr(0, 2), 16) / 255;
+    const g = parseInt(hex.substr(2, 2), 16) / 255;
+    const b = parseInt(hex.substr(4, 2), 16) / 255;
+    const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    return lum > 0.6 ? "#2a1810" : "#ffffff";
+  } catch (e) {
+    return "#ffffff";
+  }
+}
+
+exports.shareCard = onRequest(
+  { region: "asia-southeast1", memory: "512MiB" },
+  async (req, res) => {
+    try {
+      const { createCanvas, loadImage } = require("@napi-rs/canvas");
+      const id = String(req.query.id || "");
+      const FALLBACK = "เจ้าของทรัพย์";
+      let name = FALLBACK;
+      let photoUrl = "";
+      let bgColor = "#7a1f2b";
+      if (id) {
+        const doc = await admin.firestore().collection("listers").doc(id).get();
+        if (doc.exists) {
+          const d = doc.data();
+          name = d.displayName || d.fullName || d.companyName || d.name || FALLBACK;
+          photoUrl = d.profilePhotoUrl || "";
+          bgColor = d.themeColor || bgColor;
+        }
+      }
+      const W = 1200, H = 630;
+      const canvas = createCanvas(W, H);
+      const ctx = canvas.getContext("2d");
+
+      ctx.fillStyle = bgColor;
+      ctx.fillRect(0, 0, W, H);
+
+      const textColor = pickTextColor(bgColor);
+      const isLight = textColor === "#2a1810";
+      const subColor = isLight ? "rgba(42,24,16,0.72)" : "rgba(255,255,255,0.78)";
+
+      const cx = W / 2, cy = 190, r = 110;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.fillStyle = isLight ? "rgba(0,0,0,0.06)" : "rgba(255,255,255,0.12)";
+      ctx.fill();
+      ctx.clip();
+      try {
+        const img = await loadImage(photoUrl || "https://huahin.properties/logo.png");
+        const scale = Math.max((r * 2) / img.width, (r * 2) / img.height);
+        const iw = img.width * scale, ih = img.height * scale;
+        ctx.drawImage(img, cx - iw / 2, cy - ih / 2, iw, ih);
+      } catch (e) {
+        ctx.fillStyle = "#7a1f2b";
+        ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+      }
+      ctx.restore();
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = isLight ? "rgba(0,0,0,0.15)" : "rgba(255,255,255,0.5)";
+      ctx.stroke();
+
+      const maxNameWidth = W - 160;
+      let nameSize = 72;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      function wrapByWords(text, font, maxWidth) {
+        ctx.font = font;
+        const words = text.split(" ");
+        const lines = [];
+        let cur = "";
+        for (const w of words) {
+          const test = cur ? cur + " " + w : w;
+          if (ctx.measureText(test).width > maxWidth && cur) { lines.push(cur); cur = w; }
+          else cur = test;
+        }
+        if (cur) lines.push(cur);
+        return lines;
+      }
+      let nameLines = [];
+      while (nameSize > 34) {
+        nameLines = wrapByWords(name, `700 ${nameSize}px sans-serif`, maxNameWidth);
+        if (nameLines.length <= 2 && nameLines.every((l) => ctx.measureText(l).width <= maxNameWidth)) break;
+        nameSize -= 4;
+      }
+      const nameLineHeight = nameSize * 1.15;
+      const nameBlockTop = 330;
+      ctx.fillStyle = textColor;
+      nameLines.forEach((line, i) => {
+        ctx.font = `700 ${nameSize}px sans-serif`;
+        ctx.fillText(line, cx, nameBlockTop + i * nameLineHeight);
+      });
+      let y = nameBlockTop + nameLines.length * nameLineHeight + 8;
+
+      // Order per approved swap: Property Page, then by huahin.properties,
+      // then description — sizes unchanged (still tied to their own text).
+      const pageSize = Math.round(nameSize * 0.42);
+      y += pageSize * 1.5;
+      ctx.font = `600 ${pageSize}px sans-serif`;
+      ctx.fillStyle = subColor;
+      ctx.fillText("P R O P E R T Y   P A G E", cx, y);
+
+      const brandSize = Math.round(nameSize * 0.48);
+      y += brandSize * 1.3;
+      ctx.font = `500 ${brandSize}px sans-serif`;
+      ctx.fillStyle = subColor;
+      ctx.fillText("by huahin.properties", cx, y);
+
+      const descSize = Math.round(nameSize * 0.34);
+      const descText = name === FALLBACK
+        ? "ดูทรัพย์ทั้งหมด และติดต่อเจ้าของทรัพย์ได้โดยตรง"
+        : `ดูทรัพย์ทั้งหมด และติดต่อ ${name} ได้โดยตรง`;
+      const descLines = wrapByWords(descText, `400 ${descSize}px sans-serif`, W - 200);
+      y += descSize * 1.8;
+      ctx.font = `400 ${descSize}px sans-serif`;
+      ctx.fillStyle = subColor;
+      descLines.slice(0, 2).forEach((line, i) => {
+        ctx.fillText(line, cx, y + i * descSize * 1.3);
+      });
+
+      const buf = await canvas.encode("png");
+      res.set("Content-Type", "image/png");
+      res.set("Cache-Control", "public, max-age=31536000, immutable");
+      res.send(buf);
+    } catch (e) {
+      console.error("shareCard failed:", e);
+      res.redirect(302, "https://huahin.properties/logo.png");
     }
   }
 );
