@@ -60,7 +60,7 @@
 
 <sc-if value="{{ inAppBrowserWarning }}" hint-placeholder-val="{{ false }}">
   <div style="position:sticky; top:0; z-index:997; background:oklch(28% 0.02 60); color:white; padding:11px 16px; font-size:13px; text-align:center; line-height:1.6; display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap;">
-    <span>เข้าสู่ระบบด้วย Google/Facebook อาจใช้ไม่ได้ในเบราว์เซอร์นี้ — แตะ ⋮ หรือ ••• มุมขวาบน แล้วเลือก "เปิดในเบราว์เซอร์" เพื่อสมัครให้สำเร็จ (หรือใช้ OTP เบอร์โทรด้านล่างแทนได้เลย)</span>
+    <span>เข้าสู่ระบบด้วย Google/LINE อาจใช้ไม่ได้ในเบราว์เซอร์นี้ — แตะ ⋮ หรือ ••• มุมขวาบน แล้วเลือก "เปิดในเบราว์เซอร์" เพื่อสมัครให้สำเร็จ</span>
     <span onClick="{{ onDismissInAppWarning }}" style="cursor:pointer; opacity:0.7; flex-shrink:0;">✕</span>
   </div>
 </sc-if>
@@ -107,36 +107,18 @@
 
 
     <div style="background:white; border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:20px clamp(24px,4vw,36px); margin-bottom:16px;">
-      <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:12px;">เข้าสู่ระบบ/สมัครแบบเร็ว — ไม่ต้องพิมพ์อีเมล/รหัสผ่าน</div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
-        <div onClick="{{ onGoogleSignIn }}" style="display:flex; align-items:center; gap:10px; background:white; border:1px solid oklch(85% 0.01 70); padding:10px 18px; border-radius:6px; font-size:13.5px; font-weight:500; color:oklch(25% 0.02 60); cursor:pointer;">
-          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6.5 29.6 4.5 24 4.5 12.7 4.5 3.5 13.7 3.5 25S12.7 45.5 24 45.5 44.5 36.3 44.5 25c0-1.6-.2-2.8-.9-4.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.8 18.9 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6.5 29.6 4.5 24 4.5c-7.7 0-14.4 4.4-17.7 10.2z"/><path fill="#4CAF50" d="M24 45.5c5.5 0 10.4-1.9 14.2-5.1l-6.6-5.4c-2 1.5-4.6 2.5-7.6 2.5-5.3 0-9.7-3.1-11.3-7.5l-6.6 5.1C9.6 41 16.2 45.5 24 45.5z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4.1 5.5l6.6 5.4C41.6 36 44.5 31 44.5 25c0-1.6-.2-2.8-.9-4.5z"/></svg>
+      <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:14px;">เข้าสู่ระบบ/สมัครแบบเร็ว — ไม่ต้องพิมพ์อีเมล/รหัสผ่าน</div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-bottom:6px;">
+        <div onClick="{{ onGoogleSignIn }}" style="display:flex; align-items:center; justify-content:center; gap:10px; background:white; border:1px solid oklch(85% 0.01 70); padding:13px 18px; border-radius:8px; font-size:14px; font-weight:600; color:oklch(25% 0.02 60); cursor:pointer; transition:border-color 0.15s, box-shadow 0.15s;">
+          <svg width="19" height="19" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6.5 29.6 4.5 24 4.5 12.7 4.5 3.5 13.7 3.5 25S12.7 45.5 24 45.5 44.5 36.3 44.5 25c0-1.6-.2-2.8-.9-4.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.8 18.9 13 24 13c3.1 0 5.8 1.1 8 3l5.7-5.7C34.6 6.5 29.6 4.5 24 4.5c-7.7 0-14.4 4.4-17.7 10.2z"/><path fill="#4CAF50" d="M24 45.5c5.5 0 10.4-1.9 14.2-5.1l-6.6-5.4c-2 1.5-4.6 2.5-7.6 2.5-5.3 0-9.7-3.1-11.3-7.5l-6.6 5.1C9.6 41 16.2 45.5 24 45.5z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.1-4.1 5.5l6.6 5.4C41.6 36 44.5 31 44.5 25c0-1.6-.2-2.8-.9-4.5z"/></svg>
           เข้าสู่ระบบด้วย Google
         </div>
-        <div onClick="{{ onFacebookSignIn }}" style="display:flex; align-items:center; gap:10px; background:#1877F2; color:white; padding:10px 18px; border-radius:6px; font-size:13.5px; font-weight:500; cursor:pointer;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06C2 17.08 5.66 21.2 10.44 21.94V14.9H7.9v-2.84h2.54V9.86c0-2.5 1.49-3.89 3.78-3.89 1.1 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.78l-.44 2.84h-2.34v7.04C18.34 21.2 22 17.08 22 12.06z"/></svg>
-          เข้าสู่ระบบด้วย Facebook
-        </div>
-        <div onClick="{{ onLineSignIn }}" style="display:flex; align-items:center; gap:10px; background:#06C755; color:white; padding:10px 18px; border-radius:6px; font-size:13.5px; font-weight:500; cursor:pointer;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 5.66 2 10.17c0 4.04 3.55 7.43 8.35 8.07.33.07.77.22.88.5.1.26.07.66.03.92l-.14.86c-.04.26-.2 1.01.88.55 1.08-.46 5.82-3.43 7.94-5.87C21.29 13.5 22 11.9 22 10.17 22 5.66 17.52 2 12 2zm-3.3 10.6H7.05a.3.3 0 01-.3-.3V8.1a.3.3 0 01.3-.3h.65a.3.3 0 01.3.3v3.5h1.7a.3.3 0 01.3.3v.6a.3.3 0 01-.3.3zm2.15 0h-.65a.3.3 0 01-.3-.3V8.1a.3.3 0 01.3-.3h.65a.3.3 0 01.3.3v4.2a.3.3 0 01-.3.3zm4.85 0h-.63a.3.3 0 01-.25-.13l-1.72-2.34v2.17a.3.3 0 01-.3.3h-.65a.3.3 0 01-.3-.3V8.1a.3.3 0 01.3-.3h.65a.3.3 0 01.25.13l1.7 2.32V8.1a.3.3 0 01.3-.3h.65a.3.3 0 01.3.3v4.2a.3.3 0 01-.3.3zm3.4 0h-2.4a.3.3 0 01-.3-.3V8.1a.3.3 0 01.3-.3h2.4a.3.3 0 01.3.3v.6a.3.3 0 01-.3.3h-1.45v.7h1.45a.3.3 0 01.3.3v.6a.3.3 0 01-.3.3h-1.45v.7h1.45a.3.3 0 01.3.3v.6a.3.3 0 01-.3.3z"/></svg>
+        <div onClick="{{ onLineSignIn }}" style="display:flex; align-items:center; justify-content:center; gap:10px; background:#06C755; color:white; padding:13px 18px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; transition:filter 0.15s;">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 5.66 2 10.17c0 4.04 3.55 7.43 8.35 8.07.33.07.77.22.88.5.1.26.07.66.03.92l-.14.86c-.04.26-.2 1.01.88.55 1.08-.46 5.82-3.43 7.94-5.87C21.29 13.5 22 11.9 22 10.17 22 5.66 17.52 2 12 2zm-3.3 10.6H7.05a.3.3 0 01-.3-.3V8.1a.3.3 0 01.3-.3h.65a.3.3 0 01.3.3v3.5h1.7a.3.3 0 01.3.3v.6a.3.3 0 01-.3.3zm2.15 0h-.65a.3.3 0 01-.3-.3V8.1a.3.3 0 01.3-.3h.65a.3.3 0 01.3.3v4.2a.3.3 0 01-.3.3zm4.85 0h-.63a.3.3 0 01-.25-.13l-1.72-2.34v2.17a.3.3 0 01-.3.3h-.65a.3.3 0 01-.3-.3V8.1a.3.3 0 01.3-.3h.65a.3.3 0 01.25.13l1.7 2.32V8.1a.3.3 0 01.3-.3h.65a.3.3 0 01.3.3v4.2a.3.3 0 01-.3.3zm3.4 0h-2.4a.3.3 0 01-.3-.3V8.1a.3.3 0 01.3-.3h2.4a.3.3 0 01.3.3v.6a.3.3 0 01-.3.3h-1.45v.7h1.45a.3.3 0 01.3.3v.6a.3.3 0 01-.3.3h-1.45v.7h1.45a.3.3 0 01.3.3v.6a.3.3 0 01-.3.3z"/></svg>
           เข้าสู่ระบบด้วย LINE
         </div>
       </div>
-      <sc-if value="{{ authNotReady }}" hint-placeholder-val="{{ false }}"><div style="font-size:11.5px; color:oklch(60% 0.02 60); margin:-8px 0 12px;">กำลังเตรียมระบบเข้าสู่ระบบ... รอสักครู่ก่อนกด</div></sc-if>
-      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
-        <div style="flex:1; min-width:180px;">
-          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">หรือใช้เบอร์โทร (OTP ผ่าน SMS)</div>
-          <input value="{{ phoneOtp }}" onChange="{{ onPhoneOtp }}" placeholder="+66812345678" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:13px; font-family:inherit;" />
-        </div>
-        <sc-if value="{{ showOtpCodeInput }}">
-          <div style="flex:1; min-width:120px;">
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รหัส OTP</div>
-            <input value="{{ otpCode }}" onChange="{{ onOtpCode }}" placeholder="123456" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:13px; font-family:inherit;" />
-          </div>
-        </sc-if>
-        <div onClick="{{ onOtpAction }}" style="background:oklch(22% 0.02 60); color:white; padding:10px 18px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">{{ otpActionLabel }}</div>
-      </div>
-      <div id="hh-recaptcha"></div>
+      <sc-if value="{{ authNotReady }}" hint-placeholder-val="{{ false }}"><div style="font-size:11.5px; color:oklch(60% 0.02 60); margin-top:4px;">กำลังเตรียมระบบเข้าสู่ระบบ... รอสักครู่ก่อนกด</div></sc-if>
       <sc-if value="{{ socialError }}"><div style="font-size:12.5px; color:oklch(50% 0.18 30); margin-top:10px;">{{ socialError }}</div></sc-if>
     </div>
     <div style="text-align:center; font-size:12px; color:oklch(60% 0.02 60); margin-bottom:16px;">— หรือใช้อีเมล/รหัสผ่านแบบเดิมด้านล่าง —</div>
@@ -361,7 +343,6 @@ class Component extends DCLogic {
       if (pending) {
         sessionStorage.removeItem("hh_social_retry");
         if (pending === "google") this.googleSignIn();
-        else if (pending === "facebook") this.facebookSignIn();
       }
     } catch (e) {}
     try {
@@ -439,19 +420,6 @@ class Component extends DCLogic {
     }
   }
 
-  async facebookSignIn() {
-    if (this.state.socialBusy || !this._fb) return;
-    this.setState({ socialBusy: true, socialError: "" });
-    const fb = this._fb;
-    try {
-      const uid = await fb.signInWithFacebook();
-      await this.completeSocialSignIn(uid, fb);
-    } catch (e) {
-      if (e && e.code === "auth/popup-closed-by-user") { this.setState({ socialBusy: false }); return; }
-      this.setState({ socialBusy: false, socialError: "เข้าสู่ระบบด้วย Facebook ไม่สำเร็จ: " + (e && (e.code || e.message) || "unknown error") });
-    }
-  }
-
   onLineSignIn() {
     // Server-side OAuth now (functions/index.js: lineAuthStart) — a plain
     // full-page navigation, not a Firebase popup/redirect call. Avoids the
@@ -460,30 +428,6 @@ class Component extends DCLogic {
     // componentDidMount via the ?lineExchange= it returns with.
     if (this._fb) this._fb.goToLineLogin();
     else window.location.href = "https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/lineAuthStart";
-  }
-
-  async otpAction() {
-    if (this.state.socialBusy) return;
-    const fb = await import("./firebase-client.js");
-    if (!this.state.otpSent) {
-      if (!this.state.phoneOtp.trim()) { this.setState({ socialError: "กรอกเบอร์โทรแบบมี + รหัสประเทศ เช่น +66812345678" }); return; }
-      this.setState({ socialBusy: true, socialError: "" });
-      try {
-        await fb.startPhoneSignIn(this.state.phoneOtp.trim(), "hh-recaptcha");
-        this.setState({ otpSent: true, socialBusy: false });
-      } catch (e) {
-        this.setState({ socialBusy: false, socialError: "ส่ง OTP ไม่สำเร็จ ตรวจรูปแบบเบอร์โทรอีกครั้ง" });
-      }
-    } else {
-      if (!this.state.otpCode.trim()) { this.setState({ socialError: "กรอกรหัส OTP ที่ได้รับทาง SMS" }); return; }
-      this.setState({ socialBusy: true, socialError: "" });
-      try {
-        const uid = await fb.confirmPhoneSignIn(this.state.otpCode.trim());
-        await this.completeSocialSignIn(uid, fb);
-      } catch (e) {
-        this.setState({ socialBusy: false, socialError: "รหัส OTP ไม่ถูกต้อง ลองใหม่อีกครั้ง" });
-      }
-    }
   }
 
   async loginSubmit() {
@@ -558,7 +502,6 @@ class Component extends DCLogic {
       error: this.state.error,
       onSubmit: () => this.submit(),
       onGoogleSignIn: () => this.googleSignIn(),
-      onFacebookSignIn: () => this.facebookSignIn(),
       onLineSignIn: () => this.onLineSignIn(),
       inAppBrowserWarning: this.state.inAppBrowserWarning,
       onDismissInAppWarning: () => this.setState({ inAppBrowserWarning: false }),
@@ -572,11 +515,6 @@ class Component extends DCLogic {
       loginPasswordType: this.state.showLoginPassword ? "text" : "password",
       onToggleLoginPassword: () => this.setState((s) => ({ showLoginPassword: !s.showLoginPassword })),
       loginPasswordEyeLabel: this.state.showLoginPassword ? "🙈" : "👁️",
-      phoneOtp: this.state.phoneOtp, onPhoneOtp: (e) => this.setState({ phoneOtp: e.target.value }),
-      otpCode: this.state.otpCode, onOtpCode: (e) => this.setState({ otpCode: e.target.value }),
-      showOtpCodeInput: this.state.otpSent,
-      otpActionLabel: this.state.socialBusy ? "กำลังดำเนินการ…" : (this.state.otpSent ? "ยืนยันรหัส" : "ส่งรหัส OTP"),
-      onOtpAction: () => this.otpAction(),
       socialError: this.state.socialError,
       foundingBannerText: (this.state.foundingLimit > 0)
         ? (this.state.foundingCount < this.state.foundingLimit
