@@ -634,6 +634,45 @@ exports.stripeWebhook = onRequest(
   }
 );
 
+// Dynamic Open Graph preview for shared Agent Profile links — plain
+// GitHub Pages HTML can't vary its <meta og:*> per lister (they're baked
+// into the static file), which is what LINE/Facebook/etc. read to build
+// the link-preview card. This serves a tiny HTML shell with the real
+// lister's name/photo as og tags, then immediately sends real visitors on
+// to the actual page — chat-app crawlers only read the tags, they don't
+// follow the redirect.
+exports.agentProfileMeta = onRequest(
+  { region: "asia-southeast1" },
+  async (req, res) => {
+    try {
+      const id = String(req.query.id || "");
+      const target = `https://huahin.properties/Agent%20Profile.dc.html?id=${encodeURIComponent(id)}`;
+      let name = "เจ้าของทรัพย์";
+      let photo = "https://huahin.properties/logo.png";
+      if (id) {
+        const doc = await admin.firestore().collection("listers").doc(id).get();
+        if (doc.exists) {
+          const d = doc.data();
+          name = d.displayName || d.name || name;
+          if (d.profilePhotoUrl) photo = d.profilePhotoUrl;
+        }
+      }
+      const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+      res.set("Content-Type", "text/html; charset=utf-8");
+      res.send(`<!DOCTYPE html><html><head><meta charset="utf-8">
+<meta property="og:site_name" content="huahin.properties">
+<meta property="og:title" content="${esc(name)} — huahin.properties">
+<meta property="og:description" content="ติดต่อ${esc(name)}โดยตรงผ่าน huahin.properties">
+<meta property="og:image" content="${esc(photo)}">
+<meta http-equiv="refresh" content="0;url=${esc(target)}">
+<script>location.replace(${JSON.stringify(target)});</script>
+</head><body></body></html>`);
+    } catch (e) {
+      res.redirect(302, "https://huahin.properties/Agent%20Profile.dc.html?id=" + encodeURIComponent(String(req.query.id || "")));
+    }
+  }
+);
+
 // ── LINE Login — server-side OAuth (replaces the old client-side Firebase
 // OIDC popup/redirect for LINE only, per BLUEPRINT decision: Firebase's
 // redirect-state relay ("missing initial state") was unreliable across
