@@ -1,0 +1,44 @@
+
+> test:rules
+> firebase emulators:exec --only firestore "mocha tests/conversations.rules.test.js --timeout 20000"
+
+i  emulators: Starting emulators: firestore
+i  firestore: Firestore Emulator logging to firestore-debug.log
+✔  firestore: Firestore Emulator was started in standard edition.
+✔  firestore: Firestore Emulator UI websocket is running on 9150.
+i  Running script: mocha tests/conversations.rules.test.js --timeout 20000
+
+
+  Conversation Ownership — Security Rules (simplified v1)
+DEBUG: auth.uid diagnostic PASSED — request.auth.uid is correctly set.
+    ✔ 0. DIAGNOSTIC: request.auth.uid is actually populated by authenticatedContext (361ms)
+    ✔ 1. Visitor A cannot read Visitor B's conversation (152ms)
+[2026-07-24T02:39:11.659Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x1bd2762a error. Code: 7 Message: 7 PERMISSION_DENIED: 
+evaluation error at L263:26 for 'create' @ L263, false for 'create' @ L276, false for 'create' @ L263, false for 'create' @ L276
+    ✔ 2. Visitor A cannot write role=owner message (110ms)
+[2026-07-24T02:39:11.822Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x1bd2762c error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L263, false for 'create' @ L276
+    ✔ 3. Visitor A cannot write role=ai message (73ms)
+    ✔ 4. Owner A cannot read Owner B's conversation (78ms)
+[2026-07-24T02:39:12.091Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x1bd27630 error. Code: 7 Message: 7 PERMISSION_DENIED: 
+evaluation error at L236:24 for 'update' @ L236, false for 'update' @ L276, false for 'update' @ L236, false for 'update' @ L276
+    ✔ 5. Owner cannot change visitorId on an existing conversation (58ms)
+    ✔ 6. Unauthenticated cannot read a conversation (46ms)
+DEBUG raw CONV_A exists: true data: {"ownerId":"owner-a-uid","ownerLabel":"Test Owner","senderId":"owner-a-uid","senderLabel":"Test Owner","visitorId":"visitor-a-uid","visitorLabel":"ผู้เยี่ยมชม test","collectionIds":["HH-101"],"propertyRefs":[{"propertyId":"HH-101","title":"Test Villa","price":5000000,"thumbnailUrl":""}],"status":"ai_handling","unreadByOwner":false,"lastMessage":"","lastMessageAt":{"seconds":1784860752,"nanoseconds":223000000},"createdAt":{"seconds":1784860752,"nanoseconds":223000000},"updatedAt":{"seconds":1784860752,"nanoseconds":223000000}}
+    ✔ 7. Admin can read any conversation (120ms)
+    ✔ Positive: Visitor A CAN read their own conversation (82ms)
+    ✔ Positive: Owner A CAN read their own conversation (58ms)
+    ✔ Positive: Visitor A CAN write their own customer message (72ms)
+    ✔ Positive: Owner A CAN write role=owner message on their own conversation
+[2026-07-24T02:39:13.077Z]  @firebase/firestore: Firestore (10.14.1): GrpcConnection RPC 'Write' stream 0x1bd2763f error. Code: 7 Message: 7 PERMISSION_DENIED: 
+false for 'create' @ L232, false for 'create' @ L276, evaluation error at L236:24 for 'update' @ L236, false for 'update' @ L276, false for 'create' @ L232, false for 'create' @ L276
+    ✔ No client can create a conversation doc directly (server-only via Callable Function) (67ms)
+
+
+  13 passing (5s)
+
+✔  Script exited successfully (code 0)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
