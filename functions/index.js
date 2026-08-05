@@ -745,7 +745,7 @@ function ensureThaiFont() {
         res.on("end", () => resolve(Buffer.concat(chunks)));
       }).on("error", reject);
     });
-    GlobalFonts.registerFromBuffer(buf, "NotoSansThai");
+    GlobalFonts.register(buf, "NotoSansThai");
     console.log("Thai font registered, bytes:", buf.length);
   })().catch((e) => { console.error("Thai font load failed:", e); _thaiFontReady = null; throw e; });
   return _thaiFontReady;
