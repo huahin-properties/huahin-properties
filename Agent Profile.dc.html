@@ -504,7 +504,7 @@ class Component extends DCLogic {
         onOpen: () => this.openPropertyModal(p),
       };
     });
-    const shareUrl = `https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/agentProfileMeta?id=${encodeURIComponent(this._listerId)}`;
+    const shareUrl = `https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/agentProfileMeta?id=${encodeURIComponent(this._listerId)}${lister && lister.updatedAt ? "&v=" + encodeURIComponent(lister.updatedAt) : ""}`;
     const mp = this.state.modalProperty;
     const mpGallery = (mp && mp.gallery && mp.gallery.length) ? mp.gallery : [mp && mp.coverUrl].filter(Boolean);
     const mpStatus = mp ? (statusMap[mp.status] || statusMap.sale) : null;
