@@ -201,7 +201,8 @@
 <sc-if value="{{ showShare }}">
   <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:600;" onClick="{{ onCloseShare }}">
     <div style="background:white; border-radius:10px; padding:24px; width:min(360px,90vw);" onClick="{{ stopProp }}">
-      <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:6px;">แชร์เว็บไซต์ของ {{ displayName }}</div>
+      <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:6px;">แชร์เว็บไซต์ส่วนตัวของ {{ displayName }}</div>
+      <div style="font-size:11px; color:oklch(60% 0.02 60); margin-bottom:12px;">ลินก์นี้จะแสดงชื่อและรูปโปรไฟล์ของ {{ displayName }} เหมือนความเมื่อแชร์ใน LINE/Facebook</div>
       <div style="font-size:12px; color:oklch(50% 0.02 60); word-break:break-all; margin-bottom:16px;">{{ shareUrl }}</div>
       <div style="display:flex; flex-direction:column; gap:10px;">
         <a href="{{ shareFbUrl }}" target="_blank" style="display:block; text-align:center; background:oklch(35% 0.1 250); color:white; padding:11px; border-radius:6px; font-size:13px;">แชร์ไป Facebook</a>
@@ -503,7 +504,7 @@ class Component extends DCLogic {
         onOpen: () => this.openPropertyModal(p),
       };
     });
-    const shareUrl = `${window.location.origin}/${encodeURIComponent("Agent Profile.dc.html")}?id=${this._listerId}`;
+    const shareUrl = `https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/agentProfileMeta?id=${encodeURIComponent(this._listerId)}`;
     const mp = this.state.modalProperty;
     const mpGallery = (mp && mp.gallery && mp.gallery.length) ? mp.gallery : [mp && mp.coverUrl].filter(Boolean);
     const mpStatus = mp ? (statusMap[mp.status] || statusMap.sale) : null;
@@ -556,7 +557,19 @@ class Component extends DCLogic {
       showShare: this.state.showShare, shareUrl,
       shareFbUrl: "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(shareUrl),
       shareLineUrl: "https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(shareUrl),
-      onOpenShare: () => this.setState({ showShare: true }),
+      onOpenShare: () => {
+        // One-tap native share instead of forcing the extra "copy link"
+        // step: the URL handed to navigator.share() is the same
+        // agentProfileMeta link (carries this owner's real name/photo as
+        // its link-preview card) — customers just tap the normal share
+        // button and the card already shows their name. Modal is only a
+        // fallback for browsers without the Web Share API.
+        if (navigator.share) {
+          navigator.share({ title: `${displayName} — huahin.properties`, url: shareUrl }).catch(() => {});
+        } else {
+          this.setState({ showShare: true });
+        }
+      },
       onOpenFilters: () => this.setState({ showFilters: true }),
       onCloseFilters: () => this.setState({ showFilters: false }),
       showFilters: this.state.showFilters,
