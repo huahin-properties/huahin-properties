@@ -7,8 +7,8 @@
     "public": "hosting-public",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
-      { "source": "/s", "function": { "functionId": "agentProfileMeta", "region": "asia-southeast1", "pinTag": true } },
-      { "source": "/s/**", "function": { "functionId": "agentProfileMeta", "region": "asia-southeast1", "pinTag": true } }
+      { "source": "/s", "function": { "functionId": "agentProfileMeta", "region": "asia-southeast1" } },
+      { "source": "/s/**", "function": { "functionId": "agentProfileMeta", "region": "asia-southeast1" } }
     ]
   },
   "emulators": {
