@@ -69,20 +69,7 @@
           </a>
         </sc-for>
       </div>
-      <div style="display:flex; flex-wrap:nowrap; overflow-x:auto; gap:8px; padding-bottom:12px;">
-        <select value="{{ filterType }}" onChange="{{ onFilterType }}" style="{{ filterSelectStyle }}">
-          <sc-for list="{{ typeFilterOptions }}" as="o" hint-placeholder-count="0"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
-        </select>
-        <select value="{{ filterZone }}" onChange="{{ onFilterZone }}" style="{{ filterSelectStyle }}">
-          <sc-for list="{{ zoneFilterOptions }}" as="o" hint-placeholder-count="0"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
-        </select>
-        <select value="{{ filterBeds }}" onChange="{{ onFilterBeds }}" style="{{ filterSelectStyle }}">
-          <sc-for list="{{ bedsFilterOptions }}" as="o" hint-placeholder-count="0"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
-        </select>
-        <select value="{{ filterPrice }}" onChange="{{ onFilterPrice }}" style="{{ filterSelectStyle }}">
-          <sc-for list="{{ priceFilterOptions }}" as="o" hint-placeholder-count="0"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
-        </select>
-      </div>
+      <div onClick="{{ onOpenFilters }}" style="display:inline-flex; align-items:center; gap:6px; border:1px solid oklch(85% 0.01 70); border-radius:100px; padding:8px 16px; font-size:12.5px; color:oklch(30% 0.02 60); background:white; cursor:pointer; margin-bottom:10px;">⚙︎ กรองตัวเลือก<sc-if value="{{ activeFilterCount }}"> ({{ activeFilterCount }})</sc-if></div>
     </div>
 
     <sc-if value="{{ hasBio }}">
@@ -183,6 +170,29 @@
   </sc-if>
 </sc-if>
 
+<sc-if value="{{ showFilters }}">
+  <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:600; padding:20px;" onClick="{{ onCloseFilters }}">
+    <div style="background:white; border-radius:10px; padding:24px; width:min(360px,90vw);" onClick="{{ stopProp }}">
+      <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:14px;">กรองตัวเลือก</div>
+      <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+        <select value="{{ filterType }}" onChange="{{ onFilterType }}" style="{{ filterModalSelectStyle }}">
+          <sc-for list="{{ typeFilterOptions }}" as="o" hint-placeholder-count="0"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+        </select>
+        <select value="{{ filterZone }}" onChange="{{ onFilterZone }}" style="{{ filterModalSelectStyle }}">
+          <sc-for list="{{ zoneFilterOptions }}" as="o" hint-placeholder-count="0"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+        </select>
+        <select value="{{ filterBeds }}" onChange="{{ onFilterBeds }}" style="{{ filterModalSelectStyle }}">
+          <sc-for list="{{ bedsFilterOptions }}" as="o" hint-placeholder-count="0"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+        </select>
+        <select value="{{ filterPrice }}" onChange="{{ onFilterPrice }}" style="{{ filterModalSelectStyle }}">
+          <sc-for list="{{ priceFilterOptions }}" as="o" hint-placeholder-count="0"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
+        </select>
+      </div>
+      <div onClick="{{ onCloseFilters }}" style="text-align:center; background:oklch(22% 0.02 60); color:white; padding:11px; border-radius:6px; font-size:13px; cursor:pointer;">ดูผลลัพธ์</div>
+    </div>
+  </div>
+</sc-if>
+
 <sc-if value="{{ showShare }}">
   <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:600;" onClick="{{ onCloseShare }}">
     <div style="background:white; border-radius:10px; padding:24px; width:min(360px,90vw);" onClick="{{ stopProp }}">
@@ -270,7 +280,7 @@ const AREA_LABELS_BY_LANG = {
 
 class Component extends DCLogic {
   state = {
-    loaded: false, lister: null, properties: [], showShare: false, shareCopyLabel: "คัดลอกลิงก์",
+    loaded: false, lister: null, properties: [], showShare: false, showFilters: false, shareCopyLabel: "คัดลอกลิงก์",
     chatOpen: false, chatInput: "", chatMessages: [], chatThinking: false,
     showPropertyModal: false, modalProperty: null, modalPhotoIndex: 0,
     lang: "th", filterType: "", filterZone: "", filterBeds: "", filterPrice: "",
@@ -529,6 +539,11 @@ class Component extends DCLogic {
       shareFbUrl: "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(shareUrl),
       shareLineUrl: "https://social-plugins.line.me/lineit/share?url=" + encodeURIComponent(shareUrl),
       onOpenShare: () => this.setState({ showShare: true }),
+      onOpenFilters: () => this.setState({ showFilters: true }),
+      onCloseFilters: () => this.setState({ showFilters: false }),
+      showFilters: this.state.showFilters,
+      activeFilterCount: [this.state.filterType, this.state.filterZone, this.state.filterBeds, this.state.filterPrice].filter((v) => v && v !== "all").length,
+      filterModalSelectStyle: { border: "1px solid oklch(85% 0.01 70)", borderRadius: "6px", padding: "10px 12px", fontSize: "13px", fontFamily: "inherit", background: "white", color: "oklch(30% 0.02 60)", width: "100%" },
       onLogout: async () => { const fb = await import("./firebase-client.js"); fb.logoutAdmin(); window.location.href = "Home.dc.html"; },
       onCloseShare: () => this.setState({ showShare: false }),
       stopProp: (e) => e.stopPropagation(),
