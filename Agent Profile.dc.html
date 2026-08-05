@@ -75,6 +75,9 @@
         </sc-for>
         
         <div onClick="{{ onOpenShare }}" style="background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:10px 18px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">🔗 แชร์</div>
+        <sc-if value="{{ isOwner }}">
+          <a href="Lister Dashboard.dc.html" title="ตั้งค่า" style="background:oklch(22% 0.02 60); color:white; width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; text-decoration:none; flex-shrink:0;">⚙️</a>
+        </sc-if>
       </div>
     </div>
 
@@ -277,6 +280,13 @@ class Component extends DCLogic {
     const params = new URLSearchParams(window.location.search);
     this._listerId = params.get("id") || "";
     if (!this._listerId) { this.setState({ loaded: true, lister: null }); return; }
+    // Settings-gear icon only shows for the profile owner viewing their own
+    // site (never for visitors from a shared link) — compare the signed-in
+    // uid to the profile being viewed.
+    try {
+      const authUser = fb.getCurrentAuthUser();
+      this.setState({ isOwner: !!authUser && authUser.uid === this._listerId });
+    } catch (e) {}
     try {
       const lister = await fb.fetchListerById(this._listerId);
       let properties = [];
@@ -467,6 +477,7 @@ class Component extends DCLogic {
     const mpStatus = mp ? (statusMap[mp.status] || statusMap.sale) : null;
     return {
       notFound: false, hasLister: true,
+      isOwner: this.state.isOwner,
       // Cover photo overlay pattern removed — free tier never has a real
       // coverPhotoUrl persisted (Lister Dashboard strips it on save), so by
       // the time this renders, only paying tiers ever have a real photo

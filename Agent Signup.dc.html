@@ -250,6 +250,19 @@ class Component extends DCLogic {
       const params = new URLSearchParams(window.location.search);
       if (params.get("tab") === "login") this.setState({ tab: "login" });
     } catch (e) {}
+    // Returning from a Stripe Checkout payment (functions/index.js's default
+    // success_url) — the user just picked a paid package, so send them to
+    // their own site overview like every other "picked a package" path,
+    // instead of leaving them stuck back on this signup form.
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("checkout") === "success") {
+        window.history.replaceState({}, "", window.location.pathname);
+        const fbMod = await import("./firebase-client.js");
+        const doc = await fbMod.fetchMyListerDoc().catch(() => null);
+        if (doc) { this._fb = fbMod; this.goToWorkspaceOrPackages(doc); return; }
+      }
+    } catch (e) {}
     // LINE server-side login (functions/index.js lineAuthCallback) lands
     // back here with ?lineExchange=<code> on success or ?lineError=<msg>
     // on failure — pick either up before anything else on this page load.
@@ -356,7 +369,12 @@ class Component extends DCLogic {
   // workspace. Shared by social sign-in, email/password signup, and login.
   goToWorkspaceOrPackages(doc) {
     try { sessionStorage.removeItem("hh_auth_redirect_pending"); } catch (e) {}
-    window.location.href = (doc && (doc.tier || doc.vipTier)) ? "Lister Dashboard.dc.html" : "Lister Billing.dc.html";
+    // Land on the lister's own public site (Agent Profile) after they have a
+    // package — not the settings/work dashboard — so they see the overview
+    // first and only go to Lister Dashboard deliberately via its settings
+    // icon. Applies both right after picking a package AND on every repeat
+    // login for an already-registered lister.
+    window.location.href = (doc && (doc.tier || doc.vipTier)) ? `Agent Profile.dc.html?id=${doc.id}` : "Lister Billing.dc.html";
   }
 
   async completeSocialSignIn(uid, fb) {
