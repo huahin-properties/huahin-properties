@@ -647,24 +647,46 @@ exports.agentProfileMeta = onRequest(
     try {
       const id = String(req.query.id || "");
       const target = `https://huahin.properties/Agent%20Profile.dc.html?id=${encodeURIComponent(id)}`;
-      let name = "เจ้าของทรัพย์";
+      const FALLBACK = "ที่ปรึกษาอสังหาริมทรัพย์";
+      let name = FALLBACK;
       let photo = "https://huahin.properties/logo.png";
       if (id) {
         const doc = await admin.firestore().collection("listers").doc(id).get();
         if (doc.exists) {
           const d = doc.data();
-          name = d.displayName || d.name || name;
+          name = d.displayName || d.fullName || d.companyName || d.name || FALLBACK;
           if (d.profilePhotoUrl) photo = d.profilePhotoUrl;
         }
       }
       const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+      const title = `${name} — เว็บไซต์ทรัพย์ส่วนตัว`;
+      const description = name === FALLBACK
+        ? "ดูรายการทรัพย์และติดต่อเจ้าของโปรไฟล์โดยตรงผ่าน huahin.properties"
+        : `ดูรายการทรัพย์และติดต่อ ${name} โดยตรงผ่าน huahin.properties`;
+      const ua = String(req.headers["user-agent"] || "").toLowerCase();
+      // Chat-app link-preview bots (LINE/Facebook/WhatsApp/Telegram/etc.)
+      // read this HTML directly for the <meta og:*> tags — they do NOT
+      // execute the redirect script below, so they always see the tags.
+      // Real visitors' browsers run the script and move on immediately.
+      // (Earlier version 302-redirected everyone including bots, which is
+      // why no card ever appeared — the bot followed the redirect straight
+      // to the plain static page instead of reading these tags.)
       res.set("Content-Type", "text/html; charset=utf-8");
-      res.send(`<!DOCTYPE html><html><head><meta charset="utf-8">
+      res.set("Cache-Control", "no-store");
+      res.send(`<!DOCTYPE html><html lang="th"><head><meta charset="utf-8">
+<title>${esc(title)}</title>
+<meta property="og:type" content="website">
+<meta property="og:url" content="${esc(target)}">
 <meta property="og:site_name" content="huahin.properties">
-<meta property="og:title" content="${esc(name)} — huahin.properties">
-<meta property="og:description" content="ติดต่อ${esc(name)}โดยตรงผ่าน huahin.properties">
+<meta property="og:title" content="${esc(title)}">
+<meta property="og:description" content="${esc(description)}">
 <meta property="og:image" content="${esc(photo)}">
-<meta http-equiv="refresh" content="0;url=${esc(target)}">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${esc(title)}">
+<meta name="twitter:description" content="${esc(description)}">
+<meta name="twitter:image" content="${esc(photo)}">
 <script>location.replace(${JSON.stringify(target)});</script>
 </head><body></body></html>`);
     } catch (e) {
