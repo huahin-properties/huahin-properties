@@ -25,7 +25,7 @@
 </helmet>
 
 <div style="min-height:100vh;">
-  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #18 — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #19 — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
       <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
@@ -697,6 +697,32 @@
                 <option value="other">อื่นๆ</option>
               </select>
             </div>
+            <div style="position:relative;">
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ประเภทครัว</div>
+              <div onClick="{{ onToggleKitchenMenu }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ kitchenSummary }}</div>
+              <sc-if value="{{ kitchenMenuOpen }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute; top:100%; left:0; right:0; z-index:5; background:white; border:1px solid oklch(80% 0.01 70); border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,0.12); padding:10px 12px; margin-top:4px;">
+                  <sc-for list="{{ kitchenOptions }}" as="kt" hint-placeholder-count="2">
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(30% 0.02 60); cursor:pointer; padding:5px 0;">
+                      <input type="checkbox" checked="{{ kt.checked }}" onChange="{{ kt.onToggle }}" />{{ kt.label }}
+                    </label>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+            <div style="position:relative;">
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ช่องทางการซื้อ/ผ่อน</div>
+              <div onClick="{{ onTogglePurchaseMenu }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ purchaseSummary }}</div>
+              <sc-if value="{{ purchaseMenuOpen }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute; top:100%; left:0; right:0; z-index:5; background:white; border:1px solid oklch(80% 0.01 70); border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,0.12); padding:10px 12px; margin-top:4px;">
+                  <sc-for list="{{ purchaseOptions }}" as="po" hint-placeholder-count="6">
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(30% 0.02 60); cursor:pointer; padding:5px 0;">
+                      <input type="checkbox" checked="{{ po.checked }}" onChange="{{ po.onToggle }}" />{{ po.label }}
+                    </label>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
             <div>
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">พื้นที่ใช้สอย (ตร.ม.)</div>
               <input type="number" value="{{ f_livingArea }}" onChange="{{ onFLivingArea }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
@@ -713,28 +739,6 @@
               <sc-for list="{{ featureOptions }}" as="feat" hint-placeholder-count="13">
                 <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(30% 0.02 60); cursor:pointer;">
                   <input type="checkbox" checked="{{ feat.checked }}" onChange="{{ feat.onToggle }}" />{{ feat.label }}
-                </label>
-              </sc-for>
-            </div>
-          </div>
-
-          <div style="margin-bottom:20px;">
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">ประเภทครัว (เลือกได้หลายข้อ)</div>
-            <div style="display:flex; gap:16px; flex-wrap:wrap;">
-              <sc-for list="{{ kitchenOptions }}" as="kt" hint-placeholder-count="2">
-                <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(30% 0.02 60); cursor:pointer;">
-                  <input type="checkbox" checked="{{ kt.checked }}" onChange="{{ kt.onToggle }}" />{{ kt.label }}
-                </label>
-              </sc-for>
-            </div>
-          </div>
-
-          <div style="margin-bottom:20px;">
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">ช่องทางการซื้อ/ผ่อน (เลือกได้หลายข้อ)</div>
-            <div style="display:flex; gap:16px; flex-wrap:wrap;">
-              <sc-for list="{{ purchaseOptions }}" as="po" hint-placeholder-count="4">
-                <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(30% 0.02 60); cursor:pointer;">
-                  <input type="checkbox" checked="{{ po.checked }}" onChange="{{ po.onToggle }}" />{{ po.label }}
                 </label>
               </sc-for>
             </div>
@@ -918,7 +922,7 @@ class Component extends DCLogic {
     loaded: false, signedIn: false, lister: null, properties: [], view: "list", dashTab: "settings",
     editingId: null, f_type: "villa", f_area: "hua-hin", f_subdistrict: "", f_zone: "", f_status: "sale",
     f_price: "", f_bedrooms: "", f_bathrooms: "", f_poolSize: "", f_parking: "", f_livingArea: "", f_landSize: "", f_mapsLink: "", f_mapDisplay: "area",
-    f_titleDeed: "", f_kitchenTypes: [], f_purchaseOptions: [],
+    f_titleDeed: "", f_kitchenTypes: [], f_purchaseOptions: [], kitchenMenuOpen: false, purchaseMenuOpen: false,
     f_description: "", f_aiDraft: "", aiGenerating: false, f_features: [], saveError: "", saving: false,
     existingPhotos: [], newPhotos: [],
     savedId: "", savedPayload: null, ns_assistedSale: false, ns_commissionPct: "5",
@@ -1223,7 +1227,7 @@ class Component extends DCLogic {
     if ((s.f_kitchenTypes || []).length) lines.push("🍳 ครัว: " + s.f_kitchenTypes.map((k) => kitchenLabels[k] || k).join(" และ "));
     const titleDeedLabels = { chanote: "โฉนดครุฑแดง (นส.4จ)", nor_sor_3_gor: "นส.3ก", nor_sor_3: "นส.3", por_bor_tor_5: "ภบท.5", other: "อื่นๆ" };
     if (s.f_titleDeed) lines.push("📄 เอกสารสิทธิ์: " + (titleDeedLabels[s.f_titleDeed] || s.f_titleDeed));
-    const purchaseLabels = { cash: "เงินสด", developer_installment: "ผ่อนกับโครงการ", bank_mortgage: "ผ่อนกับธนาคาร", company_transfer: "โอนผ่านบริษัท (Freehold Company)" };
+    const purchaseLabels = { cash: "เงินสด", developer_installment: "ผ่อนกับโครงการ", bank_mortgage: "ผ่อนกับธนาคาร", company_transfer: "โอนผ่านบริษัท (Freehold Company)", leasehold: "Leasehold (เช่าซื้อระยะยาว ~30 ปี)", freehold: "Freehold (ซื้อขาด/ถือกรรมสิทธิ์เต็ม)" };
     if ((s.f_purchaseOptions || []).length) lines.push("💳 รองรับการซื้อ: " + s.f_purchaseOptions.map((p) => purchaseLabels[p] || p).join(", "));
     if (s.f_kitchenTypes.length || s.f_titleDeed || s.f_purchaseOptions.length) lines.push("");
     if (s.f_description && s.f_description.trim()) { lines.push(s.f_description.trim()); lines.push(""); }
@@ -2017,7 +2021,13 @@ class Component extends DCLogic {
         { id: "developer_installment", label: "ผ่อนกับโครงการ", checked: this.state.f_purchaseOptions.includes("developer_installment"), onToggle: () => this.toggleListVal("f_purchaseOptions", "developer_installment") },
         { id: "bank_mortgage", label: "ผ่อนกับธนาคาร", checked: this.state.f_purchaseOptions.includes("bank_mortgage"), onToggle: () => this.toggleListVal("f_purchaseOptions", "bank_mortgage") },
         { id: "company_transfer", label: "โอนผ่านบริษัท (Freehold Company)", checked: this.state.f_purchaseOptions.includes("company_transfer"), onToggle: () => this.toggleListVal("f_purchaseOptions", "company_transfer") },
+        { id: "leasehold", label: "Leasehold (เช่าซื้อระยะยาว ~30 ปี)", checked: this.state.f_purchaseOptions.includes("leasehold"), onToggle: () => this.toggleListVal("f_purchaseOptions", "leasehold") },
+        { id: "freehold", label: "Freehold (ซื้อขาด/ถือกรรมสิทธิ์เต็ม)", checked: this.state.f_purchaseOptions.includes("freehold"), onToggle: () => this.toggleListVal("f_purchaseOptions", "freehold") },
       ],
+      kitchenMenuOpen: this.state.kitchenMenuOpen, onToggleKitchenMenu: () => this.setState((s) => ({ kitchenMenuOpen: !s.kitchenMenuOpen, purchaseMenuOpen: false })),
+      purchaseMenuOpen: this.state.purchaseMenuOpen, onTogglePurchaseMenu: () => this.setState((s) => ({ purchaseMenuOpen: !s.purchaseMenuOpen, kitchenMenuOpen: false })),
+      kitchenSummary: this.state.f_kitchenTypes.length ? this.state.f_kitchenTypes.map((k) => ({ thai_kitchen: "ครัวไทย", european_kitchen: "ครัวยุโรป" }[k] || k)).join(", ") : "— เลือก —",
+      purchaseSummary: this.state.f_purchaseOptions.length ? `เลือกแล้ว ${this.state.f_purchaseOptions.length} รายการ` : "— เลือก —",
       f_mapsLink: this.state.f_mapsLink, onFMapsLink: (e) => this.setState({ f_mapsLink: e.target.value }),
       isAreaMode: this.state.f_mapDisplay !== "exact", isExactMode: this.state.f_mapDisplay === "exact",
       onFMapDisplayArea: () => this.setState({ f_mapDisplay: "area" }),
