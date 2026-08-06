@@ -25,7 +25,7 @@
 </helmet>
 
 <div style="min-height:100vh;">
-  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #17 — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #18 — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
       <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
@@ -679,12 +679,23 @@
               <input type="number" value="{{ f_bathrooms }}" onChange="{{ onFBathrooms }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
             </div>
             <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ขนาดสระ (ตร.ม.)</div>
-              <input type="number" value="{{ f_poolSize }}" onChange="{{ onFPoolSize }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ขนาดสระ (เช่น 6x4 ม.)</div>
+              <input value="{{ f_poolSize }}" onChange="{{ onFPoolSize }}" placeholder="6x4 ม." style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
             </div>
             <div>
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">พื้นที่จอดรถ (คัน)</div>
               <input type="number" value="{{ f_parking }}" onChange="{{ onFParking }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+            </div>
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">เอกสารสิทธิ์</div>
+              <select value="{{ f_titleDeed }}" onChange="{{ onFTitleDeed }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white;">
+                <option value="">— เลือก —</option>
+                <option value="chanote">โฉนดครุฑแดง (นส.4จ)</option>
+                <option value="nor_sor_3_gor">นส.3ก</option>
+                <option value="nor_sor_3">นส.3</option>
+                <option value="por_bor_tor_5">ภบท.5</option>
+                <option value="other">อื่นๆ</option>
+              </select>
             </div>
             <div>
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">พื้นที่ใช้สอย (ตร.ม.)</div>
@@ -708,8 +719,30 @@
           </div>
 
           <div style="margin-bottom:20px;">
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">ประเภทครัว (เลือกได้หลายข้อ)</div>
+            <div style="display:flex; gap:16px; flex-wrap:wrap;">
+              <sc-for list="{{ kitchenOptions }}" as="kt" hint-placeholder-count="2">
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(30% 0.02 60); cursor:pointer;">
+                  <input type="checkbox" checked="{{ kt.checked }}" onChange="{{ kt.onToggle }}" />{{ kt.label }}
+                </label>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="margin-bottom:20px;">
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">ช่องทางการซื้อ/ผ่อน (เลือกได้หลายข้อ)</div>
+            <div style="display:flex; gap:16px; flex-wrap:wrap;">
+              <sc-for list="{{ purchaseOptions }}" as="po" hint-placeholder-count="4">
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(30% 0.02 60); cursor:pointer;">
+                  <input type="checkbox" checked="{{ po.checked }}" onChange="{{ po.onToggle }}" />{{ po.label }}
+                </label>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="margin-bottom:20px;">
             <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รายละเอียดเพิ่มเติม</div>
-            <textarea rows="4" value="{{ f_description }}" onChange="{{ onFDescription }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; resize:vertical;" placeholder="จุดเด่นพิเศษที่ไม่มีในช่องด้านบน เช่น ต่อรองได้ / ขายเอง ไม่มีนายหน้า / ใกล้โรงเรียนนานาชาติ"></textarea>
+            <textarea rows="4" value="{{ f_description }}" onChange="{{ onFDescription }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; resize:vertical;" placeholder="จุดเด่นพิเศษหรือโปรโมชั่นที่ไม่มีในช่องด้านบน เช่น ต่อรองได้ / ขายเอง ไม่มีนายหน้า / ใกล้โรงเรียนนานาชาติ / โปรโมชั่นแถมเฟอร์นิเจอร์"></textarea>
           </div>
 
           <div style="margin-bottom:20px;">
@@ -885,6 +918,7 @@ class Component extends DCLogic {
     loaded: false, signedIn: false, lister: null, properties: [], view: "list", dashTab: "settings",
     editingId: null, f_type: "villa", f_area: "hua-hin", f_subdistrict: "", f_zone: "", f_status: "sale",
     f_price: "", f_bedrooms: "", f_bathrooms: "", f_poolSize: "", f_parking: "", f_livingArea: "", f_landSize: "", f_mapsLink: "", f_mapDisplay: "area",
+    f_titleDeed: "", f_kitchenTypes: [], f_purchaseOptions: [],
     f_description: "", f_aiDraft: "", aiGenerating: false, f_features: [], saveError: "", saving: false,
     existingPhotos: [], newPhotos: [],
     savedId: "", savedPayload: null, ns_assistedSale: false, ns_commissionPct: "5",
@@ -1065,7 +1099,7 @@ class Component extends DCLogic {
     this.setState({
       view: "edit", editingId: null, f_type: "villa", f_area: "hua-hin", f_subdistrict: this.subdistrictsFor("hua-hin")[0] || "", f_zone: "",
       f_status: "sale", f_price: "", f_bedrooms: "", f_bathrooms: "", f_poolSize: "", f_parking: "", f_livingArea: "",
-      f_landSize: "", f_mapsLink: "", f_mapDisplay: "area", f_description: "", f_aiDraft: "", f_features: [], saveError: "", existingPhotos: [], newPhotos: [], quotaMsg: "",
+      f_landSize: "", f_mapsLink: "", f_mapDisplay: "area", f_titleDeed: "", f_kitchenTypes: [], f_purchaseOptions: [], f_description: "", f_aiDraft: "", f_features: [], saveError: "", existingPhotos: [], newPhotos: [], quotaMsg: "",
       openMenuId: "",
     });
   }
@@ -1085,6 +1119,7 @@ class Component extends DCLogic {
       f_price: p.price != null ? String(p.price) : "", f_bedrooms: p.bedrooms != null ? String(p.bedrooms) : "",
       f_bathrooms: p.bathrooms != null ? String(p.bathrooms) : "",
       f_poolSize: p.poolSize != null ? String(p.poolSize) : "", f_parking: p.parking != null ? String(p.parking) : "",
+      f_titleDeed: p.titleDeed || "", f_kitchenTypes: p.kitchenTypes || [], f_purchaseOptions: p.purchaseOptions || [],
       f_livingArea: p.livingArea != null ? String(p.livingArea) : "",
       f_aiDraft: (p.description && typeof p.description === "object") ? (p.description.th || "") : (p.description || ""),
       f_landSize: p.landSize != null ? String(p.landSize) : "", f_mapsLink: p.mapLink || "", f_mapDisplay: p.mapDisplayMode || "area", f_description: (p.description && typeof p.description === "object") ? (p.description.th || p.description.en || "") : (p.description || ""),
@@ -1124,6 +1159,10 @@ class Component extends DCLogic {
 
   removeExistingPhoto(ph) {
     this.setState((s) => ({ existingPhotos: s.existingPhotos.filter((x) => x.id !== ph.id) }));
+  }
+
+  toggleListVal(key, val) {
+    this.setState((s) => ({ [key]: s[key].includes(val) ? s[key].filter((v) => v !== val) : [...s[key], val] }));
   }
 
   subdistrictsFor(area) {
@@ -1180,6 +1219,13 @@ class Component extends DCLogic {
     if (facts.length) { lines.push(facts.join(" · ")); lines.push(""); }
     const featureLabels = (s.f_features || []).map((fid) => (this._mod && this._mod.FEATURES && this._mod.FEATURES[fid]) ? this._mod.FEATURES[fid].th : fid);
     if (featureLabels.length) { lines.push("✨ จุดเด่นของทรัพย์: " + featureLabels.join(", ")); lines.push(""); }
+    const kitchenLabels = { thai_kitchen: "ครัวไทย", european_kitchen: "ครัวยุโรป" };
+    if ((s.f_kitchenTypes || []).length) lines.push("🍳 ครัว: " + s.f_kitchenTypes.map((k) => kitchenLabels[k] || k).join(" และ "));
+    const titleDeedLabels = { chanote: "โฉนดครุฑแดง (นส.4จ)", nor_sor_3_gor: "นส.3ก", nor_sor_3: "นส.3", por_bor_tor_5: "ภบท.5", other: "อื่นๆ" };
+    if (s.f_titleDeed) lines.push("📄 เอกสารสิทธิ์: " + (titleDeedLabels[s.f_titleDeed] || s.f_titleDeed));
+    const purchaseLabels = { cash: "เงินสด", developer_installment: "ผ่อนกับโครงการ", bank_mortgage: "ผ่อนกับธนาคาร", company_transfer: "โอนผ่านบริษัท (Freehold Company)" };
+    if ((s.f_purchaseOptions || []).length) lines.push("💳 รองรับการซื้อ: " + s.f_purchaseOptions.map((p) => purchaseLabels[p] || p).join(", "));
+    if (s.f_kitchenTypes.length || s.f_titleDeed || s.f_purchaseOptions.length) lines.push("");
     if (s.f_description && s.f_description.trim()) { lines.push(s.f_description.trim()); lines.push(""); }
     const coords = (s.f_mapsLink || "").match(/(-?\d{1,2}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)/);
     if (coords) {
@@ -1255,8 +1301,9 @@ class Component extends DCLogic {
       status: this.state.f_status, price: Number(this.state.f_price) || 0,
       bedrooms: this.state.f_bedrooms ? Number(this.state.f_bedrooms) : null,
       bathrooms: this.state.f_bathrooms ? Number(this.state.f_bathrooms) : null,
-      poolSize: this.state.f_poolSize ? Number(this.state.f_poolSize) : null,
+      poolSize: this.state.f_poolSize || null,
       parking: this.state.f_parking ? Number(this.state.f_parking) : null,
+      titleDeed: this.state.f_titleDeed || null, kitchenTypes: this.state.f_kitchenTypes, purchaseOptions: this.state.f_purchaseOptions,
       livingArea: this.state.f_livingArea ? Number(this.state.f_livingArea) : null,
       landSize: this.state.f_landSize ? Number(this.state.f_landSize) : null,
       description: descriptionValue, features: this.state.f_features, mapLink: this.state.f_mapsLink.trim(), mapDisplayMode: this.state.f_mapDisplay,
@@ -1960,6 +2007,17 @@ class Component extends DCLogic {
       f_zone: this.state.f_zone, onFZone: (e) => this.setState({ f_zone: e.target.value }),
       f_poolSize: this.state.f_poolSize, onFPoolSize: (e) => this.setState({ f_poolSize: e.target.value }),
       f_parking: this.state.f_parking, onFParking: (e) => this.setState({ f_parking: e.target.value }),
+      f_titleDeed: this.state.f_titleDeed, onFTitleDeed: (e) => this.setState({ f_titleDeed: e.target.value }),
+      kitchenOptions: [
+        { id: "thai_kitchen", label: "ครัวไทย", checked: this.state.f_kitchenTypes.includes("thai_kitchen"), onToggle: () => this.toggleListVal("f_kitchenTypes", "thai_kitchen") },
+        { id: "european_kitchen", label: "ครัวยุโรป", checked: this.state.f_kitchenTypes.includes("european_kitchen"), onToggle: () => this.toggleListVal("f_kitchenTypes", "european_kitchen") },
+      ],
+      purchaseOptions: [
+        { id: "cash", label: "เงินสด", checked: this.state.f_purchaseOptions.includes("cash"), onToggle: () => this.toggleListVal("f_purchaseOptions", "cash") },
+        { id: "developer_installment", label: "ผ่อนกับโครงการ", checked: this.state.f_purchaseOptions.includes("developer_installment"), onToggle: () => this.toggleListVal("f_purchaseOptions", "developer_installment") },
+        { id: "bank_mortgage", label: "ผ่อนกับธนาคาร", checked: this.state.f_purchaseOptions.includes("bank_mortgage"), onToggle: () => this.toggleListVal("f_purchaseOptions", "bank_mortgage") },
+        { id: "company_transfer", label: "โอนผ่านบริษัท (Freehold Company)", checked: this.state.f_purchaseOptions.includes("company_transfer"), onToggle: () => this.toggleListVal("f_purchaseOptions", "company_transfer") },
+      ],
       f_mapsLink: this.state.f_mapsLink, onFMapsLink: (e) => this.setState({ f_mapsLink: e.target.value }),
       isAreaMode: this.state.f_mapDisplay !== "exact", isExactMode: this.state.f_mapDisplay === "exact",
       onFMapDisplayArea: () => this.setState({ f_mapDisplay: "area" }),
