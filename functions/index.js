@@ -661,12 +661,10 @@ exports.agentProfileMeta = onRequest(
         }
       }
       const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
-      const title = name === FALLBACK
-        ? "ที่ปรึกษาอสังหาริมทรัพย์หัวหิน — huahin.properties"
-        : `${name} | ที่ปรึกษาอสังหาริมทรัพย์หัวหิน — huahin.properties`;
+      const title = "huahin.properties";
       const description = name === FALLBACK
-        ? "ดูทรัพย์ทั้งหมด และติดต่อเจ้าของทรัพย์ได้โดยตรงที่หัวหิน"
-        : `ดูทรัพย์ทั้งหมด และติดต่อ ${name} ได้โดยตรงที่หัวหิน`;
+        ? "ติดต่อเจ้าของทรัพย์โดยตรง ที่ปรึกษาอสังหาริมทรัพย์หัวหิน"
+        : `ติดต่อ ${name} โดยตรง ที่ปรึกษาอสังหาริมทรัพย์หัวหิน`;
       photo = `https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/shareCard?id=${encodeURIComponent(id)}&v=${cardV}`;
       const ua = String(req.headers["user-agent"] || "").toLowerCase();
       // Chat-app link-preview bots (LINE/Facebook/WhatsApp/Telegram/etc.)
@@ -833,22 +831,24 @@ exports.shareCard = onRequest(
         nameSize -= 4;
       }
       const nameLineHeight = nameSize * 1.15;
-      const nameBlockTop = 355;
+      const nameBlockTop = 335;
       ctx.fillStyle = textColor;
       nameLines.forEach((line, i) => {
         ctx.font = `700 ${nameSize}px ${FONT_FAMILY}`;
         ctx.fillText(line, cx, nameBlockTop + i * nameLineHeight);
       });
-      let y = nameBlockTop + nameLines.length * nameLineHeight + 8;
+      let y = nameBlockTop + (nameLines.length - 1) * nameLineHeight;
 
       // Order (approved): Name → Property Page → description → by huahin.properties.
       // Consistent proportional gaps between each block for a tidier, more
-      // deliberate vertical rhythm instead of ad hoc offsets.
-      const pageSize = Math.round(nameSize * 0.5);
-      const brandSize = Math.round(nameSize * 0.56);
-      const descSize = Math.round(nameSize * 0.42);
+      // deliberate vertical rhythm instead of ad hoc offsets — kept tight
+      // enough that all 4 lines fit inside the 630px canvas even with a
+      // 2-line name or 2-line description.
+      const pageSize = Math.round(nameSize * 0.46);
+      const brandSize = Math.round(nameSize * 0.5);
+      const descSize = Math.round(nameSize * 0.38);
 
-      y += pageSize * 1.1;
+      y += nameSize * 0.75 + pageSize * 0.7;
       ctx.font = `600 ${pageSize}px ${FONT_FAMILY}`;
       ctx.fillStyle = subColor;
       ctx.fillText("P R O P E R T Y   P A G E", cx, y);
@@ -857,15 +857,15 @@ exports.shareCard = onRequest(
         ? "ดูทรัพย์ทั้งหมด และติดต่อเจ้าของทรัพย์ได้โดยตรง"
         : `ดูทรัพย์ทั้งหมด และติดต่อ ${name} ได้โดยตรง`;
       const descLines = wrapByWords(descText, `400 ${descSize}px ${FONT_FAMILY}`, W - 200).slice(0, 2);
-      y += pageSize * 0.9 + descSize * 1.1;
+      y += pageSize * 0.7 + descSize * 1.05;
       ctx.font = `400 ${descSize}px ${FONT_FAMILY}`;
       ctx.fillStyle = subColor;
       descLines.forEach((line, i) => {
-        ctx.fillText(line, cx, y + i * descSize * 1.3);
+        ctx.fillText(line, cx, y + i * descSize * 1.25);
       });
-      y += (descLines.length - 1) * descSize * 1.3;
+      y += (descLines.length - 1) * descSize * 1.25;
 
-      y += descSize * 0.9 + brandSize * 1.1;
+      y += descSize * 0.7 + brandSize * 1.05;
       ctx.font = `500 ${brandSize}px ${FONT_FAMILY}`;
       ctx.fillStyle = subColor;
       ctx.fillText("By: huahin.properties", cx, y);
