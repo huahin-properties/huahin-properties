@@ -25,7 +25,7 @@
 </helmet>
 
 <div style="min-height:100vh;">
-  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #20 — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #21 — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
       <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
@@ -826,10 +826,23 @@
                 <input type="number" value="{{ f_livingArea }}" onChange="{{ onFLivingArea }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
               </div>
             </sc-if>
-            <sc-if value="{{ showLandSize }}" hint-placeholder-val="{{ true }}">
+            <sc-if value="{{ showLandSizeSimple }}" hint-placeholder-val="{{ true }}">
               <div>
                 <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ขนาดที่ดิน (ตร.ว.)</div>
                 <input type="number" value="{{ f_landSize }}" onChange="{{ onFLandSize }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+              </div>
+            </sc-if>
+            <sc-if value="{{ showLandFields }}" hint-placeholder-val="{{ false }}">
+              <div style="grid-column:span 1;">
+                <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ขนาดที่ดิน — ไร่ / งาน / ตารางวา</div>
+                <div style="display:flex; gap:6px; align-items:center;">
+                  <input type="number" min="0" value="{{ f_landRai }}" onChange="{{ onFLandRai }}" placeholder="ไร่" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 8px; font-size:14px; font-family:inherit;" />
+                  <span style="font-size:12px; color:oklch(50% 0.02 60);">ไร่</span>
+                  <input type="number" min="0" max="3" value="{{ f_landNgan }}" onChange="{{ onFLandNgan }}" placeholder="งาน" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 8px; font-size:14px; font-family:inherit;" />
+                  <span style="font-size:12px; color:oklch(50% 0.02 60);">งาน</span>
+                  <input type="number" min="0" max="99" value="{{ f_landWah }}" onChange="{{ onFLandWah }}" placeholder="ตร.ว." style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 8px; font-size:14px; font-family:inherit;" />
+                  <span style="font-size:12px; color:oklch(50% 0.02 60); white-space:nowrap;">ตร.ว.</span>
+                </div>
               </div>
             </sc-if>
           </div>
@@ -851,16 +864,16 @@
           </div>
 
           <div style="margin-bottom:20px;">
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">📌 บันทึกภายใน (ไม่แสดงต่อสาธารณะ — เห็นเฉพาะคุณ)</div>
-            <textarea rows="3" value="{{ f_internalNotes }}" onChange="{{ onFInternalNotes }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; resize:vertical; background:oklch(98% 0.01 90);" placeholder="เช่น ชื่อ-เบอร์โทรเจ้าของบ้านจริง, ค่าคอมมิชชั่น/ส่วนแบ่ง, เงื่อนไขพิเศษกับเจ้าของ, ประวัติการต่อรอง"></textarea>
-          </div>
-
-          <div style="margin-bottom:20px;">
             <div onClick="{{ onGenerateAiDraft }}" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">✨ {{ aiGenerateLabel }}</div>
             <div style="font-size:12px; color:oklch(50% 0.02 60); margin-top:8px; margin-bottom:12px;">AI จะรวมข้อมูลทรัพย์ทั้งหมดด้านบน + ข้อมูลติดต่อ/Social จากหน้าตั้งค่า + พิกัดแผนที่ + ข้อมูลเพิ่มเติม มาร่างเป็นข้อความประกาศที่ครบถ้วน พร้อมสถานที่สำคัญใกล้เคียงและระยะทาง/เวลาขับรถโดยประมาณ — แก้ไขได้ก่อนบันทึก</div>
             <sc-if value="{{ hasAiDraft }}" hint-placeholder-val="{{ false }}">
               <textarea rows="10" value="{{ f_aiDraft }}" onChange="{{ onFAiDraft }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:12px; font-size:13.5px; font-family:inherit; resize:vertical; line-height:1.6;"></textarea>
             </sc-if>
+          </div>
+
+          <div style="margin-bottom:20px;">
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">📌 บันทึกภายใน (ไม่แสดงต่อสาธารณะ — เห็นเฉพาะคุณ)</div>
+            <textarea rows="3" value="{{ f_internalNotes }}" onChange="{{ onFInternalNotes }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; resize:vertical; background:oklch(98% 0.01 90);" placeholder="เช่น ชื่อ-เบอร์โทรเจ้าของบ้านจริง, ค่าคอมมิชชั่น/ส่วนแบ่ง, เงื่อนไขพิเศษกับเจ้าของ, ประวัติการต่อรอง"></textarea>
           </div>
 
           <div style="display:flex; gap:10px; flex-wrap:wrap;">
@@ -1031,7 +1044,7 @@ class Component extends DCLogic {
     f_titleDeed: "", f_kitchenTypes: [], f_purchaseOptions: [], kitchenMenuOpen: false, purchaseMenuOpen: false,
     f_condition: "resale", f_yearBuilt: "", f_floor: "", f_commonFee: "", f_foreignQuota: "",
     f_landShape: "", f_roadWidth: "", f_landCondition: "", f_utilities: "", f_zoningColor: "",
-    f_floors: "", f_electricalPhase: "", f_internalNotes: "",
+    f_floors: "", f_electricalPhase: "", f_internalNotes: "", f_landRai: "", f_landNgan: "", f_landWah: "",
     f_description: "", f_aiDraft: "", aiGenerating: false, f_features: [], saveError: "", saving: false,
     existingPhotos: [], newPhotos: [],
     savedId: "", savedPayload: null, ns_assistedSale: false, ns_commissionPct: "5",
@@ -1215,7 +1228,7 @@ class Component extends DCLogic {
       f_landSize: "", f_mapsLink: "", f_mapDisplay: "area", f_titleDeed: "", f_kitchenTypes: [], f_purchaseOptions: [],
       f_condition: "resale", f_yearBuilt: "", f_floor: "", f_commonFee: "", f_foreignQuota: "",
       f_landShape: "", f_roadWidth: "", f_landCondition: "", f_utilities: "", f_zoningColor: "",
-      f_floors: "", f_electricalPhase: "", f_internalNotes: "",
+      f_floors: "", f_electricalPhase: "", f_internalNotes: "", f_landRai: "", f_landNgan: "", f_landWah: "",
       f_description: "", f_aiDraft: "", f_features: [], saveError: "", existingPhotos: [], newPhotos: [], quotaMsg: "",
       openMenuId: "",
     });
@@ -1242,6 +1255,7 @@ class Component extends DCLogic {
       f_landShape: p.landShape || "", f_roadWidth: p.roadWidth != null ? String(p.roadWidth) : "", f_landCondition: p.landCondition || "",
       f_utilities: p.utilities || "", f_zoningColor: p.zoningColor || "",
       f_floors: p.floors != null ? String(p.floors) : "", f_electricalPhase: p.electricalPhase || "", f_internalNotes: p.internalNotes || "",
+      f_landRai: p.landRai != null ? String(p.landRai) : "", f_landNgan: p.landNgan != null ? String(p.landNgan) : "", f_landWah: p.landWah != null ? String(p.landWah) : "",
       f_livingArea: p.livingArea != null ? String(p.livingArea) : "",
       f_aiDraft: (p.description && typeof p.description === "object") ? (p.description.th || "") : (p.description || ""),
       f_landSize: p.landSize != null ? String(p.landSize) : "", f_mapsLink: p.mapLink || "", f_mapDisplay: p.mapDisplayMode || "area", f_description: (p.description && typeof p.description === "object") ? (p.description.th || p.description.en || "") : (p.description || ""),
@@ -1338,6 +1352,13 @@ class Component extends DCLogic {
     if (s.f_parking) facts.push(`🚗 ที่จอดรถ ${s.f_parking} คัน`);
     if (s.f_livingArea) facts.push(`📐 พื้นที่ใช้สอย ${s.f_livingArea} ตร.ม.`);
     if (s.f_landSize) facts.push(`🌳 ขนาดที่ดิน ${s.f_landSize} ตร.ว.`);
+    if (s.f_type === "land" && (s.f_landRai || s.f_landNgan || s.f_landWah)) {
+      const parts = [];
+      if (s.f_landRai) parts.push(`${s.f_landRai} ไร่`);
+      if (s.f_landNgan) parts.push(`${s.f_landNgan} งาน`);
+      if (s.f_landWah) parts.push(`${s.f_landWah} ตร.ว.`);
+      facts.push(`🌳 ขนาดที่ดิน ${parts.join(" ")}`);
+    }
     if (facts.length) { lines.push(facts.join(" · ")); lines.push(""); }
     const featureLabels = (s.f_features || []).map((fid) => (this._mod && this._mod.FEATURES && this._mod.FEATURES[fid]) ? this._mod.FEATURES[fid].th : fid);
     if (featureLabels.length) { lines.push("✨ จุดเด่นของทรัพย์: " + featureLabels.join(", ")); lines.push(""); }
@@ -1457,6 +1478,7 @@ class Component extends DCLogic {
       landShape: this.state.f_landShape || null, roadWidth: this.state.f_roadWidth ? Number(this.state.f_roadWidth) : null, landCondition: this.state.f_landCondition || null,
       utilities: this.state.f_utilities || null, zoningColor: this.state.f_zoningColor || null,
       floors: this.state.f_floors ? Number(this.state.f_floors) : null, electricalPhase: this.state.f_electricalPhase || null, internalNotes: this.state.f_internalNotes || null,
+      landRai: this.state.f_landRai ? Number(this.state.f_landRai) : null, landNgan: this.state.f_landNgan ? Number(this.state.f_landNgan) : null, landWah: this.state.f_landWah ? Number(this.state.f_landWah) : null,
       livingArea: this.state.f_livingArea ? Number(this.state.f_livingArea) : null,
       landSize: this.state.f_landSize ? Number(this.state.f_landSize) : null,
       description: descriptionValue, features: this.state.f_features, mapLink: this.state.f_mapsLink.trim(), mapDisplayMode: this.state.f_mapDisplay,
@@ -2174,10 +2196,14 @@ class Component extends DCLogic {
       f_floors: this.state.f_floors, onFFloors: (e) => this.setState({ f_floors: e.target.value }),
       f_electricalPhase: this.state.f_electricalPhase, onFElectricalPhase: (e) => this.setState({ f_electricalPhase: e.target.value }),
       f_internalNotes: this.state.f_internalNotes, onFInternalNotes: (e) => this.setState({ f_internalNotes: e.target.value }),
+      f_landRai: this.state.f_landRai, onFLandRai: (e) => this.setState({ f_landRai: e.target.value }),
+      f_landNgan: this.state.f_landNgan, onFLandNgan: (e) => this.setState({ f_landNgan: Math.min(3, Math.max(0, Number(e.target.value) || 0)) }),
+      f_landWah: this.state.f_landWah, onFLandWah: (e) => this.setState({ f_landWah: Math.min(99, Math.max(0, Number(e.target.value) || 0)) }),
       showBedBath: this.state.f_type !== "land", showPool: this.state.f_type === "villa" || this.state.f_type === "house",
       showKitchen: this.state.f_type !== "land" && this.state.f_type !== "commercial",
       showParking: this.state.f_type !== "land", showConditionYear: this.state.f_type !== "land",
       showLivingArea: this.state.f_type !== "land", showLandSize: this.state.f_type !== "condo",
+      showLandSizeSimple: this.state.f_type !== "condo" && this.state.f_type !== "land",
       showCondoFields: this.state.f_type === "condo", showLandFields: this.state.f_type === "land", showCommercialFields: this.state.f_type === "commercial",
       kitchenOptions: [
         { id: "thai_kitchen", label: "ครัวไทย", checked: this.state.f_kitchenTypes.includes("thai_kitchen"), onToggle: () => this.toggleListVal("f_kitchenTypes", "thai_kitchen") },
