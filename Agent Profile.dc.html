@@ -34,17 +34,17 @@
 </sc-if>
 
 <sc-if value="{{ hasLister }}">
-  <div style="display:flex; align-items:center; justify-content:space-between; padding:16px clamp(20px,4vw,40px); border-bottom:1px solid oklch(93% 0.01 70); background:white; gap:14px; flex-wrap:wrap;">
-    <div>
-      <a href="Home.dc.html" style="display:flex; align-items:center; gap:9px;">
-        <img src="logo.png" alt="huahin.properties" style="height:30px; width:30px; object-fit:contain; border-radius:50%;" />
-        <span style="font-family:'Playfair Display',serif; font-size:15px; color:oklch(20% 0.02 60);">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</span>
+  <div style="display:flex; align-items:center; justify-content:space-between; padding:16px clamp(14px,4vw,40px); border-bottom:1px solid oklch(93% 0.01 70); background:white; gap:10px; flex-wrap:nowrap;">
+    <div style="min-width:0;">
+      <a href="Home.dc.html" style="display:flex; align-items:center; gap:9px; min-width:0;">
+        <img src="logo.png" alt="huahin.properties" style="height:30px; width:30px; object-fit:contain; border-radius:50%; flex-shrink:0;" />
+        <span style="font-family:'Playfair Display',serif; font-size:15px; color:oklch(20% 0.02 60); white-space:nowrap;">huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</span>
       </a>
-      <div style="font-size:11px; color:oklch(55% 0.02 60); margin-top:3px; padding-left:39px;">{{ headerSiteLabel }}</div>
+      <div style="font-size:11px; color:oklch(55% 0.02 60); margin-top:3px; padding-left:39px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ headerSiteLabel }}</div>
     </div>
-    <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+    <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
       <dc-import name="LanguageSwitcher" lang="{{ lang }}" options="{{ langOptions }}" on-select="{{ onSelectLang }}" compact="{{ true }}" hint-size="70px,36px"></dc-import>
-      <div onClick="{{ onOpenShare }}" title="แชร์" style="width:36px; height:36px; border-radius:50%; background:oklch(93% 0.01 70); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; font-size:15px; cursor:pointer; flex-shrink:0;">🔗</div>
+      <div onClick="{{ onOpenShare }}" title="แชร์" style="width:36px; height:36px; border-radius:50%; background:oklch(93% 0.01 70); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg></div>
       <sc-if value="{{ isOwner }}">
         <a href="Lister Dashboard.dc.html" title="ตั้งค่า" style="width:36px; height:36px; border-radius:50%; background:oklch(93% 0.01 70); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; text-decoration:none; flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></a>
         <div onClick="{{ onLogout }}" title="ออกจากระบบ" style="width:36px; height:36px; border-radius:50%; background:oklch(93% 0.01 70); color:oklch(45% 0.15 25); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></div>
@@ -57,8 +57,8 @@
       <div style="{{ avatarStyle }}">
         <sc-if value="{{ noAvatarPhoto }}"><span>{{ initial }}</span></sc-if>
       </div>
-      <div style="padding-bottom:6px; flex:1; min-width:180px;">
-        <div style="font-family:'Playfair Display',serif; font-size:clamp(24px,3.4vw,32px); color:oklch(18% 0.02 60); display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+      <div style="padding-bottom:6px; flex:1; min-width:220px;">
+        <div style="font-family:'Playfair Display',serif; font-size:clamp(20px,3.4vw,32px); line-height:1.25; color:oklch(18% 0.02 60); display:flex; align-items:center; gap:10px; flex-wrap:wrap; word-break:break-word;">
           {{ displayName }}
           <sc-if value="{{ isVerifiedVip }}"><span style="{{ vipBadgeStyle }}">{{ vipBadgeLabel }}</span></sc-if>
         </div>
