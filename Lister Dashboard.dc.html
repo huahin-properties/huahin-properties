@@ -25,7 +25,7 @@
 </helmet>
 
 <div style="min-height:100vh;">
-  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #10 — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #11 — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
       <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
@@ -1212,7 +1212,10 @@ class Component extends DCLogic {
     if (p.bedrooms || p.bathrooms) lines.push(`🛏️ ${p.bedrooms || 0} ห้องนอน · 🚿 ${p.bathrooms || 0} ห้องน้ำ`);
     if (p.livingArea) lines.push(`📐 พื้นที่ใช้สอย ${p.livingArea} ตร.ม.`);
     if (p.landSize) lines.push(`🌳 ที่ดิน ${p.landSize} ตร.ว.`);
-    if (p.description) { lines.push(""); lines.push(p.description); }
+    if (p.description) {
+      const descText = (typeof p.description === "object") ? (p.description.th || p.description.en || "") : p.description;
+      if (descText) { lines.push(""); lines.push(descText); }
+    }
     lines.push("");
     lines.push(`รหัสทรัพย์: ${this.state.savedId}`);
     lines.push(`ดูรายละเอียดเพิ่มเติม 👉 ${window.location.origin}/Property Details.dc.html?id=${this.state.savedId}`);
