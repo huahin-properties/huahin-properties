@@ -25,6 +25,7 @@
 </helmet>
 
 <div style="min-height:100vh;">
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
       <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
@@ -1762,6 +1763,9 @@ class Component extends DCLogic {
       showTrialUpsell: !!trial && trial.nearEnd,
       trialUpsellViewsLabel: trial ? `ยอดเข้าชมรวมทุกประกาศของคุณ: ${(this.state.properties || []).reduce((sum, p) => sum + (p.viewCount || 0), 0)} ครั้ง` : "",
       onLogout: () => this.onLogout(),
+      debugView: this.state.view, debugDashTab: this.state.dashTab, debugLoaded: String(this.state.loaded),
+      debugSignedIn: String(this.state.signedIn), debugHasLister: String(!!this.state.lister),
+      debugNewParam: new URLSearchParams(window.location.search).get("new") || "none",
       showList: this.state.view === "list", showEdit: this.state.view === "edit", showSaved: this.state.view === "saved",
       propCount: properties.length, hasNoProps: properties.length === 0,
       showFirstTimeCta: properties.length === 0,
