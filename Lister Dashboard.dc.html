@@ -25,7 +25,7 @@
 </helmet>
 
 <div style="min-height:100vh;">
-  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #22 — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #23 — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
       <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
@@ -863,12 +863,14 @@
             <textarea rows="4" value="{{ f_description }}" onChange="{{ onFDescription }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; resize:vertical;" placeholder="จุดเด่นพิเศษหรือโปรโมชั่นที่ไม่มีในช่องด้านบน เช่น ต่อรองได้ / ขายเอง ไม่มีนายหน้า / ใกล้โรงเรียนนานาชาติ / โปรโมชั่นแถมเฟอร์นิเจอร์"></textarea>
           </div>
 
-          <div style="margin-bottom:20px; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:14px; box-sizing:border-box;">
-            <div onClick="{{ onGenerateAiDraft }}" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">✨ {{ aiGenerateLabel }}</div>
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-top:8px; margin-bottom:12px;">AI จะรวมข้อมูลทรัพย์ทั้งหมดด้านบน + ข้อมูลติดต่อ/Social จากหน้าตั้งค่า + พิกัดแผนที่ + ข้อมูลเพิ่มเติม มาร่างเป็นข้อความประกาศที่ครบถ้วน พร้อมสถานที่สำคัญใกล้เคียงและระยะทาง/เวลาขับรถโดยประมาณ — แก้ไขได้ก่อนบันทึก</div>
-            <sc-if value="{{ hasAiDraft }}" hint-placeholder-val="{{ false }}">
-              <textarea rows="10" value="{{ f_aiDraft }}" onChange="{{ onFAiDraft }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:12px; font-size:13.5px; font-family:inherit; resize:vertical; line-height:1.6;"></textarea>
-            </sc-if>
+          <div style="margin-bottom:20px;">
+            <div onClick="{{ onGenerateAiDraft }}" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; margin-bottom:12px;">✨ {{ aiGenerateLabel }}</div>
+            <div style="border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:14px; box-sizing:border-box; resize:vertical; overflow:auto; min-height:90px;">
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:12px;">AI จะรวมข้อมูลทรัพย์ทั้งหมดด้านบน + ข้อมูลติดต่อ/Social จากหน้าตั้งค่า + พิกัดแผนที่ + ข้อมูลเพิ่มเติม มาร่างเป็นข้อความประกาศที่ครบถ้วน พร้อมสถานที่สำคัญใกล้เคียงและระยะทาง/เวลาขับรถโดยประมาณ — แก้ไขได้ก่อนบันทึก</div>
+              <sc-if value="{{ hasAiDraft }}" hint-placeholder-val="{{ false }}">
+                <textarea rows="10" value="{{ f_aiDraft }}" onChange="{{ onFAiDraft }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:12px; font-size:13.5px; font-family:inherit; resize:vertical; line-height:1.6;"></textarea>
+              </sc-if>
+            </div>
           </div>
 
           <div style="margin-bottom:20px;">
