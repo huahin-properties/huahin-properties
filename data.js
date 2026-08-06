@@ -22,6 +22,16 @@ export const AREAS = [
   { id: "cha-am", label: { en: "Cha-am", th: "ชะอำ", ru: "Ча-Ам", zh: "差安", de: "Cha-am", no: "Cha-am", fr: "Cha-am", it: "Cha-am" } },
 ];
 
+// Real ตำบล (sub-district) names per อำเภอ (district) — lets the lister narrow
+// location further than the district-level AREAS list above. Plain Thai
+// strings (not translated) since this is an internal form filter tag, not
+// public multi-language display copy.
+export const SUBDISTRICTS = {
+  "hua-hin": ["หัวหิน", "หนองแก", "หินเหล็กไฟ", "หนองพลับ", "ทับใต้", "ห้วยสัตว์ใหญ่", "บึงนคร", "ศาลาลัย"],
+  "pranburi": ["ปราณบุรี", "เขาน้อย", "ปากน้ำปราณ", "วังก์พง", "หนองตาแต้ม", "ไร่ใหม่"],
+  "cha-am": ["ชะอำ", "บางเก่า", "เขาใหญ่", "ห้วยทรายเหนือ", "ไร่ใหม่พัฒนา", "ดอนขุนห้วย", "สามพระยา", "นายาง"],
+};
+
 export const TYPES = [
   { id: "villa", label: { en: "Pool Villa", th: "พูลวิลล่า", ru: "Вилла с бассейном", zh: "泳池别墅", de: "Poolvilla", no: "Bassengvilla", fr: "Villa avec piscine", it: "Villa con piscina" } },
   { id: "house", label: { en: "House", th: "บ้านเดี่ยว", ru: "Дом", zh: "独立屋", de: "Haus", no: "Hus", fr: "Maison", it: "Casa" } },
