@@ -663,8 +663,8 @@ exports.agentProfileMeta = onRequest(
       const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
       const title = name;
       const description = name === FALLBACK
-        ? "Property Page — ดูทรัพย์ทั้งหมด และติดต่อเจ้าของทรัพย์ได้โดยตรง — by huahin.properties"
-        : `Property Page — ดูทรัพย์ทั้งหมด และติดต่อ ${name} ได้โดยตรง — by huahin.properties`;
+        ? "Property Page — ดูทรัพย์และติดต่อเจ้าของทรัพย์ — By: huahin.properties"
+        : `Property Page — ดูทรัพย์และติดต่อ ${name} — By: huahin.properties`;
       photo = `https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/shareCard?id=${encodeURIComponent(id)}&v=${cardV}`;
       const ua = String(req.headers["user-agent"] || "").toLowerCase();
       // Chat-app link-preview bots (LINE/Facebook/WhatsApp/Telegram/etc.)
