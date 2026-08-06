@@ -1467,8 +1467,47 @@ export function trialStatus(lister) {
 // Submits a new/edited listing for admin approval — the lister's own write
 // is only ever allowed to move a listing INTO "pending" (see
 // firestore.rules); only the admin can move pending → live/rejected.
+// Auto-publish (Aug 2026 policy change — see chat log): a lister's own
+// listing goes straight to "live" the moment they submit it, no admin
+// wait. Admin still reviews after the fact from Listing Approvals.dc.html
+// and can force a listing "offline" there at any time (see
+// setPropertyOffline/reinstateProperty below) if it turns out to be wrong
+// or harmful — that decision sticks until admin reinstates it (Firestore
+// rules block a lister from flipping "offline" back to "live" themselves).
 export async function submitForApproval(propertyId, payload) {
-  await setDoc("properties", propertyId, { ...(payload || {}), listingStatus: "pending", submittedAt: Date.now(), isDraft: false });
+  const now = Date.now();
+  await setDoc("properties", propertyId, {
+    ...(payload || {}), listingStatus: "live", submittedAt: now, isDraft: false,
+    publishedAt: now, expiresAt: now + LISTING_DURATION_DAYS * 86400000, approvedAt: now,
+  });
+}
+
+// Admin-only: takes a live listing offline (hidden from the public site)
+// without deleting it — used when a report or manual review turns up a
+// problem. reason is stored for the admin's own record only.
+export async function setPropertyOffline(propertyId, reason) {
+  await updateDocFields("properties", propertyId, { listingStatus: "offline", offlineAt: Date.now(), offlineReason: reason || "" });
+}
+
+// Admin-only: reverses setPropertyOffline, putting the listing back live.
+export async function reinstateProperty(propertyId) {
+  await updateDocFields("properties", propertyId, { listingStatus: "live", offlineAt: null, offlineReason: null });
+}
+
+// Public: anyone (no login required) can flag a listing for admin review.
+// Written to its own collection rather than onto the property doc so a
+// visitor's report can never touch the listing itself.
+export async function reportProperty(propertyId, reason, contact) {
+  const id = `${propertyId}_${Date.now()}`;
+  await setDoc("propertyReports", id, {
+    propertyId, reason: reason || "", contact: contact || "", createdAt: Date.now(), resolved: false,
+  });
+}
+
+// Admin-only: marks a report as handled (keeps it for the record, just no
+// longer counted in the "ยังไม่จัดการ" badge).
+export async function resolveReport(reportId) {
+  await updateDocFields("propertyReports", reportId, { resolved: true, resolvedAt: Date.now() });
 }
 
 export async function approveListing(propertyId) {

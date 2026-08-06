@@ -25,7 +25,7 @@
 </helmet>
 
 <div style="min-height:100vh;">
-  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #11 — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #13 — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
       <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
@@ -699,7 +699,7 @@
           </div>
 
           <div onClick="{{ onSaveProperty }}" style="background:oklch(40% 0.13 25); color:white; text-align:center; padding:14px; border-radius:4px; font-size:15px; font-weight:600; cursor:pointer;">{{ saveLabel }}</div>
-          <div style="font-size:11.5px; color:oklch(55% 0.02 60); text-align:center; margin-top:8px;">บันทึกเป็นร่างก่อน — กด "ส่งขออนุมัติ" ในหน้ารายการเมื่อพร้อม ทีมงานจะตรวจสอบก่อนขึ้นเว็บสาธารณะ (ปกติภายใน 24 ชม.)</div>
+          <div style="font-size:11.5px; color:oklch(55% 0.02 60); text-align:center; margin-top:8px;">บันทึกเป็นร่างก่อน — กด "เผยแพร่ประกาศ" เพื่อให้ขึ้นเว็บทันที (แอดมินตรวจสอบย้อนหลังและปิดได้ภายหลังหากมีปัญหา)</div>
           <sc-if value="{{ saveError }}"><div style="font-size:13px; color:oklch(50% 0.18 30); text-align:center; margin-top:10px;">{{ saveError }}</div></sc-if>
         </div>
       </sc-if>
@@ -950,8 +950,11 @@ class Component extends DCLogic {
       new URLSearchParams(window.location.search).get("new") === "1"
     ) {
       this._handledNewParam = true;
+      // Per CEO decision: "+" (เพิ่มทรัพย์) from Agent Profile lands on the
+      // property LIST (with existing properties visible, approved or not),
+      // never the blank add-form directly — the form only opens when the
+      // "+ เพิ่มทรัพย์ใหม่" button inside that list is clicked.
       this.setState({ dashTab: "list" });
-      this.startNew();
     }
   }
 
@@ -1663,6 +1666,7 @@ class Component extends DCLogic {
       live: { label: "✅ กำลังแสดง", bg: "oklch(93% 0.05 145)", color: "oklch(35% 0.12 145)" },
       expired: { label: "⏰ หมดอายุ", bg: "oklch(93% 0.02 30)", color: "oklch(45% 0.1 30)" },
       rejected: { label: "✕ ถูกปฏิเสธ", bg: "oklch(93% 0.03 30)", color: "oklch(45% 0.15 30)" },
+      offline: { label: "⛔ ปิดโดยแอดมิน", bg: "oklch(90% 0.03 30)", color: "oklch(40% 0.15 30)" },
     };
     const properties = (this.state.properties || []).map((p) => {
       const st = statusMap[p.status] || statusMap.sale;
@@ -1672,8 +1676,9 @@ class Component extends DCLogic {
       const lc = lifecycleMap[lifecycle] || lifecycleMap.draft;
       const daysLeft = p.expiresAt ? Math.max(0, Math.ceil((p.expiresAt - now) / 86400000)) : null;
       let actionLabel = "", actionIcon = "📤", actionColor = "oklch(35% 0.1 250)", onAction = () => {};
-      if (lifecycle === "draft") { actionLabel = "ส่งขออนุมัติ"; actionIcon = "📤"; onAction = () => this.submitListing(p); }
+      if (lifecycle === "draft") { actionLabel = "เผยแพร่ประกาศ"; actionIcon = "🚀"; onAction = () => this.submitListing(p); }
       else if (lifecycle === "pending") { actionLabel = "รออนุมัติ"; actionIcon = "⏳"; actionColor = "oklch(50% 0.02 60)"; onAction = () => {}; }
+      else if (lifecycle === "offline") { actionLabel = "ปิดโดยแอดมิน"; actionIcon = "⛔"; actionColor = "oklch(45% 0.15 30)"; onAction = () => {}; }
       else if (lifecycle === "live") { actionLabel = "ดูประกาศ"; actionIcon = "✅"; actionColor = "oklch(45% 0.13 145)"; onAction = () => window.open(`Property Details.dc.html?id=${p.id}`, "_blank"); }
       else if (lifecycle === "expired") {
         const canRenewFree = this._fb && this._fb.hasActivePaidPackage(lister);

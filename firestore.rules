@@ -59,18 +59,32 @@ service cloud.firestore {
           get(/databases/$(database)/documents/listers/$(request.auth.uid)).data.subscriptionStatus == "active" &&
           get(/databases/$(database)/documents/listers/$(request.auth.uid)).data.tier in ["pro", "agency", "level3", "level4"];
       }
+      // Aug 2026: auto-publish — a lister may now set their own listing
+      // straight to "live" (previously admin-only). The one thing they can
+      // NEVER do is move it OUT of "offline" — that status only exists
+      // because an admin put it there (see setPropertyOffline in
+      // firebase-client.js), and only an admin write (isAdmin() above) can
+      // undo it. This is enforced here, not just in the UI, so it can't be
+      // bypassed from devtools/console.
       function listerListingStatusOk() {
         return request.resource.data.listingStatus == resource.data.listingStatus
-          || request.resource.data.listingStatus == "pending"
-          || (request.resource.data.listingStatus == "live" && resource.data.listingStatus == "expired" && listerHasActivePaidPackage());
+          || (request.resource.data.listingStatus == "live" && resource.data.listingStatus != "offline");
       }
-      allow create: if isAdmin() || (request.auth != null && request.resource.data.listerId == request.auth.uid && request.resource.data.listingStatus != "live");
+      allow create: if isAdmin() || (request.auth != null && request.resource.data.listerId == request.auth.uid && request.resource.data.listingStatus != "offline");
       allow update: if isAdmin() || (request.auth != null && resource.data.listerId == request.auth.uid && request.resource.data.listerId == request.auth.uid && listerListingStatusOk())
         // Public view-count increment (Property Details page, any visitor,
         // no auth) — restricted to ONLY the viewCount field changing so
         // this can't be abused to alter price/status/etc.
         || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']);
       allow delete: if isAdmin() || (request.auth != null && resource.data.listerId == request.auth.uid);
+    }
+    // Public reporting channel (Aug 2026): anyone, signed in or not, can
+    // flag a listing for admin review — create-only, no read/update/delete,
+    // so a reporter can never see or tamper with other people's reports.
+    // Admin (Listing Approvals.dc.html "รายงานปัญหา" tab) reads/resolves.
+    match /propertyReports/{id} {
+      allow read, update, delete: if isAdmin();
+      allow create: if request.resource.data.propertyId is string && request.resource.data.propertyId.size() > 0;
     }
     // Public read. Admin can write anything. A signed-in lister may write a
     // photo doc for a property they own (checked via the linked property's

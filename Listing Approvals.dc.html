@@ -37,8 +37,8 @@
   </div>
 
   <div style="max-width:1000px; margin:0 auto; padding:clamp(20px,4vw,40px);">
-    <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:6px;">คิวอนุมัติประกาศ</div>
-    <div style="font-size:14px; color:oklch(50% 0.02 60); margin-bottom:24px;">ประกาศใหม่ทุกรายการต้องผ่านการอนุมัติที่นี่ก่อนขึ้นเว็บสาธารณะ</div>
+    <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:6px;">ตรวจสอบประกาศ</div>
+    <div style="font-size:14px; color:oklch(50% 0.02 60); margin-bottom:24px;">ประกาศของสมาชิกขึ้นเว็บทันทีที่กดเผยแพร่ — แอดมินตรวจสอบย้อนหลังและปิดประกาศที่มีปัญหาได้ที่นี่</div>
 
     <sc-if value="{{ hasSuspects }}">
       <div style="background:oklch(96% 0.06 60); border:1px solid oklch(80% 0.1 60); border-radius:8px; padding:16px 20px; margin-bottom:22px;">
@@ -55,9 +55,35 @@
       <div onClick="{{ onFilterLive }}" style="{{ tabLiveStyle }}">กำลังแสดง ({{ countLive }})</div>
       <div onClick="{{ onFilterExpired }}" style="{{ tabExpiredStyle }}">หมดอายุ ({{ countExpired }})</div>
       <div onClick="{{ onFilterRejected }}" style="{{ tabRejectedStyle }}">ปฏิเสธ ({{ countRejected }})</div>
+      <div onClick="{{ onFilterOffline }}" style="{{ tabOfflineStyle }}">ปิดใช้งาน ({{ countOffline }})</div>
+      <div onClick="{{ onFilterReports }}" style="{{ tabReportsStyle }}">🚩 รายงานปัญหา ({{ countReports }})</div>
     </div>
 
-    <div style="display:flex; flex-direction:column; gap:10px;">
+<sc-if value="{{ isReportsTab }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <sc-for list="{{ reportRows }}" as="rp" hint-placeholder-count="2">
+          <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:16px 18px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:200px;">
+              <div style="font-size:14px; font-weight:700; color:oklch(40% 0.13 25);">{{ rp.code }} <span style="font-weight:400; color:oklch(50% 0.02 60); font-size:12.5px;">— {{ rp.zone }}</span></div>
+              <div style="font-size:12.5px; color:oklch(50% 0.02 60);">เหตุผลที่แจ้ง: {{ rp.reasonLabel }}</div>
+              <div style="font-size:11.5px; color:oklch(60% 0.02 60); margin-top:2px;">โดย {{ rp.contactLabel }} · แจ้งเมื่อ {{ rp.dateLabel }}</div>
+            </div>
+            <div style="font-size:12px; font-weight:600; padding:5px 12px; border-radius:100px; background:{{ rp.statusBg }}; color:{{ rp.statusColor }}; white-space:nowrap;">{{ rp.statusLabel }}</div>
+            <div style="display:flex; gap:8px;">
+              <a href="{{ rp.viewUrl }}" target="_blank" style="background:oklch(93% 0.01 70); color:oklch(30% 0.02 60); padding:8px 14px; border-radius:6px; font-size:13px; text-decoration:none; white-space:nowrap;">👁️ ดู</a>
+              <sc-if value="{{ rp.canOffline }}">
+                <div onClick="{{ rp.onOffline }}" style="background:oklch(95% 0.02 30); color:oklch(45% 0.15 30); padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">⛔ ปิดประกาศ</div>
+              </sc-if>
+              <div onClick="{{ rp.onResolve }}" style="background:oklch(93% 0.01 70); color:oklch(30% 0.02 60); padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">✓ จัดการแล้ว</div>
+            </div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noReportRows }}">
+          <div style="text-align:center; padding:40px; color:oklch(55% 0.02 60); font-size:14px;">ยังไม่มีรายงานปัญหา</div>
+        </sc-if>
+      </div>
+    </sc-if>
+    <div style="display:{{ rowsListDisplay }}; flex-direction:column; gap:10px;">
       <sc-for list="{{ rows }}" as="r" hint-placeholder-count="2">
         <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:16px 18px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
           <div style="{{ r.coverStyle }}"></div>
@@ -75,6 +101,12 @@
             <sc-if value="{{ r.showReject }}">
               <div onClick="{{ r.onReject }}" style="background:oklch(95% 0.02 30); color:oklch(45% 0.15 30); padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">✕ ปฏิเสธ</div>
             </sc-if>
+            <sc-if value="{{ r.showOffline }}">
+              <div onClick="{{ r.onOffline }}" style="background:oklch(95% 0.02 30); color:oklch(45% 0.15 30); padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">⛔ ปิดประกาศ</div>
+            </sc-if>
+            <sc-if value="{{ r.showReinstate }}">
+              <div onClick="{{ r.onReinstate }}" style="background:oklch(40% 0.13 150); color:white; padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">↺ เปิดใช้งานอีกครั้ง</div>
+            </sc-if>
           </div>
         </div>
       </sc-for>
@@ -88,7 +120,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { properties: [], listersById: {}, suspects: [], filter: "pending", loaded: false };
+  state = { properties: [], listersById: {}, suspects: [], reports: [], filter: "all", loaded: false };
 
   async componentDidMount() {
     const fb = await import("./firebase-client.js");
@@ -96,14 +128,15 @@ class Component extends DCLogic {
     await fb.onAdminAuthReady();
     if (!fb.requireAdminAuth()) return;
     try {
-      const [properties, listers, suspects] = await Promise.all([
+      const [properties, listers, suspects, reports] = await Promise.all([
         fb.fetchCollection("properties"),
         fb.fetchCollection("listers"),
         fb.findDuplicateTrialSuspects(),
+        fb.fetchCollection("propertyReports").catch(() => []),
       ]);
       const listersById = {};
       listers.forEach((l) => { listersById[l.id] = l; });
-      this.setState({ properties: properties.filter((p) => p.listerId), listersById, suspects, loaded: true });
+      this.setState({ properties: properties.filter((p) => p.listerId), listersById, suspects, reports, loaded: true });
     } catch (e) {
       console.warn("fetch failed:", e);
       this.setState({ loaded: true });
@@ -121,6 +154,22 @@ class Component extends DCLogic {
     try { await this._fb.rejectListing(id, reason); } catch (e) { console.warn("reject failed:", e); }
   }
 
+  async takeOffline(id) {
+    const reason = window.prompt("เหตุผลที่ปิดประกาศนี้ (เก็บไว้ภายใน ไม่แสดงให้ใครเห็น):", "") || "";
+    this.setState((s) => ({ properties: s.properties.map((p) => (p.id === id ? { ...p, listingStatus: "offline" } : p)) }));
+    try { await this._fb.setPropertyOffline(id, reason); } catch (e) { console.warn("offline failed:", e); }
+  }
+
+  async reinstate(id) {
+    this.setState((s) => ({ properties: s.properties.map((p) => (p.id === id ? { ...p, listingStatus: "live" } : p)) }));
+    try { await this._fb.reinstateProperty(id); } catch (e) { console.warn("reinstate failed:", e); }
+  }
+
+  async resolveReport(id, propertyId) {
+    this.setState((s) => ({ reports: s.reports.map((r) => (r.id === id ? { ...r, resolved: true } : r)) }));
+    try { await this._fb.resolveReport(id); } catch (e) { console.warn("resolve failed:", e); }
+  }
+
   renderVals() {
     const all = this.state.properties || [];
     const countAll = all.length;
@@ -128,21 +177,24 @@ class Component extends DCLogic {
     const countLive = all.filter((p) => p.listingStatus === "live").length;
     const countExpired = all.filter((p) => p.listingStatus === "expired").length;
     const countRejected = all.filter((p) => p.listingStatus === "rejected").length;
+    const countOffline = all.filter((p) => p.listingStatus === "offline").length;
+    const countReports = (this.state.reports || []).filter((r) => !r.resolved).length;
 
     const tabBase = "padding:8px 16px; border-radius:100px; font-size:13px; cursor:pointer;";
     const tabActive = tabBase + "background:oklch(22% 0.02 60); color:white;";
     const tabInactive = tabBase + "background:white; color:oklch(35% 0.02 60); border:1px solid oklch(88% 0.01 70);";
 
-    const filtered = this.state.filter === "all" ? all : all.filter((p) => p.listingStatus === this.state.filter);
+    const filtered = this.state.filter === "all" || this.state.filter === "reports" ? all : all.filter((p) => p.listingStatus === this.state.filter);
 
     const statusMap = {
       pending: { label: "รออนุมัติ", bg: "oklch(95% 0.06 75)", color: "oklch(45% 0.13 75)" },
       live: { label: "กำลังแสดง", bg: "oklch(93% 0.05 145)", color: "oklch(35% 0.12 145)" },
       expired: { label: "หมดอายุ", bg: "oklch(93% 0.02 30)", color: "oklch(45% 0.1 30)" },
       rejected: { label: "ปฏิเสธ", bg: "oklch(93% 0.03 30)", color: "oklch(45% 0.15 30)" },
+      offline: { label: "ปิดใช้งาน (แอดมิน)", bg: "oklch(90% 0.03 30)", color: "oklch(40% 0.15 30)" },
     };
 
-    const rows = filtered
+    const rows = this.state.filter === "reports" ? [] : filtered
       .sort((a, b) => (b.submittedAt || b.updatedAt || 0) - (a.submittedAt || a.updatedAt || 0))
       .map((p) => {
         const st = statusMap[p.listingStatus] || statusMap.pending;
@@ -157,25 +209,58 @@ class Component extends DCLogic {
           viewUrl: `Property Details.dc.html?id=${p.id}`,
           showApprove: p.listingStatus === "pending",
           showReject: p.listingStatus === "pending",
+          showOffline: p.listingStatus === "live",
+          showReinstate: p.listingStatus === "offline",
           onApprove: () => this.approve(p.id),
           onReject: () => this.reject(p.id),
+          onOffline: () => this.takeOffline(p.id),
+          onReinstate: () => this.reinstate(p.id),
         };
       });
 
+    const reportRows = this.state.filter === "reports" ? (this.state.reports || [])
+      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+      .map((r) => {
+        const p = all.find((x) => x.id === r.propertyId) || {};
+        return {
+          id: r.id,
+          code: r.propertyId || "-", zone: p.zone || "-",
+          reasonLabel: r.reason || "(ไม่ระบุเหตุผล)",
+          contactLabel: r.contact || "ไม่ระบุผู้แจ้ง",
+          dateLabel: r.createdAt ? new Date(r.createdAt).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" }) : "-",
+          resolved: !!r.resolved,
+          statusLabel: r.resolved ? "จัดการแล้ว" : "ยังไม่จัดการ",
+          statusBg: r.resolved ? "oklch(93% 0.02 145)" : "oklch(95% 0.06 75)",
+          statusColor: r.resolved ? "oklch(35% 0.1 145)" : "oklch(45% 0.13 75)",
+          viewUrl: `Property Details.dc.html?id=${r.propertyId}`,
+          canOffline: p.listingStatus === "live",
+          onOffline: () => this.takeOffline(r.propertyId),
+          onResolve: () => this.resolveReport(r.id, r.propertyId),
+        };
+      }) : [];
+
     return {
       onLogout: () => { this._fb.logoutAdmin(); window.location.href = "Admin Login.dc.html"; },
-      countAll, countPending, countLive, countExpired, countRejected,
+      countAll, countPending, countLive, countExpired, countRejected, countOffline, countReports,
       tabAllStyle: this.state.filter === "all" ? tabActive : tabInactive,
       tabPendingStyle: this.state.filter === "pending" ? tabActive : tabInactive,
       tabLiveStyle: this.state.filter === "live" ? tabActive : tabInactive,
       tabExpiredStyle: this.state.filter === "expired" ? tabActive : tabInactive,
       tabRejectedStyle: this.state.filter === "rejected" ? tabActive : tabInactive,
+      tabOfflineStyle: this.state.filter === "offline" ? tabActive : tabInactive,
+      tabReportsStyle: this.state.filter === "reports" ? tabActive : tabInactive,
       onFilterAll: () => this.setState({ filter: "all" }),
       onFilterPending: () => this.setState({ filter: "pending" }),
       onFilterLive: () => this.setState({ filter: "live" }),
       onFilterExpired: () => this.setState({ filter: "expired" }),
       onFilterRejected: () => this.setState({ filter: "rejected" }),
-      rows, noRows: this.state.loaded && rows.length === 0,
+      onFilterOffline: () => this.setState({ filter: "offline" }),
+      onFilterReports: () => this.setState({ filter: "reports" }),
+      isReportsTab: this.state.filter === "reports",
+      rowsListDisplay: this.state.filter === "reports" ? "none" : "flex",
+      rows, reportRows,
+      noRows: this.state.loaded && this.state.filter !== "reports" && rows.length === 0,
+      noReportRows: this.state.loaded && this.state.filter === "reports" && reportRows.length === 0,
       hasSuspects: (this.state.suspects || []).length > 0,
       suspects: (this.state.suspects || []).map((grp) => ({
         phone: (grp[0].phone || "-"),
