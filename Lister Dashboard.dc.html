@@ -25,7 +25,7 @@
 </helmet>
 
 <div style="min-height:100vh;">
-  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #14 — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #15 — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
       <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
@@ -679,6 +679,14 @@
               <input type="number" value="{{ f_bathrooms }}" onChange="{{ onFBathrooms }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
             </div>
             <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ขนาดสระ (ตร.ม.)</div>
+              <input type="number" value="{{ f_poolSize }}" onChange="{{ onFPoolSize }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+            </div>
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">พื้นที่จอดรถ (คัน)</div>
+              <input type="number" value="{{ f_parking }}" onChange="{{ onFParking }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+            </div>
+            <div>
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">พื้นที่ใช้สอย (ตร.ม.)</div>
               <input type="number" value="{{ f_livingArea }}" onChange="{{ onFLivingArea }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
             </div>
@@ -704,10 +712,9 @@
             <textarea rows="4" value="{{ f_description }}" onChange="{{ onFDescription }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; resize:vertical;" placeholder="จุดเด่นพิเศษที่ไม่มีในช่องด้านบน เช่น ต่อรองได้ / ขายเอง ไม่มีนายหน้า / ใกล้โรงเรียนนานาชาติ"></textarea>
           </div>
 
-          <div style="margin-bottom:20px; background:oklch(97% 0.015 75); border:1px solid oklch(88% 0.02 70); border-radius:8px; padding:16px;">
-            <div style="font-size:13.5px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:4px;">✨ ให้ AI ช่วยร่างประกาศให้</div>
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:12px;">AI จะรวมข้อมูลทรัพย์ทั้งหมดด้านบน + พิกัดแผนที่ + ข้อมูลเพิ่มเติม มาร่างเป็นข้อความประกาศที่ครบถ้วน พร้อมสถานที่สำคัญใกล้เคียงและระยะทาง/เวลาขับรถโดยประมาณ — แก้ไขได้ก่อนบันทึก</div>
-            <div onClick="{{ onGenerateAiDraft }}" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; margin-bottom:12px;">{{ aiGenerateLabel }}</div>
+          <div style="margin-bottom:20px;">
+            <div onClick="{{ onGenerateAiDraft }}" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">✨ {{ aiGenerateLabel }}</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-top:8px; margin-bottom:12px;">AI จะรวมข้อมูลทรัพย์ทั้งหมดด้านบน + ข้อมูลติดต่อ/Social จากหน้าตั้งค่า + พิกัดแผนที่ + ข้อมูลเพิ่มเติม มาร่างเป็นข้อความประกาศที่ครบถ้วน พร้อมสถานที่สำคัญใกล้เคียงและระยะทาง/เวลาขับรถโดยประมาณ — แก้ไขได้ก่อนบันทึก</div>
             <sc-if value="{{ hasAiDraft }}" hint-placeholder-val="{{ false }}">
               <textarea rows="10" value="{{ f_aiDraft }}" onChange="{{ onFAiDraft }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:12px; font-size:13.5px; font-family:inherit; resize:vertical; line-height:1.6;"></textarea>
             </sc-if>
@@ -877,7 +884,7 @@ class Component extends DCLogic {
   state = {
     loaded: false, signedIn: false, lister: null, properties: [], view: "list", dashTab: "settings",
     editingId: null, f_type: "villa", f_area: "hua-hin", f_subdistrict: "", f_zone: "", f_status: "sale",
-    f_price: "", f_bedrooms: "", f_bathrooms: "", f_livingArea: "", f_landSize: "", f_mapsLink: "", f_mapDisplay: "area",
+    f_price: "", f_bedrooms: "", f_bathrooms: "", f_poolSize: "", f_parking: "", f_livingArea: "", f_landSize: "", f_mapsLink: "", f_mapDisplay: "area",
     f_description: "", f_aiDraft: "", aiGenerating: false, f_features: [], saveError: "", saving: false,
     existingPhotos: [], newPhotos: [],
     savedId: "", savedPayload: null, ns_assistedSale: false, ns_commissionPct: "5",
@@ -1057,7 +1064,7 @@ class Component extends DCLogic {
     this.pushViewHistory();
     this.setState({
       view: "edit", editingId: null, f_type: "villa", f_area: "hua-hin", f_subdistrict: this.subdistrictsFor("hua-hin")[0] || "", f_zone: "",
-      f_status: "sale", f_price: "", f_bedrooms: "", f_bathrooms: "", f_livingArea: "",
+      f_status: "sale", f_price: "", f_bedrooms: "", f_bathrooms: "", f_poolSize: "", f_parking: "", f_livingArea: "",
       f_landSize: "", f_mapsLink: "", f_mapDisplay: "area", f_description: "", f_aiDraft: "", f_features: [], saveError: "", existingPhotos: [], newPhotos: [], quotaMsg: "",
       openMenuId: "",
     });
@@ -1076,7 +1083,9 @@ class Component extends DCLogic {
       f_subdistrict: p.subdistrict || this.subdistrictsFor(p.area || "hua-hin")[0] || "",
       f_zone: p.zone || "", f_status: p.status === "rent" ? "rent" : "sale",
       f_price: p.price != null ? String(p.price) : "", f_bedrooms: p.bedrooms != null ? String(p.bedrooms) : "",
-      f_bathrooms: p.bathrooms != null ? String(p.bathrooms) : "", f_livingArea: p.livingArea != null ? String(p.livingArea) : "",
+      f_bathrooms: p.bathrooms != null ? String(p.bathrooms) : "",
+      f_poolSize: p.poolSize != null ? String(p.poolSize) : "", f_parking: p.parking != null ? String(p.parking) : "",
+      f_livingArea: p.livingArea != null ? String(p.livingArea) : "",
       f_aiDraft: (p.description && typeof p.description === "object") ? (p.description.th || "") : (p.description || ""),
       f_landSize: p.landSize != null ? String(p.landSize) : "", f_mapsLink: p.mapLink || "", f_mapDisplay: p.mapDisplayMode || "area", f_description: (p.description && typeof p.description === "object") ? (p.description.th || p.description.en || "") : (p.description || ""),
       f_features: p.features || [],
@@ -1164,6 +1173,8 @@ class Component extends DCLogic {
     if (s.f_price) facts.push(`ราคา ${Number(s.f_price).toLocaleString()} บาท`);
     if (s.f_bedrooms) facts.push(`${s.f_bedrooms} ห้องนอน`);
     if (s.f_bathrooms) facts.push(`${s.f_bathrooms} ห้องน้ำ`);
+    if (s.f_poolSize) facts.push(`สระว่ายน้ำขนาด ${s.f_poolSize} ตร.ม.`);
+    if (s.f_parking) facts.push(`ที่จอดรถ ${s.f_parking} คัน`);
     if (s.f_livingArea) facts.push(`พื้นที่ใช้สอย ${s.f_livingArea} ตร.ม.`);
     if (s.f_landSize) facts.push(`ขนาดที่ดิน ${s.f_landSize} ตร.ว.`);
     if (facts.length) { lines.push(facts.join(" · ")); lines.push(""); }
@@ -1183,6 +1194,11 @@ class Component extends DCLogic {
       lines.push("");
     }
     lines.push(`สนใจติดต่อ ${lister.name || lister.email || "เจ้าของทรัพย์"} ${lister.phone ? "โทร " + lister.phone : ""}`.trim());
+    const sl = lister.socialLinks || {};
+    if (sl.facebook) lines.push(`Facebook: ${sl.facebook}`);
+    if (sl.instagram) lines.push(`Instagram: ${sl.instagram}`);
+    if (sl.tiktok) lines.push(`TikTok: ${sl.tiktok}`);
+    if (sl.youtube) lines.push(`YouTube: ${sl.youtube}`);
     lines.push(`รหัสทรัพย์: ${s.editingId || "(จะได้รับหลังบันทึก)"}`);
     return lines.filter((l) => l !== undefined).join("\n");
   }
@@ -1223,6 +1239,8 @@ class Component extends DCLogic {
       status: this.state.f_status, price: Number(this.state.f_price) || 0,
       bedrooms: this.state.f_bedrooms ? Number(this.state.f_bedrooms) : null,
       bathrooms: this.state.f_bathrooms ? Number(this.state.f_bathrooms) : null,
+      poolSize: this.state.f_poolSize ? Number(this.state.f_poolSize) : null,
+      parking: this.state.f_parking ? Number(this.state.f_parking) : null,
       livingArea: this.state.f_livingArea ? Number(this.state.f_livingArea) : null,
       landSize: this.state.f_landSize ? Number(this.state.f_landSize) : null,
       description: descriptionValue, features: this.state.f_features, mapLink: this.state.f_mapsLink.trim(), mapDisplayMode: this.state.f_mapDisplay,
@@ -1924,6 +1942,8 @@ class Component extends DCLogic {
       subdistrictOptions: this.subdistrictsFor(this.state.f_area),
       f_subdistrict: this.state.f_subdistrict, onFSubdistrict: (e) => this.setState({ f_subdistrict: e.target.value }),
       f_zone: this.state.f_zone, onFZone: (e) => this.setState({ f_zone: e.target.value }),
+      f_poolSize: this.state.f_poolSize, onFPoolSize: (e) => this.setState({ f_poolSize: e.target.value }),
+      f_parking: this.state.f_parking, onFParking: (e) => this.setState({ f_parking: e.target.value }),
       f_mapsLink: this.state.f_mapsLink, onFMapsLink: (e) => this.setState({ f_mapsLink: e.target.value }),
       isAreaMode: this.state.f_mapDisplay !== "exact", isExactMode: this.state.f_mapDisplay === "exact",
       onFMapDisplayArea: () => this.setState({ f_mapDisplay: "area" }),
