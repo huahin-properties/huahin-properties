@@ -922,12 +922,6 @@ class Component extends DCLogic {
         const agentCode = await fb.ensureAgentCode(lister.id, lister.agentCode).catch(() => "");
         if (agentCode) this.setState((s) => ({ lister: { ...s.lister, agentCode } }));
       }
-      // Agent Profile's "+" (เพิ่มทรัพย์) icon links here with ?new=1 so it
-      // opens straight into the add-property form instead of just landing
-      // on the plain dashboard list (which is what the ⚙ settings icon does).
-      if (new URLSearchParams(window.location.search).get("new") === "1") {
-        this.startNew();
-      }
     } catch (e) {
       console.warn("Failed to load dashboard:", e);
       this.setState({ loaded: true, signedIn: true, lister: null, properties: [] });
@@ -938,6 +932,23 @@ class Component extends DCLogic {
 
   componentWillUnmount() {
     window.removeEventListener("popstate", this._onPopState);
+  }
+
+  // Agent Profile's "+" (เพิ่มทรัพย์) icon links here with ?new=1 so it opens
+  // straight into the add-property form instead of the plain dashboard list
+  // (which is what the ⚙ settings icon does). Checked in componentDidUpdate
+  // (not inline in componentDidMount's async chain) so it only fires once
+  // `lister`/`properties` are truly committed to state — avoids a race where
+  // startNew()'s quota check reads stale/null state from before the big
+  // setState in componentDidMount has flushed.
+  componentDidUpdate() {
+    if (
+      this.state.loaded && this.state.signedIn && this.state.lister && !this._handledNewParam &&
+      new URLSearchParams(window.location.search).get("new") === "1"
+    ) {
+      this._handledNewParam = true;
+      this.startNew();
+    }
   }
 
   pushViewHistory() {
