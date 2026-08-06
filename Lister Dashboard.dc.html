@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-3 (ย่อกล่อง Hover ให้พอดีกรอบแผนที่เล็ก) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-4 (แก้รูปหายในกล่อง Hover ของบ้านที่กำลังกรอก) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -2000,7 +2000,9 @@ class Component extends DCLogic {
         return m;
       });
       this._ownerMarker = new google.maps.Marker({ position: coords, map: this._ownerMap });
-      const currentInfo = { id: this.state.editingId, coverUrl: (this.state.existingPhotos || [])[0] && this.state.existingPhotos[0].url, zone: this.state.f_zone, area: this.state.f_area, internalNotes: this.state.f_internalNotes };
+      const firstExisting = (this.state.existingPhotos || [])[0];
+      const firstNew = (this.state.newPhotos || [])[0];
+      const currentInfo = { id: this.state.editingId || "(ยังไม่บันทึก)", coverUrl: (firstExisting && firstExisting.url) || (firstNew && firstNew.url) || null, zone: this.state.f_zone, area: this.state.f_area, internalNotes: this.state.f_internalNotes };
       this._ownerMarker.addListener("mouseover", () => { this._ownerInfoWindow.setContent(infoHtml(currentInfo)); this._ownerInfoWindow.open(this._ownerMap, this._ownerMarker); });
       this._ownerMarker.addListener("mouseout", () => this._ownerInfoWindow.close());
       this._ownerMapKey = key;
