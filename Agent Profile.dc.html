@@ -34,6 +34,7 @@
 </sc-if>
 
 <sc-if value="{{ hasLister }}">
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #8 — DEBUG: isOwner={{ debugIsOwner }} listerId={{ debugListerId }}</div>
   <div style="position:relative;">
     <div style="{{ coverStyle }}"></div>
     <div style="position:absolute; top:0; left:0; right:0; display:flex; align-items:center; justify-content:space-between; padding:14px clamp(14px,4vw,40px); gap:10px; flex-wrap:nowrap;">
@@ -218,7 +219,7 @@
         </div>
       </sc-if>
       <sc-if value="{{ isOwner }}">
-        <a href="{{ addPropertyUrl }}" style="display:block; text-align:center; background:oklch(22% 0.02 60); color:white; padding:11px; border-radius:6px; font-size:13px; font-weight:600; margin-bottom:10px;">+ เพิ่มทรัพย์</a>
+        <a href="Lister Dashboard.dc.html" style="display:block; text-align:center; background:oklch(22% 0.02 60); color:white; padding:11px; border-radius:6px; font-size:13px; font-weight:600; margin-bottom:10px;">แก้ไขและบันทึก</a>
       </sc-if>
       <div onClick="{{ onCloseAbout }}" style="text-align:center; margin-top:6px; font-size:12px; color:oklch(50% 0.02 60); cursor:pointer;">ปิด</div>
     </div>
@@ -538,6 +539,7 @@ class Component extends DCLogic {
     return {
       notFound: false, hasLister: true,
       isOwner: this.state.isOwner,
+      debugIsOwner: String(this.state.isOwner), debugListerId: this._listerId || "",
       // Cover photo overlay pattern removed — free tier never has a real
       // coverPhotoUrl persisted (Lister Dashboard strips it on save), so by
       // the time this renders, only paying tiers ever have a real photo
