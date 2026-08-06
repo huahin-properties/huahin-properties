@@ -25,7 +25,7 @@
 </helmet>
 
 <div style="min-height:100vh;">
-  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #7 — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #9 — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
       <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
@@ -452,10 +452,12 @@
       </sc-if>
 
       <sc-if value="{{ showFirstTimeCta }}">
-        <div style="background:white; border-radius:10px; padding:48px 24px; text-align:center; margin-bottom:22px;">
-          <div style="font-family:'Playfair Display',serif; font-size:22px; color:oklch(20% 0.02 60); margin-bottom:10px;">เริ่มต้นเลย — ลงประกาศแรกของคุณ</div>
-          <div style="font-size:13.5px; color:oklch(50% 0.02 60); margin-bottom:24px;">เพิ่มทรัพย์แรก แล้วให้ AI ช่วยร่างโพสต์ขายให้อัตโนมัติ</div>
-          <div onClick="{{ onNewProperty }}" style="display:inline-block; background:oklch(22% 0.02 60); color:white; padding:16px 36px; border-radius:100px; font-size:16px; font-weight:700; cursor:pointer;">+ เพิ่มทรัพย์ใหม่</div>
+        <div style="background:white; border-radius:8px; padding:16px 20px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;">
+          <div>
+            <div style="font-family:'Playfair Display',serif; font-size:16px; color:oklch(20% 0.02 60);">เริ่มต้นเลย — ลงประกาศแรกของคุณ</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60);">เพิ่มทรัพย์แรก แล้วให้ AI ช่วยร่างโพสต์ขายให้อัตโนมัติ</div>
+          </div>
+          <div onClick="{{ onNewProperty }}" style="display:inline-block; background:oklch(22% 0.02 60); color:white; padding:10px 22px; border-radius:100px; font-size:13.5px; font-weight:700; cursor:pointer; white-space:nowrap;">+ เพิ่มทรัพย์ใหม่</div>
         </div>
       </sc-if>
 
