@@ -25,7 +25,7 @@
 </helmet>
 
 <div style="min-height:100vh;">
-  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #15 — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #16 — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
       <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
@@ -1193,7 +1193,7 @@ class Component extends DCLogic {
       withDist.forEach((lm) => lines.push(`• ${lm.name} — ประมาณ ${lm.km.toFixed(1)} กม. (${lm.mins} นาที)`));
       lines.push("");
     }
-    lines.push(`สนใจติดต่อ ${lister.name || lister.email || "เจ้าของทรัพย์"} ${lister.phone ? "โทร " + lister.phone : ""}`.trim());
+    lines.push(`สนใจติดต่อ ${lister.displayName || lister.name || lister.email || "เจ้าของทรัพย์"} ${lister.phone ? "โทร " + lister.phone : ""}`.trim());
     const sl = lister.socialLinks || {};
     if (sl.facebook) lines.push(`Facebook: ${sl.facebook}`);
     if (sl.instagram) lines.push(`Instagram: ${sl.instagram}`);
