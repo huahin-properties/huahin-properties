@@ -661,10 +661,12 @@ exports.agentProfileMeta = onRequest(
         }
       }
       const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
-      const title = name;
+      const title = name === FALLBACK
+        ? "ที่ปรึกษาอสังหาริมทรัพย์หัวหิน — huahin.properties"
+        : `${name} | ที่ปรึกษาอสังหาริมทรัพย์หัวหิน — huahin.properties`;
       const description = name === FALLBACK
-        ? "Property Page — ดูทรัพย์และติดต่อเจ้าของทรัพย์ — By: huahin.properties"
-        : `Property Page — ดูทรัพย์และติดต่อ ${name} — By: huahin.properties`;
+        ? "ดูทรัพย์ทั้งหมด และติดต่อเจ้าของทรัพย์ได้โดยตรงที่หัวหิน"
+        : `ดูทรัพย์ทั้งหมด และติดต่อ ${name} ได้โดยตรงที่หัวหิน`;
       photo = `https://asia-southeast1-huahin-properties-5f1b5.cloudfunctions.net/shareCard?id=${encodeURIComponent(id)}&v=${cardV}`;
       const ua = String(req.headers["user-agent"] || "").toLowerCase();
       // Chat-app link-preview bots (LINE/Facebook/WhatsApp/Telegram/etc.)
@@ -831,7 +833,7 @@ exports.shareCard = onRequest(
         nameSize -= 4;
       }
       const nameLineHeight = nameSize * 1.15;
-      const nameBlockTop = 330;
+      const nameBlockTop = 355;
       ctx.fillStyle = textColor;
       nameLines.forEach((line, i) => {
         ctx.font = `700 ${nameSize}px ${FONT_FAMILY}`;
@@ -842,9 +844,9 @@ exports.shareCard = onRequest(
       // Order (approved): Name → Property Page → description → by huahin.properties.
       // Consistent proportional gaps between each block for a tidier, more
       // deliberate vertical rhythm instead of ad hoc offsets.
-      const pageSize = Math.round(nameSize * 0.42);
-      const brandSize = Math.round(nameSize * 0.48);
-      const descSize = Math.round(nameSize * 0.34);
+      const pageSize = Math.round(nameSize * 0.5);
+      const brandSize = Math.round(nameSize * 0.56);
+      const descSize = Math.round(nameSize * 0.42);
 
       y += pageSize * 1.1;
       ctx.font = `600 ${pageSize}px ${FONT_FAMILY}`;
@@ -866,7 +868,7 @@ exports.shareCard = onRequest(
       y += descSize * 0.9 + brandSize * 1.1;
       ctx.font = `500 ${brandSize}px ${FONT_FAMILY}`;
       ctx.fillStyle = subColor;
-      ctx.fillText("by huahin.properties", cx, y);
+      ctx.fillText("By: huahin.properties", cx, y);
 
       const buf = await canvas.encode("png");
       res.set("Content-Type", "image/png");
