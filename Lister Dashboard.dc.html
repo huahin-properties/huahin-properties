@@ -922,6 +922,12 @@ class Component extends DCLogic {
         const agentCode = await fb.ensureAgentCode(lister.id, lister.agentCode).catch(() => "");
         if (agentCode) this.setState((s) => ({ lister: { ...s.lister, agentCode } }));
       }
+      // Agent Profile's "+" (เพิ่มทรัพย์) icon links here with ?new=1 so it
+      // opens straight into the add-property form instead of just landing
+      // on the plain dashboard list (which is what the ⚙ settings icon does).
+      if (new URLSearchParams(window.location.search).get("new") === "1") {
+        this.startNew();
+      }
     } catch (e) {
       console.warn("Failed to load dashboard:", e);
       this.setState({ loaded: true, signedIn: true, lister: null, properties: [] });
