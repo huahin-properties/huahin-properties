@@ -34,7 +34,7 @@
 </sc-if>
 
 <sc-if value="{{ hasLister }}">
-  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #8 — DEBUG: isOwner={{ debugIsOwner }} listerId={{ debugListerId }}</div>
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #9 — DEBUG: isOwner={{ debugIsOwner }} listerId={{ debugListerId }}</div>
   <div style="position:relative;">
     <div style="{{ coverStyle }}"></div>
     <div style="position:absolute; top:0; left:0; right:0; display:flex; align-items:center; justify-content:space-between; padding:14px clamp(14px,4vw,40px); gap:10px; flex-wrap:nowrap;">
@@ -47,6 +47,7 @@
         <div onClick="{{ onOpenShare }}" title="แชร์" style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg></div>
         <sc-if value="{{ isOwner }}">
           <a href="{{ addPropertyUrl }}" title="เพิ่มทรัพย์" style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; text-decoration:none; flex-shrink:0;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></a>
+          <div onClick="{{ onOpenMyMap }}" title="แผนที่ทรัพย์ของฉัน" style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></div>
           <a href="Lister Dashboard.dc.html" title="ตั้งค่า" style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; text-decoration:none; flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></a>
           <div onClick="{{ onLogout }}" title="ออกจากระบบ" style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); color:oklch(45% 0.15 25); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></div>
         </sc-if>
@@ -242,6 +243,19 @@
   </div>
 </sc-if>
 
+<sc-if value="{{ showMyMap }}">
+  <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:600;" onClick="{{ onCloseMyMap }}">
+    <div style="background:white; border-radius:10px; padding:20px; width:min(560px,92vw);" onClick="{{ stopProp }}">
+      <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:4px;">🔒 แผนที่ทรัพย์ของฉัน (ส่วนตัว)</div>
+      <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:12px;">แสดงพิกัดจริงของทุกทรัพย์ที่คุณลงไว้ — ไม่แสดงต่อสาธารณะ เห็นเฉพาะคุณ</div>
+      <div style="aspect-ratio:16/11; border-radius:8px; overflow:hidden; background:oklch(93% 0.015 75);">
+        <div ref="{{ myMapRef }}" style="width:100%; height:100%;"></div>
+      </div>
+      <div onClick="{{ onCloseMyMap }}" style="text-align:center; margin-top:16px; font-size:12px; color:oklch(50% 0.02 60); cursor:pointer;">ปิด</div>
+    </div>
+  </div>
+</sc-if>
+
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 const CLOUD_FUNCTION_URL = "https://claudecomplete-3j4ldf4pja-as.a.run.app";
@@ -312,9 +326,38 @@ const AREA_LABELS_BY_LANG = {
   it: { "hua-hin": "Hua Hin", "pranburi": "Pranburi", "cha-am": "Cha-am" },
 };
 
+const HH_GOOGLE_MAPS_KEY = "AIzaSyAEkTsWJ83cot_Hwfe0dsx1Nqg0bIw2YP4";
+function loadGoogleMapsHH() {
+  if (window.google && window.google.maps) return Promise.resolve();
+  if (window.__hhGoogleMapsLoading) return window.__hhGoogleMapsLoading;
+  window.__hhGoogleMapsLoading = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${HH_GOOGLE_MAPS_KEY}`;
+    script.async = true;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+  return window.__hhGoogleMapsLoading;
+}
+function waitForGoogleMapsHH() {
+  return loadGoogleMapsHH().then(() => new Promise((resolve) => {
+    if (window.google && window.google.maps) { resolve(); return; }
+    const check = setInterval(() => {
+      if (window.google && window.google.maps) { clearInterval(check); resolve(); }
+    }, 50);
+  }));
+}
+function parseLatLngHH(input) {
+  if (!input) return null;
+  const m = String(input).match(/(-?\d{1,2}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)/);
+  if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+  return null;
+}
+
 class Component extends DCLogic {
   state = {
-    loaded: false, lister: null, properties: [], showShare: false, showAbout: false, showFilters: false, shareCopyLabel: "คัดลอกลิงก์",
+    loaded: false, lister: null, properties: [], showShare: false, showAbout: false, showFilters: false, showMyMap: false, shareCopyLabel: "คัดลอกลิงก์",
     chatOpen: false, chatInput: "", chatMessages: [], chatThinking: false,
     showPropertyModal: false, modalProperty: null, modalPhotoIndex: 0,
     lang: "th", filterType: "", filterZone: "", filterBeds: "", filterPrice: "",
@@ -371,6 +414,49 @@ class Component extends DCLogic {
 
   onSelectLang(code) {
     this.setState({ lang: code });
+  }
+
+  _myMapRefCb = (el) => {
+    const justMounted = !!el && !this._myMapEl;
+    this._myMapEl = el;
+    if (justMounted) this._syncMyMap();
+  };
+
+  // Private "all my listings" map for the profile owner only — never shown
+  // to visitors, opened from the map-pin icon. Plots every property this
+  // lister owns that has real coordinates saved.
+  async _syncMyMap() {
+    if (!this._myMapEl || !this.state.showMyMap) return;
+    const pins = (this.state.properties || [])
+      .map((p) => ({ id: p.id, coords: parseLatLngHH(p.mapLink) }))
+      .filter((p) => p.coords);
+    const key = pins.map((p) => p.id + ":" + p.coords.lat + "," + p.coords.lng).join("|");
+    if (this._myMapKey === key || this._myMapBusy) return;
+    this._myMapBusy = true;
+    try {
+      await waitForGoogleMapsHH();
+      if (!this._myMapEl) return;
+      const center = pins.length ? pins[0].coords : { lat: 12.55, lng: 99.95 };
+      if (!this._myMap) {
+        this._myMap = new google.maps.Map(this._myMapEl, {
+          center, zoom: 11, disableDefaultUI: true, zoomControl: true,
+          gestureHandling: "greedy", keyboardShortcuts: false, clickableIcons: false,
+        });
+      }
+      (this._myMapMarkers || []).forEach((m) => m.setMap(null));
+      this._myMapMarkers = pins.map((p) => new google.maps.Marker({ position: p.coords, map: this._myMap, title: p.id }));
+      if (pins.length > 1) {
+        const bounds = new google.maps.LatLngBounds();
+        pins.forEach((p) => bounds.extend(p.coords));
+        this._myMap.fitBounds(bounds, 40);
+      } else if (pins.length === 1) {
+        this._myMap.setCenter(pins[0].coords);
+        this._myMap.setZoom(14);
+      }
+      this._myMapKey = key;
+    } finally {
+      this._myMapBusy = false;
+    }
   }
 
   filteredProperties() {
@@ -493,6 +579,7 @@ class Component extends DCLogic {
   }
 
   renderVals() {
+    this._syncMyMap();
     const mod = this._mod;
     const lister = this.state.lister;
     if (!this.state.loaded) return { notFound: false, hasLister: false };
@@ -611,6 +698,10 @@ class Component extends DCLogic {
       filterModalSelectStyle: { border: "1px solid oklch(85% 0.01 70)", borderRadius: "6px", padding: "10px 12px", fontSize: "13px", fontFamily: "inherit", background: "white", color: "oklch(30% 0.02 60)", width: "100%" },
       onLogout: async () => { const fb = await import("./firebase-client.js"); fb.logoutAdmin(); window.location.href = "Home.dc.html"; },
       onCloseShare: () => this.setState({ showShare: false }),
+      showMyMap: this.state.showMyMap,
+      onOpenMyMap: () => this.setState({ showMyMap: true }),
+      onCloseMyMap: () => this.setState({ showMyMap: false }),
+      myMapRef: this._myMapRefCb,
       stopProp: (e) => e.stopPropagation(),
       showPropertyModal: this.state.showPropertyModal,
       onCloseModal: () => this.closePropertyModal(),
@@ -657,7 +748,7 @@ class Component extends DCLogic {
         });
       },
       shareCopyLabel: this.state.shareCopyLabel,
-      onCopyShareLink: () => {
+          onCopyShareLink: () => {
         if (navigator.clipboard) navigator.clipboard.writeText(shareUrl).catch(() => {});
         this.setState({ shareCopyLabel: "คัดลอกแล้ว ✓" });
         setTimeout(() => this.setState({ shareCopyLabel: "คัดลอกลิงก์" }), 2000);
