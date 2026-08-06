@@ -25,7 +25,7 @@
 </helmet>
 
 <div style="min-height:100vh;">
-  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #23 — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">BUILD #24 — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
       <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
@@ -655,12 +655,36 @@
                   <input type="radio" name="mapDisplay" value="none" checked="{{ isNoneMode }}" onChange="{{ onFMapDisplayNone }}" />ไม่แสดงตำแหน่งต่อสาธารณะ
                 </label>
               </div>
-              <sc-if value="{{ hasMapPreview }}" hint-placeholder-val="{{ false }}">
-                <div style="aspect-ratio:16/6; border-radius:6px; overflow:hidden; position:relative; background:oklch(93% 0.015 75);">
-                  <div ref="{{ privateMapRef }}" style="width:100%; height:100%;"></div>
-                  <div style="position:absolute; top:10px; left:10px; background:oklch(99% 0.005 80 / 0.92); border-radius:4px; padding:5px 10px; font-size:11.5px; color:oklch(30% 0.02 60);">👁 ตัวอย่างที่ผู้เข้าชมเว็บจะเห็น</div>
+              <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px;">
+                <div>
+                  <div style="font-size:12px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:6px;">👁 มุมมองที่ลูกค้าเห็น</div>
+                  <div style="aspect-ratio:16/10; border-radius:6px; overflow:hidden; position:relative; background:oklch(93% 0.015 75);">
+                    <div ref="{{ privateMapRef }}" style="width:100%; height:100%;"></div>
+                    <sc-if value="{{ isNoneMode }}" hint-placeholder-val="{{ false }}">
+                      <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:oklch(93% 0.015 75); text-align:center; padding:16px;">
+                        <div style="font-size:12.5px; color:oklch(50% 0.02 60);">ไม่แสดงตำแหน่งบนแผนที่สาธารณะ</div>
+                      </div>
+                    </sc-if>
+                  </div>
                 </div>
-              </sc-if>
+                <div>
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
+                    <div style="font-size:12px; font-weight:600; color:oklch(30% 0.02 60);">🔒 มุมมองที่คุณ (เจ้าของ) เห็น — พิกัดจริงเสมอ</div>
+                    <div style="display:flex; gap:10px;">
+                      <label style="display:flex; align-items:center; gap:4px; font-size:12px; color:oklch(30% 0.02 60); cursor:pointer;">
+                        <input type="radio" name="ownerZoom" checked="{{ isOwnerZoomClose }}" onChange="{{ onOwnerZoomClose }}" />โฟกัสใกล้
+                      </label>
+                      <label style="display:flex; align-items:center; gap:4px; font-size:12px; color:oklch(30% 0.02 60); cursor:pointer;">
+                        <input type="radio" name="ownerZoom" checked="{{ isOwnerZoomWide }}" onChange="{{ onOwnerZoomWide }}" />ภาพรวม 3 อำเภอ
+                      </label>
+                    </div>
+                  </div>
+                  <div style="aspect-ratio:16/10; border-radius:6px; overflow:hidden; position:relative; background:oklch(93% 0.015 75);">
+                    <div ref="{{ ownerMapRef }}" style="width:100%; height:100%;"></div>
+                  </div>
+                </div>
+              </div>
+              <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-top:6px;">ตัวอย่างแผนที่ด้านบน — กรอกพิกัดในช่อง "พิกัดบ้าน" ด้านบนเพื่อดูตำแหน่งจริงของทรัพย์นี้</div>
             </div>
             <div>
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">สถานะ</div>
@@ -1915,6 +1939,44 @@ class Component extends DCLogic {
     if (justMounted) this._syncPreviewMap();
   };
 
+  _ownerMapRefCb = (el) => {
+    const justMounted = !!el && !this._ownerMapEl;
+    this._ownerMapEl = el;
+    if (justMounted) this._syncOwnerMap();
+  };
+
+  // Owner's own map always shows the real pin regardless of the public
+  // display choice — "close" zooms to the exact address, "wide" pulls back
+  // to see all 3 districts (Hua Hin/Pranburi/Cha-am) at once for context.
+  async _syncOwnerMap() {
+    if (!this._ownerMapEl) { this._ownerMapKey = null; return; }
+    const coords = parseLatLngHH(this.state.f_mapsLink) || { lat: 12.5684, lng: 99.9578 };
+    const wide = this.state.f_ownerMapZoom === "wide";
+    const key = coords.lat + "," + coords.lng + "|" + (wide ? "wide" : "close");
+    if (this._ownerMapKey === key || this._ownerMapBusy) return;
+    this._ownerMapBusy = true;
+    try {
+      await waitForGoogleMapsHH();
+      if (!this._ownerMapEl) return;
+      const center = wide ? { lat: 12.55, lng: 99.95 } : coords;
+      const zoom = wide ? 10 : 15;
+      if (!this._ownerMap) {
+        this._ownerMap = new google.maps.Map(this._ownerMapEl, {
+          center, zoom, disableDefaultUI: true, zoomControl: true,
+          gestureHandling: "greedy", keyboardShortcuts: false, clickableIcons: false,
+        });
+      } else {
+        this._ownerMap.setCenter(center);
+        this._ownerMap.setZoom(zoom);
+      }
+      if (this._ownerMarker) { this._ownerMarker.setMap(null); this._ownerMarker = null; }
+      this._ownerMarker = new google.maps.Marker({ position: coords, map: this._ownerMap });
+      this._ownerMapKey = key;
+    } finally {
+      this._ownerMapBusy = false;
+    }
+  }
+
   async _loadTambonMod() {
     if (!this._tambonMod) this._tambonMod = await import("./tambon-boundaries.js");
     return this._tambonMod;
@@ -1927,8 +1989,18 @@ class Component extends DCLogic {
   // render so it reacts live to the link/radio inputs. Admin's own tools
   // always show the exact pin regardless of this per-listing choice.
   async _syncPreviewMap() {
-    const coords = parseLatLngHH(this.state.f_mapsLink);
-    if (!coords || !this._previewMapEl) { this._previewMapKey = null; return; }
+    const coords = parseLatLngHH(this.state.f_mapsLink) || { lat: 12.5684, lng: 99.9578 };
+    if (!this._previewMapEl) { this._previewMapKey = null; return; }
+    if (this.state.f_mapDisplay === "none") {
+      this._previewMapKey = "none";
+      await waitForGoogleMapsHH();
+      if (!this._previewMap) this._previewMap = new google.maps.Map(this._previewMapEl, { center: coords, zoom: 12, disableDefaultUI: true });
+      if (this._previewCircle) { this._previewCircle.setMap(null); this._previewCircle = null; }
+      if (this._previewMarker) { this._previewMarker.setMap(null); this._previewMarker = null; }
+      if (this._previewPolygon) { this._previewPolygon.setMap(null); this._previewPolygon = null; }
+      if (this._previewOutline) { this._previewOutline.setMap(null); this._previewOutline = null; }
+      return;
+    }
     const mode = this.state.f_mapDisplay === "exact" ? "exact" : "area";
     const tambonMod = mode === "area" ? await this._loadTambonMod() : null;
     const tambon = tambonMod ? tambonMod.findTambonFor(coords.lat, coords.lng) : null;
@@ -1981,6 +2053,7 @@ class Component extends DCLogic {
 
   renderVals() {
     this._syncPreviewMap();
+    this._syncOwnerMap();
     const mod = this._mod;
     const apptRowsAll = (this.state.appointments || []).slice().sort((a, b) => (a.when || 0) - (b.when || 0)).map((a) => ({
       id: a.id,
@@ -2229,8 +2302,10 @@ class Component extends DCLogic {
       onFMapDisplayArea: () => this.setState({ f_mapDisplay: "area" }),
       onFMapDisplayExact: () => this.setState({ f_mapDisplay: "exact" }),
       onFMapDisplayNone: () => this.setState({ f_mapDisplay: "none" }),
-      hasMapPreview: !!parseLatLngHH(this.state.f_mapsLink),
       privateMapRef: this._privateMapRefCb,
+      ownerMapRef: this._ownerMapRefCb,
+      isOwnerZoomClose: (this.state.f_ownerMapZoom || "close") === "close", onOwnerZoomClose: () => this.setState({ f_ownerMapZoom: "close" }),
+      isOwnerZoomWide: this.state.f_ownerMapZoom === "wide", onOwnerZoomWide: () => this.setState({ f_ownerMapZoom: "wide" }),
       f_status: this.state.f_status, onFStatus: (e) => this.setState({ f_status: e.target.value }),
       f_price: this.state.f_price, onFPrice: (e) => this.setState({ f_price: e.target.value }),
       f_bedrooms: this.state.f_bedrooms, onFBedrooms: (e) => this.setState({ f_bedrooms: e.target.value }),
