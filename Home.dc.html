@@ -41,7 +41,7 @@
 </helmet>
 
 <sc-if value="{{ showDevBar }}">
-  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">HM-4 (แก้ Select language ไม่แปล + ไอคอนแชร์/บันทึกบนการ์ดค้างภาษาเก่าไม่รับ langchange)</div>
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">HM-5 (แก้ปุ่ม login/sign up + จำนวนบันทึก + ห้องนอน-ห้องน้ำ + ชื่อโซนย่อย ครบ 8 ภาษา ทุกจุดที่เหลือ)</div>
 </sc-if>
 
 <sc-if value="{{ showGate }}">
@@ -78,12 +78,12 @@
         <div style="width:1px; height:20px; background:oklch(80% 0.02 70); margin:0 4px;"></div>
         <div style="width:1px; height:20px; background:oklch(80% 0.02 70); margin:0 4px;"></div>
         <div onClick="{{ onShareOpen }}" title="{{ t.share_site }}" style="width:38px; height:38px; border-radius:50%; background:oklch(90% 0.005 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 8a3 3 0 1 0-2.83-4H15a3 3 0 0 0 .09 3.26L8.9 10.7a3 3 0 1 0 0 2.6l6.2 3.44A3 3 0 1 0 16 15l-6.2-3.44a3 3 0 0 0 0-1.12L16 7a3 3 0 0 0 2 1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
-        <a href="{{ personHref }}" title="Login" style="font-size:16px; text-decoration:none; color:oklch(40% 0.02 60);">👤</a>
+        <a href="{{ personHref }}" title="{{ t.login_signup }}" style="font-size:16px; text-decoration:none; color:oklch(40% 0.02 60);">👤</a>
         <sc-if value="{{ isLoggedIn }}" hint-placeholder-val="{{ false }}">
           <div onClick="{{ onLogout }}" style="font-size:13px; font-weight:600; color:oklch(45% 0.15 25); cursor:pointer; white-space:nowrap;">ออกจากระบบ</div>
         </sc-if>
         <sc-if value="{{ showSignupBtn }}" hint-placeholder-val="{{ true }}">
-          <a href="Agent Signup.dc.html" title="Sign up Free" style="font-size:13px; font-weight:600; text-decoration:none; color:white; background:oklch(62% 0.19 45); padding:6px 12px; border-radius:100px; white-space:nowrap;">{{ t.signup_free }}</a>
+          <a href="Agent Signup.dc.html" title="{{ t.signup_free }}" style="font-size:13px; font-weight:600; text-decoration:none; color:white; background:oklch(62% 0.19 45); padding:6px 12px; border-radius:100px; white-space:nowrap;">{{ t.signup_free }}</a>
         </sc-if>
         <a href="Admin Login.dc.html" style="font-size:13px; color:oklch(40% 0.02 60); text-decoration:none;">{{ t.nav_admin }}</a>
       </div>
@@ -116,7 +116,7 @@
         <a href="Agent Signup.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_sell }}</a>
         <a href="About.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_about }}</a>
         <a href="Contact.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_contact }}</a>
-        <a href="{{ personHref }}" style="text-decoration:none; color:oklch(50% 0.02 60); font-size:15px; font-family:'Work Sans',sans-serif;">👤 Login</a>
+        <a href="{{ personHref }}" style="text-decoration:none; color:oklch(50% 0.02 60); font-size:15px; font-family:'Work Sans',sans-serif;">👤 {{ t.login_signup }}</a>
         <a href="Agent Signup.dc.html" style="text-decoration:none; color:white; background:oklch(62% 0.19 45); padding:8px 16px; border-radius:100px; font-size:14px; font-weight:600; font-family:'Work Sans',sans-serif;">Sign up Free</a>
         <a href="Admin Login.dc.html" style="text-decoration:none; color:oklch(50% 0.02 60); font-size:15px; font-family:'Work Sans',sans-serif;">{{ t.nav_admin }}</a>
       </div>
