@@ -151,7 +151,7 @@
           <div style="aspect-ratio:16/9; max-height:560px; border-radius:6px; overflow:hidden;"><iframe src="{{ mediaVirtualTourUrl }}" style="width:100%; height:100%; border:0;" allowfullscreen></iframe></div>
         </sc-if>
         <div style="position:absolute; top:14px; left:14px; background:{{ p.statusColor }}; color:oklch(99% 0.005 80); font-size:12px; font-weight:600; padding:5px 14px; border-radius:100px; pointer-events:none;">{{ p.statusLabel }}</div>
-        <div onClick="{{ onToggleCompare }}" title="เปรียบเทียบทรัพย์" style="position:absolute; top:14px; right:102px; width:36px; height:36px; border-radius:50%; background:{{ compareBg }}; display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15); z-index:2;">
+        <div onClick="{{ onToggleCompare }}" title="{{ t.compare_property }}" style="position:absolute; top:14px; right:102px; width:36px; height:36px; border-radius:50%; background:{{ compareBg }}; display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15); z-index:2;">
           ⚖️
           <sc-if value="{{ hasCompareItems }}">
             <div style="position:absolute; top:-4px; right:-4px; background:oklch(40% 0.13 25); color:white; font-size:10px; font-weight:700; min-width:16px; height:16px; border-radius:100px; display:flex; align-items:center; justify-content:center; padding:0 4px;">{{ compareCount }}</div>
@@ -161,7 +161,7 @@
           </sc-if>
         </div>
         <div onClick="{{ onToggleFav }}" title="{{ favTitle }}" style="position:absolute; top:14px; right:14px; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; font-size:19px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15); z-index:2;">{{ favIcon }}</div>
-        <div onClick="{{ onOpenShare }}" title="แชร์ประกาศ" style="position:absolute; top:14px; right:58px; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15); z-index:2;">🔗</div>
+        <div onClick="{{ onOpenShare }}" title="{{ t.share_listing }}" style="position:absolute; top:14px; right:58px; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.15); z-index:2;">🔗</div>
       </div>
     </div>
 
@@ -377,7 +377,7 @@ function loadGoogleMapsHH() {
       return;
     }
     const script = document.createElement("script");
-    script.src = "https://maps.googleapis.com/maps/api/js?key=" + HH_GOOGLE_MAPS_KEY + "&libraries=marker";
+    script.src = "https://maps.googleapis.com/maps/api/js?key=" + HH_GOOGLE_MAPS_KEY + "&libraries=marker&language=" + (GMAPS_LANG[this.state.lang] || "en");
     script.async = true;
     script.defer = true;
     script.setAttribute("data-hh-gmaps", "1");
@@ -423,6 +423,7 @@ function haversineKm(lat1, lng1, lat2, lng2) {
   const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
+const GMAPS_LANG = { th: "th", en: "en", ru: "ru", zh: "zh-CN", de: "de", no: "no", fr: "fr", it: "it" };
 
 class Component extends DCLogic {
   state = {
@@ -908,7 +909,7 @@ class Component extends DCLogic {
       hasProperty: true,
       currentPropertyId: raw.id,
       favIcon: this.state.isFav ? "⭐" : "☆",
-      favTitle: this.state.isFav ? "นำออกจากรายการโปรด" : "บันทึกไว้ในรายการโปรด",
+      favTitle: this.state.isFav ? t.fav_remove : t.fav_add,
       showShare: this.state.showShare,
       shareUrl: `${typeof window !== "undefined" ? window.location.origin : ""}/Property Details.dc.html?id=${this._id}`,
       shareFbUrl: "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(`${typeof window !== "undefined" ? window.location.origin : ""}/Property Details.dc.html?id=${this._id}`),
