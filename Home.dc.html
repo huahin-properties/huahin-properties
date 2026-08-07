@@ -92,7 +92,7 @@
     <sc-if value="{{ isMobileNav }}">
       <div style="display:flex; align-items:center; gap:2px; flex-shrink:0;">
         <div onClick="{{ onVoiceChatOpen }}" style="width:30px; height:30px; border-radius:50%; background:oklch(90% 0.005 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; flex-shrink:0;">🎙️</div>
-        <a href="{{ personHref }}" title="Login / Sign up" style="width:30px; height:30px; border-radius:50%; background:oklch(90% 0.005 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; font-size:14px; text-decoration:none; flex-shrink:0;">👤</a>
+        <a href="{{ personHref }}" title="{{ t.login_signup }}" style="width:30px; height:30px; border-radius:50%; background:oklch(90% 0.005 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; font-size:14px; text-decoration:none; flex-shrink:0;">👤</a>
         <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" compact="{{ true }}" menu-align="right" hint-size="34,30"></dc-import>
         <div onClick="{{ onShareOpen }}" title="{{ t.share_site }}" style="width:36px; height:36px; border-radius:50%; background:oklch(90% 0.005 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M18 8a3 3 0 1 0-2.83-4H15a3 3 0 0 0 .09 3.26L8.9 10.7a3 3 0 1 0 0 2.6l6.2 3.44A3 3 0 1 0 16 15l-6.2-3.44a3 3 0 0 0 0-1.12L16 7a3 3 0 0 0 2 1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
         <div onClick="{{ toggleMenu }}" style="display:flex; flex-direction:column; gap:4px; padding:6px 4px; cursor:pointer; flex-shrink:0;">
@@ -700,7 +700,10 @@ class Component extends DCLogic {
     const featured = allOrdered.slice((featuredPage - 1) * perPage, featuredPage * perPage).map(cardProps);
 
     const areaDescKey = { "hua-hin": "area_hua_hin_desc", pranburi: "area_pranburi_desc", "cha-am": "area_cha_am_desc" };
-    const areaNeighborhoods = { "hua-hin": ["Khao Takiab", "Soi 88", "Bor Fai"], pranburi: [], "cha-am": [] };
+    const areaNeighborhoods = {
+      "hua-hin": { en: ["Khao Takiab", "Soi 88", "Bor Fai"], th: ["เขาตะเกียบ", "ซอย 88", "บ่อฝ้าย"], zh: ["达奇亚布山", "88巷", "波法伊"], ru: ["Кхао Такиаб", "Сой 88", "Бор Фай"], de: ["Khao Takiab", "Soi 88", "Bor Fai"], no: ["Khao Takiab", "Soi 88", "Bor Fai"], fr: ["Khao Takiab", "Soi 88", "Bor Fai"], it: ["Khao Takiab", "Soi 88", "Bor Fai"] },
+      pranburi: {}, "cha-am": {},
+    };
     const areaSlotPlaceholder = { "hua-hin": "วางภาพ: สถานีรถไฟหัวหิน / ชายหาด", pranburi: "วางภาพ: วิลล่าริมชายหาดปราณบุรี", "cha-am": "วางภาพ: ชายหาดชะอำ" };
     const areaPhoto = { "hua-hin": "photo: Hua Hin train station & beach", pranburi: "photo: Pranburi beachfront villa", "cha-am": "photo: Cha-am beach promenade" };
     const sc = this.state.siteContent || {};
@@ -823,7 +826,7 @@ class Component extends DCLogic {
         noCms: !content.photoUrl,
         slotId: "area-" + a.id,
         slotPlaceholder: areaSlotPlaceholder[a.id] || ("วางภาพ: " + a.label[lang]),
-        neighborhoods: areaNeighborhoods[a.id] || [],
+        neighborhoods: (areaNeighborhoods[a.id] && (areaNeighborhoods[a.id][lang] || areaNeighborhoods[a.id].en)) || [],
       };
     });
 
@@ -917,7 +920,7 @@ class Component extends DCLogic {
         areaLabel: areaLabelOf(p.area),
         priceLabel: mod.formatPrice(p.price, p.currency, lang) + (p.status === "rent" ? t.per_month : ""),
       })),
-      favoritesCountLabel: lang === "th" ? `บันทึกไว้ ${favCount} รายการ` : `${favCount} propert${favCount === 1 ? "y" : "ies"} saved`,
+      favoritesCountLabel: `${favCount} ${favCount === 1 ? (t.property_saved || "property saved") : (t.properties_saved || "properties saved")}`,
       favoritesHref: favIds.length ? `Search Results.dc.html?ids=${favIds.join(",")}` : "Search Results.dc.html",
       collections,
       discoveryCategories: [
