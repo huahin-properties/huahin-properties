@@ -53,7 +53,92 @@
       <a href="./Mission%20Library.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:7px 14px; border-radius:100px;">📚 Mission Library</a>
       <a href="./Launch%20Readiness%20Dashboard.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">🚦 Launch Readiness Dashboard</a>
       <a href="./Product%20Development%20Dashboard.dc.html" style="font-size:12.5px; text-decoration:none; background:oklch(93% 0.05 280); border:1px solid oklch(75% 0.08 280); color:oklch(35% 0.1 280); padding:7px 14px; border-radius:100px; font-weight:600;">🧩 Phase 2 — Product Development</a>
+        </div>
+
+    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">14. 📦 ชุดเอกสารส่งต่องาน (Handoff Package)</h2>
+    <div onclick="{{ toggleBanner }}" style="cursor:pointer; display:flex; align-items:center; gap:12px; background:oklch(35% 0.09 25); color:white; border-radius:8px; padding:14px 18px; margin-bottom:10px;">
+      <div style="font-size:22px;">📦</div>
+      <div style="flex:1;">
+        <div style="font-weight:700; font-size:14px;">ศูนย์เอกสารส่งต่องาน — คู่มือใช้ชุดนี้</div>
+        <div style="font-size:11.5px; opacity:0.85;">คลิกเพื่ออ่านว่าเอกสารชุดนี้คืออะไร ใช้ทำอะไร และประโยชน์ต่อ CEO</div>
+      </div>
+      <div style="font-size:13px; font-weight:600;">{{ bannerCaret }}</div>
     </div>
+    <div style="{{ bannerWrapStyle }}">
+      <div><strong>คืออะไร</strong>: รวมไฟล์ทั้งหมด 22 ไฟล์ที่ใช้ "ส่งต่อความรู้เรื่องโครงการ" ให้คนใหม่หรือ AI ห้องใหม่ — แทนที่การอธิบายปากเปล่าทุกครั้ง</div>
+      <div style="margin-top:8px;"><strong>ใช้ทำอะไร/เมื่อไหร่</strong>: 3 สถานการณ์หลัก — (1) เปิดห้องแชต AI ใหม่เพื่อทำงานต่อ (2) เปลี่ยนผู้ช่วย CEO/Product Owner คนใหม่ (3) ส่งมอบทั้งโครงการให้ผู้พัฒนาใหม่จริงๆ</div>
+      <div style="margin-top:8px;"><strong>ทำไมต้องมีหลายไฟล์ ไม่รวมเป็นไฟล์เดียว</strong>: แต่ละไฟล์มีจุดประสงค์ต่างกัน (กติกา/สถานะปัจจุบัน/ประวัติ/ขั้นตอนทำงาน) แยกไว้เพื่ออ่านเฉพาะส่วนที่จำเป็น ไม่ต้องอ่านทั้งหมดทุกครั้ง — มี <code>HUAHIN_PROPERTIES_MASTER_HANDOFF.md</code> เป็นทางลัด "ไฟล์เดียวจบ" ไว้กรณีฉุกเฉิน</div>
+      <div style="margin-top:8px;"><strong>วิธีใช้จริง</strong>: ดูตาราง 4 หมวดด้านล่าง แต่ละการ์ดกด "ดูรายละเอียด" เพื่อรู้ว่าไฟล์นั้นคืออะไรก่อนเปิด แล้วกด 📥 ดาวน์โหลดเฉพาะไฟล์ที่ต้องใช้ หรือกด "ดาวน์โหลดทั้งหมด" ถ้าต้องส่งมอบทั้งชุด</div>
+      <div style="margin-top:8px;"><strong>ประโยชน์</strong>: CEO ไม่ต้องจำเองว่าไฟล์ไหนอยู่ตรงไหน ทำหน้าที่อะไร — เปิดหน้านี้ครั้งเดียวเจอครบ พร้อมอธิบายให้คนอื่นฟังต่อได้ทันที</div>
+    </div>
+    <div style="font-size:13px; color:oklch(45% 0.02 60); margin-bottom:14px;">รวมทุกไฟล์ที่ต้องใช้ส่งต่องานให้ผู้พัฒนาใหม่หรือ AI ห้องใหม่ ไว้ในที่เดียว — กด 📥 ที่ไฟล์ใดก็ดาวน์โหลดไฟล์นั้นทันที หรือกด "ดาวน์โหลดทั้งหมด" ด้านล่างเพื่อได้ ZIP รวมทุกไฟล์ในชุดนี้ แถบสีเขียว = ยืนยันแล้วว่าไฟล์อัปเดตล่าสุดและพร้อมส่งต่อ (หากมีการอัปเดตเนื้อหาไฟล์ใด ต้องมาติ๊กสถานะที่หน้านี้ให้ตรงก่อนส่งทุกครั้ง)</div>
+
+    <!-- 🚀 Quick Start New Chat — 3 steps + verification -->
+    <div style="background:oklch(96% 0.04 150); border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:16px 18px; margin-bottom:20px;">
+      <div style="font-size:12px; font-weight:600; letter-spacing:0.08em; color:oklch(35% 0.08 150); margin-bottom:12px;">🚀 เริ่มห้องแชทใหม่ — 3 ขั้นตอน</div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <div style="display:flex; align-items:center; gap:12px; background:white; border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:10px 14px;">
+          <div style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:oklch(35% 0.09 25); color:white; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">1</div>
+          <div style="flex:1; font-size:13px; color:oklch(25% 0.02 60);">เปิด ChatGPT ห้องใหม่</div>
+          <a href="https://chatgpt.com/" target="_blank" rel="noopener" style="flex-shrink:0; font-size:12px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">เปิด ChatGPT →</a>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; background:white; border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:10px 14px;">
+          <div style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:oklch(35% 0.09 25); color:white; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">2</div>
+          <div style="flex:1; font-size:13px; color:oklch(25% 0.02 60);">ดาวน์โหลดไฟล์แนบทั้ง 8 ไฟล์ (ZIP) แตกไฟล์แล้วแนบทั้งหมดในห้องแชทใหม่</div>
+          <div onclick="{{ downloadBootstrapZip }}" style="cursor:pointer; flex-shrink:0; font-size:12px; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">📦 ดาวน์โหลด 8 ไฟล์</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px; background:white; border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:10px 14px;">
+          <div style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:oklch(35% 0.09 25); color:white; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">3</div>
+          <div style="flex:1; font-size:13px; color:oklch(25% 0.02 60);">คัดลอกข้อความเปิดห้อง แล้ววางพร้อมไฟล์แนบ ส่งครั้งเดียว</div>
+          <div onclick="{{ copyBootstrapPrompt }}" style="cursor:pointer; flex-shrink:0; font-size:12px; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">{{ copyPromptLabel }}</div>
+        </div>
+      </div>
+      <div style="margin-top:14px; padding-top:12px; border-top:1px dashed oklch(80% 0.08 150); font-size:12.5px; color:oklch(30% 0.04 150); line-height:1.7;">
+        <div><strong>อ่านคำตอบแรกของ ChatGPT</strong> — ต้องสรุป Current Phase ถูกต้อง และบอกว่าตัวเองเป็น Product Owner/CEO Assistant (ไม่ใช่เริ่มทำงานทันที)</div>
+        <div style="margin-top:6px;">ถ้าคำตอบถูกต้อง → ให้คำสั่งงานต่อได้เลย ถ้าคำตอบผิด/ถามซ้ำสิ่งที่ไฟล์บอกไว้แล้ว → เช็คว่าไฟล์แนบครบหรือไม่ก่อนแก้ไขอะไรอื่น</div>
+        <div style="margin-top:10px; padding-top:10px; border-top:1px dashed oklch(80% 0.08 150);"><strong>8 ไฟล์ (Bootstrap)</strong> มีประโยชน์มากกว่าสำหรับเปิดห้องแชทใหม่โดยเฉพาะ — คัดสรรมาแล้วให้ตรงกับสิ่งที่ AI ต้องอ่านก่อนตอบ (สถานะปัจจุบัน + กติกาทำงาน) ไม่พ่วงของที่ไม่จำเป็น ทำให้ AI โฟกัสอ่านครบทุกไฟล์จริง ไม่เสี่ยงถูกจำกัดจำนวนไฟล์แนบ</div>
+        <div style="margin-top:8px;"><strong>23 ไฟล์ (ทั้งหมด)</strong> เหมาะกับกรณี "ส่งมอบโครงการทั้งหมด" ให้ผู้พัฒนาใหม่ศึกษาเชิงลึกทีละไฟล์ ไม่ใช่ใช้เปิดห้องแชทหน้าแรก — ถ้าแนบทั้ง 23 ไฟล์เป็นข้อความแรก มีความเสี่ยง 2 อย่าง: (1) หลายแพลตฟอร์ม AI จำกัดจำนวน/ขนาดไฟล์แนบต่อข้อความ (2) แม้แนบได้ครบ AI มักอ่านแบบผิวเผินเมื่อไฟล์มากเกินจำเป็น ทำให้สรุปผิดหรือพลาดรายละเอียด</div>
+        <div style="margin-top:8px;"><strong>สรุป</strong>: เปิดห้องใหม่ทุกครั้ง → ใช้ 8 ไฟล์ (Bootstrap) เท่านั้น พอ AI เข้าใจภาพรวมแล้วค่อยส่งไฟล์อื่นในชุด 23 ไฟล์เพิ่มทีละไฟล์ตามหัวข้อที่คุยกันจริง</div>
+      </div>
+    </div>
+
+    <sc-for list="{{ handoffCategories }}" as="cat" hint-placeholder-count="4">
+      <div style="margin-bottom:16px;">
+        <div style="font-size:12px; font-weight:600; letter-spacing:0.04em; color:oklch(35% 0.08 25); margin-bottom:6px;">{{ cat.title }}</div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:8px;">
+          <sc-for list="{{ cat.items }}" as="doc" hint-placeholder-count="3">
+            <div style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:10px 12px; display:flex; flex-direction:column; gap:6px; background:oklch(99% 0.005 70);">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                <code style="font-size:11.5px; font-weight:600; word-break:break-all;">{{ doc.file }}</code>
+                <span style="flex-shrink:0; font-size:10px; font-weight:700; padding:2px 7px; border-radius:100px; background:oklch(94% 0.08 150); color:oklch(30% 0.1 150); border:1px solid oklch(75% 0.1 150);">✓ พร้อม</span>
+              </div>
+              <div style="font-size:11.5px; color:oklch(45% 0.02 60); line-height:1.5;">{{ doc.desc }}</div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <a href="{{ doc.path }}" download style="font-size:11px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:4px 10px; border-radius:100px; font-weight:600;">📥 ดาวน์โหลด</a>
+                <div onclick="{{ doc.toggle }}" style="cursor:pointer; font-size:11px; color:oklch(45% 0.09 25); font-weight:600;">{{ doc.caret }}</div>
+              </div>
+              <div style="{{ doc.detailWrapStyle }}">{{ doc.detail }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+
+    <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
+      <div onclick="{{ downloadAll }}" style="cursor:pointer; font-size:13px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:9px 18px; border-radius:100px; font-weight:600;">⬇️ ดาวน์โหลดทั้งหมด (ZIP)</div>
+      <div style="font-size:11.5px; color:oklch(55% 0.02 60);">{{ downloadAllStatus }}</div>
+    </div>
+    <div style="font-size:11px; color:oklch(60% 0.01 70); margin-top:8px;">หมายเหตุ: มีไฟล์ .md เก่า/ซ้ำซ้อนอีกจำนวนหนึ่งอยู่ในโปรเจกต์ (เช่น release-notes เวอร์ชันย่อย, changelog รุ่นก่อนหน้า) ที่ไม่ได้รวมในชุดนี้เพราะล้าสมัยแล้ว — ชุดนี้คือไฟล์ปัจจุบันที่ใช้งานจริงเท่านั้น</div>
+
+    <div style="margin-top:32px; font-size:12px; color:oklch(55% 0.02 60); text-align:center;">อ้างอิงจาก CEO GUIDE.md — หน้านี้อัปเดตพร้อมกันทุกครั้งที่เนื้อหาคู่มือเปลี่ยน</div>
+
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:8px 10px; font-family:monospace; line-height:1.6; margin-bottom:10px;">
+      <div><strong>CEO-1</strong> — 8 สิงหาคม 2569 (2026-08-08)</div>
+      <div>1) ย้ายหัวข้อ 14 "ชุดเอกสารส่งต่องาน (Handoff Package)" ทั้งหมดขึ้นมาไว้ต่อจากเมนู Mission Control ด้านบนสุด (จากเดิมอยู่ล่างสุดของหน้า)</div>
+      <div>2) เพิ่มแถบเหลืองพร้อมวันที่กำกับให้หน้านี้เป็นครั้งแรก</div>
+    </div>
+
+
 
     <div style="display:inline-flex; flex-direction:column; gap:2px; font-size:11.5px; color:oklch(45% 0.02 60); border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:8px 12px; margin-bottom:24px;">
       <div>PHS Version: <strong>1 (FINAL)</strong> &nbsp;·&nbsp; Release Date: <strong>20 July 2026</strong></div>
@@ -676,82 +761,7 @@
       <p><strong>ตรวจพบว่าแนบไฟล์ไม่ครบ</strong><br/>→ AI ควรหยุดและบอกชื่อไฟล์ที่หายไปตามกติกาใน HANDOVER PROMPT.md ถ้า AI ไม่ทำเช่นนั้น ให้แนบไฟล์ที่ขาดแล้วย้ำกติกานี้อีกครั้ง</p>
     </div>
 
-    <h2 style="font-size:18px; color:oklch(20% 0.02 60); margin:28px 0 10px;">14. 📦 ชุดเอกสารส่งต่องาน (Handoff Package)</h2>
-    <div onclick="{{ toggleBanner }}" style="cursor:pointer; display:flex; align-items:center; gap:12px; background:oklch(35% 0.09 25); color:white; border-radius:8px; padding:14px 18px; margin-bottom:10px;">
-      <div style="font-size:22px;">📦</div>
-      <div style="flex:1;">
-        <div style="font-weight:700; font-size:14px;">ศูนย์เอกสารส่งต่องาน — คู่มือใช้ชุดนี้</div>
-        <div style="font-size:11.5px; opacity:0.85;">คลิกเพื่ออ่านว่าเอกสารชุดนี้คืออะไร ใช้ทำอะไร และประโยชน์ต่อ CEO</div>
-      </div>
-      <div style="font-size:13px; font-weight:600;">{{ bannerCaret }}</div>
-    </div>
-    <div style="{{ bannerWrapStyle }}">
-      <div><strong>คืออะไร</strong>: รวมไฟล์ทั้งหมด 22 ไฟล์ที่ใช้ "ส่งต่อความรู้เรื่องโครงการ" ให้คนใหม่หรือ AI ห้องใหม่ — แทนที่การอธิบายปากเปล่าทุกครั้ง</div>
-      <div style="margin-top:8px;"><strong>ใช้ทำอะไร/เมื่อไหร่</strong>: 3 สถานการณ์หลัก — (1) เปิดห้องแชต AI ใหม่เพื่อทำงานต่อ (2) เปลี่ยนผู้ช่วย CEO/Product Owner คนใหม่ (3) ส่งมอบทั้งโครงการให้ผู้พัฒนาใหม่จริงๆ</div>
-      <div style="margin-top:8px;"><strong>ทำไมต้องมีหลายไฟล์ ไม่รวมเป็นไฟล์เดียว</strong>: แต่ละไฟล์มีจุดประสงค์ต่างกัน (กติกา/สถานะปัจจุบัน/ประวัติ/ขั้นตอนทำงาน) แยกไว้เพื่ออ่านเฉพาะส่วนที่จำเป็น ไม่ต้องอ่านทั้งหมดทุกครั้ง — มี <code>HUAHIN_PROPERTIES_MASTER_HANDOFF.md</code> เป็นทางลัด "ไฟล์เดียวจบ" ไว้กรณีฉุกเฉิน</div>
-      <div style="margin-top:8px;"><strong>วิธีใช้จริง</strong>: ดูตาราง 4 หมวดด้านล่าง แต่ละการ์ดกด "ดูรายละเอียด" เพื่อรู้ว่าไฟล์นั้นคืออะไรก่อนเปิด แล้วกด 📥 ดาวน์โหลดเฉพาะไฟล์ที่ต้องใช้ หรือกด "ดาวน์โหลดทั้งหมด" ถ้าต้องส่งมอบทั้งชุด</div>
-      <div style="margin-top:8px;"><strong>ประโยชน์</strong>: CEO ไม่ต้องจำเองว่าไฟล์ไหนอยู่ตรงไหน ทำหน้าที่อะไร — เปิดหน้านี้ครั้งเดียวเจอครบ พร้อมอธิบายให้คนอื่นฟังต่อได้ทันที</div>
-    </div>
-    <div style="font-size:13px; color:oklch(45% 0.02 60); margin-bottom:14px;">รวมทุกไฟล์ที่ต้องใช้ส่งต่องานให้ผู้พัฒนาใหม่หรือ AI ห้องใหม่ ไว้ในที่เดียว — กด 📥 ที่ไฟล์ใดก็ดาวน์โหลดไฟล์นั้นทันที หรือกด "ดาวน์โหลดทั้งหมด" ด้านล่างเพื่อได้ ZIP รวมทุกไฟล์ในชุดนี้ แถบสีเขียว = ยืนยันแล้วว่าไฟล์อัปเดตล่าสุดและพร้อมส่งต่อ (หากมีการอัปเดตเนื้อหาไฟล์ใด ต้องมาติ๊กสถานะที่หน้านี้ให้ตรงก่อนส่งทุกครั้ง)</div>
 
-    <!-- 🚀 Quick Start New Chat — 3 steps + verification -->
-    <div style="background:oklch(96% 0.04 150); border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:16px 18px; margin-bottom:20px;">
-      <div style="font-size:12px; font-weight:600; letter-spacing:0.08em; color:oklch(35% 0.08 150); margin-bottom:12px;">🚀 เริ่มห้องแชทใหม่ — 3 ขั้นตอน</div>
-      <div style="display:flex; flex-direction:column; gap:10px;">
-        <div style="display:flex; align-items:center; gap:12px; background:white; border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:10px 14px;">
-          <div style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:oklch(35% 0.09 25); color:white; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">1</div>
-          <div style="flex:1; font-size:13px; color:oklch(25% 0.02 60);">เปิด ChatGPT ห้องใหม่</div>
-          <a href="https://chatgpt.com/" target="_blank" rel="noopener" style="flex-shrink:0; font-size:12px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">เปิด ChatGPT →</a>
-        </div>
-        <div style="display:flex; align-items:center; gap:12px; background:white; border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:10px 14px;">
-          <div style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:oklch(35% 0.09 25); color:white; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">2</div>
-          <div style="flex:1; font-size:13px; color:oklch(25% 0.02 60);">ดาวน์โหลดไฟล์แนบทั้ง 8 ไฟล์ (ZIP) แตกไฟล์แล้วแนบทั้งหมดในห้องแชทใหม่</div>
-          <div onclick="{{ downloadBootstrapZip }}" style="cursor:pointer; flex-shrink:0; font-size:12px; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">📦 ดาวน์โหลด 8 ไฟล์</div>
-        </div>
-        <div style="display:flex; align-items:center; gap:12px; background:white; border:1px solid oklch(85% 0.08 150); border-radius:8px; padding:10px 14px;">
-          <div style="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:oklch(35% 0.09 25); color:white; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">3</div>
-          <div style="flex:1; font-size:13px; color:oklch(25% 0.02 60);">คัดลอกข้อความเปิดห้อง แล้ววางพร้อมไฟล์แนบ ส่งครั้งเดียว</div>
-          <div onclick="{{ copyBootstrapPrompt }}" style="cursor:pointer; flex-shrink:0; font-size:12px; background:oklch(35% 0.09 25); color:white; padding:7px 14px; border-radius:100px; font-weight:600;">{{ copyPromptLabel }}</div>
-        </div>
-      </div>
-      <div style="margin-top:14px; padding-top:12px; border-top:1px dashed oklch(80% 0.08 150); font-size:12.5px; color:oklch(30% 0.04 150); line-height:1.7;">
-        <div><strong>อ่านคำตอบแรกของ ChatGPT</strong> — ต้องสรุป Current Phase ถูกต้อง และบอกว่าตัวเองเป็น Product Owner/CEO Assistant (ไม่ใช่เริ่มทำงานทันที)</div>
-        <div style="margin-top:6px;">ถ้าคำตอบถูกต้อง → ให้คำสั่งงานต่อได้เลย ถ้าคำตอบผิด/ถามซ้ำสิ่งที่ไฟล์บอกไว้แล้ว → เช็คว่าไฟล์แนบครบหรือไม่ก่อนแก้ไขอะไรอื่น</div>
-        <div style="margin-top:10px; padding-top:10px; border-top:1px dashed oklch(80% 0.08 150);"><strong>8 ไฟล์ (Bootstrap)</strong> มีประโยชน์มากกว่าสำหรับเปิดห้องแชทใหม่โดยเฉพาะ — คัดสรรมาแล้วให้ตรงกับสิ่งที่ AI ต้องอ่านก่อนตอบ (สถานะปัจจุบัน + กติกาทำงาน) ไม่พ่วงของที่ไม่จำเป็น ทำให้ AI โฟกัสอ่านครบทุกไฟล์จริง ไม่เสี่ยงถูกจำกัดจำนวนไฟล์แนบ</div>
-        <div style="margin-top:8px;"><strong>23 ไฟล์ (ทั้งหมด)</strong> เหมาะกับกรณี "ส่งมอบโครงการทั้งหมด" ให้ผู้พัฒนาใหม่ศึกษาเชิงลึกทีละไฟล์ ไม่ใช่ใช้เปิดห้องแชทหน้าแรก — ถ้าแนบทั้ง 23 ไฟล์เป็นข้อความแรก มีความเสี่ยง 2 อย่าง: (1) หลายแพลตฟอร์ม AI จำกัดจำนวน/ขนาดไฟล์แนบต่อข้อความ (2) แม้แนบได้ครบ AI มักอ่านแบบผิวเผินเมื่อไฟล์มากเกินจำเป็น ทำให้สรุปผิดหรือพลาดรายละเอียด</div>
-        <div style="margin-top:8px;"><strong>สรุป</strong>: เปิดห้องใหม่ทุกครั้ง → ใช้ 8 ไฟล์ (Bootstrap) เท่านั้น พอ AI เข้าใจภาพรวมแล้วค่อยส่งไฟล์อื่นในชุด 23 ไฟล์เพิ่มทีละไฟล์ตามหัวข้อที่คุยกันจริง</div>
-      </div>
-    </div>
-
-    <sc-for list="{{ handoffCategories }}" as="cat" hint-placeholder-count="4">
-      <div style="margin-bottom:16px;">
-        <div style="font-size:12px; font-weight:600; letter-spacing:0.04em; color:oklch(35% 0.08 25); margin-bottom:6px;">{{ cat.title }}</div>
-        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:8px;">
-          <sc-for list="{{ cat.items }}" as="doc" hint-placeholder-count="3">
-            <div style="border:1px solid oklch(88% 0.01 70); border-radius:8px; padding:10px 12px; display:flex; flex-direction:column; gap:6px; background:oklch(99% 0.005 70);">
-              <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-                <code style="font-size:11.5px; font-weight:600; word-break:break-all;">{{ doc.file }}</code>
-                <span style="flex-shrink:0; font-size:10px; font-weight:700; padding:2px 7px; border-radius:100px; background:oklch(94% 0.08 150); color:oklch(30% 0.1 150); border:1px solid oklch(75% 0.1 150);">✓ พร้อม</span>
-              </div>
-              <div style="font-size:11.5px; color:oklch(45% 0.02 60); line-height:1.5;">{{ doc.desc }}</div>
-              <div style="display:flex; align-items:center; gap:8px;">
-                <a href="{{ doc.path }}" download style="font-size:11px; text-decoration:none; background:oklch(96% 0.02 60); border:1px solid oklch(88% 0.02 60); padding:4px 10px; border-radius:100px; font-weight:600;">📥 ดาวน์โหลด</a>
-                <div onclick="{{ doc.toggle }}" style="cursor:pointer; font-size:11px; color:oklch(45% 0.09 25); font-weight:600;">{{ doc.caret }}</div>
-              </div>
-              <div style="{{ doc.detailWrapStyle }}">{{ doc.detail }}</div>
-            </div>
-          </sc-for>
-        </div>
-      </div>
-    </sc-for>
-
-    <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
-      <div onclick="{{ downloadAll }}" style="cursor:pointer; font-size:13px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:9px 18px; border-radius:100px; font-weight:600;">⬇️ ดาวน์โหลดทั้งหมด (ZIP)</div>
-      <div style="font-size:11.5px; color:oklch(55% 0.02 60);">{{ downloadAllStatus }}</div>
-    </div>
-    <div style="font-size:11px; color:oklch(60% 0.01 70); margin-top:8px;">หมายเหตุ: มีไฟล์ .md เก่า/ซ้ำซ้อนอีกจำนวนหนึ่งอยู่ในโปรเจกต์ (เช่น release-notes เวอร์ชันย่อย, changelog รุ่นก่อนหน้า) ที่ไม่ได้รวมในชุดนี้เพราะล้าสมัยแล้ว — ชุดนี้คือไฟล์ปัจจุบันที่ใช้งานจริงเท่านั้น</div>
-
-    <div style="margin-top:32px; font-size:12px; color:oklch(55% 0.02 60); text-align:center;">อ้างอิงจาก CEO GUIDE.md — หน้านี้อัปเดตพร้อมกันทุกครั้งที่เนื้อหาคู่มือเปลี่ยน</div>
 
   </div>
 </div>
