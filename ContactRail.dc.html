@@ -603,8 +603,7 @@ class Component extends DCLogic {
     try {
       const saved = JSON.parse(localStorage.getItem("hh_chat_history") || "null");
       if (saved && saved.length) {
-        this.setState({ chatMessages: saved.map((m) => this._buildBubble(m.role, m.text)), chatOpen: true, chatMinimized: false });
-        this._scrollChat();
+        this.setState({ chatMessages: saved.map((m) => this._buildBubble(m.role, m.text)) });
         return true;
       }
     } catch (e) {}
