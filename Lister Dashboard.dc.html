@@ -26,16 +26,17 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-19 (ย่อป้ายคอลเลกชันให้สั้นลง) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-20 (ID1: เพิ่มไอคอนแปลภาษา + แปล Header/แถบเมนู 4 ขั้น/คำทักทาย) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
       <img src="logo.png" style="height:32px; width:32px; border-radius:50%; object-fit:contain;" />
       <span style="font-family:'Playfair Display',serif; font-size:19px; color:white;">huahin . properties</span>
-      <span style="color:oklch(70% 0.02 70); font-size:14px;">| หน้าทำงานของฉัน</span>
+      <span style="color:oklch(70% 0.02 70); font-size:14px;">| {{ dt.workspaceTitle }}</span>
     </div>
     <div style="display:flex; align-items:center; gap:16px;">
-      <div onClick="{{ onLogout }}" style="font-size:13px; color:oklch(75% 0.02 70); cursor:pointer;">ออกจากระบบ</div>
+      <dc-import name="LanguageSwitcher" lang="{{ lang }}" options="{{ langOptions }}" on-select="{{ onSelectLang }}" compact="{{ true }}" hint-size="70px,36px"></dc-import>
+      <div onClick="{{ onLogout }}" style="font-size:13px; color:oklch(75% 0.02 70); cursor:pointer;">{{ dt.logout }}</div>
     </div>
   </div>
 
@@ -78,41 +79,41 @@
     <sc-if value="{{ signedIn }}" hint-placeholder-val="{{ false }}">
       <div style="display:flex; align-items:center; gap:10px; margin-bottom:2px; flex-wrap:wrap;">
         <div onClick="{{ onOpenInbox }}" style="position:relative; cursor:pointer; font-size:20px;">🔔<sc-if value="{{ hasUnreadLeads }}"><span style="position:absolute; top:-6px; right:-8px; background:oklch(55% 0.2 25); color:white; font-size:10px; font-weight:700; border-radius:100px; padding:1px 5px; min-width:16px; text-align:center;">{{ unreadLeadCount }}</span></sc-if></div>
-      <div style="font-family:'Playfair Display',serif; font-size:clamp(19px,5vw,24px); color:oklch(20% 0.02 60);">สวัสดีคุณ{{ listerName }} <sc-if value="{{ showTrialActive }}"><span style="font-size:12px; font-weight:400; color:oklch(45% 0.1 250); vertical-align:middle;">🎁 กำลังทดลองใช้ฟรี — {{ trialDaysLeftLabel }}</span></sc-if></div>
+      <div style="font-family:'Playfair Display',serif; font-size:clamp(19px,5vw,24px); color:oklch(20% 0.02 60);">{{ dt.greeting }}{{ listerName }} <sc-if value="{{ showTrialActive }}"><span style="font-size:12px; font-weight:400; color:oklch(45% 0.1 250); vertical-align:middle;">🎁 {{ dt.trialActive }} — {{ trialDaysLeftLabel }}</span></sc-if></div>
       </div>
       <div style="font-size:12.5px; color:oklch(50% 0.02 60); margin-bottom:18px; word-break:break-all;">{{ listerEmail }}</div>
 
       <div style="background:white; border-radius:8px; padding:14px 16px; margin-bottom:18px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
         <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
           <div style="flex-shrink:0;">
-            <div style="font-size:10.5px; color:oklch(50% 0.02 60); white-space:nowrap;">แพ็กเกจปัจจุบัน</div>
+            <div style="font-size:10.5px; color:oklch(50% 0.02 60); white-space:nowrap;">{{ dt.currentPackage }}</div>
             <div style="font-size:13px; font-weight:600; color:oklch(25% 0.02 60); white-space:nowrap;">{{ tierLabel }}</div>
           </div>
           <sc-if value="{{ showPremiumBadge }}"><div style="background:linear-gradient(135deg, oklch(55% 0.15 75), oklch(45% 0.15 40)); color:white; font-size:10px; font-weight:700; padding:4px 10px; border-radius:100px; white-space:nowrap; letter-spacing:0.3px; flex-shrink:0;">⭐ {{ premiumBadgeLabel }}</div></sc-if>
         </div>
-        <div onClick="{{ onOpenMySite }}" style="border:1px solid oklch(88% 0.01 70); border-radius:100px; padding:7px 12px; font-size:11.5px; font-weight:500; color:oklch(45% 0.02 60); cursor:pointer; white-space:nowrap;">🌐 เว็บไซต์ของฉัน</div>
-        <a href="Lister Billing.dc.html" style="{{ upgradeTopBarStyle }}">🎁 เลือก Package</a>
+        <div onClick="{{ onOpenMySite }}" style="border:1px solid oklch(88% 0.01 70); border-radius:100px; padding:7px 12px; font-size:11.5px; font-weight:500; color:oklch(45% 0.02 60); cursor:pointer; white-space:nowrap;">🌐 {{ dt.mySite }}</div>
+        <a href="Lister Billing.dc.html" style="{{ upgradeTopBarStyle }}">🎁 {{ dt.choosePackage }}</a>
       </div>
 
-      <div style="font-size:11px; color:oklch(55% 0.02 60); margin-bottom:8px; text-align:center;">💡 แนะนำให้ทำตามลำดับ ① ➜ ② ➜ ③ เพื่อให้ประกาศของคุณพร้อมและดูมืออาชีพที่สุด</div>
+      <div style="font-size:11px; color:oklch(55% 0.02 60); margin-bottom:8px; text-align:center;">💡 {{ dt.followOrderHint }}</div>
       <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:2px; margin-bottom:8px; border-bottom:2px solid oklch(90% 0.01 70);">
-        <div onClick="{{ onSetSettingsTab }}" style="text-align:center; padding:10px 4px; font-size:clamp(11px,3.2vw,13.5px); font-weight:600; cursor:pointer; color:{{ settingsTabColor }}; border-bottom:2px solid {{ settingsTabColor }}; margin-bottom:-2px; white-space:nowrap;">① ⚙️ ตั้งค่าระบบ</div>
-        <div onClick="{{ onSetListTab }}" style="text-align:center; padding:10px 4px; font-size:clamp(11px,3.2vw,13.5px); font-weight:600; cursor:pointer; color:{{ listTabColor }}; border-bottom:2px solid {{ listTabColor }}; margin-bottom:-2px; white-space:nowrap;">② 📋 รายการทรัพย์</div>
-        <div onClick="{{ onSetCollectionsTab }}" style="text-align:center; padding:10px 4px; font-size:clamp(11px,3.2vw,13.5px); font-weight:600; cursor:pointer; color:{{ collectionsTabColor }}; border-bottom:2px solid {{ collectionsTabColor }}; margin-bottom:-2px; white-space:nowrap;">③ 📁 คอลเลกชัน</div>
-        <div onClick="{{ onSetApptTab }}" style="text-align:center; padding:10px 4px; font-size:clamp(11px,3.2vw,13.5px); font-weight:600; cursor:pointer; color:{{ apptTabColor }}; border-bottom:2px solid {{ apptTabColor }}; margin-bottom:-2px; white-space:nowrap;">④ 📅 นัดหมาย</div>
+        <div onClick="{{ onSetSettingsTab }}" style="text-align:center; padding:10px 4px; font-size:clamp(11px,3.2vw,13.5px); font-weight:600; cursor:pointer; color:{{ settingsTabColor }}; border-bottom:2px solid {{ settingsTabColor }}; margin-bottom:-2px; white-space:nowrap;">① ⚙️ {{ dt.tabSettings }}</div>
+        <div onClick="{{ onSetListTab }}" style="text-align:center; padding:10px 4px; font-size:clamp(11px,3.2vw,13.5px); font-weight:600; cursor:pointer; color:{{ listTabColor }}; border-bottom:2px solid {{ listTabColor }}; margin-bottom:-2px; white-space:nowrap;">② 📋 {{ dt.tabList }}</div>
+        <div onClick="{{ onSetCollectionsTab }}" style="text-align:center; padding:10px 4px; font-size:clamp(11px,3.2vw,13.5px); font-weight:600; cursor:pointer; color:{{ collectionsTabColor }}; border-bottom:2px solid {{ collectionsTabColor }}; margin-bottom:-2px; white-space:nowrap;">③ 📁 {{ dt.tabCollections }}</div>
+        <div onClick="{{ onSetApptTab }}" style="text-align:center; padding:10px 4px; font-size:clamp(11px,3.2vw,13.5px); font-weight:600; cursor:pointer; color:{{ apptTabColor }}; border-bottom:2px solid {{ apptTabColor }}; margin-bottom:-2px; white-space:nowrap;">④ 📅 {{ dt.tabAppt }}</div>
       </div>
 
-      <sc-if value="{{ isSettingsTab }}"><div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:18px; line-height:1.6;">เติมข้อมูลตรงนี้ครั้งเดียว ระบบจะดึงไปใช้ซ้ำอัตโนมัติทุกประกาศ — ให้เว็บไซต์และโปรไฟล์ของคุณดูมืออาชีพตั้งแต่วินาทีแรกที่ลูกค้าเห็น</div></sc-if>
-      <sc-if value="{{ isListTab }}"><div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:18px; line-height:1.6;">ไม่ต้องนั่งเขียนเอง — เพิ่มทรัพย์แล้วปล่อยให้ AI ร่างประกาศขายให้ครบ 8 ภาษาในไม่กี่วินาที พร้อมโพสต์ได้ทันที</div></sc-if>
-      <sc-if value="{{ isCollectionsTab }}"><div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:18px; line-height:1.6;">คัดทรัพย์ที่ใช่ส่งให้ลูกค้าคนนั้นด้วยลิงก์เดียว — ดูเป็นมืออาชีพ ปิดการขายไวขึ้น ไม่ต้องส่งทีละลิงก์ให้ลูกค้าไล่หาเอง</div></sc-if>
-      <sc-if value="{{ isApptTab }}"><div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:18px; line-height:1.6;">นัดชมทรัพย์กับลูกค้า ไม่พลาดคิวนัด — เพิ่ม แก้ไข และทำเครื่องหมายเสร็จได้ในที่เดียว</div></sc-if>
+      <sc-if value="{{ isSettingsTab }}"><div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:18px; line-height:1.6;">{{ dt.hintSettings }}</div></sc-if>
+      <sc-if value="{{ isListTab }}"><div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:18px; line-height:1.6;">{{ dt.hintList }}</div></sc-if>
+      <sc-if value="{{ isCollectionsTab }}"><div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:18px; line-height:1.6;">{{ dt.hintCollections }}</div></sc-if>
+      <sc-if value="{{ isApptTab }}"><div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:18px; line-height:1.6;">{{ dt.hintAppt }}</div></sc-if>
 
       <sc-if value="{{ isSettingsTab }}">
 
       <sc-if value="{{ showProfileChecklist }}">
         <div style="background:white; border-radius:8px; padding:16px 22px; margin-bottom:22px;">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; gap:10px; flex-wrap:wrap;">
-            <div style="font-size:13px; color:oklch(35% 0.02 60); font-weight:600;">ความสมบูรณ์ของเว็บไซต์และโปรไฟล์ {{ profileCompletePct }}%</div>
+            <div style="font-size:13px; color:oklch(35% 0.02 60); font-weight:600;">{{ dt.profileCompleteness }} {{ profileCompletePct }}%</div>
           </div>
           <div style="background:oklch(93% 0.005 70); border-radius:100px; height:6px; overflow:hidden;">
             <div style="background:oklch(45% 0.13 25); height:100%; width:{{ profileCompletePct }}%; border-radius:100px;"></div>
@@ -1087,8 +1088,88 @@ function parseLatLngHH(input) {
   return null;
 }
 
+const LD_LANG_OPTIONS = [
+  { code: "th", label: "ไทย" }, { code: "en", label: "English" }, { code: "ru", label: "Русский" }, { code: "zh", label: "中文" },
+  { code: "de", label: "Deutsch" }, { code: "no", label: "Norsk" }, { code: "fr", label: "Français" }, { code: "it", label: "Italiano" },
+];
+const DASH_I18N = {
+  th: { logout: "ออกจากระบบ", workspaceTitle: "หน้าทำงานของฉัน", greeting: "สวัสดีคุณ", trialActive: "กำลังทดลองใช้ฟรี",
+    tabSettings: "ตั้งค่าระบบ", tabList: "รายการทรัพย์", tabCollections: "คอลเลกชัน", tabAppt: "นัดหมาย",
+    hintSettings: "เติมข้อมูลตรงนี้ครั้งเดียว ระบบจะดึงไปใช้ซ้ำอัตโนมัติทุกประกาศ — ให้เว็บไซต์และโปรไฟล์ของคุณดูมืออาชีพตั้งแต่วินาทีแรกที่ลูกค้าเห็น",
+    hintList: "ไม่ต้องนั่งเขียนเอง — เพิ่มทรัพย์แล้วปล่อยให้ AI ร่างประกาศขายให้ครบ 8 ภาษาในไม่กี่วินาที พร้อมโพสต์ได้ทันที",
+    hintCollections: "คัดทรัพย์ที่ใช่ส่งให้ลูกค้าคนนั้นด้วยลิงก์เดียว — ดูเป็นมืออาชีพ ปิดการขายไวขึ้น ไม่ต้องส่งทีละลิงก์ให้ลูกค้าไล่หาเอง",
+    hintAppt: "นัดชมทรัพย์กับลูกค้า ไม่พลาดคิวนัด — เพิ่ม แก้ไข และทำเครื่องหมายเสร็จได้ในที่เดียว",
+    currentPackage: "แพ็กเกจปัจจุบัน", mySite: "เว็บไซต์ของฉัน", choosePackage: "เลือก Package",
+    followOrderHint: "แนะนำให้ทำตามลำดับ ① ➜ ② ➜ ③ เพื่อให้ประกาศของคุณพร้อมและดูมืออาชีพที่สุด",
+    profileCompleteness: "ความสมบูรณ์ของเว็บไซต์และโปรไฟล์" },
+  en: { logout: "Log out", workspaceTitle: "My Workspace", greeting: "Hi, ", trialActive: "Free trial active",
+    tabSettings: "Setup", tabList: "Properties", tabCollections: "Collections", tabAppt: "Appointments",
+    hintSettings: "Fill this in once — it's reused automatically across every listing, making your site and profile look professional from the first second a customer sees it.",
+    hintList: "No need to write it yourself — add a property and let AI draft the listing in all 8 languages in seconds, ready to post instantly.",
+    hintCollections: "Curate the right properties and send them to a customer with one link — look professional, close faster, no need to send links one by one.",
+    hintAppt: "Schedule viewings with customers without missing a booking — add, edit, and mark done all in one place.",
+    currentPackage: "Current package", mySite: "My Website", choosePackage: "Choose Package",
+    followOrderHint: "Follow the order ① ➜ ② ➜ ③ to get your listings ready and looking their most professional.",
+    profileCompleteness: "Website & profile completeness" },
+  ru: { logout: "Выйти", workspaceTitle: "Моё рабочее пространство", greeting: "Привет, ", trialActive: "Пробный период активен",
+    tabSettings: "Настройка", tabList: "Объекты", tabCollections: "Подборки", tabAppt: "Встречи",
+    hintSettings: "Заполните это один раз — система будет автоматически использовать это во всех объявлениях, сделав ваш сайт и профиль профессиональными с первой секунды.",
+    hintList: "Не нужно писать самостоятельно — добавьте объект, и AI составит объявление на всех 8 языках за секунды, готовое к публикации.",
+    hintCollections: "Подберите нужные объекты и отправьте их клиенту одной ссылкой — выглядите профессионально, закрывайте сделки быстрее.",
+    hintAppt: "Планируйте просмотры с клиентами без пропущенных встреч — добавляйте, редактируйте и отмечайте выполненные в одном месте.",
+    currentPackage: "Текущий пакет", mySite: "Мой сайт", choosePackage: "Выбрать пакет",
+    followOrderHint: "Следуйте порядку ① ➜ ② ➜ ③, чтобы ваши объявления были готовы и выглядели профессионально.",
+    profileCompleteness: "Полнота сайта и профиля" },
+  zh: { logout: "退出登录", workspaceTitle: "我的工作台", greeting: "你好，", trialActive: "免费试用中",
+    tabSettings: "系统设置", tabList: "房源列表", tabCollections: "合集", tabAppt: "预约",
+    hintSettings: "只需填写一次，系统会自动在每条房源中复用 — 让您的网站和资料从客户看到的第一秒起就显得专业。",
+    hintList: "不用自己动笔 — 添加房源后让 AI 在几秒内自动生成 8 种语言的完整房源文案，随时可发布。",
+    hintCollections: "为特定客户挑选合适的房源，用一个链接发送 — 显得专业，成交更快，不用一个个发链接。",
+    hintAppt: "与客户安排看房，不错过任何预约 — 在同一处添加、编辑并标记完成。",
+    currentPackage: "当前套餐", mySite: "我的网站", choosePackage: "选择套餐",
+    followOrderHint: "建议按顺序 ① ➜ ② ➜ ③ 完成，让您的房源信息更完整、更专业。",
+    profileCompleteness: "网站与资料完整度" },
+  de: { logout: "Abmelden", workspaceTitle: "Mein Arbeitsbereich", greeting: "Hallo, ", trialActive: "Kostenlose Testversion aktiv",
+    tabSettings: "Einrichtung", tabList: "Objekte", tabCollections: "Sammlungen", tabAppt: "Termine",
+    hintSettings: "Füllen Sie dies einmal aus — das System verwendet es automatisch für jedes Angebot erneut und lässt Ihre Website und Ihr Profil von der ersten Sekunde an professionell wirken.",
+    hintList: "Sie müssen nicht selbst schreiben — fügen Sie ein Objekt hinzu und lassen Sie die KI in Sekunden ein Angebot in allen 8 Sprachen erstellen, sofort veröffentlichungsbereit.",
+    hintCollections: "Wählen Sie die passenden Objekte aus und senden Sie sie einem Kunden mit einem einzigen Link — wirken Sie professionell, schließen Sie schneller ab.",
+    hintAppt: "Planen Sie Besichtigungen mit Kunden, ohne einen Termin zu verpassen — alles an einem Ort hinzufügen, bearbeiten und als erledigt markieren.",
+    currentPackage: "Aktuelles Paket", mySite: "Meine Website", choosePackage: "Paket wählen",
+    followOrderHint: "Folgen Sie der Reihenfolge ① ➜ ② ➜ ③, damit Ihre Angebote bereit und möglichst professionell wirken.",
+    profileCompleteness: "Vollständigkeit von Website & Profil" },
+  no: { logout: "Logg ut", workspaceTitle: "Mitt arbeidsområde", greeting: "Hei, ", trialActive: "Gratis prøveperiode aktiv",
+    tabSettings: "Oppsett", tabList: "Eiendommer", tabCollections: "Samlinger", tabAppt: "Avtaler",
+    hintSettings: "Fyll ut dette én gang — systemet bruker det automatisk på nytt i hver annonse, slik at nettstedet og profilen din ser profesjonell ut fra første sekund.",
+    hintList: "Du behøver ikke skrive selv — legg til en eiendom og la AI utarbeide annonsen på alle 8 språk på sekunder, klar til publisering.",
+    hintCollections: "Velg ut de riktige eiendommene og send dem til en kunde med én lenke — se profesjonell ut, avslutt raskere.",
+    hintAppt: "Planlegg visninger med kunder uten å gå glipp av en avtale — legg til, rediger og merk som utført på ett sted.",
+    currentPackage: "Nåværende pakke", mySite: "Mitt nettsted", choosePackage: "Velg pakke",
+    followOrderHint: "Følg rekkefølgen ① ➜ ② ➜ ③ for at annonsene dine skal være klare og se mest profesjonelle ut.",
+    profileCompleteness: "Fullstendighet på nettsted og profil" },
+  fr: { logout: "Se déconnecter", workspaceTitle: "Mon espace de travail", greeting: "Bonjour, ", trialActive: "Essai gratuit actif",
+    tabSettings: "Configuration", tabList: "Biens", tabCollections: "Collections", tabAppt: "Rendez-vous",
+    hintSettings: "Remplissez ceci une fois — le système le réutilise automatiquement pour chaque annonce, rendant votre site et profil professionnels dès la première seconde.",
+    hintList: "Pas besoin d'écrire vous-même — ajoutez un bien et laissez l'IA rédiger l'annonce dans les 8 langues en quelques secondes, prête à publier.",
+    hintCollections: "Sélectionnez les bons biens et envoyez-les à un client avec un seul lien — paraissez professionnel, concluez plus vite.",
+    hintAppt: "Planifiez des visites avec les clients sans manquer un rendez-vous — ajoutez, modifiez et marquez comme terminé au même endroit.",
+    currentPackage: "Forfait actuel", mySite: "Mon site", choosePackage: "Choisir un forfait",
+    followOrderHint: "Suivez l'ordre ① ➜ ② ➜ ③ pour que vos annonces soient prêtes et paraissent les plus professionnelles.",
+    profileCompleteness: "Exhaustivité du site et du profil" },
+  it: { logout: "Esci", workspaceTitle: "Il mio spazio di lavoro", greeting: "Ciao, ", trialActive: "Prova gratuita attiva",
+    tabSettings: "Configurazione", tabList: "Immobili", tabCollections: "Collezioni", tabAppt: "Appuntamenti",
+    hintSettings: "Compila questo una sola volta — il sistema lo riutilizzerà automaticamente in ogni annuncio, rendendo il tuo sito e profilo professionali dal primo secondo.",
+    hintList: "Non serve scrivere da soli — aggiungi un immobile e lascia che l'IA crei l'annuncio in tutte le 8 lingue in pochi secondi, pronto per la pubblicazione.",
+    hintCollections: "Seleziona gli immobili giusti e invialo a un cliente con un solo link — appari professionale, chiudi più velocemente.",
+    hintAppt: "Pianifica visite con i clienti senza perdere un appuntamento — aggiungi, modifica e segna come completato in un unico posto.",
+    currentPackage: "Piano attuale", mySite: "Il mio sito", choosePackage: "Scegli piano",
+    followOrderHint: "Segui l'ordine ① ➜ ② ➜ ③ per rendere i tuoi annunci pronti e più professionali possibile.",
+    profileCompleteness: "Completezza di sito e profilo" },
+};
+
 class Component extends DCLogic {
   state = {
+    lang: (() => { try { return localStorage.getItem("hhDashLang") || "th"; } catch (e) { return "th"; } })(),
     loaded: false, signedIn: false, lister: null, properties: [], view: "list", dashTab: "settings", showDevBar: false,
     editingId: null, f_type: "villa", f_area: "hua-hin", f_subdistrict: "", f_zone: "", f_status: "sale",
     f_price: "", f_bedrooms: "", f_bathrooms: "", f_poolSize: "", f_parking: "", f_livingArea: "", f_landSize: "", f_mapsLink: "", f_mapDisplay: "area",
@@ -2139,6 +2220,11 @@ class Component extends DCLogic {
     }
   }
 
+  onSelectLang(code) {
+    this.setState({ lang: code });
+    try { localStorage.setItem("hhDashLang", code); } catch (e) {}
+  }
+
   renderVals() {
     this._syncPreviewMap();
     this._syncOwnerMap();
@@ -2301,6 +2387,7 @@ class Component extends DCLogic {
       showTrialUpsell: !!trial && trial.nearEnd,
       trialUpsellViewsLabel: trial ? `ยอดเข้าชมรวมทุกประกาศของคุณ: ${(this.state.properties || []).reduce((sum, p) => sum + (p.viewCount || 0), 0)} ครั้ง` : "",
       onLogout: () => this.onLogout(),
+      dt: DASH_I18N[this.state.lang] || DASH_I18N.th, lang: this.state.lang, langOptions: LD_LANG_OPTIONS, onSelectLang: (code) => this.onSelectLang(code),
       debugView: this.state.view, debugDashTab: this.state.dashTab, debugLoaded: String(this.state.loaded),
       debugSignedIn: String(this.state.signedIn), debugHasLister: String(!!this.state.lister),
       showDevBar: this.state.showDevBar,
