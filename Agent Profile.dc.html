@@ -35,7 +35,7 @@
 
 <sc-if value="{{ hasLister }}">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">AG-3 (แก้ zone [object Object] + แปลปุ่มกรองทรัพย์/ขับเคลื่อนโดยครบ 8 ภาษา) — DEBUG: isOwner={{ debugIsOwner }} listerId={{ debugListerId }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">AG-4 (แปล tooltip ไอคอน, แชทสอบถาม, เกี่ยวกับ, แผนที่ทรัพย์ส่วนตัว ครบ 8 ภาษา) — DEBUG: isOwner={{ debugIsOwner }} listerId={{ debugListerId }}</div>
   </sc-if>
   <div style="position:relative;">
     <div style="{{ coverStyle }}"></div>
@@ -46,12 +46,12 @@
       </a>
       <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
         <dc-import name="LanguageSwitcher" lang="{{ lang }}" options="{{ langOptions }}" on-select="{{ onSelectLang }}" compact="{{ true }}" hint-size="70px,36px"></dc-import>
-        <div onClick="{{ onOpenShare }}" title="แชร์" style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg></div>
+        <div onClick="{{ onOpenShare }}" title="{{ t.shareTooltip }}" style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg></div>
         <sc-if value="{{ isOwner }}">
-          <a href="{{ addPropertyUrl }}" title="เพิ่มทรัพย์" style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; text-decoration:none; flex-shrink:0;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></a>
-          <div onClick="{{ onOpenMyMap }}" title="แผนที่ทรัพย์ของฉัน" style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></div>
-          <a href="Lister Dashboard.dc.html" title="ตั้งค่า" style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; text-decoration:none; flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></a>
-          <div onClick="{{ onLogout }}" title="ออกจากระบบ" style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); color:oklch(45% 0.15 25); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></div>
+          <a href="{{ addPropertyUrl }}" title="{{ t.addPropertyTooltip }}" style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; text-decoration:none; flex-shrink:0;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></a>
+          <div onClick="{{ onOpenMyMap }}" title="{{ t.myMapTooltip }}" style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 1 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></div>
+          <a href="Lister Dashboard.dc.html" title="{{ t.settingsTooltip }}" style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; text-decoration:none; flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></a>
+          <div onClick="{{ onLogout }}" title="{{ t.logoutTooltip }}" style="width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.9); color:oklch(45% 0.15 25); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></div>
         </sc-if>
       </div>
     </div>
@@ -134,7 +134,7 @@
             </sc-if>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
               <sc-if value="{{ hasPhone }}"><a href="{{ telHref }}" style="{{ contactBtnStyle }}">📞 {{ tContact }}</a></sc-if>
-              <div onClick="{{ onOpenChatFromModal }}" style="background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:10px 18px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">💬 แชทสอบถาม</div>
+              <div onClick="{{ onOpenChatFromModal }}" style="background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:10px 18px; border-radius:100px; font-size:13px; font-weight:600; cursor:pointer;">💬 {{ t.chatBtn }}</div>
             </div>
           </div>
         </div>
@@ -205,7 +205,7 @@
 <sc-if value="{{ showAbout }}">
   <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:600; padding:20px;" onClick="{{ onCloseAbout }}">
     <div style="background:white; border-radius:10px; padding:24px; width:min(420px,90vw); max-height:80vh; overflow-y:auto;" onClick="{{ stopProp }}">
-      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:12px;">เกี่ยวกับ {{ displayName }}</div>
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:12px;">{{ t.aboutLabel }} {{ displayName }}</div>
       <sc-if value="{{ hasBio }}">
         <div style="font-size:14px; color:oklch(35% 0.02 60); line-height:1.7; white-space:pre-wrap; margin-bottom:18px;">{{ bioText }}</div>
       </sc-if>
@@ -222,9 +222,9 @@
         </div>
       </sc-if>
       <sc-if value="{{ isOwner }}">
-        <a href="Lister Dashboard.dc.html" style="display:block; text-align:center; background:oklch(22% 0.02 60); color:white; padding:11px; border-radius:6px; font-size:13px; font-weight:600; margin-bottom:10px;">แก้ไขและบันทึก</a>
+        <a href="Lister Dashboard.dc.html" style="display:block; text-align:center; background:oklch(22% 0.02 60); color:white; padding:11px; border-radius:6px; font-size:13px; font-weight:600; margin-bottom:10px;">{{ t.editSaveBtn }}</a>
       </sc-if>
-      <div onClick="{{ onCloseAbout }}" style="text-align:center; margin-top:6px; font-size:12px; color:oklch(50% 0.02 60); cursor:pointer;">ปิด</div>
+      <div onClick="{{ onCloseAbout }}" style="text-align:center; margin-top:6px; font-size:12px; color:oklch(50% 0.02 60); cursor:pointer;">{{ t.close }}</div>
     </div>
   </div>
 </sc-if>
@@ -248,12 +248,12 @@
 <sc-if value="{{ showMyMap }}">
   <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:600;" onClick="{{ onCloseMyMap }}">
     <div style="background:white; border-radius:10px; padding:20px; width:min(560px,92vw);" onClick="{{ stopProp }}">
-      <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:4px;">🔒 แผนที่ทรัพย์ของฉัน (ส่วนตัว)</div>
-      <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:12px;">แสดงพิกัดจริงของทุกทรัพย์ที่คุณลงไว้ — ไม่แสดงต่อสาธารณะ เห็นเฉพาะคุณ</div>
+      <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:4px;">{{ t.myMapTitle }}</div>
+      <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:12px;">{{ t.myMapDesc }}</div>
       <div style="aspect-ratio:16/11; border-radius:8px; overflow:hidden; background:oklch(93% 0.015 75);">
         <div ref="{{ myMapRef }}" style="width:100%; height:100%;"></div>
       </div>
-      <div onClick="{{ onCloseMyMap }}" style="text-align:center; margin-top:16px; font-size:12px; color:oklch(50% 0.02 60); cursor:pointer;">ปิด</div>
+      <div onClick="{{ onCloseMyMap }}" style="text-align:center; margin-top:16px; font-size:12px; color:oklch(50% 0.02 60); cursor:pointer;">{{ t.close }}</div>
     </div>
   </div>
 </sc-if>
@@ -272,48 +272,64 @@ const UI_I18N = {
     allZones: "ทุกโซน", allBeds: "ห้องนอนทั้งหมด", bed1: "1+ ห้องนอน", bed2: "2+ ห้องนอน", bed3: "3+ ห้องนอน", bed4: "4+ ห้องนอน",
     allPrices: "ทุกช่วงราคา", under5: "ต่ำกว่า 5 ล้าน", p5to10: "5-10 ล้าน", p10to20: "10-20 ล้าน", over20: "มากกว่า 20 ล้าน",
     bedrooms: "ห้องนอน", bathrooms: "ห้องน้ำ", sqm: "ตร.ม.", contact: "ติดต่อสอบถาม", chatBtn: "แชทสอบถาม", close: "ปิด",
+    shareTooltip: "แชร์", addPropertyTooltip: "เพิ่มทรัพย์", myMapTooltip: "แผนที่ทรัพย์ของฉัน", settingsTooltip: "ตั้งค่า", logoutTooltip: "ออกจากระบบ",
+    aboutLabel: "เกี่ยวกับ", editSaveBtn: "แก้ไขและบันทึก", myMapTitle: "🔒 แผนที่ทรัพย์ของฉัน (ส่วนตัว)", myMapDesc: "แสดงพิกัดจริงของทุกทรัพย์ที่คุณลงไว้ — ไม่แสดงต่อสาธารณะ เห็นเฉพาะคุณ",
     allProperties: "ทรัพย์ทั้งหมด", noProperties: "ยังไม่มีทรัพย์ที่โพสต์", perMonth: "/เดือน", personalSite: "เว็บไซต์ส่วนตัวของ", filterProperties: "กรองทรัพย์", poweredBy: "ขับเคลื่อนโดย",
     forSale: "ประกาศขาย", forRent: "ประกาศเช่า", greeting: "สวัสดีค่ะ/ครับ สนใจทรัพย์ของ{name}สอบถามได้เลยค่ะ/ครับ" },
   en: { allTypes: "All types", villa: "Pool Villa", house: "House", condo: "Condo", land: "Land", commercial: "Commercial",
     allZones: "All zones", allBeds: "All bedrooms", bed1: "1+ bed", bed2: "2+ beds", bed3: "3+ beds", bed4: "4+ beds",
     allPrices: "All prices", under5: "Under ฿5M", p5to10: "฿5-10M", p10to20: "฿10-20M", over20: "Over ฿20M",
     bedrooms: "Bedrooms", bathrooms: "Bathrooms", sqm: "sqm", contact: "Contact", chatBtn: "Chat", close: "Close",
+    shareTooltip: "Share", addPropertyTooltip: "Add Property", myMapTooltip: "My Property Map", settingsTooltip: "Settings", logoutTooltip: "Log out",
+    aboutLabel: "About", editSaveBtn: "Edit & Save", myMapTitle: "🔒 My Property Map (Private)", myMapDesc: "Shows the real coordinates of every property you've listed — never shown publicly, visible only to you",
     allProperties: "All Properties", noProperties: "No properties posted yet", perMonth: "/mo", personalSite: "Personal site of", filterProperties: "Filter", poweredBy: "Powered by",
     forSale: "For Sale", forRent: "For Rent", greeting: "Hi! Interested in {name}'s properties? Feel free to ask." },
   ru: { allTypes: "Все типы", villa: "Вилла с бассейном", house: "Дом", condo: "Кондо", land: "Земля", commercial: "Коммерческая",
     allZones: "Все районы", allBeds: "Все спальни", bed1: "1+ спальня", bed2: "2+ спальни", bed3: "3+ спальни", bed4: "4+ спальни",
     allPrices: "Все цены", under5: "До 5 млн", p5to10: "5-10 млн", p10to20: "10-20 млн", over20: "Более 20 млн",
     bedrooms: "Спальни", bathrooms: "Ванные", sqm: "кв.м", contact: "Связаться", chatBtn: "Чат", close: "Закрыть",
+    shareTooltip: "Поделиться", addPropertyTooltip: "Добавить объект", myMapTooltip: "Моя карта объектов", settingsTooltip: "Настройки", logoutTooltip: "Выйти",
+    aboutLabel: "О", editSaveBtn: "Редактировать и сохранить", myMapTitle: "🔒 Моя карта объектов (личная)", myMapDesc: "Показывает реальные координаты всех ваших объектов — не отображается публично, видно только вам",
     allProperties: "Все объекты", noProperties: "Пока нет объектов", perMonth: "/мес", personalSite: "Личный сайт", filterProperties: "Фильтр", poweredBy: "Работает на",
     forSale: "Продажа", forRent: "Аренда", greeting: "Здравствуйте! Интересуют объекты {name}? Спрашивайте!" },
   zh: { allTypes: "所有类型", villa: "泳池别墅", house: "独栋别墅", condo: "公寓", land: "土地", commercial: "商业地产",
     allZones: "所有区域", allBeds: "全部卧室", bed1: "1+卧室", bed2: "2+卧室", bed3: "3+卧室", bed4: "4+卧室",
     allPrices: "全部价格", under5: "低于500万", p5to10: "500-1000万", p10to20: "1000-2000万", over20: "2000万以上",
     bedrooms: "卧室", bathrooms: "浴室", sqm: "平方米", contact: "联系咨询", chatBtn: "聊天咨询", close: "关闭",
+    shareTooltip: "分享", addPropertyTooltip: "添加房源", myMapTooltip: "我的房源地图", settingsTooltip: "设置", logoutTooltip: "退出登录",
+    aboutLabel: "关于", editSaveBtn: "编辑并保存", myMapTitle: "🔒 我的房源地图（私密）", myMapDesc: "显示您发布的所有房源的真实坐标 — 不对外公开，仅您可见",
     allProperties: "全部房源", noProperties: "暂无房源", perMonth: "/月", personalSite: "个人网站", filterProperties: "筛选", poweredBy: "技术支持",
     forSale: "出售", forRent: "出租", greeting: "您好！对{name}的房源感兴趣吗？欢迎咨询" },
   de: { allTypes: "Alle Typen", villa: "Pool-Villa", house: "Haus", condo: "Eigentumswohnung", land: "Grundstück", commercial: "Gewerbe",
     allZones: "Alle Zonen", allBeds: "Alle Schlafzimmer", bed1: "1+ Schlafzimmer", bed2: "2+ Schlafzimmer", bed3: "3+ Schlafzimmer", bed4: "4+ Schlafzimmer",
     allPrices: "Alle Preise", under5: "Unter ฿5M", p5to10: "฿5-10M", p10to20: "฿10-20M", over20: "Über ฿20M",
     bedrooms: "Schlafzimmer", bathrooms: "Badezimmer", sqm: "qm", contact: "Kontakt", chatBtn: "Chat", close: "Schließen",
+    shareTooltip: "Teilen", addPropertyTooltip: "Objekt hinzufügen", myMapTooltip: "Meine Objektkarte", settingsTooltip: "Einstellungen", logoutTooltip: "Abmelden",
+    aboutLabel: "Über", editSaveBtn: "Bearbeiten & Speichern", myMapTitle: "🔒 Meine Objektkarte (privat)", myMapDesc: "Zeigt die echten Koordinaten all Ihrer Objekte — nie öffentlich sichtbar, nur für Sie",
     allProperties: "Alle Immobilien", noProperties: "Noch keine Immobilien", perMonth: "/Monat", personalSite: "Persönliche Seite von", filterProperties: "Filter", poweredBy: "Bereitgestellt von",
     forSale: "Zu verkaufen", forRent: "Zu vermieten", greeting: "Hallo! Interessiert an {name}s Immobilien? Fragen Sie gerne!" },
   no: { allTypes: "Alle typer", villa: "Bassengvilla", house: "Hus", condo: "Leilighet", land: "Tomt", commercial: "Næringseiendom",
     allZones: "Alle soner", allBeds: "Alle soverom", bed1: "1+ soverom", bed2: "2+ soverom", bed3: "3+ soverom", bed4: "4+ soverom",
     allPrices: "Alle priser", under5: "Under ฿5M", p5to10: "฿5-10M", p10to20: "฿10-20M", over20: "Over ฿20M",
     bedrooms: "Soverom", bathrooms: "Bad", sqm: "kvm", contact: "Kontakt", chatBtn: "Chat", close: "Lukk",
+    shareTooltip: "Del", addPropertyTooltip: "Legg til eiendom", myMapTooltip: "Mitt eiendomskart", settingsTooltip: "Innstillinger", logoutTooltip: "Logg ut",
+    aboutLabel: "Om", editSaveBtn: "Rediger og lagre", myMapTitle: "🔒 Mitt eiendomskart (privat)", myMapDesc: "Viser de faktiske koordinatene til alle eiendommene du har lagt ut — vises aldri offentlig, kun synlig for deg",
     allProperties: "Alle eiendommer", noProperties: "Ingen eiendommer ennå", perMonth: "/mnd", personalSite: "Personlig side til", filterProperties: "Filter", poweredBy: "Levert av",
     forSale: "Til salgs", forRent: "Til leie", greeting: "Hei! Interessert i {name}s eiendommer? Spør i vei!" },
   fr: { allTypes: "Tous types", villa: "Villa avec piscine", house: "Maison", condo: "Condo", land: "Terrain", commercial: "Commercial",
     allZones: "Toutes zones", allBeds: "Toutes chambres", bed1: "1+ chambre", bed2: "2+ chambres", bed3: "3+ chambres", bed4: "4+ chambres",
     allPrices: "Tous prix", under5: "Moins de ฿5M", p5to10: "฿5-10M", p10to20: "฿10-20M", over20: "Plus de ฿20M",
     bedrooms: "Chambres", bathrooms: "Salles de bain", sqm: "m²", contact: "Contact", chatBtn: "Chat", close: "Fermer",
+    shareTooltip: "Partager", addPropertyTooltip: "Ajouter un bien", myMapTooltip: "Ma carte de biens", settingsTooltip: "Paramètres", logoutTooltip: "Se déconnecter",
+    aboutLabel: "À propos", editSaveBtn: "Modifier et enregistrer", myMapTitle: "🔒 Ma carte de biens (privée)", myMapDesc: "Affiche les coordonnées réelles de tous vos biens — jamais visible publiquement, visible uniquement par vous",
     allProperties: "Tous les biens", noProperties: "Aucun bien pour le moment", perMonth: "/mois", personalSite: "Site personnel de", filterProperties: "Filtrer", poweredBy: "Propulsé par",
     forSale: "À vendre", forRent: "À louer", greeting: "Bonjour ! Intéressé par les biens de {name} ? N'hésitez pas à demander !" },
   it: { allTypes: "Tutti i tipi", villa: "Villa con piscina", house: "Casa", condo: "Condominio", land: "Terreno", commercial: "Commerciale",
     allZones: "Tutte le zone", allBeds: "Tutte le camere", bed1: "1+ camera", bed2: "2+ camere", bed3: "3+ camere", bed4: "4+ camere",
     allPrices: "Tutti i prezzi", under5: "Sotto ฿5M", p5to10: "฿5-10M", p10to20: "฿10-20M", over20: "Oltre ฿20M",
     bedrooms: "Camere", bathrooms: "Bagni", sqm: "mq", contact: "Contatto", chatBtn: "Chat", close: "Chiudi",
+    shareTooltip: "Condividi", addPropertyTooltip: "Aggiungi immobile", myMapTooltip: "La mia mappa immobili", settingsTooltip: "Impostazioni", logoutTooltip: "Esci",
+    aboutLabel: "Info su", editSaveBtn: "Modifica e salva", myMapTitle: "🔒 La mia mappa immobili (privata)", myMapDesc: "Mostra le coordinate reali di tutti gli immobili che hai pubblicato — mai visibile pubblicamente, visibile solo a te",
     allProperties: "Tutti gli immobili", noProperties: "Nessun immobile ancora", perMonth: "/mese", personalSite: "Sito personale di", filterProperties: "Filtra", poweredBy: "Offerto da",
     forSale: "In vendita", forRent: "In affitto", greeting: "Ciao! Interessato agli immobili di {name}? Chiedi pure!" },
 };
