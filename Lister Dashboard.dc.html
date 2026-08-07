@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-4 (แก้รูปหายในกล่อง Hover ของบ้านที่กำลังกรอก) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-5 (แก้ Hover ไม่รีเฟรชรูปเมื่อโหลดรูปช้ากว่าแผนที่) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -1964,7 +1964,8 @@ class Component extends DCLogic {
       .filter((p) => p.id !== this.state.editingId)
       .map((p) => ({ id: p.id, coords: parseLatLngHH(p.mapLink), coverUrl: p.coverUrl, zone: p.zone, area: p.area, internalNotes: p.internalNotes }))
       .filter((p) => p.coords);
-    const key = coords.lat + "," + coords.lng + "|" + (wide ? "wide" : "close") + "|" + others.map((o) => o.id).join(",");
+    const currentCoverUrl = ((this.state.existingPhotos || [])[0] && this.state.existingPhotos[0].url) || ((this.state.newPhotos || [])[0] && this.state.newPhotos[0].url) || "";
+    const key = coords.lat + "," + coords.lng + "|" + (wide ? "wide" : "close") + "|" + others.map((o) => o.id).join(",") + "|" + currentCoverUrl.length + "|" + (this.state.f_internalNotes || "").length;
     if (this._ownerMapKey === key || this._ownerMapBusy) return;
     this._ownerMapBusy = true;
     try {
@@ -2000,9 +2001,7 @@ class Component extends DCLogic {
         return m;
       });
       this._ownerMarker = new google.maps.Marker({ position: coords, map: this._ownerMap });
-      const firstExisting = (this.state.existingPhotos || [])[0];
-      const firstNew = (this.state.newPhotos || [])[0];
-      const currentInfo = { id: this.state.editingId || "(ยังไม่บันทึก)", coverUrl: (firstExisting && firstExisting.url) || (firstNew && firstNew.url) || null, zone: this.state.f_zone, area: this.state.f_area, internalNotes: this.state.f_internalNotes };
+      const currentInfo = { id: this.state.editingId || "(ยังไม่บันทึก)", coverUrl: currentCoverUrl || null, zone: this.state.f_zone, area: this.state.f_area, internalNotes: this.state.f_internalNotes };
       this._ownerMarker.addListener("mouseover", () => { this._ownerInfoWindow.setContent(infoHtml(currentInfo)); this._ownerInfoWindow.open(this._ownerMap, this._ownerMarker); });
       this._ownerMarker.addListener("mouseout", () => this._ownerInfoWindow.close());
       this._ownerMapKey = key;
