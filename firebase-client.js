@@ -1107,7 +1107,7 @@ export async function translateDescriptionAll(text) {
   const system = `The input text may be written in any language (Thai, English, or otherwise). First understand its full meaning regardless of source language, then translate it into all 8 languages below. Respond with ONLY a JSON object, no markdown, no explanation, in this exact shape: {"th":"...","en":"...","ru":"...","zh":"...","de":"...","no":"...","fr":"...","it":"..."} — each value must be the FULL translation written entirely and naturally in that language's own script (never mixed languages), preserving the original meaning and tone. Every one of the 8 fields must be filled even if the source text was already in that language.`;
   const messages = [{ role: "user", content: text }];
   const res = await fetch("https://claudecomplete-3j4ldf4pja-as.a.run.app", {
-    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ system, messages }),
+    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ system, messages, max_tokens: 4000 }),
   });
   const data = await res.json();
   const raw = data.completion || data.reply || data.text || "";
