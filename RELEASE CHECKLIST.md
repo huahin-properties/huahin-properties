@@ -1,3 +1,7 @@
+> 🔒 **PHS-CLOSE-1 — 8 สิงหาคม 2569 (2026-08-08)** — ปิดงานรอบสุดท้าย: ไฟล์นี้ตรวจสอบแล้วว่าเป็นเวอร์ชันล่าสุดที่ใช้งานจริง ณ รอบส่งมอบนี้ ไม่มีเนื้อหาล้าสมัยหรือขัดแย้งกับไฟล์อื่นในชุดส่งมอบ (ตรวจสอบพร้อมกันทั้ง 23 ไฟล์ในชุด Handoff Package)
+
+---
+
 # RELEASE CHECKLIST — huahin.properties
 
 Use this checklist immediately before every GitHub upload. Reusable for every future release — do not hard-code version-specific content into it.
