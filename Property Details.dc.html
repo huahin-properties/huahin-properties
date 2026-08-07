@@ -366,7 +366,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 const HH_GOOGLE_MAPS_KEY = "AIzaSyAEkTsWJ83cot_Hwfe0dsx1Nqg0bIw2YP4";
-function loadGoogleMapsHH() {
+function loadGoogleMapsHH(lang) {
   if (window.google && window.google.maps) return Promise.resolve();
   if (window.__hhGoogleMapsLoading) return window.__hhGoogleMapsLoading;
   window.__hhGoogleMapsLoading = new Promise((resolve, reject) => {
@@ -377,7 +377,7 @@ function loadGoogleMapsHH() {
       return;
     }
     const script = document.createElement("script");
-    script.src = "https://maps.googleapis.com/maps/api/js?key=" + HH_GOOGLE_MAPS_KEY + "&libraries=marker";
+    script.src = "https://maps.googleapis.com/maps/api/js?key=" + HH_GOOGLE_MAPS_KEY + "&libraries=marker&language=" + (GMAPS_LANG[lang] || "en");
     script.async = true;
     script.defer = true;
     script.setAttribute("data-hh-gmaps", "1");
@@ -387,8 +387,8 @@ function loadGoogleMapsHH() {
   });
   return window.__hhGoogleMapsLoading;
 }
-function waitForGoogleMapsHH() {
-  return loadGoogleMapsHH().then(() => new Promise((resolve) => {
+function waitForGoogleMapsHH(lang) {
+  return loadGoogleMapsHH(lang).then(() => new Promise((resolve) => {
     if (window.google && window.google.maps) { resolve(); return; }
     const check = setInterval(() => {
       if (window.google && window.google.maps) { clearInterval(check); resolve(); }
@@ -624,7 +624,7 @@ class Component extends DCLogic {
     if (this._zoneMapKey === key && this._zoneMap) return;
     this._zoneMapBusy = true;
     try {
-      await waitForGoogleMapsHH();
+      await waitForGoogleMapsHH(this.state.lang);
       if (!this._zoneMapEl) return;
       const showExact = mode === "exact" && exactCoords;
       const center = exactCoords || mod.ZONE_COORDS[zone] || { lat: 12.55, lng: 99.96 };
