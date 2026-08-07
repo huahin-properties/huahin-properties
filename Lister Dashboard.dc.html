@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-9 (เอาเมนู ⋮ ที่ซ่อนออก เพิ่มไอคอนข้อความ AI ตรงเข้าแถวหลัก) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-10 (แก้บั๊ก listingStatus เป็น null ทำให้ดู/สวิตช์หาย) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -2150,7 +2150,7 @@ class Component extends DCLogic {
       const st = statusMap[p.status] || statusMap.sale;
       const bedBath = (p.bedrooms || p.bathrooms) ? `${p.bedrooms || 0} นอน / ${p.bathrooms || 0} น้ำ` : "-";
       const ageDays = p.updatedAt ? (now - p.updatedAt) / 86400000 : 0;
-      const lifecycle = p.isDraft ? "draft" : (p.listingStatus || (p.listingStatus === undefined ? "live" : p.listingStatus));
+      const lifecycle = p.isDraft ? "draft" : (p.listingStatus || "live");
       const lc = lifecycleMap[lifecycle] || lifecycleMap.draft;
       const daysLeft = p.expiresAt ? Math.max(0, Math.ceil((p.expiresAt - now) / 86400000)) : null;
       let actionLabel = "", actionIcon = "📤", actionColor = "oklch(35% 0.1 250)", onAction = () => {};
