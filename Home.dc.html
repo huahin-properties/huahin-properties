@@ -732,7 +732,7 @@ class Component extends DCLogic {
       { key: "luxury", labelEn: "Luxury Homes", labelTh: "บ้านหรู", tint: "oklch(30% 0.08 30)" },
     ];
     const collections = collectionDefs.map((c) => ({
-      href: c.key === "villa" ? "Search Results.dc.html?type=villa" : c.key === "investment" ? "Search Results.dc.html?status=sale" : "Search Results.dc.html",
+      href: `Search Results.dc.html?collection=${c.key}`,
       label: lang === "th" ? c.labelTh : c.labelEn,
       bg: `linear-gradient(160deg, ${c.tint}, oklch(20% 0.03 60))`,
     }));

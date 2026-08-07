@@ -253,6 +253,7 @@ class Component extends DCLogic {
     if (params.get("status")) filters.status = params.get("status");
     if (params.get("priceMax")) filters.priceMax = params.get("priceMax");
     if (params.get("q")) filters.keyword = params.get("q");
+    if (params.get("collection")) filters.collection = params.get("collection");
     this.setState({ lang: mod.getLang(), data: mod, filters });
     const effProps = await mod.getEffectiveProperties(mod);
     this.setState({ effProps });
@@ -336,6 +337,7 @@ class Component extends DCLogic {
     const propsList = this.state.effProps || mod.PROPERTIES;
     let list = propsList.filter((p) => {
       if (p.status === "rented" || p.status === "sold" || p.status === "reserved") return false;
+      if (f.collection && !(p.collections || []).includes(f.collection)) return false;
       if (f.area && p.area !== f.area) return false;
       if (f.type && p.type !== f.type) return false;
       if (f.status && p.status !== f.status) return false;
