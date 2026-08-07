@@ -393,7 +393,7 @@ class Component extends DCLogic {
       coverPhotoBg: (p.photos && p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
       coverPhotoUrl: (p.photos && p.photos[0] && p.photos[0].url) || "",
       noPhoto: !(p.photos && p.photos[0] && p.photos[0].url),
-      zone: p.zone,
+      zone: (p.zone && typeof p.zone === "object") ? (p.zone[lang] || p.zone.th) : p.zone,
       propertyId: p.id,
       areaLabel: areaLabelOf(p.area),
       // Self-serve listings (Lister Dashboard) have no `title` field at

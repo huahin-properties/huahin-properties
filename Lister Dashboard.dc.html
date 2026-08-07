@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-12 (สภาพทรัพย์ 4 ตัวเลือก: ใหม่/มือสอง × ในโครงการ/นอกโครงการ) — แก้บั๊ก listingStatus="pending" ค้างเก่า ทำให้ดู/สวิตช์หาย) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-13 (แปล zone/ชื่อทำเลด้วย + แก้ป้ายแท็บรูปภาพ/วิดีโอ/360 ให้แปลได้)ดู/สวิตช์หาย) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -1491,11 +1491,22 @@ class Component extends DCLogic {
     const allPhotoUrls = [...this.state.existingPhotos.map((p) => p.url), ...this.state.newPhotos.map((p) => p.url)].slice(0, this.myPhotoLimit());
     const sourceText = (opts.useAiDraft && this.state.f_aiDraft.trim()) ? this.state.f_aiDraft : this.state.f_description;
     let descriptionValue = sourceText;
+    let zoneValue = this.state.f_zone.trim();
     if (sourceText && sourceText.trim()) {
       try {
         const translated = await this._fb.translateDescriptionAll(sourceText.trim());
         if (translated) descriptionValue = translated;
       } catch (e) { console.warn("Auto-translate failed, saving original text only:", e); }
+    }
+    // Public pages (Home/Search/Property Details) must show the zone/soi
+    // name translated too, not just the description — otherwise a Chinese
+    // visitor still sees raw Thai street names on an otherwise-translated
+    // card (Aug 2026 fix).
+    if (zoneValue) {
+      try {
+        const zoneTranslated = await this._fb.translateDescriptionAll(zoneValue);
+        if (zoneTranslated) zoneValue = zoneTranslated;
+      } catch (e) { console.warn("Auto-translate zone failed, saving original text only:", e); }
     }
     const isEditingExisting = !!this.state.editingId;
     let existing = {};
@@ -1511,7 +1522,7 @@ class Component extends DCLogic {
       expiredAt: existing.expiredAt || null, approvedAt: existing.approvedAt || null,
       rejectedAt: existing.rejectedAt || null, rejectReason: existing.rejectReason || null,
       photosDeletedAt: existing.photosDeletedAt || null, viewCount: existing.viewCount || 0,
-      type: this.state.f_type, area: this.state.f_area, subdistrict: this.state.f_subdistrict, zone: this.state.f_zone,
+      type: this.state.f_type, area: this.state.f_area, subdistrict: this.state.f_subdistrict,
       status: this.state.f_status, price: Number(this.state.f_price) || 0,
       bedrooms: this.state.f_bedrooms ? Number(this.state.f_bedrooms) : null,
       bathrooms: this.state.f_bathrooms ? Number(this.state.f_bathrooms) : null,
@@ -1527,6 +1538,7 @@ class Component extends DCLogic {
       livingArea: this.state.f_livingArea ? Number(this.state.f_livingArea) : null,
       landSize: this.state.f_landSize ? Number(this.state.f_landSize) : null,
       description: descriptionValue, features: this.state.f_features, mapLink: this.state.f_mapsLink.trim(), mapDisplayMode: this.state.f_mapDisplay,
+      zone: zoneValue,
       currency: "THB", updatedAt: Date.now(), isDraft: previousIsDraft === undefined ? true : previousIsDraft,
       photos: allPhotoUrls.map(() => ({ label: "" })),
     };

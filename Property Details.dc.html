@@ -564,7 +564,7 @@ class Component extends DCLogic {
       name: (n && n.title) || raw.title[lang] || raw.title.en, description: seoDesc, url: `${window.location.origin}${window.location.pathname}?id=${raw.id}`,
       image: (n ? n.photos.filter((ph) => ph.url).map((ph) => ph.url) : (raw.photos || []).filter((ph) => ph && ph.url).map((ph) => ph.url)),
       identifier: raw.id,
-      address: { "@type": "PostalAddress", addressLocality: raw.area || raw.zone || "Hua Hin", addressRegion: "Prachuap Khiri Khan", addressCountry: "TH" },
+      address: { "@type": "PostalAddress", addressLocality: raw.area || ((raw.zone && typeof raw.zone === "object") ? (raw.zone.en || raw.zone.th) : raw.zone) || "Hua Hin", addressRegion: "Prachuap Khiri Khan", addressCountry: "TH" },
       mainEntity: {
         "@type": "Residence",
         numberOfRooms: raw.beds, numberOfBathroomsTotal: raw.baths,
@@ -602,7 +602,7 @@ class Component extends DCLogic {
     if (!this._zoneMapEl || this._zoneMapBusy) return;
     const mode = raw.mapDisplayMode === "exact" ? "exact" : "area";
     const exactCoords = parseLatLngHH(raw.mapLink);
-    const zone = raw.zone;
+    const zone = (raw.zone && typeof raw.zone === "object") ? raw.zone.th : raw.zone;
     const tambon = (mode === "area" && exactCoords && this._tambonMod) ? this._tambonMod.findTambonFor(exactCoords.lat, exactCoords.lng) : null;
     const key = mode + "|" + zone + "|" + (exactCoords ? exactCoords.lat + "," + exactCoords.lng : "") + "|" + (tambon ? tambon.nameEn : "");
     if (this._zoneMapKey === key && this._zoneMap) return;
@@ -744,7 +744,7 @@ class Component extends DCLogic {
       coverPhotoBg: (pr.photos[0] && pr.photos[0].url) ? `url('${pr.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
       coverPhotoUrl: (pr.photos[0] && pr.photos[0].url) || "",
       noPhoto: !(pr.photos[0] && pr.photos[0].url),
-      zone: pr.zone,
+      zone: (pr.zone && typeof pr.zone === "object") ? (pr.zone[lang] || pr.zone.th) : pr.zone,
       propertyId: pr.id,
       areaLabel: areaLabelOf(pr.area),
       title: pr.title[lang],
@@ -774,7 +774,7 @@ class Component extends DCLogic {
         ? mod.formatPrice(normalized.price, normalized.currency, lang) + (normalized.status === "rent" ? t.per_month : "")
         : fallbackCard.priceLabel,
       areaLabel: normalized ? normalized.areaLabel : fallbackCard.areaLabel,
-      zone: normalized ? normalized.zone : raw.zone,
+      zone: normalized ? normalized.zone : ((raw.zone && typeof raw.zone === "object") ? (raw.zone[lang] || raw.zone.th) : raw.zone),
       // Self-serve listings (Lister Dashboard) never set `fullDesc` — they
       // only have `description` (plain string, or a per-lang object after
       // auto-translate). Fall back to that, then to a standard placeholder,
@@ -787,10 +787,11 @@ class Component extends DCLogic {
       distanceBeachLabel: `${raw.distanceBeach} km ${t.beach ? "to " + t.beach : ""}`,
       distanceTownLabel: `${raw.distanceTown} km to ${t.town}`,
       locationBadgeLabel: (() => {
+        const zoneText = (raw.zone && typeof raw.zone === "object") ? (raw.zone[lang] || raw.zone.th) : raw.zone;
         const exact = parseLatLngHH(raw.mapLink);
-        if (raw.mapDisplayMode === "exact" && exact) return `${areaLabelOf(raw.area)} · ${raw.zone}`;
+        if (raw.mapDisplayMode === "exact" && exact) return `${areaLabelOf(raw.area)} · ${zoneText}`;
         const tambon = (exact && this._tambonMod) ? this._tambonMod.findTambonFor(exact.lat, exact.lng) : null;
-        return tambon ? `${t.property_general_area} · ตำบล${tambon.nameTh}` : `${t.property_general_area} · ${raw.zone}`;
+        return tambon ? `${t.property_general_area} · ตำบล${tambon.nameTh}` : `${t.property_general_area} · ${zoneText}`;
       })(),
     };
 
@@ -845,9 +846,9 @@ class Component extends DCLogic {
     // UI-only additions (Step 2.1 — display/layout only, no Firebase/Firestore
     // writes, no persistence). Reserves the approved UX for later real wiring.
     const galleryTabDefs = [
-      { key: "photos", icon: "📷", label: t.gallery_tab_photos || "รูปภาพ" },
-      { key: "video", icon: "🎬", label: (t.gallery_tab_video || "วิดีโอนำชม") + " (เร็วๆ นี้)" },
-      { key: "360", icon: "🧭", label: (t.gallery_tab_360 || "360° Tour") + " (เร็วๆ นี้)" },
+      { key: "photos", icon: "📷", label: t.gallery_tab_photos || "Photos" },
+      { key: "video", icon: "🎬", label: (t.gallery_tab_video || "Video Tour") + " (" + (t.coming_soon || "coming soon") + ")" },
+      { key: "360", icon: "🧭", label: (t.gallery_tab_360 || "360° Tour") + " (" + (t.coming_soon || "coming soon") + ")" },
     ];
     const galleryTabs = galleryTabDefs.map((g) => ({
       icon: g.icon, label: g.label,
