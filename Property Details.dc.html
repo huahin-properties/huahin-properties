@@ -260,9 +260,9 @@
     <!-- ============ REVIEWS (mock data — component ready for real data) ============ -->
     <div style="padding:0 clamp(20px,4vw,56px) clamp(24px,4vw,40px);">
       <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:14px;">
-        <div style="font-family:'Playfair Display',serif; font-size:21px; color:oklch(20% 0.02 60);">รีวิวจากลูกค้า</div>
-        <sc-if value="{{ reviewsEmpty }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px; color:oklch(55% 0.02 60);">ยังไม่มีรีวิว</div></sc-if>
-        <sc-if value="{{ reviewCount }}"><div style="font-size:13px; color:oklch(55% 0.02 60);">★ {{ avgRating }} ({{ reviewCount }} รีวิว) — ข้อมูลตัวอย่าง</div></sc-if>
+        <div style="font-family:'Playfair Display',serif; font-size:21px; color:oklch(20% 0.02 60);">{{ t.reviews_title }}</div>
+        <sc-if value="{{ reviewsEmpty }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px; color:oklch(55% 0.02 60);">{{ t.no_reviews }}</div></sc-if>
+        <sc-if value="{{ reviewCount }}"><div style="font-size:13px; color:oklch(55% 0.02 60);">★ {{ avgRating }} ({{ reviewCount }} {{ t.reviews_unit }}) — {{ t.reviews_sample_note }}</div></sc-if>
       </div>
       <sc-if value="{{ reviewsLoading }}" hint-placeholder-val="{{ true }}">
         <div style="font-size:13.5px; color:oklch(55% 0.02 60); padding:12px 0;">กำลังโหลดรีวิว…</div>
@@ -271,7 +271,7 @@
         <div style="border:1px solid oklch(85% 0.1 25); background:oklch(97% 0.03 25); border-radius:6px; padding:16px; text-align:center; font-size:13.5px; color:oklch(40% 0.15 25);">ไม่สามารถโหลดรีวิวได้ในขณะนี้</div>
       </sc-if>
       <sc-if value="{{ reviewsEmpty }}" hint-placeholder-val="{{ false }}">
-        <div style="border:1px dashed oklch(85% 0.01 70); border-radius:6px; padding:24px; text-align:center; font-size:13.5px; color:oklch(55% 0.02 60);">ยังไม่มีรีวิว — พื้นที่นี้เตรียมไว้สำหรับระบบรีวิวในเวอร์ชันถัดไป</div>
+        <div style="border:1px dashed oklch(85% 0.01 70); border-radius:6px; padding:24px; text-align:center; font-size:13.5px; color:oklch(55% 0.02 60);">{{ t.no_reviews_placeholder }}</div>
       </sc-if>
       <div style="display:flex; flex-direction:column; gap:12px;">
         <sc-for list="{{ reviews }}" as="rv" hint-placeholder-count="3">
