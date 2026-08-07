@@ -73,6 +73,12 @@ class Component extends DCLogic {
     this._favs = favs;
     this.setState({ lang: mod.getLang() });
     if (this.props.propertyId) this.setState({ isFav: favs.isFavorited(this.props.propertyId) });
+    this._onLangChange = (e) => this.setState({ lang: (e && e.detail) || mod.getLang() });
+    window.addEventListener("langchange", this._onLangChange);
+  }
+
+  componentWillUnmount() {
+    if (this._onLangChange) window.removeEventListener("langchange", this._onLangChange);
   }
 
   toggleFav(e) {
