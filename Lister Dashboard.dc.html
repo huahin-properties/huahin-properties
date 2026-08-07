@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-16 (เพิ่มตัวเลือกคอลเลกชันหน้าแรก) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-18 (แก้ zone [object Object] + คอลเลกชันเป็นดรอปดาวน์) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -844,15 +844,18 @@
               </sc-if>
             </div>
             <div style="position:relative;">
-              <div style="grid-column:1/-1;">
+              <div style="position:relative;">
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">แสดงในคอลเลกชันหน้าแรก (เลือกได้หลายอัน — ถ้าไม่เลือกจะไม่ขึ้นในหน้าคอลเลกชัน)</div>
-              <div style="display:flex; flex-wrap:wrap; gap:12px;">
-                <sc-for list="{{ collectionOptions }}" as="co" hint-placeholder-count="6">
-                  <label style="display:flex; align-items:center; gap:6px; font-size:13.5px; color:oklch(30% 0.02 60); cursor:pointer;">
-                    <input type="checkbox" checked="{{ co.checked }}" onChange="{{ co.onToggle }}" />{{ co.label }}
-                  </label>
-                </sc-for>
-              </div>
+              <div onClick="{{ onToggleCollectionMenu }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ collectionSummary }}</div>
+              <sc-if value="{{ collectionMenuOpen }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute; top:100%; left:0; right:0; z-index:5; background:white; border:1px solid oklch(80% 0.01 70); border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,0.12); padding:10px 12px; margin-top:4px;">
+                  <sc-for list="{{ collectionOptions }}" as="co" hint-placeholder-count="6">
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(30% 0.02 60); cursor:pointer; padding:5px 0;">
+                      <input type="checkbox" checked="{{ co.checked }}" onChange="{{ co.onToggle }}" />{{ co.label }}
+                    </label>
+                  </sc-for>
+                </div>
+              </sc-if>
             </div>
             <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ช่องทางการซื้อ/ผ่อน</div>
               <div onClick="{{ onTogglePurchaseMenu }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ purchaseSummary }}</div>
@@ -1089,7 +1092,7 @@ class Component extends DCLogic {
     loaded: false, signedIn: false, lister: null, properties: [], view: "list", dashTab: "settings", showDevBar: false,
     editingId: null, f_type: "villa", f_area: "hua-hin", f_subdistrict: "", f_zone: "", f_status: "sale",
     f_price: "", f_bedrooms: "", f_bathrooms: "", f_poolSize: "", f_parking: "", f_livingArea: "", f_landSize: "", f_mapsLink: "", f_mapDisplay: "area",
-    f_titleDeed: "", f_kitchenTypes: [], f_purchaseOptions: [], kitchenMenuOpen: false, purchaseMenuOpen: false,
+    f_titleDeed: "", f_kitchenTypes: [], f_purchaseOptions: [], kitchenMenuOpen: false, purchaseMenuOpen: false, collectionMenuOpen: false,
     f_condition: "resale_in_project", f_yearBuilt: "", f_floor: "", f_commonFee: "", f_foreignQuota: "",
     f_landShape: "", f_roadWidth: "", f_landCondition: "", f_utilities: "", f_zoningColor: "",
     f_floors: "", f_electricalPhase: "", f_internalNotes: "", f_landRai: "", f_landNgan: "", f_landWah: "",
@@ -1302,7 +1305,7 @@ class Component extends DCLogic {
     this.setState({
       view: "edit", editingId: p.id, f_type: p.type || "villa", f_area: p.area || "hua-hin",
       f_subdistrict: p.subdistrict || this.subdistrictsFor(p.area || "hua-hin")[0] || "",
-      f_zone: p.zone || "", f_status: p.status === "rent" ? "rent" : "sale",
+      f_zone: (p.zone && typeof p.zone === "object") ? (p.zone.th || p.zone.en || "") : (p.zone || ""), f_status: p.status === "rent" ? "rent" : "sale",
       f_price: p.price != null ? String(p.price) : "", f_bedrooms: p.bedrooms != null ? String(p.bedrooms) : "",
       f_bathrooms: p.bathrooms != null ? String(p.bathrooms) : "",
       f_poolSize: p.poolSize != null ? String(p.poolSize) : "", f_parking: p.parking != null ? String(p.parking) : "",
@@ -2352,6 +2355,11 @@ class Component extends DCLogic {
         { id: "villa", label: "พูลวิลล่า" }, { id: "beachfront", label: "ริมชายหาด" }, { id: "mountain", label: "วิวเขา" },
         { id: "investment", label: "เพื่อการลงทุน" }, { id: "family", label: "บ้านครอบครัว" }, { id: "luxury", label: "บ้านหรู" },
       ].map((c) => ({ ...c, checked: this.state.f_collections.includes(c.id), onToggle: () => this.toggleCollection(c.id) })),
+      collectionMenuOpen: this.state.collectionMenuOpen, onToggleCollectionMenu: () => this.setState((s) => ({ collectionMenuOpen: !s.collectionMenuOpen, kitchenMenuOpen: false, purchaseMenuOpen: false })),
+      collectionSummary: (() => {
+        const labels = { villa: "พูลวิลล่า", beachfront: "ริมชายหาด", mountain: "วิวเขา", investment: "เพื่อการลงทุน", family: "บ้านครอบครัว", luxury: "บ้านหรู" };
+        return this.state.f_collections.length ? this.state.f_collections.map((c) => labels[c] || c).join(", ") : "— ไม่แสดงในคอลเลกชันหน้าแรก —";
+      })(),
       f_type: this.state.f_type, onFType: (e) => this.setState({ f_type: e.target.value }),
       f_area: this.state.f_area, onFArea: (e) => {
         const area = e.target.value;

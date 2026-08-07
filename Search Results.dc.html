@@ -253,7 +253,7 @@ class Component extends DCLogic {
     if (params.get("status")) filters.status = params.get("status");
     if (params.get("priceMax")) filters.priceMax = params.get("priceMax");
     if (params.get("q")) filters.keyword = params.get("q");
-    if (params.get("collection")) filters.collection = params.get("collection");
+    if (params.get("homeCollection")) filters.collection = params.get("homeCollection");
     this.setState({ lang: mod.getLang(), data: mod, filters });
     const effProps = await mod.getEffectiveProperties(mod);
     this.setState({ effProps });
@@ -401,7 +401,7 @@ class Component extends DCLogic {
       // Self-serve listings (Lister Dashboard) have no `title` field at
       // all — fall back to zone, then the property code, so a card can
       // still render instead of crashing the whole results page.
-      title: (p.title && p.title[lang]) || p.zone || p.id,
+      title: (p.title && p.title[lang]) || ((p.zone && typeof p.zone === "object") ? (p.zone[lang] || p.zone.th) : p.zone) || p.id,
       typeLabel: typeLabelOf(p.type),
       hasBedrooms: !!p.bedrooms,
       bedrooms: p.bedrooms,
