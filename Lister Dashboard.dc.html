@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-23 (ID4: แปลคำอธิบายภาพปก/โซเชียล/แนะนำตัว/AI persona/ปุ่มบันทึก/KPI 3 ช่อง) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-24 (ID5: แปลชื่อที่แสดง/ลิงก์อัปเกรดแพ็กเกจ/หน่วยวันทดลอง) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -134,7 +134,7 @@
             <div style="font-size:12px; color:oklch(50% 0.02 60); line-height:1.6;">{{ st.sectionDesc }}</div>
 
             <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ชื่อที่แสดงให้ลูกค้าเห็น</div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">{{ st.displayNameLabel }}</div>
               <input value="{{ ps_displayName }}" onChange="{{ onPsDisplayName }}" style="width:100%; max-width:360px; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
             </div>
 
@@ -240,7 +240,7 @@
                 </div>
               </div>
               <sc-if value="{{ socialLockNote }}">
-                <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-top:6px;">{{ socialLockNote }} — <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a></div>
+                <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-top:6px;">{{ socialLockNote }} — <a href="Lister Billing.dc.html">{{ st.upgradePackage }}</a></div>
               </sc-if>
             </div>
             <div>
@@ -1220,7 +1220,7 @@ const SETTINGS_I18N = {
     bioHint: "เขียนสั้นๆ ให้ลูกค้าอ่านแล้วรู้จักคุณทันที — ใครก็ได้ ไม่ต้องเก่งเขียน แค่ตอบ 3 อย่าง: คุณเป็นใคร/ทำมากี่ปี, ถนัดโซนไหน/ทรัพย์แบบไหน, จุดเด่นที่ทำให้ลูกค้าเลือกคุณ",
     aiPersonaLabel: "บุคลิก AI ผู้ช่วยของคุณ",
     aiPersonaHint: "สิ่งที่คุณกรอกตรงนี้ AI จะนำไปใช้ตอบลูกค้าที่ทักเข้ามาในเว็บไซต์ส่วนตัวของคุณ ให้ AI \"เป็นคุณ\" ได้จริง เขียนแบบเล่าให้เพื่อนฟัง — บอกว่าคุณเป็นใคร (ชื่อ/เพศ/นิสัย), พูดจาแบบไหน, ทักทายลูกค้ายังไงเป็นประโยคแรก, เชี่ยวชาญโซน/ทรัพย์แบบไหนเป็นพิเศษ ถ้าไม่กรอก AI จะใช้ชื่อ+เบอร์ติดต่อของคุณจากตอนสมัครแทน",
-    saveSettingsBtn: "บันทึกการตั้งค่า", kpiTotalViews: "ยอดเข้าชมรวม", kpiActiveListings: "ประกาศที่กำลังแสดง", kpiTrialDaysLeft: "วันทดลองใช้เหลือ" },
+    saveSettingsBtn: "บันทึกการตั้งค่า", kpiTotalViews: "ยอดเข้าชมรวม", kpiActiveListings: "ประกาศที่กำลังแสดง", kpiTrialDaysLeft: "วันทดลองใช้เหลือ", displayNameLabel: "ชื่อที่แสดงให้ลูกค้าเห็น", daysUnit: "วัน" },
   en: { sectionDesc: "This applies only to your personal website (the page listing all your properties, shareable with customers) — it doesn't affect listings on the main site.",
     emailLocked: "Sign-up email (cannot be changed)", newPasswordLabel: "Set new password", newPasswordPh: "New password", confirmPasswordPh: "Confirm password", changePasswordBtn: "Change Password",
     profilePhotoLabel: "Profile photo (logo/your photo)", changePhoto: "Change Photo", choosePhoto: "Choose Photo",
@@ -1234,7 +1234,7 @@ const SETTINGS_I18N = {
     bioHint: "Write a short intro so customers instantly know you — anyone can do it, just answer 3 things: who you are/years in the business, which area/property type you specialize in, what makes customers choose you.",
     aiPersonaLabel: "Your AI assistant's persona",
     aiPersonaHint: "What you enter here is what the AI uses to reply to customers who message your personal website — making the AI genuinely \"be you\". Write it like telling a friend — who you are (name/gender/personality), how you talk, your first greeting to customers, and any area/property specialty. If left blank, the AI will use your name + contact number from sign-up instead.",
-    saveSettingsBtn: "Save Settings", kpiTotalViews: "Total views", kpiActiveListings: "Active listings", kpiTrialDaysLeft: "Trial days left" },
+    saveSettingsBtn: "Save Settings", kpiTotalViews: "Total views", kpiActiveListings: "Active listings", kpiTrialDaysLeft: "Trial days left", displayNameLabel: "Display name customers see", daysUnit: "days" },
   ru: { sectionDesc: "Это относится только к вашему личному сайту (странице со всеми вашими объектами, которую можно отправить клиентам) — не влияет на объявления на главном сайте.",
     emailLocked: "Email регистрации (не изменяется)", newPasswordLabel: "Новый пароль", newPasswordPh: "Новый пароль", confirmPasswordPh: "Подтвердите пароль", changePasswordBtn: "Изменить пароль",
     profilePhotoLabel: "Фото профиля (логотип/ваше фото)", changePhoto: "Изменить фото", choosePhoto: "Выбрать фото",
@@ -1248,7 +1248,7 @@ const SETTINGS_I18N = {
     bioHint: "Напишите короткое представление, чтобы клиенты сразу узнали вас — подходит любому, просто ответьте на 3 вопроса: кто вы/сколько лет в деле, в каком районе/типе объектов специализируетесь, что заставляет клиентов выбрать вас.",
     aiPersonaLabel: "Личность вашего AI-помощника",
     aiPersonaHint: "То, что вы укажете здесь, AI использует для ответов клиентам, которые пишут на ваш личный сайт — чтобы AI по-настоящему был \"вами\". Пишите как рассказ другу — кто вы (имя/пол/характер), как вы говорите, как приветствуете клиентов первой фразой, специализация по районам/типам объектов. Если оставить пустым, AI будет использовать ваше имя и контактный номер с регистрации.",
-    saveSettingsBtn: "Сохранить настройки", kpiTotalViews: "Всего просмотров", kpiActiveListings: "Активные объявления", kpiTrialDaysLeft: "Осталось дней пробного периода" },
+    saveSettingsBtn: "Сохранить настройки", kpiTotalViews: "Всего просмотров", kpiActiveListings: "Активные объявления", kpiTrialDaysLeft: "Осталось дней пробного периода", displayNameLabel: "Отображаемое имя для клиентов", daysUnit: "дн." },
   zh: { sectionDesc: "此设置仅适用于您的个人网站（列出您所有房源的页面，可分享给客户）— 不会影响主网站上的房源。",
     emailLocked: "注册邮箱（不可修改）", newPasswordLabel: "设置新密码", newPasswordPh: "新密码", confirmPasswordPh: "确认密码", changePasswordBtn: "更改密码",
     profilePhotoLabel: "头像（标志/您的照片）", changePhoto: "更换照片", choosePhoto: "选择照片",
@@ -1262,7 +1262,7 @@ const SETTINGS_I18N = {
     bioHint: "写一段简短介绍，让客户立刻认识您 — 任何人都能写，只需回答 3 个问题：您是谁/从业多少年，擅长哪个区域/哪种房源，客户选择您的理由是什么。",
     aiPersonaLabel: "您的 AI 助手人设",
     aiPersonaHint: "您在此填写的内容，AI 会用来回复联系您个人网站的客户 — 让 AI 真正“成为您”。请像跟朋友聊天一样写 — 您是谁（姓名/性别/性格）、说话风格如何、第一句如何问候客户、擅长哪个区域/房源类型。若留空，AI 将改用您注册时的姓名和联系电话。",
-    saveSettingsBtn: "保存设置", kpiTotalViews: "总浏览量", kpiActiveListings: "正在展示的房源", kpiTrialDaysLeft: "试用剩余天数" },
+    saveSettingsBtn: "保存设置", kpiTotalViews: "总浏览量", kpiActiveListings: "正在展示的房源", kpiTrialDaysLeft: "试用剩余天数", displayNameLabel: "客户看到的显示名称", daysUnit: "天" },
   de: { sectionDesc: "Dies gilt nur für Ihre persönliche Website (die Seite mit all Ihren Objekten, die Sie mit Kunden teilen können) — betrifft nicht die Angebote auf der Hauptseite.",
     emailLocked: "Anmelde-E-Mail (nicht änderbar)", newPasswordLabel: "Neues Passwort festlegen", newPasswordPh: "Neues Passwort", confirmPasswordPh: "Passwort bestätigen", changePasswordBtn: "Passwort ändern",
     profilePhotoLabel: "Profilfoto (Logo/Ihr Foto)", changePhoto: "Foto ändern", choosePhoto: "Foto wählen",
@@ -1276,7 +1276,7 @@ const SETTINGS_I18N = {
     bioHint: "Schreiben Sie eine kurze Vorstellung, damit Kunden Sie sofort kennenlernen — jeder kann das, beantworten Sie einfach 3 Dinge: wer Sie sind/wie viele Jahre Erfahrung, welches Gebiet/Objekttyp Ihre Spezialität ist, was Kunden dazu bringt, Sie zu wählen.",
     aiPersonaLabel: "Die Persönlichkeit Ihres KI-Assistenten",
     aiPersonaHint: "Was Sie hier eingeben, verwendet die KI, um Kunden zu antworten, die Ihre persönliche Website kontaktieren — damit die KI wirklich \"Sie\" ist. Schreiben Sie es, als würden Sie es einem Freund erzählen — wer Sie sind (Name/Geschlecht/Persönlichkeit), wie Sie sprechen, Ihre erste Begrüßung an Kunden, und jede Gebiets-/Objektspezialisierung. Bleibt es leer, nutzt die KI stattdessen Ihren Namen und Ihre Kontaktnummer aus der Anmeldung.",
-    saveSettingsBtn: "Einstellungen speichern", kpiTotalViews: "Gesamtaufrufe", kpiActiveListings: "Aktive Angebote", kpiTrialDaysLeft: "Verbleibende Testtage" },
+    saveSettingsBtn: "Einstellungen speichern", kpiTotalViews: "Gesamtaufrufe", kpiActiveListings: "Aktive Angebote", kpiTrialDaysLeft: "Verbleibende Testtage", displayNameLabel: "Anzeigename für Kunden", daysUnit: "Tage" },
   no: { sectionDesc: "Dette gjelder bare for ditt personlige nettsted (siden med alle eiendommene dine, som kan deles med kunder) — påvirker ikke annonser på hovedsiden.",
     emailLocked: "Registrerings-e-post (kan ikke endres)", newPasswordLabel: "Angi nytt passord", newPasswordPh: "Nytt passord", confirmPasswordPh: "Bekreft passord", changePasswordBtn: "Endre passord",
     profilePhotoLabel: "Profilbilde (logo/bildet ditt)", changePhoto: "Endre bilde", choosePhoto: "Velg bilde",
@@ -1290,7 +1290,7 @@ const SETTINGS_I18N = {
     bioHint: "Skriv en kort introduksjon slik at kunder umiddelbart kjenner deg — alle kan gjøre det, bare svar på 3 ting: hvem du er/hvor mange år i bransjen, hvilket område/eiendomstype du spesialiserer deg på, hva som gjør at kunder velger deg.",
     aiPersonaLabel: "Personligheten til AI-assistenten din",
     aiPersonaHint: "Det du skriver her bruker AI-en til å svare kunder som kontakter ditt personlige nettsted — slik at AI-en virkelig \"er deg\". Skriv det som om du forteller en venn — hvem du er (navn/kjønn/personlighet), hvordan du snakker, din første hilsen til kunder, og eventuell område-/eiendomsspesialisering. Hvis det står tomt, bruker AI-en navnet og kontaktnummeret ditt fra registreringen isteden.",
-    saveSettingsBtn: "Lagre innstillinger", kpiTotalViews: "Totale visninger", kpiActiveListings: "Aktive annonser", kpiTrialDaysLeft: "Prøvedager igjen" },
+    saveSettingsBtn: "Lagre innstillinger", kpiTotalViews: "Totale visninger", kpiActiveListings: "Aktive annonser", kpiTrialDaysLeft: "Prøvedager igjen", displayNameLabel: "Visningsnavn kunder ser", daysUnit: "dager" },
   fr: { sectionDesc: "Cela s'applique uniquement à votre site personnel (la page listant tous vos biens, partageable avec les clients) — n'affecte pas les annonces sur le site principal.",
     emailLocked: "E-mail d'inscription (non modifiable)", newPasswordLabel: "Définir un nouveau mot de passe", newPasswordPh: "Nouveau mot de passe", confirmPasswordPh: "Confirmer le mot de passe", changePasswordBtn: "Changer le mot de passe",
     profilePhotoLabel: "Photo de profil (logo/votre photo)", changePhoto: "Changer la photo", choosePhoto: "Choisir une photo",
@@ -1304,7 +1304,7 @@ const SETTINGS_I18N = {
     bioHint: "Rédigez une courte présentation pour que les clients vous connaissent instantanément — n'importe qui peut le faire, répondez juste à 3 choses : qui vous êtes/depuis combien d'années, quelle zone/type de bien vous vous spécialisez, ce qui fait que les clients vous choisissent.",
     aiPersonaLabel: "La personnalité de votre assistant IA",
     aiPersonaHint: "Ce que vous saisissez ici est utilisé par l'IA pour répondre aux clients qui contactent votre site personnel — pour que l'IA soit vraiment \"vous\". Écrivez comme si vous racontiez à un ami — qui vous êtes (nom/genre/personnalité), comment vous parlez, votre première salutation aux clients, et toute spécialité de zone/type de bien. Si laissé vide, l'IA utilisera votre nom et numéro de contact de l'inscription à la place.",
-    saveSettingsBtn: "Enregistrer les paramètres", kpiTotalViews: "Vues totales", kpiActiveListings: "Annonces actives", kpiTrialDaysLeft: "Jours d'essai restants" },
+    saveSettingsBtn: "Enregistrer les paramètres", kpiTotalViews: "Vues totales", kpiActiveListings: "Annonces actives", kpiTrialDaysLeft: "Jours d'essai restants", displayNameLabel: "Nom affiché aux clients", daysUnit: "jours" },
   it: { sectionDesc: "Questo si applica solo al tuo sito personale (la pagina con tutti i tuoi immobili, condivisibile con i clienti) — non influisce sugli annunci sul sito principale.",
     emailLocked: "Email di registrazione (non modificabile)", newPasswordLabel: "Imposta nuova password", newPasswordPh: "Nuova password", confirmPasswordPh: "Confirma password", changePasswordBtn: "Cambia password",
     profilePhotoLabel: "Foto profilo (logo/tua foto)", changePhoto: "Cambia foto", choosePhoto: "Scegli foto",
@@ -1318,7 +1318,7 @@ const SETTINGS_I18N = {
     bioHint: "Scrivi una breve presentazione così i clienti ti conoscono subito — chiunque può farlo, basta rispondere a 3 cose: chi sei/da quanti anni nel settore, in quale zona/tipo di immobile ti specializzi, cosa fa scegliere te ai clienti.",
     aiPersonaLabel: "La personalità del tuo assistente IA",
     aiPersonaHint: "Quello che scrivi qui viene usato dall'IA per rispondere ai clienti che scrivono al tuo sito personale — così l'IA è davvero \"te\". Scrivilo come se lo raccontassi a un amico — chi sei (nome/genere/personalità), come parli, il tuo primo saluto ai clienti, e qualsiasi specializzazione per zona/tipo di immobile. Se lasciato vuoto, l'IA userà il tuo nome e numero di contatto dalla registrazione.",
-    saveSettingsBtn: "Salva impostazioni", kpiTotalViews: "Visualizzazioni totali", kpiActiveListings: "Annunci attivi", kpiTrialDaysLeft: "Giorni di prova rimanenti" },
+    saveSettingsBtn: "Salva impostazioni", kpiTotalViews: "Visualizzazioni totali", kpiActiveListings: "Annunci attivi", kpiTrialDaysLeft: "Giorni di prova rimanenti", displayNameLabel: "Nome visibile ai clienti", daysUnit: "giorni" },
 };
 
 class Component extends DCLogic {
@@ -2530,7 +2530,7 @@ class Component extends DCLogic {
       kpiTotalViews: totalViews,
       kpiActiveListings: activeListingsCount,
       showKpiTrialDays: isTrial && !!trial && !trial.ended && trial.daysLeft > 0,
-      kpiTrialDaysLabel: trial && trial.daysLeft > 0 ? `${trial.daysLeft} วัน` : "",
+      kpiTrialDaysLabel: trial && trial.daysLeft > 0 ? `${trial.daysLeft} ${st.daysUnit}` : "",
       ctaState,
       showProactiveQuotaFull: quotaFull,
       quotaFullBannerMsg: `คุณใช้โควตาแพ็กเกจปัจจุบันครบแล้ว (${propCountNow}/${tierLimitNow} รายการ) — ไม่สามารถเพิ่มประกาศใหม่ได้จนกว่าจะอัปเกรดแพ็กเกจ`,
