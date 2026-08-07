@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-5 (แก้ Hover ไม่รีเฟรชรูปเมื่อโหลดรูปช้ากว่าแผนที่) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-7 (สลับออนไลน์/ออฟไลน์เอง + ลบ/ดู แสดงตรง + เอาป้ายรออนุมัติออก) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -504,7 +504,9 @@
                     <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:30px; color:oklch(75% 0.01 70);">🏠</div>
                   </sc-if>
                   <div style="position:absolute; top:8px; right:8px; font-size:11px; padding:3px 9px; border-radius:100px; background:{{ p.statusBg }}; color:{{ p.statusColor }};">{{ p.statusLabel }}</div>
-                  <div style="position:absolute; top:8px; left:8px; font-size:11px; padding:3px 9px; border-radius:100px; background:{{ p.lifecycleBg }}; color:{{ p.lifecycleColor }};">{{ p.lifecycleLabel }}</div>
+                  <sc-if value="{{ p.lifecycleLabel }}">
+                    <div style="position:absolute; top:8px; left:8px; font-size:11px; padding:3px 9px; border-radius:100px; background:{{ p.lifecycleBg }}; color:{{ p.lifecycleColor }};">{{ p.lifecycleLabel }}</div>
+                  </sc-if>
                 </div>
                 <div style="padding:14px 16px;">
                   <div style="font-size:13px; font-weight:700; color:oklch(40% 0.13 25); margin-bottom:4px;">{{ p.code }}</div>
@@ -525,19 +527,32 @@
                     <div style="font-size:11px; color:oklch(50% 0.15 60); margin-bottom:4px;">💡 ยังไม่ขาย? ลองให้ทีมช่วยขายดูไหม</div>
                   </sc-if>
                 </div>
-                <div style="display:flex; border-top:1px solid oklch(93% 0.01 70); position:relative;">
-                  <div onClick="{{ p.onEdit }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; color:oklch(35% 0.02 60); cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">✏️<br/>แก้ไข</div>
-                  <div onClick="{{ p.onPublish }}" style="flex:1; text-align:center; padding:11px 4px; font-size:11.5px; font-weight:700; color:{{ p.publishColor }}; cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">{{ p.publishIcon }}<br/>{{ p.publishLabel }}</div>
-                  <div onClick="{{ p.onToggleMenu }}" style="flex:0 0 44px; text-align:center; padding:11px 4px; font-size:15px; color:oklch(45% 0.02 60); cursor:pointer;">⋮</div>
+                <div style="display:flex; flex-wrap:wrap; border-top:1px solid oklch(93% 0.01 70); position:relative;">
+                  <div onClick="{{ p.onEdit }}" style="flex:1 1 25%; min-width:56px; text-align:center; padding:10px 4px; font-size:11px; color:oklch(35% 0.02 60); cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">✏️<br/>แก้ไข</div>
+                  <sc-if value="{{ p.toggleVisible }}">
+                    <div onClick="{{ p.onToggleOnline }}" style="flex:1 1 25%; min-width:64px; text-align:center; padding:8px 4px; cursor:pointer; border-right:1px solid oklch(93% 0.01 70); display:flex; flex-direction:column; align-items:center; gap:4px; justify-content:center;">
+                      <div style="width:32px; height:17px; border-radius:100px; background:{{ p.toggleTrackColor }}; position:relative;">
+                        <div style="width:13px; height:13px; border-radius:50%; background:white; position:absolute; top:2px; left:{{ p.toggleDotLeft }};"></div>
+                      </div>
+                      <span style="font-size:10px; color:{{ p.toggleTextColor }};">{{ p.toggleLabel }}</span>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ p.ctaVisible }}">
+                    <div onClick="{{ p.onPublish }}" style="flex:1 1 25%; min-width:64px; text-align:center; padding:10px 4px; font-size:11px; font-weight:700; color:{{ p.publishColor }}; cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">{{ p.publishIcon }}<br/>{{ p.publishLabel }}</div>
+                  </sc-if>
+                  <sc-if value="{{ p.viewVisible }}">
+                    <div onClick="{{ p.onViewProperty }}" style="flex:1 1 25%; min-width:56px; text-align:center; padding:10px 4px; font-size:11px; color:oklch(35% 0.1 250); cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">👁<br/>ดู</div>
+                  </sc-if>
+                  <div onClick="{{ p.onDeleteClick }}" style="flex:1 1 25%; min-width:56px; text-align:center; padding:10px 4px; font-size:11px; color:oklch(50% 0.18 30); cursor:pointer; border-right:1px solid oklch(93% 0.01 70);">🗑️<br/>ลบ</div>
+                  <div onClick="{{ p.onToggleMenu }}" style="flex:0 0 36px; text-align:center; padding:10px 4px; font-size:15px; color:oklch(45% 0.02 60); cursor:pointer;">⋮</div>
                   <sc-if value="{{ p.menuOpen }}">
                     <div onClick="{{ p.onCloseMenu }}" style="position:fixed; inset:0; z-index:4;"></div>
                     <div onClick="{{ stopProp }}" style="position:absolute; top:100%; right:0; background:white; border:1px solid oklch(88% 0.01 70); border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,0.12); z-index:5; min-width:170px; overflow:hidden;">
                       <div onClick="{{ p.onPostText }}" style="padding:11px 16px; font-size:12.5px; color:oklch(30% 0.02 60); cursor:pointer; border-bottom:1px solid oklch(93% 0.01 70);">🤖 ข้อความโพสต์ AI</div>
                       <div onClick="{{ p.onShare }}" style="padding:11px 16px; font-size:12.5px; color:{{ p.shareColor }}; cursor:pointer; border-bottom:1px solid oklch(93% 0.01 70);">🔗 แชร์</div>
                       <sc-if value="{{ p.isVip }}">
-                        <div onClick="{{ p.onOpenBuyer }}" style="padding:11px 16px; font-size:12.5px; color:oklch(45% 0.13 250); cursor:pointer; border-bottom:1px solid oklch(93% 0.01 70);">👤 ลงทะเบียนผู้ซื้อ</div>
+                        <div onClick="{{ p.onOpenBuyer }}" style="padding:11px 16px; font-size:12.5px; color:oklch(45% 0.13 250); cursor:pointer;">👤 ลงทะเบียนผู้ซื้อ</div>
                       </sc-if>
-                      <div onClick="{{ p.onDeleteClick }}" style="padding:11px 16px; font-size:12.5px; color:oklch(50% 0.18 30); cursor:pointer;">🗑️ ลบ</div>
                     </div>
                   </sc-if>
                 </div>
@@ -554,7 +569,9 @@
                   <sc-if value="{{ p.noCover }}">
                     <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:24px; color:oklch(75% 0.01 70);">🏠</div>
                   </sc-if>
-                  <div style="position:absolute; top:4px; left:4px; font-size:10px; padding:2px 7px; border-radius:100px; background:{{ p.lifecycleBg }}; color:{{ p.lifecycleColor }};">{{ p.lifecycleLabel }}</div>
+                  <sc-if value="{{ p.lifecycleLabel }}">
+                    <div style="position:absolute; top:4px; left:4px; font-size:10px; padding:2px 7px; border-radius:100px; background:{{ p.lifecycleBg }}; color:{{ p.lifecycleColor }};">{{ p.lifecycleLabel }}</div>
+                  </sc-if>
                 </div>
                 <div style="flex:1 1 180px; min-width:180px; padding:10px 14px;">
                   <div style="display:flex; align-items:center; gap:8px; margin-bottom:2px; flex-wrap:wrap;">
@@ -568,19 +585,32 @@
                     <sc-if value="{{ p.expiryLabel }}"><span>⏳ {{ p.expiryLabel }}</span></sc-if>
                   </div>
                 </div>
-                <div style="display:flex; align-items:center; flex-wrap:wrap; border-left:1px solid oklch(93% 0.01 70); position:relative;">
-                  <div onClick="{{ p.onEdit }}" style="padding:0 14px; text-align:center; font-size:11px; color:oklch(35% 0.02 60); cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;">✏️<br/>แก้ไข</div>
-                  <div onClick="{{ p.onPublish }}" style="padding:0 14px; text-align:center; font-size:11px; font-weight:700; color:{{ p.publishColor }}; cursor:pointer; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">{{ p.publishIcon }}<br/>{{ p.publishLabel }}</div>
-                  <div onClick="{{ p.onToggleMenu }}" style="padding:0 12px; text-align:center; font-size:16px; color:oklch(45% 0.02 60); cursor:pointer; height:100%; display:flex; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">⋮</div>
+                <div style="display:flex; align-items:stretch; flex-wrap:wrap; border-left:1px solid oklch(93% 0.01 70); position:relative; width:100%;">
+                  <div onClick="{{ p.onEdit }}" style="flex:1 1 25%; min-width:56px; padding:8px 6px; text-align:center; font-size:11px; color:oklch(35% 0.02 60); cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center;">✏️<br/>แก้ไข</div>
+                  <sc-if value="{{ p.toggleVisible }}">
+                    <div onClick="{{ p.onToggleOnline }}" style="flex:1 1 25%; min-width:64px; padding:8px 6px; cursor:pointer; border-left:1px solid oklch(93% 0.01 70); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;">
+                      <div style="width:32px; height:17px; border-radius:100px; background:{{ p.toggleTrackColor }}; position:relative;">
+                        <div style="width:13px; height:13px; border-radius:50%; background:white; position:absolute; top:2px; left:{{ p.toggleDotLeft }};"></div>
+                      </div>
+                      <span style="font-size:10px; color:{{ p.toggleTextColor }};">{{ p.toggleLabel }}</span>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ p.ctaVisible }}">
+                    <div onClick="{{ p.onPublish }}" style="flex:1 1 25%; min-width:64px; padding:8px 6px; text-align:center; font-size:11px; font-weight:700; color:{{ p.publishColor }}; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">{{ p.publishIcon }}<br/>{{ p.publishLabel }}</div>
+                  </sc-if>
+                  <sc-if value="{{ p.viewVisible }}">
+                    <div onClick="{{ p.onViewProperty }}" style="flex:1 1 25%; min-width:56px; padding:8px 6px; text-align:center; font-size:11px; color:oklch(35% 0.1 250); cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">👁<br/>ดู</div>
+                  </sc-if>
+                  <div onClick="{{ p.onDeleteClick }}" style="flex:1 1 25%; min-width:56px; padding:8px 6px; text-align:center; font-size:11px; color:oklch(50% 0.18 30); cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">🗑️<br/>ลบ</div>
+                  <div onClick="{{ p.onToggleMenu }}" style="flex:0 0 36px; padding:8px 4px; text-align:center; font-size:15px; color:oklch(45% 0.02 60); cursor:pointer; display:flex; align-items:center; justify-content:center; border-left:1px solid oklch(93% 0.01 70);">⋮</div>
                   <sc-if value="{{ p.menuOpen }}">
                     <div onClick="{{ p.onCloseMenu }}" style="position:fixed; inset:0; z-index:4;"></div>
                     <div onClick="{{ stopProp }}" style="position:absolute; top:100%; right:0; background:white; border:1px solid oklch(88% 0.01 70); border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,0.12); z-index:5; min-width:170px; overflow:hidden;">
                       <div onClick="{{ p.onPostText }}" style="padding:11px 16px; font-size:12.5px; color:oklch(30% 0.02 60); cursor:pointer; border-bottom:1px solid oklch(93% 0.01 70);">🤖 ข้อความโพสต์ AI</div>
                       <div onClick="{{ p.onShare }}" style="padding:11px 16px; font-size:12.5px; color:{{ p.shareColor }}; cursor:pointer; border-bottom:1px solid oklch(93% 0.01 70);">🔗 แชร์</div>
                       <sc-if value="{{ p.isVip }}">
-                        <div onClick="{{ p.onOpenBuyer }}" style="padding:11px 16px; font-size:12.5px; color:oklch(45% 0.13 250); cursor:pointer; border-bottom:1px solid oklch(93% 0.01 70);">👤 ลงทะเบียนผู้ซื้อ</div>
+                        <div onClick="{{ p.onOpenBuyer }}" style="padding:11px 16px; font-size:12.5px; color:oklch(45% 0.13 250); cursor:pointer;">👤 ลงทะเบียนผู้ซื้อ</div>
                       </sc-if>
-                      <div onClick="{{ p.onDeleteClick }}" style="padding:11px 16px; font-size:12.5px; color:oklch(50% 0.18 30); cursor:pointer;">🗑️ ลบ</div>
                     </div>
                   </sc-if>
                 </div>
@@ -1104,7 +1134,8 @@ class Component extends DCLogic {
     this._mod = mod;
     const params = new URLSearchParams(window.location.search);
     if (params.get("dev") === "1") { try { localStorage.setItem("hhDevBar", "1"); } catch (e) {} }
-    this.setState({ showDevBar: (() => { try { return localStorage.getItem("hhDevBar") === "1"; } catch (e) { return false; } })() });
+    const isPreviewEnv = !/huahin\.properties$/.test(window.location.hostname);
+    this.setState({ showDevBar: isPreviewEnv || (() => { try { return localStorage.getItem("hhDevBar") === "1"; } catch (e) { return false; } })() });
     const authedUser = await fb.onAdminAuthReady().catch(() => null);
     const signedIn = !!authedUser;
     if (!signedIn) { this.setState({ loaded: true, signedIn: false }); return; }
@@ -1660,6 +1691,17 @@ class Component extends DCLogic {
     }
   }
 
+  async toggleListingOnline(id, lifecycle) {
+    const next = lifecycle === "live" ? "paused" : "live";
+    try {
+      await this._fb.setListerPropertyPaused(id, next === "paused");
+      await this.refreshProperties();
+    } catch (e) {
+      console.warn("toggleListingOnline failed:", e);
+      window.alert("เปลี่ยนสถานะไม่สำเร็จ ลองใหม่อีกครั้ง");
+    }
+  }
+
   requestDelete(p) {
     this.setState({ showDeleteConfirm: true, deleteTargetId: p.id, deleting: false });
   }
@@ -2119,8 +2161,9 @@ class Component extends DCLogic {
     const now = Date.now();
     const lifecycleMap = {
       draft: { label: "📝 ร่าง", bg: "oklch(90% 0.01 70)", color: "oklch(35% 0.02 60)" },
-      pending: { label: "⏳ รออนุมัติ", bg: "oklch(95% 0.06 75)", color: "oklch(45% 0.13 75)" },
+      pending: { label: "", bg: "oklch(95% 0.06 75)", color: "oklch(45% 0.13 75)" },
       live: { label: "✅ กำลังแสดง", bg: "oklch(93% 0.05 145)", color: "oklch(35% 0.12 145)" },
+      paused: { label: "⏸ ปิดชั่วคราว", bg: "oklch(91% 0.02 60)", color: "oklch(45% 0.05 60)" },
       expired: { label: "⏰ หมดอายุ", bg: "oklch(93% 0.02 30)", color: "oklch(45% 0.1 30)" },
       rejected: { label: "✕ ถูกปฏิเสธ", bg: "oklch(93% 0.03 30)", color: "oklch(45% 0.15 30)" },
       offline: { label: "⛔ ปิดโดยแอดมิน", bg: "oklch(90% 0.03 30)", color: "oklch(40% 0.15 30)" },
@@ -2145,6 +2188,7 @@ class Component extends DCLogic {
         onAction = () => this.renewListing(p);
       }
       else if (lifecycle === "rejected") { actionLabel = "แก้ไข & ส่งใหม่"; actionIcon = "✏️"; actionColor = "oklch(45% 0.15 30)"; onAction = () => this.startEdit(p); }
+      const isLive = lifecycle === "live", isPaused = lifecycle === "paused", isLiveOrPaused = isLive || isPaused;
       return {
         id: p.id, code: p.id, zone: p.zone || "-", areaLabel: areaLabels[p.area] || p.area || "-",
         typeLabel: typeLabels[p.type] || p.type || "-", bedBath,
@@ -2161,6 +2205,15 @@ class Component extends DCLogic {
         viewCountLabel: `👁️ ${p.viewCount || 0} ครั้ง`,
         rejectReasonLabel: lifecycle === "rejected" && p.rejectReason ? `เหตุผล: ${p.rejectReason}` : "",
         publishIcon: actionIcon, publishLabel: actionLabel, publishColor: actionColor,
+        ctaVisible: !isLiveOrPaused && lifecycle !== "pending" && lifecycle !== "offline",
+        toggleVisible: isLiveOrPaused,
+        onToggleOnline: () => this.toggleListingOnline(p.id, lifecycle),
+        toggleTrackColor: isLive ? "oklch(55% 0.14 145)" : "oklch(85% 0.01 70)",
+        toggleDotLeft: isLive ? "18px" : "2px",
+        toggleLabel: isLive ? "ออนไลน์" : "ออฟไลน์",
+        toggleTextColor: isLive ? "oklch(40% 0.12 145)" : "oklch(50% 0.02 60)",
+        viewVisible: isLiveOrPaused,
+        onViewProperty: () => window.open(`Property Details.dc.html?id=${p.id}`, "_blank"),
         onEdit: () => this.startEdit(p),
         onPublish: onAction,
         onPostText: () => this.openPostView(p),
