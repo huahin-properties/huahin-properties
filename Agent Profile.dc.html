@@ -35,7 +35,7 @@
 
 <sc-if value="{{ hasLister }}">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">AG-4 (แปล tooltip ไอคอน, แชทสอบถาม, เกี่ยวกับ, แผนที่ทรัพย์ส่วนตัว ครบ 8 ภาษา) — DEBUG: isOwner={{ debugIsOwner }} listerId={{ debugListerId }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">AG-5 (แก้ tooltip ไอคอนไม่โชว์เลย — root cause: t ไม่ถูกส่งเข้า template + แปลกรองตัวเลือก/ดูผลลัพธ์) — DEBUG: isOwner={{ debugIsOwner }} listerId={{ debugListerId }}</div>
   </sc-if>
   <div style="position:relative;">
     <div style="{{ coverStyle }}"></div>
@@ -182,7 +182,7 @@
 <sc-if value="{{ showFilters }}">
   <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:600; padding:20px;" onClick="{{ onCloseFilters }}">
     <div style="background:white; border-radius:10px; padding:24px; width:min(360px,90vw);" onClick="{{ stopProp }}">
-      <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:14px;">กรองตัวเลือก</div>
+      <div style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(20% 0.02 60); margin-bottom:14px;">{{ t.filterModalTitle }}</div>
       <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
         <select value="{{ filterType }}" onChange="{{ onFilterType }}" style="{{ filterModalSelectStyle }}">
           <sc-for list="{{ typeFilterOptions }}" as="o" hint-placeholder-count="0"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
@@ -197,7 +197,7 @@
           <sc-for list="{{ priceFilterOptions }}" as="o" hint-placeholder-count="0"><option value="{{ o.value }}">{{ o.label }}</option></sc-for>
         </select>
       </div>
-      <div onClick="{{ onCloseFilters }}" style="text-align:center; background:oklch(22% 0.02 60); color:white; padding:11px; border-radius:6px; font-size:13px; cursor:pointer;">ดูผลลัพธ์</div>
+      <div onClick="{{ onCloseFilters }}" style="text-align:center; background:oklch(22% 0.02 60); color:white; padding:11px; border-radius:6px; font-size:13px; cursor:pointer;">{{ t.viewResults }}</div>
     </div>
   </div>
 </sc-if>
@@ -274,6 +274,7 @@ const UI_I18N = {
     bedrooms: "ห้องนอน", bathrooms: "ห้องน้ำ", sqm: "ตร.ม.", contact: "ติดต่อสอบถาม", chatBtn: "แชทสอบถาม", close: "ปิด",
     shareTooltip: "แชร์", addPropertyTooltip: "เพิ่มทรัพย์", myMapTooltip: "แผนที่ทรัพย์ของฉัน", settingsTooltip: "ตั้งค่า", logoutTooltip: "ออกจากระบบ",
     aboutLabel: "เกี่ยวกับ", editSaveBtn: "แก้ไขและบันทึก", myMapTitle: "🔒 แผนที่ทรัพย์ของฉัน (ส่วนตัว)", myMapDesc: "แสดงพิกัดจริงของทุกทรัพย์ที่คุณลงไว้ — ไม่แสดงต่อสาธารณะ เห็นเฉพาะคุณ",
+    filterModalTitle: "กรองตัวเลือก", viewResults: "ดูผลลัพธ์",
     allProperties: "ทรัพย์ทั้งหมด", noProperties: "ยังไม่มีทรัพย์ที่โพสต์", perMonth: "/เดือน", personalSite: "เว็บไซต์ส่วนตัวของ", filterProperties: "กรองทรัพย์", poweredBy: "ขับเคลื่อนโดย",
     forSale: "ประกาศขาย", forRent: "ประกาศเช่า", greeting: "สวัสดีค่ะ/ครับ สนใจทรัพย์ของ{name}สอบถามได้เลยค่ะ/ครับ" },
   en: { allTypes: "All types", villa: "Pool Villa", house: "House", condo: "Condo", land: "Land", commercial: "Commercial",
@@ -282,6 +283,7 @@ const UI_I18N = {
     bedrooms: "Bedrooms", bathrooms: "Bathrooms", sqm: "sqm", contact: "Contact", chatBtn: "Chat", close: "Close",
     shareTooltip: "Share", addPropertyTooltip: "Add Property", myMapTooltip: "My Property Map", settingsTooltip: "Settings", logoutTooltip: "Log out",
     aboutLabel: "About", editSaveBtn: "Edit & Save", myMapTitle: "🔒 My Property Map (Private)", myMapDesc: "Shows the real coordinates of every property you've listed — never shown publicly, visible only to you",
+    filterModalTitle: "Filter Options", viewResults: "View Results",
     allProperties: "All Properties", noProperties: "No properties posted yet", perMonth: "/mo", personalSite: "Personal site of", filterProperties: "Filter", poweredBy: "Powered by",
     forSale: "For Sale", forRent: "For Rent", greeting: "Hi! Interested in {name}'s properties? Feel free to ask." },
   ru: { allTypes: "Все типы", villa: "Вилла с бассейном", house: "Дом", condo: "Кондо", land: "Земля", commercial: "Коммерческая",
@@ -290,6 +292,7 @@ const UI_I18N = {
     bedrooms: "Спальни", bathrooms: "Ванные", sqm: "кв.м", contact: "Связаться", chatBtn: "Чат", close: "Закрыть",
     shareTooltip: "Поделиться", addPropertyTooltip: "Добавить объект", myMapTooltip: "Моя карта объектов", settingsTooltip: "Настройки", logoutTooltip: "Выйти",
     aboutLabel: "О", editSaveBtn: "Редактировать и сохранить", myMapTitle: "🔒 Моя карта объектов (личная)", myMapDesc: "Показывает реальные координаты всех ваших объектов — не отображается публично, видно только вам",
+    filterModalTitle: "Параметры фильтра", viewResults: "Показать результаты",
     allProperties: "Все объекты", noProperties: "Пока нет объектов", perMonth: "/мес", personalSite: "Личный сайт", filterProperties: "Фильтр", poweredBy: "Работает на",
     forSale: "Продажа", forRent: "Аренда", greeting: "Здравствуйте! Интересуют объекты {name}? Спрашивайте!" },
   zh: { allTypes: "所有类型", villa: "泳池别墅", house: "独栋别墅", condo: "公寓", land: "土地", commercial: "商业地产",
@@ -298,6 +301,7 @@ const UI_I18N = {
     bedrooms: "卧室", bathrooms: "浴室", sqm: "平方米", contact: "联系咨询", chatBtn: "聊天咨询", close: "关闭",
     shareTooltip: "分享", addPropertyTooltip: "添加房源", myMapTooltip: "我的房源地图", settingsTooltip: "设置", logoutTooltip: "退出登录",
     aboutLabel: "关于", editSaveBtn: "编辑并保存", myMapTitle: "🔒 我的房源地图（私密）", myMapDesc: "显示您发布的所有房源的真实坐标 — 不对外公开，仅您可见",
+    filterModalTitle: "筛选条件", viewResults: "查看结果",
     allProperties: "全部房源", noProperties: "暂无房源", perMonth: "/月", personalSite: "个人网站", filterProperties: "筛选", poweredBy: "技术支持",
     forSale: "出售", forRent: "出租", greeting: "您好！对{name}的房源感兴趣吗？欢迎咨询" },
   de: { allTypes: "Alle Typen", villa: "Pool-Villa", house: "Haus", condo: "Eigentumswohnung", land: "Grundstück", commercial: "Gewerbe",
@@ -306,6 +310,7 @@ const UI_I18N = {
     bedrooms: "Schlafzimmer", bathrooms: "Badezimmer", sqm: "qm", contact: "Kontakt", chatBtn: "Chat", close: "Schließen",
     shareTooltip: "Teilen", addPropertyTooltip: "Objekt hinzufügen", myMapTooltip: "Meine Objektkarte", settingsTooltip: "Einstellungen", logoutTooltip: "Abmelden",
     aboutLabel: "Über", editSaveBtn: "Bearbeiten & Speichern", myMapTitle: "🔒 Meine Objektkarte (privat)", myMapDesc: "Zeigt die echten Koordinaten all Ihrer Objekte — nie öffentlich sichtbar, nur für Sie",
+    filterModalTitle: "Filteroptionen", viewResults: "Ergebnisse anzeigen",
     allProperties: "Alle Immobilien", noProperties: "Noch keine Immobilien", perMonth: "/Monat", personalSite: "Persönliche Seite von", filterProperties: "Filter", poweredBy: "Bereitgestellt von",
     forSale: "Zu verkaufen", forRent: "Zu vermieten", greeting: "Hallo! Interessiert an {name}s Immobilien? Fragen Sie gerne!" },
   no: { allTypes: "Alle typer", villa: "Bassengvilla", house: "Hus", condo: "Leilighet", land: "Tomt", commercial: "Næringseiendom",
@@ -314,6 +319,7 @@ const UI_I18N = {
     bedrooms: "Soverom", bathrooms: "Bad", sqm: "kvm", contact: "Kontakt", chatBtn: "Chat", close: "Lukk",
     shareTooltip: "Del", addPropertyTooltip: "Legg til eiendom", myMapTooltip: "Mitt eiendomskart", settingsTooltip: "Innstillinger", logoutTooltip: "Logg ut",
     aboutLabel: "Om", editSaveBtn: "Rediger og lagre", myMapTitle: "🔒 Mitt eiendomskart (privat)", myMapDesc: "Viser de faktiske koordinatene til alle eiendommene du har lagt ut — vises aldri offentlig, kun synlig for deg",
+    filterModalTitle: "Filtervalg", viewResults: "Vis resultater",
     allProperties: "Alle eiendommer", noProperties: "Ingen eiendommer ennå", perMonth: "/mnd", personalSite: "Personlig side til", filterProperties: "Filter", poweredBy: "Levert av",
     forSale: "Til salgs", forRent: "Til leie", greeting: "Hei! Interessert i {name}s eiendommer? Spør i vei!" },
   fr: { allTypes: "Tous types", villa: "Villa avec piscine", house: "Maison", condo: "Condo", land: "Terrain", commercial: "Commercial",
@@ -322,6 +328,7 @@ const UI_I18N = {
     bedrooms: "Chambres", bathrooms: "Salles de bain", sqm: "m²", contact: "Contact", chatBtn: "Chat", close: "Fermer",
     shareTooltip: "Partager", addPropertyTooltip: "Ajouter un bien", myMapTooltip: "Ma carte de biens", settingsTooltip: "Paramètres", logoutTooltip: "Se déconnecter",
     aboutLabel: "À propos", editSaveBtn: "Modifier et enregistrer", myMapTitle: "🔒 Ma carte de biens (privée)", myMapDesc: "Affiche les coordonnées réelles de tous vos biens — jamais visible publiquement, visible uniquement par vous",
+    filterModalTitle: "Options de filtrage", viewResults: "Voir les résultats",
     allProperties: "Tous les biens", noProperties: "Aucun bien pour le moment", perMonth: "/mois", personalSite: "Site personnel de", filterProperties: "Filtrer", poweredBy: "Propulsé par",
     forSale: "À vendre", forRent: "À louer", greeting: "Bonjour ! Intéressé par les biens de {name} ? N'hésitez pas à demander !" },
   it: { allTypes: "Tutti i tipi", villa: "Villa con piscina", house: "Casa", condo: "Condominio", land: "Terreno", commercial: "Commerciale",
@@ -330,6 +337,7 @@ const UI_I18N = {
     bedrooms: "Camere", bathrooms: "Bagni", sqm: "mq", contact: "Contatto", chatBtn: "Chat", close: "Chiudi",
     shareTooltip: "Condividi", addPropertyTooltip: "Aggiungi immobile", myMapTooltip: "La mia mappa immobili", settingsTooltip: "Impostazioni", logoutTooltip: "Esci",
     aboutLabel: "Info su", editSaveBtn: "Modifica e salva", myMapTitle: "🔒 La mia mappa immobili (privata)", myMapDesc: "Mostra le coordinate reali di tutti gli immobili che hai pubblicato — mai visibile pubblicamente, visibile solo a te",
+    filterModalTitle: "Opzioni filtro", viewResults: "Visualizza risultati",
     allProperties: "Tutti gli immobili", noProperties: "Nessun immobile ancora", perMonth: "/mese", personalSite: "Sito personale di", filterProperties: "Filtra", poweredBy: "Offerto da",
     forSale: "In vendita", forRent: "In affitto", greeting: "Ciao! Interessato agli immobili di {name}? Chiedi pure!" },
 };
@@ -658,6 +666,7 @@ class Component extends DCLogic {
     const mpStatus = mp ? (statusMap[mp.status] || statusMap.sale) : null;
     return {
       notFound: false, hasLister: true,
+      t,
       isOwner: this.state.isOwner,
       debugIsOwner: String(this.state.isOwner), debugListerId: this._listerId || "", showDevBar: this.state.showDevBar,
       // Cover photo overlay pattern removed — free tier never has a real
