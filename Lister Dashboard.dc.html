@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-22 (ID3: แปลคำอธิบาย/อีเมล/รหัสผ่าน/รูปโปรไฟล์-ปก/สีธีม/ตัวอย่างสด/รายการทรัพย์) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-23 (ID4: แปลคำอธิบายภาพปก/โซเชียล/แนะนำตัว/AI persona/ปุ่มบันทึก/KPI 3 ช่อง) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -182,7 +182,7 @@
                     <sc-if value="{{ ps_coverPhotoUrl }}"><div style="{{ psCoverThumbStyle }}"></div></sc-if>
                   </div>
                   <sc-if value="{{ cannotCustomCover }}">
-                    <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-top:5px;">👀 ดูตัวอย่างได้ฟรี (รวมช่วงทดลองใช้) — บันทึกภาพปกจริงได้เฉพาะแพ็กเกจที่ชำระเงินเท่านั้น <a href="Lister Billing.dc.html">อัปเกรดแพ็กเกจ</a></div>
+                    <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-top:5px;">👀 {{ st.coverFreePreview }} <a href="Lister Billing.dc.html">{{ st.upgradePackage }}</a></div>
                   </sc-if>
                 </div>
 
@@ -228,7 +228,7 @@
             </div>
 
             <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">🔗 ลิงก์โซเชียลมีเดีย (โชว์เป็นไอคอนบนเว็บไซต์ของคุณ)</div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">🔗 {{ st.socialLinksLabel }}</div>
               <div style="{{ socialSectionStyle }}">
                 <div style="display:flex; flex-direction:column; gap:8px;">
                   <sc-for list="{{ socialFields }}" as="s" hint-placeholder-count="4">
@@ -244,13 +244,13 @@
               </sc-if>
             </div>
             <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">📝 ข้อความแนะนำตัว (โชว์บนเว็บไซต์ส่วนตัวของคุณ)</div>
-              <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:8px; line-height:1.6;">เขียนสั้นๆ ให้ลูกค้าอ่านแล้วรู้จักคุณทันที — ใครก็ได้ ไม่ต้องเก่งเขียน แค่ตอบ 3 อย่าง: คุณเป็นใคร/ทำมากี่ปี, ถนัดโซนไหน/ทรัพย์แบบไหน, จุดเด่นที่ทำให้ลูกค้าเลือกคุณ</div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">📝 {{ st.bioSectionLabel }}</div>
+              <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:8px; line-height:1.6;">{{ st.bioHint }}</div>
               <textarea rows="3" value="{{ ps_bioText }}" onChange="{{ onPsBioText }}" placeholder="ตัวอย่าง: สวัสดีค่ะ ฉันชื่อปิ่ม ตัวแทนอสังหาริมทรัพย์มืออาชีพในหัวหินมา 8 ปี ถนัดพูลวิลล่าและคอนโดโซนเขาเต่า-หัวหินใต้ เคยดูแลลูกค้าต่างชาติมามากกว่า 50 ครอบครัว พร้อมช่วยตั้งแต่หาบ้าน เจรจาราคา ไปจนถึงจดทะเบียนโอนกรรมสิทธิ์ให้ครบจบในที่เดียว" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical;"></textarea>
             </div>
             <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">🤖 บุคลิก AI ผู้ช่วยของคุณ</div>
-              <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:8px; line-height:1.6;">สิ่งที่คุณกรอกตรงนี้ AI จะนำไปใช้ตอบลูกค้าที่ทักเข้ามาในเว็บไซต์ส่วนตัวของคุณ ให้ AI "เป็นคุณ" ได้จริง เขียนแบบเล่าให้เพื่อนฟัง — บอกว่าคุณเป็นใคร (ชื่อ/เพศ/นิสัย), พูดจาแบบไหน, ทักทายลูกค้ายังไงเป็นประโยคแรก, เชี่ยวชาญโซน/ทรัพย์แบบไหนเป็นพิเศษ ถ้าไม่กรอก AI จะใช้ชื่อ+เบอร์ติดต่อของคุณจากตอนสมัครแทน</div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:6px;">🤖 {{ st.aiPersonaLabel }}</div>
+              <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:8px; line-height:1.6;">{{ st.aiPersonaHint }}</div>
               <textarea rows="6" value="{{ ps_aiPersonaText }}" onChange="{{ onPsAiPersonaText }}" placeholder="ตัวอย่าง: ฉันชื่อปิ่ม เป็นผู้หญิงค่ะ นิสัยเป็นกันเอง พูดจาสุภาพอบอุ่นเหมือนคุยกับเพื่อน ทักทายลูกค้าคนแรกด้วยประโยค &quot;สวัสดีค่ะ สนใจบ้านหลังไหนเป็นพิเศษไหมคะ ยินดีช่วยแนะนำเลยค่ะ&quot; ฉันเชี่ยวชาญพูลวิลล่าราคา 5-15 ล้านบาทโซนเขาเต่าและหัวหินใต้ รู้จักทำเลดีในปราณบุรีด้วย ติดต่อได้ทุกวัน 9:00-20:00 ถ้าลูกค้าถามราคาต่อรองได้ ให้บอกว่าคุยกับเจ้าของบ้านให้ได้ก่อนนัดดูจริง" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:13px; font-family:inherit; resize:vertical;"></textarea>
             </div>
 
@@ -266,16 +266,16 @@
       <sc-if value="{{ showKpiStrip }}">
         <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:22px;">
           <div style="background:white; border-radius:8px; padding:16px 18px;">
-            <div style="font-size:11px; color:oklch(50% 0.02 60); margin-bottom:4px;">👁️ ยอดเข้าชมรวม</div>
+            <div style="font-size:11px; color:oklch(50% 0.02 60); margin-bottom:4px;">👁️ {{ st.kpiTotalViews }}</div>
             <div style="font-size:24px; font-weight:700; color:oklch(25% 0.02 60);">{{ kpiTotalViews }}</div>
           </div>
           <div style="background:white; border-radius:8px; padding:16px 18px;">
-            <div style="font-size:11px; color:oklch(50% 0.02 60); margin-bottom:4px;">✅ ประกาศที่กำลังแสดง</div>
+            <div style="font-size:11px; color:oklch(50% 0.02 60); margin-bottom:4px;">✅ {{ st.kpiActiveListings }}</div>
             <div style="font-size:24px; font-weight:700; color:oklch(25% 0.02 60);">{{ kpiActiveListings }}</div>
           </div>
           <sc-if value="{{ showKpiTrialDays }}">
             <div style="background:white; border-radius:8px; padding:16px 18px;">
-              <div style="font-size:11px; color:oklch(50% 0.02 60); margin-bottom:4px;">🎁 วันทดลองใช้เหลือ</div>
+              <div style="font-size:11px; color:oklch(50% 0.02 60); margin-bottom:4px;">🎁 {{ st.kpiTrialDaysLeft }}</div>
               <div style="font-size:24px; font-weight:700; color:oklch(25% 0.02 60);">{{ kpiTrialDaysLabel }}</div>
             </div>
           </sc-if>
@@ -1212,49 +1212,113 @@ const SETTINGS_I18N = {
     profilePhotoLabel: "รูปโปรไฟล์ (โลโก้/รูปของคุณ)", changePhoto: "เปลี่ยนรูป", choosePhoto: "เลือกรูป",
     coverPhotoLabel: "ภาพปก (เหมือน Facebook cover)", changeCover: "เปลี่ยนภาพปก", chooseCover: "เลือกภาพปก",
     themeColorLabel: "สีธีมเว็บไซต์ของคุณ", customColor: "กำหนดเอง", selectedTheme: "สีธีมที่เลือก",
-    livePreview: "ตัวอย่างสด", propertiesCount: "รายการทรัพย์" },
+    livePreview: "ตัวอย่างสด", propertiesCount: "รายการทรัพย์",
+    coverFreePreview: "ดูตัวอย่างได้ฟรี (รวมช่วงทดลองใช้) — บันทึกภาพปกจริงได้เฉพาะแพ็กเกจที่ชำระเงินเท่านั้น", upgradePackage: "อัปเกรดแพ็กเกจ",
+    socialLinksLabel: "ลิงก์โซเชียลมีเดีย (โชว์เป็นไอคอนบนเว็บไซต์ของคุณ)",
+    socialLockTrial: "ใส่ลิงก์ได้จริงตั้งแต่แพ็กเกจ 1 ขึ้นไป — ตอนนี้แสดงเป็นตัวอย่างเฉยๆ", socialLockFree: "เพิ่มลิงก์โซเชียลได้ตั้งแต่แพ็กเกจ 1 ขึ้นไป",
+    bioSectionLabel: "ข้อความแนะนำตัว (โชว์บนเว็บไซต์ส่วนตัวของคุณ)",
+    bioHint: "เขียนสั้นๆ ให้ลูกค้าอ่านแล้วรู้จักคุณทันที — ใครก็ได้ ไม่ต้องเก่งเขียน แค่ตอบ 3 อย่าง: คุณเป็นใคร/ทำมากี่ปี, ถนัดโซนไหน/ทรัพย์แบบไหน, จุดเด่นที่ทำให้ลูกค้าเลือกคุณ",
+    aiPersonaLabel: "บุคลิก AI ผู้ช่วยของคุณ",
+    aiPersonaHint: "สิ่งที่คุณกรอกตรงนี้ AI จะนำไปใช้ตอบลูกค้าที่ทักเข้ามาในเว็บไซต์ส่วนตัวของคุณ ให้ AI \"เป็นคุณ\" ได้จริง เขียนแบบเล่าให้เพื่อนฟัง — บอกว่าคุณเป็นใคร (ชื่อ/เพศ/นิสัย), พูดจาแบบไหน, ทักทายลูกค้ายังไงเป็นประโยคแรก, เชี่ยวชาญโซน/ทรัพย์แบบไหนเป็นพิเศษ ถ้าไม่กรอก AI จะใช้ชื่อ+เบอร์ติดต่อของคุณจากตอนสมัครแทน",
+    saveSettingsBtn: "บันทึกการตั้งค่า", kpiTotalViews: "ยอดเข้าชมรวม", kpiActiveListings: "ประกาศที่กำลังแสดง", kpiTrialDaysLeft: "วันทดลองใช้เหลือ" },
   en: { sectionDesc: "This applies only to your personal website (the page listing all your properties, shareable with customers) — it doesn't affect listings on the main site.",
     emailLocked: "Sign-up email (cannot be changed)", newPasswordLabel: "Set new password", newPasswordPh: "New password", confirmPasswordPh: "Confirm password", changePasswordBtn: "Change Password",
     profilePhotoLabel: "Profile photo (logo/your photo)", changePhoto: "Change Photo", choosePhoto: "Choose Photo",
     coverPhotoLabel: "Cover photo (like a Facebook cover)", changeCover: "Change Cover", chooseCover: "Choose Cover",
     themeColorLabel: "Your website theme color", customColor: "Custom", selectedTheme: "Selected theme",
-    livePreview: "Live Preview", propertiesCount: "properties" },
+    livePreview: "Live Preview", propertiesCount: "properties",
+    coverFreePreview: "Free preview (including during trial) — only paid plans can save a real cover photo", upgradePackage: "Upgrade Package",
+    socialLinksLabel: "Social media links (shown as icons on your website)",
+    socialLockTrial: "Links only go live from Package 1 onward — this is just a preview for now", socialLockFree: "Add social links starting from Package 1",
+    bioSectionLabel: "Intro text (shown on your personal website)",
+    bioHint: "Write a short intro so customers instantly know you — anyone can do it, just answer 3 things: who you are/years in the business, which area/property type you specialize in, what makes customers choose you.",
+    aiPersonaLabel: "Your AI assistant's persona",
+    aiPersonaHint: "What you enter here is what the AI uses to reply to customers who message your personal website — making the AI genuinely \"be you\". Write it like telling a friend — who you are (name/gender/personality), how you talk, your first greeting to customers, and any area/property specialty. If left blank, the AI will use your name + contact number from sign-up instead.",
+    saveSettingsBtn: "Save Settings", kpiTotalViews: "Total views", kpiActiveListings: "Active listings", kpiTrialDaysLeft: "Trial days left" },
   ru: { sectionDesc: "Это относится только к вашему личному сайту (странице со всеми вашими объектами, которую можно отправить клиентам) — не влияет на объявления на главном сайте.",
     emailLocked: "Email регистрации (не изменяется)", newPasswordLabel: "Новый пароль", newPasswordPh: "Новый пароль", confirmPasswordPh: "Подтвердите пароль", changePasswordBtn: "Изменить пароль",
     profilePhotoLabel: "Фото профиля (логотип/ваше фото)", changePhoto: "Изменить фото", choosePhoto: "Выбрать фото",
     coverPhotoLabel: "Обложка (как обложка Facebook)", changeCover: "Изменить обложку", chooseCover: "Выбрать обложку",
     themeColorLabel: "Цвет темы вашего сайта", customColor: "Свой цвет", selectedTheme: "Выбранная тема",
-    livePreview: "Живой предпросмотр", propertiesCount: "объектов" },
+    livePreview: "Живой предпросмотр", propertiesCount: "объектов",
+    coverFreePreview: "Бесплатный предпросмотр (включая пробный период) — сохранить реальную обложку можно только на платных тарифах", upgradePackage: "Улучшить пакет",
+    socialLinksLabel: "Ссылки на соцсети (отображаются как значки на вашем сайте)",
+    socialLockTrial: "Ссылки заработают только с Пакета 1 — сейчас это просто предпросмотр", socialLockFree: "Добавьте ссылки на соцсети начиная с Пакета 1",
+    bioSectionLabel: "Текст о себе (показывается на вашем личном сайте)",
+    bioHint: "Напишите короткое представление, чтобы клиенты сразу узнали вас — подходит любому, просто ответьте на 3 вопроса: кто вы/сколько лет в деле, в каком районе/типе объектов специализируетесь, что заставляет клиентов выбрать вас.",
+    aiPersonaLabel: "Личность вашего AI-помощника",
+    aiPersonaHint: "То, что вы укажете здесь, AI использует для ответов клиентам, которые пишут на ваш личный сайт — чтобы AI по-настоящему был \"вами\". Пишите как рассказ другу — кто вы (имя/пол/характер), как вы говорите, как приветствуете клиентов первой фразой, специализация по районам/типам объектов. Если оставить пустым, AI будет использовать ваше имя и контактный номер с регистрации.",
+    saveSettingsBtn: "Сохранить настройки", kpiTotalViews: "Всего просмотров", kpiActiveListings: "Активные объявления", kpiTrialDaysLeft: "Осталось дней пробного периода" },
   zh: { sectionDesc: "此设置仅适用于您的个人网站（列出您所有房源的页面，可分享给客户）— 不会影响主网站上的房源。",
     emailLocked: "注册邮箱（不可修改）", newPasswordLabel: "设置新密码", newPasswordPh: "新密码", confirmPasswordPh: "确认密码", changePasswordBtn: "更改密码",
     profilePhotoLabel: "头像（标志/您的照片）", changePhoto: "更换照片", choosePhoto: "选择照片",
     coverPhotoLabel: "封面图片（类似 Facebook 封面）", changeCover: "更换封面", chooseCover: "选择封面",
     themeColorLabel: "您网站的主题颜色", customColor: "自定义", selectedTheme: "已选主题",
-    livePreview: "实时预览", propertiesCount: "个房源" },
+    livePreview: "实时预览", propertiesCount: "个房源",
+    coverFreePreview: "免费预览（包括试用期内）— 只有付费套餐才能保存真实封面图片", upgradePackage: "升级套餐",
+    socialLinksLabel: "社交媒体链接（在您的网站上以图标显示）",
+    socialLockTrial: "链接需从套餐 1 起才会真正生效 — 目前只是预览", socialLockFree: "从套餐 1 起可添加社交链接",
+    bioSectionLabel: "自我介绍文字（显示在您的个人网站上）",
+    bioHint: "写一段简短介绍，让客户立刻认识您 — 任何人都能写，只需回答 3 个问题：您是谁/从业多少年，擅长哪个区域/哪种房源，客户选择您的理由是什么。",
+    aiPersonaLabel: "您的 AI 助手人设",
+    aiPersonaHint: "您在此填写的内容，AI 会用来回复联系您个人网站的客户 — 让 AI 真正“成为您”。请像跟朋友聊天一样写 — 您是谁（姓名/性别/性格）、说话风格如何、第一句如何问候客户、擅长哪个区域/房源类型。若留空，AI 将改用您注册时的姓名和联系电话。",
+    saveSettingsBtn: "保存设置", kpiTotalViews: "总浏览量", kpiActiveListings: "正在展示的房源", kpiTrialDaysLeft: "试用剩余天数" },
   de: { sectionDesc: "Dies gilt nur für Ihre persönliche Website (die Seite mit all Ihren Objekten, die Sie mit Kunden teilen können) — betrifft nicht die Angebote auf der Hauptseite.",
     emailLocked: "Anmelde-E-Mail (nicht änderbar)", newPasswordLabel: "Neues Passwort festlegen", newPasswordPh: "Neues Passwort", confirmPasswordPh: "Passwort bestätigen", changePasswordBtn: "Passwort ändern",
     profilePhotoLabel: "Profilfoto (Logo/Ihr Foto)", changePhoto: "Foto ändern", choosePhoto: "Foto wählen",
     coverPhotoLabel: "Titelbild (wie ein Facebook-Cover)", changeCover: "Titelbild ändern", chooseCover: "Titelbild wählen",
     themeColorLabel: "Designfarbe Ihrer Website", customColor: "Benutzerdefiniert", selectedTheme: "Ausgewähltes Design",
-    livePreview: "Live-Vorschau", propertiesCount: "Objekte" },
+    livePreview: "Live-Vorschau", propertiesCount: "Objekte",
+    coverFreePreview: "Kostenlose Vorschau (auch während der Testversion) — ein echtes Titelbild kann nur bei bezahlten Paketen gespeichert werden", upgradePackage: "Paket upgraden",
+    socialLinksLabel: "Social-Media-Links (als Symbole auf Ihrer Website angezeigt)",
+    socialLockTrial: "Links werden erst ab Paket 1 aktiv — im Moment nur eine Vorschau", socialLockFree: "Social-Links hinzufügen ab Paket 1",
+    bioSectionLabel: "Vorstellungstext (auf Ihrer persönlichen Website angezeigt)",
+    bioHint: "Schreiben Sie eine kurze Vorstellung, damit Kunden Sie sofort kennenlernen — jeder kann das, beantworten Sie einfach 3 Dinge: wer Sie sind/wie viele Jahre Erfahrung, welches Gebiet/Objekttyp Ihre Spezialität ist, was Kunden dazu bringt, Sie zu wählen.",
+    aiPersonaLabel: "Die Persönlichkeit Ihres KI-Assistenten",
+    aiPersonaHint: "Was Sie hier eingeben, verwendet die KI, um Kunden zu antworten, die Ihre persönliche Website kontaktieren — damit die KI wirklich \"Sie\" ist. Schreiben Sie es, als würden Sie es einem Freund erzählen — wer Sie sind (Name/Geschlecht/Persönlichkeit), wie Sie sprechen, Ihre erste Begrüßung an Kunden, und jede Gebiets-/Objektspezialisierung. Bleibt es leer, nutzt die KI stattdessen Ihren Namen und Ihre Kontaktnummer aus der Anmeldung.",
+    saveSettingsBtn: "Einstellungen speichern", kpiTotalViews: "Gesamtaufrufe", kpiActiveListings: "Aktive Angebote", kpiTrialDaysLeft: "Verbleibende Testtage" },
   no: { sectionDesc: "Dette gjelder bare for ditt personlige nettsted (siden med alle eiendommene dine, som kan deles med kunder) — påvirker ikke annonser på hovedsiden.",
     emailLocked: "Registrerings-e-post (kan ikke endres)", newPasswordLabel: "Angi nytt passord", newPasswordPh: "Nytt passord", confirmPasswordPh: "Bekreft passord", changePasswordBtn: "Endre passord",
     profilePhotoLabel: "Profilbilde (logo/bildet ditt)", changePhoto: "Endre bilde", choosePhoto: "Velg bilde",
     coverPhotoLabel: "Omslagsbilde (som et Facebook-omslag)", changeCover: "Endre omslag", chooseCover: "Velg omslag",
     themeColorLabel: "Temafarge for nettstedet ditt", customColor: "Egendefinert", selectedTheme: "Valgt tema",
-    livePreview: "Live forhåndsvisning", propertiesCount: "eiendommer" },
+    livePreview: "Live forhåndsvisning", propertiesCount: "eiendommer",
+    coverFreePreview: "Gratis forhåndsvisning (også i prøveperioden) — bare betalte pakker kan lagre et ekte omslagsbilde", upgradePackage: "Oppgrader pakke",
+    socialLinksLabel: "Lenker til sosiale medier (vises som ikoner på nettstedet ditt)",
+    socialLockTrial: "Lenker blir først aktive fra Pakke 1 — dette er bare en forhåndsvisning nå", socialLockFree: "Legg til sosiale lenker fra Pakke 1",
+    bioSectionLabel: "Introtekst (vises på ditt personlige nettsted)",
+    bioHint: "Skriv en kort introduksjon slik at kunder umiddelbart kjenner deg — alle kan gjøre det, bare svar på 3 ting: hvem du er/hvor mange år i bransjen, hvilket område/eiendomstype du spesialiserer deg på, hva som gjør at kunder velger deg.",
+    aiPersonaLabel: "Personligheten til AI-assistenten din",
+    aiPersonaHint: "Det du skriver her bruker AI-en til å svare kunder som kontakter ditt personlige nettsted — slik at AI-en virkelig \"er deg\". Skriv det som om du forteller en venn — hvem du er (navn/kjønn/personlighet), hvordan du snakker, din første hilsen til kunder, og eventuell område-/eiendomsspesialisering. Hvis det står tomt, bruker AI-en navnet og kontaktnummeret ditt fra registreringen isteden.",
+    saveSettingsBtn: "Lagre innstillinger", kpiTotalViews: "Totale visninger", kpiActiveListings: "Aktive annonser", kpiTrialDaysLeft: "Prøvedager igjen" },
   fr: { sectionDesc: "Cela s'applique uniquement à votre site personnel (la page listant tous vos biens, partageable avec les clients) — n'affecte pas les annonces sur le site principal.",
     emailLocked: "E-mail d'inscription (non modifiable)", newPasswordLabel: "Définir un nouveau mot de passe", newPasswordPh: "Nouveau mot de passe", confirmPasswordPh: "Confirmer le mot de passe", changePasswordBtn: "Changer le mot de passe",
     profilePhotoLabel: "Photo de profil (logo/votre photo)", changePhoto: "Changer la photo", choosePhoto: "Choisir une photo",
     coverPhotoLabel: "Photo de couverture (comme une couverture Facebook)", changeCover: "Changer la couverture", chooseCover: "Choisir une couverture",
     themeColorLabel: "Couleur du thème de votre site", customColor: "Personnalisé", selectedTheme: "Thème sélectionné",
-    livePreview: "Aperçu en direct", propertiesCount: "biens" },
+    livePreview: "Aperçu en direct", propertiesCount: "biens",
+    coverFreePreview: "Aperçu gratuit (y compris pendant l'essai) — seuls les forfaits payants permettent d'enregistrer une vraie photo de couverture", upgradePackage: "Améliorer le forfait",
+    socialLinksLabel: "Liens des réseaux sociaux (affichés comme icônes sur votre site)",
+    socialLockTrial: "Les liens ne seront actifs qu'à partir du Forfait 1 — ceci n'est qu'un aperçu pour l'instant", socialLockFree: "Ajoutez des liens sociaux à partir du Forfait 1",
+    bioSectionLabel: "Texte de présentation (affiché sur votre site personnel)",
+    bioHint: "Rédigez une courte présentation pour que les clients vous connaissent instantanément — n'importe qui peut le faire, répondez juste à 3 choses : qui vous êtes/depuis combien d'années, quelle zone/type de bien vous vous spécialisez, ce qui fait que les clients vous choisissent.",
+    aiPersonaLabel: "La personnalité de votre assistant IA",
+    aiPersonaHint: "Ce que vous saisissez ici est utilisé par l'IA pour répondre aux clients qui contactent votre site personnel — pour que l'IA soit vraiment \"vous\". Écrivez comme si vous racontiez à un ami — qui vous êtes (nom/genre/personnalité), comment vous parlez, votre première salutation aux clients, et toute spécialité de zone/type de bien. Si laissé vide, l'IA utilisera votre nom et numéro de contact de l'inscription à la place.",
+    saveSettingsBtn: "Enregistrer les paramètres", kpiTotalViews: "Vues totales", kpiActiveListings: "Annonces actives", kpiTrialDaysLeft: "Jours d'essai restants" },
   it: { sectionDesc: "Questo si applica solo al tuo sito personale (la pagina con tutti i tuoi immobili, condivisibile con i clienti) — non influisce sugli annunci sul sito principale.",
     emailLocked: "Email di registrazione (non modificabile)", newPasswordLabel: "Imposta nuova password", newPasswordPh: "Nuova password", confirmPasswordPh: "Confirma password", changePasswordBtn: "Cambia password",
     profilePhotoLabel: "Foto profilo (logo/tua foto)", changePhoto: "Cambia foto", choosePhoto: "Scegli foto",
     coverPhotoLabel: "Foto di copertina (come una copertina Facebook)", changeCover: "Cambia copertina", chooseCover: "Scegli copertina",
     themeColorLabel: "Colore tema del tuo sito", customColor: "Personalizzato", selectedTheme: "Tema selezionato",
-    livePreview: "Anteprima live", propertiesCount: "immobili" },
+    livePreview: "Anteprima live", propertiesCount: "immobili",
+    coverFreePreview: "Anteprima gratuita (anche durante la prova) — solo i piani a pagamento possono salvare una foto di copertina reale", upgradePackage: "Aggiorna piano",
+    socialLinksLabel: "Link social media (mostrati come icone sul tuo sito)",
+    socialLockTrial: "I link diventeranno attivi solo dal Piano 1 — per ora è solo un'anteprima", socialLockFree: "Aggiungi link social a partire dal Piano 1",
+    bioSectionLabel: "Testo di presentazione (mostrato sul tuo sito personale)",
+    bioHint: "Scrivi una breve presentazione così i clienti ti conoscono subito — chiunque può farlo, basta rispondere a 3 cose: chi sei/da quanti anni nel settore, in quale zona/tipo di immobile ti specializzi, cosa fa scegliere te ai clienti.",
+    aiPersonaLabel: "La personalità del tuo assistente IA",
+    aiPersonaHint: "Quello che scrivi qui viene usato dall'IA per rispondere ai clienti che scrivono al tuo sito personale — così l'IA è davvero \"te\". Scrivilo come se lo raccontassi a un amico — chi sei (nome/genere/personalità), come parli, il tuo primo saluto ai clienti, e qualsiasi specializzazione per zona/tipo di immobile. Se lasciato vuoto, l'IA userà il tuo nome e numero di contatto dalla registrazione.",
+    saveSettingsBtn: "Salva impostazioni", kpiTotalViews: "Visualizzazioni totali", kpiActiveListings: "Annunci attivi", kpiTrialDaysLeft: "Giorni di prova rimanenti" },
 };
 
 class Component extends DCLogic {
@@ -2753,7 +2817,7 @@ class Component extends DCLogic {
         : "width:38px; height:38px; border:none; border-radius:8px; padding:0; cursor:not-allowed; opacity:0.4; filter:grayscale(1);",
       canCustomSocial: canSocial, cannotCustomSocial: !canSocial,
       socialLockNote: !canSocial
-        ? (isTrial ? "🔒 ใส่ลิงก์ได้จริงตั้งแต่แพ็กเกจ 1 ขึ้นไป — ตอนนี้แสดงเป็นตัวอย่างเฉยๆ" : "🔒 เพิ่มลิงก์โซเชียลได้ตั้งแต่แพ็กเกจ 1 ขึ้นไป")
+        ? (isTrial ? "🔒 " + st.socialLockTrial : "🔒 " + st.socialLockFree)
         : (socialLimit < 4 ? `ใส่ลิงก์ได้ ${socialLimit} ช่องทางตามแพ็กเกจปัจจุบัน — แพ็กเกจ 3 ใส่ได้ครบ 4 ช่องทาง` : ""),
       psPhotoThumbStyle: { width: "56px", height: "56px", borderRadius: "8px", background: `url('${this.state.ps_profilePhotoUrl}') center/cover`, border: "1px solid oklch(88% 0.01 70)", flexShrink: 0 },
       psCoverThumbStyle: { width: "90px", height: "56px", borderRadius: "8px", background: `url('${this.state.ps_coverPhotoUrl}') center/cover`, border: "1px solid oklch(88% 0.01 70)", flexShrink: 0 },
@@ -2779,7 +2843,7 @@ class Component extends DCLogic {
         onSelect: () => { if (tier3) this.setState({ ps_themeColor: c }); },
       })),
       onSaveProfileSettings: () => this.saveProfileSettings(),
-      ps_saveLabel: this.state.ps_saving ? "กำลังบันทึก…" : "บันทึกการตั้งค่า",
+      ps_saveLabel: this.state.ps_saving ? "กำลังบันทึก…" : st.saveSettingsBtn,
       ps_saveMsg: this.state.ps_saveMsg,
     };
   }
