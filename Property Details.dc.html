@@ -408,6 +408,21 @@ function parseLatLngHH(input) {
   if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
   return null;
 }
+// Reference points for real distance-to-beach / distance-to-town-centre
+// calculations from the owner's actual pinned coordinates (2026-08 fix —
+// previously these read a static distanceBeach/distanceTown field that
+// self-serve listings never set, always showing "0 km").
+const AREA_REF_POINTS = {
+  "hua-hin": { beach: { lat: 12.5683, lng: 99.9577 }, town: { lat: 12.5683, lng: 99.9577 } },
+  pranburi: { beach: { lat: 12.3853, lng: 99.9847 }, town: { lat: 12.3831, lng: 99.9425 } },
+  "cha-am": { beach: { lat: 12.7972, lng: 99.9683 }, town: { lat: 12.7947, lng: 99.9583 } },
+};
+function haversineKm(lat1, lng1, lat2, lng2) {
+  const R = 6371, toRad = (d) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 class Component extends DCLogic {
   state = {
@@ -784,8 +799,18 @@ class Component extends DCLogic {
         || (raw.description && (typeof raw.description === "object" ? raw.description[lang] : raw.description))
         || t.no_description,
       features: raw.features.map((f) => mod.FEATURES[f][lang]),
-      distanceBeachLabel: `${raw.distanceBeach} ${t.km_to} ${t.beach ? t.beach : ""}`,
-      distanceTownLabel: `${raw.distanceTown} ${t.km_to} ${t.town}`,
+      distanceBeachLabel: (() => {
+        const exact = parseLatLngHH(raw.mapLink);
+        const ref = AREA_REF_POINTS[raw.area];
+        const km = (exact && ref) ? haversineKm(exact.lat, exact.lng, ref.beach.lat, ref.beach.lng).toFixed(1) : raw.distanceBeach;
+        return `${km} ${t.km_to} ${t.beach ? t.beach : ""}`;
+      })(),
+      distanceTownLabel: (() => {
+        const exact = parseLatLngHH(raw.mapLink);
+        const ref = AREA_REF_POINTS[raw.area];
+        const km = (exact && ref) ? haversineKm(exact.lat, exact.lng, ref.town.lat, ref.town.lng).toFixed(1) : raw.distanceTown;
+        return `${km} ${t.km_to} ${t.town}`;
+      })(),
       locationBadgeLabel: (() => {
         const zoneText = (raw.zone && typeof raw.zone === "object") ? (raw.zone[lang] || raw.zone.th) : raw.zone;
         const exact = parseLatLngHH(raw.mapLink);
