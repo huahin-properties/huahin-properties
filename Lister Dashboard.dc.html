@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-10 (แก้บั๊ก listingStatus เป็น null ทำให้ดู/สวิตช์หาย) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-11 (แก้บั๊ก listingStatus="pending" ค้างเก่า ทำให้ดู/สวิตช์หาย) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -1670,7 +1670,7 @@ class Component extends DCLogic {
   }
 
   async toggleListingOnline(id, lifecycle) {
-    const next = lifecycle === "live" ? "paused" : "live";
+    const next = (lifecycle === "live" || lifecycle === "pending") ? "paused" : "live";
     try {
       await this._fb.setListerPropertyPaused(id, next === "paused");
       await this.refreshProperties();
@@ -2166,7 +2166,11 @@ class Component extends DCLogic {
         onAction = () => this.renewListing(p);
       }
       else if (lifecycle === "rejected") { actionLabel = "แก้ไข & ส่งใหม่"; actionIcon = "✏️"; actionColor = "oklch(45% 0.15 30)"; onAction = () => this.startEdit(p); }
-      const isLive = lifecycle === "live", isPaused = lifecycle === "paused", isLiveOrPaused = isLive || isPaused;
+      // "pending" is a dead status from the pre-auto-publish approval queue —
+      // any listing still carrying it (old data) is treated as live so the
+      // owner's view/online-toggle controls work; toggling self-heals the
+      // stored value to "live"/"paused" going forward.
+      const isLive = lifecycle === "live" || lifecycle === "pending", isPaused = lifecycle === "paused", isLiveOrPaused = isLive || isPaused;
       return {
         id: p.id, code: p.id, zone: p.zone || "-", areaLabel: areaLabels[p.area] || p.area || "-",
         typeLabel: typeLabels[p.type] || p.type || "-", bedBath,
