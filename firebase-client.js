@@ -1485,6 +1485,14 @@ export async function submitForApproval(propertyId, payload) {
 // Admin-only: takes a live listing offline (hidden from the public site)
 // without deleting it — used when a report or manual review turns up a
 // problem. reason is stored for the admin's own record only.
+// Lister-controlled pause/resume for their own already-live listing —
+// distinct from admin setPropertyOffline: freely reversible by the lister,
+// unlike "offline" which only an admin can undo (see firestore.rules
+// listerListingStatusOk — "paused" is allowed both ways, "offline" isn't).
+export async function setListerPropertyPaused(propertyId, paused) {
+  await updateDocFields("properties", propertyId, { listingStatus: paused ? "paused" : "live" });
+}
+
 export async function setPropertyOffline(propertyId, reason) {
   await updateDocFields("properties", propertyId, { listingStatus: "offline", offlineAt: Date.now(), offlineReason: reason || "" });
 }
