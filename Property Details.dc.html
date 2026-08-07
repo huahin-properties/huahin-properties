@@ -377,7 +377,7 @@ function loadGoogleMapsHH() {
       return;
     }
     const script = document.createElement("script");
-    script.src = "https://maps.googleapis.com/maps/api/js?key=" + HH_GOOGLE_MAPS_KEY + "&libraries=marker&language=" + (GMAPS_LANG[this.state.lang] || "en");
+    script.src = "https://maps.googleapis.com/maps/api/js?key=" + HH_GOOGLE_MAPS_KEY + "&libraries=marker";
     script.async = true;
     script.defer = true;
     script.setAttribute("data-hh-gmaps", "1");
