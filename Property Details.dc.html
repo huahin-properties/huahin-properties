@@ -136,7 +136,7 @@
         </sc-if>
         <sc-if value="{{ showVideoPlaceholder }}">
           <div style="aspect-ratio:16/9; max-height:560px; border-radius:6px; background:oklch(93% 0.015 75); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px; color:oklch(45% 0.02 60);">
-            <div style="font-size:32px;">🎬</div><div style="font-size:14px;">วิดีโอนำชม — เร็วๆ นี้</div>
+            <div style="font-size:32px;">🎬</div><div style="font-size:14px;">{{ t.video_tour_soon }}</div>
           </div>
         </sc-if>
         <sc-if value="{{ showVideoPlayer }}">
@@ -144,7 +144,7 @@
         </sc-if>
         <sc-if value="{{ show360Placeholder }}">
           <div style="aspect-ratio:16/9; max-height:560px; border-radius:6px; background:oklch(93% 0.015 75); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:8px; color:oklch(45% 0.02 60);">
-            <div style="font-size:32px;">🧭</div><div style="font-size:14px;">360° Virtual Tour — เร็วๆ นี้</div>
+            <div style="font-size:32px;">🧭</div><div style="font-size:14px;">{{ t.tour_360_soon }}</div>
           </div>
         </sc-if>
         <sc-if value="{{ show360Player }}">
