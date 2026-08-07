@@ -60,7 +60,7 @@ export function normalizeProperty(raw, mod, lang) {
     status: safeStr(raw.status, "sale"),
     areaLabel: (areaDef && areaDef.label && areaDef.label[lang]) || safeStr(raw.area, "—"),
     typeLabel: (typeDef && typeDef.label && typeDef.label[lang]) || safeStr(raw.type, "—"),
-    zone: safeStr(raw.zone, ""),
+    zone: (raw.zone && typeof raw.zone === "object") ? (raw.zone[lang] || raw.zone.th || "") : safeStr(raw.zone, ""),
     bedrooms: safeNum(raw.bedrooms),
     bathrooms: safeNum(raw.bathrooms),
     landSize: safeNum(raw.landSize),

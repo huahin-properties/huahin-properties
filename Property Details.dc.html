@@ -225,20 +225,20 @@
           <a href="https://wa.me/6632000000" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background:oklch(52% 0.13 150); color:oklch(98% 0.01 80); padding:12px; border-radius:4px; font-size:14px; text-decoration:none;">💬 {{ t.whatsapp }}</a>
           <a href="https://line.me/ti/p/huahinproperties" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background:oklch(58% 0.16 145); color:oklch(98% 0.01 80); padding:12px; border-radius:4px; font-size:14px; text-decoration:none;">✆ {{ t.line_app }}</a>
           <a href="mailto:hello@huahin.properties" style="display:flex; align-items:center; justify-content:center; gap:8px; border:1px solid oklch(75% 0.02 60); color:oklch(25% 0.02 60); padding:12px; border-radius:4px; font-size:14px; text-decoration:none;">✉ {{ t.email_cta }}</a>
-          <div onClick="{{ onOpenSchedule }}" style="display:flex; align-items:center; justify-content:center; gap:8px; border:1px solid oklch(80% 0.02 60); color:oklch(25% 0.02 60); padding:12px; border-radius:4px; font-size:14px; cursor:pointer;">📅 นัดชมทรัพย์</div>
+          <div onClick="{{ onOpenSchedule }}" style="display:flex; align-items:center; justify-content:center; gap:8px; border:1px solid oklch(80% 0.02 60); color:oklch(25% 0.02 60); padding:12px; border-radius:4px; font-size:14px; cursor:pointer;">📅 {{ t.schedule_viewing_title }}</div>
           <div style="font-size:11px; color:oklch(55% 0.02 60); text-align:center;">Mini Site: huahin.properties/{{ miniSiteSlug }}</div>
         </div>
 
         <div style="background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:6px; padding:20px 22px; display:flex; flex-direction:column; gap:10px;">
-          <div style="font-family:'Playfair Display',serif; font-size:16px; color:oklch(20% 0.02 60);">🧮 คำนวณสินเชื่อเบื้องต้น</div>
+          <div style="font-family:'Playfair Display',serif; font-size:16px; color:oklch(20% 0.02 60);">🧮 {{ t.mortgage_calc_title }}</div>
           <div style="display:flex; flex-direction:column; gap:10px; font-size:13px;">
-            <label style="color:oklch(50% 0.02 60);">เงินดาวน์ ({{ mortgageDownPct }}%)<input type="range" min="10" max="50" value="{{ mortgageDownPct }}" onChange="{{ onMortgageDownChange }}" style="width:100%; margin-top:4px;" /></label>
-            <label style="color:oklch(50% 0.02 60);">ระยะเวลากู้ ({{ mortgageYears }} ปี)<input type="range" min="5" max="30" value="{{ mortgageYears }}" onChange="{{ onMortgageYearsChange }}" style="width:100%; margin-top:4px;" /></label>
-            <label style="color:oklch(50% 0.02 60);">อัตราดอกเบี้ย ({{ mortgageRate }}%)<input type="range" min="3" max="10" step="0.1" value="{{ mortgageRate }}" onChange="{{ onMortgageRateChange }}" style="width:100%; margin-top:4px;" /></label>
-            <div style="display:flex; justify-content:space-between; color:oklch(30% 0.02 60); padding-top:6px; border-top:1px solid oklch(91% 0.01 70);"><span>ผ่อนโดยประมาณ / เดือน</span><strong>{{ monthlyPaymentLabel }}</strong></div>
+            <label style="color:oklch(50% 0.02 60);">{{ t.mortgage_down_payment }} ({{ mortgageDownPct }}%)<input type="range" min="10" max="50" value="{{ mortgageDownPct }}" onChange="{{ onMortgageDownChange }}" style="width:100%; margin-top:4px;" /></label>
+            <label style="color:oklch(50% 0.02 60);">{{ t.mortgage_loan_years }} ({{ mortgageYears }} {{ t.years_unit }})<input type="range" min="5" max="30" value="{{ mortgageYears }}" onChange="{{ onMortgageYearsChange }}" style="width:100%; margin-top:4px;" /></label>
+            <label style="color:oklch(50% 0.02 60);">{{ t.mortgage_interest_rate }} ({{ mortgageRate }}%)<input type="range" min="3" max="10" step="0.1" value="{{ mortgageRate }}" onChange="{{ onMortgageRateChange }}" style="width:100%; margin-top:4px;" /></label>
+            <div style="display:flex; justify-content:space-between; color:oklch(30% 0.02 60); padding-top:6px; border-top:1px solid oklch(91% 0.01 70);"><span>{{ t.mortgage_monthly_payment }}</span><strong>{{ monthlyPaymentLabel }}</strong></div>
           </div>
           <sc-if value="{{ mortgageErrorMessage }}"><div style="font-size:11.5px; color:oklch(50% 0.18 25);">{{ mortgageErrorMessage }}</div></sc-if>
-          <div style="font-size:11px; color:oklch(55% 0.02 60);">เป็นการประมาณเบื้องต้น (เงินต้น+ดอกเบี้ยเท่านั้น ไม่รวมค่าธรรมเนียม/ประกัน) ไม่ใช่ข้อเสนอสินเชื่อจริง</div>
+          <div style="font-size:11px; color:oklch(55% 0.02 60);">{{ t.mortgage_disclaimer }}</div>
         </div>
 
         <div style="background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:6px; padding:22px; display:flex; flex-direction:column; gap:12px;">
@@ -311,7 +311,7 @@
 <sc-if value="{{ showSchedule }}">
   <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:200;" onClick="{{ onCloseSchedule }}">
     <div style="background:white; border-radius:10px; padding:24px; width:min(400px,90vw);" onClick="{{ stopProp }}">
-      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:4px;">นัดชมทรัพย์</div>
+      <div style="font-family:'Playfair Display',serif; font-size:18px; color:oklch(20% 0.02 60); margin-bottom:4px;">{{ t.schedule_viewing_title }}</div>
       <div style="font-size:12.5px; color:oklch(55% 0.02 60); margin-bottom:16px;">{{ p.propertyId }} — {{ p.title }}</div>
       <sc-if value="{{ scheduleSent }}">
         <div style="font-size:14px; color:oklch(45% 0.1 150); padding:16px 0; text-align:center;">ขอบคุณ! ทีมงานจะติดต่อกลับเพื่อยืนยันนัดหมาย (ตัวอย่างฟอร์ม — ยังไม่ส่งข้อมูลจริง)</div>
