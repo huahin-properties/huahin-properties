@@ -40,6 +40,10 @@
   </style>
 </helmet>
 
+<sc-if value="{{ showDevBar }}">
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">HM-1 (แก้ ?collection= ชนพารามิเตอร์แชร์แชท — เปลี่ยนเป็น ?homeCollection=)</div>
+</sc-if>
+
 <sc-if value="{{ showGate }}">
   <div style="position:fixed; inset:0; background:oklch(96% 0.015 75); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
     <img src="logo.png" alt="huahin.properties logo" style="height:56px; width:56px; object-fit:contain; border-radius:50%; margin-bottom:20px;" />
@@ -536,6 +540,10 @@ class Component extends DCLogic {
   };
 
   async componentDidMount() {
+    const devParams = new URLSearchParams(window.location.search);
+    if (devParams.get("dev") === "1") { try { localStorage.setItem("hhDevBar", "1"); } catch (e) {} }
+    const isPreviewEnv = !/huahin\.properties$/.test(window.location.hostname);
+    this.setState({ showDevBar: isPreviewEnv || (() => { try { return localStorage.getItem("hhDevBar") === "1"; } catch (e) { return false; } })() });
     const fb0 = await import("./firebase-client.js");
     this._fb = fb0;
     try {
@@ -614,6 +622,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const gateVals = {
+      showDevBar: this.state.showDevBar,
       showGate: this.state.showGate,
       showChrome: !this.state.showGate,
       gatePassword: this.state.gatePassword,
@@ -732,7 +741,7 @@ class Component extends DCLogic {
       { key: "luxury", labelEn: "Luxury Homes", labelTh: "บ้านหรู", tint: "oklch(30% 0.08 30)" },
     ];
     const collections = collectionDefs.map((c) => ({
-      href: `Search Results.dc.html?collection=${c.key}`,
+      href: `Search Results.dc.html?homeCollection=${c.key}`,
       label: lang === "th" ? c.labelTh : c.labelEn,
       bg: `linear-gradient(160deg, ${c.tint}, oklch(20% 0.03 60))`,
     }));
