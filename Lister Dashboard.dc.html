@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-21 (ID2: แปลวันคงเหลือทดลอง/แพ็กเกจ/checklist/หัวข้อตั้งค่า/เบอร์โทร/ปุ่มซ่อน-แก้ไข/บันทึกหน้าจอมือถือ) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-22 (ID3: แปลคำอธิบาย/อีเมล/รหัสผ่าน/รูปโปรไฟล์-ปก/สีธีม/ตัวอย่างสด/รายการทรัพย์) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -131,7 +131,7 @@
         </div>
         <sc-if value="{{ showProfileSettings }}">
           <div style="margin-top:18px; display:flex; flex-direction:column; gap:20px;">
-            <div style="font-size:12px; color:oklch(50% 0.02 60); line-height:1.6;">ตั้งค่านี้ใช้กับเว็บไซต์ส่วนตัวของคุณเท่านั้น (หน้าที่รวมทรัพย์ทั้งหมดของคุณ แชร์ให้ลูกค้าดูได้) ไม่กระทบประกาศในเว็บหลัก</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); line-height:1.6;">{{ st.sectionDesc }}</div>
 
             <div>
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ชื่อที่แสดงให้ลูกค้าเห็น</div>
@@ -145,14 +145,14 @@
 
             <div style="display:flex; gap:24px; flex-wrap:wrap; max-width:600px;">
               <div style="flex:1; min-width:220px;">
-                <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">อีเมลที่ใช้สมัคร (แก้ไขไม่ได้)</div>
+                <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">{{ st.emailLocked }}</div>
                 <input value="{{ ps_email }}" placeholder="ไม่มีอีเมลบันทึกไว้" disabled="{{ true }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(90% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit; background:oklch(95% 0.005 70); color:oklch(55% 0.02 60);" />
               </div>
               <div style="flex:1; min-width:220px;">
-                <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ตั้งรหัสผ่านใหม่</div>
+                <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">{{ st.newPasswordLabel }}</div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                  <input type="password" value="{{ ps_newPassword }}" onChange="{{ onPsNewPassword }}" placeholder="รหัสผ่านใหม่" style="flex:1; min-width:120px; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
-                  <input type="password" value="{{ ps_confirmPassword }}" onChange="{{ onPsConfirmPassword }}" placeholder="ยืนยันรหัสผ่าน" style="flex:1; min-width:120px; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+                  <input type="password" value="{{ ps_newPassword }}" onChange="{{ onPsNewPassword }}" placeholder="{{ st.newPasswordPh }}" style="flex:1; min-width:120px; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
+                  <input type="password" value="{{ ps_confirmPassword }}" onChange="{{ onPsConfirmPassword }}" placeholder="{{ st.confirmPasswordPh }}" style="flex:1; min-width:120px; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
                   <div onClick="{{ onChangePassword }}" style="background:oklch(93% 0.005 70); color:oklch(30% 0.02 60); padding:10px 16px; border-radius:4px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;">{{ pwSaveLabel }}</div>
                 </div>
                 <sc-if value="{{ ps_pwMsg }}"><div style="font-size:12px; color:oklch(45% 0.13 145); margin-top:6px;">{{ ps_pwMsg }}</div></sc-if>
@@ -162,7 +162,7 @@
             <div style="display:flex; gap:24px; flex-wrap:wrap-reverse; align-items:flex-start;">
               <div style="flex:1; min-width:280px; display:flex; flex-direction:column; gap:16px;">
                 <div>
-                  <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รูปโปรไฟล์ (โลโก้/รูปของคุณ)</div>
+                  <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">{{ st.profilePhotoLabel }}</div>
                   <div style="display:flex; align-items:center; gap:10px;">
                     <label style="display:inline-flex; align-items:center; gap:8px; border:1px dashed oklch(80% 0.02 60); border-radius:6px; padding:9px 14px; cursor:pointer; font-size:13px; color:oklch(45% 0.02 60);">
                       <input type="file" accept="image/*" onChange="{{ onPsProfilePhoto }}" style="display:none;" />
@@ -173,7 +173,7 @@
                 </div>
 
                 <div>
-                  <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ภาพปก (เหมือน Facebook cover)</div>
+                  <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">{{ st.coverPhotoLabel }}</div>
                   <div style="display:flex; align-items:center; gap:10px;">
                     <label style="{{ coverPickerStyle }}">
                       <input type="file" accept="image/*" onChange="{{ onPsCoverPhoto }}" style="display:none;" />
@@ -187,7 +187,7 @@
                 </div>
 
                 <div>
-                  <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">สีธีมเว็บไซต์ของคุณ</div>
+                  <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">{{ st.themeColorLabel }}</div>
                   <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
                     <div style="display:flex; gap:10px;">
                       <sc-for list="{{ themeOptions }}" as="c" hint-placeholder-count="4">
@@ -196,7 +196,7 @@
                     </div>
                     <div style="display:flex; align-items:center; gap:8px;">
                       <input type="color" value="{{ ps_themeColorHex }}" onChange="{{ onPsThemeColorPicker }}" disabled="{{ cannotCustomTheme }}" style="{{ themeColorPickerStyle }}" />
-                      <span style="font-size:11px; color:oklch(55% 0.02 60);">กำหนดเอง</span>
+                      <span style="font-size:11px; color:oklch(55% 0.02 60);">{{ st.customColor }}</span>
                     </div>
                   </div>
                   <sc-if value="{{ cannotCustomTheme }}">
@@ -206,7 +206,7 @@
               </div>
 
               <div style="width:280px; flex-shrink:0;">
-                <div style="font-size:11px; color:oklch(50% 0.02 60); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.03em;">👁️ ตัวอย่างสด</div>
+                <div style="font-size:11px; color:oklch(50% 0.02 60); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.03em;">👁️ {{ st.livePreview }}</div>
                 <div style="border:1px solid oklch(90% 0.01 70); border-radius:10px; overflow:hidden; background:white;">
                   <div style="{{ previewCoverStyle }}"></div>
                   <div style="padding:0 16px 18px; margin-top:-36px;">
@@ -215,11 +215,11 @@
                     </div>
                     <div style="{{ previewThemeUnderlineStyle }}"></div>
                     <div style="font-size:16px; font-weight:600; color:oklch(20% 0.02 60); margin-top:8px;">{{ previewName }}</div>
-                    <div style="font-size:12px; color:oklch(55% 0.02 60); margin-bottom:8px;">{{ propCount }} รายการทรัพย์</div>
+                    <div style="font-size:12px; color:oklch(55% 0.02 60); margin-bottom:8px;">{{ propCount }} {{ st.propertiesCount }}</div>
                     <sc-if value="{{ hasThemeColor }}">
                       <div style="display:flex; align-items:center; gap:8px;">
                         <div style="{{ selectedThemeChipStyle }}"></div>
-                        <span style="font-size:10.5px; color:oklch(55% 0.02 60);">สีธีมที่เลือก — {{ ps_themeColorHex }}</span>
+                        <span style="font-size:10.5px; color:oklch(55% 0.02 60);">{{ st.selectedTheme }} — {{ ps_themeColorHex }}</span>
                       </div>
                     </sc-if>
                   </div>
@@ -1205,6 +1205,56 @@ const DASH_I18N = {
     hideToggle: "Nascondi ▲", editToggle: "Modifica ▼", addToHomeScreen: "Salva su schermata Home",
     checklist: { profilePhoto: "Foto profilo", bioText: "Testo di presentazione", coverPhoto: "Foto di copertina (solo piani a pagamento)", fb: "Link Facebook", tiktok: "Link TikTok", youtube: "Link YouTube", instagram: "Link Instagram", shareBtn: "Pulsante condividi sito (piani a pagamento)" },
     tiers: { trial: "🎁 Prova gratuita", basic: "① Gratis", pro: "② Livello 1", agency: "② Livello 1", level3: "③ Livello 2", level4: "④ Livello 3" } },
+};
+const SETTINGS_I18N = {
+  th: { sectionDesc: "ตั้งค่านี้ใช้กับเว็บไซต์ส่วนตัวของคุณเท่านั้น (หน้าที่รวมทรัพย์ทั้งหมดของคุณ แชร์ให้ลูกค้าดูได้) ไม่กระทบประกาศในเว็บหลัก",
+    emailLocked: "อีเมลที่ใช้สมัคร (แก้ไขไม่ได้)", newPasswordLabel: "ตั้งรหัสผ่านใหม่", newPasswordPh: "รหัสผ่านใหม่", confirmPasswordPh: "ยืนยันรหัสผ่าน", changePasswordBtn: "เปลี่ยนรหัสผ่าน",
+    profilePhotoLabel: "รูปโปรไฟล์ (โลโก้/รูปของคุณ)", changePhoto: "เปลี่ยนรูป", choosePhoto: "เลือกรูป",
+    coverPhotoLabel: "ภาพปก (เหมือน Facebook cover)", changeCover: "เปลี่ยนภาพปก", chooseCover: "เลือกภาพปก",
+    themeColorLabel: "สีธีมเว็บไซต์ของคุณ", customColor: "กำหนดเอง", selectedTheme: "สีธีมที่เลือก",
+    livePreview: "ตัวอย่างสด", propertiesCount: "รายการทรัพย์" },
+  en: { sectionDesc: "This applies only to your personal website (the page listing all your properties, shareable with customers) — it doesn't affect listings on the main site.",
+    emailLocked: "Sign-up email (cannot be changed)", newPasswordLabel: "Set new password", newPasswordPh: "New password", confirmPasswordPh: "Confirm password", changePasswordBtn: "Change Password",
+    profilePhotoLabel: "Profile photo (logo/your photo)", changePhoto: "Change Photo", choosePhoto: "Choose Photo",
+    coverPhotoLabel: "Cover photo (like a Facebook cover)", changeCover: "Change Cover", chooseCover: "Choose Cover",
+    themeColorLabel: "Your website theme color", customColor: "Custom", selectedTheme: "Selected theme",
+    livePreview: "Live Preview", propertiesCount: "properties" },
+  ru: { sectionDesc: "Это относится только к вашему личному сайту (странице со всеми вашими объектами, которую можно отправить клиентам) — не влияет на объявления на главном сайте.",
+    emailLocked: "Email регистрации (не изменяется)", newPasswordLabel: "Новый пароль", newPasswordPh: "Новый пароль", confirmPasswordPh: "Подтвердите пароль", changePasswordBtn: "Изменить пароль",
+    profilePhotoLabel: "Фото профиля (логотип/ваше фото)", changePhoto: "Изменить фото", choosePhoto: "Выбрать фото",
+    coverPhotoLabel: "Обложка (как обложка Facebook)", changeCover: "Изменить обложку", chooseCover: "Выбрать обложку",
+    themeColorLabel: "Цвет темы вашего сайта", customColor: "Свой цвет", selectedTheme: "Выбранная тема",
+    livePreview: "Живой предпросмотр", propertiesCount: "объектов" },
+  zh: { sectionDesc: "此设置仅适用于您的个人网站（列出您所有房源的页面，可分享给客户）— 不会影响主网站上的房源。",
+    emailLocked: "注册邮箱（不可修改）", newPasswordLabel: "设置新密码", newPasswordPh: "新密码", confirmPasswordPh: "确认密码", changePasswordBtn: "更改密码",
+    profilePhotoLabel: "头像（标志/您的照片）", changePhoto: "更换照片", choosePhoto: "选择照片",
+    coverPhotoLabel: "封面图片（类似 Facebook 封面）", changeCover: "更换封面", chooseCover: "选择封面",
+    themeColorLabel: "您网站的主题颜色", customColor: "自定义", selectedTheme: "已选主题",
+    livePreview: "实时预览", propertiesCount: "个房源" },
+  de: { sectionDesc: "Dies gilt nur für Ihre persönliche Website (die Seite mit all Ihren Objekten, die Sie mit Kunden teilen können) — betrifft nicht die Angebote auf der Hauptseite.",
+    emailLocked: "Anmelde-E-Mail (nicht änderbar)", newPasswordLabel: "Neues Passwort festlegen", newPasswordPh: "Neues Passwort", confirmPasswordPh: "Passwort bestätigen", changePasswordBtn: "Passwort ändern",
+    profilePhotoLabel: "Profilfoto (Logo/Ihr Foto)", changePhoto: "Foto ändern", choosePhoto: "Foto wählen",
+    coverPhotoLabel: "Titelbild (wie ein Facebook-Cover)", changeCover: "Titelbild ändern", chooseCover: "Titelbild wählen",
+    themeColorLabel: "Designfarbe Ihrer Website", customColor: "Benutzerdefiniert", selectedTheme: "Ausgewähltes Design",
+    livePreview: "Live-Vorschau", propertiesCount: "Objekte" },
+  no: { sectionDesc: "Dette gjelder bare for ditt personlige nettsted (siden med alle eiendommene dine, som kan deles med kunder) — påvirker ikke annonser på hovedsiden.",
+    emailLocked: "Registrerings-e-post (kan ikke endres)", newPasswordLabel: "Angi nytt passord", newPasswordPh: "Nytt passord", confirmPasswordPh: "Bekreft passord", changePasswordBtn: "Endre passord",
+    profilePhotoLabel: "Profilbilde (logo/bildet ditt)", changePhoto: "Endre bilde", choosePhoto: "Velg bilde",
+    coverPhotoLabel: "Omslagsbilde (som et Facebook-omslag)", changeCover: "Endre omslag", chooseCover: "Velg omslag",
+    themeColorLabel: "Temafarge for nettstedet ditt", customColor: "Egendefinert", selectedTheme: "Valgt tema",
+    livePreview: "Live forhåndsvisning", propertiesCount: "eiendommer" },
+  fr: { sectionDesc: "Cela s'applique uniquement à votre site personnel (la page listant tous vos biens, partageable avec les clients) — n'affecte pas les annonces sur le site principal.",
+    emailLocked: "E-mail d'inscription (non modifiable)", newPasswordLabel: "Définir un nouveau mot de passe", newPasswordPh: "Nouveau mot de passe", confirmPasswordPh: "Confirmer le mot de passe", changePasswordBtn: "Changer le mot de passe",
+    profilePhotoLabel: "Photo de profil (logo/votre photo)", changePhoto: "Changer la photo", choosePhoto: "Choisir une photo",
+    coverPhotoLabel: "Photo de couverture (comme une couverture Facebook)", changeCover: "Changer la couverture", chooseCover: "Choisir une couverture",
+    themeColorLabel: "Couleur du thème de votre site", customColor: "Personnalisé", selectedTheme: "Thème sélectionné",
+    livePreview: "Aperçu en direct", propertiesCount: "biens" },
+  it: { sectionDesc: "Questo si applica solo al tuo sito personale (la pagina con tutti i tuoi immobili, condivisibile con i clienti) — non influisce sugli annunci sul sito principale.",
+    emailLocked: "Email di registrazione (non modificabile)", newPasswordLabel: "Imposta nuova password", newPasswordPh: "Nuova password", confirmPasswordPh: "Confirma password", changePasswordBtn: "Cambia password",
+    profilePhotoLabel: "Foto profilo (logo/tua foto)", changePhoto: "Cambia foto", choosePhoto: "Scegli foto",
+    coverPhotoLabel: "Foto di copertina (come una copertina Facebook)", changeCover: "Cambia copertina", chooseCover: "Scegli copertina",
+    themeColorLabel: "Colore tema del tuo sito", customColor: "Personalizzato", selectedTheme: "Tema selezionato",
+    livePreview: "Anteprima live", propertiesCount: "immobili" },
 };
 
 class Component extends DCLogic {
@@ -2268,6 +2318,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const dt = DASH_I18N[this.state.lang] || DASH_I18N.th;
+    const st = SETTINGS_I18N[this.state.lang] || SETTINGS_I18N.th;
     this._syncPreviewMap();
     this._syncOwnerMap();
     const mod = this._mod;
@@ -2430,7 +2481,7 @@ class Component extends DCLogic {
       showTrialUpsell: !!trial && trial.nearEnd,
       trialUpsellViewsLabel: trial ? `ยอดเข้าชมรวมทุกประกาศของคุณ: ${(this.state.properties || []).reduce((sum, p) => sum + (p.viewCount || 0), 0)} ครั้ง` : "",
       onLogout: () => this.onLogout(),
-      dt, lang: this.state.lang, langOptions: LD_LANG_OPTIONS, onSelectLang: (code) => this.onSelectLang(code),
+      dt, st, lang: this.state.lang, langOptions: LD_LANG_OPTIONS, onSelectLang: (code) => this.onSelectLang(code),
       debugView: this.state.view, debugDashTab: this.state.dashTab, debugLoaded: String(this.state.loaded),
       debugSignedIn: String(this.state.signedIn), debugHasLister: String(!!this.state.lister),
       showDevBar: this.state.showDevBar,
@@ -2686,16 +2737,16 @@ class Component extends DCLogic {
       ps_email: this.state.ps_email,
       ps_newPassword: this.state.ps_newPassword, onPsNewPassword: (e) => this.setState({ ps_newPassword: e.target.value }),
       ps_confirmPassword: this.state.ps_confirmPassword, onPsConfirmPassword: (e) => this.setState({ ps_confirmPassword: e.target.value }),
-      pwSaveLabel: this.state.ps_pwSaving ? "กำลังบันทึก…" : "เปลี่ยนรหัสผ่าน",
+      pwSaveLabel: this.state.ps_pwSaving ? "กำลังบันทึก…" : st.changePasswordBtn,
       ps_pwMsg: this.state.ps_pwMsg,
       onChangePassword: () => this.changePassword(),
-      ps_profilePhotoLabel: this.state.ps_profilePhotoUrl ? "เปลี่ยนรูป" : "เลือกรูป",
+      ps_profilePhotoLabel: this.state.ps_profilePhotoUrl ? st.changePhoto : st.choosePhoto,
       onPsProfilePhoto: (e) => this.onPsProfilePhoto(e),
       ps_aiPersonaText: this.state.ps_aiPersonaText, onPsAiPersonaText: (e) => this.setState({ ps_aiPersonaText: e.target.value }),
       ps_bioText: this.state.ps_bioText, onPsBioText: (e) => this.setState({ ps_bioText: e.target.value }),
       canCustomCover: !this._lockedCoverBlocked(), cannotCustomCover: this._lockedCoverBlocked(),
       coverPickerStyle: "display:inline-flex; align-items:center; gap:8px; border:1px dashed oklch(80% 0.02 60); border-radius:6px; padding:9px 14px; cursor:pointer; font-size:13px; color:oklch(45% 0.02 60);",
-      ps_coverPhotoLabel: this.state.ps_coverPhotoUrl ? "เปลี่ยนภาพปก" : "เลือกภาพปก",
+      ps_coverPhotoLabel: this.state.ps_coverPhotoUrl ? st.changeCover : st.chooseCover,
       onPsCoverPhoto: (e) => this.onPsCoverPhoto(e),
       themeColorPickerStyle: tier3
         ? "width:38px; height:38px; border:none; border-radius:8px; padding:0; cursor:pointer; background:none;"
