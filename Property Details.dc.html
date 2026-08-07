@@ -26,6 +26,8 @@
   </style>
 </helmet>
 
+<div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">PD-1 (แก้ &language= ผ่าน this-context bug ใน loadGoogleMapsHH — Google Maps ไม่เชื่อม this.state.lang ได้เพราะเป็น standalone function)</div>
+
 <sc-if value="{{ showGate }}">
   <div style="position:fixed; inset:0; background:oklch(96% 0.015 75); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
     <img src="logo.png" alt="huahin.properties logo" style="height:56px; width:56px; object-fit:contain; border-radius:50%; margin-bottom:20px;" />
@@ -427,7 +429,7 @@ const GMAPS_LANG = { th: "th", en: "en", ru: "ru", zh: "zh-CN", de: "de", no: "n
 
 class Component extends DCLogic {
   state = {
-    lang: "en",
+    lang: (() => { try { return localStorage.getItem("hh_lang") || "th"; } catch (e) { return "th"; } })(),
     isFav: false,
     banners: [],
     reviewsState: "loading", reviewsData: [],
