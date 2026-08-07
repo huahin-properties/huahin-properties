@@ -226,7 +226,7 @@
           <a href="https://line.me/ti/p/huahinproperties" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background:oklch(58% 0.16 145); color:oklch(98% 0.01 80); padding:12px; border-radius:4px; font-size:14px; text-decoration:none;">✆ {{ t.line_app }}</a>
           <a href="mailto:hello@huahin.properties" style="display:flex; align-items:center; justify-content:center; gap:8px; border:1px solid oklch(75% 0.02 60); color:oklch(25% 0.02 60); padding:12px; border-radius:4px; font-size:14px; text-decoration:none;">✉ {{ t.email_cta }}</a>
           <div onClick="{{ onOpenSchedule }}" style="display:flex; align-items:center; justify-content:center; gap:8px; border:1px solid oklch(80% 0.02 60); color:oklch(25% 0.02 60); padding:12px; border-radius:4px; font-size:14px; cursor:pointer;">📅 {{ t.schedule_viewing_title }}</div>
-          <div style="font-size:11px; color:oklch(55% 0.02 60); text-align:center;">Mini Site: huahin.properties/{{ miniSiteSlug }}</div>
+          <div style="font-size:11px; color:oklch(55% 0.02 60); text-align:center;">{{ t.mini_site_label }}: huahin.properties/{{ miniSiteSlug }}</div>
         </div>
 
         <div style="background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:6px; padding:20px 22px; display:flex; flex-direction:column; gap:10px;">
@@ -784,8 +784,8 @@ class Component extends DCLogic {
         || (raw.description && (typeof raw.description === "object" ? raw.description[lang] : raw.description))
         || t.no_description,
       features: raw.features.map((f) => mod.FEATURES[f][lang]),
-      distanceBeachLabel: `${raw.distanceBeach} km ${t.beach ? "to " + t.beach : ""}`,
-      distanceTownLabel: `${raw.distanceTown} km to ${t.town}`,
+      distanceBeachLabel: `${raw.distanceBeach} ${t.km_to} ${t.beach ? t.beach : ""}`,
+      distanceTownLabel: `${raw.distanceTown} ${t.km_to} ${t.town}`,
       locationBadgeLabel: (() => {
         const zoneText = (raw.zone && typeof raw.zone === "object") ? (raw.zone[lang] || raw.zone.th) : raw.zone;
         const exact = parseLatLngHH(raw.mapLink);
