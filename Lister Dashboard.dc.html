@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-11 (แก้บั๊ก listingStatus="pending" ค้างเก่า ทำให้ดู/สวิตช์หาย) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-12 (สภาพทรัพย์ 4 ตัวเลือก: ใหม่/มือสอง × ในโครงการ/นอกโครงการ) — แก้บั๊ก listingStatus="pending" ค้างเก่า ทำให้ดู/สวิตช์หาย) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -733,8 +733,10 @@
               <div>
                 <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">สภาพทรัพย์</div>
                 <select value="{{ f_condition }}" onChange="{{ onFCondition }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white;">
-                  <option value="new">ใหม่ (จากโครงการ/ยังไม่เคยอยู่)</option>
-                  <option value="resale">มือสอง</option>
+                  <option value="new_in_project">ใหม่ในโครงการ</option>
+                  <option value="new_outside_project">ใหม่นอกโครงการ</option>
+                  <option value="resale_in_project">มือสองในโครงการ</option>
+                  <option value="resale_outside_project">มือสองนอกโครงการ</option>
                 </select>
               </div>
               <div>
@@ -1078,7 +1080,7 @@ class Component extends DCLogic {
     editingId: null, f_type: "villa", f_area: "hua-hin", f_subdistrict: "", f_zone: "", f_status: "sale",
     f_price: "", f_bedrooms: "", f_bathrooms: "", f_poolSize: "", f_parking: "", f_livingArea: "", f_landSize: "", f_mapsLink: "", f_mapDisplay: "area",
     f_titleDeed: "", f_kitchenTypes: [], f_purchaseOptions: [], kitchenMenuOpen: false, purchaseMenuOpen: false,
-    f_condition: "resale", f_yearBuilt: "", f_floor: "", f_commonFee: "", f_foreignQuota: "",
+    f_condition: "resale_in_project", f_yearBuilt: "", f_floor: "", f_commonFee: "", f_foreignQuota: "",
     f_landShape: "", f_roadWidth: "", f_landCondition: "", f_utilities: "", f_zoningColor: "",
     f_floors: "", f_electricalPhase: "", f_internalNotes: "", f_landRai: "", f_landNgan: "", f_landWah: "",
     f_description: "", f_aiDraft: "", aiGenerating: false, f_features: [], saveError: "", saving: false,
@@ -1266,7 +1268,7 @@ class Component extends DCLogic {
       view: "edit", editingId: null, f_type: "villa", f_area: "hua-hin", f_subdistrict: this.subdistrictsFor("hua-hin")[0] || "", f_zone: "",
       f_status: "sale", f_price: "", f_bedrooms: "", f_bathrooms: "", f_poolSize: "", f_parking: "", f_livingArea: "",
       f_landSize: "", f_mapsLink: "", f_mapDisplay: "area", f_titleDeed: "", f_kitchenTypes: [], f_purchaseOptions: [],
-      f_condition: "resale", f_yearBuilt: "", f_floor: "", f_commonFee: "", f_foreignQuota: "",
+      f_condition: "resale_in_project", f_yearBuilt: "", f_floor: "", f_commonFee: "", f_foreignQuota: "",
       f_landShape: "", f_roadWidth: "", f_landCondition: "", f_utilities: "", f_zoningColor: "",
       f_floors: "", f_electricalPhase: "", f_internalNotes: "", f_landRai: "", f_landNgan: "", f_landWah: "",
       f_description: "", f_aiDraft: "", f_features: [], saveError: "", existingPhotos: [], newPhotos: [], quotaMsg: "",
@@ -1290,7 +1292,7 @@ class Component extends DCLogic {
       f_bathrooms: p.bathrooms != null ? String(p.bathrooms) : "",
       f_poolSize: p.poolSize != null ? String(p.poolSize) : "", f_parking: p.parking != null ? String(p.parking) : "",
       f_titleDeed: p.titleDeed || "", f_kitchenTypes: p.kitchenTypes || [], f_purchaseOptions: p.purchaseOptions || [],
-      f_condition: p.condition || "resale", f_yearBuilt: p.yearBuilt != null ? String(p.yearBuilt) : "",
+      f_condition: p.condition || "resale_in_project", f_yearBuilt: p.yearBuilt != null ? String(p.yearBuilt) : "",
       f_floor: p.floor || "", f_commonFee: p.commonFee != null ? String(p.commonFee) : "", f_foreignQuota: p.foreignQuota || "",
       f_landShape: p.landShape || "", f_roadWidth: p.roadWidth != null ? String(p.roadWidth) : "", f_landCondition: p.landCondition || "",
       f_utilities: p.utilities || "", f_zoningColor: p.zoningColor || "",
@@ -1409,7 +1411,10 @@ class Component extends DCLogic {
     const purchaseLabels = { cash: "เงินสด", developer_installment: "ผ่อนกับโครงการ", bank_mortgage: "ผ่อนกับธนาคาร", company_transfer: "โอนผ่านบริษัท (Freehold Company)", leasehold: "Leasehold (เช่าซื้อระยะยาว ~30 ปี)", freehold: "Freehold (ซื้อขาด/ถือกรรมสิทธิ์เต็ม)" };
     if ((s.f_purchaseOptions || []).length) lines.push("💳 รองรับการซื้อ: " + s.f_purchaseOptions.map((p) => purchaseLabels[p] || p).join(", "));
     if (s.f_kitchenTypes.length || s.f_titleDeed || s.f_purchaseOptions.length) lines.push("");
-    if (s.f_type !== "land" && s.f_condition) lines.push(s.f_condition === "new" ? "🆕 ทรัพย์ใหม่ ยังไม่เคยอยู่" : "🏠 มือสอง" + (s.f_yearBuilt ? ` (สร้างปี ${s.f_yearBuilt})` : ""));
+    if (s.f_type !== "land" && s.f_condition) {
+      const conditionLabels = { new_in_project: "🆕 ทรัพย์ใหม่ ในโครงการ", new_outside_project: "🆕 ทรัพย์ใหม่ นอกโครงการ", resale_in_project: "🏠 มือสอง ในโครงการ", resale_outside_project: "🏠 มือสอง นอกโครงการ" };
+      lines.push((conditionLabels[s.f_condition] || "") + (s.f_yearBuilt ? ` (สร้างปี ${s.f_yearBuilt})` : ""));
+    }
     if (s.f_type === "condo") {
       const condoLines = [];
       if (s.f_floor) condoLines.push(`ชั้น ${s.f_floor}`);
