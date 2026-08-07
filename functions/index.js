@@ -75,12 +75,17 @@ exports.claudeComplete = onRequest(
     }
 
     try {
-      const { content, tool, system, messages } = req.body;
+      const { content, tool, system, messages, max_tokens } = req.body;
 
       // Multi-turn chat mode (used by the ContactRail AI chat widget):
-      // caller sends {system, messages} instead of {content}.
+      // caller sends {system, messages} instead of {content}. Chat replies
+      // stay capped at 600 tokens for cost/speed, but a caller doing a
+      // heavier job (e.g. translateDescriptionAll translating a full
+      // listing description into 8 languages at once) can pass its own
+      // max_tokens — without this, long descriptions got cut off mid-JSON
+      // and silently failed to translate (BLUEPRINT.md fix, Aug 2026).
       if (messages) {
-        const chatBody = { model: "claude-haiku-4-5", max_tokens: 600, messages };
+        const chatBody = { model: "claude-haiku-4-5", max_tokens: max_tokens || 600, messages };
         if (system) chatBody.system = system;
         const chatRes = await fetch("https://api.anthropic.com/v1/messages", {
           method: "POST",
