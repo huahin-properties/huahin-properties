@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-20 (ID1: เพิ่มไอคอนแปลภาษา + แปล Header/แถบเมนู 4 ขั้น/คำทักทาย) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-21 (ID2: แปลวันคงเหลือทดลอง/แพ็กเกจ/checklist/หัวข้อตั้งค่า/เบอร์โทร/ปุ่มซ่อน-แก้ไข/บันทึกหน้าจอมือถือ) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -45,7 +45,7 @@
     <div onClick="{{ onNewProperty }}" style="position:fixed; bottom:22px; right:22px; z-index:50; width:56px; height:56px; border-radius:50%; background:oklch(40% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-size:28px; box-shadow:0 4px 14px rgba(0,0,0,0.25); cursor:pointer;">+</div>
   </sc-if>
 
-  <div onClick="{{ onOpenAddHome }}" style="position:fixed; bottom:{{ addHomeBottom }}; right:22px; z-index:50; display:flex; align-items:center; gap:8px; background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:10px 16px; border-radius:100px; font-size:12.5px; font-weight:600; box-shadow:0 4px 14px rgba(0,0,0,0.15); cursor:pointer; white-space:nowrap;">📲 บันทึกไว้หน้าจอมือถือ</div>
+  <div onClick="{{ onOpenAddHome }}" style="position:fixed; bottom:{{ addHomeBottom }}; right:22px; z-index:50; display:flex; align-items:center; gap:8px; background:white; border:1px solid oklch(85% 0.01 70); color:oklch(30% 0.02 60); padding:10px 16px; border-radius:100px; font-size:12.5px; font-weight:600; box-shadow:0 4px 14px rgba(0,0,0,0.15); cursor:pointer; white-space:nowrap;">📲 {{ dt.addToHomeScreen }}</div>
 
   <sc-if value="{{ showAddHomeModal }}">
     <div style="position:fixed; inset:0; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:100;" onClick="{{ onCloseAddHome }}">
@@ -118,7 +118,7 @@
           <div style="background:oklch(93% 0.005 70); border-radius:100px; height:6px; overflow:hidden;">
             <div style="background:oklch(45% 0.13 25); height:100%; width:{{ profileCompletePct }}%; border-radius:100px;"></div>
           </div>
-          <sc-if value="{{ profileMissingText }}"><div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-top:6px;">ยังขาด: {{ profileMissingText }}</div></sc-if>
+          <sc-if value="{{ profileMissingText }}"><div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-top:6px;">{{ dt.missingPrefix }} {{ profileMissingText }}</div></sc-if>
         </div>
       </sc-if>
 
@@ -126,7 +126,7 @@
       <sc-if value="{{ showList }}">
       <div style="background:white; border-radius:8px; padding:20px 22px; margin-bottom:22px;">
         <div onClick="{{ onToggleProfileSettings }}" style="display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
-          <div style="font-size:14px; font-weight:600; color:oklch(25% 0.02 60);">⚙️ ตั้งค่าโปรไฟล์ · เว็บไซต์ · AI ผู้ช่วย</div>
+          <div style="font-size:14px; font-weight:600; color:oklch(25% 0.02 60);">{{ dt.sectionSettingsTitle }}</div>
           <div style="font-size:13px; color:oklch(50% 0.02 60);">{{ profileSettingsToggleLabel }}</div>
         </div>
         <sc-if value="{{ showProfileSettings }}">
@@ -139,7 +139,7 @@
             </div>
 
             <div>
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">เบอร์โทร (แสดงพร้อมไอคอนโทรศัพท์บนเว็บไซต์ของคุณ)</div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">{{ dt.phoneFieldLabel }}</div>
               <input value="{{ ps_phone }}" onChange="{{ onPsPhone }}" placeholder="เช่น 081-234-5678" style="width:100%; max-width:360px; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:10px 12px; font-size:14px; font-family:inherit;" />
             </div>
 
@@ -1101,7 +1101,12 @@ const DASH_I18N = {
     hintAppt: "นัดชมทรัพย์กับลูกค้า ไม่พลาดคิวนัด — เพิ่ม แก้ไข และทำเครื่องหมายเสร็จได้ในที่เดียว",
     currentPackage: "แพ็กเกจปัจจุบัน", mySite: "เว็บไซต์ของฉัน", choosePackage: "เลือก Package",
     followOrderHint: "แนะนำให้ทำตามลำดับ ① ➜ ② ➜ ③ เพื่อให้ประกาศของคุณพร้อมและดูมืออาชีพที่สุด",
-    profileCompleteness: "ความสมบูรณ์ของเว็บไซต์และโปรไฟล์" },
+    profileCompleteness: "ความสมบูรณ์ของเว็บไซต์และโปรไฟล์",
+    daysLeft: (n) => `เหลืออีก ${n} วัน`, missingPrefix: "ยังขาด:", noPackage: "ยังไม่ได้เลือกแพ็กเกจ",
+    sectionSettingsTitle: "⚙️ ตั้งค่าโปรไฟล์ · เว็บไซต์ · AI ผู้ช่วย", phoneFieldLabel: "เบอร์โทร (แสดงพร้อมไอคอนโทรศัพท์บนเว็บไซต์ของคุณ)",
+    hideToggle: "ซ่อน ▲", editToggle: "แก้ไข ▼", addToHomeScreen: "บันทึกไว้หน้าจอมือถือ",
+    checklist: { profilePhoto: "รูปโปรไฟล์", bioText: "ข้อความแนะนำตัว", coverPhoto: "ภาพปก (เฉพาะแพ็กเกจที่ชำระเงิน)", fb: "ลิงก์ Facebook", tiktok: "ลิงก์ TikTok", youtube: "ลิงก์ YouTube", instagram: "ลิงก์ Instagram", shareBtn: "ปุ่มแชร์เว็บไซต์ (แพ็กเกจที่ชำระเงิน)" },
+    tiers: { trial: "🎁 ทดลองใช้ฟรี", basic: "① ฟรี", pro: "② ระดับ 1", agency: "② ระดับ 1", level3: "③ ระดับ 2", level4: "④ ระดับ 3" } },
   en: { logout: "Log out", workspaceTitle: "My Workspace", greeting: "Hi, ", trialActive: "Free trial active",
     tabSettings: "Setup", tabList: "Properties", tabCollections: "Collections", tabAppt: "Appointments",
     hintSettings: "Fill this in once — it's reused automatically across every listing, making your site and profile look professional from the first second a customer sees it.",
@@ -1110,7 +1115,12 @@ const DASH_I18N = {
     hintAppt: "Schedule viewings with customers without missing a booking — add, edit, and mark done all in one place.",
     currentPackage: "Current package", mySite: "My Website", choosePackage: "Choose Package",
     followOrderHint: "Follow the order ① ➜ ② ➜ ③ to get your listings ready and looking their most professional.",
-    profileCompleteness: "Website & profile completeness" },
+    profileCompleteness: "Website & profile completeness",
+    daysLeft: (n) => `${n} days left`, missingPrefix: "Missing:", noPackage: "No package chosen yet",
+    sectionSettingsTitle: "⚙️ Profile · Website · AI Assistant Settings", phoneFieldLabel: "Phone (shown with a phone icon on your website)",
+    hideToggle: "Hide ▲", editToggle: "Edit ▼", addToHomeScreen: "Save to Home Screen",
+    checklist: { profilePhoto: "Profile photo", bioText: "Intro text", coverPhoto: "Cover photo (paid plans only)", fb: "Facebook link", tiktok: "TikTok link", youtube: "YouTube link", instagram: "Instagram link", shareBtn: "Share-website button (paid plans)" },
+    tiers: { trial: "🎁 Free Trial", basic: "① Free", pro: "② Tier 1", agency: "② Tier 1", level3: "③ Tier 2", level4: "④ Tier 3" } },
   ru: { logout: "Выйти", workspaceTitle: "Моё рабочее пространство", greeting: "Привет, ", trialActive: "Пробный период активен",
     tabSettings: "Настройка", tabList: "Объекты", tabCollections: "Подборки", tabAppt: "Встречи",
     hintSettings: "Заполните это один раз — система будет автоматически использовать это во всех объявлениях, сделав ваш сайт и профиль профессиональными с первой секунды.",
@@ -1119,7 +1129,12 @@ const DASH_I18N = {
     hintAppt: "Планируйте просмотры с клиентами без пропущенных встреч — добавляйте, редактируйте и отмечайте выполненные в одном месте.",
     currentPackage: "Текущий пакет", mySite: "Мой сайт", choosePackage: "Выбрать пакет",
     followOrderHint: "Следуйте порядку ① ➜ ② ➜ ③, чтобы ваши объявления были готовы и выглядели профессионально.",
-    profileCompleteness: "Полнота сайта и профиля" },
+    profileCompleteness: "Полнота сайта и профиля",
+    daysLeft: (n) => `Осталось ${n} дн.`, missingPrefix: "Не хватает:", noPackage: "Пакет ещё не выбран",
+    sectionSettingsTitle: "⚙️ Настройки профиля · сайта · AI-помощника", phoneFieldLabel: "Телефон (показывается с иконкой на вашем сайте)",
+    hideToggle: "Скрыть ▲", editToggle: "Изменить ▼", addToHomeScreen: "Сохранить на главный экран",
+    checklist: { profilePhoto: "Фото профиля", bioText: "Текст о себе", coverPhoto: "Обложка (только платные тарифы)", fb: "Ссылка Facebook", tiktok: "Ссылка TikTok", youtube: "Ссылка YouTube", instagram: "Ссылка Instagram", shareBtn: "Кнопка «поделиться сайтом» (платные тарифы)" },
+    tiers: { trial: "🎁 Бесплатный пробный период", basic: "① Бесплатно", pro: "② Уровень 1", agency: "② Уровень 1", level3: "③ Уровень 2", level4: "④ Уровень 3" } },
   zh: { logout: "退出登录", workspaceTitle: "我的工作台", greeting: "你好，", trialActive: "免费试用中",
     tabSettings: "系统设置", tabList: "房源列表", tabCollections: "合集", tabAppt: "预约",
     hintSettings: "只需填写一次，系统会自动在每条房源中复用 — 让您的网站和资料从客户看到的第一秒起就显得专业。",
@@ -1128,7 +1143,12 @@ const DASH_I18N = {
     hintAppt: "与客户安排看房，不错过任何预约 — 在同一处添加、编辑并标记完成。",
     currentPackage: "当前套餐", mySite: "我的网站", choosePackage: "选择套餐",
     followOrderHint: "建议按顺序 ① ➜ ② ➜ ③ 完成，让您的房源信息更完整、更专业。",
-    profileCompleteness: "网站与资料完整度" },
+    profileCompleteness: "网站与资料完整度",
+    daysLeft: (n) => `还剩 ${n} 天`, missingPrefix: "尚缺:", noPackage: "尚未选择套餐",
+    sectionSettingsTitle: "⚙️ 资料 · 网站 · AI 助手设置", phoneFieldLabel: "电话号码（会在您的网站上以电话图标显示）",
+    hideToggle: "隐藏 ▲", editToggle: "编辑 ▼", addToHomeScreen: "添加到主屏幕",
+    checklist: { profilePhoto: "头像", bioText: "自我介绍文字", coverPhoto: "封面图片（仅付费套餐）", fb: "Facebook 链接", tiktok: "TikTok 链接", youtube: "YouTube 链接", instagram: "Instagram 链接", shareBtn: "分享网站按钮（付费套餐）" },
+    tiers: { trial: "🎁 免费试用", basic: "① 免费", pro: "② 等级 1", agency: "② 等级 1", level3: "③ 等级 2", level4: "④ 等级 3" } },
   de: { logout: "Abmelden", workspaceTitle: "Mein Arbeitsbereich", greeting: "Hallo, ", trialActive: "Kostenlose Testversion aktiv",
     tabSettings: "Einrichtung", tabList: "Objekte", tabCollections: "Sammlungen", tabAppt: "Termine",
     hintSettings: "Füllen Sie dies einmal aus — das System verwendet es automatisch für jedes Angebot erneut und lässt Ihre Website und Ihr Profil von der ersten Sekunde an professionell wirken.",
@@ -1137,7 +1157,12 @@ const DASH_I18N = {
     hintAppt: "Planen Sie Besichtigungen mit Kunden, ohne einen Termin zu verpassen — alles an einem Ort hinzufügen, bearbeiten und als erledigt markieren.",
     currentPackage: "Aktuelles Paket", mySite: "Meine Website", choosePackage: "Paket wählen",
     followOrderHint: "Folgen Sie der Reihenfolge ① ➜ ② ➜ ③, damit Ihre Angebote bereit und möglichst professionell wirken.",
-    profileCompleteness: "Vollständigkeit von Website & Profil" },
+    profileCompleteness: "Vollständigkeit von Website & Profil",
+    daysLeft: (n) => `Noch ${n} Tage`, missingPrefix: "Fehlt noch:", noPackage: "Noch kein Paket gewählt",
+    sectionSettingsTitle: "⚙️ Profil · Website · KI-Assistent Einstellungen", phoneFieldLabel: "Telefon (wird mit Telefonsymbol auf Ihrer Website angezeigt)",
+    hideToggle: "Ausblenden ▲", editToggle: "Bearbeiten ▼", addToHomeScreen: "Zum Startbildschirm hinzufügen",
+    checklist: { profilePhoto: "Profilfoto", bioText: "Vorstellungstext", coverPhoto: "Titelbild (nur bezahlte Pakete)", fb: "Facebook-Link", tiktok: "TikTok-Link", youtube: "YouTube-Link", instagram: "Instagram-Link", shareBtn: "Website-Teilen-Button (bezahlte Pakete)" },
+    tiers: { trial: "🎁 Kostenlose Testversion", basic: "① Kostenlos", pro: "② Stufe 1", agency: "② Stufe 1", level3: "③ Stufe 2", level4: "④ Stufe 3" } },
   no: { logout: "Logg ut", workspaceTitle: "Mitt arbeidsområde", greeting: "Hei, ", trialActive: "Gratis prøveperiode aktiv",
     tabSettings: "Oppsett", tabList: "Eiendommer", tabCollections: "Samlinger", tabAppt: "Avtaler",
     hintSettings: "Fyll ut dette én gang — systemet bruker det automatisk på nytt i hver annonse, slik at nettstedet og profilen din ser profesjonell ut fra første sekund.",
@@ -1146,7 +1171,12 @@ const DASH_I18N = {
     hintAppt: "Planlegg visninger med kunder uten å gå glipp av en avtale — legg til, rediger og merk som utført på ett sted.",
     currentPackage: "Nåværende pakke", mySite: "Mitt nettsted", choosePackage: "Velg pakke",
     followOrderHint: "Følg rekkefølgen ① ➜ ② ➜ ③ for at annonsene dine skal være klare og se mest profesjonelle ut.",
-    profileCompleteness: "Fullstendighet på nettsted og profil" },
+    profileCompleteness: "Fullstendighet på nettsted og profil",
+    daysLeft: (n) => `${n} dager igjen`, missingPrefix: "Mangler:", noPackage: "Ingen pakke valgt ennå",
+    sectionSettingsTitle: "⚙️ Profil · Nettsted · AI-assistent innstillinger", phoneFieldLabel: "Telefon (vises med telefonikon på nettstedet ditt)",
+    hideToggle: "Skjul ▲", editToggle: "Rediger ▼", addToHomeScreen: "Lagre til hjemskjerm",
+    checklist: { profilePhoto: "Profilbilde", bioText: "Introtekst", coverPhoto: "Omslagsbilde (kun betalte pakker)", fb: "Facebook-lenke", tiktok: "TikTok-lenke", youtube: "YouTube-lenke", instagram: "Instagram-lenke", shareBtn: "Del-nettsted-knapp (betalte pakker)" },
+    tiers: { trial: "🎁 Gratis prøveperiode", basic: "① Gratis", pro: "② Nivå 1", agency: "② Nivå 1", level3: "③ Nivå 2", level4: "④ Nivå 3" } },
   fr: { logout: "Se déconnecter", workspaceTitle: "Mon espace de travail", greeting: "Bonjour, ", trialActive: "Essai gratuit actif",
     tabSettings: "Configuration", tabList: "Biens", tabCollections: "Collections", tabAppt: "Rendez-vous",
     hintSettings: "Remplissez ceci une fois — le système le réutilise automatiquement pour chaque annonce, rendant votre site et profil professionnels dès la première seconde.",
@@ -1155,7 +1185,12 @@ const DASH_I18N = {
     hintAppt: "Planifiez des visites avec les clients sans manquer un rendez-vous — ajoutez, modifiez et marquez comme terminé au même endroit.",
     currentPackage: "Forfait actuel", mySite: "Mon site", choosePackage: "Choisir un forfait",
     followOrderHint: "Suivez l'ordre ① ➜ ② ➜ ③ pour que vos annonces soient prêtes et paraissent les plus professionnelles.",
-    profileCompleteness: "Exhaustivité du site et du profil" },
+    profileCompleteness: "Exhaustivité du site et du profil",
+    daysLeft: (n) => `${n} jours restants`, missingPrefix: "Manquant :", noPackage: "Aucun forfait choisi",
+    sectionSettingsTitle: "⚙️ Paramètres Profil · Site · Assistant IA", phoneFieldLabel: "Téléphone (affiché avec une icône téléphone sur votre site)",
+    hideToggle: "Masquer ▲", editToggle: "Modifier ▼", addToHomeScreen: "Ajouter à l'écran d'accueil",
+    checklist: { profilePhoto: "Photo de profil", bioText: "Texte de présentation", coverPhoto: "Photo de couverture (forfaits payants uniquement)", fb: "Lien Facebook", tiktok: "Lien TikTok", youtube: "Lien YouTube", instagram: "Lien Instagram", shareBtn: "Bouton partager le site (forfaits payants)" },
+    tiers: { trial: "🎁 Essai gratuit", basic: "① Gratuit", pro: "② Niveau 1", agency: "② Niveau 1", level3: "③ Niveau 2", level4: "④ Niveau 3" } },
   it: { logout: "Esci", workspaceTitle: "Il mio spazio di lavoro", greeting: "Ciao, ", trialActive: "Prova gratuita attiva",
     tabSettings: "Configurazione", tabList: "Immobili", tabCollections: "Collezioni", tabAppt: "Appuntamenti",
     hintSettings: "Compila questo una sola volta — il sistema lo riutilizzerà automaticamente in ogni annuncio, rendendo il tuo sito e profilo professionali dal primo secondo.",
@@ -1164,7 +1199,12 @@ const DASH_I18N = {
     hintAppt: "Pianifica visite con i clienti senza perdere un appuntamento — aggiungi, modifica e segna come completato in un unico posto.",
     currentPackage: "Piano attuale", mySite: "Il mio sito", choosePackage: "Scegli piano",
     followOrderHint: "Segui l'ordine ① ➜ ② ➜ ③ per rendere i tuoi annunci pronti e più professionali possibile.",
-    profileCompleteness: "Completezza di sito e profilo" },
+    profileCompleteness: "Completezza di sito e profilo",
+    daysLeft: (n) => `Ancora ${n} giorni`, missingPrefix: "Manca ancora:", noPackage: "Nessun piano scelto",
+    sectionSettingsTitle: "⚙️ Impostazioni Profilo · Sito · Assistente IA", phoneFieldLabel: "Telefono (mostrato con icona telefono sul tuo sito)",
+    hideToggle: "Nascondi ▲", editToggle: "Modifica ▼", addToHomeScreen: "Salva su schermata Home",
+    checklist: { profilePhoto: "Foto profilo", bioText: "Testo di presentazione", coverPhoto: "Foto di copertina (solo piani a pagamento)", fb: "Link Facebook", tiktok: "Link TikTok", youtube: "Link YouTube", instagram: "Link Instagram", shareBtn: "Pulsante condividi sito (piani a pagamento)" },
+    tiers: { trial: "🎁 Prova gratuita", basic: "① Gratis", pro: "② Livello 1", agency: "② Livello 1", level3: "③ Livello 2", level4: "④ Livello 3" } },
 };
 
 class Component extends DCLogic {
@@ -2058,17 +2098,18 @@ class Component extends DCLogic {
     const isTrial = lister.tier === "trial";
     const shareEnabled = !isTrial && lister.tier;
     const sl = lister.socialLinks || {};
+    const dt = DASH_I18N[this.state.lang] || DASH_I18N.th;
     const checks = [
-      { ok: !!(lister.name || lister.displayName), label: "ชื่อที่แสดง" },
-      { ok: !!lister.phone, label: "เบอร์โทร" },
-      { ok: !!lister.profilePhotoUrl, label: "รูปโปรไฟล์" },
-      { ok: !!(lister.bioText && (typeof lister.bioText === "string" ? lister.bioText.trim() : lister.bioText.th || lister.bioText.en)), label: "ข้อความแนะนำตัว" },
-      { ok: !!lister.coverPhotoUrl, label: "ภาพปก (เฉพาะแพ็กเกจที่ชำระเงิน)" },
-      { ok: !!sl.facebook, label: "ลิงก์ Facebook" },
-      { ok: !!sl.tiktok, label: "ลิงก์ TikTok" },
-      { ok: !!sl.youtube, label: "ลิงก์ YouTube" },
-      { ok: !!sl.instagram, label: "ลิงก์ Instagram" },
-      { ok: !!shareEnabled, label: "ปุ่มแชร์เว็บไซต์ (แพ็กเกจที่ชำระเงิน)" },
+      { ok: !!(lister.name || lister.displayName), label: dt.checklist.displayName || "ชื่อที่แสดง" },
+      { ok: !!lister.phone, label: dt.checklist.phone || "เบอร์โทร" },
+      { ok: !!lister.profilePhotoUrl, label: dt.checklist.profilePhoto },
+      { ok: !!(lister.bioText && (typeof lister.bioText === "string" ? lister.bioText.trim() : lister.bioText.th || lister.bioText.en)), label: dt.checklist.bioText },
+      { ok: !!lister.coverPhotoUrl, label: dt.checklist.coverPhoto },
+      { ok: !!sl.facebook, label: dt.checklist.fb },
+      { ok: !!sl.tiktok, label: dt.checklist.tiktok },
+      { ok: !!sl.youtube, label: dt.checklist.youtube },
+      { ok: !!sl.instagram, label: dt.checklist.instagram },
+      { ok: !!shareEnabled, label: dt.checklist.shareBtn },
     ];
     const done = checks.filter((c) => c.ok).length;
     return { pct: Math.round((done / checks.length) * 100), missing: checks.filter((c) => !c.ok).map((c) => c.label) };
@@ -2226,6 +2267,7 @@ class Component extends DCLogic {
   }
 
   renderVals() {
+    const dt = DASH_I18N[this.state.lang] || DASH_I18N.th;
     this._syncPreviewMap();
     this._syncOwnerMap();
     const mod = this._mod;
@@ -2241,7 +2283,8 @@ class Component extends DCLogic {
       onMarkDone: () => this.markApptDone(a.id),
       onDelete: () => this.deleteApptNow(a.id),
     }));
-    const tierLabels = { trial: "🎁 ทดลองใช้ฟรี", basic: "① ฟรี", pro: "② ระดับ 1", agency: "② ระดับ 1", level3: "③ ระดับ 2", level4: "④ ระดับ 3", silver: "🥈 VIP เงิน", gold: "🥇 VIP ทอง", diamond: "💎 VIP เพชร" };
+    const dt2 = DASH_I18N[this.state.lang] || DASH_I18N.th;
+    const tierLabels = { ...dt2.tiers, silver: "🥈 VIP", gold: "🥇 VIP", diamond: "💎 VIP" };
     const lister = this.state.lister || {};
     const isTrial = lister.tier === "trial";
     const tier2Plus = lister.tier === "pro" || lister.tier === "agency" || lister.tier === "level3" || lister.tier === "level4" || isTrial;
@@ -2383,11 +2426,11 @@ class Component extends DCLogic {
         ? "background:oklch(90% 0.01 70); color:oklch(55% 0.02 60); padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;"
         : "background:oklch(22% 0.02 60); color:white; padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;",
       showTrialActive: !!trial && !trial.ended,
-      trialDaysLeftLabel: trial ? (trial.daysLeft > 0 ? `เหลืออีก ${trial.daysLeft} วัน` : (trial.inGrace ? "หมดอายุแล้ว — อยู่ในช่วงผ่อนผัน" : "")) : "",
+      trialDaysLeftLabel: trial ? (trial.daysLeft > 0 ? dt.daysLeft(trial.daysLeft) : (trial.inGrace ? "หมดอายุแล้ว — อยู่ในช่วงผ่อนผัน" : "")) : "",
       showTrialUpsell: !!trial && trial.nearEnd,
       trialUpsellViewsLabel: trial ? `ยอดเข้าชมรวมทุกประกาศของคุณ: ${(this.state.properties || []).reduce((sum, p) => sum + (p.viewCount || 0), 0)} ครั้ง` : "",
       onLogout: () => this.onLogout(),
-      dt: DASH_I18N[this.state.lang] || DASH_I18N.th, lang: this.state.lang, langOptions: LD_LANG_OPTIONS, onSelectLang: (code) => this.onSelectLang(code),
+      dt, lang: this.state.lang, langOptions: LD_LANG_OPTIONS, onSelectLang: (code) => this.onSelectLang(code),
       debugView: this.state.view, debugDashTab: this.state.dashTab, debugLoaded: String(this.state.loaded),
       debugSignedIn: String(this.state.signedIn), debugHasLister: String(!!this.state.lister),
       showDevBar: this.state.showDevBar,
@@ -2636,7 +2679,7 @@ class Component extends DCLogic {
         : "padding:8px 12px; font-size:13px; color:oklch(35% 0.02 60); cursor:pointer; border-left:1px solid oklch(88% 0.01 70);",
       onShareMySite: () => isTrial ? window.alert("ฟีเจอร์แชร์เว็บไซต์ใช้งานได้ตั้งแต่แพ็กเกจ 1 ขึ้นไป — อัปเกรดแพ็กเกจเพื่อใช้งาน") : this.shareMySite(),
       showProfileSettings: this.state.showProfileSettings,
-      profileSettingsToggleLabel: this.state.showProfileSettings ? "ซ่อน ▲" : "แก้ไข ▼",
+      profileSettingsToggleLabel: this.state.showProfileSettings ? dt.hideToggle : dt.editToggle,
       onToggleProfileSettings: () => this.setState((s) => ({ showProfileSettings: !s.showProfileSettings })),
       ps_displayName: this.state.ps_displayName, onPsDisplayName: (e) => this.setState({ ps_displayName: e.target.value }),
       ps_phone: this.state.ps_phone, onPsPhone: (e) => this.setState({ ps_phone: e.target.value }),
