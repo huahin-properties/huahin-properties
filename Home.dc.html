@@ -41,7 +41,7 @@
 </helmet>
 
 <sc-if value="{{ showDevBar }}">
-  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">HM-5 (แก้ปุ่ม login/sign up + จำนวนบันทึก + ห้องนอน-ห้องน้ำ + ชื่อโซนย่อย ครบ 8 ภาษา ทุกจุดที่เหลือ)</div>
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">HM-6 — 8 ส.ค. 2569 14:20 (แก้ zone/title แสดง [object Object] เมื่อข้อมูลเก่าเป็น object ไม่มีภาษานั้น)</div>
 </sc-if>
 
 <sc-if value="{{ showGate }}">
@@ -654,10 +654,10 @@ class Component extends DCLogic {
       coverPhotoBg: (p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
       coverPhotoUrl: (p.photos[0] && p.photos[0].url) || "",
       noPhoto: !(p.photos[0] && p.photos[0].url),
-      zone: (p.zone && typeof p.zone === "object") ? (p.zone[lang] || p.zone.th) : p.zone,
+      zone: (p.zone && typeof p.zone === "object") ? (p.zone[lang] || p.zone.th || p.zone.en || "") : (p.zone || ""),
       propertyId: p.id,
       areaLabel: areaLabelOf(p.area),
-      title: p.title[lang],
+      title: (p.title && typeof p.title === "object") ? (p.title[lang] || p.title.en || p.title.th || "") : (p.title || ""),
       typeLabel: typeLabelOf(p.type),
       hasBedrooms: !!p.bedrooms,
       bedrooms: p.bedrooms,
@@ -916,7 +916,7 @@ class Component extends DCLogic {
       favPreview: favIds.slice(0, 3).map((id) => propsList.find((p) => p.id === id)).filter(Boolean).map((p) => ({
         href: `Property Details.dc.html?id=${p.id}`,
         photoBg: (p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
-        title: p.title[lang],
+        title: (p.title && typeof p.title === "object") ? (p.title[lang] || p.title.en || p.title.th || "") : (p.title || ""),
         areaLabel: areaLabelOf(p.area),
         priceLabel: mod.formatPrice(p.price, p.currency, lang) + (p.status === "rent" ? t.per_month : ""),
       })),
