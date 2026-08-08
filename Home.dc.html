@@ -75,7 +75,10 @@
       <h1 style="font-family:'Playfair Display',serif; font-weight:500; font-size:clamp(15.5px,4.4vw,64px); color:oklch(32% 0.13 25); line-height:1.25; letter-spacing:-0.01em; margin:8px 0 4px; max-width:100%; flex-shrink:0;">{{ w.title1 }}</h1>
       <div style="font-size:clamp(10px,2.4vw,22px); color:oklch(32% 0.02 60); margin-bottom:8px; line-height:1.3; flex-shrink:0;">{{ w.title2 }}</div>
 
-      <div style="width:100%; max-width:780px; flex:1; min-height:0; background:oklch(99% 0.005 80 / 0.96); border:1px solid oklch(75% 0.05 75 / 0.3); border-radius:20px; box-shadow:0 16px 44px oklch(20% 0.02 60 / 0.14); box-sizing:border-box; padding:clamp(12px,2.4vw,20px); display:flex; flex-direction:column;">
+      <div style="width:100%; max-width:780px; flex:1; min-height:0; background:oklch(99% 0.005 80 / 0.96); border:1px solid oklch(75% 0.05 75 / 0.3); border-radius:20px; box-shadow:0 16px 44px oklch(20% 0.02 60 / 0.14); box-sizing:border-box; padding:clamp(12px,2.4vw,20px); display:flex; flex-direction:column; position:relative;">
+        <sc-if value="{{ hasWelcomeChatMessages }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ onClearWelcomeChat }}" title="Clear chat" style="position:absolute; top:10px; right:10px; width:24px; height:24px; border-radius:50%; background:oklch(93% 0.01 75); color:oklch(45% 0.02 60); display:flex; align-items:center; justify-content:center; font-size:13px; cursor:pointer; z-index:2;">✕</div>
+        </sc-if>
         <div ref="{{ welcomeChatScrollRef }}" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; text-align:left; padding-right:2px;">
           <sc-if value="{{ !hasWelcomeChatMessages }}" hint-placeholder-val="{{ false }}">
             <div style="display:flex; align-items:flex-start; gap:10px;">
@@ -90,13 +93,20 @@
             <div style="align-self:{{ m.align }}; max-width:88%; display:flex; flex-direction:column; gap:6px;">
               <div style="{{ m.bubbleStyle }}">{{ m.text }}</div>
               <sc-for list="{{ m.links }}" as="lnk" hint-placeholder-count="0">
-                <div onClick="{{ lnk.onClick }}" style="display:flex; align-items:center; gap:8px; background:white; border:1px solid oklch(85% 0.02 70); border-radius:12px; padding:8px 10px; cursor:pointer;">
-                  <div style="width:36px; height:36px; border-radius:8px; background:{{ lnk.thumbBg }}; flex-shrink:0;"></div>
-                  <div style="min-width:0;">
-                    <div style="font-size:12.5px; font-weight:600; color:oklch(28% 0.02 60); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ lnk.label }}</div>
-                    <div style="font-size:11.5px; color:oklch(50% 0.02 60);">{{ lnk.priceLabel }}</div>
+                <sc-if value="{{ lnk.noThumb }}">
+                  <div onClick="{{ lnk.onClick }}" style="align-self:flex-start; display:inline-block; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:6px 13px; border-radius:13px; font-size:13.5px; line-height:1.5; cursor:pointer;">{{ lnk.label }}</div>
+                </sc-if>
+                <sc-if value="{{ !lnk.noThumb }}">
+                <div onClick="{{ lnk.onClick }}" style="display:flex; align-items:stretch; gap:10px; background:white; border:1px solid oklch(85% 0.02 70); border-radius:10px; padding:0; cursor:pointer; overflow:hidden;">
+                  <div style="width:76px; background:{{ lnk.thumbBg }}; flex-shrink:0;"></div>
+                  <div style="min-width:0; padding:3px 10px 3px 0; flex:1; display:flex; flex-direction:column; justify-content:center;">
+                    <div style="font-size:12.5px; font-weight:600; color:oklch(35% 0.13 25); line-height:1.2;">{{ lnk.priceLabel }}</div>
+                    <sc-if value="{{ lnk.locationLabel }}"><div style="font-size:10.5px; color:oklch(55% 0.02 60); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2;">{{ lnk.locationLabel }}</div></sc-if>
+                    <sc-if value="{{ lnk.specsLabel }}"><div style="font-size:10.5px; color:oklch(55% 0.02 60); line-height:1.2;">{{ lnk.specsLabel }}</div></sc-if>
+                    <div style="font-size:9.5px; color:oklch(65% 0.02 60); line-height:1.2;">{{ lnk.code }}</div>
                   </div>
                 </div>
+                </sc-if>
               </sc-for>
             </div>
           </sc-for>
@@ -611,17 +621,19 @@ class Component extends DCLogic {
     try {
       const saved = JSON.parse(localStorage.getItem("hh_chat_history") || "null");
       if (saved && saved.length) {
-        const props = this.state.effProps || (this._mod ? this._mod.PROPERTIES : []) || [];
         const msgs = saved.map((m) => ({
           role: m.role, text: m.text, align: m.role === "user" ? "flex-end" : "flex-start",
-          links: m.role === "user" ? [] : this._extractWelcomeLinks(m.text, props),
           bubbleStyle: m.role === "user"
-            ? "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 13px; border-radius:13px 13px 2px 13px; font-size:13.5px; line-height:1.5;"
-            : "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:9px 13px; border-radius:13px 13px 13px 2px; font-size:13.5px; line-height:1.5;",
+            ? "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:7px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5;"
+            : "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:7px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;",
         }));
         this.setState({ welcomeChatMessages: msgs });
       }
     } catch (e) {}
+  }
+  clearWelcomeChat() {
+    try { localStorage.removeItem("hh_chat_history"); } catch (e) {}
+    this.setState({ welcomeChatMessages: [] });
   }
   _persistWelcomeHistory(messages) {
     try { localStorage.setItem("hh_chat_history", JSON.stringify(messages.map((m) => ({ role: m.role, text: m.text })))); } catch (e) {}
@@ -657,7 +669,7 @@ class Component extends DCLogic {
       const fb = await import("./firebase-client.js");
       if (fb.logAiSearchQuery) fb.logAiSearchQuery(q, this.state.lang).catch(() => {});
     } catch (e) {}
-    const userMsg = { role: "user", text: q, align: "flex-end", links: [], bubbleStyle: "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 13px; border-radius:13px 13px 2px 13px; font-size:13.5px; line-height:1.5;" };
+    const userMsg = { role: "user", text: q, align: "flex-end", bubbleStyle: "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:7px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5;" };
     const history = [...this.state.welcomeChatMessages, userMsg];
     this.setState({ welcomeChatMessages: history, welcomeQuery: "", welcomeChatLoading: true });
     this._persistWelcomeHistory(history);
@@ -679,29 +691,53 @@ class Component extends DCLogic {
         const data = await res.json();
         reply = data.reply || data.completion || "";
       }
-      const links = this._extractWelcomeLinks(reply, props);
-      const aiMsg = { role: "assistant", text: reply, align: "flex-start", links, bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:9px 13px; border-radius:13px 13px 13px 2px; font-size:13.5px; line-height:1.5;" };
+      const links = this._extractWelcomeLinks(reply, props, this._detectLang(reply));
+      const aiMsg = { role: "assistant", text: reply, align: "flex-start", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:7px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" };
       const finalHistory = [...history, aiMsg];
       this.setState({ welcomeChatMessages: finalHistory, welcomeChatLoading: false });
       this._persistWelcomeHistory(finalHistory);
     } catch (e) {
       console.warn("welcome chat error:", e);
-      const errMsg = { role: "assistant", text: "Sorry, something went wrong. Try again or browse the full site.", align: "flex-start", links: [], bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:9px 13px; border-radius:13px 13px 13px 2px; font-size:13.5px; line-height:1.5;" };
+      const errMsg = { role: "assistant", text: "Sorry, something went wrong. Try again or browse the full site.", align: "flex-start", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:7px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" };
       const finalHistory = [...history, errMsg];
       this.setState({ welcomeChatMessages: finalHistory, welcomeChatLoading: false });
       this._persistWelcomeHistory(finalHistory);
     }
     this._scrollWelcomeChat();
   }
-  _extractWelcomeLinks(text, props) {
+  _detectLang(text) {
+    if (!text) return this.state.lang;
+    if (/[\u0E00-\u0E7F]/.test(text)) return "th";
+    if (/[\u4e00-\u9fff]/.test(text)) return "zh";
+    if (/[\u0400-\u04FF]/.test(text)) return "ru";
+    return this.state.lang === "en" ? "en" : this.state.lang;
+  }
+  _extractWelcomeLinks(text, props, custLang) {
     if (!text) return [];
-    const codes = [...new Set((text.match(/\b[A-Z]{2,4}-\d{2,4}\b/g) || []))];
+    if (/list your property|ฝากขาย|ฝากเช่า|เผยแพร่ทรัพย์|разместить (свой )?объект|发布(您的)?房源|immobilie inserieren|legg ut din eiendom|publier votre bien|pubblica il tuo immobile/i.test(text)) {
+      const labels = { en: "List property", th: "ฝากขาย/เช่า", zh: "发布房源", ru: "Разместить", de: "Inserieren", no: "Legg ut", fr: "Publier", it: "Pubblica" };
+      return [{ label: labels[custLang] || labels.en, noThumb: true, onClick: () => { window.location.href = "Agent Signup.dc.html"; } }];
+    }
+    const codes = [...new Set((text.match(/\b[A-Z]{2,4}-\d{2,6}\b/g) || []))];
     return codes.map((code) => {
       const p = props.find((pr) => pr.id === code);
       if (!p) return null;
       const photoUrl = p.photos && p.photos[0] && p.photos[0].url;
       const thumbBg = photoUrl ? `url(${photoUrl}) center/cover` : "oklch(88% 0.02 75)";
-      return { label: code, thumbBg, priceLabel: `${(p.price || 0).toLocaleString()} ${p.currency || "THB"}`, onClick: () => { window.location.href = "Property Details.dc.html?id=" + encodeURIComponent(code); } };
+      const title = (p.title && (p.title.en || p.title.th)) || code;
+      const zoneStr = (p.zone && typeof p.zone === "object") ? (p.zone.th || p.zone.en || "") : (p.zone || "");
+      const areaLabel = { "hua-hin": "Hua Hin", "pranburi": "Pranburi", "cha-am": "Cha-am" }[p.area] || p.area || "";
+      const locationLabel = [zoneStr, p.subdistrict, areaLabel].filter(Boolean).join(", ");
+      const specsParts = [];
+      if (p.bedrooms != null) specsParts.push(`${p.bedrooms} bed`);
+      if (p.livingArea) specsParts.push(`${p.livingArea} sqm`);
+      if (p.landSize) specsParts.push(`land ${p.landSize} sqwah`);
+      return {
+        label: title, thumbBg, code,
+        priceLabel: `${(p.price || 0).toLocaleString()} ${p.currency || "THB"}`,
+        locationLabel, specsLabel: specsParts.join(" · "),
+        onClick: () => { window.location.href = "Property Details.dc.html?id=" + encodeURIComponent(code); },
+      };
     }).filter(Boolean);
   }
   _scrollWelcomeChat() {
@@ -1044,7 +1080,9 @@ class Component extends DCLogic {
       welcomeOpacity: this.state.welcomeDismissing ? 0 : 1,
       welcomeQuery: this.state.welcomeQuery, onWelcomeQuery: (e) => this.setState({ welcomeQuery: e.target.value }),
       hasWelcomeQuery: !!(this.state.welcomeQuery || "").trim(),
-      welcomeChatMessages: this.state.welcomeChatMessages, hasWelcomeChatMessages: this.state.welcomeChatMessages.length > 0,
+      welcomeChatMessages: this.state.welcomeChatMessages.map((m) => ({ ...m, links: m.role === "user" ? [] : this._extractWelcomeLinks(m.text, this.state.effProps || [], this._detectLang(m.text)) })),
+      hasWelcomeChatMessages: this.state.welcomeChatMessages.length > 0,
+      onClearWelcomeChat: () => this.clearWelcomeChat(),
       welcomeChatLoading: this.state.welcomeChatLoading,
       welcomeChatScrollRef: (el) => { this._welcomeChatScrollEl = el; },
       onWelcomeSubmit: () => this.submitWelcome(),
