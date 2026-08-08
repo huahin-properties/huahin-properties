@@ -41,7 +41,7 @@
 </helmet>
 
 <sc-if value="{{ showDevBar }}">
-  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">HM-7 — 8 ส.ค. 2569 (เพิ่มหน้า AI Welcome Gateway เต็มจอ โชว์วันละครั้ง)</div>
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">HM-10 — 8 ส.ค. 2569 (Welcome: non-member เห็นทุกครั้ง, member เห็นวันละครั้ง+ปุ่มเข้าระบบ/แดชบอร์ด)</div>
 </sc-if>
 
 <sc-if value="{{ showGate }}">
@@ -72,7 +72,10 @@
 
     <div onClick="{{ onWelcomeSampleClick }}" style="margin-top:16px; font-size:12.5px; color:oklch(45% 0.09 220); background:oklch(96% 0.02 220); border:1px solid oklch(88% 0.03 220); padding:7px 16px; border-radius:100px; cursor:pointer;">💬 {{ w.sample }}</div>
 
-    <div onClick="{{ onWelcomeDismiss }}" style="margin-top:44px; font-size:13px; color:oklch(55% 0.02 60); cursor:pointer; text-decoration:underline; text-underline-offset:3px;">{{ w.browseSite }}</div>
+    <div style="display:flex; gap:20px; align-items:center; margin-top:44px; flex-wrap:wrap; justify-content:center;">
+      <a href="{{ personHref }}" onClick="{{ onWelcomeMarkSeen }}" style="font-size:13px; font-weight:600; color:oklch(40% 0.13 25); text-decoration:none;">{{ welcomeLoginLabel }}</a>
+      <div onClick="{{ onWelcomeDismiss }}" style="font-size:13px; color:oklch(55% 0.02 60); cursor:pointer; text-decoration:underline; text-underline-offset:3px;">{{ w.browseSite }}</div>
+    </div>
   </div>
 </sc-if>
 
@@ -574,7 +577,7 @@ class Component extends DCLogic {
     isMobile: (typeof window !== "undefined" && window.innerWidth < 900),
     mobileMenuOpen: false,
     showGate: false, gatePassword: "", gateError: "",
-    showWelcome: (() => { try { return localStorage.getItem("hhWelcomeSeenDate") !== new Date().toDateString(); } catch (e) { return true; } })(),
+    showWelcome: true, welcomeCheckedLogin: false,
     welcomeQuery: "", welcomeDismissing: false,
     wantValue: "sale",
     keyword: "",
@@ -598,7 +601,13 @@ class Component extends DCLogic {
     this._fb = fb0;
     try {
       const u = fb0.getCurrentAuthUser();
-      if (u) this.setState({ personHref: "Lister Dashboard.dc.html", isLoggedIn: true });
+      if (u) {
+        this.setState({ personHref: "Lister Dashboard.dc.html", isLoggedIn: true });
+        const seenToday = (() => { try { return localStorage.getItem("hhWelcomeSeenDate") === new Date().toDateString(); } catch (e) { return false; } })();
+        const forceWelcome = /[?&]welcome=1/.test(window.location.search);
+        if (seenToday && !forceWelcome) { window.location.href = "Lister Dashboard.dc.html"; return; }
+        this.setState({ showWelcome: true });
+      }
     } catch (e) {}
     if (!fb0.hasSiteBypass() && !fb0.isAdminAuthed()) {
       try {
@@ -674,7 +683,7 @@ class Component extends DCLogic {
     const gateVals = {
       showDevBar: this.state.showDevBar,
       showGate: this.state.showGate,
-      showChrome: !this.state.showGate,
+      showChrome: !this.state.showGate && !(this.state.showWelcome && !this.state.isLoggedIn),
       gatePassword: this.state.gatePassword,
       gateInputRef: (el) => { this._gateInputEl = el; },
       onGatePassword: (e) => { this.setState({ gatePassword: e.target.value, gateError: "" }); },
@@ -883,7 +892,9 @@ class Component extends DCLogic {
     return {
       t: tMerged,
       w: WELCOME_I18N.en,
-      showWelcome: this.state.showWelcome && !this.state.isLoggedIn, welcomeDismissing: this.state.welcomeDismissing,
+      showWelcome: this.state.showWelcome, welcomeDismissing: this.state.welcomeDismissing,
+      welcomeLoginLabel: this.state.isLoggedIn ? "→ Go to my Dashboard" : "Log in / Sign up",
+      onWelcomeMarkSeen: () => this.markWelcomeSeen(),
       welcomeOpacity: this.state.welcomeDismissing ? 0 : 1,
       welcomeQuery: this.state.welcomeQuery, onWelcomeQuery: (e) => this.setState({ welcomeQuery: e.target.value }),
       onWelcomeSubmit: () => this.submitWelcome(),
