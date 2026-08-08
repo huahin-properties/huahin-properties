@@ -41,7 +41,7 @@
 </helmet>
 
 <sc-if value="{{ showDevBar }}">
-  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">HM-15 — 8 ส.ค. 2569 (Welcome Gateway: คำนวณ font-size หัวข้อใหม่ตามความกว้างข้อความจริง ให้พอดี 1 บรรทัดบนจอเล็กสุด 320px)</div>
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">HM-16 — 8 ส.ค. 2569 (Welcome Gateway: รีดีไซน์เต็มรูปแบบตามภาพอ้างอิง — พื้นหลังภาพวิลล่า, กล่องแชท AI ใหญ่, เส้นคั่นทอง, การ์ด 4 คุณค่า, footer login เลือดหมู)</div>
 </sc-if>
 
 <sc-if value="{{ showGate }}">
@@ -58,25 +58,56 @@
 </sc-if>
 
 <sc-if value="{{ showWelcome }}" hint-placeholder-val="{{ false }}">
-  <div style="position:fixed; inset:0; z-index:9000; background:linear-gradient(160deg, oklch(97% 0.015 75) 0%, oklch(94% 0.02 70) 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:clamp(20px,6vw,24px); box-sizing:border-box; text-align:center; opacity:{{ welcomeOpacity }}; transition:opacity 0.28s ease; overflow-y:auto; overflow-x:hidden;">
-    <img src="logo.png" alt="huahin.properties logo" style="height:clamp(40px,9vw,52px); width:clamp(40px,9vw,52px); object-fit:contain; border-radius:50%; margin-bottom:14px; flex-shrink:0;" />
-    <div style="font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:oklch(42% 0.12 25); margin-bottom:12px;">{{ w.kicker }}</div>
-    <div style="font-family:'Playfair Display',serif; font-size:clamp(16px,4.6vw,34px); color:oklch(20% 0.02 60); line-height:1.15; width:100%; max-width:640px; margin-bottom:10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ w.title1 }}</div>
-    <div style="font-size:clamp(13.5px,3.6vw,17px); color:oklch(45% 0.02 60); max-width:480px; margin-bottom:clamp(22px,5vw,34px); line-height:1.55; padding:0 8px;">{{ w.title2 }}</div>
+  <div style="position:fixed; inset:0; z-index:9000; overflow-y:auto; overflow-x:hidden; opacity:{{ welcomeOpacity }}; transition:opacity 0.3s ease; background-image:linear-gradient(180deg, oklch(98% 0.02 75 / 0.55) 0%, oklch(96% 0.02 70 / 0.65) 55%, oklch(93% 0.02 65 / 0.78) 100%), url('https://images.unsplash.com/photo-1602343168117-bb8ffe3e2e9f?q=80&amp;w=2000&amp;auto=format&amp;fit=crop'); background-size:cover; background-position:center; display:flex; flex-direction:column; align-items:center;">
+    <div style="width:100%; max-width:1100px; padding:clamp(28px,6vw,50px) clamp(18px,4vw,40px) 0; display:flex; flex-direction:column; align-items:center; text-align:center; box-sizing:border-box;">
+      <img src="logo.png" alt="huahin.properties logo" style="height:clamp(52px,8vw,82px); width:clamp(52px,8vw,82px); object-fit:contain; border-radius:50%; margin-bottom:18px; box-shadow:0 6px 20px oklch(20% 0.02 60 / 0.18);" />
+      <h1 style="font-family:'Playfair Display',serif; font-weight:500; font-size:clamp(26px,5.6vw,58px); color:oklch(32% 0.13 25); line-height:1.08; letter-spacing:-0.01em; margin:0 0 14px; white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis;">{{ w.title1 }}</h1>
+      <div style="font-size:clamp(14px,2.4vw,22px); color:oklch(32% 0.02 60); margin-bottom:16px; line-height:1.4;">{{ w.title2 }}</div>
+      <div style="width:170px; height:1px; background:oklch(65% 0.1 80); position:relative; margin-bottom:22px;">
+        <div style="position:absolute; left:50%; top:-3px; transform:translateX(-50%) rotate(45deg); width:6px; height:6px; background:oklch(65% 0.1 80);"></div>
+      </div>
 
-    <div style="width:100%; max-width:400px; display:flex; align-items:center; gap:6px; background:white; border:1.5px solid oklch(85% 0.02 70); border-radius:100px; padding:8px 8px 8px 16px; box-shadow:0 8px 28px oklch(20% 0.02 60 / 0.08); box-sizing:border-box;">
-      <input value="{{ welcomeQuery }}" onChange="{{ onWelcomeQuery }}" onKeyDown="{{ onWelcomeKeyDown }}" placeholder="{{ w.placeholder }}" style="flex:1; min-width:0; width:0; border:none; outline:none; font-size:13px; font-family:inherit; background:transparent; color:oklch(20% 0.02 60);" />
-      <div onClick="{{ onWelcomeMic }}" title="🎙️" style="width:32px; height:32px; border-radius:50%; background:oklch(94% 0.01 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; flex-shrink:0;">🎙️</div>
+      <div style="display:flex; gap:10px; flex-wrap:nowrap; overflow-x:auto; max-width:100%; padding:2px 2px 10px; margin-bottom:14px; justify-content:{{ chipsJustify }};">
+        <sc-for list="{{ suggestionChips }}" as="chip" hint-placeholder-count="3">
+          <div onClick="{{ chip.onClick }}" style="flex-shrink:0; display:flex; align-items:center; gap:7px; background:oklch(99% 0.005 80 / 0.9); border:1px solid oklch(70% 0.06 70 / 0.35); border-radius:100px; padding:11px 20px; font-size:14.5px; color:oklch(28% 0.02 60); cursor:pointer; box-shadow:0 2px 10px oklch(20% 0.02 60 / 0.05); white-space:nowrap;">
+            <span>{{ chip.icon }}</span>{{ chip.label }}
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="width:100%; max-width:780px; background:oklch(99% 0.005 80 / 0.96); border:1px solid oklch(75% 0.05 75 / 0.3); border-radius:24px; box-shadow:0 16px 44px oklch(20% 0.02 60 / 0.14); box-sizing:border-box; padding:clamp(16px,3vw,26px) clamp(16px,3vw,22px) clamp(14px,2.4vw,18px); display:flex; flex-direction:column; min-height:clamp(300px,42vw,420px);">
+        <div style="display:flex; align-items:flex-start; gap:10px; text-align:left; margin-bottom:16px;">
+          <div style="font-size:19px; flex-shrink:0; margin-top:1px;">✨</div>
+          <div>
+            <div style="font-size:clamp(15px,1.8vw,17px); font-weight:600; color:oklch(24% 0.02 60);">{{ w.chatGreeting }}</div>
+            <div style="font-size:clamp(13px,1.6vw,15px); color:oklch(48% 0.02 60); margin-top:3px;">{{ w.chatSub }}</div>
+          </div>
+        </div>
+
+        <div style="flex:1;"></div>
+
+        <div style="display:flex; align-items:center; gap:8px; background:white; border:1px solid oklch(82% 0.02 70); border-radius:18px; padding:clamp(10px,1.6vw,14px) clamp(10px,1.6vw,14px) clamp(10px,1.6vw,14px) clamp(16px,2.4vw,22px); box-sizing:border-box;">
+          <input value="{{ welcomeQuery }}" onChange="{{ onWelcomeQuery }}" onKeyDown="{{ onWelcomeKeyDown }}" placeholder="{{ w.placeholder }}" style="flex:1; min-width:0; width:0; border:none; outline:none; font-size:clamp(13.5px,1.7vw,16px); font-family:inherit; background:transparent; color:oklch(20% 0.02 60);" />
+          <div onClick="{{ onWelcomeMic }}" title="🎙️" style="width:clamp(38px,5vw,48px); height:clamp(38px,5vw,48px); border-radius:50%; background:oklch(95% 0.02 80); color:oklch(38% 0.13 65); display:flex; align-items:center; justify-content:center; font-size:clamp(15px,2vw,19px); cursor:pointer; flex-shrink:0;">🎙️</div>
+        </div>
+      </div>
+
+      <div onClick="{{ onWelcomeSubmit }}" style="margin-top:16px; color:oklch(32% 0.13 25); font-size:clamp(14.5px,1.8vw,17px); font-weight:600; cursor:pointer; padding:9px 20px; border-radius:100px; background:oklch(99% 0.005 80 / 0.6);">✨ {{ w.submit }}</div>
+
+      <div style="width:100%; max-width:1000px; display:grid; grid-template-columns:repeat({{ benefitCols }},1fr); gap:clamp(14px,2vw,20px); margin-top:clamp(24px,4vw,40px); text-align:center;">
+        <sc-for list="{{ benefitItems }}" as="b" hint-placeholder-count="4">
+          <div style="padding:0 8px;">
+            <div style="font-size:clamp(22px,3vw,30px); color:oklch(65% 0.1 80); margin-bottom:8px;">{{ b.icon }}</div>
+            <div style="font-size:clamp(14px,1.6vw,16px); font-weight:600; color:oklch(24% 0.02 60); margin-bottom:4px;">{{ b.title }}</div>
+            <div style="font-size:clamp(12px,1.4vw,13.5px); color:oklch(48% 0.02 60); line-height:1.5;">{{ b.desc }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div onClick="{{ onWelcomeDismiss }}" style="margin-top:clamp(26px,4vw,40px); font-size:clamp(14px,1.6vw,17px); color:oklch(40% 0.03 60); cursor:pointer; text-decoration:underline; text-underline-offset:4px;">{{ w.browseSite }}</div>
     </div>
 
-    <div onClick="{{ onWelcomeSubmit }}" style="margin-top:12px; background:oklch(40% 0.13 25); color:white; padding:8px 18px; border-radius:100px; font-size:12px; font-weight:600; cursor:pointer; display:inline-block;">{{ w.submit }}</div>
-
-    <div onClick="{{ onWelcomeSampleClick }}" style="margin-top:12px; font-size:12px; color:oklch(45% 0.09 220); background:oklch(96% 0.02 220); border:1px solid oklch(88% 0.03 220); padding:7px 14px; border-radius:100px; cursor:pointer; max-width:90vw; box-sizing:border-box;">💬 {{ w.sample }}</div>
-
-    <div style="display:flex; gap:16px; align-items:center; margin-top:clamp(24px,6vw,44px); flex-wrap:wrap; justify-content:center;">
-      <a href="{{ personHref }}" onClick="{{ onWelcomeMarkSeen }}" style="font-size:13px; font-weight:600; color:oklch(40% 0.13 25); text-decoration:none;">{{ welcomeLoginLabel }}</a>
-      <div onClick="{{ onWelcomeDismiss }}" style="font-size:13px; color:oklch(55% 0.02 60); cursor:pointer; text-decoration:underline; text-underline-offset:3px;">{{ w.browseSite }}</div>
-    </div>
+    <a href="{{ personHref }}" onClick="{{ onWelcomeMarkSeen }}" style="margin-top:clamp(22px,4vw,34px); width:100%; background:oklch(32% 0.13 25); color:white; text-decoration:none; text-align:center; padding:clamp(20px,2.6vw,26px) 16px; font-size:clamp(14.5px,1.8vw,17px); font-weight:500; box-sizing:border-box;">{{ welcomeLoginLabel }}</a>
   </div>
 </sc-if>
 
@@ -536,7 +567,20 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 const WELCOME_I18N = {
-  en: { kicker: "huahin.properties", title1: "Welcome to Hua Hin Properties.", title2: "Find your perfect property with AI.", placeholder: "Tell us what you're looking for — e.g. \"3 bedroom pool villa under 9M\"", sample: "3 bedroom pool villa under 9M", submit: "Search with AI", browseSite: "Browse the full site instead →" },
+  en: { kicker: "huahin.properties", title1: "Welcome to Hua Hin Properties", title2: "Find your perfect property with AI.",
+    chatGreeting: "Hi! What kind of property are you looking for?", chatSub: "You can type or speak to tell me your needs.",
+    chips: [
+      { icon: "🏠", label: "3 bedroom pool villa under 9M" },
+      { icon: "🌊", label: "Villa near the beach" },
+      { icon: "📍", label: "House in Hua Hin Soi 88" },
+    ],
+    benefits: [
+      { icon: "🏠", title: "Wide Selection", desc: "Thousands of properties in Hua Hin & nearby areas." },
+      { icon: "🛡️", title: "Trusted Agents", desc: "Verified property listings from local experts." },
+      { icon: "❤️", title: "Tailored for You", desc: "AI helps you find the perfect property that fits your needs." },
+      { icon: "🗺️", title: "Local Expertise", desc: "In-depth knowledge of the Hua Hin market." },
+    ],
+    placeholder: "Type your message here... — e.g. \"3 bedroom pool villa under 9M\"", sample: "3 bedroom pool villa under 9M", submit: "Search with AI", browseSite: "Browse the full site instead →" },
   th: { kicker: "huahin.properties", title1: "ยินดีต้อนรับสู่หัวหิน พร็อพเพอร์ตี้", title2: "บอกความต้องการ แล้วให้ AI ค้นหาทรัพย์ที่ใช่ให้คุณ", placeholder: "บอกสิ่งที่คุณต้องการ — เช่น \"พูลวิลล่า 3 ห้องนอน ไม่เกิน 9 ล้าน\"", sample: "พูลวิลล่า 3 ห้องนอน ไม่เกิน 9 ล้าน", submit: "ค้นหาด้วย AI", browseSite: "เข้าเว็บไซต์แบบปกติแทน →" },
   ru: { kicker: "huahin.properties", title1: "Добро пожаловать в Hua Hin Properties.", title2: "Найдите идеальную недвижимость с помощью ИИ.", placeholder: "Расскажите, что вы ищете — напр. «вилла с бассейном, 3 спальни, до 9 млн»", sample: "Вилла с бассейном, 3 спальни, до 9 млн", submit: "Поиск с ИИ", browseSite: "Перейти на обычный сайт →" },
   zh: { kicker: "huahin.properties", title1: "欢迎来到华欣房产。", title2: "用 AI 找到您理想的房产。", placeholder: "告诉我们您的需求 — 例如「3居室泳池别墅，900万以内」", sample: "3居室泳池别墅，900万以内", submit: "用 AI 搜索", browseSite: "改为浏览完整网站 →" },
@@ -890,9 +934,10 @@ class Component extends DCLogic {
       };
     });
 
+    const w = WELCOME_I18N[lang] || WELCOME_I18N.en;
     return {
       t: tMerged,
-      w: WELCOME_I18N.en,
+      w,
       showWelcome: this.state.showWelcome, welcomeDismissing: this.state.welcomeDismissing,
       welcomeLoginLabel: this.state.isLoggedIn ? "→ Go to my Dashboard" : "Log in / Sign up",
       onWelcomeMarkSeen: () => this.markWelcomeSeen(),
@@ -901,6 +946,10 @@ class Component extends DCLogic {
       onWelcomeSubmit: () => this.submitWelcome(),
       onWelcomeKeyDown: (e) => { if (e.key === "Enter") this.submitWelcome(); },
       onWelcomeSampleClick: () => { this.setState({ welcomeQuery: (WELCOME_I18N[lang] || WELCOME_I18N.en).sample }); },
+      chipsJustify: "center",
+      suggestionChips: (w.chips || WELCOME_I18N.en.chips).map((c) => ({ icon: c.icon, label: c.label, onClick: () => this.setState({ welcomeQuery: c.label }) })),
+      benefitCols: (typeof window !== "undefined" && window.innerWidth < 640) ? 2 : 4,
+      benefitItems: w.benefits || WELCOME_I18N.en.benefits,
       onWelcomeMic: () => window.dispatchEvent(new CustomEvent("hh-open-voice-chat")),
       onWelcomeDismiss: () => this.dismissWelcome(),
       lang,
