@@ -41,7 +41,7 @@
 </helmet>
 
 <sc-if value="{{ showDevBar }}">
-  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">HM-6 — 8 ส.ค. 2569 14:20 (แก้ zone/title แสดง [object Object] เมื่อข้อมูลเก่าเป็น object ไม่มีภาษานั้น)</div>
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">HM-7 — 8 ส.ค. 2569 (เพิ่มหน้า AI Welcome Gateway เต็มจอ โชว์วันละครั้ง)</div>
 </sc-if>
 
 <sc-if value="{{ showGate }}">
@@ -54,6 +54,25 @@
       <div onClick="{{ onGateSubmit }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:12px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">เข้าดูตัวอย่าง</div>
       <sc-if value="{{ gateError }}"><div style="font-size:13px; color:oklch(50% 0.18 30);">{{ gateError }}</div></sc-if>
     </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ showWelcome }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed; inset:0; z-index:9000; background:linear-gradient(160deg, oklch(97% 0.015 75) 0%, oklch(94% 0.02 70) 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center; opacity:{{ welcomeOpacity }}; transition:opacity 0.28s ease;">
+    <img src="logo.png" alt="huahin.properties logo" style="height:52px; width:52px; object-fit:contain; border-radius:50%; margin-bottom:18px;" />
+    <div style="font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:oklch(42% 0.12 25); margin-bottom:14px;">{{ w.kicker }}</div>
+    <div style="font-family:'Playfair Display',serif; font-size:clamp(26px,4.2vw,42px); color:oklch(20% 0.02 60); line-height:1.25; max-width:720px; margin-bottom:10px;">{{ w.title1 }}</div>
+    <div style="font-size:clamp(14px,1.8vw,17px); color:oklch(45% 0.02 60); max-width:520px; margin-bottom:34px; line-height:1.6;">{{ w.title2 }}</div>
+
+    <div style="width:100%; max-width:640px; display:flex; align-items:center; gap:8px; background:white; border:1.5px solid oklch(85% 0.02 70); border-radius:100px; padding:8px 8px 8px 22px; box-shadow:0 8px 28px oklch(20% 0.02 60 / 0.08);">
+      <input value="{{ welcomeQuery }}" onChange="{{ onWelcomeQuery }}" onKeyDown="{{ onWelcomeKeyDown }}" placeholder="{{ w.placeholder }}" style="flex:1; border:none; outline:none; font-size:15px; font-family:inherit; background:transparent; color:oklch(20% 0.02 60);" />
+      <div onClick="{{ onWelcomeMic }}" title="🎙️" style="width:42px; height:42px; border-radius:50%; background:oklch(94% 0.01 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; font-size:17px; cursor:pointer; flex-shrink:0;">🎙️</div>
+      <div onClick="{{ onWelcomeSubmit }}" style="background:oklch(40% 0.13 25); color:white; padding:12px 24px; border-radius:100px; font-size:14px; font-weight:600; cursor:pointer; white-space:nowrap; flex-shrink:0;">{{ w.submit }}</div>
+    </div>
+
+    <div onClick="{{ onWelcomeSampleClick }}" style="margin-top:16px; font-size:12.5px; color:oklch(45% 0.09 220); background:oklch(96% 0.02 220); border:1px solid oklch(88% 0.03 220); padding:7px 16px; border-radius:100px; cursor:pointer;">💬 {{ w.sample }}</div>
+
+    <div onClick="{{ onWelcomeDismiss }}" style="margin-top:44px; font-size:13px; color:oklch(55% 0.02 60); cursor:pointer; text-decoration:underline; text-underline-offset:3px;">{{ w.browseSite }}</div>
   </div>
 </sc-if>
 
@@ -512,7 +531,36 @@
 
 </x-dc>
 <script type="text/x-dc" data-dc-script>
+const WELCOME_I18N = {
+  en: { kicker: "huahin.properties", title1: "Welcome to Hua Hin Properties.", title2: "Find your perfect property with AI.", placeholder: "Tell us what you're looking for — e.g. \"3 bedroom pool villa under 9M\"", sample: "3 bedroom pool villa under 9M", submit: "Search with AI", browseSite: "Browse the full site instead →" },
+  th: { kicker: "huahin.properties", title1: "ยินดีต้อนรับสู่หัวหิน พร็อพเพอร์ตี้", title2: "บอกความต้องการ แล้วให้ AI ค้นหาทรัพย์ที่ใช่ให้คุณ", placeholder: "บอกสิ่งที่คุณต้องการ — เช่น \"พูลวิลล่า 3 ห้องนอน ไม่เกิน 9 ล้าน\"", sample: "พูลวิลล่า 3 ห้องนอน ไม่เกิน 9 ล้าน", submit: "ค้นหาด้วย AI", browseSite: "เข้าเว็บไซต์แบบปกติแทน →" },
+  ru: { kicker: "huahin.properties", title1: "Добро пожаловать в Hua Hin Properties.", title2: "Найдите идеальную недвижимость с помощью ИИ.", placeholder: "Расскажите, что вы ищете — напр. «вилла с бассейном, 3 спальни, до 9 млн»", sample: "Вилла с бассейном, 3 спальни, до 9 млн", submit: "Поиск с ИИ", browseSite: "Перейти на обычный сайт →" },
+  zh: { kicker: "huahin.properties", title1: "欢迎来到华欣房产。", title2: "用 AI 找到您理想的房产。", placeholder: "告诉我们您的需求 — 例如「3居室泳池别墅，900万以内」", sample: "3居室泳池别墅，900万以内", submit: "用 AI 搜索", browseSite: "改为浏览完整网站 →" },
+  de: { kicker: "huahin.properties", title1: "Willkommen bei Hua Hin Properties.", title2: "Finden Sie Ihre perfekte Immobilie mit KI.", placeholder: "Sagen Sie uns, wonach Sie suchen — z.B. \"3-Zimmer-Poolvilla unter 9 Mio.\"", sample: "3-Zimmer-Poolvilla unter 9 Mio.", submit: "Mit KI suchen", browseSite: "Stattdessen die ganze Website durchsuchen →" },
+  no: { kicker: "huahin.properties", title1: "Velkommen til Hua Hin Properties.", title2: "Finn din perfekte eiendom med AI.", placeholder: "Fortell oss hva du leter etter — f.eks. \"3-roms poolvilla under 9M\"", sample: "3-roms poolvilla under 9M", submit: "Søk med AI", browseSite: "Bla gjennom hele siden i stedet →" },
+  fr: { kicker: "huahin.properties", title1: "Bienvenue chez Hua Hin Properties.", title2: "Trouvez votre bien idéal grâce à l'IA.", placeholder: "Dites-nous ce que vous cherchez — ex. \"villa avec piscine 3 chambres sous 9M\"", sample: "Villa avec piscine 3 chambres sous 9M", submit: "Rechercher avec l'IA", browseSite: "Parcourir le site complet →" },
+  it: { kicker: "huahin.properties", title1: "Benvenuto su Hua Hin Properties.", title2: "Trova la tua proprietà ideale con l'IA.", placeholder: "Dicci cosa cerchi — es. \"villa con piscina 3 camere sotto 9M\"", sample: "Villa con piscina 3 camere sotto 9M", submit: "Cerca con l'IA", browseSite: "Sfoglia invece il sito completo →" },
+};
+
 class Component extends DCLogic {
+  markWelcomeSeen() {
+    try { localStorage.setItem("hhWelcomeSeenDate", new Date().toDateString()); } catch (e) {}
+  }
+  dismissWelcome() {
+    this.markWelcomeSeen();
+    this.setState({ welcomeDismissing: true });
+    setTimeout(() => this.setState({ showWelcome: false }), 280);
+  }
+  async submitWelcome() {
+    const q = (this.state.welcomeQuery || "").trim();
+    if (!q) return;
+    this.markWelcomeSeen();
+    try {
+      const fb = await import("./firebase-client.js");
+      if (fb.logAiSearchQuery) fb.logAiSearchQuery(q, this.state.lang).catch(() => {});
+    } catch (e) {}
+    window.location.href = "Search Results.dc.html?q=" + encodeURIComponent(q);
+  }
   goToPage(p) {
     this.setState({ page: p });
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -526,6 +574,8 @@ class Component extends DCLogic {
     isMobile: (typeof window !== "undefined" && window.innerWidth < 900),
     mobileMenuOpen: false,
     showGate: false, gatePassword: "", gateError: "",
+    showWelcome: (() => { try { return localStorage.getItem("hhWelcomeSeenDate") !== new Date().toDateString(); } catch (e) { return true; } })(),
+    welcomeQuery: "", welcomeDismissing: false,
     wantValue: "sale",
     keyword: "",
     areaValue: "",
@@ -832,6 +882,15 @@ class Component extends DCLogic {
 
     return {
       t: tMerged,
+      w: WELCOME_I18N.en,
+      showWelcome: this.state.showWelcome && !this.state.isLoggedIn, welcomeDismissing: this.state.welcomeDismissing,
+      welcomeOpacity: this.state.welcomeDismissing ? 0 : 1,
+      welcomeQuery: this.state.welcomeQuery, onWelcomeQuery: (e) => this.setState({ welcomeQuery: e.target.value }),
+      onWelcomeSubmit: () => this.submitWelcome(),
+      onWelcomeKeyDown: (e) => { if (e.key === "Enter") this.submitWelcome(); },
+      onWelcomeSampleClick: () => { this.setState({ welcomeQuery: (WELCOME_I18N[lang] || WELCOME_I18N.en).sample }); },
+      onWelcomeMic: () => window.dispatchEvent(new CustomEvent("hh-open-voice-chat")),
+      onWelcomeDismiss: () => this.dismissWelcome(),
       lang,
       personHref: this.state.personHref,
       isLoggedIn: this.state.isLoggedIn,
