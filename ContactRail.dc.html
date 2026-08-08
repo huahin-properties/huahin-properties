@@ -388,7 +388,7 @@ class Component extends DCLogic {
   state = {
     isMobile: (typeof window !== "undefined" && window.innerWidth < 640),
     ownerPreview: false,
-    railOpen: true, formOpen: false, submitted: false, favoritesOpen: false, favIds: [],
+    railOpen: false, formOpen: false, submitted: false, favoritesOpen: false, favIds: [],
     favFilterStatus: "", favFilterBedrooms: "", favFilterZone: "", favFilterArea: "", favFilterPriceMax: "", saveMsg: "",
     favCollections: [], favActiveCollection: "", favPendingIds: [], showAddToCollectionFor: "", favMinimized: false,
     name: "", phone: "", email: "", message: "",
@@ -402,8 +402,8 @@ class Component extends DCLogic {
 
   async componentDidMount() {
     try {
-      const collapsed = localStorage.getItem("contactRailCollapsed") === "1";
-      this.setState({ railOpen: !collapsed });
+      const collapsed = localStorage.getItem("contactRailCollapsed");
+      this.setState({ railOpen: collapsed === "0" });
     } catch (e) {}
     this._onOpenVoiceChat = () => {
       this.setState({ chatOpen: true });
@@ -760,6 +760,7 @@ class Component extends DCLogic {
     if (/[\u0400-\u04FF]/.test(text)) return "ru";
     return this.state.lang === "en" ? "en" : this.state.lang;
   }
+  _navigate(href) {
     const isDesktop = window.matchMedia("(min-width: 768px)").matches;
     if (isDesktop) {
       window.open(href, "_blank", "noopener");
