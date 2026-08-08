@@ -101,8 +101,8 @@
     </div>
 
     <div style="display:flex; gap:0; margin-bottom:20px; border-bottom:1px solid oklch(88% 0.01 70);">
-      <div onClick="{{ onTabSignup }}" style="padding:10px 20px; font-size:14px; font-weight:600; cursor:pointer; border-bottom:2px solid {{ signupTabColor }}; color:{{ signupTabColor }};">Sign up Free</div>
-      <div onClick="{{ onTabLogin }}" style="padding:10px 20px; font-size:14px; font-weight:600; cursor:pointer; border-bottom:2px solid {{ loginTabColor }}; color:{{ loginTabColor }};">Login</div>
+      <div onClick="{{ onTabSignup }}" style="padding:10px 20px; font-size:14px; font-weight:600; cursor:pointer; border-bottom:2px solid {{ signupTabColor }}; color:{{ signupTabColor }};">{{ t.signupTab }}</div>
+      <div onClick="{{ onTabLogin }}" style="padding:10px 20px; font-size:14px; font-weight:600; cursor:pointer; border-bottom:2px solid {{ loginTabColor }}; color:{{ loginTabColor }};">{{ t.loginTab }}</div>
     </div>
 
 
@@ -208,14 +208,14 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 const SIGNUP_I18N = {
-  en: { pickPackage: "Choose your package (required before signing up)", free: "① Free", tier2: "② Level 2", tier3: "③ Level 3", perMonth: "/month", requirePkg: "Please choose a package before signing up" },
-  th: { pickPackage: "เลือกแพ็กเกจ (จำเป็นต้องเลือกก่อนสมัคร)", free: "① ฟรี", tier2: "② ระดับ 2", tier3: "③ ระดับ 3", perMonth: "/เดือน", requirePkg: "กรุณาเลือกแพ็กเกจก่อนสมัคร" },
-  ru: { pickPackage: "Выберите пакет (обязательно перед регистрацией)", free: "① Бесплатно", tier2: "② Уровень 2", tier3: "③ Уровень 3", perMonth: "/мес", requirePkg: "Пожалуйста, выберите пакет" },
-  zh: { pickPackage: "选择套餐（注册前必选）", free: "① 免费", tier2: "② 二级", tier3: "③ 三级", perMonth: "/月", requirePkg: "请先选择套餐" },
-  de: { pickPackage: "Paket wählen (vor Anmeldung erforderlich)", free: "① Kostenlos", tier2: "② Stufe 2", tier3: "③ Stufe 3", perMonth: "/Monat", requirePkg: "Bitte wählen Sie ein Paket" },
-  no: { pickPackage: "Velg pakke (påkrevd før registrering)", free: "① Gratis", tier2: "② Nivå 2", tier3: "③ Nivå 3", perMonth: "/mnd", requirePkg: "Velg en pakke" },
-  fr: { pickPackage: "Choisissez votre forfait (requis avant l'inscription)", free: "① Gratuit", tier2: "② Niveau 2", tier3: "③ Niveau 3", perMonth: "/mois", requirePkg: "Veuillez choisir un forfait" },
-  it: { pickPackage: "Scegli il pacchetto (obbligatorio prima dell'iscrizione)", free: "① Gratuito", tier2: "② Livello 2", tier3: "③ Livello 3", perMonth: "/mese", requirePkg: "Seleziona un pacchetto" },
+  en: { pickPackage: "Choose your package (required before signing up)", signupTab: "Sign up Free", loginTab: "Login", free: "① Free", tier2: "② Level 2", tier3: "③ Level 3", perMonth: "/month", requirePkg: "Please choose a package before signing up" },
+  th: { pickPackage: "เลือกแพ็กเกจ (จำเป็นต้องเลือกก่อนสมัคร)", signupTab: "สมัครฟรี", loginTab: "เข้าสู่ระบบ", free: "① ฟรี", tier2: "② ระดับ 2", tier3: "③ ระดับ 3", perMonth: "/เดือน", requirePkg: "กรุณาเลือกแพ็กเกจก่อนสมัคร" },
+  ru: { pickPackage: "Выберите пакет (обязательно перед регистрацией)", signupTab: "Бесплатная регистрация", loginTab: "Вход", free: "① Бесплатно", tier2: "② Уровень 2", tier3: "③ Уровень 3", perMonth: "/мес", requirePkg: "Пожалуйста, выберите пакет" },
+  zh: { pickPackage: "选择套餐（注册前必选）", signupTab: "免费注册", loginTab: "登录", free: "① 免费", tier2: "② 二级", tier3: "③ 三级", perMonth: "/月", requirePkg: "请先选择套餐" },
+  de: { pickPackage: "Paket wählen (vor Anmeldung erforderlich)", signupTab: "Kostenlos registrieren", loginTab: "Anmelden", free: "① Kostenlos", tier2: "② Stufe 2", tier3: "③ Stufe 3", perMonth: "/Monat", requirePkg: "Bitte wählen Sie ein Paket" },
+  no: { pickPackage: "Velg pakke (påkrevd før registrering)", signupTab: "Registrer deg gratis", loginTab: "Logg inn", free: "① Gratis", tier2: "② Nivå 2", tier3: "③ Nivå 3", perMonth: "/mnd", requirePkg: "Velg en pakke" },
+  fr: { pickPackage: "Choisissez votre forfait (requis avant l'inscription)", signupTab: "Inscription gratuite", loginTab: "Connexion", free: "① Gratuit", tier2: "② Niveau 2", tier3: "③ Niveau 3", perMonth: "/mois", requirePkg: "Veuillez choisir un forfait" },
+  it: { pickPackage: "Scegli il pacchetto (obbligatorio prima dell'iscrizione)", signupTab: "Registrati gratis", loginTab: "Accedi", free: "① Gratuito", tier2: "② Livello 2", tier3: "③ Livello 3", perMonth: "/mese", requirePkg: "Seleziona un pacchetto" },
 };
 
 class Component extends DCLogic {
@@ -499,7 +499,9 @@ class Component extends DCLogic {
   }
 
   renderVals() {
+    const t = SIGNUP_I18N[this.state.lang] || SIGNUP_I18N.th;
     return {
+      t,
       name: this.state.name, onName: (e) => this.setState({ name: e.target.value }),
       phone: this.state.phone, onPhone: (e) => this.setState({ phone: e.target.value }),
       email: this.state.email, onEmail: (e) => this.setState({ email: e.target.value }),
