@@ -607,6 +607,48 @@ class Component extends DCLogic {
     this.setState({ welcomeDismissing: true });
     setTimeout(() => this.setState({ showWelcome: false }), 280);
   }
+  _restoreWelcomeHistory() {
+    try {
+      const saved = JSON.parse(localStorage.getItem("hh_chat_history") || "null");
+      if (saved && saved.length) {
+        const props = this.state.effProps || (this._mod ? this._mod.PROPERTIES : []) || [];
+        const msgs = saved.map((m) => ({
+          role: m.role, text: m.text, align: m.role === "user" ? "flex-end" : "flex-start",
+          links: m.role === "user" ? [] : this._extractWelcomeLinks(m.text, props),
+          bubbleStyle: m.role === "user"
+            ? "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 13px; border-radius:13px 13px 2px 13px; font-size:13.5px; line-height:1.5;"
+            : "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:9px 13px; border-radius:13px 13px 13px 2px; font-size:13.5px; line-height:1.5;",
+        }));
+        this.setState({ welcomeChatMessages: msgs });
+      }
+    } catch (e) {}
+  }
+  _persistWelcomeHistory(messages) {
+    try { localStorage.setItem("hh_chat_history", JSON.stringify(messages.map((m) => ({ role: m.role, text: m.text })))); } catch (e) {}
+  }
+  _buildWelcomeContext(props) {
+    return props.map((p) => {
+      const title = (p.title && (p.title.en || p.title.th)) || p.id;
+      const desc = (p.description && (p.description.en || p.description.th)) || "";
+      const zoneStr = (p.zone && typeof p.zone === "object") ? (p.zone.th || p.zone.en || "") : (p.zone || "");
+      const parts = [
+        `${p.id} | ${title}`,
+        `area:${p.area}`, `subdistrict:${p.subdistrict || "-"}`, `zone/soi:${zoneStr || "-"}`,
+        `type:${p.type}`, `status:${p.status}`, `condition:${p.condition || "-"}`, `yearBuilt:${p.yearBuilt || "-"}`,
+        `price:${p.price}${p.currency}`, `beds:${p.bedrooms ?? "-"}`, `baths:${p.bathrooms ?? "-"}`,
+        `land:${p.landSize || "-"}sqm`, `landRai/Ngan/Wah:${p.landRai || 0}/${p.landNgan || 0}/${p.landWah || 0}`,
+        `living:${p.livingArea || "-"}sqm`, `pool:${p.pool ? "yes" : "no"} poolSize:${p.poolSize || "-"}`,
+        `parking:${p.parking ?? "-"}`, `floor:${p.floor || "-"}`, `commonFee:${p.commonFee || "-"}`, `foreignQuota:${p.foreignQuota || "-"}`,
+        `titleDeed:${p.titleDeed || "-"}`, `kitchenTypes:${(p.kitchenTypes || []).join(",") || "-"}`,
+        `purchaseOptions:${(p.purchaseOptions || []).join(",") || "-"}`, `features:${(p.features || []).join(",") || "-"}`,
+        `collections:${(p.collections || []).join(",") || "-"}`,
+        `landShape:${p.landShape || "-"}`, `roadWidth:${p.roadWidth || "-"}`, `landCondition:${p.landCondition || "-"}`,
+        `utilities:${p.utilities || "-"}`, `zoningColor:${p.zoningColor || "-"}`, `floors:${p.floors || "-"}`, `electricalPhase:${p.electricalPhase || "-"}`,
+      ];
+      if (desc) parts.push(`description:"${desc.replace(/\n/g, " ").slice(0, 600)}"`);
+      return parts.join(" | ");
+    }).join("\n");
+  }
   async submitWelcome() {
     const q = (this.state.welcomeQuery || "").trim();
     if (!q || this.state.welcomeChatLoading) return;
@@ -618,13 +660,13 @@ class Component extends DCLogic {
     const userMsg = { role: "user", text: q, align: "flex-end", links: [], bubbleStyle: "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 13px; border-radius:13px 13px 2px 13px; font-size:13.5px; line-height:1.5;" };
     const history = [...this.state.welcomeChatMessages, userMsg];
     this.setState({ welcomeChatMessages: history, welcomeQuery: "", welcomeChatLoading: true });
+    this._persistWelcomeHistory(history);
     this._scrollWelcomeChat();
     try {
       const lang = this.state.lang;
       const props = this.state.effProps || (this._mod ? this._mod.PROPERTIES : []) || [];
-      const MAX_LISTINGS = 40;
-      const listingsBlock = props.slice(0, MAX_LISTINGS).map((p) => `${p.id}: ${p.type || ""} in ${p.zone || p.area || ""}, ${p.bedrooms || 0} bed, ${(p.price || 0).toLocaleString()} ${p.currency || "THB"}, status ${p.status || ""}`).join("\n");
-      const system = `You are a helpful, warm real-estate assistant for huahin.properties (Hua Hin, Pranburi, Cha-am, Thailand). Reply in the customer's language (${lang}). Use ONLY the listings below — never invent facts. When recommending a property, state its code (e.g. HH-109) in your reply so the UI can render a card.\n\nListings:\n${listingsBlock}`;
+      const listingsBlock = this._buildWelcomeContext(props);
+      const system = `You are a helpful, warm real-estate assistant for huahin.properties (Hua Hin, Pranburi, Cha-am, Thailand). Reply in the customer's language (${lang}), and always in the SAME language the customer just wrote in regardless of this setting. Use ONLY the listings below — never invent facts. Whenever you mention a specific property, always include its exact property code (e.g. HH-109) written plainly in your reply — the interface automatically turns it into a clickable card, so never write a fake link yourself.\n\nCURRENT LISTINGS (code | title | area | subdistrict | zone/soi | type | status | condition | yearBuilt | price | beds | baths | land size | land rai/ngan/wah | living area | pool | parking | floor | commonFee | foreignQuota | titleDeed | kitchenTypes | purchaseOptions | features | collections | landShape | roadWidth | landCondition | utilities | zoningColor | floors | electricalPhase | description):\n${listingsBlock}`;
       const messages = history.map((m) => ({ role: m.role, content: m.text }));
       let reply;
       if (window.claude && window.claude.complete) {
@@ -639,11 +681,15 @@ class Component extends DCLogic {
       }
       const links = this._extractWelcomeLinks(reply, props);
       const aiMsg = { role: "assistant", text: reply, align: "flex-start", links, bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:9px 13px; border-radius:13px 13px 13px 2px; font-size:13.5px; line-height:1.5;" };
-      this.setState({ welcomeChatMessages: [...history, aiMsg], welcomeChatLoading: false });
+      const finalHistory = [...history, aiMsg];
+      this.setState({ welcomeChatMessages: finalHistory, welcomeChatLoading: false });
+      this._persistWelcomeHistory(finalHistory);
     } catch (e) {
       console.warn("welcome chat error:", e);
       const errMsg = { role: "assistant", text: "Sorry, something went wrong. Try again or browse the full site.", align: "flex-start", links: [], bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:9px 13px; border-radius:13px 13px 13px 2px; font-size:13.5px; line-height:1.5;" };
-      this.setState({ welcomeChatMessages: [...history, errMsg], welcomeChatLoading: false });
+      const finalHistory = [...history, errMsg];
+      this.setState({ welcomeChatMessages: finalHistory, welcomeChatLoading: false });
+      this._persistWelcomeHistory(finalHistory);
     }
     this._scrollWelcomeChat();
   }
@@ -691,6 +737,7 @@ class Component extends DCLogic {
   };
 
   async componentDidMount() {
+    this._restoreWelcomeHistory();
     const devParams = new URLSearchParams(window.location.search);
     if (devParams.get("dev") === "1") { try { localStorage.setItem("hhDevBar", "1"); } catch (e) {} }
     const isPreviewEnv = !/huahin\.properties$/.test(window.location.hostname);
