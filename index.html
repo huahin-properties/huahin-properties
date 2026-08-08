@@ -12,6 +12,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
@@ -38,6 +39,10 @@
     a:hover { color: oklch(32% 0.13 25); }
   </style>
 </helmet>
+
+<sc-if value="{{ showDevBar }}">
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">HM-6 — 8 ส.ค. 2569 14:20 (แก้ zone/title แสดง [object Object] เมื่อข้อมูลเก่าเป็น object ไม่มีภาษานั้น)</div>
+</sc-if>
 
 <sc-if value="{{ showGate }}">
   <div style="position:fixed; inset:0; background:oklch(96% 0.015 75); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
@@ -73,12 +78,12 @@
         <div style="width:1px; height:20px; background:oklch(80% 0.02 70); margin:0 4px;"></div>
         <div style="width:1px; height:20px; background:oklch(80% 0.02 70); margin:0 4px;"></div>
         <div onClick="{{ onShareOpen }}" title="{{ t.share_site }}" style="width:38px; height:38px; border-radius:50%; background:oklch(90% 0.005 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 8a3 3 0 1 0-2.83-4H15a3 3 0 0 0 .09 3.26L8.9 10.7a3 3 0 1 0 0 2.6l6.2 3.44A3 3 0 1 0 16 15l-6.2-3.44a3 3 0 0 0 0-1.12L16 7a3 3 0 0 0 2 1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
-        <a href="{{ personHref }}" title="Login" style="font-size:16px; text-decoration:none; color:oklch(40% 0.02 60);">👤</a>
+        <a href="{{ personHref }}" title="{{ t.login_signup }}" style="font-size:16px; text-decoration:none; color:oklch(40% 0.02 60);">👤</a>
         <sc-if value="{{ isLoggedIn }}" hint-placeholder-val="{{ false }}">
           <div onClick="{{ onLogout }}" style="font-size:13px; font-weight:600; color:oklch(45% 0.15 25); cursor:pointer; white-space:nowrap;">ออกจากระบบ</div>
         </sc-if>
         <sc-if value="{{ showSignupBtn }}" hint-placeholder-val="{{ true }}">
-        <a href="Agent Signup.dc.html" title="Sign up Free" style="font-size:13px; font-weight:600; text-decoration:none; color:white; background:oklch(62% 0.19 45); padding:6px 12px; border-radius:100px; white-space:nowrap;">Sign up Free</a>
+          <a href="Agent Signup.dc.html" title="{{ t.signup_free }}" style="font-size:13px; font-weight:600; text-decoration:none; color:white; background:oklch(62% 0.19 45); padding:6px 12px; border-radius:100px; white-space:nowrap;">{{ t.signup_free }}</a>
         </sc-if>
         <a href="Admin Login.dc.html" style="font-size:13px; color:oklch(40% 0.02 60); text-decoration:none;">{{ t.nav_admin }}</a>
       </div>
@@ -87,7 +92,7 @@
     <sc-if value="{{ isMobileNav }}">
       <div style="display:flex; align-items:center; gap:2px; flex-shrink:0;">
         <div onClick="{{ onVoiceChatOpen }}" style="width:30px; height:30px; border-radius:50%; background:oklch(90% 0.005 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; font-size:14px; cursor:pointer; flex-shrink:0;">🎙️</div>
-        <a href="Agent Signup.dc.html" title="Login / Sign up" style="width:30px; height:30px; border-radius:50%; background:oklch(90% 0.005 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; font-size:14px; text-decoration:none; flex-shrink:0;">👤</a>
+        <a href="{{ personHref }}" title="{{ t.login_signup }}" style="width:30px; height:30px; border-radius:50%; background:oklch(90% 0.005 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; font-size:14px; text-decoration:none; flex-shrink:0;">👤</a>
         <dc-import name="LanguageSwitcher" lang="{{ langValue }}" options="{{ langOptions }}" on-select="{{ onLangChange }}" compact="{{ true }}" menu-align="right" hint-size="34,30"></dc-import>
         <div onClick="{{ onShareOpen }}" title="{{ t.share_site }}" style="width:36px; height:36px; border-radius:50%; background:oklch(90% 0.005 75); color:oklch(30% 0.02 60); display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M18 8a3 3 0 1 0-2.83-4H15a3 3 0 0 0 .09 3.26L8.9 10.7a3 3 0 1 0 0 2.6l6.2 3.44A3 3 0 1 0 16 15l-6.2-3.44a3 3 0 0 0 0-1.12L16 7a3 3 0 0 0 2 1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
         <div onClick="{{ toggleMenu }}" style="display:flex; flex-direction:column; gap:4px; padding:6px 4px; cursor:pointer; flex-shrink:0;">
@@ -111,7 +116,7 @@
         <a href="Agent Signup.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_sell }}</a>
         <a href="About.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_about }}</a>
         <a href="Contact.dc.html" style="text-decoration:none; color:inherit;">{{ t.nav_contact }}</a>
-        <a href="{{ personHref }}" style="text-decoration:none; color:oklch(50% 0.02 60); font-size:15px; font-family:'Work Sans',sans-serif;">👤 Login</a>
+        <a href="{{ personHref }}" style="text-decoration:none; color:oklch(50% 0.02 60); font-size:15px; font-family:'Work Sans',sans-serif;">👤 {{ t.login_signup }}</a>
         <a href="Agent Signup.dc.html" style="text-decoration:none; color:white; background:oklch(62% 0.19 45); padding:8px 16px; border-radius:100px; font-size:14px; font-weight:600; font-family:'Work Sans',sans-serif;">Sign up Free</a>
         <a href="Admin Login.dc.html" style="text-decoration:none; color:oklch(50% 0.02 60); font-size:15px; font-family:'Work Sans',sans-serif;">{{ t.nav_admin }}</a>
       </div>
@@ -203,7 +208,7 @@
     <a href="{{ rentHref }}" style="flex:1; text-align:center; border:1.5px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:8px 2px; border-radius:8px; font-size:{{ ctaFontSize }}; text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.cta_rent }}</a>
     <a href="Agent Signup.dc.html" style="flex:1; text-align:center; background:oklch(40% 0.13 25); border:1.5px solid oklch(40% 0.13 25); color:white; padding:8px 2px; border-radius:8px; font-size:{{ ctaFontSize }}; text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.cta_list }}</a>
     <a href="Contact.dc.html" style="flex:1; text-align:center; border:1.5px solid oklch(60% 0.02 60); color:oklch(25% 0.02 60); padding:8px 2px; border-radius:8px; font-size:{{ ctaFontSize }}; text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ t.cta_contact }}</a>
-    <a href="Agent Signup.dc.html" style="flex:1; text-align:center; background:oklch(62% 0.19 45); color:white; padding:8px 2px; border-radius:8px; font-size:{{ ctaFontSize }}; text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600;">สมัครฟรี</a>
+    <a href="Agent Signup.dc.html" style="flex:1; text-align:center; background:oklch(62% 0.19 45); color:white; padding:8px 2px; border-radius:8px; font-size:{{ ctaFontSize }}; text-decoration:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:600;">{{ t.signup_free }}</a>
   </div>
 
   <!-- ============ QUICK DISCOVERY CATEGORIES ============ -->
@@ -292,7 +297,7 @@
     </div>
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px;">
       <sc-for list="{{ featured }}" as="p" hint-placeholder-count="8">
-        <dc-import name="PropertyCard" href="{{ p.href }}" status-color="{{ p.statusColor }}" status-label="{{ p.statusLabel }}" is-featured="{{ p.isFeatured }}" is-vip="{{ p.isVip }}" cover-photo-label="{{ p.coverPhotoLabel }}" cover-photo-bg="{{ p.coverPhotoBg }}" no-photo="{{ p.noPhoto }}" property-id="{{ p.propertyId }}" zone="{{ p.zone }}" area-label="{{ p.areaLabel }}" title="{{ p.title }}" type-label="{{ p.typeLabel }}" has-bedrooms="{{ p.hasBedrooms }}" bedrooms="{{ p.bedrooms }}" has-bathrooms="{{ p.hasBathrooms }}" bathrooms="{{ p.bathrooms }}" has-living-area="{{ p.hasLivingArea }}" living-area="{{ p.livingArea }}" sqm-label="{{ p.sqmLabel }}" price-label="{{ p.priceLabel }}" view-details-label="{{ p.viewDetailsLabel }}" hint-size="100%,380px"></dc-import>
+        <dc-import name="PropertyCard" href="{{ p.href }}" status-color="{{ p.statusColor }}" status-label="{{ p.statusLabel }}" is-featured="{{ p.isFeatured }}" is-vip="{{ p.isVip }}" cover-photo-label="{{ p.coverPhotoLabel }}" cover-photo-bg="{{ p.coverPhotoBg }}" cover-photo-url="{{ p.coverPhotoUrl }}" no-photo="{{ p.noPhoto }}" property-id="{{ p.propertyId }}" zone="{{ p.zone }}" area-label="{{ p.areaLabel }}" title="{{ p.title }}" type-label="{{ p.typeLabel }}" has-bedrooms="{{ p.hasBedrooms }}" bedrooms="{{ p.bedrooms }}" has-bathrooms="{{ p.hasBathrooms }}" bathrooms="{{ p.bathrooms }}" has-living-area="{{ p.hasLivingArea }}" living-area="{{ p.livingArea }}" sqm-label="{{ p.sqmLabel }}" price-label="{{ p.priceLabel }}" view-details-label="{{ p.viewDetailsLabel }}" hint-size="100%,380px"></dc-import>
       </sc-for>
     </div>
     <sc-if value="{{ showFeaturedPagination }}">
@@ -436,7 +441,7 @@
     <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
       <a href="{{ buyHref }}" style="text-decoration:none; border:1.5px solid oklch(80% 0.02 70 / 0.6); color:oklch(97% 0.01 80); padding:11px 22px; border-radius:100px; font-size:14px;">{{ t.cta_find }}</a>
       <a href="Agent Signup.dc.html" style="text-decoration:none; background:oklch(97% 0.01 80); color:oklch(24% 0.06 30); padding:11px 22px; border-radius:100px; font-size:14px; font-weight:600;">{{ t.cta_list }}</a>
-      <a href="Agent Signup.dc.html" style="text-decoration:none; border:1.5px solid oklch(80% 0.02 70 / 0.6); color:oklch(97% 0.01 80); padding:11px 22px; border-radius:100px; font-size:14px;">สมัครฟรี</a>
+      <a href="Agent Signup.dc.html" style="text-decoration:none; border:1.5px solid oklch(80% 0.02 70 / 0.6); color:oklch(97% 0.01 80); padding:11px 22px; border-radius:100px; font-size:14px;">{{ t.signup_free }}</a>
     </div>
   </div>
 
@@ -535,6 +540,10 @@ class Component extends DCLogic {
   };
 
   async componentDidMount() {
+    const devParams = new URLSearchParams(window.location.search);
+    if (devParams.get("dev") === "1") { try { localStorage.setItem("hhDevBar", "1"); } catch (e) {} }
+    const isPreviewEnv = !/huahin\.properties$/.test(window.location.hostname);
+    this.setState({ showDevBar: isPreviewEnv || (() => { try { return localStorage.getItem("hhDevBar") === "1"; } catch (e) { return false; } })() });
     const fb0 = await import("./firebase-client.js");
     this._fb = fb0;
     try {
@@ -613,6 +622,7 @@ class Component extends DCLogic {
 
   renderVals() {
     const gateVals = {
+      showDevBar: this.state.showDevBar,
       showGate: this.state.showGate,
       showChrome: !this.state.showGate,
       gatePassword: this.state.gatePassword,
@@ -642,11 +652,12 @@ class Component extends DCLogic {
       isVip: !!(p.vipTier && p.vipUntil > Date.now()),
       coverPhotoLabel: (p.photos[0] && p.photos[0].label) || p.photos[0] || "photo",
       coverPhotoBg: (p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
+      coverPhotoUrl: (p.photos[0] && p.photos[0].url) || "",
       noPhoto: !(p.photos[0] && p.photos[0].url),
-      zone: p.zone,
+      zone: (p.zone && typeof p.zone === "object") ? (p.zone[lang] || p.zone.th || p.zone.en || "") : (p.zone || ""),
       propertyId: p.id,
       areaLabel: areaLabelOf(p.area),
-      title: p.title[lang],
+      title: (p.title && typeof p.title === "object") ? (p.title[lang] || p.title.en || p.title.th || "") : (p.title || ""),
       typeLabel: typeLabelOf(p.type),
       hasBedrooms: !!p.bedrooms,
       bedrooms: p.bedrooms,
@@ -689,13 +700,16 @@ class Component extends DCLogic {
     const featured = allOrdered.slice((featuredPage - 1) * perPage, featuredPage * perPage).map(cardProps);
 
     const areaDescKey = { "hua-hin": "area_hua_hin_desc", pranburi: "area_pranburi_desc", "cha-am": "area_cha_am_desc" };
-    const areaNeighborhoods = { "hua-hin": ["Khao Takiab", "Soi 88", "Bor Fai"], pranburi: [], "cha-am": [] };
+    const areaNeighborhoods = {
+      "hua-hin": { en: ["Khao Takiab", "Soi 88", "Bor Fai"], th: ["เขาตะเกียบ", "ซอย 88", "บ่อฝ้าย"], zh: ["达奇亚布山", "88巷", "波法伊"], ru: ["Кхао Такиаб", "Сой 88", "Бор Фай"], de: ["Khao Takiab", "Soi 88", "Bor Fai"], no: ["Khao Takiab", "Soi 88", "Bor Fai"], fr: ["Khao Takiab", "Soi 88", "Bor Fai"], it: ["Khao Takiab", "Soi 88", "Bor Fai"] },
+      pranburi: {}, "cha-am": {},
+    };
     const areaSlotPlaceholder = { "hua-hin": "วางภาพ: สถานีรถไฟหัวหิน / ชายหาด", pranburi: "วางภาพ: วิลล่าริมชายหาดปราณบุรี", "cha-am": "วางภาพ: ชายหาดชะอำ" };
     const areaPhoto = { "hua-hin": "photo: Hua Hin train station & beach", pranburi: "photo: Pranburi beachfront villa", "cha-am": "photo: Cha-am beach promenade" };
     const sc = this.state.siteContent || {};
     const homeStrings = {
       en: { my_favorites_title: "My Favorites", my_favorites_view: "View saved properties", collections_title: "Curated Collections", collections_sub: "Handpicked selections for every kind of buyer",
-        quick_actions_title: "Get Started",
+        quick_actions_title: "Get Started", signup_free: "Sign up Free",
         projects_title: "Featured Projects", projects_sub: "New developments and off-plan projects across Hua Hin", projects_empty: "No active project launches right now — check back soon, or ask our team about upcoming developments.",
         map_title: "Explore on the Map", map_desc: "See where every listing sits relative to the beach, town centre and key landmarks. Full interactive map view is coming soon — for now, browse all listings with area filters.", map_cta: "Browse Listings", map_placeholder: "Interactive map — coming soon",
         news_title: "News & Updates", news_sub: "Local market insights and platform updates", news_empty: "No news posted yet — this section will feature Hua Hin market updates and platform announcements.",
@@ -705,7 +719,7 @@ class Component extends DCLogic {
         talk_admin_title: "Admin Support", talk_admin_desc: "Ask our team about your account, package, listings, or how to use the platform", talk_admin_who: "You're talking to: huahin.properties team",
         contact_us_title: "Talk to Us", contact_us_sub: "Reach our team directly through any channel below", contact_us_form: "Contact Form", ai_chat_title: "AI Property Assistant", ai_chat_desc: "Ask in your own words — search, compare, or get answers instantly.", admin_chat_title: "Chat with our Team", admin_chat_desc: "Talk to huahin.properties directly for support or general questions.", member_chat_hint: "Viewing a specific listing? You can message that property's agent directly from its details page." },
       th: {
-        quick_actions_title: "เริ่มต้นใช้งาน",
+        quick_actions_title: "เริ่มต้นใช้งาน", signup_free: "สมัครฟรี",
         projects_title: "โครงการแนะนำ", projects_sub: "โครงการใหม่และพรีเซลทั่วหัวหิน", projects_empty: "ขณะนี้ยังไม่มีโครงการเปิดตัวใหม่ — กลับมาดูอีกครั้งเร็วๆ นี้ หรือสอบถามทีมงานเกี่ยวกับโครงการที่กำลังจะมา",
         map_title: "สำรวจบนแผนที่", map_desc: "ดูตำแหน่งของแต่ละประกาศเทียบกับชายหาด ตัวเมือง และจุดสำคัญต่างๆ แผนที่แบบอินเทอร์แอกทีฟเต็มรูปแบบกำลังจะมาเร็วๆ นี้ — ระหว่างนี้เลือกดูประกาศทั้งหมดพร้อมตัวกรองพื้นที่ได้เลย", map_cta: "ดูรายการทรัพย์", map_placeholder: "แผนที่อินเทอร์แอกทีฟ — เร็วๆ นี้",
         news_title: "ข่าวสารและอัปเดต", news_sub: "ข้อมูลตลาดหัวหินและความเคลื่อนไหวของแพลตฟอร์ม", news_empty: "ยังไม่มีข่าวสารในขณะนี้ — ส่วนนี้จะแสดงอัปเดตตลาดหัวหินและประกาศจากแพลตฟอร์ม",
@@ -715,23 +729,83 @@ class Component extends DCLogic {
         talk_agent_title: "ติดต่อสมาชิกหรือเอเจนต์", talk_agent_desc: "ติดต่อผู้ดูแลประกาศหรือเจ้าของทรัพย์โดยตรง — เริ่มจากการ์ดทรัพย์หรือหน้ารายละเอียดทรัพย์ที่คุณสนใจ", talk_agent_who: "ไปที่หน้าค้นหาทรัพย์",
         talk_admin_title: "Admin Support", talk_admin_desc: "สอบถามเรื่องบัญชี แพ็กเกจ การลงประกาศ หรือการใช้งานระบบกับทีมงาน", talk_admin_who: "กำลังคุยกับ: ทีมงาน huahin.properties",
         my_favorites_title: "รายการโปรดของฉัน", my_favorites_view: "ดูทรัพย์ที่บันทึกไว้", my_favorites_collection: "สร้าง Collection จากรายการโปรด", my_favorites_desc: "บันทึกทรัพย์ที่คุณสนใจ กลับมาดูภายหลัง เปรียบเทียบทรัพย์ หรือนำไปสร้าง Collection เพื่อส่งให้ลูกค้า", my_favorites_empty: "คุณยังไม่มีทรัพย์ที่บันทึกไว้ กดไอคอน ♥ บนประกาศใดก็ได้เพื่อเพิ่มที่นี่", collections_title: "ชุดทรัพย์คัดสรร", collections_sub: "คัดสรรไว้สำหรับผู้ซื้อทุกไลฟ์สไตล์", ai_chat_title: "AI ผู้ช่วยค้นหาทรัพย์", ai_chat_desc: "พิมพ์คำถามด้วยภาษาของคุณเอง ค้นหา เปรียบเทียบ หรือขอคำตอบได้ทันที", admin_chat_title: "คุยกับทีมงาน", admin_chat_desc: "ติดต่อ huahin.properties โดยตรงเพื่อขอความช่วยเหลือหรือสอบถามทั่วไป", member_chat_hint: "ดูประกาศเฉพาะรายการอยู่ใช่ไหม? คุณสามารถส่งข้อความถึงตัวแทนของทรัพย์นั้นได้โดยตรงจากหน้ารายละเอียด" },
+      zh: { my_favorites_title: "我的收藏", my_favorites_view: "查看已保存的房源", my_favorites_collection: "根据收藏创建合集", my_favorites_desc: "保存您感兴趣的房源，方便日后查看、比较，或整理成合集发给客户", my_favorites_empty: "您还没有收藏任何房源 — 点击任意房源上的 ♥ 图标即可添加", collections_title: "精选合集", collections_sub: "为每一类买家精心挑选",
+        quick_actions_title: "开始使用", signup_free: "免费注册",
+        projects_title: "推荐项目", projects_sub: "华欣地区的新开发及预售项目", projects_empty: "目前没有新项目发布 — 请稍后再查看，或联系我们的团队了解即将推出的项目。",
+        map_title: "在地图上探索", map_desc: "查看每个房源相对于海滩、市中心和主要地标的位置。完整的互动地图即将上线 — 现在可先使用区域筛选浏览所有房源。", map_cta: "浏览房源", map_placeholder: "互动地图 — 即将上线",
+        news_title: "新闻与动态", news_sub: "华欣本地市场资讯与平台更新", news_empty: "暂无新闻发布 — 此处将显示华欣市场动态与平台公告。",
+        talkhub_title: "沟通中心", talkhub_sub: "选择最适合您需求的渠道 — 每个渠道连接不同的人",
+        talk_ai_title: "AI 助手", talk_ai_desc: "让 AI 帮您搜索、比较房源，并根据预算和位置给出建议，回答关于房源的问题。可打字或语音输入。", talk_ai_who: "正在与：自动 AI 助手对话",
+        talk_agent_title: "联系会员或经纪人", talk_agent_desc: "直接联系房源业主或经纪人 — 可从房源卡片或详情页开始联系", talk_agent_who: "前往搜索房源",
+        talk_admin_title: "管理员支持", talk_admin_desc: "如有账户、套餐、房源发布或平台使用方面的问题，可联系我们的团队", talk_admin_who: "正在与：huahin.properties 团队对话",
+        contact_us_title: "联系我们", contact_us_sub: "通过以下任意渠道直接联系我们的团队", contact_us_form: "联系表单", ai_chat_title: "AI 房产助手", ai_chat_desc: "用您自己的话提问 — 即时搜索、比较或获取答案。", admin_chat_title: "与我们的团队聊天", admin_chat_desc: "直接联系 huahin.properties 获取支持或一般咨询。", member_chat_hint: "正在查看某个具体房源？您可以直接从详情页向该房源的经纪人发送消息。" },
+      ru: { my_favorites_title: "Мои избранные", my_favorites_view: "Смотреть сохранённые объекты", my_favorites_collection: "Создать подборку из избранного", my_favorites_desc: "Сохраняйте интересующие объекты, сравнивайте их позже или создавайте подборки для клиентов", my_favorites_empty: "У вас пока нет сохранённых объектов — нажмите ♥ на любом объявлении, чтобы добавить его сюда", collections_title: "Подобранные коллекции", collections_sub: "Подборки для покупателей любого типа",
+        quick_actions_title: "Начать", signup_free: "Зарегистрироваться бесплатно",
+        projects_title: "Рекомендуемые проекты", projects_sub: "Новые и предпродажные проекты в Хуа Хине", projects_empty: "Сейчас активных запусков проектов нет — заходите позже или спросите нашу команду о будущих проектах.",
+        map_title: "Исследовать на карте", map_desc: "Смотрите, где расположен каждый объект относительно пляжа, центра города и ключевых мест. Полноценная интерактивная карта скоро появится — пока используйте фильтры по районам.", map_cta: "Смотреть объекты", map_placeholder: "Интерактивная карта — скоро",
+        news_title: "Новости и обновления", news_sub: "Новости рынка Хуа Хина и обновления платформы", news_empty: "Новостей пока нет — здесь будут появляться обновления рынка и объявления платформы.",
+        talkhub_title: "Центр общения", talkhub_sub: "Выберите канал, который вам подходит — каждый соединяет с разными людьми",
+        talk_ai_title: "AI-ассистент", talk_ai_desc: "Пусть AI поможет с поиском, сравнением и рекомендациями по бюджету и локации, а также ответит на вопросы об объектах. Пишите или говорите.", talk_ai_who: "Вы общаетесь с: автоматическим AI-ассистентом",
+        talk_agent_title: "Связаться с участником или агентом", talk_agent_desc: "Свяжитесь с владельцем объекта или агентом напрямую — начните с карточки объекта или страницы с деталями", talk_agent_who: "Перейти к поиску объектов",
+        talk_admin_title: "Поддержка администратора", talk_admin_desc: "Обратитесь к нашей команде по вопросам аккаунта, тарифа, объявлений или использования платформы", talk_admin_who: "Вы общаетесь с: командой huahin.properties",
+        contact_us_title: "Связаться с нами", contact_us_sub: "Свяжитесь с нашей командой напрямую через любой канал ниже", contact_us_form: "Форма обратной связи", ai_chat_title: "AI-помощник по недвижимости", ai_chat_desc: "Спросите своими словами — ищите, сравнивайте или получайте ответы мгновенно.", admin_chat_title: "Чат с нашей командой", admin_chat_desc: "Свяжитесь с huahin.properties напрямую для поддержки или общих вопросов.", member_chat_hint: "Смотрите конкретный объект? Вы можете написать агенту этого объекта прямо со страницы деталей." },
+      de: { my_favorites_title: "Meine Favoriten", my_favorites_view: "Gespeicherte Objekte ansehen", my_favorites_collection: "Sammlung aus Favoriten erstellen", my_favorites_desc: "Speichern Sie interessante Objekte, vergleichen Sie sie später oder erstellen Sie Sammlungen für Kunden", my_favorites_empty: "Sie haben noch keine gespeicherten Objekte — klicken Sie auf ♥ bei einem Angebot, um es hier hinzuzufügen", collections_title: "Kuratierte Sammlungen", collections_sub: "Handverlesene Auswahl für jeden Käufertyp",
+        quick_actions_title: "Erste Schritte", signup_free: "Kostenlos registrieren",
+        projects_title: "Empfohlene Projekte", projects_sub: "Neue und Off-Plan-Projekte in ganz Hua Hin", projects_empty: "Derzeit keine aktiven Projektstarts — schauen Sie später wieder vorbei oder fragen Sie unser Team nach kommenden Projekten.",
+        map_title: "Auf der Karte erkunden", map_desc: "Sehen Sie, wo sich jedes Objekt im Verhältnis zum Strand, Stadtzentrum und wichtigen Sehenswürdigkeiten befindet. Die vollständige interaktive Karte kommt bald — nutzen Sie inzwischen die Gebietsfilter.", map_cta: "Angebote durchsuchen", map_placeholder: "Interaktive Karte — demnächst",
+        news_title: "Neuigkeiten & Updates", news_sub: "Lokale Marktinformationen und Plattform-Updates", news_empty: "Noch keine Neuigkeiten — hier erscheinen bald Marktupdates aus Hua Hin und Plattformankündigungen.",
+        talkhub_title: "Kontakt-Hub", talkhub_sub: "Wählen Sie den passenden Kanal — jeder verbindet Sie mit jemand anderem",
+        talk_ai_title: "KI-Assistent", talk_ai_desc: "Lassen Sie die KI bei Suche, Vergleich und Empfehlungen nach Budget und Lage helfen und Fragen zu Angeboten beantworten. Tippen oder sprechen Sie.", talk_ai_who: "Sie sprechen mit: automatischem KI-Assistenten",
+        talk_agent_title: "Mitglied oder Makler kontaktieren", talk_agent_desc: "Kontaktieren Sie den Eigentümer oder Makler direkt — beginnen Sie über eine Objektkarte oder die Detailseite", talk_agent_who: "Zur Objektsuche",
+        talk_admin_title: "Admin-Support", talk_admin_desc: "Fragen Sie unser Team zu Konto, Paket, Angeboten oder Nutzung der Plattform", talk_admin_who: "Sie sprechen mit: huahin.properties Team",
+        contact_us_title: "Kontaktieren Sie uns", contact_us_sub: "Erreichen Sie unser Team direkt über einen der folgenden Kanäle", contact_us_form: "Kontaktformular", ai_chat_title: "KI-Immobilienassistent", ai_chat_desc: "Fragen Sie in Ihren eigenen Worten — suchen, vergleichen oder sofort Antworten erhalten.", admin_chat_title: "Chat mit unserem Team", admin_chat_desc: "Kontaktieren Sie huahin.properties direkt für Support oder allgemeine Fragen.", member_chat_hint: "Sehen Sie sich ein bestimmtes Angebot an? Sie können den Makler dieses Objekts direkt von der Detailseite aus kontaktieren." },
+      no: { my_favorites_title: "Mine favoritter", my_favorites_view: "Se lagrede eiendommer", my_favorites_collection: "Lag samling fra favoritter", my_favorites_desc: "Lagre eiendommer du er interessert i, se dem senere, sammenlign eller lag en samling til kunder", my_favorites_empty: "Du har ingen lagrede eiendommer ennå — klikk ♥ på en annonse for å legge den til her", collections_title: "Kuraterte samlinger", collections_sub: "Håndplukket for hver type kjøper",
+        quick_actions_title: "Kom i gang", signup_free: "Registrer deg gratis",
+        projects_title: "Utvalgte prosjekter", projects_sub: "Nye og forhåndssalgsprosjekter i hele Hua Hin", projects_empty: "Ingen aktive prosjektlanseringer akkurat nå — kom tilbake senere, eller spør teamet vårt om kommende prosjekter.",
+        map_title: "Utforsk på kartet", map_desc: "Se hvor hver eiendom ligger i forhold til stranden, sentrum og viktige landemerker. Full interaktiv kartvisning kommer snart — bla gjennom alle annonser med områdefiltre i mellomtiden.", map_cta: "Se annonser", map_placeholder: "Interaktivt kart — kommer snart",
+        news_title: "Nyheter og oppdateringer", news_sub: "Lokal markedsinnsikt og plattformoppdateringer", news_empty: "Ingen nyheter publisert ennå — denne delen vil vise markedsoppdateringer fra Hua Hin og plattformkunngjøringer.",
+        talkhub_title: "Kontakt-hub", talkhub_sub: "Velg kanalen som passer dine behov — hver kobler deg til en annen person",
+        talk_ai_title: "AI-assistent", talk_ai_desc: "La AI hjelpe deg med søk, sammenligning og anbefalinger etter budsjett og beliggenhet, og svare på spørsmål om annonser. Skriv eller snakk.", talk_ai_who: "Du snakker med: automatisk AI-assistent",
+        talk_agent_title: "Kontakt et medlem eller agent", talk_agent_desc: "Ta direkte kontakt med eiendomseieren eller agenten — start fra et eiendomskort eller detaljsiden", talk_agent_who: "Gå til eiendomssøk",
+        talk_admin_title: "Admin-support", talk_admin_desc: "Spør teamet vårt om konto, pakke, annonser eller hvordan du bruker plattformen", talk_admin_who: "Du snakker med: huahin.properties-teamet",
+        contact_us_title: "Ta kontakt", contact_us_sub: "Nå teamet vårt direkte via en av kanalene nedenfor", contact_us_form: "Kontaktformular", ai_chat_title: "AI-eiendomsassistent", ai_chat_desc: "Spør med dine egne ord — søk, sammenlign eller få svar umiddelbart.", admin_chat_title: "Chat med teamet vårt", admin_chat_desc: "Ta direkte kontakt med huahin.properties for support eller generelle spørsmål.", member_chat_hint: "Ser du på en spesifikk annonse? Du kan sende melding direkte til den eiendommens agent fra detaljsiden." },
+      fr: { my_favorites_title: "Mes favoris", my_favorites_view: "Voir les biens enregistrés", my_favorites_collection: "Créer une collection à partir des favoris", my_favorites_desc: "Enregistrez les biens qui vous intéressent, consultez-les plus tard, comparez-les ou créez une collection pour vos clients", my_favorites_empty: "Vous n'avez encore aucun bien enregistré — cliquez sur ♥ sur une annonce pour l'ajouter ici", collections_title: "Collections sélectionnées", collections_sub: "Sélections pour chaque type d'acheteur",
+        quick_actions_title: "Commencer", signup_free: "Inscription gratuite",
+        projects_title: "Projets en vedette", projects_sub: "Nouveaux projets et pré-ventes à Hua Hin", projects_empty: "Aucun lancement de projet actif pour le moment — revenez bientôt, ou demandez à notre équipe les prochains projets.",
+        map_title: "Explorer sur la carte", map_desc: "Découvrez où se situe chaque bien par rapport à la plage, au centre-ville et aux points d'intérêt. La carte interactive complète arrive bientôt — pour l'instant, parcourez les annonces avec les filtres de zone.", map_cta: "Parcourir les annonces", map_placeholder: "Carte interactive — bientôt disponible",
+        news_title: "Actualités et mises à jour", news_sub: "Informations locales sur le marché et mises à jour de la plateforme", news_empty: "Aucune actualité publiée pour le moment — cette section affichera bientôt les actualités du marché de Hua Hin et les annonces de la plateforme.",
+        talkhub_title: "Centre de contact", talkhub_sub: "Choisissez le canal adapté à votre besoin — chacun vous met en relation avec une personne différente",
+        talk_ai_title: "Assistant IA", talk_ai_desc: "Laissez l'IA vous aider à rechercher, comparer et obtenir des recommandations selon votre budget et votre localisation, et répondre à vos questions sur les annonces. Tapez ou parlez.", talk_ai_who: "Vous parlez à : assistant IA automatisé",
+        talk_agent_title: "Contacter un membre ou un agent", talk_agent_desc: "Contactez directement le propriétaire ou l'agent — commencez depuis une fiche de bien ou la page de détails", talk_agent_who: "Aller à la recherche de biens",
+        talk_admin_title: "Support administratif", talk_admin_desc: "Demandez à notre équipe des informations sur votre compte, votre forfait, vos annonces ou l'utilisation de la plateforme", talk_admin_who: "Vous parlez à : l'équipe huahin.properties",
+        contact_us_title: "Contactez-nous", contact_us_sub: "Contactez directement notre équipe via l'un des canaux ci-dessous", contact_us_form: "Formulaire de contact", ai_chat_title: "Assistant IA immobilier", ai_chat_desc: "Posez vos questions avec vos propres mots — recherchez, comparez ou obtenez des réponses instantanément.", admin_chat_title: "Discuter avec notre équipe", admin_chat_desc: "Contactez directement huahin.properties pour une assistance ou des questions générales.", member_chat_hint: "Vous consultez une annonce spécifique ? Vous pouvez envoyer un message directement à l'agent de ce bien depuis sa page de détails." },
+      it: { my_favorites_title: "I miei preferiti", my_favorites_view: "Vedi immobili salvati", my_favorites_collection: "Crea una collezione dai preferiti", my_favorites_desc: "Salva gli immobili che ti interessano, consultali in seguito, confrontali o crea una collezione per i tuoi clienti", my_favorites_empty: "Non hai ancora immobili salvati — clicca su ♥ su un annuncio per aggiungerlo qui", collections_title: "Collezioni selezionate", collections_sub: "Selezioni curate per ogni tipo di acquirente",
+        quick_actions_title: "Inizia", signup_free: "Registrati gratis",
+        projects_title: "Progetti in evidenza", projects_sub: "Nuovi progetti e prevendite in tutta Hua Hin", projects_empty: "Nessun lancio di progetto attivo al momento — torna a controllare presto, oppure chiedi al nostro team dei prossimi progetti.",
+        map_title: "Esplora sulla mappa", map_desc: "Scopri dove si trova ogni immobile rispetto alla spiaggia, al centro città e ai punti di interesse. La mappa interattiva completa arriverà presto — per ora sfoglia tutti gli annunci con i filtri per zona.", map_cta: "Sfoglia annunci", map_placeholder: "Mappa interattiva — prossimamente",
+        news_title: "Notizie e aggiornamenti", news_sub: "Approfondimenti sul mercato locale e aggiornamenti della piattaforma", news_empty: "Nessuna notizia pubblicata ancora — questa sezione mostrerà presto gli aggiornamenti del mercato di Hua Hin e gli annunci della piattaforma.",
+        talkhub_title: "Centro contatti", talkhub_sub: "Scegli il canale più adatto alle tue esigenze — ognuno ti collega a una persona diversa",
+        talk_ai_title: "Assistente IA", talk_ai_desc: "Lascia che l'IA ti aiuti a cercare, confrontare e ottenere consigli in base a budget e posizione, e a rispondere a domande sugli annunci. Scrivi o parla.", talk_ai_who: "Stai parlando con: assistente IA automatico",
+        talk_agent_title: "Contatta un membro o un agente", talk_agent_desc: "Contatta direttamente il proprietario o l'agente — inizia da una scheda immobile o dalla pagina dei dettagli", talk_agent_who: "Vai alla ricerca immobili",
+        talk_admin_title: "Supporto amministrativo", talk_admin_desc: "Chiedi al nostro team informazioni su account, piano, annunci o utilizzo della piattaforma", talk_admin_who: "Stai parlando con: il team di huahin.properties",
+        contact_us_title: "Contattaci", contact_us_sub: "Raggiungi direttamente il nostro team tramite uno dei canali sotto", contact_us_form: "Modulo di contatto", ai_chat_title: "Assistente IA immobiliare", ai_chat_desc: "Chiedi con parole tue — cerca, confronta o ottieni risposte all'istante.", admin_chat_title: "Chatta con il nostro team", admin_chat_desc: "Contatta direttamente huahin.properties per supporto o domande generali.", member_chat_hint: "Stai guardando un annuncio specifico? Puoi scrivere direttamente all'agente di quell'immobile dalla pagina dei dettagli." },
     };
-    const tMerged = { ...t, ...(homeStrings[lang] || homeStrings.en) };
+    const tMerged = { ...t, ...homeStrings.en, ...(homeStrings[lang] || {}) };
 
     const favCount = (this._favs && this._favs.favoriteCount) ? this._favs.favoriteCount() : 0;
     const favIds = (this._favs && this._favs.getFavoritedIds) ? this._favs.getFavoritedIds() : [];
 
     const collectionDefs = [
-      { key: "villa", labelEn: "Pool Villas", labelTh: "พูลวิลล่า", tint: "oklch(55% 0.1 220)" },
-      { key: "beachfront", labelEn: "Beachfront", labelTh: "ริมชายหาด", tint: "oklch(50% 0.1 220)" },
-      { key: "mountain", labelEn: "Mountain View", labelTh: "วิวเขา", tint: "oklch(45% 0.08 150)" },
-      { key: "investment", labelEn: "Investment", labelTh: "เพื่อการลงทุน", tint: "oklch(40% 0.13 25)" },
-      { key: "family", labelEn: "Family Homes", labelTh: "บ้านครอบครัว", tint: "oklch(55% 0.1 80)" },
-      { key: "luxury", labelEn: "Luxury Homes", labelTh: "บ้านหรู", tint: "oklch(30% 0.08 30)" },
+      { key: "villa", label: { th: "พูลวิลล่า", en: "Pool Villas", zh: "泳池别墅", ru: "Виллы с бассейном", de: "Pool-Villen", no: "Poolvillaer", fr: "Villas avec piscine", it: "Ville con piscina" }, tint: "oklch(55% 0.1 220)" },
+      { key: "beachfront", label: { th: "ริมชายหาด", en: "Beachfront", zh: "海滨", ru: "На берегу моря", de: "Strandnah", no: "Strandnært", fr: "Bord de mer", it: "Fronte mare" }, tint: "oklch(50% 0.1 220)" },
+      { key: "mountain", label: { th: "วิวเขา", en: "Mountain View", zh: "山景", ru: "Вид на горы", de: "Bergblick", no: "Fjellutsikt", fr: "Vue montagne", it: "Vista montagna" }, tint: "oklch(45% 0.08 150)" },
+      { key: "investment", label: { th: "เพื่อการลงทุน", en: "Investment", zh: "投资物业", ru: "Для инвестиций", de: "Investment", no: "Investering", fr: "Investissement", it: "Investimento" }, tint: "oklch(40% 0.13 25)" },
+      { key: "family", label: { th: "บ้านครอบครัว", en: "Family Homes", zh: "家庭住宅", ru: "Дома для семьи", de: "Familienhäuser", no: "Familiehus", fr: "Maisons familiales", it: "Case per famiglie" }, tint: "oklch(55% 0.1 80)" },
+      { key: "luxury", label: { th: "บ้านหรู", en: "Luxury Homes", zh: "豪华住宅", ru: "Элитные дома", de: "Luxushäuser", no: "Luksushus", fr: "Maisons de luxe", it: "Case di lusso" }, tint: "oklch(30% 0.08 30)" },
     ];
     const collections = collectionDefs.map((c) => ({
-      href: c.key === "villa" ? "Search Results.dc.html?type=villa" : c.key === "investment" ? "Search Results.dc.html?status=sale" : "Search Results.dc.html",
-      label: lang === "th" ? c.labelTh : c.labelEn,
+      href: `Search Results.dc.html?homeCollection=${c.key}`,
+      label: c.label[lang] || c.label.en,
       bg: `linear-gradient(160deg, ${c.tint}, oklch(20% 0.03 60))`,
     }));
 
@@ -752,7 +826,7 @@ class Component extends DCLogic {
         noCms: !content.photoUrl,
         slotId: "area-" + a.id,
         slotPlaceholder: areaSlotPlaceholder[a.id] || ("วางภาพ: " + a.label[lang]),
-        neighborhoods: areaNeighborhoods[a.id] || [],
+        neighborhoods: (areaNeighborhoods[a.id] && (areaNeighborhoods[a.id][lang] || areaNeighborhoods[a.id].en)) || [],
       };
     });
 
@@ -822,22 +896,31 @@ class Component extends DCLogic {
       onFeaturedNextPage: () => this.goToPage(Math.min(totalFeaturedPages, featuredPage + 1)),
       areaCards,
       hasProjects: false, noProjects: true,
-      quickActions: [
-        { href: "Agent Signup.dc.html", icon: "🏠", bg: "oklch(40% 0.13 25)", label: lang === "th" ? "ฝากขาย/ฝากเช่า" : "List a Property", desc: lang === "th" ? "ลงประกาศทรัพย์ของคุณฟรี" : "Post your listing free" },
-        { href: "Search Results.dc.html", icon: "🔍", bg: "oklch(45% 0.09 230)", label: lang === "th" ? "ค้นหาทรัพย์" : "Search Properties", desc: lang === "th" ? "เรียกดูประกาศทั้งหมด" : "Browse all listings" },
-        { href: "Lister Dashboard.dc.html", icon: "💼", bg: "oklch(50% 0.1 145)", label: lang === "th" ? "Workspace ของฉัน" : "My Workspace", desc: lang === "th" ? "จัดการทรัพย์ที่คุณลงไว้" : "Manage your own listings" },
-        { href: "#", icon: "🤖", bg: "oklch(55% 0.14 300)", label: lang === "th" ? "ถาม AI" : "Ask AI", desc: lang === "th" ? "ให้ AI ช่วยหาบ้าน" : "Get AI help finding a home", onClick: (e) => { e.preventDefault(); window.dispatchEvent(new CustomEvent("hh-open-voice-chat")); } },
-      ],
+      quickActions: (() => {
+        const qa = {
+          list: { th: ["ฝากขาย/ฝากเช่า", "ลงประกาศทรัพย์ของคุณฟรี"], en: ["List a Property", "Post your listing free"], zh: ["委托出售/出租", "免费发布您的房源"], ru: ["Разместить объект", "Разместите объявление бесплатно"], de: ["Objekt inserieren", "Inserieren Sie Ihr Objekt kostenlos"], no: ["Legg ut eiendom", "Legg ut annonsen din gratis"], fr: ["Publier un bien", "Publiez votre annonce gratuitement"], it: ["Pubblica un immobile", "Pubblica gratis il tuo annuncio"] },
+          search: { th: ["ค้นหาทรัพย์", "เรียกดูประกาศทั้งหมด"], en: ["Search Properties", "Browse all listings"], zh: ["搜索房源", "浏览所有房源"], ru: ["Поиск объектов", "Просмотреть все объявления"], de: ["Objekte suchen", "Alle Angebote durchsuchen"], no: ["Søk eiendommer", "Bla gjennom alle annonser"], fr: ["Rechercher des biens", "Parcourir toutes les annonces"], it: ["Cerca immobili", "Sfoglia tutti gli annunci"] },
+          workspace: { th: ["Workspace ของฉัน", "จัดการทรัพย์ที่คุณลงไว้"], en: ["My Workspace", "Manage your own listings"], zh: ["我的工作台", "管理您发布的房源"], ru: ["Моё рабочее пространство", "Управляйте своими объявлениями"], de: ["Mein Arbeitsbereich", "Verwalten Sie Ihre eigenen Angebote"], no: ["Mitt arbeidsområde", "Administrer dine egne annonser"], fr: ["Mon espace de travail", "Gérez vos propres annonces"], it: ["Il mio spazio di lavoro", "Gestisci i tuoi annunci"] },
+          ai: { th: ["ถาม AI", "ให้ AI ช่วยหาบ้าน"], en: ["Ask AI", "Get AI help finding a home"], zh: ["询问 AI", "让 AI 帮您找房"], ru: ["Спросить AI", "Пусть AI поможет найти дом"], de: ["KI fragen", "Lassen Sie sich von der KI bei der Haussuche helfen"], no: ["Spør AI", "Få AI-hjelp til å finne et hjem"], fr: ["Demander à l'IA", "Laissez l'IA vous aider à trouver un logement"], it: ["Chiedi all'IA", "Fatti aiutare dall'IA a trovare casa"] },
+        };
+        const pick = (id) => (qa[id][lang] || qa[id].en);
+        return [
+          { href: "Agent Signup.dc.html", icon: "🏠", bg: "oklch(40% 0.13 25)", label: pick("list")[0], desc: pick("list")[1] },
+          { href: "Search Results.dc.html", icon: "🔍", bg: "oklch(45% 0.09 230)", label: pick("search")[0], desc: pick("search")[1] },
+          { href: "Lister Dashboard.dc.html", icon: "💼", bg: "oklch(50% 0.1 145)", label: pick("workspace")[0], desc: pick("workspace")[1] },
+          { href: "#", icon: "🤖", bg: "oklch(55% 0.14 300)", label: pick("ai")[0], desc: pick("ai")[1], onClick: (e) => { e.preventDefault(); window.dispatchEvent(new CustomEvent("hh-open-voice-chat")); } },
+        ];
+      })(),
       hasFavorites: favCount > 0,
       noFavorites: favCount === 0,
       favPreview: favIds.slice(0, 3).map((id) => propsList.find((p) => p.id === id)).filter(Boolean).map((p) => ({
         href: `Property Details.dc.html?id=${p.id}`,
         photoBg: (p.photos[0] && p.photos[0].url) ? `url('${p.photos[0].url}') center/cover` : "repeating-linear-gradient(135deg, #e0d9c8 0px, #e0d9c8 2px, #ede7d9 2px, #ede7d9 22px)",
-        title: p.title[lang],
+        title: (p.title && typeof p.title === "object") ? (p.title[lang] || p.title.en || p.title.th || "") : (p.title || ""),
         areaLabel: areaLabelOf(p.area),
         priceLabel: mod.formatPrice(p.price, p.currency, lang) + (p.status === "rent" ? t.per_month : ""),
       })),
-      favoritesCountLabel: lang === "th" ? `บันทึกไว้ ${favCount} รายการ` : `${favCount} propert${favCount === 1 ? "y" : "ies"} saved`,
+      favoritesCountLabel: `${favCount} ${favCount === 1 ? (t.property_saved || "property saved") : (t.properties_saved || "properties saved")}`,
       favoritesHref: favIds.length ? `Search Results.dc.html?ids=${favIds.join(",")}` : "Search Results.dc.html",
       collections,
       discoveryCategories: [
