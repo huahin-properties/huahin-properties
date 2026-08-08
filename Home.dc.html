@@ -41,7 +41,7 @@
 </helmet>
 
 <sc-if value="{{ showDevBar }}">
-  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">HM-16 — 8 ส.ค. 2569 (Welcome Gateway: รีดีไซน์เต็มรูปแบบตามภาพอ้างอิง — พื้นหลังภาพวิลล่า, กล่องแชท AI ใหญ่, เส้นคั่นทอง, การ์ด 4 คุณค่า, footer login เลือดหมู)</div>
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">HM-18 — 8 ส.ค. 2569 (Welcome: ปรับ mobile-first ให้เหมาะกับ LINE in-app browser + แชทบอทจริงเชื่อม AI พร้อมการ์ดทรัพย์ + ปุ่มส่ง แทนปุ่มค้นหาด้วย AI)</div>
 </sc-if>
 
 <sc-if value="{{ showGate }}">
@@ -60,39 +60,61 @@
 <sc-if value="{{ showWelcome }}" hint-placeholder-val="{{ false }}">
   <div style="position:fixed; inset:0; z-index:9000; overflow-y:auto; overflow-x:hidden; opacity:{{ welcomeOpacity }}; transition:opacity 0.3s ease; background-image:linear-gradient(180deg, oklch(98% 0.02 75 / 0.55) 0%, oklch(96% 0.02 70 / 0.65) 55%, oklch(93% 0.02 65 / 0.78) 100%), url('https://images.unsplash.com/photo-1602343168117-bb8ffe3e2e9f?q=80&amp;w=2000&amp;auto=format&amp;fit=crop'); background-size:cover; background-position:center; display:flex; flex-direction:column; align-items:center;">
     <div style="width:100%; max-width:1100px; padding:clamp(28px,6vw,50px) clamp(18px,4vw,40px) 0; display:flex; flex-direction:column; align-items:center; text-align:center; box-sizing:border-box;">
-      <img src="logo.png" alt="huahin.properties logo" style="height:clamp(52px,8vw,82px); width:clamp(52px,8vw,82px); object-fit:contain; border-radius:50%; margin-bottom:18px; box-shadow:0 6px 20px oklch(20% 0.02 60 / 0.18);" />
-      <h1 style="font-family:'Playfair Display',serif; font-weight:500; font-size:clamp(26px,5.6vw,58px); color:oklch(32% 0.13 25); line-height:1.08; letter-spacing:-0.01em; margin:0 0 14px; white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis;">{{ w.title1 }}</h1>
-      <div style="font-size:clamp(14px,2.4vw,22px); color:oklch(32% 0.02 60); margin-bottom:16px; line-height:1.4;">{{ w.title2 }}</div>
-      <div style="width:170px; height:1px; background:oklch(65% 0.1 80); position:relative; margin-bottom:22px;">
+      <img src="logo.png" alt="huahin.properties logo" style="height:clamp(40px,7vw,82px); width:clamp(40px,7vw,82px); object-fit:contain; border-radius:50%; margin-bottom:12px; box-shadow:0 6px 20px oklch(20% 0.02 60 / 0.18);" />
+      <h1 style="font-family:'Playfair Display',serif; font-weight:500; font-size:clamp(19px,5.5vw,58px); color:oklch(32% 0.13 25); line-height:1.3; letter-spacing:-0.01em; margin:0 0 8px; max-width:100%;">{{ w.title1 }}</h1>
+      <div style="font-size:clamp(12.5px,3vw,22px); color:oklch(32% 0.02 60); margin-bottom:12px; line-height:1.4;">{{ w.title2 }}</div>
+      <div style="width:130px; height:1px; background:oklch(65% 0.1 80); position:relative; margin-bottom:16px;">
         <div style="position:absolute; left:50%; top:-3px; transform:translateX(-50%) rotate(45deg); width:6px; height:6px; background:oklch(65% 0.1 80);"></div>
       </div>
 
-      <div style="display:flex; gap:10px; flex-wrap:nowrap; overflow-x:auto; max-width:100%; padding:2px 2px 10px; margin-bottom:14px; justify-content:{{ chipsJustify }};">
+      <div style="display:flex; gap:8px; flex-wrap:nowrap; overflow-x:auto; max-width:100%; padding:2px 2px 10px; margin-bottom:10px; justify-content:{{ chipsJustify }};">
         <sc-for list="{{ suggestionChips }}" as="chip" hint-placeholder-count="3">
-          <div onClick="{{ chip.onClick }}" style="flex-shrink:0; display:flex; align-items:center; gap:7px; background:oklch(99% 0.005 80 / 0.9); border:1px solid oklch(70% 0.06 70 / 0.35); border-radius:100px; padding:11px 20px; font-size:14.5px; color:oklch(28% 0.02 60); cursor:pointer; box-shadow:0 2px 10px oklch(20% 0.02 60 / 0.05); white-space:nowrap;">
+          <div onClick="{{ chip.onClick }}" style="flex-shrink:0; display:flex; align-items:center; gap:6px; background:oklch(99% 0.005 80 / 0.9); border:1px solid oklch(70% 0.06 70 / 0.35); border-radius:100px; padding:9px 15px; font-size:12.5px; color:oklch(28% 0.02 60); cursor:pointer; box-shadow:0 2px 10px oklch(20% 0.02 60 / 0.05); white-space:nowrap;">
             <span>{{ chip.icon }}</span>{{ chip.label }}
           </div>
         </sc-for>
       </div>
 
-      <div style="width:100%; max-width:780px; background:oklch(99% 0.005 80 / 0.96); border:1px solid oklch(75% 0.05 75 / 0.3); border-radius:24px; box-shadow:0 16px 44px oklch(20% 0.02 60 / 0.14); box-sizing:border-box; padding:clamp(16px,3vw,26px) clamp(16px,3vw,22px) clamp(14px,2.4vw,18px); display:flex; flex-direction:column; min-height:clamp(300px,42vw,420px);">
-        <div style="display:flex; align-items:flex-start; gap:10px; text-align:left; margin-bottom:16px;">
-          <div style="font-size:19px; flex-shrink:0; margin-top:1px;">✨</div>
-          <div>
-            <div style="font-size:clamp(15px,1.8vw,17px); font-weight:600; color:oklch(24% 0.02 60);">{{ w.chatGreeting }}</div>
-            <div style="font-size:clamp(13px,1.6vw,15px); color:oklch(48% 0.02 60); margin-top:3px;">{{ w.chatSub }}</div>
-          </div>
+      <div style="width:100%; max-width:780px; background:oklch(99% 0.005 80 / 0.96); border:1px solid oklch(75% 0.05 75 / 0.3); border-radius:20px; box-shadow:0 16px 44px oklch(20% 0.02 60 / 0.14); box-sizing:border-box; padding:clamp(12px,2.4vw,20px); display:flex; flex-direction:column; height:clamp(280px,50vh,420px);">
+        <div ref="{{ welcomeChatScrollRef }}" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:10px; text-align:left; padding-right:2px;">
+          <sc-if value="{{ !hasWelcomeChatMessages }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; align-items:flex-start; gap:10px;">
+              <div style="font-size:19px; flex-shrink:0; margin-top:1px;">✨</div>
+              <div>
+                <div style="font-size:clamp(14.5px,1.8vw,17px); font-weight:600; color:oklch(24% 0.02 60);">{{ w.chatGreeting }}</div>
+                <div style="font-size:clamp(12.5px,1.6vw,15px); color:oklch(48% 0.02 60); margin-top:3px;">{{ w.chatSub }}</div>
+              </div>
+            </div>
+          </sc-if>
+          <sc-for list="{{ welcomeChatMessages }}" as="m" hint-placeholder-count="0">
+            <div style="align-self:{{ m.align }}; max-width:88%; display:flex; flex-direction:column; gap:6px;">
+              <div style="{{ m.bubbleStyle }}">{{ m.text }}</div>
+              <sc-for list="{{ m.links }}" as="lnk" hint-placeholder-count="0">
+                <div onClick="{{ lnk.onClick }}" style="display:flex; align-items:center; gap:8px; background:white; border:1px solid oklch(85% 0.02 70); border-radius:12px; padding:8px 10px; cursor:pointer;">
+                  <div style="width:36px; height:36px; border-radius:8px; background:{{ lnk.thumbBg }}; flex-shrink:0;"></div>
+                  <div style="min-width:0;">
+                    <div style="font-size:12.5px; font-weight:600; color:oklch(28% 0.02 60); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ lnk.label }}</div>
+                    <div style="font-size:11.5px; color:oklch(50% 0.02 60);">{{ lnk.priceLabel }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+          <sc-if value="{{ welcomeChatLoading }}" hint-placeholder-val="{{ false }}">
+            <div style="align-self:flex-start; font-size:13px; color:oklch(55% 0.02 60);">…</div>
+          </sc-if>
         </div>
 
-        <div style="flex:1;"></div>
-
-        <div style="display:flex; align-items:center; gap:8px; background:white; border:1px solid oklch(82% 0.02 70); border-radius:18px; padding:clamp(10px,1.6vw,14px) clamp(10px,1.6vw,14px) clamp(10px,1.6vw,14px) clamp(16px,2.4vw,22px); box-sizing:border-box;">
-          <input value="{{ welcomeQuery }}" onChange="{{ onWelcomeQuery }}" onKeyDown="{{ onWelcomeKeyDown }}" placeholder="{{ w.placeholder }}" style="flex:1; min-width:0; width:0; border:none; outline:none; font-size:clamp(13.5px,1.7vw,16px); font-family:inherit; background:transparent; color:oklch(20% 0.02 60);" />
-          <div onClick="{{ onWelcomeMic }}" title="🎙️" style="width:clamp(38px,5vw,48px); height:clamp(38px,5vw,48px); border-radius:50%; background:oklch(95% 0.02 80); color:oklch(38% 0.13 65); display:flex; align-items:center; justify-content:center; font-size:clamp(15px,2vw,19px); cursor:pointer; flex-shrink:0;">🎙️</div>
+        <div style="display:flex; align-items:center; gap:8px; background:white; border:1px solid oklch(82% 0.02 70); border-radius:18px; padding:clamp(8px,1.4vw,12px) clamp(8px,1.4vw,12px) clamp(8px,1.4vw,12px) clamp(14px,2.2vw,20px); box-sizing:border-box; margin-top:10px; flex-shrink:0;">
+          <input value="{{ welcomeQuery }}" onChange="{{ onWelcomeQuery }}" onKeyDown="{{ onWelcomeKeyDown }}" placeholder="{{ w.placeholder }}" style="flex:1; min-width:0; width:0; border:none; outline:none; font-size:clamp(13px,1.7vw,16px); font-family:inherit; background:transparent; color:oklch(20% 0.02 60);" />
+          <sc-if value="{{ hasWelcomeQuery }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ onWelcomeSubmit }}" title="Send" style="width:clamp(36px,5vw,44px); height:clamp(36px,5vw,44px); border-radius:50%; background:oklch(38% 0.13 65); color:white; display:flex; align-items:center; justify-content:center; font-size:clamp(14px,1.8vw,17px); cursor:pointer; flex-shrink:0;">➤</div>
+          </sc-if>
+          <sc-if value="{{ !hasWelcomeQuery }}" hint-placeholder-val="{{ true }}">
+            <div onClick="{{ onWelcomeMic }}" title="🎙️" style="width:clamp(36px,5vw,44px); height:clamp(36px,5vw,44px); border-radius:50%; background:oklch(95% 0.02 80); color:oklch(38% 0.13 65); display:flex; align-items:center; justify-content:center; font-size:clamp(14px,1.8vw,17px); cursor:pointer; flex-shrink:0;">🎙️</div>
+          </sc-if>
         </div>
       </div>
-
-      <div onClick="{{ onWelcomeSubmit }}" style="margin-top:16px; color:oklch(32% 0.13 25); font-size:clamp(14.5px,1.8vw,17px); font-weight:600; cursor:pointer; padding:9px 20px; border-radius:100px; background:oklch(99% 0.005 80 / 0.6);">✨ {{ w.submit }}</div>
 
       <div style="width:100%; max-width:1000px; display:grid; grid-template-columns:repeat({{ benefitCols }},1fr); gap:clamp(14px,2vw,20px); margin-top:clamp(24px,4vw,40px); text-align:center;">
         <sc-for list="{{ benefitItems }}" as="b" hint-placeholder-count="4">
@@ -601,13 +623,57 @@ class Component extends DCLogic {
   }
   async submitWelcome() {
     const q = (this.state.welcomeQuery || "").trim();
-    if (!q) return;
+    if (!q || this.state.welcomeChatLoading) return;
     this.markWelcomeSeen();
     try {
       const fb = await import("./firebase-client.js");
       if (fb.logAiSearchQuery) fb.logAiSearchQuery(q, this.state.lang).catch(() => {});
     } catch (e) {}
-    window.location.href = "Search Results.dc.html?q=" + encodeURIComponent(q);
+    const userMsg = { role: "user", text: q, align: "flex-end", links: [], bubbleStyle: "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:9px 13px; border-radius:13px 13px 2px 13px; font-size:13.5px; line-height:1.5;" };
+    const history = [...this.state.welcomeChatMessages, userMsg];
+    this.setState({ welcomeChatMessages: history, welcomeQuery: "", welcomeChatLoading: true });
+    this._scrollWelcomeChat();
+    try {
+      const lang = this.state.lang;
+      const props = this.state.effProps || (this._mod ? this._mod.PROPERTIES : []) || [];
+      const MAX_LISTINGS = 40;
+      const listingsBlock = props.slice(0, MAX_LISTINGS).map((p) => `${p.id}: ${p.type || ""} in ${p.zone || p.area || ""}, ${p.bedrooms || 0} bed, ${(p.price || 0).toLocaleString()} ${p.currency || "THB"}, status ${p.status || ""}`).join("\n");
+      const system = `You are a helpful, warm real-estate assistant for huahin.properties (Hua Hin, Pranburi, Cha-am, Thailand). Reply in the customer's language (${lang}). Use ONLY the listings below — never invent facts. When recommending a property, state its code (e.g. HH-109) in your reply so the UI can render a card.\n\nListings:\n${listingsBlock}`;
+      const messages = history.map((m) => ({ role: m.role, content: m.text }));
+      let reply;
+      if (window.claude && window.claude.complete) {
+        reply = await window.claude.complete({ system, messages, model: "claude-haiku-4-5", max_tokens: 500 });
+      } else {
+        const res = await fetch("https://claudecomplete-3j4ldf4pja-as.a.run.app", {
+          method: "POST", headers: { "content-type": "application/json" },
+          body: JSON.stringify({ system, messages, model: "claude-haiku-4-5", max_tokens: 500 }),
+        });
+        const data = await res.json();
+        reply = data.reply || data.completion || "";
+      }
+      const links = this._extractWelcomeLinks(reply, props);
+      const aiMsg = { role: "assistant", text: reply, align: "flex-start", links, bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:9px 13px; border-radius:13px 13px 13px 2px; font-size:13.5px; line-height:1.5;" };
+      this.setState({ welcomeChatMessages: [...history, aiMsg], welcomeChatLoading: false });
+    } catch (e) {
+      console.warn("welcome chat error:", e);
+      const errMsg = { role: "assistant", text: "Sorry, something went wrong. Try again or browse the full site.", align: "flex-start", links: [], bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:9px 13px; border-radius:13px 13px 13px 2px; font-size:13.5px; line-height:1.5;" };
+      this.setState({ welcomeChatMessages: [...history, errMsg], welcomeChatLoading: false });
+    }
+    this._scrollWelcomeChat();
+  }
+  _extractWelcomeLinks(text, props) {
+    if (!text) return [];
+    const codes = [...new Set((text.match(/\b[A-Z]{2,4}-\d{2,4}\b/g) || []))];
+    return codes.map((code) => {
+      const p = props.find((pr) => pr.id === code);
+      if (!p) return null;
+      const photoUrl = p.photos && p.photos[0] && p.photos[0].url;
+      const thumbBg = photoUrl ? `url(${photoUrl}) center/cover` : "oklch(88% 0.02 75)";
+      return { label: code, thumbBg, priceLabel: `${(p.price || 0).toLocaleString()} ${p.currency || "THB"}`, onClick: () => { window.location.href = "Property Details.dc.html?id=" + encodeURIComponent(code); } };
+    }).filter(Boolean);
+  }
+  _scrollWelcomeChat() {
+    setTimeout(() => { if (this._welcomeChatScrollEl) this._welcomeChatScrollEl.scrollTop = this._welcomeChatScrollEl.scrollHeight; }, 50);
   }
   goToPage(p) {
     this.setState({ page: p });
@@ -624,6 +690,7 @@ class Component extends DCLogic {
     showGate: false, gatePassword: "", gateError: "",
     showWelcome: true, welcomeCheckedLogin: false,
     welcomeQuery: "", welcomeDismissing: false,
+    welcomeChatMessages: [], welcomeChatLoading: false,
     wantValue: "sale",
     keyword: "",
     areaValue: "",
@@ -943,6 +1010,10 @@ class Component extends DCLogic {
       onWelcomeMarkSeen: () => this.markWelcomeSeen(),
       welcomeOpacity: this.state.welcomeDismissing ? 0 : 1,
       welcomeQuery: this.state.welcomeQuery, onWelcomeQuery: (e) => this.setState({ welcomeQuery: e.target.value }),
+      hasWelcomeQuery: !!(this.state.welcomeQuery || "").trim(),
+      welcomeChatMessages: this.state.welcomeChatMessages, hasWelcomeChatMessages: this.state.welcomeChatMessages.length > 0,
+      welcomeChatLoading: this.state.welcomeChatLoading,
+      welcomeChatScrollRef: (el) => { this._welcomeChatScrollEl = el; },
       onWelcomeSubmit: () => this.submitWelcome(),
       onWelcomeKeyDown: (e) => { if (e.key === "Enter") this.submitWelcome(); },
       onWelcomeSampleClick: () => { this.setState({ welcomeQuery: (WELCOME_I18N[lang] || WELCOME_I18N.en).sample }); },
