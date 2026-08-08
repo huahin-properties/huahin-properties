@@ -85,6 +85,9 @@
 </sc-if>
 
 <div style="min-height:100vh;">
+  <sc-if value="{{ showDevBar }}">
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">AS-1 — 8 ส.ค. 2569 (แท็บ Sign up Free/Login แปลตามภาษาที่จำไว้อัตโนมัติ)</div>
+  </sc-if>
   <div style="display:flex; align-items:center; justify-content:space-between; padding:20px clamp(20px,4vw,56px); border-bottom:1px solid oklch(90% 0.01 70);">
     <a href="Home.dc.html" style="display:flex; align-items:center; gap:9px; font-family:'Playfair Display',serif; font-size:22px; color:oklch(22% 0.02 60); text-decoration:none;"><img src="logo.png" style="height:36px; width:36px; border-radius:50%; object-fit:contain;" />huahin<span style="color:oklch(40% 0.13 25);">.</span>properties</a>
     <a href="Home.dc.html" style="font-size:13px; color:oklch(45% 0.02 60); text-decoration:none;">← กลับหน้าแรก</a>
@@ -219,7 +222,7 @@ const SIGNUP_I18N = {
 };
 
 class Component extends DCLogic {
-  state = { tab: "signup", name: "", phone: "", email: "", password: "", submitted: false, submitting: false, error: "", loginEmail: "", loginPassword: "", loginBusy: false, loginError: "", packageChoice: null, lang: "th", foundingLimit: 0, foundingCount: 0, foundingNote: "", phoneOtp: "", otpCode: "", otpSent: false, socialBusy: false, socialError: "", needManualEmail: false, manualEmail: "", manualEmailError: "", pendingSocialUid: null, showSignupPassword: false, showLoginPassword: false,
+  state = { showDevBar: false, tab: "signup", name: "", phone: "", email: "", password: "", submitted: false, submitting: false, error: "", loginEmail: "", loginPassword: "", loginBusy: false, loginError: "", packageChoice: null, lang: "th", foundingLimit: 0, foundingCount: 0, foundingNote: "", phoneOtp: "", otpCode: "", otpSent: false, socialBusy: false, socialError: "", needManualEmail: false, manualEmail: "", manualEmailError: "", pendingSocialUid: null, showSignupPassword: false, showLoginPassword: false,
     // True the instant this page loads back from a Google/Facebook redirect —
     // read synchronously (before any await) so the very first render already
     // shows the loading overlay instead of flashing the login/signup form.
@@ -241,6 +244,10 @@ class Component extends DCLogic {
       }
       const isFbIg = /FBAN|FBAV|Instagram/i.test(ua);
       if (isFbIg) this.setState({ inAppBrowserWarning: true });
+    } catch (e) {}
+    try {
+      const isPreviewEnv = !/huahin\.properties$/.test(window.location.hostname);
+      this.setState({ showDevBar: isPreviewEnv || (localStorage.getItem("hhDevBar") === "1") });
     } catch (e) {}
     try {
       const mod = await import("./data.js");
@@ -502,6 +509,7 @@ class Component extends DCLogic {
     const t = SIGNUP_I18N[this.state.lang] || SIGNUP_I18N.th;
     return {
       t,
+      showDevBar: this.state.showDevBar,
       name: this.state.name, onName: (e) => this.setState({ name: e.target.value }),
       phone: this.state.phone, onPhone: (e) => this.setState({ phone: e.target.value }),
       email: this.state.email, onEmail: (e) => this.setState({ email: e.target.value }),
