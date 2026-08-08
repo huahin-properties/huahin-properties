@@ -26,7 +26,7 @@
   </style>
 </helmet>
 
-<div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">PD-2 (แก้แชทบอทเด้งอัตโนมัติทุกครั้งที่เปิดหน้า — root cause: _restoreHistory ใน ContactRail.dc.html)</div>
+<div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">PD-4 (แชทบอทไม่เด้งเปิดอัตโนมัติแล้ว — เริ่มพับเก็บเสมอ + กันหน้าขาวเมื่อไม่มี id ในพรีวิว)</div>
 
 <sc-if value="{{ showGate }}">
   <div style="position:fixed; inset:0; background:oklch(96% 0.015 75); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
@@ -467,7 +467,7 @@ class Component extends DCLogic {
     const mod = await import("./data.js");
     this._mod = mod;
     const params = new URLSearchParams(window.location.search);
-    this._id = params.get("id") || mod.PROPERTIES[0].id;
+    this._id = params.get("id") || (mod.PROPERTIES[0] && mod.PROPERTIES[0].id);
     this.setState({ lang: mod.getLang(), data: mod });
     // Reviews fetch was previously fired before this._id was assigned (a
     // pre-existing ordering bug invisible until reviews became per-property
