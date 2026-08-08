@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-24 (ID5: แปลชื่อที่แสดง/ลิงก์อัปเกรดแพ็กเกจ/หน่วยวันทดลอง) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-25 (ภาษาที่เลือกจำข้ามหน้าทุกหน้าแล้ว ใช้ค่า hh_lang เดียวกับหน้าอื่นทั้งเว็บ) — เดิม: ID5: แปลชื่อที่แสดง/ลิงก์อัปเกรดแพ็กเกจ/หน่วยวันทดลอง) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -1323,7 +1323,7 @@ const SETTINGS_I18N = {
 
 class Component extends DCLogic {
   state = {
-    lang: (() => { try { return localStorage.getItem("hhDashLang") || "th"; } catch (e) { return "th"; } })(),
+    lang: (() => { try { return localStorage.getItem("hh_lang") || localStorage.getItem("hhDashLang") || "th"; } catch (e) { return "th"; } })(),
     loaded: false, signedIn: false, lister: null, properties: [], view: "list", dashTab: "settings", showDevBar: false,
     editingId: null, f_type: "villa", f_area: "hua-hin", f_subdistrict: "", f_zone: "", f_status: "sale",
     f_price: "", f_bedrooms: "", f_bathrooms: "", f_poolSize: "", f_parking: "", f_livingArea: "", f_landSize: "", f_mapsLink: "", f_mapDisplay: "area",
@@ -2377,7 +2377,7 @@ class Component extends DCLogic {
 
   onSelectLang(code) {
     this.setState({ lang: code });
-    try { localStorage.setItem("hhDashLang", code); } catch (e) {}
+    try { localStorage.setItem("hh_lang", code); localStorage.setItem("hhDashLang", code); window.dispatchEvent(new CustomEvent("langchange", { detail: code })); } catch (e) {}
   }
 
   renderVals() {

@@ -386,7 +386,7 @@ class Component extends DCLogic {
     loaded: false, lister: null, properties: [], showShare: false, showAbout: false, showFilters: false, showMyMap: false, showDevBar: false, shareCopyLabel: "คัดลอกลิงก์",
     chatOpen: false, chatInput: "", chatMessages: [], chatThinking: false,
     showPropertyModal: false, modalProperty: null, modalPhotoIndex: 0,
-    lang: "th", filterType: "", filterZone: "", filterBeds: "", filterPrice: "",
+    lang: (() => { try { return localStorage.getItem("hh_lang") || "th"; } catch (e) { return "th"; } })(), filterType: "", filterZone: "", filterBeds: "", filterPrice: "",
   };
 
   async componentDidMount() {
@@ -442,6 +442,7 @@ class Component extends DCLogic {
 
   onSelectLang(code) {
     this.setState({ lang: code });
+    try { localStorage.setItem("hh_lang", code); window.dispatchEvent(new CustomEvent("langchange", { detail: code })); } catch (e) {}
   }
 
   _myMapRefCb = (el) => {
