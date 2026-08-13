@@ -117,7 +117,7 @@
             <textarea rows="4" value="{{ f_details }}" onChange="{{ onFDetails }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px; resize:vertical;"></textarea>
           </div>
           <div>
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รูปทรัพย์ (ขั้นต่ำ 5 รูป) — {{ photoCount }}/5</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รูปทรัพย์ (ขั้นต่ำ 5 รูป) — อัปโหลดแล้ว {{ photoCount }} รูป</div>
             <input type="file" accept="image/*" multiple="{{ true }}" onChange="{{ onPhotosChange }}" style="width:100%; font-size:13px;" />
             <sc-if value="{{ hasPhotos }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
@@ -257,7 +257,7 @@ class Component extends DCLogic {
   }
 
   async onPhotosChange(e) {
-    const files = Array.from(e.target.files || []).slice(0, 5 - this.state.photos.length);
+    const files = Array.from(e.target.files || []);
     for (const file of files) {
       const dataUrl = await this._fb.fileToDataUrl(file, 1000);
       this.setState((s) => ({ photos: [...s.photos, { url: dataUrl }] }));
