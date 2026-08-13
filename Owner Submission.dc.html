@@ -131,6 +131,11 @@
             <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">พิกัดตำแหน่งจริง (lat,lng — เช่น 12.558940,99.909039)</div>
             <input value="{{ f_coords }}" onChange="{{ onFCoords }}" placeholder="12.558940,99.909039" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px;" />
             <div style="font-size:11px; color:oklch(55% 0.02 60); margin-top:4px;">เปิด Google Maps → กดค้างที่ตำแหน่งบ้าน → คัดลอกตัวเลขที่ขึ้นมาวางที่นี่</div>
+            <sc-if value="{{ hasValidCoords }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:10px; border-radius:8px; overflow:hidden; border:1px solid oklch(85% 0.01 70); height:220px;">
+                <iframe src="{{ mapEmbedUrl }}" style="width:100%; height:100%; border:0;" loading="lazy"></iframe>
+              </div>
+            </sc-if>
           </div>
           <div>
             <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ข้อมูลติดต่อเจ้าของทรัพย์จริง (ถ้าต่างจากผู้กรอก)</div>
@@ -287,6 +292,8 @@ class Component extends DCLogic {
       f_price: s.f_price, onFPrice: (e) => this.setState({ f_price: e.target.value }),
       f_details: s.f_details, onFDetails: (e) => this.setState({ f_details: e.target.value }),
       f_coords: s.f_coords, onFCoords: (e) => this.setState({ f_coords: e.target.value }),
+      hasValidCoords: /^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$/.test(s.f_coords),
+      mapEmbedUrl: `https://maps.google.com/maps?q=${encodeURIComponent(s.f_coords.trim())}&z=16&output=embed`,
       f_ownerContact: s.f_ownerContact, onFOwnerContact: (e) => this.setState({ f_ownerContact: e.target.value }),
       photoCount: s.photos.length, photoThumbs: s.photos, hasPhotos: s.photos.length > 0,
       onPhotosChange: (e) => this.onPhotosChange(e),
