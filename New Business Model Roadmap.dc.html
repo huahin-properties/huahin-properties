@@ -44,22 +44,22 @@
 
         <div style="display:flex; gap:14px;">
           <div style="flex-shrink:0; width:30px; height:30px; border-radius:50%; background:oklch(40% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">1</div>
-          <div style="font-size:14px; line-height:1.7;"><strong>จุดเข้า</strong> — คลิกเมนู "ฝากขาย/เช่า" หรือพิมพ์ในแชท AI ว่าอยากฝากขาย → ระบบตรวจจับคำ แสดงปุ่มลิงก์ไปหน้ากรอกข้อมูล</div>
+          <div style="font-size:14px; line-height:1.7; color:oklch(35% 0.13 145);"><strong>✅ จุดเข้า</strong> — คลิกเมนู "ฝากขาย/เช่า" หรือพิมพ์ในแชท AI ว่าอยากฝากขาย → ระบบตรวจจับคำ แสดงปุ่มลิงก์ไปหน้ากรอกข้อมูล <em>(Owner Submission.dc.html — OS-1)</em></div>
         </div>
 
         <div style="display:flex; gap:14px;">
           <div style="flex-shrink:0; width:30px; height:30px; border-radius:50%; background:oklch(40% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">2</div>
-          <div style="font-size:14px; line-height:1.7;"><strong>ระบุตัวตนแบบเบา</strong> — ชื่อ + เบอร์โทร/อีเมล (หรือ login ด้วย Google/LINE เพื่อติดตามสถานะย้อนหลัง) → ระบบตรวจสอบเบอร์โทรซ้ำกับทรัพย์ที่เคยฝากไว้ก่อนหน้า (เตือน Admin ถ้าซ้ำ ไม่บล็อกอัตโนมัติ) → ถ้าเจ้าของมีทรัพย์อื่นฝากไว้แล้ว ดึงข้อมูลติดต่อเดิมมาเติมให้อัตโนมัติ ไม่ต้องกรอกซ้ำ</div>
+          <div style="font-size:14px; line-height:1.7; color:oklch(35% 0.13 145);"><strong>✅ ระบุตัวตนแบบเบา</strong> — ชื่อ + เบอร์โทร/อีเมล (หรือ login ด้วย Google/LINE เพื่อติดตามสถานะย้อนหลัง) → ดึงข้อมูลติดต่อเดิมมาเติมให้อัตโนมัติถ้าเคยกรอกไว้ก่อนหน้า <em>(ยังไม่มีระบบตรวจเบอร์ซ้ำเตือน Admin — รอทำ)</em></div>
         </div>
 
         <div style="display:flex; gap:14px;">
           <div style="flex-shrink:0; width:30px; height:30px; border-radius:50%; background:oklch(40% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">3</div>
-          <div style="font-size:14px; line-height:1.7;"><strong>เลือกประเภทธุรกรรม</strong> — ขายหรือเช่า (<code>status</code>: sale/rent)</div>
+          <div style="font-size:14px; line-height:1.7; color:oklch(35% 0.13 145);"><strong>✅ เลือกประเภทธุรกรรม</strong> — ขายหรือเช่า (<code>status</code>: sale/rent)</div>
         </div>
 
         <div style="display:flex; gap:14px;">
           <div style="flex-shrink:0; width:30px; height:30px; border-radius:50%; background:oklch(40% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">4</div>
-          <div style="font-size:14px; line-height:1.7;"><strong>กรอกข้อมูลทรัพย์</strong> — ประเภททรัพย์ (<code>type</code>) → สภาพทรัพย์ (<code>condition</code>: มือ1/มือสอง) → ราคา → รายละเอียด → อัปโหลดรูปขั้นต่ำตามเกณฑ์ที่กำหนด (เช่น 5 รูปขึ้นไป) → ปักหมุดตำแหน่งจริง → ข้อมูลติดต่อเจ้าของจริง → แนบเอกสารยืนยันความเป็นเจ้าของ (ไม่บังคับ แต่แนะนำ — โฉนด/สัญญาเดิม) → ระบบบันทึก <code>source: owner_submission</code> อัตโนมัติ</div>
+          <div style="font-size:14px; line-height:1.7; color:oklch(35% 0.13 145);"><strong>✅ กรอกข้อมูลทรัพย์</strong> — ประเภททรัพย์ (<code>type</code>) → สภาพทรัพย์ (<code>condition</code>: มือ1/มือสอง) → ราคา → รายละเอียด → อัปโหลดรูปขั้นต่ำ 5 รูป → ปักหมุดตำแหน่งจริง (พิกัด lat,lng) → ข้อมูลติดต่อเจ้าของจริง → แนบเอกสารยืนยันความเป็นเจ้าของ (ไม่บังคับ) → ระบบบันทึก <code>source: owner_submission</code> อัตโนมัติ <em>(ยังไม่มีเกณฑ์คุณภาพรูปอัตโนมัติเกินกว่านับจำนวน — พอสำหรับ Phase 1)</em></div>
         </div>
 
         <div style="display:flex; gap:14px;">

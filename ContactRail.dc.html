@@ -790,7 +790,7 @@ class Component extends DCLogic {
       links.push({ label: t.chat_contact_us || "Contact us", noThumb: true, onClick: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }) });
     }
     if (/list your property|ฝากขาย|ฝากเช่า|เผยแพร่ทรัพย์|разместить (свой )?объект|发布(您的)?房源|immobilie inserieren|legg ut din eiendom|publier votre bien|pubblica il tuo immobile/i.test(text)) {
-      links.push({ label: t.chat_list_property || "List property", noThumb: true, onClick: () => this._navigate("Agent Signup.dc.html") });
+      links.push({ label: t.chat_list_property || "List property", noThumb: true, onClick: () => this._navigate("Owner Submission.dc.html") });
     }
     return links;
   }

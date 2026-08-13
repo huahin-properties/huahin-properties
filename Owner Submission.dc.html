@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <title>ฝากขาย/ฝากเช่าทรัพย์ — huahin.properties</title>
+  <style>
+    body { margin: 0; }
+    a { color: oklch(40% 0.13 25); }
+    a:hover { color: oklch(32% 0.13 25); }
+    input, select, textarea { font-family: 'Inter', sans-serif; }
+  </style>
+</helmet>
+
+<sc-if value="{{ showDevBar }}" hint-placeholder-val="{{ true }}">
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">OS-4 (ย้ายแถบเหลืองมาหลัง helmet — เดิมอยู่ผิดตำแหน่งจึงไม่โชว์)</div>
+</sc-if>
+
+<div style="font-family:'Inter',sans-serif; background:oklch(97% 0.01 80); min-height:100vh; color:oklch(22% 0.02 60);">
+  <div style="max-width:640px; margin:0 auto; padding:24px 20px 60px;">
+
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+      <a href="Home.dc.html" style="font-size:13px; text-decoration:none;">← กลับหน้าแรก</a>
+    </div>
+
+    <div style="font-family:'Playfair Display',serif; font-size:24px; font-weight:700; color:oklch(35% 0.13 25); margin-bottom:6px;">ฝากขาย / ฝากเช่าทรัพย์กับเรา</div>
+    <div style="font-size:13.5px; color:oklch(50% 0.02 60); margin-bottom:24px;">ให้ทีม huahin.properties ช่วยจับคู่ทรัพย์ของคุณกับผู้ซื้อ/ผู้เช่าที่กำลังค้นหาอยู่จริง</div>
+
+    <div style="display:flex; gap:6px; margin-bottom:28px;">
+      <sc-for list="{{ stepDots }}" as="d" hint-placeholder-count="4">
+        <div style="flex:1; height:4px; border-radius:3px; background:{{ d.color }};"></div>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ isStep1 }}" hint-placeholder-val="{{ true }}">
+      <div style="background:white; border-radius:12px; padding:24px; border:1px solid oklch(88% 0.01 70);">
+        <div style="font-size:15px; font-weight:600; margin-bottom:14px;">ขั้นตอนที่ 1 — ข้อมูลติดต่อของคุณ</div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ชื่อ-นามสกุล</div>
+            <input value="{{ f_name }}" onChange="{{ onFName }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">เบอร์โทร</div>
+            <input value="{{ f_phone }}" onChange="{{ onFPhone }}" placeholder="08X-XXX-XXXX" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">อีเมล (ไม่บังคับ)</div>
+            <input value="{{ f_email }}" onChange="{{ onFEmail }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px;" />
+          </div>
+          <sc-if value="{{ hasPriorSubmission }}" hint-placeholder-val="{{ false }}">
+            <div style="background:oklch(95% 0.06 145); border:1px solid oklch(80% 0.08 145); border-radius:8px; padding:10px 12px; font-size:12.5px; color:oklch(30% 0.1 145);">พบข้อมูลติดต่อที่คุณเคยฝากทรัพย์ไว้ก่อนหน้า — ระบบดึงข้อมูลมาเติมให้แล้ว</div>
+          </sc-if>
+        </div>
+        <div onClick="{{ onGoStep2 }}" style="margin-top:20px; background:oklch(22% 0.02 60); color:white; text-align:center; padding:13px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">ถัดไป →</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isStep2 }}" hint-placeholder-val="{{ false }}">
+      <div style="background:white; border-radius:12px; padding:24px; border:1px solid oklch(88% 0.01 70);">
+        <div style="font-size:15px; font-weight:600; margin-bottom:14px;">ขั้นตอนที่ 2 — ต้องการฝากขายหรือฝากเช่า?</div>
+        <div style="display:flex; gap:12px;">
+          <div onClick="{{ onSelectSale }}" style="{{ saleCardStyle }}">
+            <div style="font-size:26px; margin-bottom:6px;">🏷️</div>
+            <div style="font-size:14px; font-weight:600;">ฝากขาย</div>
+          </div>
+          <div onClick="{{ onSelectRent }}" style="{{ rentCardStyle }}">
+            <div style="font-size:26px; margin-bottom:6px;">🔑</div>
+            <div style="font-size:14px; font-weight:600;">ฝากเช่า</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <div onClick="{{ onBackStep1 }}" style="flex:1; text-align:center; padding:13px; border-radius:8px; font-size:14px; border:1px solid oklch(80% 0.02 60); cursor:pointer;">← ย้อนกลับ</div>
+          <div onClick="{{ onGoStep3 }}" style="{{ step2NextStyle }}">ถัดไป →</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isStep3 }}" hint-placeholder-val="{{ false }}">
+      <div style="background:white; border-radius:12px; padding:24px; border:1px solid oklch(88% 0.01 70);">
+        <div style="font-size:15px; font-weight:600; margin-bottom:14px;">ขั้นตอนที่ 3 — ข้อมูลทรัพย์</div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ประเภททรัพย์</div>
+            <select value="{{ f_type }}" onChange="{{ onFType }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px; background:white;">
+              <option value="villa">พูลวิลล่า</option>
+              <option value="house">บ้านเดี่ยว</option>
+              <option value="condo">คอนโด</option>
+              <option value="land">ที่ดิน</option>
+              <option value="commercial">อาคารพาณิชย์</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">สภาพทรัพย์</div>
+            <select value="{{ f_condition }}" onChange="{{ onFCondition }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px; background:white;">
+              <option value="new">ใหม่ (จากโครงการ/ยังไม่เคยอยู่)</option>
+              <option value="resale">มือสอง</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ราคา (บาท)</div>
+            <input type="number" value="{{ f_price }}" onChange="{{ onFPrice }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รายละเอียดทรัพย์ (ห้องนอน/ห้องน้ำ/พื้นที่/สิ่งอำนวยความสะดวก ฯลฯ)</div>
+            <textarea rows="4" value="{{ f_details }}" onChange="{{ onFDetails }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px; resize:vertical;"></textarea>
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รูปทรัพย์ (ขั้นต่ำ 5 รูป) — {{ photoCount }}/5</div>
+            <input type="file" accept="image/*" multiple="{{ true }}" onChange="{{ onPhotosChange }}" style="width:100%; font-size:13px;" />
+            <sc-if value="{{ hasPhotos }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
+                <sc-for list="{{ photoThumbs }}" as="ph" hint-placeholder-count="0">
+                  <img src="{{ ph.url }}" style="width:56px; height:56px; object-fit:cover; border-radius:6px; border:1px solid oklch(85% 0.01 70);" />
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">พิกัดตำแหน่งจริง (lat,lng — เช่น 12.558940,99.909039)</div>
+            <input value="{{ f_coords }}" onChange="{{ onFCoords }}" placeholder="12.558940,99.909039" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px;" />
+            <div style="font-size:11px; color:oklch(55% 0.02 60); margin-top:4px;">เปิด Google Maps → กดค้างที่ตำแหน่งบ้าน → คัดลอกตัวเลขที่ขึ้นมาวางที่นี่</div>
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ข้อมูลติดต่อเจ้าของทรัพย์จริง (ถ้าต่างจากผู้กรอก)</div>
+            <input value="{{ f_ownerContact }}" onChange="{{ onFOwnerContact }}" placeholder="ชื่อ + เบอร์โทรเจ้าของทรัพย์" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px;" />
+          </div>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">เอกสารยืนยันความเป็นเจ้าของ (ไม่บังคับ — โฉนด/สัญญาเดิม)</div>
+            <input type="file" accept="image/*,.pdf" onChange="{{ onOwnershipDocChange }}" style="width:100%; font-size:13px;" />
+            <sc-if value="{{ hasOwnershipDoc }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size:12px; color:oklch(35% 0.1 145); margin-top:4px;">✓ แนบเอกสารแล้ว</div>
+            </sc-if>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <div onClick="{{ onBackStep2 }}" style="flex:1; text-align:center; padding:13px; border-radius:8px; font-size:14px; border:1px solid oklch(80% 0.02 60); cursor:pointer;">← ย้อนกลับ</div>
+          <div onClick="{{ onGoStep4 }}" style="{{ step3NextStyle }}">ถัดไป →</div>
+        </div>
+        <sc-if value="{{ step3Error }}" hint-placeholder-val="{{ false }}">
+          <div style="color:oklch(45% 0.18 25); font-size:12.5px; margin-top:10px;">{{ step3Error }}</div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isStep4 }}" hint-placeholder-val="{{ false }}">
+      <div style="background:white; border-radius:12px; padding:24px; border:1px solid oklch(88% 0.01 70);">
+        <sc-if value="{{ !submitted }}" hint-placeholder-val="{{ true }}">
+          <div style="font-size:15px; font-weight:600; margin-bottom:14px;">ขั้นตอนที่ 4 — ตรวจสอบข้อมูลก่อนส่ง</div>
+          <div style="background:oklch(98% 0.01 80); border-radius:8px; padding:14px; font-size:13px; line-height:1.8; color:oklch(30% 0.02 60);">
+            <div>ผู้ติดต่อ: {{ f_name }} · {{ f_phone }}</div>
+            <div>ธุรกรรม: {{ txnLabel }}</div>
+            <div>ประเภท: {{ f_type }} · {{ conditionLabel }}</div>
+            <div>ราคา: {{ f_price }} บาท</div>
+            <div>รูป: {{ photoCount }} รูป</div>
+          </div>
+          <div style="font-size:12px; color:oklch(55% 0.02 60); margin-top:16px;">การส่งข้อมูลนี้ ทีมงานจะติดต่อคุณเพื่อกำหนดค่าคอมมิชชั่นและให้คุณยืนยันสัญญาฝากขาย/ฝากเช่าในขั้นตอนถัดไปทางโทรศัพท์/LINE ก่อนทรัพย์ของคุณจะถูกเผยแพร่จริง</div>
+          <div style="display:flex; gap:10px; margin-top:16px;">
+            <div onClick="{{ onBackStep3 }}" style="flex:1; text-align:center; padding:13px; border-radius:8px; font-size:14px; border:1px solid oklch(80% 0.02 60); cursor:pointer;">← ย้อนกลับ</div>
+            <div onClick="{{ onSubmit }}" style="{{ submitStyle }}">{{ submitLabel }}</div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center; padding:20px 0;">
+            <div style="font-size:40px; margin-bottom:10px;">✅</div>
+            <div style="font-size:16px; font-weight:600; margin-bottom:8px;">ส่งข้อมูลสำเร็จ</div>
+            <div style="font-size:13.5px; color:oklch(50% 0.02 60);">ทีมงาน huahin.properties จะติดต่อคุณกลับภายใน 1-2 วันทำการ เพื่อยืนยันรายละเอียดและสัญญา</div>
+            <a href="Home.dc.html" style="display:inline-block; margin-top:20px; background:oklch(22% 0.02 60); color:white; padding:12px 24px; border-radius:8px; text-decoration:none; font-size:14px;">กลับหน้าแรก</a>
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+
+class Component extends DCLogic {
+  state = {
+    step: 1, f_name: "", f_phone: "", f_email: "", hasPriorSubmission: false,
+    txnType: "", f_type: "villa", f_condition: "resale", f_price: "", f_details: "",
+    f_coords: "", f_ownerContact: "", photos: [], ownershipDocUrl: "",
+    step3Error: "", submitting: false, submitted: false, showDevBar: false,
+  };
+
+  async componentDidMount() {
+    const isPreviewEnv = !/huahin\.properties$/.test(window.location.hostname);
+    this.setState({ showDevBar: isPreviewEnv || (() => { try { return localStorage.getItem("hhDevBar") === "1"; } catch (e) { return false; } })() });
+    const fb0 = await import("./firebase-client.js");
+    this._fb = fb0;
+    try {
+      const saved = JSON.parse(localStorage.getItem("hhOwnerContact") || "null");
+      if (saved && saved.phone) {
+        this.setState({ f_name: saved.name || "", f_phone: saved.phone || "", f_email: saved.email || "", hasPriorSubmission: true });
+      }
+    } catch (e) {}
+  }
+
+  goStep2() {
+    if (!this.state.f_name.trim() || !this.state.f_phone.trim()) return;
+    try { localStorage.setItem("hhOwnerContact", JSON.stringify({ name: this.state.f_name, phone: this.state.f_phone, email: this.state.f_email })); } catch (e) {}
+    this.setState({ step: 2 });
+  }
+
+  async submit() {
+    if (this.state.photos.length < 5) { this.setState({ step3Error: "" }); }
+    this.setState({ submitting: true });
+    try {
+      const id = "own-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+      await this._fb.setDoc("properties", id, {
+        source: "owner_submission",
+        listingStatus: "pending",
+        reviewStatus: "submitted",
+        status: this.state.txnType,
+        type: this.state.f_type,
+        condition: this.state.f_condition,
+        price: Number(this.state.f_price) || 0,
+        description: this.state.f_details,
+        coordsRaw: this.state.f_coords,
+        ownerContact: this.state.f_ownerContact,
+        ownershipDocUrl: this.state.ownershipDocUrl || null,
+        contactName: this.state.f_name,
+        contactPhone: this.state.f_phone,
+        contactEmail: this.state.f_email,
+        submittedAt: Date.now(),
+      });
+      await Promise.all(this.state.photos.map((p, i) => this._fb.savePhoto(id, i, p.url)));
+      this.setState({ submitted: true, submitting: false });
+    } catch (e) {
+      console.warn("Owner submission failed:", e);
+      this.setState({ submitting: false, step3Error: "ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่" });
+    }
+  }
+
+  async onPhotosChange(e) {
+    const files = Array.from(e.target.files || []).slice(0, 5 - this.state.photos.length);
+    for (const file of files) {
+      const dataUrl = await this._fb.fileToDataUrl(file, 1000);
+      this.setState((s) => ({ photos: [...s.photos, { url: dataUrl }] }));
+    }
+  }
+
+  async onOwnershipDocChange(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const dataUrl = await this._fb.fileToDataUrl(file, 1400);
+    this.setState({ ownershipDocUrl: dataUrl });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const stepColors = [1, 2, 3, 4].map((n) => n <= s.step ? "oklch(40% 0.13 25)" : "oklch(90% 0.01 70)");
+    const cardBase = "flex:1; text-align:center; padding:20px; border-radius:10px; cursor:pointer; border:2px solid ";
+    const nextBase = "flex:1; text-align:center; padding:13px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; ";
+    const canStep2Next = !!s.txnType;
+    const canStep3Next = s.f_price && s.f_details.trim() && s.photos.length >= 5 && s.f_coords.trim();
+    return {
+      isStep1: s.step === 1, isStep2: s.step === 2, isStep3: s.step === 3, isStep4: s.step === 4,
+      stepDots: stepColors.map((c) => ({ color: c })),
+      f_name: s.f_name, onFName: (e) => this.setState({ f_name: e.target.value }),
+      f_phone: s.f_phone, onFPhone: (e) => this.setState({ f_phone: e.target.value }),
+      f_email: s.f_email, onFEmail: (e) => this.setState({ f_email: e.target.value }),
+      hasPriorSubmission: s.hasPriorSubmission,
+      onGoStep2: () => this.goStep2(),
+      saleCardStyle: cardBase + (s.txnType === "sale" ? "oklch(40% 0.13 25); background:oklch(97% 0.03 25);" : "oklch(88% 0.01 70); background:white;"),
+      rentCardStyle: cardBase + (s.txnType === "rent" ? "oklch(40% 0.13 25); background:oklch(97% 0.03 25);" : "oklch(88% 0.01 70); background:white;"),
+      onSelectSale: () => this.setState({ txnType: "sale" }),
+      onSelectRent: () => this.setState({ txnType: "rent" }),
+      onBackStep1: () => this.setState({ step: 1 }),
+      onGoStep3: () => canStep2Next && this.setState({ step: 3 }),
+      step2NextStyle: nextBase + (canStep2Next ? "background:oklch(22% 0.02 60); color:white;" : "background:oklch(92% 0.01 70); color:oklch(65% 0.01 70); cursor:not-allowed;"),
+      f_type: s.f_type, onFType: (e) => this.setState({ f_type: e.target.value }),
+      f_condition: s.f_condition, onFCondition: (e) => this.setState({ f_condition: e.target.value }),
+      f_price: s.f_price, onFPrice: (e) => this.setState({ f_price: e.target.value }),
+      f_details: s.f_details, onFDetails: (e) => this.setState({ f_details: e.target.value }),
+      f_coords: s.f_coords, onFCoords: (e) => this.setState({ f_coords: e.target.value }),
+      f_ownerContact: s.f_ownerContact, onFOwnerContact: (e) => this.setState({ f_ownerContact: e.target.value }),
+      photoCount: s.photos.length, photoThumbs: s.photos, hasPhotos: s.photos.length > 0,
+      onPhotosChange: (e) => this.onPhotosChange(e),
+      hasOwnershipDoc: !!s.ownershipDocUrl, onOwnershipDocChange: (e) => this.onOwnershipDocChange(e),
+      onBackStep2: () => this.setState({ step: 2 }),
+      onGoStep4: () => canStep3Next && this.setState({ step: 4, step3Error: "" }),
+      step3NextStyle: nextBase + (canStep3Next ? "background:oklch(22% 0.02 60); color:white;" : "background:oklch(92% 0.01 70); color:oklch(65% 0.01 70); cursor:not-allowed;"),
+      step3Error: canStep3Next ? "" : "",
+      txnLabel: s.txnType === "sale" ? "ฝากขาย" : "ฝากเช่า",
+      conditionLabel: s.f_condition === "new" ? "ใหม่" : "มือสอง",
+      onBackStep3: () => this.setState({ step: 3 }),
+      submitted: s.submitted,
+      submitLabel: s.submitting ? "กำลังส่ง…" : "ส่งข้อมูล",
+      submitStyle: nextBase + "background:oklch(40% 0.13 25); color:white;",
+      onSubmit: () => !s.submitting && this.submit(),
+      showDevBar: s.showDevBar,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

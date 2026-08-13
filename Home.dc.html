@@ -716,7 +716,7 @@ class Component extends DCLogic {
     if (!text) return [];
     if (/list your property|ฝากขาย|ฝากเช่า|เผยแพร่ทรัพย์|разместить (свой )?объект|发布(您的)?房源|immobilie inserieren|legg ut din eiendom|publier votre bien|pubblica il tuo immobile/i.test(text)) {
       const labels = { en: "List property", th: "ฝากขาย/เช่า", zh: "发布房源", ru: "Разместить", de: "Inserieren", no: "Legg ut", fr: "Publier", it: "Pubblica" };
-      return [{ label: labels[custLang] || labels.en, noThumb: true, onClick: () => { window.location.href = "Agent Signup.dc.html"; } }];
+      return [{ label: labels[custLang] || labels.en, noThumb: true, onClick: () => { window.location.href = "Owner Submission.dc.html"; } }];
     }
     const codes = [...new Set((text.match(/\b[A-Z]{2,4}-\d{2,6}\b/g) || []))];
     return codes.map((code) => {
