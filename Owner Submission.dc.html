@@ -122,7 +122,10 @@
             <sc-if value="{{ hasPhotos }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
                 <sc-for list="{{ photoThumbs }}" as="ph" hint-placeholder-count="0">
-                  <img src="{{ ph.url }}" style="width:56px; height:56px; object-fit:cover; border-radius:6px; border:1px solid oklch(85% 0.01 70);" />
+                  <div style="position:relative; width:56px; height:56px;">
+                    <img src="{{ ph.url }}" style="width:56px; height:56px; object-fit:cover; border-radius:6px; border:1px solid oklch(85% 0.01 70);" />
+                    <div onClick="{{ ph.onRemove }}" style="position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:50%; background:oklch(40% 0.18 25); color:white; display:flex; align-items:center; justify-content:center; font-size:12px; cursor:pointer; line-height:1;">×</div>
+                  </div>
                 </sc-for>
               </div>
             </sc-if>
@@ -261,6 +264,10 @@ class Component extends DCLogic {
     }
   }
 
+  removePhoto(i) {
+    this.setState((s) => ({ photos: s.photos.filter((_, idx) => idx !== i) }));
+  }
+
   async onOwnershipDocChange(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
@@ -298,7 +305,8 @@ class Component extends DCLogic {
       hasValidCoords: /^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$/.test(s.f_coords),
       mapEmbedUrl: `https://www.google.com/maps?q=${encodeURIComponent(s.f_coords.trim())}&hl=th&z=16&output=embed`,
       f_ownerContact: s.f_ownerContact, onFOwnerContact: (e) => this.setState({ f_ownerContact: e.target.value }),
-      photoCount: s.photos.length, photoThumbs: s.photos, hasPhotos: s.photos.length > 0,
+      photoCount: s.photos.length, hasPhotos: s.photos.length > 0,
+      photoThumbs: s.photos.map((p, i) => ({ url: p.url, onRemove: () => this.removePhoto(i) })),
       onPhotosChange: (e) => this.onPhotosChange(e),
       hasOwnershipDoc: !!s.ownershipDocUrl, onOwnershipDocChange: (e) => this.onOwnershipDocChange(e),
       onBackStep2: () => this.setState({ step: 2 }),
