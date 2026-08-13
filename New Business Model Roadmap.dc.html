@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; }
+    a { color: oklch(40% 0.13 25); }
+    a:hover { color: oklch(32% 0.13 25); }
+  </style>
+</helmet>
+
+<div style="font-family:'Inter',sans-serif; background:oklch(97% 0.01 80); min-height:100vh; padding:40px 24px; color:oklch(22% 0.02 60);">
+  <div style="max-width:820px; margin:0 auto;">
+
+    <div style="margin-bottom:32px;">
+      <div style="font-family:'Playfair Display',serif; font-size:30px; font-weight:700; color:oklch(35% 0.13 25);">huahin . properties — New Business Model Roadmap</div>
+      <div style="font-size:13.5px; color:oklch(50% 0.02 60); margin-top:6px;">บันทึกทิศทางธุรกิจใหม่: Central Inventory + Buyer Matching + Viewing History — ระบบเดิม (Agent Membership/Mini-Site) เก็บรักษาไว้ ไม่ลบ ไม่รื้อ</div>
+    </div>
+
+    <div style="background:white; border:1px solid oklch(88% 0.01 70); border-radius:12px; padding:24px; margin-bottom:24px;">
+      <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(30% 0.02 60); margin-bottom:10px;">ลำดับการพัฒนา 3 ฝั่ง</div>
+      <div style="font-size:14px; line-height:1.9;">
+        <div><strong>1. ฝั่งเจ้าของ/ผู้ฝากขาย-เช่า (Owner)</strong> — ทำก่อน เพื่อให้มีทรัพย์เข้า Central Inventory</div>
+        <div><strong>2. ฝั่งผู้ซื้อ (Buyer)</strong> — ทำต่อ ใช้ทรัพย์จริงจากขั้น 1 ทดสอบค้นหา/AI Matching/สร้าง Lead</div>
+        <div><strong>3. ฝั่ง Sales/Viewing Agent ภายใน</strong> — ทำท้ายสุด ใช้ Lead จริงจากขั้น 2 ทดสอบมอบหมาย/นัด Viewing/บันทึกผล</div>
+      </div>
+      <div style="font-size:12.5px; color:oklch(55% 0.02 60); margin-top:10px;">แต่ละฝั่งทำแยกกันได้ ไม่ต้องพร้อมกัน — ตามหลัก Simple First</div>
+    </div>
+
+    <div style="background:white; border:1px solid oklch(88% 0.01 70); border-radius:12px; padding:24px;">
+      <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(30% 0.02 60); margin-bottom:4px;">ฝั่งที่ 1 — เจ้าของ/ผู้ฝากขาย-เช่า (ต้นน้ำ → ปลายน้ำ)</div>
+      <div style="font-size:12.5px; color:oklch(55% 0.02 60); margin-bottom:16px;">9 ขั้นตอน รวมทุกฟังก์ชันที่ตกลงกันไว้</div>
+
+      <div style="display:flex; flex-direction:column; gap:14px;">
+
+        <div style="display:flex; gap:14px;">
+          <div style="flex-shrink:0; width:30px; height:30px; border-radius:50%; background:oklch(40% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">1</div>
+          <div style="font-size:14px; line-height:1.7;"><strong>จุดเข้า</strong> — คลิกเมนู "ฝากขาย/เช่า" หรือพิมพ์ในแชท AI ว่าอยากฝากขาย → ระบบตรวจจับคำ แสดงปุ่มลิงก์ไปหน้ากรอกข้อมูล</div>
+        </div>
+
+        <div style="display:flex; gap:14px;">
+          <div style="flex-shrink:0; width:30px; height:30px; border-radius:50%; background:oklch(40% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">2</div>
+          <div style="font-size:14px; line-height:1.7;"><strong>ระบุตัวตนแบบเบา</strong> — ชื่อ + เบอร์โทร/อีเมล (หรือ login ด้วย Google/LINE เพื่อติดตามสถานะย้อนหลัง) → ระบบตรวจสอบเบอร์โทรซ้ำกับทรัพย์ที่เคยฝากไว้ก่อนหน้า (เตือน Admin ถ้าซ้ำ ไม่บล็อกอัตโนมัติ) → ถ้าเจ้าของมีทรัพย์อื่นฝากไว้แล้ว ดึงข้อมูลติดต่อเดิมมาเติมให้อัตโนมัติ ไม่ต้องกรอกซ้ำ</div>
+        </div>
+
+        <div style="display:flex; gap:14px;">
+          <div style="flex-shrink:0; width:30px; height:30px; border-radius:50%; background:oklch(40% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">3</div>
+          <div style="font-size:14px; line-height:1.7;"><strong>เลือกประเภทธุรกรรม</strong> — ขายหรือเช่า (<code>status</code>: sale/rent)</div>
+        </div>
+
+        <div style="display:flex; gap:14px;">
+          <div style="flex-shrink:0; width:30px; height:30px; border-radius:50%; background:oklch(40% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">4</div>
+          <div style="font-size:14px; line-height:1.7;"><strong>กรอกข้อมูลทรัพย์</strong> — ประเภททรัพย์ (<code>type</code>) → สภาพทรัพย์ (<code>condition</code>: มือ1/มือสอง) → ราคา → รายละเอียด → อัปโหลดรูปขั้นต่ำตามเกณฑ์ที่กำหนด (เช่น 5 รูปขึ้นไป) → ปักหมุดตำแหน่งจริง → ข้อมูลติดต่อเจ้าของจริง → แนบเอกสารยืนยันความเป็นเจ้าของ (ไม่บังคับ แต่แนะนำ — โฉนด/สัญญาเดิม) → ระบบบันทึก <code>source: owner_submission</code> อัตโนมัติ</div>
+        </div>
+
+        <div style="display:flex; gap:14px;">
+          <div style="flex-shrink:0; width:30px; height:30px; border-radius:50%; background:oklch(40% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">5</div>
+          <div style="font-size:14px; line-height:1.7;"><strong>Admin กำหนดค่าคอมมิชชั่น/ระดับบริการ</strong> — Admin/ทีม Sales คุยตกลงกับเจ้าของ แล้วเลือก/กรอกอัตราเข้าระบบ (มาตรฐาน 3% / เร่งขาย 5% / Exclusive 10%, override ได้ทุกกรณี)</div>
+        </div>
+
+        <div style="display:flex; gap:14px;">
+          <div style="flex-shrink:0; width:30px; height:30px; border-radius:50%; background:oklch(40% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">6</div>
+          <div style="font-size:14px; line-height:1.7;"><strong>ยอมรับสัญญาฝากขาย/ฝากเช่า</strong> — สัญญาดึงอัตราจากข้อ 5 มาแสดงอัตโนมัติ พร้อม: ระยะเวลาฝาก, สิทธิ์ถอนประกาศเองได้จากหน้าติดตามสถานะเมื่อใดก็ได้, ยืนยันสิทธิ์ความเป็นเจ้าของจริง, ข้อมูลเผยแพร่สาธารณะ VS เก็บภายใน — บันทึกวันเวลา+เวอร์ชันที่ยอมรับไว้เป็นหลักฐาน</div>
+        </div>
+
+        <div style="display:flex; gap:14px;">
+          <div style="flex-shrink:0; width:30px; height:30px; border-radius:50%; background:oklch(40% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">7</div>
+          <div style="font-size:14px; line-height:1.7;"><strong>ส่งตรวจสอบ</strong> — กดส่ง → สถานะ "รอตรวจสอบ" เจ้าของติดตามผ่านลิงก์ส่วนตัว (เบอร์โทร/อีเมล) ที่ให้ถอนประกาศเองได้ด้วย → ระบบยิงแจ้งเตือนเข้า LINE ทีมงาน/Admin ทันที (ชื่อทรัพย์/ราคา/เบอร์เจ้าของ + ลิงก์ตรวจสอบ เข้าถึงจากมือถือได้)</div>
+        </div>
+
+        <div style="display:flex; gap:14px;">
+          <div style="flex-shrink:0; width:30px; height:30px; border-radius:50%; background:oklch(40% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">8</div>
+          <div style="font-size:14px; line-height:1.7;"><strong>Admin ตรวจสอบข้อมูล</strong> — ผ่านหน้า Listing Approvals ที่กรองซ้อนได้หลายมิติ (ขาย/เช่า × ประเภท × มือ1-มือสอง × ที่มา) รองรับมือถือ → ถ้าไม่ครบ กด "ขอข้อมูลเพิ่ม" → ระบบแจ้งเตือนกลับเจ้าของอัตโนมัติทุกครั้งที่สถานะเปลี่ยน (SMS/LINE/อีเมล) → ถ้าเจ้าของไม่ตอบกลับภายใน 7-14 วัน ระบบปิดเคสอัตโนมัติ (auto-expire)</div>
+        </div>
+
+        <div style="display:flex; gap:14px;">
+          <div style="flex-shrink:0; width:30px; height:30px; border-radius:50%; background:oklch(40% 0.13 25); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px;">9</div>
+          <div style="font-size:14px; line-height:1.7;"><strong>อนุมัติและเผยแพร่</strong> — Admin กด Approve → เข้า Central Inventory (จัดเก็บแยกประเภทครบตามข้อ 4) → เผยแพร่ Public (ตำแหน่งโดยประมาณเท่านั้น) → แจ้งผลเจ้าของอัตโนมัติ พร้อมช่องทางติดตาม Lead ผ่านทีมงานเรา → ทรัพย์ที่ขาย/เช่าสำเร็จหรือค้างนานเกินกำหนด ระบบแจ้งเตือน Admin ให้ปิด/ต่ออายุประกาศ</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div style="background:oklch(95% 0.02 75); border:1px solid oklch(85% 0.05 70); border-radius:12px; padding:20px 24px; margin-top:24px;">
+      <div style="font-family:'Playfair Display',serif; font-size:16px; color:oklch(35% 0.1 60); margin-bottom:6px;">ยังไม่ได้ลง Step-by-Step (รอทำต่อตามลำดับ)</div>
+      <div style="font-size:13.5px; line-height:1.8;">
+        <div>ฝั่งที่ 2 — ผู้ซื้อ (Buyer): ค้นหา/คุยกับ AI → Matching % → Lead → Screening → มอบหมาย Sales/Viewing Agent → นัด Viewing → Feedback/History → Follow-up → Negotiation → Closing</div>
+        <div>ฝั่งที่ 3 — Sales/Viewing Agent ภายใน: รับมอบหมาย Lead → เข้าถึงข้อมูลทรัพย์/เจ้าของ → บันทึกผล Viewing → Commission-split ภายในทีม (ถ้ามี)</div>
+      </div>
+    </div>
+
+    <div style="font-size:11.5px; color:oklch(60% 0.01 70); text-align:center; margin-top:28px;">กฎสำคัญ: ห้าม Delete / ห้ามรื้อระบบเดิม (Agent Membership, Mini-Site, Package, Social Share) — ถือเป็น Existing/Reserved System</div>
+
+  </div>
+</div>
+
+</x-dc>
+</body>
+</html>
