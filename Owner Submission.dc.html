@@ -181,6 +181,9 @@
             <div style="font-size:40px; margin-bottom:10px;">✅</div>
             <div style="font-size:16px; font-weight:600; margin-bottom:8px;">ส่งข้อมูลสำเร็จ</div>
             <div style="font-size:13.5px; color:oklch(50% 0.02 60);">ทีมงาน huahin.properties จะติดต่อคุณกลับภายใน 1-2 วันทำการ เพื่อยืนยันรายละเอียดและสัญญา</div>
+            <div style="background:oklch(98% 0.01 80); border-radius:8px; padding:12px 16px; margin-top:16px; font-size:12px; color:oklch(45% 0.02 60); text-align:left;">
+              <strong>สำหรับแอดมิน — ตรวจสอบว่าส่งจริง:</strong><br/>รหัสอ้างอิง: {{ submittedId }}<br/>เข้า Firebase Console → Firestore → collection <code>properties</code> → หา doc รหัสนี้ (หรือเปิดหน้า Listing Approvals.dc.html แล้วดูรายการที่มีคำว่า owner_submission)
+            </div>
             <a href="Home.dc.html" style="display:inline-block; margin-top:20px; background:oklch(22% 0.02 60); color:white; padding:12px 24px; border-radius:8px; text-decoration:none; font-size:14px;">กลับหน้าแรก</a>
           </div>
         </sc-if>
@@ -198,7 +201,7 @@ class Component extends DCLogic {
     step: 1, f_name: "", f_phone: "", f_email: "", hasPriorSubmission: false,
     txnType: "", f_type: "villa", f_condition: "resale", f_price: "", f_details: "",
     f_coords: "", f_ownerContact: "", photos: [], ownershipDocUrl: "",
-    step3Error: "", submitting: false, submitted: false, showDevBar: false,
+    step3Error: "", submitting: false, submitted: false, showDevBar: false, submittedId: "",
   };
 
   async componentDidMount() {
@@ -243,10 +246,10 @@ class Component extends DCLogic {
         submittedAt: Date.now(),
       });
       await Promise.all(this.state.photos.map((p, i) => this._fb.savePhoto(id, i, p.url)));
-      this.setState({ submitted: true, submitting: false });
+      this.setState({ submitted: true, submitting: false, submittedId: id });
     } catch (e) {
       console.warn("Owner submission failed:", e);
-      this.setState({ submitting: false, step3Error: "ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่" });
+      this.setState({ submitting: false, step3Error: "ส่งข้อมูลไม่สำเร็จ: " + (e.message || e) });
     }
   }
 
@@ -293,7 +296,7 @@ class Component extends DCLogic {
       f_details: s.f_details, onFDetails: (e) => this.setState({ f_details: e.target.value }),
       f_coords: s.f_coords, onFCoords: (e) => this.setState({ f_coords: e.target.value }),
       hasValidCoords: /^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$/.test(s.f_coords),
-      mapEmbedUrl: `https://maps.google.com/maps?q=${encodeURIComponent(s.f_coords.trim())}&z=16&output=embed`,
+      mapEmbedUrl: `https://www.google.com/maps?q=${encodeURIComponent(s.f_coords.trim())}&hl=th&z=16&output=embed`,
       f_ownerContact: s.f_ownerContact, onFOwnerContact: (e) => this.setState({ f_ownerContact: e.target.value }),
       photoCount: s.photos.length, photoThumbs: s.photos, hasPhotos: s.photos.length > 0,
       onPhotosChange: (e) => this.onPhotosChange(e),
@@ -305,7 +308,7 @@ class Component extends DCLogic {
       txnLabel: s.txnType === "sale" ? "ฝากขาย" : "ฝากเช่า",
       conditionLabel: s.f_condition === "new" ? "ใหม่" : "มือสอง",
       onBackStep3: () => this.setState({ step: 3 }),
-      submitted: s.submitted,
+      submitted: s.submitted, submittedId: s.submittedId,
       submitLabel: s.submitting ? "กำลังส่ง…" : "ส่งข้อมูล",
       submitStyle: nextBase + "background:oklch(40% 0.13 25); color:white;",
       onSubmit: () => !s.submitting && this.submit(),
