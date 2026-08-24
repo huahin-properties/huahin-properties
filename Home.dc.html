@@ -18,21 +18,21 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="./image-slot.js"></script>
-  <title>huahin.properties — Luxury Pool Villas &amp; Homes in Hua Hin, Pranburi, Cha-am</title>
+  <title>Hua Hin Property &amp; Hua Hin Properties for Sale and Rent | huahin.properties</title>
   <link rel="icon" type="image/png" href="./logo.png">
-  <meta name="description" content="Curated pool villas, beachfront homes and land for sale and rent across Hua Hin, Pranburi and Cha-am, Thailand.">
-  <link rel="canonical" href="https://huahin.properties/Home.dc.html">
+  <meta name="description" content="Hua Hin property specialists — search Hua Hin properties for sale and rent: pool villas, beachfront homes, condos and land across Hua Hin, Pranburi and Cha-am, Thailand.">
+  <link rel="canonical" href="https://huahin.properties/">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="huahin.properties">
-  <meta property="og:title" content="huahin.properties — Luxury Pool Villas & Homes in Hua Hin, Pranburi, Cha-am">
-  <meta property="og:description" content="Curated pool villas, beachfront homes and land for sale and rent across Hua Hin, Pranburi and Cha-am, Thailand.">
-  <meta property="og:url" content="https://huahin.properties/Home.dc.html">
+  <meta property="og:title" content="Hua Hin Property & Hua Hin Properties for Sale and Rent | huahin.properties">
+  <meta property="og:description" content="Hua Hin property specialists — search Hua Hin properties for sale and rent: pool villas, beachfront homes, condos and land across Hua Hin, Pranburi and Cha-am, Thailand.">
+  <meta property="og:url" content="https://huahin.properties/">
   <meta property="og:image" content="https://huahin.properties/logo.png">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="huahin.properties — Luxury Pool Villas & Homes in Hua Hin, Pranburi, Cha-am">
-  <meta name="twitter:description" content="Curated pool villas, beachfront homes and land for sale and rent across Hua Hin, Pranburi and Cha-am, Thailand.">
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"huahin.properties","url":"https://huahin.properties/Home.dc.html","potentialAction":{"@type":"SearchAction","target":"https://huahin.properties/Search%20Results.dc.html?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
-  <script type="application/ld+json">{"@context":"https://schema.org","@type":"RealEstateAgent","name":"huahin.properties","url":"https://huahin.properties/Home.dc.html","logo":"https://huahin.properties/logo.png","areaServed":["Hua Hin","Pranburi","Cha-am"]}</script>
+  <meta name="twitter:title" content="Hua Hin Property & Hua Hin Properties for Sale and Rent | huahin.properties">
+  <meta name="twitter:description" content="Hua Hin property specialists — search Hua Hin properties for sale and rent: pool villas, beachfront homes, condos and land across Hua Hin, Pranburi and Cha-am, Thailand.">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"huahin.properties","alternateName":["Hua Hin Property","Hua Hin Properties","huahin property","huahinproperties","huahinproperty","อสังหาริมทรัพย์หัวหิน"],"url":"https://huahin.properties/","potentialAction":{"@type":"SearchAction","target":"https://huahin.properties/Search%20Results.dc.html?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"RealEstateAgent","name":"huahin.properties","alternateName":["Hua Hin Property","Hua Hin Properties","huahin property","huahinproperty"],"description":"Hua Hin property agency listing Hua Hin properties for sale and rent — pool villas, beachfront homes, condos and land.","url":"https://huahin.properties/","logo":"https://huahin.properties/logo.png","areaServed":["Hua Hin","Pranburi","Cha-am"]}</script>
   <style>
     body { margin: 0; background: oklch(98% 0.01 80); font-family: 'Work Sans', sans-serif; }
     a { color: oklch(42% 0.12 25); }
@@ -780,26 +780,28 @@ class Component extends DCLogic {
     this.setState({ showDevBar: isPreviewEnv || (() => { try { return localStorage.getItem("hhDevBar") === "1"; } catch (e) { return false; } })() });
     const fb0 = await import("./firebase-client.js");
     this._fb = fb0;
+    const mod = await import("./data.js");
+    this._mod = mod;
+    try { this._favs = await import("./favorites.js"); } catch (e) { console.warn("favorites.js load failed:", e); }
+    this.setState({ lang: mod.getLang(), data: mod });
+    let redirecting = false;
     try {
       const u = fb0.getCurrentAuthUser();
       if (u) {
         this.setState({ personHref: "Lister Dashboard.dc.html", isLoggedIn: true });
         const seenToday = (() => { try { return localStorage.getItem("hhWelcomeSeenDate") === new Date().toDateString(); } catch (e) { return false; } })();
         const forceWelcome = /[?&]welcome=1/.test(window.location.search);
-        if (seenToday && !forceWelcome) { window.location.href = "Lister Dashboard.dc.html"; return; }
-        this.setState({ showWelcome: true });
+        if (seenToday && !forceWelcome) { window.location.href = "Lister Dashboard.dc.html"; redirecting = true; }
+        else this.setState({ showWelcome: true });
       }
     } catch (e) {}
+    if (redirecting) return;
     if (!fb0.hasSiteBypass() && !fb0.isAdminAuthed()) {
       try {
         const on = await fb0.fetchMaintenanceMode();
         if (on) this.setState({ showGate: true });
       } catch (e) { console.warn("Failed to check maintenance mode:", e); }
     }
-    const mod = await import("./data.js");
-    this._mod = mod;
-    try { this._favs = await import("./favorites.js"); } catch (e) { console.warn("favorites.js load failed:", e); }
-    this.setState({ lang: mod.getLang(), data: mod });
     const effProps = await mod.getEffectiveProperties(mod);
     this.setState({ effProps });
     try {
