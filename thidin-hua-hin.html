@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ที่ดินหัวหิน — ขายที่ดินหัวหิน ปราณบุรี ชะอำ | huahin.properties</title>
+<meta name="description" content="ขายที่ดินหัวหิน ปราณบุรี และชะอำ ที่ดินเปล่าถมแล้วพร้อมปลูกสร้าง มีโฉนดครุฑแดง พร้อมข้อมูลผังเมือง ไฟฟ้า น้ำประปา และหน้ากว้างติดถนน">
+<link rel="canonical" href="https://huahin.properties/thidin-hua-hin.html">
+<link rel="icon" type="image/png" href="./logo.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="huahin.properties">
+<meta property="og:title" content="ที่ดินหัวหิน — ขายที่ดินหัวหิน ปราณบุรี ชะอำ | huahin.properties">
+<meta property="og:description" content="ขายที่ดินหัวหิน ปราณบุรี และชะอำ ที่ดินเปล่าถมแล้วพร้อมปลูกสร้าง มีโฉนดครุฑแดง พร้อมข้อมูลผังเมือง ไฟฟ้า น้ำประปา และหน้ากว้างติดถนน">
+<meta property="og:url" content="https://huahin.properties/thidin-hua-hin.html">
+<meta property="og:image" content="https://huahin.properties/logo.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ที่ดินหัวหิน — ขายที่ดินหัวหิน ปราณบุรี ชะอำ | huahin.properties">
+<meta name="twitter:description" content="ขายที่ดินหัวหิน ปราณบุรี และชะอำ ที่ดินเปล่าถมแล้วพร้อมปลูกสร้าง มีโฉนดครุฑแดง พร้อมข้อมูลผังเมือง ไฟฟ้า น้ำประปา และหน้ากว้างติดถนน">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"huahin.properties","item":"https://huahin.properties/"},{"@type":"ListItem","position":2,"name":"ที่ดินหัวหิน — ที่ดินเปล่าพร้อมปลูกสร้าง","item":"https://huahin.properties/thidin-hua-hin.html"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"ที่ดินหัวหินราคาต่อตารางวาเท่าไหร่","acceptedAnswer":{"@type":"Answer","text":"โซนหัวหินซอย 70–112 ราว 15,000–35,000 บาทต่อตารางวา โซนทับใต้และหินเหล็กไฟราว 12,000–25,000 บาท โซนใกล้ทะเลเขาตะเกียบ 50,000 บาทขึ้นไป และปราณบุรีถูกกว่าหัวหินราว 30–40%"}},{"@type":"Question","name":"ต่างชาติซื้อที่ดินหัวหินได้ไหม","acceptedAnswer":{"@type":"Answer","text":"ไม่สามารถถือกรรมสิทธิ์ที่ดินในชื่อบุคคลต่างชาติได้ ทางเลือกที่ถูกกฎหมายคือเช่าระยะยาว 30 ปีจดหลังโฉนด หรือถือผ่านนิติบุคคลไทยที่มีโครงสร้างผู้ถือหุ้นถูกต้อง แนะนำปรึกษาทนายก่อนดำเนินการ"}},{"@type":"Question","name":"ควรเลือกโฉนดประเภทไหน","acceptedAnswer":{"@type":"Answer","text":"ควรเป็นโฉนดครุฑแดง (น.ส.4 จ.) ซึ่งมีการรังวัดชัดเจนและซื้อขายโอนได้ทันที หลีกเลี่ยง น.ส.3 ก. (ครุฑเขียว) ที่ยังไม่ได้รังวัดแน่นอน และ ส.ป.ก. ที่ห้ามซื้อขาย"}}]}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+</head>
+<body style="margin:0; background:oklch(98% 0.01 80); font-family:'Work Sans',sans-serif; color:oklch(25% 0.02 60); -webkit-font-smoothing:antialiased;">
+
+<header style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 20px; background:oklch(99% 0.005 80); border-bottom:1px solid oklch(90% 0.01 70); flex-wrap:wrap;">
+  <a href="./" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit;">
+    <img src="./logo.png" alt="huahin.properties" width="36" height="36" style="border-radius:50%;">
+    <span style="font-family:'Playfair Display',serif; font-size:17px; color:oklch(35% 0.13 25);">huahin<span style="opacity:.5;"> . </span>properties</span>
+  </a>
+  <a href="./" style="font-size:13.5px; color:oklch(42% 0.12 25); text-decoration:none;">← กลับหน้าหลัก</a>
+</header>
+
+<main style="max-width:960px; margin:0 auto; padding:32px 20px 56px;">
+  <h1 style="font-family:'Playfair Display',serif; font-size:clamp(26px,4.4vw,40px); line-height:1.25; margin:0 0 20px; color:oklch(22% 0.03 50); text-wrap:pretty;">ที่ดินหัวหิน — ที่ดินเปล่าพร้อมปลูกสร้าง</h1>
+
+  <div style="display:flex; flex-direction:column; gap:18px; font-size:15.5px; line-height:1.85; color:oklch(32% 0.02 55); text-wrap:pretty;">
+    <p style="margin:0;">การซื้อที่ดินหัวหินเพื่อปลูกสร้างเองให้ความยืดหยุ่นสูงกว่าการซื้อบ้านสำเร็จ ทั้งเรื่องแบบบ้าน วัสดุ และงบประมาณที่ควบคุมได้ ต้นทุนก่อสร้างบ้านคุณภาพดีในหัวหินปัจจุบันอยู่ราว 18,000–28,000 บาทต่อตารางเมตร และหากรวมสระว่ายน้ำขนาด 4x8 เมตรจะเพิ่มอีกประมาณ 600,000–900,000 บาท</p>
+    <p style="margin:0;">เรื่องผังเมืองที่ต้องตรวจก่อนซื้อ: หัวหินอยู่ภายใต้ผังเมืองรวมที่กำหนดสีการใช้ประโยชน์ที่ดิน <strong>สีเหลือง</strong> คือที่อยู่อาศัยหนาแน่นน้อย สร้างบ้านพักอาศัยได้ปกติ <strong>สีส้ม</strong> คือที่อยู่อาศัยหนาแน่นปานกลาง สร้างอาคารสูงได้มากกว่า <strong>สีเขียว</strong> เป็นพื้นที่เกษตรกรรม มีข้อจำกัดการสร้างอาคารพาณิชย์ ควรขอดูใบตรวจสอบการใช้ประโยชน์ที่ดินจากสำนักงานโยธาธิการก่อนวางเงินจอง</p>
+    <p style="margin:0;">ตรวจสอบทางเข้าออกให้ชัดเจนที่สุด นี่เป็นประเด็นที่ทำให้ผู้ซื้อเสียหายมากที่สุดในตลาดที่ดินหัวหิน ที่ดินที่ไม่มีทางออกสู่ถนนสาธารณะ (ที่ดินตาบอด) จะขออนุญาตปลูกสร้างและขอเลขที่บ้านไม่ได้ หากเข้าออกผ่านที่ดินคนอื่นต้องมีการจดภาระจำยอมในโฉนดอย่างเป็นทางการ ไม่ใช่แค่ข้อตกลงปากเปล่ากับเจ้าของเดิม</p>
+    <p style="margin:0;">หน้ากว้างติดถนนมีผลต่อทั้งการใช้งานและราคาขายต่อ ที่ดินหน้ากว้างน้อยกว่า 15 เมตรจะออกแบบบ้านที่มีที่จอดรถและสวนหน้าบ้านได้ลำบาก ส่วนเรื่องระดับดิน ที่ดินที่ยังไม่ถมต้องคำนวณค่าถมเพิ่ม ซึ่งในหัวหินอยู่ราว 250–400 บาทต่อคิว และควรถมทิ้งไว้ให้ดินยุบตัวอย่างน้อย 6–12 เดือนก่อนลงเสาเข็ม</p>
+  </div>
+
+  <h2 style="font-family:'Playfair Display',serif; font-size:clamp(20px,2.8vw,26px); margin:44px 0 16px; color:oklch(24% 0.03 50);">ประกาศที่ตรงกับหมวดนี้</h2>
+  <div id="listings" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px;">
+    <div style="font-size:14px; color:oklch(55% 0.02 60);">กำลังโหลดรายการทรัพย์…</div>
+  </div>
+  <div style="margin-top:18px;"><a href="./Search%20Results.dc.html" style="display:inline-block; background:oklch(40% 0.13 25); color:oklch(98% 0.01 80); padding:11px 22px; border-radius:6px; font-size:13.5px; font-weight:600; text-decoration:none;">ดูทรัพย์ทั้งหมด</a></div>
+
+  <h2 style="font-family:'Playfair Display',serif; font-size:clamp(20px,2.8vw,26px); margin:48px 0 16px; color:oklch(24% 0.03 50);">คำถามที่พบบ่อย</h2>
+  <div style="display:flex; flex-direction:column; gap:14px;">
+    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:16px 18px;">
+      <h3 style="margin:0 0 8px; font-size:15px; font-weight:600; color:oklch(30% 0.05 40);">ที่ดินหัวหินราคาต่อตารางวาเท่าไหร่</h3>
+      <p style="margin:0; font-size:14.5px; line-height:1.75; color:oklch(38% 0.02 55);">โซนหัวหินซอย 70–112 ราว 15,000–35,000 บาทต่อตารางวา โซนทับใต้และหินเหล็กไฟราว 12,000–25,000 บาท โซนใกล้ทะเลเขาตะเกียบ 50,000 บาทขึ้นไป และปราณบุรีถูกกว่าหัวหินราว 30–40%</p>
+    </div>
+    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:16px 18px;">
+      <h3 style="margin:0 0 8px; font-size:15px; font-weight:600; color:oklch(30% 0.05 40);">ต่างชาติซื้อที่ดินหัวหินได้ไหม</h3>
+      <p style="margin:0; font-size:14.5px; line-height:1.75; color:oklch(38% 0.02 55);">ไม่สามารถถือกรรมสิทธิ์ที่ดินในชื่อบุคคลต่างชาติได้ ทางเลือกที่ถูกกฎหมายคือเช่าระยะยาว 30 ปีจดหลังโฉนด หรือถือผ่านนิติบุคคลไทยที่มีโครงสร้างผู้ถือหุ้นถูกต้อง แนะนำปรึกษาทนายก่อนดำเนินการ</p>
+    </div>
+    <div style="background:oklch(99% 0.005 80); border:1px solid oklch(91% 0.01 70); border-radius:8px; padding:16px 18px;">
+      <h3 style="margin:0 0 8px; font-size:15px; font-weight:600; color:oklch(30% 0.05 40);">ควรเลือกโฉนดประเภทไหน</h3>
+      <p style="margin:0; font-size:14.5px; line-height:1.75; color:oklch(38% 0.02 55);">ควรเป็นโฉนดครุฑแดง (น.ส.4 จ.) ซึ่งมีการรังวัดชัดเจนและซื้อขายโอนได้ทันที หลีกเลี่ยง น.ส.3 ก. (ครุฑเขียว) ที่ยังไม่ได้รังวัดแน่นอน และ ส.ป.ก. ที่ห้ามซื้อขาย</p>
+    </div>
+  </div>
+
+  <h2 style="font-family:'Playfair Display',serif; font-size:clamp(20px,2.8vw,26px); margin:48px 0 16px; color:oklch(24% 0.03 50);">หมวดอื่นที่น่าสนใจ</h2>
+  <div style="display:flex; flex-wrap:wrap; gap:10px;">
+    <a href="./baan-hua-hin.html" style="background:oklch(96% 0.01 78); border:1px solid oklch(89% 0.01 70); border-radius:100px; padding:8px 16px; font-size:13px; color:oklch(35% 0.08 35); text-decoration:none;">ขายบ้านหัวหิน — บ้านเดี่ยวและพูลวิลล่าคัดสรร</a>
+    <a href="./pool-villa-hua-hin.html" style="background:oklch(96% 0.01 78); border:1px solid oklch(89% 0.01 70); border-radius:100px; padding:8px 16px; font-size:13px; color:oklch(35% 0.08 35); text-decoration:none;">พูลวิลล่าหัวหิน — บ้านพร้อมสระว่ายน้ำส่วนตัว</a>
+    <a href="./condo-hua-hin.html" style="background:oklch(96% 0.01 78); border:1px solid oklch(89% 0.01 70); border-radius:100px; padding:8px 16px; font-size:13px; color:oklch(35% 0.08 35); text-decoration:none;">คอนโดหัวหิน — คอนโดติดทะเลและวิวทะเล</a>
+    <a href="./baan-chao-hua-hin.html" style="background:oklch(96% 0.01 78); border:1px solid oklch(89% 0.01 70); border-radius:100px; padding:8px 16px; font-size:13px; color:oklch(35% 0.08 35); text-decoration:none;">บ้านเช่าหัวหิน — รายเดือนและรายปี</a>
+  </div>
+
+  <section style="margin-top:52px; background:oklch(96% 0.015 78); border:1px solid oklch(89% 0.02 65); border-radius:12px; padding:26px 24px;">
+    <h2 style="font-family:'Playfair Display',serif; font-size:22px; margin:0 0 8px; color:oklch(28% 0.06 40);">ฝากขาย / ฝากเช่าทรัพย์ของคุณ</h2>
+    <p style="margin:0 0 16px; font-size:14.5px; line-height:1.7; color:oklch(40% 0.02 55);">ให้ทีม huahin.properties ช่วยดูแลการขายหรือปล่อยเช่าทรัพย์ของคุณ</p>
+    <a href="./Owner%20Submission.dc.html" style="display:inline-block; background:oklch(40% 0.13 25); color:oklch(98% 0.01 80); padding:11px 22px; border-radius:6px; font-size:13.5px; font-weight:600; text-decoration:none;">ฝากทรัพย์กับเรา</a>
+  </section>
+</main>
+
+<footer style="border-top:1px solid oklch(90% 0.01 70); padding:24px 20px 40px; text-align:center; font-size:12.5px; color:oklch(55% 0.02 60);">
+  huahin.properties — Hua Hin · Pranburi · Cha-Am, Thailand
+</footer>
+
+<script type="module">
+const F = {"types":["land"]};
+const LANG = "th";
+const T = {"none":"ยังไม่มีประกาศในหมวดนี้ — ดูทรัพย์ทั้งหมด","bed":"นอน","bath":"น้ำ"};
+const box = document.getElementById("listings");
+const fmt = (n) => new Intl.NumberFormat("en-US").format(n);
+try {
+  const mod = await import("./data.js");
+  const props = await mod.getEffectiveProperties(mod);
+  const match = (props || []).filter((x) => {
+    if (F.area && String(x.area || "").toLowerCase().replace(/\s/g, "-") !== F.area) return false;
+    if (F.status && x.status !== F.status) return false;
+    if (F.types && !F.types.includes(x.type)) return false;
+    return true;
+  }).slice(0, 12);
+  if (!match.length) {
+    box.innerHTML = '<div style="font-size:14px; color:oklch(55% 0.02 60);"><a href="./Search%20Results.dc.html" style="color:oklch(42% 0.12 25);">' + T.none + '</a></div>';
+  } else {
+    box.innerHTML = match.map((x) => {
+      const ttl = (x.title && (x.title[LANG] || x.title.en)) || x.id;
+      const img = (x.photos && x.photos[0] && x.photos[0].url) || "";
+      const specs = [x.bedrooms != null ? x.bedrooms + " " + T.bed : "", x.bathrooms != null ? x.bathrooms + " " + T.bath : "", x.livingArea ? x.livingArea + " sqm" : ""].filter(Boolean).join(" · ");
+      return '<a href="./Property%20Details.dc.html?id=' + encodeURIComponent(x.id) + '" style="display:block; background:white; border:1px solid oklch(90% 0.01 70); border-radius:10px; overflow:hidden; text-decoration:none; color:inherit;">'
+        + (img ? '<img src="' + img + '" alt="' + String(ttl).replace(/"/g, "&quot;") + '" loading="lazy" style="width:100%; height:150px; object-fit:cover; display:block;">' : '<div style="height:150px; background:oklch(93% 0.02 70);"></div>')
+        + '<div style="padding:12px 13px;">'
+        + '<div style="font-size:14.5px; font-weight:600; color:oklch(30% 0.02 55); line-height:1.35; margin-bottom:5px;">' + ttl + '</div>'
+        + (x.price ? '<div style="font-size:14px; font-weight:600; color:oklch(38% 0.13 25); margin-bottom:4px;">฿' + fmt(x.price) + '</div>' : '')
+        + (specs ? '<div style="font-size:12px; color:oklch(55% 0.02 60);">' + specs + '</div>' : '')
+        + '<div style="font-size:10.5px; color:oklch(65% 0.02 60); margin-top:5px;">' + x.id + '</div>'
+        + '</div></a>';
+    }).join("");
+  }
+} catch (e) {
+  box.innerHTML = '<div style="font-size:14px; color:oklch(55% 0.02 60);"><a href="./Search%20Results.dc.html" style="color:oklch(42% 0.12 25);">' + T.none + '</a></div>';
+  console.warn("listing load failed", e);
+}
+</script>
+</body>
+</html>
