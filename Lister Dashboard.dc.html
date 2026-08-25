@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-32 (กดปุ่มเดียว สร้างชื่อประกาศ + ข้อความประกาศ AI พร้อมกันทันที) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-33 (รวมเป็นกล่องเดียว ปุ่มเดียว AI ร่างทั้งชื่อประกาศและข้อความประกาศ แก้ไขได้ทั้งสองช่อง) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -930,23 +930,15 @@
             <textarea rows="4" value="{{ f_description }}" onChange="{{ onFDescription }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; resize:vertical;" placeholder="จุดเด่นพิเศษหรือโปรโมชั่นที่ไม่มีในช่องด้านบน เช่น ต่อรองได้ / ขายเอง ไม่มีนายหน้า / ใกล้โรงเรียนนานาชาติ / โปรโมชั่นแถมเฟอร์นิเจอร์"></textarea>
           </div>
 
-          <div style="margin-bottom:16px; padding:14px; background:oklch(97% 0.012 80); border:2px solid oklch(45% 0.15 25); border-radius:8px;">
-            <div style="font-size:13px; font-weight:700; color:oklch(35% 0.14 25); margin-bottom:4px;">⚠️ ขั้นตอนที่ 1 — ชื่อประกาศ (Title) · จำเป็นต้องมี ไม่กรอกจะบันทึกไม่ได้</div>
-            <div style="font-size:11.5px; color:oklch(45% 0.02 60); margin-bottom:8px;">ชื่อนี้คือสิ่งที่ลูกค้าเห็นบน Google และหน้าประกาศ — กดปุ่มด้านล่าง ระบบจะสร้างทั้งชื่อประกาศและข้อความประกาศให้พร้อมกันทันทีจากข้อมูลที่กรอกไว้ แล้วแก้เพิ่มเองได้</div>
-            <div onClick="{{ onAutoTitle }}" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; margin-bottom:8px;">✨ สร้างชื่อประกาศ + ข้อความประกาศอัตโนมัติ</div>
-            <input value="{{ f_title }}" onChange="{{ onFTitle }}" placeholder="เช่น พูลวิลล่าหัวหิน 3 ห้องนอน เขาตะเกียบ ใกล้ทะเล ขาย 8.5 ล้าน" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
-            <div style="font-size:11.5px; color:{{ titleLenColor }}; margin-top:5px;">{{ titleLenLabel }}</div>
-          </div>
-
-          <div style="margin-bottom:20px;">
-            <div style="font-size:13px; font-weight:700; color:oklch(35% 0.14 25); margin-bottom:8px;">ขั้นตอนที่ 2 — ข้อความประกาศ (ไม่บังคับ)</div>
-            <div onClick="{{ onGenerateAiDraft }}" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; margin-bottom:12px;">✨ {{ aiGenerateLabel }}</div>
-            <div style="border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:14px; box-sizing:border-box; resize:vertical; overflow:auto; min-height:90px;">
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:12px;">AI จะรวมข้อมูลทรัพย์ทั้งหมดด้านบน + ข้อมูลติดต่อ/Social จากหน้าตั้งค่า + พิกัดแผนที่ + ข้อมูลเพิ่มเติม มาร่างเป็นข้อความประกาศที่ครบถ้วน พร้อมสถานที่สำคัญใกล้เคียงและระยะทาง/เวลาขับรถโดยประมาณ — แก้ไขได้ก่อนบันทึก</div>
-              <sc-if value="{{ hasAiDraft }}" hint-placeholder-val="{{ false }}">
-                <textarea rows="10" value="{{ f_aiDraft }}" onChange="{{ onFAiDraft }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:12px; font-size:13.5px; font-family:inherit; resize:vertical; line-height:1.6;"></textarea>
-              </sc-if>
-            </div>
+          <div style="margin-bottom:20px; padding:14px; background:oklch(97% 0.012 80); border:2px solid oklch(45% 0.15 25); border-radius:8px;">
+            <div style="font-size:13px; font-weight:700; color:oklch(35% 0.14 25); margin-bottom:4px;">⚠️ ชื่อประกาศ + ข้อความประกาศ · จำเป็นต้องมี ไม่กรอกจะบันทึกไม่ได้</div>
+            <div style="font-size:11.5px; color:oklch(45% 0.02 60); margin-bottom:10px;">กดปุ่มเดียว AI จะร่างทั้งชื่อประกาศและข้อความประกาศให้จากข้อมูลที่กรอกไว้ทั้งหมด พร้อมคีย์เวิร์ด SEO — ตรวจทานแล้วแก้ไขได้ทั้งสองช่องก่อนบันทึก (กดใหม่จะเขียนทับทั้งสองช่อง)</div>
+            <div onClick="{{ onAutoTitle }}" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; margin-bottom:12px;">✨ {{ autoAllLabel }}</div>
+            <div style="font-size:12px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:4px;">ชื่อประกาศ (Title) — สิ่งที่ลูกค้าเห็นบน Google</div>
+            <input value="{{ f_title }}" onChange="{{ onFTitle }}" placeholder="เช่น พูลวิลล่าหัวหิน 3 ห้องนอน เขาตะเกียบ ใกล้ทะเล ขาย 8.5 ล้าน" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white;" />
+            <div style="font-size:11.5px; color:{{ titleLenColor }}; margin-top:4px; margin-bottom:12px;">{{ titleLenLabel }}</div>
+            <div style="font-size:12px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:4px;">ข้อความประกาศ</div>
+            <textarea rows="12" value="{{ f_aiDraft }}" onChange="{{ onFAiDraft }}" placeholder="กดปุ่มด้านบน AI จะร่างข้อความประกาศฉบับเต็มให้ที่นี่ — รวมราคา ห้องนอน ทำเล จุดขาย ข้อมูลติดต่อ และสถานที่สำคัญใกล้เคียง" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:12px; font-size:13.5px; font-family:inherit; line-height:1.7; resize:vertical; background:white;"></textarea>
           </div>
 
           <div style="margin-bottom:20px;">
@@ -2748,6 +2740,7 @@ class Component extends DCLogic {
       f_zone: this.state.f_zone, onFZone: (e) => this.setState({ f_zone: e.target.value }),
       f_poolSize: this.state.f_poolSize, onFPoolSize: (e) => this.setState({ f_poolSize: e.target.value }),
       f_parking: this.state.f_parking, onFParking: (e) => this.setState({ f_parking: e.target.value }),
+      autoAllLabel: this.state.aiGenerating ? "กำลังร่าง…" : ((this.state.f_title || this.state.f_aiDraft) ? "สร้างใหม่อีกครั้งโดย AI" : "สร้างชื่อประกาศ + ข้อความประกาศ อัตโนมัติโดย AI"),
       f_titleDeed: this.state.f_titleDeed, onFTitleDeed: (e) => this.setState({ f_titleDeed: e.target.value }),
       f_title: this.state.f_title,
       onFTitle: (e) => this.setState({ f_title: e.target.value }),
