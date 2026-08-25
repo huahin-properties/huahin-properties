@@ -178,6 +178,9 @@
             <div onClick="{{ onBackStep3 }}" style="flex:1; text-align:center; padding:13px; border-radius:8px; font-size:14px; border:1px solid oklch(80% 0.02 60); cursor:pointer;">← ย้อนกลับ</div>
             <div onClick="{{ onSubmit }}" style="{{ submitStyle }}">{{ submitLabel }}</div>
           </div>
+          <sc-if value="{{ step3Error }}" hint-placeholder-val="{{ false }}">
+            <div style="background:oklch(95% 0.05 30); border:1px solid oklch(82% 0.12 30); border-radius:8px; padding:12px 14px; margin-top:14px; color:oklch(40% 0.16 30); font-size:12.5px; line-height:1.6;">{{ step3Error }}</div>
+          </sc-if>
         </sc-if>
         <sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
           <div style="text-align:center; padding:20px 0;">
@@ -227,8 +230,7 @@ class Component extends DCLogic {
   }
 
   async submit() {
-    if (this.state.photos.length < 5) { this.setState({ step3Error: "" }); }
-    this.setState({ submitting: true });
+    this.setState({ submitting: true, step3Error: "" });
     try {
       const id = "own-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
       await this._fb.setDoc("properties", id, {
