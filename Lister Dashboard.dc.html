@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-33 (รวมเป็นกล่องเดียว ปุ่มเดียว AI ร่างทั้งชื่อประกาศและข้อความประกาศ แก้ไขได้ทั้งสองช่อง) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-34 (เพิ่มย่อหน้าบรรยายเชิญชวน/บันดาลใจในข้อความประกาศ ข้อมูลเดิมครบเหมือนเดิม) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -1676,6 +1676,50 @@ class Component extends DCLogic {
     return sets[area] || sets["hua-hin"];
   }
 
+  _buildNarrative() {
+    const s = this.state;
+    const f = s.f_features || [];
+    const typeTh = this._typeLabelTh(), areaTh = this._areaLabelTh();
+    const isRent = s.f_status === "rent";
+    const out = [];
+
+    const areaMood = {
+      "หัวหิน": "หัวหินคือเมืองตากอากาศที่คนกรุงเทพฯ เลือกมาพักผ่อนมากที่สุด ใกล้พอที่จะขับรถมาได้ในวันหยุด แต่ไกลพอที่จะทิ้งความวุ่นวายไว้ข้างหลัง",
+      "ปราณบุรี": "ปราณบุรีคือเสน่ห์ของทะเลที่ยังเงียบสงบ ธรรมชาติสมบูรณ์ ราคายังเข้าถึงได้ และเติบโตขึ้นทุกปี",
+      "ชะอำ": "ชะอำคือชายทะเลคลาสสิกที่อยู่ใกล้กรุงเทพฯ ที่สุด บรรยากาศครอบครัว สงบ และมีเสน่ห์แบบเมืองชายทะเลไทยแท้",
+    }[areaTh] || "";
+
+    let opener = "";
+    if (s.f_type === "villa") opener = `${isRent ? "พูลวิลล่าให้เช่า" : "พูลวิลล่า"}หลังนี้ออกแบบมาเพื่อการพักผ่อนอย่างแท้จริง — ตื่นเช้ามาเปิดประตูเจอสระว่ายน้ำส่วนตัว ใช้ชีวิตแบบรีสอร์ตได้ทุกวันโดยไม่ต้องเดินทางไปไหน`;
+    else if (s.f_type === "house") opener = `บ้าน${isRent ? "ให้เช่า" : ""}หลังนี้เหมาะกับครอบครัวที่ต้องการพื้นที่ส่วนตัว อยู่สบาย และอยู่ในทำเลที่เดินทางสะดวก`;
+    else if (s.f_type === "condo") opener = `คอนโด${isRent ? "ให้เช่า" : ""}ห้องนี้ตอบโจทย์คนที่ต้องการความสะดวก ดูแลง่าย พร้อมเข้าอยู่ และอยู่ใกล้สิ่งอำนวยความสะดวกครบครัน`;
+    else if (s.f_type === "land") opener = `ที่ดินแปลงนี้เหมาะสำหรับผู้ที่มองหาการลงทุนระยะยาว หรือต้องการสร้างบ้านในฝันบนทำเลที่เลือกเอง`;
+    else opener = `ทรัพย์ทำเลธุรกิจ${isRent ? "ให้เช่า" : ""}ชิ้นนี้เหมาะกับผู้ที่มองหาพื้นที่ค้าขายหรือขยายกิจการในทำเลที่มีผู้คนสัญจรจริง`;
+    out.push(opener);
+
+    const highlights = [];
+    if (f.includes("sea_view")) highlights.push("วิวทะเลที่มองได้ทุกวันไม่มีเบื่อ");
+    if (f.includes("beachfront")) highlights.push("อยู่ติดชายหาด เดินลงทะเลได้เลย");
+    if (f.includes("mountain_view")) highlights.push("วิวภูเขาเปิดโล่ง อากาศถ่ายเทดี");
+    if (f.includes("near_beach")) highlights.push("ใกล้ทะเล ขับรถไม่กี่นาทีถึงหาด");
+    if (f.includes("private_pool") || s.f_poolSize) highlights.push("มีสระว่ายน้ำส่วนตัว ใช้ได้ทุกวันแบบไม่ต้องแบ่งใคร");
+    if (f.includes("near_golf")) highlights.push("ใกล้สนามกอล์ฟ เหมาะกับคนรักกีฬากอล์ฟ");
+    if (f.includes("quiet_soi")) highlights.push("อยู่ในซอยเงียบสงบ เป็นส่วนตัว ไม่มีเสียงรบกวน");
+    if (f.includes("gated_community")) highlights.push("อยู่ในหมู่บ้านที่มีระบบรักษาความปลอดภัย อุ่นใจตลอด 24 ชม.");
+    if (f.includes("furnished")) highlights.push("ตกแต่งพร้อมเฟอร์นิเจอร์ ยกกระเป๋าเข้าอยู่ได้เลย");
+    if (f.includes("riverside")) highlights.push("ติดริมแม่น้ำ บรรยากาศร่มรื่นเป็นธรรมชาติ");
+    if (f.includes("pet_friendly")) highlights.push("เลี้ยงสัตว์เลี้ยงได้ เหมาะกับคนมีน้องหมาน้องแมว");
+    if (highlights.length) out.push("จุดเด่นที่ทำให้หลังนี้น่าสนใจ: " + highlights.slice(0, 4).join(" · "));
+
+    if (areaMood) out.push(areaMood);
+
+    if (f.includes("good_rental_yield")) out.push("นอกจากอยู่เองได้สบาย ทรัพย์ในทำเลนี้ยังปล่อยเช่าได้ดี เหมาะกับผู้ที่มองทั้งการพักผ่อนและผลตอบแทนไปพร้อมกัน");
+    else if (!isRent) out.push("ทรัพย์ในทำเลนี้เป็นที่ต้องการต่อเนื่อง ทั้งจากผู้ซื้ออยู่เองและนักลงทุน — แนะนำให้นัดชมก่อนตัดสินใจ");
+
+    out.push(isRent ? "สนใจเข้าชมหรือสอบถามเงื่อนไขการเช่า ติดต่อได้ตามช่องทางด้านล่างครับ" : "สนใจนัดชมทรัพย์หรือสอบถามรายละเอียดเพิ่มเติม ติดต่อได้ตามช่องทางด้านล่างครับ");
+    return out.join("\n\n");
+  }
+
   buildAiDraft() {
     const s = this.state, lister = s.lister || {};
     const typeLabel = ((this._mod && this._mod.TYPES) || []).find((t) => t.id === s.f_type);
@@ -1683,6 +1727,8 @@ class Component extends DCLogic {
     const lines = [];
     const title = (s.f_title || "").trim() || `${typeLabel ? typeLabel.label.th : "ทรัพย์"}${s.f_subdistrict ? " ตำบล" + s.f_subdistrict : ""} ${s.f_zone || ""} ${areaLabel ? areaLabel.label.th : ""}`.replace(/\s+/g, " ").trim();
     lines.push(title);
+    lines.push("");
+    lines.push(this._buildNarrative());
     lines.push("");
     if (s.f_price) lines.push(`💰 ราคา ${Number(s.f_price).toLocaleString()} บาท`);
     const facts = [];
