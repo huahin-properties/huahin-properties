@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { margin:0; background:oklch(96% 0.012 85); font-family:'Sarabun',sans-serif; }
+    a { color: oklch(40% 0.13 25); }
+    a:hover { color: oklch(32% 0.13 25); }
+  </style>
+</helmet>
+
+<div style="min-height:100vh;">
+  <sc-if value="{{ showDevBar }}">
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">PF-1 (ผลงาน — เป้ารายเดือน + ไทม์ไลน์ + สถิติ + funnel)</div>
+  </sc-if>
+
+  <div style="background:oklch(22% 0.02 60); padding:18px clamp(18px,4vw,48px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <img src="logo.png" alt="huahin.properties" style="height:36px; width:36px; border-radius:50%; object-fit:contain;" />
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:clamp(15px,4vw,19px); color:oklch(97% 0.01 80);">huahin . properties</div>
+        <div style="font-size:11.5px; color:oklch(75% 0.02 70);">ผลงานและบันทึกการทำงาน</div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+      <a href="Leads.dc.html" style="color:oklch(85% 0.02 70); font-size:12.5px; text-decoration:none; white-space:nowrap;">👥 ลูกค้า</a>
+      <a href="Staff Handbook.dc.html" style="color:oklch(85% 0.02 70); font-size:12.5px; text-decoration:none; white-space:nowrap;">📋 คู่มือ</a>
+      <a href="Lister Dashboard.dc.html" style="color:oklch(85% 0.02 70); font-size:12.5px; text-decoration:none; white-space:nowrap;">← หน้าทำงาน</a>
+    </div>
+  </div>
+
+  <div style="max-width:1000px; margin:0 auto; padding:clamp(18px,4vw,36px);">
+
+    <sc-if value="{{ notAllowed }}" hint-placeholder-val="{{ false }}">
+      <div style="background:white; border-radius:10px; padding:40px 24px; text-align:center; border:1px solid oklch(90% 0.01 70);">
+        <div style="font-size:15px; color:oklch(40% 0.02 60); margin-bottom:8px;">หน้านี้สำหรับทีมงานเท่านั้น</div>
+        <a href="Admin Login.dc.html" style="font-size:13px;">เข้าสู่ระบบ</a>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ allowed }}" hint-placeholder-val="{{ true }}">
+
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:6px;">
+        <div style="font-family:'Playfair Display',serif; font-size:clamp(21px,5vw,26px); color:oklch(20% 0.02 60);">🎯 เป้าหมาย{{ monthLabel }}</div>
+        <sc-if value="{{ isOwner }}">
+          <div onClick="{{ onToggleEditTargets }}" style="background:oklch(93% 0.01 70); color:oklch(30% 0.02 60); padding:8px 16px; border-radius:6px; font-size:12.5px; font-weight:600; cursor:pointer; white-space:nowrap;">{{ editTargetsLabel }}</div>
+        </sc-if>
+      </div>
+      <div style="font-size:12.5px; color:oklch(50% 0.02 60); margin-bottom:16px;">{{ daysLeftLabel }}</div>
+
+      <div style="background:white; border-radius:10px; padding:18px 20px; margin-bottom:22px; border:1px solid oklch(90% 0.01 70);">
+        <sc-if value="{{ editingTargets }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:12.5px; color:oklch(45% 0.02 60); margin-bottom:12px;">ตั้งเป้าเดือนนี้ — เว้นว่างหรือใส่ 0 เพื่อไม่แสดงหัวข้อนั้น</div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-bottom:14px;">
+            <sc-for list="{{ targetInputs }}" as="ti" hint-placeholder-count="4">
+              <div>
+                <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">{{ ti.label }}</div>
+                <input type="number" value="{{ ti.value }}" onChange="{{ ti.onChange }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:5px; padding:9px 11px; font-size:13px; font-family:inherit;" />
+              </div>
+            </sc-for>
+          </div>
+          <div onClick="{{ onSaveTargets }}" style="background:oklch(40% 0.13 25); color:white; padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; display:inline-block;">{{ saveTargetsLabel }}</div>
+        </sc-if>
+
+        <sc-if value="{{ !editingTargets }}" hint-placeholder-val="{{ true }}">
+          <sc-if value="{{ hasTargets }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:16px;">
+              <sc-for list="{{ goals }}" as="g" hint-placeholder-count="4">
+                <div>
+                  <div style="display:flex; justify-content:space-between; gap:10px; margin-bottom:5px; flex-wrap:wrap;">
+                    <div style="font-size:13.5px; font-weight:600; color:oklch(30% 0.02 60);">{{ g.icon }} {{ g.name }}</div>
+                    <div style="font-size:13px; font-weight:700; color:{{ g.color }}; white-space:nowrap;">{{ g.progressLabel }} · {{ g.pct }}%</div>
+                  </div>
+                  <div style="background:oklch(94% 0.005 70); border-radius:100px; height:9px; overflow:hidden;">
+                    <div style="{{ g.barStyle }}"></div>
+                  </div>
+                  <sc-if value="{{ g.hasWarn }}"><div style="font-size:11px; color:oklch(48% 0.15 45); margin-top:4px;">{{ g.warn }}</div></sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ !hasTargets }}" hint-placeholder-val="{{ true }}">
+            <div style="text-align:center; padding:20px; font-size:13px; color:oklch(55% 0.02 60);">{{ noTargetsLabel }}</div>
+          </sc-if>
+        </sc-if>
+      </div>
+
+      <div style="font-family:'Playfair Display',serif; font-size:clamp(19px,4.5vw,23px); color:oklch(20% 0.02 60); margin-bottom:12px;">📊 สถิติ</div>
+      <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
+        <sc-for list="{{ ranges }}" as="rg" hint-placeholder-count="4">
+          <div onClick="{{ rg.onClick }}" style="{{ rg.style }}">{{ rg.label }}</div>
+        </sc-for>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:12px; margin-bottom:22px;">
+        <sc-for list="{{ stats }}" as="s" hint-placeholder-count="6">
+          <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:16px 18px;">
+            <div style="font-size:11.5px; color:oklch(52% 0.02 60); margin-bottom:5px; line-height:1.4;">{{ s.name }}</div>
+            <div style="font-size:23px; font-weight:700; color:oklch(35% 0.13 25); line-height:1.2;">{{ s.value }}</div>
+            <div style="font-size:11px; color:oklch(58% 0.02 60);">{{ s.unit }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="font-family:'Playfair Display',serif; font-size:clamp(19px,4.5vw,23px); color:oklch(20% 0.02 60); margin-bottom:4px;">🔻 เส้นทางลูกค้า (Funnel)</div>
+      <div style="font-size:12.5px; color:oklch(50% 0.02 60); margin-bottom:12px;">ดูว่าลูกค้าหลุดตรงไหนมากที่สุด — จุดนั้นคือสิ่งที่ต้องแก้ก่อน</div>
+      <div style="background:white; border-radius:10px; padding:18px 20px; margin-bottom:22px; border:1px solid oklch(90% 0.01 70);">
+        <div style="display:flex; flex-direction:column; gap:11px;">
+          <sc-for list="{{ funnel }}" as="fn" hint-placeholder-count="5">
+            <div>
+              <div style="display:flex; justify-content:space-between; gap:10px; margin-bottom:4px; flex-wrap:wrap;">
+                <div style="font-size:13px; color:oklch(32% 0.02 60);">{{ fn.name }}</div>
+                <div style="font-size:13px; font-weight:700; color:oklch(35% 0.02 60); white-space:nowrap;">{{ fn.count }} ราย{{ fn.rateLabel }}</div>
+              </div>
+              <div style="background:oklch(94% 0.005 70); border-radius:5px; height:22px; overflow:hidden;">
+                <div style="{{ fn.barStyle }}"></div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="font-family:'Playfair Display',serif; font-size:clamp(19px,4.5vw,23px); color:oklch(20% 0.02 60); margin-bottom:12px;">🕐 บันทึกการทำงาน</div>
+      <div style="background:white; border-radius:10px; padding:6px 20px; margin-bottom:30px; border:1px solid oklch(90% 0.01 70);">
+        <sc-for list="{{ timeline }}" as="t" hint-placeholder-count="5">
+          <div style="display:flex; gap:12px; padding:13px 0; border-bottom:1px solid oklch(96% 0.005 70); align-items:flex-start;">
+            <div style="font-size:11.5px; color:oklch(58% 0.02 60); white-space:nowrap; min-width:88px; padding-top:1px;">{{ t.when }}</div>
+            <div style="font-size:16px; line-height:1.2;">{{ t.icon }}</div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:13px; color:oklch(30% 0.02 60); line-height:1.5;">{{ t.summary }}</div>
+              <div style="font-size:11px; color:oklch(60% 0.02 60);">{{ t.who }}</div>
+            </div>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noTimeline }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center; padding:34px 12px; font-size:13px; color:oklch(55% 0.02 60);">ยังไม่มีบันทึกการทำงานในช่วงเวลานี้</div>
+        </sc-if>
+      </div>
+
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const GOAL_DEFS = [
+  { key: "properties", name: "ทรัพย์เข้าใหม่", icon: "🏡", unit: "หลัง", logTypes: ["property_submitted"] },
+  { key: "leads", name: "ลูกค้าใหม่", icon: "👥", unit: "ราย", countLeads: true },
+  { key: "viewings", name: "นัดพาชม", icon: "📅", unit: "ครั้ง", logTypes: ["viewing_booked"] },
+  { key: "closed", name: "ปิดการขาย", icon: "🎉", unit: "ดีล", countWon: true },
+  { key: "calls", name: "โทรลูกค้า", icon: "📞", unit: "สาย", logTypes: ["lead_call"] },
+  { key: "mediaJobs", name: "ใบงานถ่ายภาพ", icon: "📸", unit: "งาน", logTypes: ["media_job"] },
+];
+
+const TYPE_ICONS = {
+  property_submitted: "🏡", lead_call: "📞", lead_note: "📝", lead_status: "🔄",
+  viewing_booked: "📅", viewing_result: "✅", owner_contact: "☎️", media_job: "📸",
+};
+
+class Component extends DCLogic {
+  state = {
+    loaded: false, allowed: false, adminRole: null, showDevBar: false,
+    logs: [], leads: [], targets: null, range: "month",
+    editingTargets: false, targetDrafts: {}, savingTargets: false,
+  };
+
+  async componentDidMount() {
+    const isPreviewEnv = !/huahin\.properties$/.test(window.location.hostname);
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("dev") === "1") { try { localStorage.setItem("hhDevBar", "1"); } catch (e) {} }
+    let dev = false;
+    try { dev = localStorage.getItem("hhDevBar") === "1"; } catch (e) {}
+    this.setState({ showDevBar: isPreviewEnv || dev });
+
+    const fb = await import("./firebase-client.js");
+    this._fb = fb;
+    const user = await fb.onAdminAuthReady().catch(() => null);
+    if (!user) { this.setState({ loaded: true, allowed: false }); return; }
+    let role = null;
+    try { role = await fb.fetchAdminRole(); } catch (e) {}
+    if (!role) { this.setState({ loaded: true, allowed: false }); return; }
+    this.setState({ adminRole: role, allowed: true });
+
+    const monthStart = new Date();
+    monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0);
+    const [logs, leads, targets] = await Promise.all([
+      fb.fetchActivityLog(monthStart.getTime() - 90 * 86400000).catch(() => []),
+      fb.fetchLeads().catch(() => []),
+      fb.fetchMonthlyTargets().catch(() => null),
+    ]);
+    this.setState({ logs, leads, targets, loaded: true });
+  }
+
+  rangeStart() {
+    const d = new Date();
+    if (this.state.range === "today") { d.setHours(0, 0, 0, 0); return d.getTime(); }
+    if (this.state.range === "week") { d.setDate(d.getDate() - 7); return d.getTime(); }
+    if (this.state.range === "month") { d.setDate(1); d.setHours(0, 0, 0, 0); return d.getTime(); }
+    d.setDate(d.getDate() - 90); return d.getTime();
+  }
+
+  monthStartMs() {
+    const d = new Date(); d.setDate(1); d.setHours(0, 0, 0, 0); return d.getTime();
+  }
+
+  targetDraft(key) {
+    if (key in this.state.targetDrafts) return this.state.targetDrafts[key];
+    const t = this.state.targets || {};
+    return t[key] != null ? String(t[key]) : "";
+  }
+
+  async saveTargets() {
+    if (this.state.savingTargets) return;
+    this.setState({ savingTargets: true });
+    const out = {};
+    GOAL_DEFS.forEach((g) => {
+      const v = Number(this.targetDraft(g.key));
+      if (Number.isFinite(v) && v > 0) out[g.key] = v;
+    });
+    try {
+      await this._fb.saveMonthlyTargets(this._fb.monthKey(), out);
+      this.setState({ targets: out, editingTargets: false, savingTargets: false, targetDrafts: {} });
+    } catch (e) {
+      console.warn("saveMonthlyTargets failed:", e);
+      this.setState({ savingTargets: false });
+    }
+  }
+
+  renderVals() {
+    const now = new Date();
+    const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const daysLeft = daysInMonth - now.getDate();
+    const monthElapsedPct = (now.getDate() / daysInMonth) * 100;
+    const mStart = this.monthStartMs();
+
+    const monthLogs = this.state.logs.filter((l) => (l.at || 0) >= mStart);
+    const monthLeads = this.state.leads.filter((l) => (l.createdAt || 0) >= mStart);
+
+    const countFor = (g, logs, leads) => {
+      if (g.countLeads) return leads.length;
+      if (g.countWon) return leads.filter((l) => l.leadStatus === "won").length;
+      return logs.filter((l) => g.logTypes.includes(l.type)).length;
+    };
+
+    const targets = this.state.targets || {};
+    const hasTargets = Object.keys(targets).some((k) => targets[k] > 0);
+
+    const goals = GOAL_DEFS.filter((g) => targets[g.key] > 0).map((g) => {
+      const done = countFor(g, monthLogs, monthLeads);
+      const target = targets[g.key];
+      const pct = Math.min(100, Math.round((done / target) * 100));
+      const onTrack = pct >= monthElapsedPct - 12;
+      const color = pct >= 100 ? "oklch(35% 0.14 145)" : onTrack ? "oklch(38% 0.12 145)" : "oklch(45% 0.16 45)";
+      const barColor = pct >= 100 ? "oklch(45% 0.14 145)" : onTrack ? "oklch(52% 0.12 145)" : "oklch(58% 0.15 55)";
+      return {
+        icon: g.icon, name: g.name, pct,
+        progressLabel: `${done} / ${target} ${g.unit}`,
+        color,
+        barStyle: `background:${barColor}; height:100%; width:${pct}%; border-radius:100px; transition:width .3s;`,
+        hasWarn: !onTrack && pct < 100,
+        warn: `⚠️ ช้ากว่าเป้า — ผ่านไป ${Math.round(monthElapsedPct)}% ของเดือน แต่ทำได้ ${pct}%`,
+      };
+    });
+
+    const rStart = this.rangeStart();
+    const rangeLogs = this.state.logs.filter((l) => (l.at || 0) >= rStart);
+    const rangeLeads = this.state.leads.filter((l) => (l.createdAt || 0) >= rStart);
+
+    const callLogs = rangeLogs.filter((l) => l.type === "lead_call");
+    const respTimes = rangeLeads
+      .filter((l) => l.lastCallAt && l.createdAt && l.lastCallAt > l.createdAt)
+      .map((l) => l.lastCallAt - l.createdAt);
+    const avgResp = respTimes.length ? respTimes.reduce((a, b) => a + b, 0) / respTimes.length : 0;
+    const avgRespLabel = avgResp
+      ? (avgResp >= 3600000 ? `${Math.floor(avgResp / 3600000)} ชม. ${Math.round((avgResp % 3600000) / 60000)} น.` : `${Math.round(avgResp / 60000)} นาที`)
+      : "—";
+    const uncontacted = rangeLeads.filter((l) => !l.contacted).length;
+
+    const stats = [
+      { name: "ลูกค้าใหม่", value: String(rangeLeads.length), unit: "ราย" },
+      { name: "โทรลูกค้า", value: String(callLogs.length), unit: "สาย" },
+      { name: "เวลาตอบเฉลี่ย", value: avgRespLabel, unit: "เป้า ≤ 2 ชม." },
+      { name: "ยังไม่ได้โทร", value: String(uncontacted), unit: "ราย" },
+      { name: "ทรัพย์ส่งอนุมัติ", value: String(rangeLogs.filter((l) => l.type === "property_submitted").length), unit: "หลัง" },
+      { name: "นัดพาชม", value: String(rangeLogs.filter((l) => l.type === "viewing_booked").length), unit: "ครั้ง" },
+      { name: "ปิดการขายได้", value: String(rangeLeads.filter((l) => l.leadStatus === "won").length), unit: "ดีล" },
+      { name: "บันทึกการคุย", value: String(rangeLogs.filter((l) => l.type === "lead_note").length), unit: "ครั้ง" },
+    ];
+
+    const fStages = [
+      { name: "ลูกค้าติดต่อเข้ามา", count: rangeLeads.length },
+      { name: "โทรกลับแล้ว", count: rangeLeads.filter((l) => l.contacted).length },
+      { name: "คัดกรองแล้ว (รู้งบ+ความต้องการ)", count: rangeLeads.filter((l) => l.budget || l.want).length },
+      { name: "นัดพาชม", count: rangeLeads.filter((l) => ["booked", "hot", "won"].includes(l.leadStatus)).length },
+      { name: "พร้อมซื้อ", count: rangeLeads.filter((l) => ["hot", "won"].includes(l.leadStatus)).length },
+      { name: "ปิดการขายได้", count: rangeLeads.filter((l) => l.leadStatus === "won").length },
+    ];
+    const top = fStages[0].count || 1;
+    const funnel = fStages.map((s, i) => {
+      const w = Math.max(2, Math.round((s.count / top) * 100));
+      const prev = i > 0 ? fStages[i - 1].count : 0;
+      const rate = i > 0 && prev > 0 ? Math.round((s.count / prev) * 100) : null;
+      return {
+        name: s.name, count: s.count,
+        rateLabel: rate != null ? ` · ${rate}% จากขั้นก่อน` : "",
+        barStyle: `background:oklch(${58 - i * 3}% 0.13 ${25 + i * 12}); height:100%; width:${w}%; border-radius:5px; transition:width .3s;`,
+      };
+    });
+
+    const fmt = (ms) => {
+      const d = new Date(ms);
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const hm = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+      if (ms >= today.getTime()) return `วันนี้ ${hm}`;
+      return `${d.getDate()}/${d.getMonth() + 1} ${hm}`;
+    };
+
+    const timeline = rangeLogs.slice(0, 60).map((l) => ({
+      when: fmt(l.at || 0),
+      icon: TYPE_ICONS[l.type] || "•",
+      summary: l.summary || l.type || "",
+      who: l.actorEmail || "ทีมงาน",
+    }));
+
+    const pill = "padding:7px 14px; border-radius:100px; font-size:12.5px; cursor:pointer; white-space:nowrap;";
+    const pillOn = pill + "background:oklch(22% 0.02 60); color:white;";
+    const pillOff = pill + "background:white; color:oklch(35% 0.02 60); border:1px solid oklch(88% 0.01 70);";
+    const rangeDefs = [
+      { key: "today", label: "วันนี้" }, { key: "week", label: "7 วัน" },
+      { key: "month", label: "เดือนนี้" }, { key: "quarter", label: "90 วัน" },
+    ];
+
+    return {
+      showDevBar: this.state.showDevBar,
+      allowed: this.state.allowed,
+      notAllowed: this.state.loaded && !this.state.allowed,
+      isOwner: this.state.adminRole === "owner",
+      monthLabel: `เดือน${months[now.getMonth()]} ${now.getFullYear() + 543}`,
+      daysLeftLabel: daysLeft > 0 ? `เหลืออีก ${daysLeft} วันในเดือนนี้ · ผ่านไปแล้ว ${Math.round(monthElapsedPct)}% ของเดือน` : "วันสุดท้ายของเดือนนี้",
+      editingTargets: this.state.editingTargets,
+      editTargetsLabel: this.state.editingTargets ? "✕ ปิดการแก้ไข" : "✏️ ตั้งเป้าเดือนนี้",
+      onToggleEditTargets: () => this.setState((s) => ({ editingTargets: !s.editingTargets })),
+      targetInputs: GOAL_DEFS.map((g) => ({
+        label: `${g.icon} ${g.name} (${g.unit})`,
+        value: this.targetDraft(g.key),
+        onChange: (e) => this.setState((s) => ({ targetDrafts: { ...s.targetDrafts, [g.key]: e.target.value } })),
+      })),
+      saveTargetsLabel: this.state.savingTargets ? "กำลังบันทึก…" : "💾 บันทึกเป้าหมาย",
+      onSaveTargets: () => this.saveTargets(),
+      hasTargets, goals,
+      noTargetsLabel: this.state.adminRole === "owner" ? "ยังไม่ได้ตั้งเป้าเดือนนี้ — กดปุ่ม \"ตั้งเป้าเดือนนี้\" ด้านบน" : "เจ้าของระบบยังไม่ได้ตั้งเป้าหมายเดือนนี้",
+      ranges: rangeDefs.map((r) => ({
+        label: r.label,
+        style: this.state.range === r.key ? pillOn : pillOff,
+        onClick: () => this.setState({ range: r.key }),
+      })),
+      stats, funnel, timeline,
+      noTimeline: this.state.loaded && timeline.length === 0,
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { margin:0; background:oklch(96% 0.012 85); font-family:'Sarabun',sans-serif; }
+    a { color: oklch(40% 0.13 25); }
+    a:hover { color: oklch(32% 0.13 25); }
+  </style>
+</helmet>
+
+<div style="min-height:100vh;">
+  <sc-if value="{{ showDevBar }}">
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LE-1 (หน้าจัดการลูกค้า — บันทึกการโทร/สถานะ/นัดชม + เขียน log อัตโนมัติ)</div>
+  </sc-if>
+
+  <div style="background:oklch(22% 0.02 60); padding:18px clamp(18px,4vw,48px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <img src="logo.png" alt="huahin.properties" style="height:36px; width:36px; border-radius:50%; object-fit:contain;" />
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:clamp(15px,4vw,19px); color:oklch(97% 0.01 80);">huahin . properties</div>
+        <div style="font-size:11.5px; color:oklch(75% 0.02 70);">จัดการลูกค้า</div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+      <a href="Performance.dc.html" style="color:oklch(85% 0.02 70); font-size:12.5px; text-decoration:none; white-space:nowrap;">📊 ผลงาน</a>
+      <a href="Staff Handbook.dc.html" style="color:oklch(85% 0.02 70); font-size:12.5px; text-decoration:none; white-space:nowrap;">📋 คู่มือ</a>
+      <a href="Lister Dashboard.dc.html" style="color:oklch(85% 0.02 70); font-size:12.5px; text-decoration:none; white-space:nowrap;">← หน้าทำงาน</a>
+    </div>
+  </div>
+
+  <div style="max-width:1000px; margin:0 auto; padding:clamp(18px,4vw,36px);">
+
+    <sc-if value="{{ notAllowed }}" hint-placeholder-val="{{ false }}">
+      <div style="background:white; border-radius:10px; padding:40px 24px; text-align:center; border:1px solid oklch(90% 0.01 70);">
+        <div style="font-size:15px; color:oklch(40% 0.02 60); margin-bottom:8px;">หน้านี้สำหรับทีมงานเท่านั้น</div>
+        <a href="Admin Login.dc.html" style="font-size:13px;">เข้าสู่ระบบ</a>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ allowed }}" hint-placeholder-val="{{ true }}">
+      <div style="font-family:'Playfair Display',serif; font-size:clamp(21px,5vw,26px); color:oklch(20% 0.02 60); margin-bottom:4px;">จัดการลูกค้า</div>
+      <div style="font-size:12.5px; color:oklch(50% 0.02 60); margin-bottom:18px;">โทรกลับทุกรายภายใน 2 ชั่วโมง · บันทึกทุกครั้งที่คุยเพื่อไม่ให้ข้อมูลหาย</div>
+
+      <sc-if value="{{ hasOverdue }}" hint-placeholder-val="{{ false }}">
+        <div style="background:oklch(95% 0.06 30); border:1px solid oklch(80% 0.12 30); border-radius:8px; padding:13px 16px; margin-bottom:16px; font-size:13px; color:oklch(40% 0.16 30);">🔴 มีลูกค้า {{ overdueCount }} รายที่ยังไม่ได้โทรกลับเกิน 2 ชั่วโมง — ควรโทรทันที</div>
+      </sc-if>
+
+      <div style="display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap;">
+        <sc-for list="{{ filters }}" as="f" hint-placeholder-count="6">
+          <div onClick="{{ f.onClick }}" style="{{ f.style }}">{{ f.label }}</div>
+        </sc-for>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <sc-for list="{{ rows }}" as="r" hint-placeholder-count="3">
+          <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:16px 18px;">
+            <div style="display:flex; gap:12px; align-items:flex-start; flex-wrap:wrap;">
+              <div style="flex:1; min-width:200px;">
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:3px;">
+                  <div style="font-size:14.5px; font-weight:700; color:oklch(28% 0.02 60);">{{ r.name }}</div>
+                  <div style="{{ r.statusStyle }}">{{ r.statusLabel }}</div>
+                  <sc-if value="{{ r.isOverdue }}"><div style="background:oklch(94% 0.06 30); color:oklch(42% 0.16 30); font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:100px;">ยังไม่โทร {{ r.waitLabel }}</div></sc-if>
+                </div>
+                <div style="font-size:12.5px; color:oklch(45% 0.02 60);">{{ r.contactLabel }}</div>
+                <sc-if value="{{ r.hasProperty }}"><div style="font-size:12px; color:oklch(50% 0.02 60); margin-top:2px;">สนใจทรัพย์: {{ r.propertyLabel }}</div></sc-if>
+                <div style="font-size:11.5px; color:oklch(60% 0.02 60); margin-top:2px;">เข้ามาเมื่อ {{ r.dateLabel }}</div>
+                <sc-if value="{{ r.hasMessage }}">
+                  <div style="background:oklch(97% 0.008 80); border-radius:6px; padding:9px 11px; margin-top:8px; font-size:12px; color:oklch(40% 0.02 60); line-height:1.6;">💬 {{ r.message }}</div>
+                </sc-if>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:6px; min-width:150px;">
+                <sc-if value="{{ r.hasPhone }}">
+                  <a href="{{ r.telHref }}" onClick="{{ r.onCall }}" style="background:oklch(40% 0.14 145); color:white; padding:9px 14px; border-radius:6px; font-size:12.5px; font-weight:600; text-decoration:none; text-align:center; white-space:nowrap;">📞 โทร + บันทึก</a>
+                </sc-if>
+                <div onClick="{{ r.onToggleNote }}" style="background:oklch(93% 0.01 70); color:oklch(30% 0.02 60); padding:9px 14px; border-radius:6px; font-size:12.5px; font-weight:600; cursor:pointer; text-align:center; white-space:nowrap;">📝 บันทึกการคุย</div>
+                <select value="{{ r.status }}" onChange="{{ r.onStatusChange }}" style="border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:8px 10px; font-size:12px; font-family:inherit; background:white;">
+                  <option value="new">🔴 ใหม่ ยังไม่โทร</option>
+                  <option value="talking">🟡 กำลังคุย</option>
+                  <option value="booked">🟢 นัดชมแล้ว</option>
+                  <option value="hot">⭐ พร้อมซื้อ</option>
+                  <option value="won">🎉 ปิดการขายได้</option>
+                  <option value="lost">⚪ ไม่สนใจแล้ว</option>
+                </select>
+              </div>
+            </div>
+
+            <sc-if value="{{ r.noteOpen }}">
+              <div style="border-top:1px solid oklch(94% 0.005 70); margin-top:14px; padding-top:14px;">
+                <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:10px;">
+                  <div>
+                    <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">งบประมาณ</div>
+                    <input value="{{ r.budget }}" onChange="{{ r.onBudgetChange }}" placeholder="เช่น 8 ล้าน" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:5px; padding:8px 10px; font-size:12.5px; font-family:inherit;" />
+                  </div>
+                  <div>
+                    <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">ต้องการทรัพย์แบบไหน/โซนไหน</div>
+                    <input value="{{ r.want }}" onChange="{{ r.onWantChange }}" placeholder="เช่น พูลวิลล่า 3 นอน เขาตะเกียบ" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:5px; padding:8px 10px; font-size:12.5px; font-family:inherit;" />
+                  </div>
+                  <div>
+                    <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">จะซื้อ/เช่าเมื่อไหร่</div>
+                    <input value="{{ r.timeline }}" onChange="{{ r.onTimelineChange }}" placeholder="เช่น ภายใน 3 เดือน" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:5px; padding:8px 10px; font-size:12.5px; font-family:inherit;" />
+                  </div>
+                  <div>
+                    <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">เงินสด/กู้ธนาคาร</div>
+                    <input value="{{ r.finance }}" onChange="{{ r.onFinanceChange }}" placeholder="เช่น กู้ธนาคาร 70%" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:5px; padding:8px 10px; font-size:12.5px; font-family:inherit;" />
+                  </div>
+                </div>
+                <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:4px;">บันทึกการคุยครั้งนี้</div>
+                <textarea rows="3" value="{{ r.noteDraft }}" onChange="{{ r.onNoteChange }}" placeholder="คุยอะไรไว้ · ลูกค้ากังวลอะไร · ขั้นตอนถัดไปคืออะไร" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:10px 12px; font-size:12.5px; font-family:inherit; resize:vertical;"></textarea>
+                <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+                  <div onClick="{{ r.onSaveNote }}" style="background:oklch(40% 0.13 25); color:white; padding:9px 18px; border-radius:6px; font-size:12.5px; font-weight:600; cursor:pointer;">{{ r.saveLabel }}</div>
+                  <div onClick="{{ r.onBookViewing }}" style="background:oklch(93% 0.01 70); color:oklch(30% 0.02 60); padding:9px 18px; border-radius:6px; font-size:12.5px; font-weight:600; cursor:pointer;">📅 บันทึกว่านัดชมแล้ว</div>
+                </div>
+                <sc-if value="{{ r.hasHistory }}">
+                  <div style="margin-top:14px;">
+                    <div style="font-size:11.5px; font-weight:700; color:oklch(40% 0.02 60); margin-bottom:6px;">ประวัติการคุย</div>
+                    <sc-for list="{{ r.history }}" as="hh" hint-placeholder-count="1">
+                      <div style="border-left:2px solid oklch(88% 0.02 70); padding-left:10px; margin-bottom:8px;">
+                        <div style="font-size:11px; color:oklch(60% 0.02 60);">{{ hh.when }} · {{ hh.who }}</div>
+                        <div style="font-size:12.5px; color:oklch(35% 0.02 60); line-height:1.6;">{{ hh.text }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noRows }}" hint-placeholder-val="{{ false }}">
+          <div style="background:white; border-radius:10px; padding:40px 20px; text-align:center; font-size:13.5px; color:oklch(55% 0.02 60); border:1px solid oklch(90% 0.01 70);">{{ emptyLabel }}</div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const STATUS_MAP = {
+  new: { label: "🔴 ใหม่ ยังไม่โทร", bg: "oklch(95% 0.05 30)", color: "oklch(42% 0.16 30)" },
+  talking: { label: "🟡 กำลังคุย", bg: "oklch(95% 0.06 75)", color: "oklch(45% 0.13 75)" },
+  booked: { label: "🟢 นัดชมแล้ว", bg: "oklch(93% 0.05 145)", color: "oklch(35% 0.12 145)" },
+  hot: { label: "⭐ พร้อมซื้อ", bg: "oklch(94% 0.08 60)", color: "oklch(42% 0.15 45)" },
+  won: { label: "🎉 ปิดการขายได้", bg: "oklch(90% 0.09 145)", color: "oklch(32% 0.14 145)" },
+  lost: { label: "⚪ ไม่สนใจแล้ว", bg: "oklch(94% 0.005 70)", color: "oklch(55% 0.02 60)" },
+};
+
+class Component extends DCLogic {
+  state = {
+    loaded: false, allowed: false, adminRole: null, showDevBar: false,
+    leads: [], filter: "all", openNoteId: "", drafts: {}, savingId: "",
+  };
+
+  async componentDidMount() {
+    const isPreviewEnv = !/huahin\.properties$/.test(window.location.hostname);
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("dev") === "1") { try { localStorage.setItem("hhDevBar", "1"); } catch (e) {} }
+    let dev = false;
+    try { dev = localStorage.getItem("hhDevBar") === "1"; } catch (e) {}
+    this.setState({ showDevBar: isPreviewEnv || dev });
+
+    const fb = await import("./firebase-client.js");
+    this._fb = fb;
+    const user = await fb.onAdminAuthReady().catch(() => null);
+    if (!user) { this.setState({ loaded: true, allowed: false }); return; }
+    let role = null;
+    try { role = await fb.fetchAdminRole(); } catch (e) {}
+    if (!role) { this.setState({ loaded: true, allowed: false }); return; }
+    this.setState({ adminRole: role, allowed: true });
+    await this.reload();
+  }
+
+  async reload() {
+    try {
+      const leads = await this._fb.fetchLeads();
+      this.setState({ leads, loaded: true });
+    } catch (e) {
+      console.warn("fetchLeads failed:", e);
+      this.setState({ loaded: true, leads: [] });
+    }
+  }
+
+  draft(id, key) {
+    const d = this.state.drafts[id] || {};
+    if (key in d) return d[key];
+    const lead = this.state.leads.find((l) => l.id === id) || {};
+    return lead[key] || "";
+  }
+
+  setDraft(id, key, value) {
+    this.setState((s) => ({ drafts: { ...s.drafts, [id]: { ...(s.drafts[id] || {}), [key]: value } } }));
+  }
+
+  async changeStatus(lead, status) {
+    const prev = lead.leadStatus || "new";
+    this.setState((s) => ({ leads: s.leads.map((l) => (l.id === lead.id ? { ...l, leadStatus: status } : l)) }));
+    try {
+      await this._fb.updateDocFields("leads", lead.id, { leadStatus: status, statusChangedAt: Date.now() });
+      await this._fb.logActivity({
+        type: "lead_status", leadId: lead.id, leadName: lead.name || "",
+        from: prev, to: status,
+        summary: `เปลี่ยนสถานะลูกค้า ${lead.name || lead.id} เป็น ${(STATUS_MAP[status] || {}).label || status}`,
+      });
+    } catch (e) {
+      console.warn("changeStatus failed:", e);
+      this.setState((s) => ({ leads: s.leads.map((l) => (l.id === lead.id ? { ...l, leadStatus: prev } : l)) }));
+    }
+  }
+
+  async logCall(lead) {
+    try {
+      await this._fb.updateDocFields("leads", lead.id, { contacted: true, lastCallAt: Date.now() });
+      await this._fb.logActivity({ type: "lead_call", leadId: lead.id, leadName: lead.name || "", summary: `โทรลูกค้า ${lead.name || lead.id}` });
+      this.setState((s) => ({ leads: s.leads.map((l) => (l.id === lead.id ? { ...l, contacted: true, lastCallAt: Date.now() } : l)) }));
+    } catch (e) { console.warn("logCall failed:", e); }
+  }
+
+  async saveNote(lead) {
+    if (this.state.savingId) return;
+    this.setState({ savingId: lead.id });
+    const noteText = (this.draft(lead.id, "noteDraft") || "").trim();
+    const fields = {
+      budget: this.draft(lead.id, "budget"),
+      want: this.draft(lead.id, "want"),
+      timeline: this.draft(lead.id, "timeline"),
+      finance: this.draft(lead.id, "finance"),
+    };
+    const history = [...(lead.callHistory || [])];
+    if (noteText) {
+      history.unshift({ text: noteText, at: Date.now(), by: (this._fb.currentAuthEmail && this._fb.currentAuthEmail()) || "" });
+    }
+    try {
+      await this._fb.updateDocFields("leads", lead.id, { ...fields, callHistory: history, contacted: true });
+      if (noteText) {
+        await this._fb.logActivity({ type: "lead_note", leadId: lead.id, leadName: lead.name || "", summary: `บันทึกการคุยกับ ${lead.name || lead.id}` });
+      }
+      this.setState((s) => ({
+        leads: s.leads.map((l) => (l.id === lead.id ? { ...l, ...fields, callHistory: history, contacted: true } : l)),
+        drafts: { ...s.drafts, [lead.id]: { ...(s.drafts[lead.id] || {}), noteDraft: "" } },
+        savingId: "",
+      }));
+    } catch (e) {
+      console.warn("saveNote failed:", e);
+      this.setState({ savingId: "" });
+    }
+  }
+
+  async bookViewing(lead) {
+    try {
+      await this._fb.updateDocFields("leads", lead.id, { leadStatus: "booked", viewingBookedAt: Date.now() });
+      await this._fb.logActivity({ type: "viewing_booked", leadId: lead.id, leadName: lead.name || "", propertyId: lead.propertyId || "", summary: `นัดพาชมกับ ${lead.name || lead.id}` });
+      this.setState((s) => ({ leads: s.leads.map((l) => (l.id === lead.id ? { ...l, leadStatus: "booked" } : l)) }));
+    } catch (e) { console.warn("bookViewing failed:", e); }
+  }
+
+  renderVals() {
+    const now = Date.now();
+    const pill = "padding:7px 14px; border-radius:100px; font-size:12.5px; cursor:pointer; white-space:nowrap;";
+    const pillOn = pill + "background:oklch(22% 0.02 60); color:white;";
+    const pillOff = pill + "background:white; color:oklch(35% 0.02 60); border:1px solid oklch(88% 0.01 70);";
+
+    const counts = { all: this.state.leads.length };
+    Object.keys(STATUS_MAP).forEach((k) => {
+      counts[k] = this.state.leads.filter((l) => (l.leadStatus || "new") === k).length;
+    });
+
+    const filterDefs = [
+      { key: "all", label: `ทั้งหมด (${counts.all})` },
+      { key: "new", label: `🔴 ใหม่ (${counts.new})` },
+      { key: "talking", label: `🟡 กำลังคุย (${counts.talking})` },
+      { key: "booked", label: `🟢 นัดแล้ว (${counts.booked})` },
+      { key: "hot", label: `⭐ พร้อมซื้อ (${counts.hot})` },
+      { key: "won", label: `🎉 ปิดได้ (${counts.won})` },
+      { key: "lost", label: `⚪ ไม่สนใจ (${counts.lost})` },
+    ];
+
+    const visible = this.state.filter === "all"
+      ? this.state.leads
+      : this.state.leads.filter((l) => (l.leadStatus || "new") === this.state.filter);
+
+    const overdue = this.state.leads.filter((l) => !l.contacted && (l.leadStatus || "new") === "new" && (now - (l.createdAt || now)) > 2 * 3600 * 1000);
+
+    const fmt = (ms) => {
+      if (!ms) return "-";
+      const d = new Date(ms);
+      return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+    };
+
+    const rows = visible.map((l) => {
+      const status = l.leadStatus || "new";
+      const st = STATUS_MAP[status] || STATUS_MAP.new;
+      const waitMs = now - (l.createdAt || now);
+      const waitHours = Math.floor(waitMs / 3600000);
+      const isOverdue = !l.contacted && status === "new" && waitMs > 2 * 3600 * 1000;
+      const history = (l.callHistory || []).slice(0, 6).map((h) => ({
+        when: fmt(h.at), who: h.by || "ทีมงาน", text: h.text || "",
+      }));
+      return {
+        id: l.id,
+        name: l.name || "ไม่ระบุชื่อ",
+        statusLabel: st.label,
+        statusStyle: `background:${st.bg}; color:${st.color}; font-size:11px; font-weight:700; padding:3px 10px; border-radius:100px; white-space:nowrap;`,
+        contactLabel: [l.phone, l.email, l.line].filter(Boolean).join(" · ") || "ไม่มีข้อมูลติดต่อ",
+        hasPhone: !!l.phone,
+        telHref: `tel:${l.phone || ""}`,
+        hasProperty: !!l.propertyId,
+        propertyLabel: l.propertyId || "",
+        dateLabel: fmt(l.createdAt),
+        hasMessage: !!(l.message && String(l.message).trim()),
+        message: l.message || "",
+        isOverdue,
+        waitLabel: waitHours >= 24 ? `${Math.floor(waitHours / 24)} วัน` : `${waitHours} ชม.`,
+        status,
+        noteOpen: this.state.openNoteId === l.id,
+        budget: this.draft(l.id, "budget"),
+        want: this.draft(l.id, "want"),
+        timeline: this.draft(l.id, "timeline"),
+        finance: this.draft(l.id, "finance"),
+        noteDraft: this.draft(l.id, "noteDraft"),
+        saveLabel: this.state.savingId === l.id ? "กำลังบันทึก…" : "💾 บันทึก",
+        hasHistory: history.length > 0,
+        history,
+        onCall: () => this.logCall(l),
+        onToggleNote: () => this.setState((s) => ({ openNoteId: s.openNoteId === l.id ? "" : l.id })),
+        onStatusChange: (e) => this.changeStatus(l, e.target.value),
+        onBudgetChange: (e) => this.setDraft(l.id, "budget", e.target.value),
+        onWantChange: (e) => this.setDraft(l.id, "want", e.target.value),
+        onTimelineChange: (e) => this.setDraft(l.id, "timeline", e.target.value),
+        onFinanceChange: (e) => this.setDraft(l.id, "finance", e.target.value),
+        onNoteChange: (e) => this.setDraft(l.id, "noteDraft", e.target.value),
+        onSaveNote: () => this.saveNote(l),
+        onBookViewing: () => this.bookViewing(l),
+      };
+    });
+
+    return {
+      showDevBar: this.state.showDevBar,
+      allowed: this.state.allowed,
+      notAllowed: this.state.loaded && !this.state.allowed,
+      filters: filterDefs.map((f) => ({
+        label: f.label,
+        style: this.state.filter === f.key ? pillOn : pillOff,
+        onClick: () => this.setState({ filter: f.key }),
+      })),
+      rows,
+      noRows: this.state.loaded && rows.length === 0,
+      emptyLabel: this.state.leads.length === 0 ? "ยังไม่มีลูกค้าติดต่อเข้ามา" : "ไม่มีลูกค้าในหมวดนี้",
+      hasOverdue: overdue.length > 0,
+      overdueCount: overdue.length,
+    };
+  }
+}
+</script>
+</body>
+</html>

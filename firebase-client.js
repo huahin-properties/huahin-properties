@@ -632,6 +632,61 @@ export async function markLeadContacted(id, contacted = true) {
   await updateDocFields("leads", id, { contacted });
 }
 
+// ── Activity log + monthly targets (Aug 2026, staff performance tracking) ──
+// Every meaningful team action writes one small activityLog doc automatically
+// (never typed by hand) so the Owner can see real work and real statistics
+// without asking, and the staff member can see their own progress. Fire and
+// forget: a failed log write must NEVER block the action the user just took.
+export async function logActivity(entry) {
+  try {
+    const a = authApp();
+    const user = a && a.currentUser;
+    const id = "act-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+    await setDoc("activityLog", id, {
+      ...(entry || {}),
+      actorUid: user ? user.uid : "",
+      actorEmail: user ? (user.email || "") : "",
+      at: Date.now(),
+    });
+  } catch (e) { console.warn("logActivity failed (non-blocking):", e); }
+}
+
+export async function fetchWhereGte(collectionName, field, value, limitN) {
+  let q = db().collection(collectionName).where(field, ">=", value).orderBy(field, "desc");
+  if (limitN) q = q.limit(limitN);
+  const snap = await q.get();
+  return snap.docs.map((d) => ({ ...d.data(), id: d.id }));
+}
+
+// Bounded read — only the requested window, capped, so cost stays flat even
+// as activityLog grows forever (it is append-only by design).
+export async function fetchActivityLog(sinceMs) {
+  try {
+    return await fetchWhereGte("activityLog", "at", sinceMs || 0, 500);
+  } catch (e) {
+    console.warn("fetchActivityLog failed:", e);
+    return [];
+  }
+}
+
+// Monthly targets are Owner-set (staff read-only, enforced in firestore.rules).
+// Doc id is the month key "YYYY-MM" so history is kept automatically.
+export function monthKey(d) {
+  const dt = d || new Date();
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
+}
+
+export async function fetchMonthlyTargets(key) {
+  try {
+    const doc = await db().collection("monthlyTargets").doc(key || monthKey()).get();
+    return doc.exists ? doc.data() : null;
+  } catch (e) { console.warn("fetchMonthlyTargets failed:", e); return null; }
+}
+
+export async function saveMonthlyTargets(key, targets) {
+  await setDoc("monthlyTargets", key || monthKey(), { ...(targets || {}), updatedAt: Date.now() });
+}
+
 // ── One-time migration: existing photos saved as huge base64 data: URLs
 // (from before Storage was enabled) get re-uploaded to Storage and their
 // Firestore doc updated to hold the short URL instead. Safe to run more
