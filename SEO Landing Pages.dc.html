@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <title>ศูนย์รวมหน้า SEO Landing Pages — huahin.properties</title>
+  <style>
+    body { margin: 0; background: oklch(98% 0.01 80); font-family: 'Work Sans', sans-serif; }
+    a { color: oklch(42% 0.12 25); }
+    a:hover { color: oklch(32% 0.13 25); }
+  </style>
+</helmet>
+
+<div style="min-height:100vh; padding:28px 20px 60px;">
+  <div style="max-width:1000px; margin:0 auto;">
+
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:8px 10px; font-family:monospace; line-height:1.6; margin-bottom:18px; border-radius:6px;">
+      <div><strong>SEO-1</strong> — 25 สิงหาคม 2569 (2026-08-25)</div>
+      <div>สร้างหน้าศูนย์รวมลิงก์ SEO Landing Pages ทั้ง 16 หน้า พร้อมคีย์เวิร์ดเป้าหมายและลิงก์เครื่องมือ Search Console</div>
+    </div>
+
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:8px;">
+      <h1 style="font-family:'Playfair Display',serif; font-size:clamp(24px,3.4vw,32px); margin:0; color:oklch(22% 0.03 50);">🔍 ศูนย์รวมหน้า SEO Landing Pages</h1>
+      <a href="Mission Control.dc.html" style="font-size:13px; text-decoration:none; white-space:nowrap;">← กลับ Mission Control</a>
+    </div>
+    <p style="margin:0 0 24px; font-size:14px; line-height:1.75; color:oklch(45% 0.02 55); max-width:70ch;">หน้านี้เก็บลิงก์หน้าดักคีย์เวิร์ดทั้งหมดที่สร้างไว้ เพื่อกลับมาตรวจสอบภายหลัง — คลิกชื่อหน้าเพื่อเปิดดูหน้าจริงบนเว็บ ทุกหน้าดึงรายการทรัพย์จากระบบอัตโนมัติ ไม่ต้องแก้ไขเนื้อหาเมื่อมีทรัพย์ใหม่</p>
+
+    <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:30px;">
+      <a href="https://search.google.com/search-console" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:7px; text-decoration:none; background:oklch(35% 0.09 25); color:white; padding:9px 18px; border-radius:100px; font-size:13px; font-weight:600;">Google Search Console</a>
+      <a href="https://huahin.properties/sitemap.xml" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:7px; text-decoration:none; background:white; border:1px solid oklch(85% 0.02 60); color:oklch(30% 0.02 60); padding:9px 18px; border-radius:100px; font-size:13px; font-weight:600;">ดู sitemap.xml</a>
+      <a href="https://www.google.com/business/" target="_blank" rel="noopener" style="display:inline-flex; align-items:center; gap:7px; text-decoration:none; background:oklch(93% 0.05 145); border:1px solid oklch(75% 0.1 145); color:oklch(30% 0.08 145); padding:9px 18px; border-radius:100px; font-size:13px; font-weight:600;">Google Business Profile</a>
+    </div>
+
+    <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+      <div style="margin-bottom:32px;">
+        <div style="display:flex; align-items:baseline; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+          <h2 style="font-family:'Playfair Display',serif; font-size:20px; margin:0; color:oklch(26% 0.04 45);">{{ g.title }}</h2>
+          <span style="font-size:12px; color:oklch(58% 0.02 60);">{{ g.note }}</span>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:12px;">
+          <sc-for list="{{ g.items }}" as="p" hint-placeholder-count="5">
+            <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:14px 16px;">
+              <a href="{{ p.url }}" target="_blank" rel="noopener" style="font-size:14.5px; font-weight:600; text-decoration:none; line-height:1.4;">{{ p.name }}</a>
+              <div style="font-size:11.5px; color:oklch(60% 0.02 60); margin-top:5px; font-family:monospace; word-break:break-all;">{{ p.file }}</div>
+              <div style="font-size:12.5px; color:oklch(48% 0.02 55); margin-top:8px; line-height:1.6;">🎯 {{ p.kw }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+
+    <div style="background:oklch(96% 0.015 78); border:1px solid oklch(89% 0.02 65); border-radius:12px; padding:22px 24px; margin-top:8px;">
+      <h2 style="font-family:'Playfair Display',serif; font-size:19px; margin:0 0 12px; color:oklch(28% 0.06 40);">📋 สิ่งที่ต้องทำเป็นระยะ</h2>
+      <div style="display:flex; flex-direction:column; gap:10px; font-size:13.5px; line-height:1.7; color:oklch(40% 0.02 55);">
+        <div><strong>ทุกครั้งที่เพิ่มหน้า SEO ใหม่:</strong> อัปโหลด sitemap.xml ใหม่ → Search Console → Sitemap → พิมพ์ <code style="background:white; padding:2px 6px; border-radius:4px;">sitemap.xml</code> → ส่ง</div>
+        <div><strong>ขอให้ Google เก็บข้อมูลเร็วขึ้น:</strong> Search Console → วาง URL ในช่องค้นหาด้านบน → Enter → กด "ขอการจัดทำดัชนี" (จำกัดราว 10 URL ต่อวัน)</div>
+        <div><strong>ทุก 2 สัปดาห์:</strong> Search Console → ผลการปฏิบัติงาน → ดูว่าคีย์เวิร์ดไหนเริ่มมีคนเห็น/คลิก แล้วลงแรงเพิ่มที่คำนั้น</div>
+        <div><strong>สิ่งที่ให้ผลมากที่สุดจากนี้:</strong> Google Business Profile + backlink จาก Facebook Page / LINE OA / ไดเรกทอรีอสังหาฯ โดยใช้ลิงก์หน้าเฉพาะ ไม่ใช่แค่หน้าแรก</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const B = "https://huahin.properties/";
+    const mk = (file, name, kw) => ({ file, name, kw, url: B + file });
+    return {
+      groups: [
+        { title: "🇹🇭 หน้าไทย — คีย์เวิร์ดหลัก", note: "5 หน้า · ครอบคลุมหมวดทรัพย์หลัก", items: [
+          mk("baan-hua-hin.html", "ขายบ้านหัวหิน", "ขายบ้านหัวหิน · บ้านหัวหิน · ซื้อบ้านหัวหิน"),
+          mk("pool-villa-hua-hin.html", "พูลวิลล่าหัวหิน", "พูลวิลล่าหัวหิน · บ้านพร้อมสระหัวหิน"),
+          mk("condo-hua-hin.html", "คอนโดหัวหิน", "คอนโดหัวหิน · คอนโดขายหัวหิน"),
+          mk("thidin-hua-hin.html", "ที่ดินหัวหิน", "ที่ดินหัวหิน · ขายที่ดินหัวหิน · ที่ดินปราณบุรี"),
+          mk("baan-chao-hua-hin.html", "บ้านเช่าหัวหิน", "บ้านเช่าหัวหิน · เช่าบ้านหัวหิน · เช่ารายเดือน"),
+        ] },
+        { title: "🇹🇭 หน้าไทย — โซนย่อย", note: "6 หน้า · คู่แข่งน้อย ติดอันดับง่ายกว่า", items: [
+          mk("pool-villa-khao-takiab.html", "พูลวิลล่าเขาตะเกียบ", "พูลวิลล่าเขาตะเกียบ · บ้านเขาตะเกียบ"),
+          mk("baan-thap-tai.html", "บ้านทับใต้ หัวหิน", "บ้านทับใต้ · ที่ดินทับใต้ · บ้านจัดสรรทับใต้"),
+          mk("baan-hin-lek-fai.html", "บ้านหินเหล็กไฟ", "บ้านหินเหล็กไฟ · บ้านวิวเขาหัวหิน"),
+          mk("condo-tid-talay-hua-hin.html", "คอนโดติดทะเลหัวหิน", "คอนโดติดทะเลหัวหิน · คอนโดวิวทะเล"),
+          mk("baan-pranburi.html", "ขายบ้านปราณบุรี", "ขายบ้านปราณบุรี · ที่ดินปราณบุรี"),
+          mk("baan-cha-am.html", "ขายบ้านชะอำ", "ขายบ้านชะอำ · คอนโดชะอำ · บ้านชะอำ"),
+        ] },
+        { title: "🇬🇧 หน้าอังกฤษ", note: "5 หน้า · จับคู่ hreflang กับหน้าไทย", items: [
+          mk("hua-hin-house-for-sale.html", "Hua Hin Houses for Sale", "hua hin house for sale · hua hin property"),
+          mk("hua-hin-pool-villa.html", "Hua Hin Pool Villas", "hua hin pool villa · pool villa for sale"),
+          mk("hua-hin-condo.html", "Hua Hin Condos", "hua hin condo · beachfront condo hua hin"),
+          mk("pranburi-property.html", "Pranburi Property", "pranburi property · pranburi villa"),
+          mk("cha-am-property.html", "Cha-Am Property", "cha am property · cha am condo"),
+        ] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
