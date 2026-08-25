@@ -26,7 +26,7 @@
   </style>
 </helmet>
 
-<div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">PD-6 (แก้หน้าขาวเมื่อเปิดทรัพย์ฝากขายที่รออนุมัติ) — เดิม: PD-5 (แสดง "หมวดที่เกี่ยวข้อง" ลิงก์กลับหน้ารวมคีย์เวิร์ด) — เดิม: PD-4 (แชทบอทไม่เด้งเปิดอัตโนมัติแล้ว — เริ่มพับเก็บเสมอ + กันหน้าขาวเมื่อไม่มี id ในพรีวิว)</div>
+<div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">PD-7 (แก้ error เปิดทรัพย์ฝากขาย — เติมโครงข้อมูลที่ฟอร์มลูกค้าไม่มี) — เดิม: PD-5 (แสดง "หมวดที่เกี่ยวข้อง" ลิงก์กลับหน้ารวมคีย์เวิร์ด) — เดิม: PD-4 (แชทบอทไม่เด้งเปิดอัตโนมัติแล้ว — เริ่มพับเก็บเสมอ + กันหน้าขาวเมื่อไม่มี id ในพรีวิว)</div>
 
 <sc-if value="{{ showGate }}">
   <div style="position:fixed; inset:0; background:oklch(96% 0.015 75); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
@@ -514,7 +514,16 @@ class Component extends DCLogic {
       try {
         const fb = await import("./firebase-client.js");
         const doc = await fb.fetchDocById("properties", this._id);
-        if (doc) effProps = [...effProps, { ...doc, id: this._id }];
+        if (doc) {
+          // An owner submission carries only the fields the public form asks
+          // for, so fill in the shapes the detail page expects (it was built
+          // for fully-prepared listings) rather than crashing on undefined.
+          const safe = { photos: [], features: [], area: doc.area || "hua-hin",
+            type: doc.type || "villa", status: doc.status || "sale", ...doc, id: this._id };
+          if (!Array.isArray(safe.photos)) safe.photos = [];
+          if (!Array.isArray(safe.features)) safe.features = [];
+          effProps = [...effProps, safe];
+        }
       } catch (e) { console.warn("direct property fetch failed:", e); }
     }
     this.setState({ effProps }, () => this._maybeFetchMedia());
