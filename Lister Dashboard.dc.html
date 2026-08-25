@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-41 (ซ่อนแบนเนอร์ทดลองใช้ฟรีสำหรับบัญชีทีมงาน) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-42 (เพิ่มปุ่มคู่มืองานของฉันสำหรับบัญชีทีมงาน) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -96,7 +96,12 @@
       </div>
 
       <sc-if value="{{ !isStaffOnlyAccount }}" hint-placeholder-val="{{ true }}"><div style="font-size:11px; color:oklch(55% 0.02 60); margin-bottom:8px; text-align:center;">💡 {{ dt.followOrderHint }}</div></sc-if>
-      <sc-if value="{{ isStaffOnlyAccount }}" hint-placeholder-val="{{ false }}"><div style="font-size:11.5px; color:oklch(45% 0.02 60); margin-bottom:10px; text-align:center;">🛠 บัญชีทีมงาน — บันทึกทรัพย์ที่ได้จากลูกค้าหรือที่คุณสำรวจเอง แล้วส่งให้ Owner อนุมัติ</div></sc-if>
+      <sc-if value="{{ isStaffOnlyAccount }}" hint-placeholder-val="{{ false }}">
+        <div style="background:oklch(97% 0.015 80); border:1px solid oklch(88% 0.02 75); border-radius:8px; padding:12px 16px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+          <div style="font-size:12.5px; color:oklch(40% 0.02 60); line-height:1.6;">🛠 บัญชีทีมงาน — บันทึกทรัพย์ที่ได้จากลูกค้าหรือที่คุณสำรวจเอง แล้วส่งให้ Owner อนุมัติ</div>
+          <a href="Staff Handbook.dc.html" style="background:oklch(40% 0.13 25); color:white; padding:8px 16px; border-radius:6px; font-size:12.5px; font-weight:600; text-decoration:none; white-space:nowrap;">📋 คู่มืองานของฉัน</a>
+        </div>
+      </sc-if>
       <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:2px; margin-bottom:8px; border-bottom:2px solid oklch(90% 0.01 70);">
         <sc-if value="{{ !isStaffOnlyAccount }}" hint-placeholder-val="{{ true }}"><div onClick="{{ onSetSettingsTab }}" style="text-align:center; padding:10px 4px; font-size:clamp(11px,3.2vw,13.5px); font-weight:600; cursor:pointer; color:{{ settingsTabColor }}; border-bottom:2px solid {{ settingsTabColor }}; margin-bottom:-2px; white-space:nowrap;">① ⚙️ {{ dt.tabSettings }}</div></sc-if>
         <div onClick="{{ onSetListTab }}" style="text-align:center; padding:10px 4px; font-size:clamp(11px,3.2vw,13.5px); font-weight:600; cursor:pointer; color:{{ listTabColor }}; border-bottom:2px solid {{ listTabColor }}; margin-bottom:-2px; white-space:nowrap;">② 📋 {{ dt.tabList }}</div>

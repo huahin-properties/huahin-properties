@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { margin:0; background:oklch(96% 0.012 85); font-family:'Sarabun',sans-serif; }
+    a { color: oklch(40% 0.13 25); }
+    a:hover { color: oklch(32% 0.13 25); }
+  </style>
+</helmet>
+
+<div style="min-height:100vh;">
+  <sc-if value="{{ showDevBar }}">
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">SH-1 (คู่มือหน้าที่ผู้ช่วยประสานงาน — เช็คลิสต์รายวัน + ราคาบริการ + ขั้นตอนงาน)</div>
+  </sc-if>
+
+  <div style="background:oklch(22% 0.02 60); padding:20px clamp(18px,4vw,48px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <img src="logo.png" alt="huahin.properties" style="height:38px; width:38px; border-radius:50%; object-fit:contain;" />
+      <div>
+        <div style="font-family:'Playfair Display',serif; font-size:clamp(16px,4vw,20px); color:oklch(97% 0.01 80);">huahin . properties</div>
+        <div style="font-size:11.5px; color:oklch(75% 0.02 70);">คู่มือหน้าที่ · ผู้ช่วยประสานงาน</div>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <a href="Lister Dashboard.dc.html" style="color:oklch(85% 0.02 70); font-size:13px; text-decoration:none; white-space:nowrap;">← หน้าทำงาน</a>
+    </div>
+  </div>
+
+  <div style="max-width:900px; margin:0 auto; padding:clamp(18px,4vw,36px);">
+
+    <div style="font-family:'Playfair Display',serif; font-size:clamp(22px,5vw,28px); color:oklch(20% 0.02 60); margin-bottom:4px;">งานของคุณวันนี้</div>
+    <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:6px;">{{ todayLabel }}</div>
+    <div style="font-size:13px; color:oklch(45% 0.02 60); margin-bottom:20px;">คุณคือผู้ประสานงานหลักของ huahin.properties — ดูแลลูกค้า รับทรัพย์เข้าระบบ นัดพาชม และประสานทุกฝ่าย · เจ้าของระบบมีหน้าที่อนุมัติและดูภาพรวม</div>
+
+    <div style="background:white; border-radius:10px; padding:18px 20px; margin-bottom:20px; border:1px solid oklch(90% 0.01 70);">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+        <div style="font-size:14px; font-weight:700; color:oklch(30% 0.02 60);">ความคืบหน้าวันนี้ {{ donePct }}%</div>
+        <div style="font-size:12px; color:oklch(50% 0.02 60);">เสร็จ {{ doneCount }} / {{ totalCount }} งาน</div>
+      </div>
+      <div style="background:oklch(93% 0.005 70); border-radius:100px; height:8px; overflow:hidden;">
+        <div style="{{ progressStyle }}"></div>
+      </div>
+      <div onClick="{{ onResetDay }}" style="font-size:11.5px; color:oklch(55% 0.02 60); margin-top:10px; cursor:pointer; display:inline-block;">↺ เริ่มวันใหม่ (ล้างเครื่องหมายถูกทั้งหมด)</div>
+    </div>
+
+    <sc-for list="{{ blocks }}" as="blk" hint-placeholder-count="3">
+      <div style="background:white; border-radius:10px; padding:18px 20px; margin-bottom:16px; border:1px solid oklch(90% 0.01 70);">
+        <div style="font-size:15px; font-weight:700; color:oklch(30% 0.02 60); margin-bottom:2px;">{{ blk.title }}</div>
+        <div style="font-size:12px; color:oklch(55% 0.02 60); margin-bottom:14px;">{{ blk.time }}</div>
+        <div style="display:flex; flex-direction:column; gap:12px;">
+          <sc-for list="{{ blk.tasks }}" as="tk" hint-placeholder-count="3">
+            <div style="display:flex; gap:10px; align-items:flex-start;">
+              <div onClick="{{ tk.onToggle }}" style="{{ tk.boxStyle }}">{{ tk.mark }}</div>
+              <div style="flex:1; min-width:0;">
+                <div style="{{ tk.labelStyle }}">{{ tk.label }}</div>
+                <div style="font-size:11.5px; color:oklch(55% 0.02 60); line-height:1.6;">{{ tk.detail }}</div>
+                <sc-if value="{{ tk.hasLink }}">
+                  <a href="{{ tk.href }}" style="font-size:11.5px; font-weight:600; text-decoration:none;">→ {{ tk.linkLabel }}</a>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+
+    <div style="font-family:'Playfair Display',serif; font-size:clamp(19px,4.5vw,24px); color:oklch(20% 0.02 60); margin:30px 0 12px;">ราคาบริการที่คุณต้องรู้</div>
+    <div style="font-size:12.5px; color:oklch(50% 0.02 60); margin-bottom:14px;">ใช้ตอบลูกค้าได้ทันทีเมื่อถูกถาม — ถ้าลูกค้าขอต่อรองเกินนี้ ต้องถามเจ้าของระบบก่อน</div>
+
+    <div style="background:white; border-radius:10px; padding:18px 20px; margin-bottom:16px; border:1px solid oklch(90% 0.01 70);">
+      <div style="font-size:14px; font-weight:700; color:oklch(30% 0.02 60); margin-bottom:12px;">📸 บริการถ่ายภาพและเก็บข้อมูลทรัพย์</div>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <sc-for list="{{ mediaPackages }}" as="pk" hint-placeholder-count="3">
+          <div style="border-left:3px solid {{ pk.accent }}; padding-left:12px;">
+            <div style="display:flex; gap:10px; align-items:baseline; flex-wrap:wrap;">
+              <div style="font-size:13.5px; font-weight:700; color:oklch(30% 0.02 60);">{{ pk.name }}</div>
+              <div style="font-size:14px; font-weight:700; color:oklch(40% 0.13 25);">{{ pk.price }}</div>
+            </div>
+            <div style="font-size:12px; color:oklch(45% 0.02 60); line-height:1.7; margin-top:3px;">{{ pk.includes }}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="background:oklch(96% 0.04 145); border:1px solid oklch(85% 0.08 145); border-radius:8px; padding:12px 14px; margin-top:14px;">
+        <div style="font-size:13px; font-weight:700; color:oklch(35% 0.12 145); margin-bottom:4px;">🎁 ข้อเสนอที่ให้ผลดีที่สุด — ถ่ายฟรีแลกสัญญาเอกซ์คลูซีฟ</div>
+        <div style="font-size:12px; color:oklch(38% 0.08 145); line-height:1.7;">ถ้าเจ้าของยอมเซ็นให้เราขายคนเดียว 3-6 เดือน → ถ่ายภาพมืออาชีพให้ฟรี (มูลค่า 2,500) · ใช้ปิดดีลได้ดีมากกับเจ้าของที่ลังเล · ต้องแจ้งเจ้าของระบบก่อนเสนอทุกครั้ง</div>
+      </div>
+    </div>
+
+    <div style="font-family:'Playfair Display',serif; font-size:clamp(19px,4.5vw,24px); color:oklch(20% 0.02 60); margin:30px 0 12px;">ขั้นตอนงานแต่ละแบบ</div>
+
+    <sc-for list="{{ procedures }}" as="pr" hint-placeholder-count="4">
+      <div style="background:white; border-radius:10px; padding:18px 20px; margin-bottom:14px; border:1px solid oklch(90% 0.01 70);">
+        <div style="font-size:14px; font-weight:700; color:oklch(30% 0.02 60); margin-bottom:10px;">{{ pr.title }}</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <sc-for list="{{ pr.steps }}" as="st" hint-placeholder-count="4">
+            <div style="display:flex; gap:9px; align-items:flex-start;">
+              <div style="background:oklch(93% 0.02 70); color:oklch(40% 0.13 25); width:20px; height:20px; border-radius:50%; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;">{{ st.n }}</div>
+              <div style="font-size:12.5px; color:oklch(38% 0.02 60); line-height:1.7;">{{ st.text }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ pr.hasWarn }}">
+          <div style="background:oklch(96% 0.04 60); border-radius:6px; padding:10px 12px; margin-top:10px; font-size:11.5px; color:oklch(40% 0.1 50); line-height:1.6;">⚠️ {{ pr.warn }}</div>
+        </sc-if>
+      </div>
+    </sc-for>
+
+    <div style="font-family:'Playfair Display',serif; font-size:clamp(19px,4.5vw,24px); color:oklch(20% 0.02 60); margin:30px 0 12px;">เป้าหมายผลงานของคุณ</div>
+    <div style="font-size:12.5px; color:oklch(50% 0.02 60); margin-bottom:14px;">ระบบเก็บตัวเลขเหล่านี้อัตโนมัติ — เจ้าของระบบดูได้ตลอด ไม่ต้องรายงานเอง</div>
+    <div style="background:white; border-radius:10px; padding:6px 20px; margin-bottom:24px; border:1px solid oklch(90% 0.01 70);">
+      <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="5">
+        <div style="display:flex; justify-content:space-between; gap:12px; padding:13px 0; border-bottom:1px solid oklch(95% 0.005 70); flex-wrap:wrap;">
+          <div style="font-size:13px; color:oklch(35% 0.02 60);">{{ k.name }}</div>
+          <div style="font-size:13px; font-weight:700; color:oklch(40% 0.13 25); white-space:nowrap;">{{ k.target }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="background:oklch(22% 0.02 60); border-radius:10px; padding:20px 22px; margin-bottom:30px;">
+      <div style="font-size:14px; font-weight:700; color:oklch(97% 0.01 80); margin-bottom:8px;">สิ่งที่คุณตัดสินใจเองได้ / ต้องถามก่อน</div>
+      <div style="font-size:12.5px; color:oklch(85% 0.02 70); line-height:1.9;">
+        <strong>ตัดสินใจเองได้:</strong> โทรคุยลูกค้า · นัดวันพาชม · มอบหมาย Agent พาชม · ขอข้อมูล/รูปเพิ่มจากเจ้าของ · บันทึกข้อมูลทุกอย่าง · สร้างใบงานถ่ายภาพ<br />
+        <strong>ต้องถามเจ้าของระบบก่อน:</strong> เผยแพร่ประกาศขึ้นเว็บ · ลดราคาค่าบริการ · เสนอถ่ายฟรี · รับทรัพย์ที่ราคาสูงผิดปกติ · เรื่องเงิน/คอมมิชชั่นทุกกรณี
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { showDevBar: false, checked: {}, dayKey: "" };
+
+  componentDidMount() {
+    const isPreviewEnv = !/huahin\.properties$/.test(window.location.hostname);
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("dev") === "1") { try { localStorage.setItem("hhDevBar", "1"); } catch (e) {} }
+    let dev = false;
+    try { dev = localStorage.getItem("hhDevBar") === "1"; } catch (e) {}
+    const dayKey = new Date().toDateString();
+    let checked = {};
+    try {
+      const raw = JSON.parse(localStorage.getItem("hhStaffChecklist") || "null");
+      if (raw && raw.dayKey === dayKey) checked = raw.checked || {};
+    } catch (e) {}
+    this.setState({ showDevBar: isPreviewEnv || dev, checked, dayKey });
+  }
+
+  toggle(id) {
+    this.setState((s) => {
+      const next = { ...s.checked, [id]: !s.checked[id] };
+      try { localStorage.setItem("hhStaffChecklist", JSON.stringify({ dayKey: s.dayKey, checked: next })); } catch (e) {}
+      return { checked: next };
+    });
+  }
+
+  resetDay() {
+    try { localStorage.setItem("hhStaffChecklist", JSON.stringify({ dayKey: this.state.dayKey, checked: {} })); } catch (e) {}
+    this.setState({ checked: {} });
+  }
+
+  renderVals() {
+    const rawBlocks = [
+      {
+        title: "☀️ ช่วงเช้า — ตอบให้เร็วที่สุด",
+        time: "09:00 – 10:00 · ประมาณ 1 ชั่วโมง",
+        tasks: [
+          { id: "m1", label: "เช็คลูกค้าใหม่ที่ติดต่อเข้ามาเมื่อคืน แล้วโทรกลับทุกราย", detail: "ธุรกิจอสังหาฯ ใครตอบเร็วชนะ — ลูกค้าที่ทักมาตอนกลางคืนมักติดต่อหลายที่พร้อมกัน ตอบก่อนได้เปรียบมาก", href: "Lister Dashboard.dc.html", linkLabel: "ไปดูลูกค้าที่ติดต่อเข้ามา" },
+          { id: "m2", label: "เช็คเรื่องฝากขายใหม่ แล้วโทรยืนยันข้อมูลกับเจ้าของ", detail: "ถามข้อมูลที่เขากรอกไม่ครบ · ขอรูปเพิ่มถ้ารูปน้อยกว่า 5 · เช็คว่าราคาที่แจ้งต่อรองได้แค่ไหน" },
+          { id: "m3", label: "ยืนยันนัดพาชมของวันนี้ทั้งกับลูกค้าและเจ้าของบ้าน", detail: "โทรยืนยันทุกนัด อย่าใช้แต่ข้อความ — ลูกค้าลืมนัดบ่อย และเจ้าของบ้านต้องเตรียมบ้านให้พร้อม" },
+        ],
+      },
+      {
+        title: "🏡 ช่วงกลางวัน — งานหลักที่สร้างรายได้",
+        time: "10:00 – 16:00 · ประมาณ 4-5 ชั่วโมง",
+        tasks: [
+          { id: "d1", label: "คัดกรองลูกค้าที่คุยไว้ — บันทึกงบ ความต้องการ และความจริงจัง", detail: "ต้องรู้ 4 อย่างทุกราย: งบเท่าไหร่ · ต้องการแบบไหน/โซนไหน · จะซื้อเมื่อไหร่ · เงินสดหรือกู้ธนาคาร" },
+          { id: "d2", label: "จับคู่ทรัพย์ที่ตรงเงื่อนไข แล้วส่งให้ลูกค้าดู", detail: "ส่ง 2-4 หลังที่ตรงจริง ดีกว่าส่ง 20 หลังให้เลือกเอง — ลูกค้าจะรู้สึกว่าเราเข้าใจเขา" },
+          { id: "d3", label: "นัดวันพาชม แล้วมอบหมาย Agent ที่จะพาไป", detail: "นัดให้เร็วที่สุดหลังลูกค้าสนใจ ยิ่งช้ายิ่งเปลี่ยนใจ · เลือก Agent ที่รู้จักโซนนั้นดี" },
+          { id: "d4", label: "กรอกทรัพย์ใหม่เข้าระบบ แล้วส่งให้เจ้าของระบบอนุมัติ", detail: "กรอกข้อมูลให้ครบ → กดปุ่มสร้างชื่อประกาศ+ข้อความอัตโนมัติโดย AI → ตรวจแก้ให้ถูกต้อง → กดส่งให้ Owner อนุมัติ", href: "Lister Dashboard.dc.html", linkLabel: "ไปเพิ่มทรัพย์ใหม่" },
+          { id: "d5", label: "สร้างใบงานถ่ายภาพ ถ้าทรัพย์นั้นรูปไม่พอหรือรูปคุณภาพต่ำ", detail: "ทรัพย์ราคาเกิน 5 ล้านควรมีรูปมืออาชีพเสมอ — เสนอแพ็กเกจถ่ายภาพหรือข้อเสนอถ่ายฟรีแลกสัญญาเอกซ์คลูซีฟ" },
+        ],
+      },
+      {
+        title: "🌙 ช่วงเย็น — ปิดงานและติดตาม",
+        time: "16:00 – 17:30 · ประมาณ 1 ชั่วโมงครึ่ง",
+        tasks: [
+          { id: "e1", label: "ติดตามผลพาชมที่เกิดขึ้นวันนี้ แล้วบันทึกไว้", detail: "ถามทั้ง Agent และลูกค้า: ชอบ/ไม่ชอบอะไร · ราคาโอเคไหม · จะตัดสินใจเมื่อไหร่ · ขั้นตอนถัดไปคืออะไร" },
+          { id: "e2", label: "โทรอัปเดตเจ้าของทรัพย์ที่มีคนสนใจวันนี้", detail: "เจ้าของบ้านกังวลว่าเราไม่ทำงาน — โทรอัปเดตแม้ยังไม่มีข่าวดี จะรักษาความสัมพันธ์ไว้ได้" },
+          { id: "e3", label: "เช็ครายการค้าง — ลูกค้าที่ยังไม่ได้โทร และทรัพย์ที่ข้อมูลไม่ครบ", detail: "ไม่ควรมีลูกค้าค้างเกิน 1 วัน · ไม่ควรมีทรัพย์ที่รูปน้อยกว่า 5 รูปหรือไม่มีพิกัดค้างในระบบ" },
+          { id: "e4", label: "เช็คเจ้าของทรัพย์ที่ไม่ได้ติดต่อเกิน 30 วัน แล้วโทรเช็ค", detail: "ถามว่ายังขายอยู่ไหม · ราคาเปลี่ยนไหม · ขายไปแล้วหรือยัง — ทรัพย์ที่ขายไปแล้วแต่ยังโชว์อยู่ทำให้เสียความน่าเชื่อถือ" },
+        ],
+      },
+    ];
+
+    const blocks = rawBlocks.map((b) => ({
+      title: b.title,
+      time: b.time,
+      tasks: b.tasks.map((t) => {
+        const done = !!this.state.checked[t.id];
+        return {
+          label: t.label,
+          detail: t.detail,
+          mark: done ? "✓" : "",
+          hasLink: !!t.href,
+          href: t.href || "#",
+          linkLabel: t.linkLabel || "",
+          boxStyle: done
+            ? "width:22px; height:22px; border-radius:5px; background:oklch(45% 0.14 145); color:white; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; cursor:pointer; flex-shrink:0; margin-top:1px;"
+            : "width:22px; height:22px; border-radius:5px; background:white; border:2px solid oklch(82% 0.02 70); cursor:pointer; flex-shrink:0; margin-top:1px;",
+          labelStyle: done
+            ? "font-size:13.5px; font-weight:600; color:oklch(62% 0.02 60); text-decoration:line-through; margin-bottom:3px; line-height:1.5;"
+            : "font-size:13.5px; font-weight:600; color:oklch(28% 0.02 60); margin-bottom:3px; line-height:1.5;",
+          onToggle: () => this.toggle(t.id),
+        };
+      }),
+    }));
+
+    const allIds = rawBlocks.reduce((acc, b) => acc.concat(b.tasks.map((t) => t.id)), []);
+    const doneCount = allIds.filter((id) => this.state.checked[id]).length;
+    const totalCount = allIds.length;
+    const donePct = totalCount ? Math.round((doneCount / totalCount) * 100) : 0;
+
+    const days = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+    const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+    const now = new Date();
+
+    return {
+      showDevBar: this.state.showDevBar,
+      todayLabel: `วัน${days[now.getDay()]}ที่ ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear() + 543}`,
+      blocks, doneCount, totalCount, donePct,
+      progressStyle: `background:oklch(45% 0.14 145); height:100%; width:${donePct}%; border-radius:100px; transition:width .25s;`,
+      onResetDay: () => this.resetDay(),
+      mediaPackages: [
+        { name: "พื้นฐาน", price: "ฟรี", accent: "oklch(85% 0.02 70)", includes: "เจ้าของส่งรูปมาเอง ทีมงานไม่ต้องเดินทางไป — เหมาะกับทรัพย์ราคาต่ำกว่า 3 ล้าน หรือเจ้าของที่มีรูปสวยอยู่แล้ว" },
+        { name: "มาตรฐาน", price: "1,500 – 2,500 บาท", accent: "oklch(55% 0.1 60)", includes: "ทีมไปถ่ายรูปมืออาชีพ 20-30 รูป · วัดขนาดจริง · เช็คสภาพบ้าน · ถ่ายเอกสารสิทธิ์ · ปักพิกัดจริงหน้างาน" },
+        { name: "พรีเมียม", price: "3,500 – 5,000 บาท", accent: "oklch(45% 0.15 40)", includes: "ทุกอย่างในแพ็กเกจมาตรฐาน + ภาพถ่ายทางอากาศด้วยโดรน + วิดีโอทัวร์ 1-2 นาที — เหมาะกับพูลวิลล่าและทรัพย์เกิน 8 ล้าน" },
+      ],
+      procedures: [
+        {
+          title: "① เมื่อมีลูกค้าติดต่อเข้ามาใหม่",
+          steps: [
+            { n: "1", text: "โทรกลับภายใน 2 ชั่วโมง (ถ้าเข้ามากลางคืน โทรเช้าวันถัดไปทันที)" },
+            { n: "2", text: "ถามให้ครบ 4 ข้อ: งบประมาณ · ต้องการทรัพย์แบบไหน/โซนไหน · จะซื้อ-เช่าเมื่อไหร่ · จ่ายเงินสดหรือกู้ธนาคาร" },
+            { n: "3", text: "บันทึกทุกอย่างที่คุยลงระบบทันทีหลังวางสาย อย่าจดใน LINE หรือกระดาษ" },
+            { n: "4", text: "จับคู่ทรัพย์ที่ตรงจริง 2-4 หลัง ส่งให้ดู" },
+            { n: "5", text: "ถ้าสนใจ → นัดพาชมทันที · ถ้ายังไม่แน่ใจ → ตั้งเตือนโทรตามใน 3-7 วัน" },
+          ],
+          hasWarn: true,
+          warn: "ห้ามให้เบอร์เจ้าของทรัพย์หรือ Agent กับลูกค้าโดยตรง — ลูกค้าทุกรายต้องติดต่อผ่านเราเท่านั้น",
+        },
+        {
+          title: "② เมื่อมีเจ้าของทรัพย์ฝากขาย/ฝากเช่า",
+          steps: [
+            { n: "1", text: "โทรยืนยันตัวตนและข้อมูลที่เขากรอกมา ภายในวันเดียวกัน" },
+            { n: "2", text: "เช็คว่ารูปครบ 5 รูปขึ้นไปหรือไม่ · มีพิกัดหรือยัง · ราคาต่อรองได้แค่ไหน · ใครเป็นเจ้าของกรรมสิทธิ์จริง" },
+            { n: "3", text: "ถ้ารูปไม่พอ/คุณภาพต่ำ → เสนอแพ็กเกจถ่ายภาพ หรือข้อเสนอถ่ายฟรีแลกสัญญาเอกซ์คลูซีฟ" },
+            { n: "4", text: "กดปุ่มดึงข้อมูลมาโพสต์ → กรอกส่วนที่ขาด → กดสร้างชื่อประกาศ+ข้อความอัตโนมัติโดย AI" },
+            { n: "5", text: "ตรวจทานให้ถูกต้อง (ราคา ห้องนอน ทำเล) แล้วกดส่งให้เจ้าของระบบอนุมัติ" },
+          ],
+          hasWarn: true,
+          warn: "อย่าลืมกรอกช่องบันทึกภายใน: ชื่อ-เบอร์เจ้าของจริง · ราคาต่ำสุดที่รับได้ · ค่าคอมมิชชั่นที่ตกลง — ข้อมูลนี้ลูกค้าไม่เห็น",
+        },
+        {
+          title: "③ เมื่อจะนัดพาชมทรัพย์",
+          steps: [
+            { n: "1", text: "เช็คว่าลูกค้าคนนี้ผ่านการคัดกรองแล้ว (รู้งบและความต้องการชัดเจน) ก่อนนัด" },
+            { n: "2", text: "โทรถามเจ้าของบ้านว่าวันไหนสะดวก แล้วเสนอลูกค้า 2-3 ตัวเลือก" },
+            { n: "3", text: "มอบหมาย Agent ที่รู้จักโซนนั้น — ส่งข้อมูลลูกค้าและทรัพย์ให้เขา" },
+            { n: "4", text: "โทรยืนยันอีกครั้ง 1 วันก่อนนัด ทั้งลูกค้าและเจ้าของบ้าน" },
+            { n: "5", text: "หลังพาชมเสร็จ ถามผลจากทั้ง Agent และลูกค้าในวันเดียวกัน แล้วบันทึกลงระบบ" },
+          ],
+          hasWarn: false,
+          warn: "",
+        },
+        {
+          title: "④ เมื่อจะสร้างใบงานให้ทีมถ่ายภาพ",
+          steps: [
+            { n: "1", text: "ตกลงราคากับเจ้าของทรัพย์ให้ชัดก่อน (แพ็กเกจไหน จ่ายเมื่อไหร่)" },
+            { n: "2", text: "สร้างใบงาน: ที่อยู่ · พิกัด · เบอร์เจ้าของ · วันเวลานัด · ต้องถ่ายอะไร" },
+            { n: "3", text: "มอบหมายทีมถ่าย แล้วส่งรายละเอียดให้เขา" },
+            { n: "4", text: "เมื่อทีมส่งงาน ตรวจว่ารูปครบและคุณภาพใช้ได้ ก่อนส่งให้เจ้าของระบบอนุมัติจ่ายเงิน" },
+            { n: "5", text: "นำรูปเข้าประกาศทรัพย์นั้น แล้วอัปเดตให้เจ้าของทรัพย์รู้" },
+          ],
+          hasWarn: true,
+          warn: "ถ้าจะเสนอถ่ายฟรีแลกสัญญาเอกซ์คลูซีฟ ต้องขออนุมัติเจ้าของระบบก่อนทุกครั้ง",
+        },
+      ],
+      kpis: [
+        { name: "เวลาตอบลูกค้ารายใหม่ครั้งแรก", target: "ภายใน 2 ชั่วโมง" },
+        { name: "ลูกค้าที่โทรกลับครบทุกราย", target: "100%" },
+        { name: "ทรัพย์ใหม่เข้าระบบ", target: "8 – 12 หลัง/เดือน" },
+        { name: "นัดพาชม", target: "8 – 15 ครั้ง/เดือน" },
+        { name: "ข้อมูลทรัพย์ครบถ้วน (รูป ≥5 · พิกัด · ราคา · ข้อมูลเจ้าของ)", target: "100%" },
+        { name: "เจ้าของทรัพย์ที่ติดต่ออัปเดตภายใน 30 วัน", target: "100%" },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
