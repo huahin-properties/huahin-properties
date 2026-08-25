@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-26 (เพิ่มช่องติ๊ก "แท็ก SEO" 15 หน้ารวมคีย์เวิร์ด — ทรัพย์จะไปแสดงในหน้านั้นและมีลิงก์กลับ) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-27 (ย้ายช่อง "แท็ก SEO" ลงมาอยู่โซนเดียวกับคุณสมบัติ เลือกได้ในคราวเดียว) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -858,20 +858,6 @@
                 </div>
               </sc-if>
             </div>
-            <div style="position:relative;">
-              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">🔍 แท็ก SEO (หน้ารวมคีย์เวิร์ด)</div>
-              <div onClick="{{ onToggleSeoTagMenu }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ seoTagSummary }}</div>
-              <sc-if value="{{ seoTagMenuOpen }}" hint-placeholder-val="{{ false }}">
-                <div style="position:absolute; top:100%; left:0; right:0; z-index:6; background:white; border:1px solid oklch(80% 0.01 70); border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,0.12); padding:10px 12px; margin-top:4px; max-height:280px; overflow-y:auto;">
-                  <div style="font-size:11px; color:oklch(58% 0.02 60); line-height:1.5; margin-bottom:8px;">เลือกเฉพาะที่ตรงกับทรัพย์จริง 3–5 อัน — ทรัพย์จะไปแสดงในหน้ารวมคีย์เวิร์ดนั้น และหน้าทรัพย์จะมีลิงก์กลับ ช่วยอันดับ Google</div>
-                  <sc-for list="{{ seoTagOptions }}" as="st" hint-placeholder-count="15">
-                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(30% 0.02 60); cursor:pointer; padding:5px 0;">
-                      <input type="checkbox" checked="{{ st.checked }}" onChange="{{ st.onToggle }}" />{{ st.label }}
-                    </label>
-                  </sc-for>
-                </div>
-              </sc-if>
-            </div>
             <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ช่องทางการซื้อ/ผ่อน</div>
               <div onClick="{{ onTogglePurchaseMenu }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ purchaseSummary }}</div>
               <sc-if value="{{ purchaseMenuOpen }}" hint-placeholder-val="{{ false }}">
@@ -906,6 +892,23 @@
                   <span style="font-size:12px; color:oklch(50% 0.02 60);">งาน</span>
                   <input type="number" min="0" max="99" value="{{ f_landWah }}" onChange="{{ onFLandWah }}" placeholder="ตร.ว." style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 8px; font-size:14px; font-family:inherit;" />
                   <span style="font-size:12px; color:oklch(50% 0.02 60); white-space:nowrap;">ตร.ว.</span>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+
+          <div style="margin-bottom:20px; position:relative;">
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">🔍 แท็ก SEO — หน้ารวมคีย์เวิร์ดที่ทรัพย์นี้จะไปแสดง (เลือกได้หลายข้อ)</div>
+            <div onClick="{{ onToggleSeoTagMenu }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white; cursor:pointer;">{{ seoTagSummary }}</div>
+            <sc-if value="{{ seoTagMenuOpen }}" hint-placeholder-val="{{ false }}">
+              <div style="position:absolute; top:100%; left:0; right:0; z-index:6; background:white; border:1px solid oklch(80% 0.01 70); border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,0.12); padding:12px 14px; margin-top:4px; max-height:320px; overflow-y:auto;">
+                <div style="font-size:11px; color:oklch(58% 0.02 60); line-height:1.5; margin-bottom:10px;">เลือกเฉพาะที่ตรงกับทรัพย์จริง 3–5 อัน — ทรัพย์จะไปแสดงในหน้ารวมคีย์เวิร์ดนั้น และหน้าทรัพย์จะมีลิงก์กลับ ช่วยอันดับ Google</div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:4px 12px;">
+                  <sc-for list="{{ seoTagOptions }}" as="st" hint-placeholder-count="15">
+                    <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(30% 0.02 60); cursor:pointer; padding:4px 0;">
+                      <input type="checkbox" checked="{{ st.checked }}" onChange="{{ st.onToggle }}" />{{ st.label }}
+                    </label>
+                  </sc-for>
                 </div>
               </div>
             </sc-if>
