@@ -97,6 +97,17 @@
             <div style="font-size:14px; font-weight:700; color:oklch(40% 0.13 25);">{{ r.code }} <span style="font-weight:400; color:oklch(50% 0.02 60); font-size:12.5px;">— {{ r.zone }}</span></div>
             <div style="font-size:12.5px; color:oklch(50% 0.02 60);">{{ r.priceLabel }} · ผู้ลงประกาศ: {{ r.listerEmail }}</div>
             <div style="font-size:11.5px; color:oklch(60% 0.02 60); margin-top:2px;">ส่งเมื่อ {{ r.dateLabel }}</div>
+            <sc-if value="{{ r.isOwnerSub }}" hint-placeholder-val="{{ false }}">
+              <div style="background:oklch(97% 0.01 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:12px 14px; margin-top:10px; font-size:12.5px; color:oklch(35% 0.02 60); line-height:1.7;">
+                <div style="font-weight:700; color:oklch(40% 0.13 25); margin-bottom:6px;">🏠 ทรัพย์ฝากขายจากลูกค้า</div>
+                <div>ผู้ติดต่อ: {{ r.contactName }} · {{ r.contactPhone }} {{ r.contactEmailLabel }}</div>
+                <div>ธุรกรรม: {{ r.txnLabel }} · ประเภท: {{ r.typeLabel }} · สภาพ: {{ r.conditionLabel }}</div>
+                <div>พิกัด: {{ r.coordsLabel }}</div>
+                <div>ข้อมูลติดต่อเจ้าของ (ถ้าไม่ใช่คนเดียวกัน): {{ r.ownerContactLabel }}</div>
+                <div style="margin-top:6px; white-space:pre-wrap;">{{ r.detailsLabel }}</div>
+                <div style="margin-top:8px;">รูปที่ส่งมา: {{ r.photoCountLabel }}</div>
+              </div>
+            </sc-if>
           </div>
           <div style="font-size:12px; font-weight:600; padding:5px 12px; border-radius:100px; background:{{ r.statusBg }}; color:{{ r.statusColor }}; white-space:nowrap;">{{ r.statusLabel }}</div>
           <div style="display:flex; gap:8px;">
@@ -224,6 +235,16 @@ class Component extends DCLogic {
           statusLabel: st.label, statusBg: st.bg, statusColor: st.color,
           coverStyle: { width: "64px", height: "48px", borderRadius: "6px", flexShrink: 0, background: "oklch(93% 0.01 70)" },
           viewUrl: `Property Details.dc.html?id=${p.id}`,
+          isOwnerSub: p.source === "owner_submission",
+          contactName: p.contactName || "-", contactPhone: p.contactPhone || "-",
+          contactEmailLabel: p.contactEmail ? "· " + p.contactEmail : "",
+          txnLabel: p.status === "rent" ? "ฝากเช่า" : "ฝากขาย",
+          typeLabel: ({ villa: "พูลวิลล่า", house: "บ้านเดี่ยว", condo: "คอนโด", land: "ที่ดิน", commercial: "เชิงพาณิชย์" })[p.type] || p.type || "-",
+          conditionLabel: p.condition === "new" ? "ใหม่" : "มือสอง",
+          coordsLabel: p.coordsRaw || "-",
+          ownerContactLabel: p.ownerContact || "— (ไม่ได้ระบุ)",
+          detailsLabel: p.description || "— (ไม่มีรายละเอียดเพิ่มเติม)",
+          photoCountLabel: (p.photoCount != null ? p.photoCount : "?") + " รูป (ดูได้ใน Firebase Console → propertyPhotos)",
           showApprove: this.state.adminRole === "owner" && (p.listingStatus === "pending" || p.listingStatus === "pending_owner"),
           showReject: this.state.adminRole === "owner" && (p.listingStatus === "pending" || p.listingStatus === "pending_owner"),
           showOffline: p.listingStatus === "live",
