@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-27 (ย้ายช่อง "แท็ก SEO" ลงมาอยู่โซนเดียวกับคุณสมบัติ เลือกได้ในคราวเดียว) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-28 (สลับตำแหน่ง: ขนาดที่ดินขึ้นไปแทน Collection/ช่องทางซื้อ ซึ่งย้ายลงมาข้างล่าง) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -844,6 +844,18 @@
               </sc-if>
               </sc-if>
             </div>
+            <sc-if value="{{ showLandSizeSimple }}" hint-placeholder-val="{{ true }}">
+              <div>
+                <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ขนาดที่ดิน (ตร.ว.)</div>
+                <input type="number" value="{{ f_landSize }}" onChange="{{ onFLandSize }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+              </div>
+            </sc-if>
+            <sc-if value="{{ showLivingArea }}" hint-placeholder-val="{{ true }}">
+              <div>
+                <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">พื้นที่ใช้สอย (ตร.ม.)</div>
+                <input type="number" value="{{ f_livingArea }}" onChange="{{ onFLivingArea }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+              </div>
+            </sc-if>
             <div style="position:relative;">
               <div style="position:relative;">
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">แสดงใน Collection หน้าแรก</div>
@@ -870,18 +882,6 @@
                 </div>
               </sc-if>
             </div>
-            <sc-if value="{{ showLivingArea }}" hint-placeholder-val="{{ true }}">
-              <div>
-                <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">พื้นที่ใช้สอย (ตร.ม.)</div>
-                <input type="number" value="{{ f_livingArea }}" onChange="{{ onFLivingArea }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
-              </div>
-            </sc-if>
-            <sc-if value="{{ showLandSizeSimple }}" hint-placeholder-val="{{ true }}">
-              <div>
-                <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ขนาดที่ดิน (ตร.ว.)</div>
-                <input type="number" value="{{ f_landSize }}" onChange="{{ onFLandSize }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
-              </div>
-            </sc-if>
             <sc-if value="{{ showLandFields }}" hint-placeholder-val="{{ false }}">
               <div style="grid-column:span 1;">
                 <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ขนาดที่ดิน — ไร่ / งาน / ตารางวา</div>
