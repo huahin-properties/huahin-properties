@@ -19,7 +19,14 @@ service firebase.storage {
       // upload in Lister Dashboard. Storage rules can't easily parse the
       // propertyId back out of the filename to check ownership precisely,
       // so this is intentionally a bit looser than the Firestore rule.
-      allow write: if isAdmin() || request.auth != null;
+      // Aug 2026 — public owner-submission channel (Owner Submission.dc.html):
+      // a property owner with NO account must be able to attach photos when
+      // consigning a property to us. Files named "own-*" (the id prefix the
+      // owner-submission page generates) may therefore be written without
+      // auth. The parent Firestore doc is still forced to be an unpublished
+      // pending owner_submission by firestore.rules, so this cannot be used
+      // to publish anything — it only lets a real prospect send us photos.
+      allow write: if isAdmin() || request.auth != null || fileName.matches('own-.*');
     }
     match /profilePhotos/{fileName} {
       allow read: if true;
