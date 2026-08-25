@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-37 (STEP 1: Owner/Staff + Staff ส่งอนุมัติ + LINE alert + ทีมงานไม่ติดโควตา) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-38 (แก้ตรวจ role จากอีเมลด้วย + ป้ายบัญชีทีมงานไม่จำกัด ซ่อนปุ่ม Package) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -92,7 +92,7 @@
           <sc-if value="{{ showPremiumBadge }}"><div style="background:linear-gradient(135deg, oklch(55% 0.15 75), oklch(45% 0.15 40)); color:white; font-size:10px; font-weight:700; padding:4px 10px; border-radius:100px; white-space:nowrap; letter-spacing:0.3px; flex-shrink:0;">⭐ {{ premiumBadgeLabel }}</div></sc-if>
         </div>
         <div onClick="{{ onOpenMySite }}" style="border:1px solid oklch(88% 0.01 70); border-radius:100px; padding:7px 12px; font-size:11.5px; font-weight:500; color:oklch(45% 0.02 60); cursor:pointer; white-space:nowrap;">🌐 {{ dt.mySite }}</div>
-        <a href="Lister Billing.dc.html" style="{{ upgradeTopBarStyle }}">🎁 {{ dt.choosePackage }}</a>
+        <sc-if value="{{ !isTeamAccount }}" hint-placeholder-val="{{ true }}"><a href="Lister Billing.dc.html" style="{{ upgradeTopBarStyle }}">🎁 {{ dt.choosePackage }}</a></sc-if>
       </div>
 
       <div style="font-size:11px; color:oklch(55% 0.02 60); margin-bottom:8px; text-align:center;">💡 {{ dt.followOrderHint }}</div>
@@ -607,7 +607,7 @@
           </div>
 
           <div style="margin-bottom:18px;">
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">รูปภาพ (สูงสุด {{ photoLimit }} รูปตามแพ็กเกจของคุณ — รูปแรกเป็นภาพปก)</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">รูปภาพ{{ photoLimitLabel }} — รูปแรกเป็นภาพปก</div>
             <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
               <sc-for list="{{ existingPhotos }}" as="ph" hint-placeholder-count="0">
                 <div style="{{ ph.thumbStyle }}">
@@ -2686,7 +2686,7 @@ class Component extends DCLogic {
     return {
       loaded: this.state.loaded, signedIn: this.state.signedIn, notSignedIn: this.state.loaded && !this.state.signedIn,
       listerName: lister.name ? " " + lister.name : "", listerEmail: lister.email || "",
-      tierLabel: tierLabels[lister.tier] || tierLabels[lister.vipTier] || (lister.tier ? lister.tier : "ยังไม่ได้เลือกแพ็กเกจ"),
+      tierLabel: (this.state.adminRole === "owner" || this.state.adminRole === "staff") ? (this.state.adminRole === "owner" ? "👑 บัญชีเจ้าของระบบ — ไม่จำกัด" : "🛠 บัญชีทีมงาน — ไม่จำกัด") : (tierLabels[lister.tier] || tierLabels[lister.vipTier] || (lister.tier ? lister.tier : "ยังไม่ได้เลือกแพ็กเกจ")),
       showPremiumBadge: !!(lister.tier === "level4" || lister.vipTier),
       premiumBadgeLabel: lister.vipTier ? "VIP" : "พรีเมียม",
       isListTab: this.state.dashTab === "list",
@@ -2723,7 +2723,8 @@ class Component extends DCLogic {
       newPropertyBtnStyle: quotaFull
         ? "background:oklch(90% 0.01 70); color:oklch(55% 0.02 60); padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;"
         : "background:oklch(22% 0.02 60); color:white; padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;",
-      showTrialActive: !!trial && !trial.ended,
+      showTrialActive: !!trial && !trial.ended && !(this.state.adminRole === "owner" || this.state.adminRole === "staff"),
+      isTeamAccount: this.state.adminRole === "owner" || this.state.adminRole === "staff",
       trialDaysLeftLabel: trial ? (trial.daysLeft > 0 ? dt.daysLeft(trial.daysLeft) : (trial.inGrace ? "หมดอายุแล้ว — อยู่ในช่วงผ่อนผัน" : "")) : "",
       showTrialUpsell: !!trial && trial.nearEnd,
       trialUpsellViewsLabel: trial ? `ยอดเข้าชมรวมทุกประกาศของคุณ: ${(this.state.properties || []).reduce((sum, p) => sum + (p.viewCount || 0), 0)} ครั้ง` : "",
@@ -2886,6 +2887,7 @@ class Component extends DCLogic {
       canAddPhoto: this.totalPhotoCount() < this.myPhotoLimit(),
       photoCount: this.totalPhotoCount(),
       photoLimit: this.myPhotoLimit(),
+      photoLimitLabel: (this.state.adminRole === "owner" || this.state.adminRole === "staff") ? " (ไม่จำกัดจำนวน)" : ` (สูงสุด ${this.myPhotoLimit()} รูปตามแพ็กเกจของคุณ)`,
       onPhotosFile: (e) => this.onPhotosFile(e),
       saveLabel: this.state.saving ? "กำลังบันทึก…" : "บันทึกแบบร่าง",
       onSaveProperty: () => this.saveProperty(),

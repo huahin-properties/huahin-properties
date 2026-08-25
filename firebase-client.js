@@ -1521,7 +1521,20 @@ export async function fetchAdminRole() {
   try {
     const doc = await db().collection("adminUsers").doc(user.uid).get();
     if (doc.exists && doc.data().role) return doc.data().role;
-  } catch (e) { console.warn("fetchAdminRole failed:", e); }
+  } catch (e) { console.warn("fetchAdminRole (uid) failed:", e); }
+  // The Lister Dashboard signs in with the team member's own lister account,
+  // whose Firebase UID differs from the Admin Login account UID stored in
+  // adminUsers. Fall back to matching on the verified email claim so an
+  // Owner/Staff is recognised in the dashboard too.
+  try {
+    const email = (user.email || "").trim().toLowerCase();
+    if (!email) return null;
+    const snap = await db().collection("adminUsers").where("email", "==", email).limit(1).get();
+    if (!snap.empty) {
+      const d = snap.docs[0].data();
+      if (d.role) return d.role;
+    }
+  } catch (e) { console.warn("fetchAdminRole (email) failed:", e); }
   return null;
 }
 
