@@ -25,7 +25,7 @@
 </helmet>
 
 <sc-if value="{{ showDevBar }}" hint-placeholder-val="{{ true }}">
-  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">OS-10 (แก้อัปโหลดรูปไม่ได้ — ขาดไลบรารี Firebase Storage)</div>
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">OS-11 (แก้ข้อความ error ถูกซ่อน — ตอนนี้แสดงสาเหตุจริงเมื่อส่งไม่สำเร็จ) OS-10-old (แก้อัปโหลดรูปไม่ได้ — ขาดไลบรารี Firebase Storage)</div>
 </sc-if>
 
 <div style="font-family:'Inter',sans-serif; background:oklch(97% 0.01 80); min-height:100vh; color:oklch(22% 0.02 60);">
@@ -315,7 +315,7 @@ class Component extends DCLogic {
       onBackStep2: () => this.setState({ step: 2 }),
       onGoStep4: () => canStep3Next && this.setState({ step: 4, step3Error: "" }),
       step3NextStyle: nextBase + (canStep3Next ? "background:oklch(22% 0.02 60); color:white;" : "background:oklch(92% 0.01 70); color:oklch(65% 0.01 70); cursor:not-allowed;"),
-      step3Error: canStep3Next ? "" : "",
+      step3Error: s.step3Error,
       txnLabel: s.txnType === "sale" ? "ฝากขาย" : "ฝากเช่า",
       conditionLabel: s.f_condition === "new" ? "ใหม่" : "มือสอง",
       onBackStep3: () => this.setState({ step: 3 }),
