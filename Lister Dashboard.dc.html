@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-34 (เพิ่มย่อหน้าบรรยายเชิญชวน/บันดาลใจในข้อความประกาศ ข้อมูลเดิมครบเหมือนเดิม) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-35 (เพิ่ม Pop-up เตือนให้ตรวจทานหลัง AI ร่างเสร็จ) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -930,6 +930,17 @@
             <textarea rows="4" value="{{ f_description }}" onChange="{{ onFDescription }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; resize:vertical;" placeholder="จุดเด่นพิเศษหรือโปรโมชั่นที่ไม่มีในช่องด้านบน เช่น ต่อรองได้ / ขายเอง ไม่มีนายหน้า / ใกล้โรงเรียนนานาชาติ / โปรโมชั่นแถมเฟอร์นิเจอร์"></textarea>
           </div>
 
+          <sc-if value="{{ showReviewNotice }}" hint-placeholder-val="{{ false }}">
+            <div style="position:fixed; inset:0; background:oklch(20% 0.02 60 / 0.55); display:flex; align-items:center; justify-content:center; padding:20px; z-index:9999;">
+              <div style="background:white; border-radius:12px; padding:26px 24px; max-width:440px; box-shadow:0 20px 60px oklch(20% 0.02 60 / 0.3);">
+                <div style="font-size:34px; text-align:center; margin-bottom:10px;">📝</div>
+                <div style="font-family:'Playfair Display',serif; font-size:20px; color:oklch(30% 0.02 60); text-align:center; margin-bottom:10px;">AI ร่างให้เรียบร้อยแล้ว</div>
+                <div style="font-size:13.5px; color:oklch(40% 0.02 60); line-height:1.75; margin-bottom:18px;">กรุณา<strong>ตรวจทานและแก้ไข</strong>ชื่อประกาศและข้อความประกาศให้ถูกต้องก่อนบันทึก — ข้อความนี้ AI ร่างจากข้อมูลที่คุณกรอกไว้ อาจมีจุดที่ต้องปรับให้ตรงกับทรัพย์จริงของคุณ เช่น ราคาต่อรอง เงื่อนไขพิเศษ หรือถ้อยคำที่คุณต้องการสื่อเอง</div>
+                <div onClick="{{ onCloseReviewNotice }}" style="background:oklch(40% 0.13 25); color:white; padding:12px; border-radius:8px; font-size:14px; font-weight:600; text-align:center; cursor:pointer;">เข้าใจแล้ว — ไปตรวจทาน</div>
+              </div>
+            </div>
+          </sc-if>
+
           <div style="margin-bottom:20px; padding:14px; background:oklch(97% 0.012 80); border:2px solid oklch(45% 0.15 25); border-radius:8px;">
             <div style="font-size:13px; font-weight:700; color:oklch(35% 0.14 25); margin-bottom:4px;">⚠️ ชื่อประกาศ + ข้อความประกาศ · จำเป็นต้องมี ไม่กรอกจะบันทึกไม่ได้</div>
             <div style="font-size:11.5px; color:oklch(45% 0.02 60); margin-bottom:10px;">กดปุ่มเดียว AI จะร่างทั้งชื่อประกาศและข้อความประกาศให้จากข้อมูลที่กรอกไว้ทั้งหมด พร้อมคีย์เวิร์ด SEO — ตรวจทานแล้วแก้ไขได้ทั้งสองช่องก่อนบันทึก (กดใหม่จะเขียนทับทั้งสองช่อง)</div>
@@ -1364,7 +1375,7 @@ class Component extends DCLogic {
     editingId: null, f_type: "villa", f_area: "hua-hin", f_subdistrict: "", f_zone: "", f_status: "sale",
     f_price: "", f_bedrooms: "", f_bathrooms: "", f_poolSize: "", f_parking: "", f_livingArea: "", f_landSize: "", f_mapsLink: "", f_mapDisplay: "area",
     f_titleDeed: "", f_kitchenTypes: [], f_purchaseOptions: [], kitchenMenuOpen: false, purchaseMenuOpen: false, collectionMenuOpen: false,
-    f_title: "",
+    f_title: "", showReviewNotice: false,
     f_condition: "resale_in_project", f_yearBuilt: "", f_floor: "", f_commonFee: "", f_foreignQuota: "",
     f_landShape: "", f_roadWidth: "", f_landCondition: "", f_utilities: "", f_zoningColor: "",
     f_floors: "", f_electricalPhase: "", f_internalNotes: "", f_landRai: "", f_landNgan: "", f_landWah: "",
@@ -2793,8 +2804,10 @@ class Component extends DCLogic {
       onAutoTitle: () => {
         const t = this.buildAutoTitle();
         this.setState({ f_title: t, aiGenerating: true });
-        setTimeout(() => this.setState({ f_aiDraft: this.buildAiDraft(), aiGenerating: false }), 300);
+        setTimeout(() => this.setState({ f_aiDraft: this.buildAiDraft(), aiGenerating: false, showReviewNotice: true }), 300);
       },
+      showReviewNotice: this.state.showReviewNotice,
+      onCloseReviewNotice: () => this.setState({ showReviewNotice: false }),
       titleLenLabel: (() => {
         const n = (this.state.f_title || "").trim().length;
         if (!n) return "ยังไม่ได้กรอก";
