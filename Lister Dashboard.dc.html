@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-30 (Title บันทึกเป็น object 8 ภาษาเหมือน zone/description — แก้บั๊กชื่อไม่แสดงบนหน้าเว็บ) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-32 (กดปุ่มเดียว สร้างชื่อประกาศ + ข้อความประกาศ AI พร้อมกันทันที) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -628,18 +628,6 @@
             </sc-if>
           </div>
 
-          <div style="margin-bottom:16px; padding:12px; background:oklch(97% 0.012 80); border:1px solid oklch(88% 0.015 75); border-radius:8px;">
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:6px;">
-              <div style="font-size:12px; font-weight:600; color:oklch(30% 0.02 60);">🔍 ชื่อประกาศ (Title) — สำคัญที่สุดต่อการค้นหาบน Google <span style="color:oklch(45% 0.18 25);">*</span></div>
-              <div onClick="{{ onAutoTitle }}" style="background:oklch(40% 0.13 25); color:white; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap;">✨ สร้างให้อัตโนมัติ</div>
-            </div>
-            <input value="{{ f_title }}" onChange="{{ onFTitle }}" placeholder="เช่น พูลวิลล่าหัวหิน 3 ห้องนอน เขาตะเกียบ ใกล้ทะเล ขาย 8.5 ล้าน" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
-            <div style="display:flex; align-items:center; gap:10px; margin-top:5px; flex-wrap:wrap;">
-              <div style="font-size:11.5px; color:{{ titleLenColor }};">{{ titleLenLabel }}</div>
-              <div style="font-size:11.5px; color:oklch(55% 0.02 60);">กรอกข้อมูลด้านล่างให้ครบก่อน แล้วกด "สร้างให้อัตโนมัติ" จะได้ชื่อที่ถูกหลัก SEO ทันที — แก้เพิ่มเองได้</div>
-            </div>
-          </div>
-
           <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:16px;">
             <div>
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ประเภททรัพย์</div>
@@ -942,7 +930,16 @@
             <textarea rows="4" value="{{ f_description }}" onChange="{{ onFDescription }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; resize:vertical;" placeholder="จุดเด่นพิเศษหรือโปรโมชั่นที่ไม่มีในช่องด้านบน เช่น ต่อรองได้ / ขายเอง ไม่มีนายหน้า / ใกล้โรงเรียนนานาชาติ / โปรโมชั่นแถมเฟอร์นิเจอร์"></textarea>
           </div>
 
+          <div style="margin-bottom:16px; padding:14px; background:oklch(97% 0.012 80); border:2px solid oklch(45% 0.15 25); border-radius:8px;">
+            <div style="font-size:13px; font-weight:700; color:oklch(35% 0.14 25); margin-bottom:4px;">⚠️ ขั้นตอนที่ 1 — ชื่อประกาศ (Title) · จำเป็นต้องมี ไม่กรอกจะบันทึกไม่ได้</div>
+            <div style="font-size:11.5px; color:oklch(45% 0.02 60); margin-bottom:8px;">ชื่อนี้คือสิ่งที่ลูกค้าเห็นบน Google และหน้าประกาศ — กดปุ่มด้านล่าง ระบบจะสร้างทั้งชื่อประกาศและข้อความประกาศให้พร้อมกันทันทีจากข้อมูลที่กรอกไว้ แล้วแก้เพิ่มเองได้</div>
+            <div onClick="{{ onAutoTitle }}" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; margin-bottom:8px;">✨ สร้างชื่อประกาศ + ข้อความประกาศอัตโนมัติ</div>
+            <input value="{{ f_title }}" onChange="{{ onFTitle }}" placeholder="เช่น พูลวิลล่าหัวหิน 3 ห้องนอน เขาตะเกียบ ใกล้ทะเล ขาย 8.5 ล้าน" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+            <div style="font-size:11.5px; color:{{ titleLenColor }}; margin-top:5px;">{{ titleLenLabel }}</div>
+          </div>
+
           <div style="margin-bottom:20px;">
+            <div style="font-size:13px; font-weight:700; color:oklch(35% 0.14 25); margin-bottom:8px;">ขั้นตอนที่ 2 — ข้อความประกาศ (ไม่บังคับ)</div>
             <div onClick="{{ onGenerateAiDraft }}" style="display:inline-block; background:oklch(40% 0.13 25); color:white; padding:10px 20px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer; margin-bottom:12px;">✨ {{ aiGenerateLabel }}</div>
             <div style="border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:14px; box-sizing:border-box; resize:vertical; overflow:auto; min-height:90px;">
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:12px;">AI จะรวมข้อมูลทรัพย์ทั้งหมดด้านบน + ข้อมูลติดต่อ/Social จากหน้าตั้งค่า + พิกัดแผนที่ + ข้อมูลเพิ่มเติม มาร่างเป็นข้อความประกาศที่ครบถ้วน พร้อมสถานที่สำคัญใกล้เคียงและระยะทาง/เวลาขับรถโดยประมาณ — แก้ไขได้ก่อนบันทึก</div>
@@ -1692,7 +1689,7 @@ class Component extends DCLogic {
     const typeLabel = ((this._mod && this._mod.TYPES) || []).find((t) => t.id === s.f_type);
     const areaLabel = ((this._mod && this._mod.AREAS) || []).find((a) => a.id === s.f_area);
     const lines = [];
-    const title = `${typeLabel ? typeLabel.label.th : "ทรัพย์"}${s.f_subdistrict ? " ตำบล" + s.f_subdistrict : ""} ${s.f_zone || ""} ${areaLabel ? areaLabel.label.th : ""}`.replace(/\s+/g, " ").trim();
+    const title = (s.f_title || "").trim() || `${typeLabel ? typeLabel.label.th : "ทรัพย์"}${s.f_subdistrict ? " ตำบล" + s.f_subdistrict : ""} ${s.f_zone || ""} ${areaLabel ? areaLabel.label.th : ""}`.replace(/\s+/g, " ").trim();
     lines.push(title);
     lines.push("");
     if (s.f_price) lines.push(`💰 ราคา ${Number(s.f_price).toLocaleString()} บาท`);
@@ -2754,7 +2751,11 @@ class Component extends DCLogic {
       f_titleDeed: this.state.f_titleDeed, onFTitleDeed: (e) => this.setState({ f_titleDeed: e.target.value }),
       f_title: this.state.f_title,
       onFTitle: (e) => this.setState({ f_title: e.target.value }),
-      onAutoTitle: () => this.setState({ f_title: this.buildAutoTitle() }),
+      onAutoTitle: () => {
+        const t = this.buildAutoTitle();
+        this.setState({ f_title: t, aiGenerating: true });
+        setTimeout(() => this.setState({ f_aiDraft: this.buildAiDraft(), aiGenerating: false }), 300);
+      },
       titleLenLabel: (() => {
         const n = (this.state.f_title || "").trim().length;
         if (!n) return "ยังไม่ได้กรอก";
