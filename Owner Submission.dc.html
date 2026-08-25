@@ -14,6 +14,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
   <title>ฝากขาย/ฝากเช่าทรัพย์ — huahin.properties</title>
   <style>
     body { margin: 0; }
@@ -24,7 +25,7 @@
 </helmet>
 
 <sc-if value="{{ showDevBar }}" hint-placeholder-val="{{ true }}">
-  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">OS-9 (แก้ส่งฝากขายไม่ผ่าน + แสดง error จริง)</div>
+  <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">OS-10 (แก้อัปโหลดรูปไม่ได้ — ขาดไลบรารี Firebase Storage)</div>
 </sc-if>
 
 <div style="font-family:'Inter',sans-serif; background:oklch(97% 0.01 80); min-height:100vh; color:oklch(22% 0.02 60);">
