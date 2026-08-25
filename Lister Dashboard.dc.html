@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-39 (แก้ race: ตรวจ role หลัง auth พร้อมแล้ว) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-40 (บัญชี Staff เห็นแค่งานที่ต้องทำ ซ่อนตั้งค่าเว็บ/คอลเลกชัน/มินิไซต์) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -91,15 +91,16 @@
           </div>
           <sc-if value="{{ showPremiumBadge }}"><div style="background:linear-gradient(135deg, oklch(55% 0.15 75), oklch(45% 0.15 40)); color:white; font-size:10px; font-weight:700; padding:4px 10px; border-radius:100px; white-space:nowrap; letter-spacing:0.3px; flex-shrink:0;">⭐ {{ premiumBadgeLabel }}</div></sc-if>
         </div>
-        <div onClick="{{ onOpenMySite }}" style="border:1px solid oklch(88% 0.01 70); border-radius:100px; padding:7px 12px; font-size:11.5px; font-weight:500; color:oklch(45% 0.02 60); cursor:pointer; white-space:nowrap;">🌐 {{ dt.mySite }}</div>
+        <sc-if value="{{ !isStaffOnlyAccount }}" hint-placeholder-val="{{ true }}"><div onClick="{{ onOpenMySite }}" style="border:1px solid oklch(88% 0.01 70); border-radius:100px; padding:7px 12px; font-size:11.5px; font-weight:500; color:oklch(45% 0.02 60); cursor:pointer; white-space:nowrap;">🌐 {{ dt.mySite }}</div></sc-if>
         <sc-if value="{{ !isTeamAccount }}" hint-placeholder-val="{{ true }}"><a href="Lister Billing.dc.html" style="{{ upgradeTopBarStyle }}">🎁 {{ dt.choosePackage }}</a></sc-if>
       </div>
 
-      <div style="font-size:11px; color:oklch(55% 0.02 60); margin-bottom:8px; text-align:center;">💡 {{ dt.followOrderHint }}</div>
+      <sc-if value="{{ !isStaffOnlyAccount }}" hint-placeholder-val="{{ true }}"><div style="font-size:11px; color:oklch(55% 0.02 60); margin-bottom:8px; text-align:center;">💡 {{ dt.followOrderHint }}</div></sc-if>
+      <sc-if value="{{ isStaffOnlyAccount }}" hint-placeholder-val="{{ false }}"><div style="font-size:11.5px; color:oklch(45% 0.02 60); margin-bottom:10px; text-align:center;">🛠 บัญชีทีมงาน — บันทึกทรัพย์ที่ได้จากลูกค้าหรือที่คุณสำรวจเอง แล้วส่งให้ Owner อนุมัติ</div></sc-if>
       <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:2px; margin-bottom:8px; border-bottom:2px solid oklch(90% 0.01 70);">
-        <div onClick="{{ onSetSettingsTab }}" style="text-align:center; padding:10px 4px; font-size:clamp(11px,3.2vw,13.5px); font-weight:600; cursor:pointer; color:{{ settingsTabColor }}; border-bottom:2px solid {{ settingsTabColor }}; margin-bottom:-2px; white-space:nowrap;">① ⚙️ {{ dt.tabSettings }}</div>
+        <sc-if value="{{ !isStaffOnlyAccount }}" hint-placeholder-val="{{ true }}"><div onClick="{{ onSetSettingsTab }}" style="text-align:center; padding:10px 4px; font-size:clamp(11px,3.2vw,13.5px); font-weight:600; cursor:pointer; color:{{ settingsTabColor }}; border-bottom:2px solid {{ settingsTabColor }}; margin-bottom:-2px; white-space:nowrap;">① ⚙️ {{ dt.tabSettings }}</div></sc-if>
         <div onClick="{{ onSetListTab }}" style="text-align:center; padding:10px 4px; font-size:clamp(11px,3.2vw,13.5px); font-weight:600; cursor:pointer; color:{{ listTabColor }}; border-bottom:2px solid {{ listTabColor }}; margin-bottom:-2px; white-space:nowrap;">② 📋 {{ dt.tabList }}</div>
-        <div onClick="{{ onSetCollectionsTab }}" style="text-align:center; padding:10px 4px; font-size:clamp(11px,3.2vw,13.5px); font-weight:600; cursor:pointer; color:{{ collectionsTabColor }}; border-bottom:2px solid {{ collectionsTabColor }}; margin-bottom:-2px; white-space:nowrap;">③ 📁 {{ dt.tabCollections }}</div>
+        <sc-if value="{{ !isStaffOnlyAccount }}" hint-placeholder-val="{{ true }}"><div onClick="{{ onSetCollectionsTab }}" style="text-align:center; padding:10px 4px; font-size:clamp(11px,3.2vw,13.5px); font-weight:600; cursor:pointer; color:{{ collectionsTabColor }}; border-bottom:2px solid {{ collectionsTabColor }}; margin-bottom:-2px; white-space:nowrap;">③ 📁 {{ dt.tabCollections }}</div></sc-if>
         <div onClick="{{ onSetApptTab }}" style="text-align:center; padding:10px 4px; font-size:clamp(11px,3.2vw,13.5px); font-weight:600; cursor:pointer; color:{{ apptTabColor }}; border-bottom:2px solid {{ apptTabColor }}; margin-bottom:-2px; white-space:nowrap;">④ 📅 {{ dt.tabAppt }}</div>
       </div>
 
@@ -1415,7 +1416,7 @@ class Component extends DCLogic {
     const authedUser = await fb.onAdminAuthReady().catch(() => null);
     const signedIn = !!authedUser;
     if (!signedIn) { this.setState({ loaded: true, signedIn: false }); return; }
-    try { const role = await fb.fetchAdminRole(); if (role) this.setState({ adminRole: role }); } catch (e) { console.warn("fetchAdminRole failed:", e); }
+    try { const role = await fb.fetchAdminRole(); if (role) this.setState({ adminRole: role, dashTab: role === "staff" ? "list" : this.state.dashTab }); } catch (e) { console.warn("fetchAdminRole failed:", e); }
     try {
       const lister = await fb.fetchMyListerDoc();
       if (!lister) { this.setState({ loaded: true, signedIn: false }); return; }
@@ -2701,7 +2702,8 @@ class Component extends DCLogic {
       settingsTabColor: this.state.dashTab === "settings" ? "oklch(40% 0.13 25)" : "oklch(70% 0.01 70)",
       collectionsTabColor: this.state.dashTab === "collections" ? "oklch(40% 0.13 25)" : "oklch(70% 0.01 70)",
       apptTabColor: this.state.dashTab === "appt" ? "oklch(40% 0.13 25)" : "oklch(70% 0.01 70)",
-      showProfileChecklist: this.state.signedIn && !!lister.id,
+      showProfileChecklist: this.state.signedIn && !!lister.id && this.state.adminRole !== "staff",
+      isStaffOnlyAccount: this.state.adminRole === "staff",
       profileCompletePct: this.profileCompleteness(lister, tier2Plus).pct,
       profileMissingText: this.profileCompleteness(lister, tier2Plus).missing.join(" · "),
       agentCodeLabel: lister.agentCode ? `รหัส Agent: ${lister.agentCode}` : "",
