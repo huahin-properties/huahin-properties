@@ -9,7 +9,7 @@
 // window.claude.complete when running outside the Claude.ai preview.
 
 const { onRequest, onCall, HttpsError } = require("firebase-functions/v2/https");
-const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const { onDocumentCreated, onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
 const Stripe = require("stripe");
@@ -882,6 +882,86 @@ exports.shareCard = onRequest(
     } catch (e) {
       console.error("shareCard failed:", e);
       res.redirect(302, "https://huahin.properties/logo.png");
+    }
+  }
+);
+
+// ── LINE notification to the Owner when a listing needs approval ──
+// Fires whenever a property document is written with listingStatus
+// "pending_owner" (Staff prepared it and pressed "ส่งให้ Owner อนุมัติ") or
+// "pending" (an external member submitted). Sends a LINE push message to the
+// Owner's LINE user id so they can approve from their phone while out.
+//
+// SETUP REQUIRED BEFORE THIS WORKS (Owner does this once):
+//   1. Create a LINE Messaging API channel (LINE Developers Console)
+//   2. Get its Channel Access Token (long-lived)
+//   3. Add friend / follow that channel with your own LINE account
+//   4. Set the secrets:
+//        firebase functions:secrets:set LINE_MESSAGING_TOKEN
+//        firebase functions:secrets:set LINE_OWNER_USER_ID
+// Until both secrets exist this function logs and exits quietly — it never
+// blocks or breaks the listing save.
+const LINE_MESSAGING_TOKEN = defineSecret("LINE_MESSAGING_TOKEN");
+const LINE_OWNER_USER_ID = defineSecret("LINE_OWNER_USER_ID");
+
+exports.notifyOwnerApproval = onDocumentWritten(
+  {
+    document: "properties/{propertyId}",
+    region: "asia-southeast1",
+    secrets: [LINE_MESSAGING_TOKEN, LINE_OWNER_USER_ID],
+  },
+  async (event) => {
+    try {
+      const after = event.data && event.data.after && event.data.after.data();
+      const before = event.data && event.data.before && event.data.before.data();
+      if (!after) return;
+      const newStatus = after.listingStatus;
+      const oldStatus = before ? before.listingStatus : null;
+      // Only fire on a fresh transition INTO an approval-waiting state.
+      if (newStatus !== "pending_owner" && newStatus !== "pending") return;
+      if (oldStatus === newStatus) return;
+
+      let token = "";
+      let ownerId = "";
+      try { token = LINE_MESSAGING_TOKEN.value(); } catch (e) {}
+      try { ownerId = LINE_OWNER_USER_ID.value(); } catch (e) {}
+      if (!token || !ownerId) {
+        console.log("notifyOwnerApproval: LINE secrets not configured yet — skipping push");
+        return;
+      }
+
+      const code = event.params.propertyId;
+      const titleTh = (after.title && (after.title.th || after.title.en)) || code;
+      const price = Number(after.price) || 0;
+      const zone = (after.zone && (after.zone.th || after.zone.en)) || after.zone || "-";
+      const who = newStatus === "pending_owner" ? "ทีมงาน" : "สมาชิก";
+      const text = [
+        "🔔 มีประกาศรออนุมัติ",
+        "",
+        `${who}เตรียมประกาศไว้แล้ว รอคุณตรวจและอนุมัติ`,
+        "",
+        `📌 ${titleTh}`,
+        `💰 ${price.toLocaleString()} บาท`,
+        `📍 ${zone}`,
+        `🏷️ รหัส ${code}`,
+        "",
+        "ตรวจและอนุมัติที่:",
+        `${SITE_URL}/Listing%20Approvals.dc.html`,
+      ].join("\n");
+
+      const res = await fetch("https://api.line.me/v2/bot/message/push", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ to: ownerId, messages: [{ type: "text", text }] }),
+      });
+      if (!res.ok) {
+        console.error("notifyOwnerApproval: LINE push failed", res.status, await res.text());
+      }
+    } catch (e) {
+      console.error("notifyOwnerApproval failed:", e);
     }
   }
 );
