@@ -26,7 +26,7 @@
   </style>
 </helmet>
 
-<div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">PD-4 (แชทบอทไม่เด้งเปิดอัตโนมัติแล้ว — เริ่มพับเก็บเสมอ + กันหน้าขาวเมื่อไม่มี id ในพรีวิว)</div>
+<div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">PD-5 (แสดง "หมวดที่เกี่ยวข้อง" ลิงก์กลับหน้ารวมคีย์เวิร์ด) — เดิม: PD-4 (แชทบอทไม่เด้งเปิดอัตโนมัติแล้ว — เริ่มพับเก็บเสมอ + กันหน้าขาวเมื่อไม่มี id ในพรีวิว)</div>
 
 <sc-if value="{{ showGate }}">
   <div style="position:fixed; inset:0; background:oklch(96% 0.015 75); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
@@ -289,6 +289,17 @@
       </div>
     </div>
 
+    <sc-if value="{{ hasSeoTags }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:0 clamp(20px,4vw,56px) clamp(24px,3vw,36px);">
+        <div style="font-size:13px; color:oklch(50% 0.02 60); margin-bottom:10px;">{{ seoTagsLabel }}</div>
+        <div style="display:flex; flex-wrap:wrap; gap:9px;">
+          <sc-for list="{{ seoTagLinks }}" as="tg" hint-placeholder-count="3">
+            <a href="{{ tg.href }}" style="background:oklch(96% 0.01 78); border:1px solid oklch(89% 0.01 70); border-radius:100px; padding:7px 15px; font-size:12.5px; color:oklch(35% 0.08 35); text-decoration:none;">{{ tg.label }}</a>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
     <!-- ============ SIMILAR PROPERTIES ============ -->
     <div style="padding:clamp(40px,6vw,72px) clamp(20px,4vw,56px);">
       <div style="font-family:'Playfair Display',serif; font-size:clamp(22px,2.8vw,28px); color:oklch(20% 0.02 60); margin-bottom:24px;">{{ t.similar_properties }}</div>
@@ -426,6 +437,24 @@ function haversineKm(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 const GMAPS_LANG = { th: "th", en: "en", ru: "ru", zh: "zh-CN", de: "de", no: "no", fr: "fr", it: "it" };
+
+const SEO_TAG_MAP = {
+  "baan-hua-hin": { label: "ขายบ้านหัวหิน", href: "baan-hua-hin.html" },
+  "pool-villa-hua-hin": { label: "พูลวิลล่าหัวหิน", href: "pool-villa-hua-hin.html" },
+  "condo-hua-hin": { label: "คอนโดหัวหิน", href: "condo-hua-hin.html" },
+  "thidin-hua-hin": { label: "ที่ดินหัวหิน", href: "thidin-hua-hin.html" },
+  "baan-chao-hua-hin": { label: "บ้านเช่าหัวหิน", href: "baan-chao-hua-hin.html" },
+  "khao-takiab": { label: "พูลวิลล่าเขาตะเกียบ", href: "pool-villa-khao-takiab.html" },
+  "thap-tai": { label: "บ้านทับใต้ หัวหิน", href: "baan-thap-tai.html" },
+  "hin-lek-fai": { label: "บ้านหินเหล็กไฟ", href: "baan-hin-lek-fai.html" },
+  "condo-beachfront": { label: "คอนโดติดทะเลหัวหิน", href: "condo-tid-talay-hua-hin.html" },
+  "pranburi": { label: "ขายบ้านปราณบุรี", href: "baan-pranburi.html" },
+  "cha-am": { label: "ขายบ้านชะอำ", href: "baan-cha-am.html" },
+  "bed3": { label: "บ้าน 3 ห้องนอน หัวหิน", href: "baan-3-hongnon-hua-hin.html" },
+  "bed4": { label: "บ้าน 4 ห้องนอน หัวหิน", href: "baan-4-hongnon-hua-hin.html" },
+  "under5m": { label: "บ้านหัวหินไม่เกิน 5 ล้าน", href: "baan-hua-hin-mai-kern-5-lan.html" },
+  "under10m": { label: "บ้านหัวหินไม่เกิน 10 ล้าน", href: "baan-hua-hin-mai-kern-10-lan.html" },
+};
 
 class Component extends DCLogic {
   state = {
@@ -948,6 +977,9 @@ class Component extends DCLogic {
       enquiryNotSent: !this.state.enquirySent,
       enquiryThanks: lang === "th" ? "ขอบคุณ! ทีมงานจะติดต่อกลับเร็วๆ นี้" : lang === "ru" ? "Спасибо! Мы скоро свяжемся с вами." : lang === "zh" ? "谢谢！我们会尽快与您联系。" : "Thank you! We'll be in touch shortly.",
       sendEnquiry: () => this.setState({ enquirySent: true }),
+      hasSeoTags: (raw.seoTags || []).length > 0,
+      seoTagsLabel: lang === "th" ? "หมวดที่เกี่ยวข้อง" : lang === "ru" ? "Похожие категории" : lang === "zh" ? "相关分类" : lang === "de" ? "Verwandte Kategorien" : lang === "no" ? "Relaterte kategorier" : lang === "fr" ? "Catégories associées" : lang === "it" ? "Categorie correlate" : "Related categories",
+      seoTagLinks: (raw.seoTags || []).map((id) => SEO_TAG_MAP[id]).filter(Boolean),
       similar,
       galleryTabs,
       showPhotoGallery: this.state.galleryTab === "photos",

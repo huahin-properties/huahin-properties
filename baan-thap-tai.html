@@ -69,6 +69,10 @@
 
   <h2 style="font-family:'Playfair Display',serif; font-size:clamp(20px,2.8vw,26px); margin:48px 0 16px; color:oklch(24% 0.03 50);">หมวดอื่นที่น่าสนใจ</h2>
   <div style="display:flex; flex-wrap:wrap; gap:10px;">
+    <a href="./baan-3-hongnon-hua-hin.html" style="background:oklch(96% 0.01 78); border:1px solid oklch(89% 0.01 70); border-radius:100px; padding:8px 16px; font-size:13px; color:oklch(35% 0.08 35); text-decoration:none;">บ้าน 3 ห้องนอน หัวหิน</a>
+    <a href="./baan-4-hongnon-hua-hin.html" style="background:oklch(96% 0.01 78); border:1px solid oklch(89% 0.01 70); border-radius:100px; padding:8px 16px; font-size:13px; color:oklch(35% 0.08 35); text-decoration:none;">บ้าน 4 ห้องนอน หัวหิน</a>
+    <a href="./baan-hua-hin-mai-kern-5-lan.html" style="background:oklch(96% 0.01 78); border:1px solid oklch(89% 0.01 70); border-radius:100px; padding:8px 16px; font-size:13px; color:oklch(35% 0.08 35); text-decoration:none;">บ้านหัวหินไม่เกิน 5 ล้านบาท</a>
+    <a href="./baan-hua-hin-mai-kern-10-lan.html" style="background:oklch(96% 0.01 78); border:1px solid oklch(89% 0.01 70); border-radius:100px; padding:8px 16px; font-size:13px; color:oklch(35% 0.08 35); text-decoration:none;">บ้านหัวหินไม่เกิน 10 ล้านบาท</a>
     <a href="./baan-hua-hin.html" style="background:oklch(96% 0.01 78); border:1px solid oklch(89% 0.01 70); border-radius:100px; padding:8px 16px; font-size:13px; color:oklch(35% 0.08 35); text-decoration:none;">ขายบ้านหัวหิน</a>
     <a href="./pool-villa-hua-hin.html" style="background:oklch(96% 0.01 78); border:1px solid oklch(89% 0.01 70); border-radius:100px; padding:8px 16px; font-size:13px; color:oklch(35% 0.08 35); text-decoration:none;">พูลวิลล่าหัวหิน</a>
     <a href="./condo-hua-hin.html" style="background:oklch(96% 0.01 78); border:1px solid oklch(89% 0.01 70); border-radius:100px; padding:8px 16px; font-size:13px; color:oklch(35% 0.08 35); text-decoration:none;">คอนโดหัวหิน</a>
@@ -97,12 +101,14 @@ const MATCH = ["ทับใต้","thap tai","tap tai"];
 const AREA = "hua-hin";
 const TYPE = "";
 const T = {"none":"ยังไม่มีประกาศในหมวดนี้ — ดูทรัพย์ทั้งหมด","bed":"นอน","bath":"น้ำ"};
+const SEO_TAG = "thap-tai";
 const box = document.getElementById("listings");
 const fmt = (n) => new Intl.NumberFormat("en-US").format(n);
 try {
   const mod = await import("./data.js");
   const props = await mod.getEffectiveProperties(mod);
   const match = (props || []).filter((x) => {
+    if ((x.seoTags || []).includes(SEO_TAG)) return true;
     if (AREA && String(x.area || "").toLowerCase().replace(/\s/g, "-") !== AREA) return false;
     if (TYPE && x.type !== TYPE) return false;
     if (MATCH.length) {
