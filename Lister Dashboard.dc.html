@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-35 (เพิ่ม Pop-up เตือนให้ตรวจทานหลัง AI ร่างเสร็จ) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-37 (STEP 1: Owner/Staff + Staff ส่งอนุมัติ + LINE alert + ทีมงานไม่ติดโควตา) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -1375,7 +1375,7 @@ class Component extends DCLogic {
     editingId: null, f_type: "villa", f_area: "hua-hin", f_subdistrict: "", f_zone: "", f_status: "sale",
     f_price: "", f_bedrooms: "", f_bathrooms: "", f_poolSize: "", f_parking: "", f_livingArea: "", f_landSize: "", f_mapsLink: "", f_mapDisplay: "area",
     f_titleDeed: "", f_kitchenTypes: [], f_purchaseOptions: [], kitchenMenuOpen: false, purchaseMenuOpen: false, collectionMenuOpen: false,
-    f_title: "", showReviewNotice: false,
+    f_title: "", showReviewNotice: false, adminRole: null,
     f_condition: "resale_in_project", f_yearBuilt: "", f_floor: "", f_commonFee: "", f_foreignQuota: "",
     f_landShape: "", f_roadWidth: "", f_landCondition: "", f_utilities: "", f_zoningColor: "",
     f_floors: "", f_electricalPhase: "", f_internalNotes: "", f_landRai: "", f_landNgan: "", f_landWah: "",
@@ -1406,6 +1406,7 @@ class Component extends DCLogic {
   async componentDidMount() {
     const fb = await import("./firebase-client.js");
     this._fb = fb;
+    try { const role = await fb.fetchAdminRole(); if (role) this.setState({ adminRole: role }); } catch (e) {}
     const mod = await import("./data.js");
     this._mod = mod;
     const params = new URLSearchParams(window.location.search);
@@ -1491,10 +1492,14 @@ class Component extends DCLogic {
   }
 
   tierLimit(tier) {
+    // Owner/Staff (internal team accounts) are never limited by a paid
+    // package — quotas exist for external paying members only.
+    if (this.state.adminRole === "owner" || this.state.adminRole === "staff") return 99999;
     return { trial: 5, basic: 5, pro: 5, agency: 5, level3: 15, level4: 25 }[tier] || 5;
   }
 
   photoLimit(tier) {
+    if (this.state.adminRole === "owner" || this.state.adminRole === "staff") return 99999;
     return { trial: 8, basic: 10, pro: 15, agency: 15, level3: 18, level4: 20 }[tier] || 10;
   }
 
@@ -1534,7 +1539,7 @@ class Component extends DCLogic {
   async submitListing(p) {
     const merged = { ...p }; delete merged.coverUrl;
     try {
-      await this._fb.submitForApproval(p.id, merged);
+      await this._fb.submitForApproval(p.id, merged, { staffPending: this.state.adminRole === "staff" });
       await this.refreshProperties();
     } catch (e) { console.warn("submitListing failed:", e); }
   }
@@ -2884,7 +2889,7 @@ class Component extends DCLogic {
       onPhotosFile: (e) => this.onPhotosFile(e),
       saveLabel: this.state.saving ? "กำลังบันทึก…" : "บันทึกแบบร่าง",
       onSaveProperty: () => this.saveProperty(),
-      saveAndSendLabel: this.state.saving ? "กำลังบันทึก…" : "บันทึกและส่งไปแดชบอร์ด",
+      saveAndSendLabel: this.state.saving ? "กำลังบันทึก…" : (this.state.adminRole === "staff" ? "ส่งให้ Owner อนุมัติ" : "บันทึกและส่งไปแดชบอร์ด"),
       onSaveAndSend: () => this.saveProperty({ useAiDraft: true, redirectToList: true }),
       f_aiDraft: this.state.f_aiDraft, onFAiDraft: (e) => this.setState({ f_aiDraft: e.target.value }),
       hasAiDraft: !!this.state.f_aiDraft,

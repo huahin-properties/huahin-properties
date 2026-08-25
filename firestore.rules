@@ -68,15 +68,27 @@ service cloud.firestore {
       // bypassed from devtools/console.
       function listerListingStatusOk() {
         return request.resource.data.listingStatus == resource.data.listingStatus
-          || (request.resource.data.listingStatus == "live" && resource.data.listingStatus != "offline");
+          || (request.resource.data.listingStatus == "live" && resource.data.listingStatus != "offline")
+          || (request.resource.data.listingStatus == "paused" && resource.data.listingStatus != "offline");
       }
-      allow create: if isAdmin() || (request.auth != null && request.resource.data.listerId == request.auth.uid && request.resource.data.listingStatus != "offline");
-      allow update: if isAdmin() || (request.auth != null && resource.data.listerId == request.auth.uid && request.resource.data.listerId == request.auth.uid && listerListingStatusOk())
+      // Staff role (Aug 2026, Owner-approval workflow): a Staff member may
+      // prepare a listing (create/edit/upload photos, draft it, mark it
+      // "pending_owner") but may NEVER put it live — only the Owner can flip
+      // listingStatus to "live". Enforced here, not just in the UI, so it
+      // cannot be bypassed from devtools/console.
+      function isStaffOnly() {
+        return isAdmin() && !isOwner();
+      }
+      function staffStatusOk() {
+        return request.resource.data.listingStatus != "live";
+      }
+      allow create: if (isOwner()) || (isStaffOnly() && staffStatusOk()) || (request.auth != null && request.resource.data.listerId == request.auth.uid && request.resource.data.listingStatus != "offline");
+      allow update: if (isOwner()) || (isStaffOnly() && staffStatusOk()) || (request.auth != null && resource.data.listerId == request.auth.uid && request.resource.data.listerId == request.auth.uid && listerListingStatusOk())
         // Public view-count increment (Property Details page, any visitor,
         // no auth) — restricted to ONLY the viewCount field changing so
         // this can't be abused to alter price/status/etc.
         || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']);
-      allow delete: if isAdmin() || (request.auth != null && resource.data.listerId == request.auth.uid);
+      allow delete: if isOwner() || (request.auth != null && resource.data.listerId == request.auth.uid);
     }
     // Public reporting channel (Aug 2026): anyone, signed in or not, can
     // flag a listing for admin review — create-only, no read/update/delete,

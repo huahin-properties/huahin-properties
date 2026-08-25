@@ -563,6 +563,23 @@ export async function confirmPhoneSignIn(code) {
   return cred.user.uid;
 }
 
+// AI Welcome Gateway search log — every query typed into the homepage's
+// full-screen AI search box, stored with a rough parse (budget/beds/type
+// keywords extracted client-side) so this becomes a structured demand
+// signal over time, not just free text. Best-effort/non-blocking: callers
+// should .catch(() => {}) this, a logging failure must never block search.
+export async function logAiSearchQuery(query, lang) {
+  const id = "aiq-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+  const lower = (query || "").toLowerCase();
+  const bedMatch = lower.match(/(\d+)\s*(bed|bedroom|ห้องนอน|卧)/);
+  const priceMatch = lower.match(/(\d+(?:\.\d+)?)\s*(m|million|ล้าน|万)/);
+  await setDoc("aiSearchQueries", id, {
+    query, lang: lang || "en", createdAt: Date.now(),
+    parsedBedrooms: bedMatch ? Number(bedMatch[1]) : null,
+    parsedBudgetHint: priceMatch ? priceMatch[0] : null,
+  });
+}
+
 export async function saveLead(lead) {
   const id = "lead-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
   await setDoc("leads", id, { ...lead, createdAt: Date.now(), contacted: false });
@@ -1474,12 +1491,38 @@ export function trialStatus(lister) {
 // setPropertyOffline/reinstateProperty below) if it turns out to be wrong
 // or harmful — that decision sticks until admin reinstates it (Firestore
 // rules block a lister from flipping "offline" back to "live" themselves).
-export async function submitForApproval(propertyId, payload) {
+export async function submitForApproval(propertyId, payload, opts) {
   const now = Date.now();
+  // Staff (adminUsers role "staff") may prepare a listing but never publish
+  // it — their submit lands in "pending_owner" for the Owner to approve in
+  // Listing Approvals. Firestore rules enforce this too, so a modified
+  // client can't bypass it. Owners and ordinary paying listers publish
+  // straight to "live" as before.
+  if (opts && opts.staffPending) {
+    await setDoc("properties", propertyId, {
+      ...(payload || {}), listingStatus: "pending_owner", submittedAt: now, isDraft: false,
+    });
+    return;
+  }
   await setDoc("properties", propertyId, {
     ...(payload || {}), listingStatus: "live", submittedAt: now, isDraft: false,
     publishedAt: now, expiresAt: now + LISTING_DURATION_DAYS * 86400000, approvedAt: now,
   });
+}
+
+// Reads the signed-in user's admin role from adminUsers/{uid}: "owner",
+// "staff", or null when they are not a team member at all. Used to decide
+// whether a save publishes immediately or goes into the Owner approval
+// queue (see submitForApproval above).
+export async function fetchAdminRole() {
+  const a = authApp();
+  const user = a && a.currentUser;
+  if (!user) return null;
+  try {
+    const doc = await db().collection("adminUsers").doc(user.uid).get();
+    if (doc.exists && doc.data().role) return doc.data().role;
+  } catch (e) { console.warn("fetchAdminRole failed:", e); }
+  return null;
 }
 
 // Admin-only: takes a live listing offline (hidden from the public site)
