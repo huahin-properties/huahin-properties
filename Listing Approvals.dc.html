@@ -37,6 +37,14 @@
   </div>
 
   <div style="max-width:1000px; margin:0 auto; padding:clamp(20px,4vw,40px);">
+    <sc-if value="{{ lightboxOpen }}" hint-placeholder-val="{{ false }}">
+      <div onClick="{{ onLightboxClose }}" style="position:fixed; inset:0; background:rgba(0,0,0,0.82); z-index:200; display:flex; align-items:center; justify-content:center; gap:14px; cursor:zoom-out;">
+        <div onClick="{{ onLightboxPrev }}" style="background:rgba(255,255,255,0.16); color:white; width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; cursor:pointer; flex-shrink:0;">‹</div>
+        <img src="{{ lightboxSrc }}" alt="รูปทรัพย์" onClick="{{ onLightboxStop }}" style="{{ lightboxImgStyle }}" />
+        <div onClick="{{ onLightboxNext }}" style="background:rgba(255,255,255,0.16); color:white; width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; cursor:pointer; flex-shrink:0;">›</div>
+        <div style="position:absolute; top:18px; left:0; right:0; text-align:center; color:white; font-size:13px;">{{ lightboxCounter }} · คลิกพื้นหลังเพื่อปิด</div>
+      </div>
+    </sc-if>
     <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:6px;">ตรวจสอบประกาศ</div>
     <div style="font-size:14px; color:oklch(50% 0.02 60); margin-bottom:24px;">ประกาศของสมาชิกขึ้นเว็บทันทีที่กดเผยแพร่ — แอดมินตรวจสอบย้อนหลังและปิดประกาศที่มีปัญหาได้ที่นี่</div>
 
@@ -144,7 +152,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
+  state = { lightboxUrls: [], lightboxIndex: 0, properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
 
   async componentDidMount() {
     const fb = await import("./firebase-client.js");
@@ -269,7 +277,7 @@ class Component extends DCLogic {
           submissionPhotos: (this.state.photosByProp[p.id] || []).map((ph, i) => ({
             key: ph.id || String(i),
             style: { width: "88px", height: "66px", borderRadius: "6px", flexShrink: 0, backgroundImage: (ph.dataUrl || ph.url) ? `url('${ph.dataUrl || ph.url}')` : "none", backgroundColor: "oklch(92% 0.01 70)", backgroundSize: "cover", backgroundPosition: "center", cursor: "pointer" },
-            onClick: () => { const u = ph.dataUrl || ph.url; if (u) window.open(u, "_blank", "noopener"); },
+            onClick: () => this.setState({ lightboxUrls: (this.state.photosByProp[p.id] || []).map((x) => x.dataUrl || x.url).filter(Boolean), lightboxIndex: i }),
           })),
           phoneHref: p.contactPhone ? "tel:" + String(p.contactPhone).replace(/[^0-9+]/g, "") : "",
           hasPhone: !!p.contactPhone,
@@ -309,6 +317,14 @@ class Component extends DCLogic {
       onLogout: () => { this._fb.logoutAdmin(); window.location.href = "Admin Login.dc.html"; },
       countAll, countPending, countPendingOwner, countLive, countExpired, countRejected, countOffline, countReports,
       isOwnerRole: this.state.adminRole === "owner",
+      lightboxOpen: this.state.lightboxUrls.length > 0,
+      lightboxImgStyle: { maxWidth: "92vw", maxHeight: "82vh", objectFit: "contain", borderRadius: "8px", boxShadow: "0 20px 60px rgba(0,0,0,0.5)" },
+      lightboxSrc: this.state.lightboxUrls[this.state.lightboxIndex] || "",
+      lightboxCounter: (this.state.lightboxIndex + 1) + " / " + this.state.lightboxUrls.length,
+      onLightboxClose: () => this.setState({ lightboxUrls: [] }),
+      onLightboxPrev: (e) => { e.stopPropagation(); this.setState((st) => ({ lightboxIndex: (st.lightboxIndex - 1 + st.lightboxUrls.length) % st.lightboxUrls.length })); },
+      onLightboxNext: (e) => { e.stopPropagation(); this.setState((st) => ({ lightboxIndex: (st.lightboxIndex + 1) % st.lightboxUrls.length })); },
+      onLightboxStop: (e) => e.stopPropagation(),
       actionError: this.state.actionError, hasActionError: !!this.state.actionError,
       tabAllStyle: this.state.filter === "all" ? tabActive : tabInactive,
       tabPendingStyle: this.state.filter === "pending" ? tabActive : tabInactive,
