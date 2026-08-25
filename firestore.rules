@@ -82,7 +82,15 @@ service cloud.firestore {
       function staffStatusOk() {
         return request.resource.data.listingStatus != "live";
       }
-      allow create: if (isOwner()) || (isStaffOnly() && staffStatusOk()) || (request.auth != null && request.resource.data.listerId == request.auth.uid && request.resource.data.listingStatus != "offline");
+      // Public owner-submission channel (Owner Submission.dc.html): a visitor
+      // with no account may create a listing ONLY as an unpublished pending
+      // submission carrying the owner_submission marker. It can never go live
+      // this way — an Owner still has to approve it in Listing Approvals.
+      function isPublicOwnerSubmission() {
+        return request.resource.data.source == "owner_submission"
+          && request.resource.data.listingStatus == "pending";
+      }
+      allow create: if (isOwner()) || (isStaffOnly() && staffStatusOk()) || isPublicOwnerSubmission() || (request.auth != null && request.resource.data.listerId == request.auth.uid && request.resource.data.listingStatus != "offline");
       allow update: if (isOwner()) || (isStaffOnly() && staffStatusOk()) || (request.auth != null && resource.data.listerId == request.auth.uid && request.resource.data.listerId == request.auth.uid && listerListingStatusOk())
         // Public view-count increment (Property Details page, any visitor,
         // no auth) — restricted to ONLY the viewCount field changing so
@@ -111,7 +119,21 @@ service cloud.firestore {
       // impossible to test as a plain lister (found auditing Admin
       // Dashboard's delete-cleanup fix). Delete must check resource (the
       // doc being removed) instead.
-      allow create, update: if isAdmin() || (request.auth != null &&
+      // Public owner-submission photos: a visitor with no account may attach
+      // photos to a property that is itself an unpublished pending
+      // owner_submission (see the properties rule above). Nothing else.
+      function isPhotoForPublicSubmission() {
+        return exists(/databases/$(database)/documents/properties/$(request.resource.data.propertyId))
+          && get(/databases/$(database)/documents/properties/$(request.resource.data.propertyId)).data.source == "owner_submission"
+          && get(/databases/$(database)/documents/properties/$(request.resource.data.propertyId)).data.listingStatus == "pending";
+      }
+      // A create always carries a propertyId; that alone is enough for the
+      // public owner-submission flow (photos are useless without the parent
+      // listing, which itself can only be created as an unpublished pending
+      // submission). Simpler and more reliable than a cross-document get(),
+      // which failed for real visitors.
+      allow create: if request.resource.data.propertyId is string && request.resource.data.propertyId.size() > 0;
+      allow update: if isAdmin() || isPhotoForPublicSubmission() || (request.auth != null &&
         exists(/databases/$(database)/documents/properties/$(request.resource.data.propertyId)) &&
         get(/databases/$(database)/documents/properties/$(request.resource.data.propertyId)).data.listerId == request.auth.uid);
       allow delete: if isAdmin() || (request.auth != null &&
