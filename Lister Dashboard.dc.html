@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-38 (แก้ตรวจ role จากอีเมลด้วย + ป้ายบัญชีทีมงานไม่จำกัด ซ่อนปุ่ม Package) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-39 (แก้ race: ตรวจ role หลัง auth พร้อมแล้ว) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -1406,7 +1406,6 @@ class Component extends DCLogic {
   async componentDidMount() {
     const fb = await import("./firebase-client.js");
     this._fb = fb;
-    try { const role = await fb.fetchAdminRole(); if (role) this.setState({ adminRole: role }); } catch (e) {}
     const mod = await import("./data.js");
     this._mod = mod;
     const params = new URLSearchParams(window.location.search);
@@ -1416,6 +1415,7 @@ class Component extends DCLogic {
     const authedUser = await fb.onAdminAuthReady().catch(() => null);
     const signedIn = !!authedUser;
     if (!signedIn) { this.setState({ loaded: true, signedIn: false }); return; }
+    try { const role = await fb.fetchAdminRole(); if (role) this.setState({ adminRole: role }); } catch (e) { console.warn("fetchAdminRole failed:", e); }
     try {
       const lister = await fb.fetchMyListerDoc();
       if (!lister) { this.setState({ loaded: true, signedIn: false }); return; }
