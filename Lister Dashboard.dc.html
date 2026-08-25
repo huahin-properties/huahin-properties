@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-28 (สลับตำแหน่ง: ขนาดที่ดินขึ้นไปแทน Collection/ช่องทางซื้อ ซึ่งย้ายลงมาข้างล่าง) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-30 (Title บันทึกเป็น object 8 ภาษาเหมือน zone/description — แก้บั๊กชื่อไม่แสดงบนหน้าเว็บ) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -626,6 +626,18 @@
                 📷 เพิ่มรูป ({{ photoCount }}/{{ photoLimit }})
               </label>
             </sc-if>
+          </div>
+
+          <div style="margin-bottom:16px; padding:12px; background:oklch(97% 0.012 80); border:1px solid oklch(88% 0.015 75); border-radius:8px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:6px;">
+              <div style="font-size:12px; font-weight:600; color:oklch(30% 0.02 60);">🔍 ชื่อประกาศ (Title) — สำคัญที่สุดต่อการค้นหาบน Google <span style="color:oklch(45% 0.18 25);">*</span></div>
+              <div onClick="{{ onAutoTitle }}" style="background:oklch(40% 0.13 25); color:white; padding:6px 14px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap;">✨ สร้างให้อัตโนมัติ</div>
+            </div>
+            <input value="{{ f_title }}" onChange="{{ onFTitle }}" placeholder="เช่น พูลวิลล่าหัวหิน 3 ห้องนอน เขาตะเกียบ ใกล้ทะเล ขาย 8.5 ล้าน" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+            <div style="display:flex; align-items:center; gap:10px; margin-top:5px; flex-wrap:wrap;">
+              <div style="font-size:11.5px; color:{{ titleLenColor }};">{{ titleLenLabel }}</div>
+              <div style="font-size:11.5px; color:oklch(55% 0.02 60);">กรอกข้อมูลด้านล่างให้ครบก่อน แล้วกด "สร้างให้อัตโนมัติ" จะได้ชื่อที่ถูกหลัก SEO ทันที — แก้เพิ่มเองได้</div>
+            </div>
           </div>
 
           <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:16px;">
@@ -1363,6 +1375,7 @@ class Component extends DCLogic {
     editingId: null, f_type: "villa", f_area: "hua-hin", f_subdistrict: "", f_zone: "", f_status: "sale",
     f_price: "", f_bedrooms: "", f_bathrooms: "", f_poolSize: "", f_parking: "", f_livingArea: "", f_landSize: "", f_mapsLink: "", f_mapDisplay: "area",
     f_titleDeed: "", f_kitchenTypes: [], f_purchaseOptions: [], kitchenMenuOpen: false, purchaseMenuOpen: false, collectionMenuOpen: false,
+    f_title: "",
     f_condition: "resale_in_project", f_yearBuilt: "", f_floor: "", f_commonFee: "", f_foreignQuota: "",
     f_landShape: "", f_roadWidth: "", f_landCondition: "", f_utilities: "", f_zoningColor: "",
     f_floors: "", f_electricalPhase: "", f_internalNotes: "", f_landRai: "", f_landNgan: "", f_landWah: "",
@@ -1551,6 +1564,7 @@ class Component extends DCLogic {
       view: "edit", editingId: null, f_type: "villa", f_area: "hua-hin", f_subdistrict: this.subdistrictsFor("hua-hin")[0] || "", f_zone: "",
       f_status: "sale", f_price: "", f_bedrooms: "", f_bathrooms: "", f_poolSize: "", f_parking: "", f_livingArea: "",
       f_landSize: "", f_mapsLink: "", f_mapDisplay: "area", f_titleDeed: "", f_kitchenTypes: [], f_purchaseOptions: [],
+      f_title: "",
       f_condition: "resale_in_project", f_yearBuilt: "", f_floor: "", f_commonFee: "", f_foreignQuota: "",
       f_landShape: "", f_roadWidth: "", f_landCondition: "", f_utilities: "", f_zoningColor: "",
       f_floors: "", f_electricalPhase: "", f_internalNotes: "", f_landRai: "", f_landNgan: "", f_landWah: "",
@@ -1586,6 +1600,7 @@ class Component extends DCLogic {
       f_bathrooms: p.bathrooms != null ? String(p.bathrooms) : "",
       f_poolSize: p.poolSize != null ? String(p.poolSize) : "", f_parking: p.parking != null ? String(p.parking) : "",
       f_titleDeed: p.titleDeed || "", f_kitchenTypes: p.kitchenTypes || [], f_purchaseOptions: p.purchaseOptions || [],
+      f_title: (p.title && typeof p.title === "object" && (p.title.th || p.title.en)) || (typeof p.title === "string" ? p.title : "") || (p.seo && p.seo.title) || "",
       f_condition: p.condition || "resale_in_project", f_yearBuilt: p.yearBuilt != null ? String(p.yearBuilt) : "",
       f_floor: p.floor || "", f_commonFee: p.commonFee != null ? String(p.commonFee) : "", f_foreignQuota: p.foreignQuota || "",
       f_landShape: p.landShape || "", f_roadWidth: p.roadWidth != null ? String(p.roadWidth) : "", f_landCondition: p.landCondition || "",
@@ -1773,9 +1788,76 @@ class Component extends DCLogic {
     return tags.slice(0, 10).join(" ");
   }
 
+  _typeLabelTh() {
+    const m = { villa: "พูลวิลล่า", house: "บ้านเดี่ยว", condo: "คอนโด", land: "ที่ดิน", commercial: "อาคารพาณิชย์" };
+    return m[this.state.f_type] || "ทรัพย์";
+  }
+  _priceLabelTh() {
+    const p = Number(this.state.f_price) || 0;
+    if (!p) return "";
+    if (this.state.f_status === "rent") return `${p.toLocaleString()} บาท/เดือน`;
+    if (p >= 1000000) {
+      const m = p / 1000000;
+      return `${m % 1 === 0 ? m : m.toFixed(1)} ล้าน`;
+    }
+    return `${p.toLocaleString()} บาท`;
+  }
+  _areaLabelTh() {
+    const m = { "hua-hin": "หัวหิน", pranburi: "ปราณบุรี", "cha-am": "ชะอำ" };
+    return m[this.state.f_area] || "หัวหิน";
+  }
+  _sellingPointTh() {
+    const f = this.state.f_features || [];
+    if (f.includes("sea_view")) return "วิวทะเล";
+    if (f.includes("beachfront")) return "ติดหาด";
+    if (f.includes("private_pool") || this.state.f_poolSize) return "มีสระว่ายน้ำ";
+    if (f.includes("mountain_view")) return "วิวเขา";
+    if (f.includes("near_beach")) return "ใกล้ทะเล";
+    if (f.includes("furnished")) return "ตกแต่งครบ";
+    return "";
+  }
+  buildAutoTitle() {
+    const parts = [this._typeLabelTh() + this._areaLabelTh()];
+    if (this.state.f_type !== "land" && this.state.f_bedrooms) parts.push(`${this.state.f_bedrooms} ห้องนอน`);
+    if (this.state.f_type === "land") {
+      const rai = this.state.f_landRai, ngan = this.state.f_landNgan, wah = this.state.f_landWah;
+      const sz = [rai ? `${rai} ไร่` : "", ngan ? `${ngan} งาน` : "", wah ? `${wah} ตร.ว.` : ""].filter(Boolean).join(" ");
+      if (sz) parts.push(sz);
+    }
+    const zone = (this.state.f_zone || "").trim();
+    if (zone) parts.push(zone);
+    const sp = this._sellingPointTh();
+    if (sp) parts.push(sp);
+    parts.push(this.state.f_status === "rent" ? "ให้เช่า" : "ขาย");
+    const pl = this._priceLabelTh();
+    if (pl) parts.push(pl);
+    return parts.join(" ").replace(/\s+/g, " ").trim();
+  }
+  _buildSeoKeywords() {
+    const typeTh = this._typeLabelTh(), areaTh = this._areaLabelTh();
+    const typeEn = { villa: "pool villa", house: "house", condo: "condo", land: "land", commercial: "commercial building" }[this.state.f_type] || "property";
+    const areaEn = { "hua-hin": "Hua Hin", pranburi: "Pranburi", "cha-am": "Cha-am" }[this.state.f_area] || "Hua Hin";
+    const actTh = this.state.f_status === "rent" ? "เช่า" : "ขาย";
+    const actEn = this.state.f_status === "rent" ? "for rent" : "for sale";
+    const zone = (this.state.f_zone || "").trim();
+    const bed = this.state.f_bedrooms;
+    const kws = [
+      `${typeTh}${areaTh}`, `${actTh}${typeTh}${areaTh}`, `${typeTh}${areaTh} ${actTh}`,
+      `${typeEn} ${areaEn}`, `${typeEn} ${areaEn} ${actEn}`,
+      zone ? `${typeTh}${zone}` : "", zone ? `${typeEn} ${zone}` : "",
+      bed ? `${typeTh}${areaTh} ${bed} ห้องนอน` : "", bed ? `${bed} bedroom ${typeEn} ${areaEn}` : "",
+      this._sellingPointTh() ? `${typeTh}${areaTh} ${this._sellingPointTh()}` : "",
+    ].filter(Boolean);
+    return [...new Set(kws)].join(", ");
+  }
+
   async saveProperty(opts) {
     opts = opts || {};
     if (this.state.saving) return;
+    if (!this.state.f_title.trim()) {
+      this.setState({ saveError: "กรุณากรอกชื่อประกาศ (Title) — กดปุ่ม ✨ สร้างให้อัตโนมัติ ได้ถ้าไม่ทราบว่าจะเขียนอะไร" });
+      return;
+    }
     if (!this.state.f_zone.trim() || !this.state.f_price) {
       this.setState({ saveError: "กรุณากรอกชื่อทำเลและราคาให้ครบ" });
       return;
@@ -1801,6 +1883,13 @@ class Component extends DCLogic {
         const zoneTranslated = await this._fb.translateDescriptionAll(zoneValue);
         if (zoneTranslated) zoneValue = zoneTranslated;
       } catch (e) { console.warn("Auto-translate zone failed, saving original text only:", e); }
+    }
+    let titleValue = this.state.f_title.trim();
+    if (titleValue) {
+      try {
+        const titleTranslated = await this._fb.translateDescriptionAll(titleValue);
+        if (titleTranslated) titleValue = titleTranslated;
+      } catch (e) { console.warn("Auto-translate title failed, saving original text only:", e); }
     }
     const isEditingExisting = !!this.state.editingId;
     let existing = {};
@@ -1832,6 +1921,8 @@ class Component extends DCLogic {
       livingArea: this.state.f_livingArea ? Number(this.state.f_livingArea) : null,
       landSize: this.state.f_landSize ? Number(this.state.f_landSize) : null,
       description: descriptionValue, features: this.state.f_features, collections: this.state.f_collections, seoTags: this.state.f_seoTags || [], mapLink: this.state.f_mapsLink.trim(), mapDisplayMode: this.state.f_mapDisplay,
+      title: titleValue,
+      seo: Object.assign({}, existing.seo || {}, { title: this.state.f_title.trim(), keywords: this._buildSeoKeywords() }),
       zone: zoneValue,
       currency: "THB", updatedAt: Date.now(), isDraft: previousIsDraft === undefined ? true : previousIsDraft,
       photos: allPhotoUrls.map(() => ({ label: "" })),
@@ -2661,6 +2752,22 @@ class Component extends DCLogic {
       f_poolSize: this.state.f_poolSize, onFPoolSize: (e) => this.setState({ f_poolSize: e.target.value }),
       f_parking: this.state.f_parking, onFParking: (e) => this.setState({ f_parking: e.target.value }),
       f_titleDeed: this.state.f_titleDeed, onFTitleDeed: (e) => this.setState({ f_titleDeed: e.target.value }),
+      f_title: this.state.f_title,
+      onFTitle: (e) => this.setState({ f_title: e.target.value }),
+      onAutoTitle: () => this.setState({ f_title: this.buildAutoTitle() }),
+      titleLenLabel: (() => {
+        const n = (this.state.f_title || "").trim().length;
+        if (!n) return "ยังไม่ได้กรอก";
+        if (n < 30) return `${n} ตัวอักษร — สั้นเกินไป ควร 50-60`;
+        if (n <= 65) return `${n} ตัวอักษร — เหมาะสม ✓`;
+        return `${n} ตัวอักษร — ยาวเกิน Google จะตัดทิ้ง`;
+      })(),
+      titleLenColor: (() => {
+        const n = (this.state.f_title || "").trim().length;
+        if (!n) return "oklch(55% 0.02 60)";
+        if (n < 30 || n > 65) return "oklch(50% 0.15 55)";
+        return "oklch(45% 0.14 145)";
+      })(),
       f_condition: this.state.f_condition, onFCondition: (e) => this.setState({ f_condition: e.target.value }),
       f_yearBuilt: this.state.f_yearBuilt, onFYearBuilt: (e) => this.setState({ f_yearBuilt: e.target.value }),
       f_floor: this.state.f_floor, onFFloor: (e) => this.setState({ f_floor: e.target.value }),
