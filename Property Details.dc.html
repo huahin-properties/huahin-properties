@@ -26,7 +26,7 @@
   </style>
 </helmet>
 
-<div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">PD-5 (แสดง "หมวดที่เกี่ยวข้อง" ลิงก์กลับหน้ารวมคีย์เวิร์ด) — เดิม: PD-4 (แชทบอทไม่เด้งเปิดอัตโนมัติแล้ว — เริ่มพับเก็บเสมอ + กันหน้าขาวเมื่อไม่มี id ในพรีวิว)</div>
+<div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">PD-6 (แก้หน้าขาวเมื่อเปิดทรัพย์ฝากขายที่รออนุมัติ) — เดิม: PD-5 (แสดง "หมวดที่เกี่ยวข้อง" ลิงก์กลับหน้ารวมคีย์เวิร์ด) — เดิม: PD-4 (แชทบอทไม่เด้งเปิดอัตโนมัติแล้ว — เริ่มพับเก็บเสมอ + กันหน้าขาวเมื่อไม่มี id ในพรีวิว)</div>
 
 <sc-if value="{{ showGate }}">
   <div style="position:fixed; inset:0; background:oklch(96% 0.015 75); z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center;">
@@ -506,7 +506,17 @@ class Component extends DCLogic {
       const result = await repo.fetchReviews(this._id);
       this.setState({ reviewsState: result.state, reviewsData: result.reviews || [] });
     });
-    const effProps = await mod.getEffectiveProperties(mod);
+    let effProps = await mod.getEffectiveProperties(mod);
+    // Aug 2026 — a pending owner-submission (Owner Submission.dc.html) is not
+    // part of the merged live list, so an Owner clicking "ดู" in Listing
+    // Approvals used to land on a blank page. Fetch that one doc directly.
+    if (this._id && !effProps.find((p) => p.id === this._id)) {
+      try {
+        const fb = await import("./firebase-client.js");
+        const doc = await fb.fetchDocById("properties", this._id);
+        if (doc) effProps = [...effProps, { ...doc, id: this._id }];
+      } catch (e) { console.warn("direct property fetch failed:", e); }
+    }
     this.setState({ effProps }, () => this._maybeFetchMedia());
     // Self-serve listings (Lister Dashboard) track a per-listing view count
     // the owner sees on their dashboard — increment once per page view.
