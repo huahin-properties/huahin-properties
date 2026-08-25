@@ -100,12 +100,17 @@
             <sc-if value="{{ r.isOwnerSub }}" hint-placeholder-val="{{ false }}">
               <div style="background:oklch(97% 0.01 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:12px 14px; margin-top:10px; font-size:12.5px; color:oklch(35% 0.02 60); line-height:1.7;">
                 <div style="font-weight:700; color:oklch(40% 0.13 25); margin-bottom:6px;">🏠 ทรัพย์ฝากขายจากลูกค้า</div>
-                <div>ผู้ติดต่อ: {{ r.contactName }} · {{ r.contactPhone }} {{ r.contactEmailLabel }}</div>
+                <div>ผู้ติดต่อ: {{ r.contactName }} · <sc-if value="{{ r.hasPhone }}" hint-placeholder-val="{{ true }}"><a href="{{ r.phoneHref }}" style="color:oklch(40% 0.13 25); font-weight:600;">📞 {{ r.contactPhone }}</a></sc-if> {{ r.contactEmailLabel }}</div>
                 <div>ธุรกรรม: {{ r.txnLabel }} · ประเภท: {{ r.typeLabel }} · สภาพ: {{ r.conditionLabel }}</div>
                 <div>พิกัด: {{ r.coordsLabel }}</div>
                 <div>ข้อมูลติดต่อเจ้าของ (ถ้าไม่ใช่คนเดียวกัน): {{ r.ownerContactLabel }}</div>
                 <div style="margin-top:6px; white-space:pre-wrap;">{{ r.detailsLabel }}</div>
                 <div style="margin-top:8px;">รูปที่ส่งมา: {{ r.photoCountLabel }}</div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+                  <sc-for list="{{ r.submissionPhotos }}" as="ph" hint-placeholder-count="0">
+                    <div onClick="{{ ph.onClick }}" style="{{ ph.style }}"></div>
+                  </sc-for>
+                </div>
               </div>
             </sc-if>
           </div>
@@ -137,7 +142,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { properties: [], listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
+  state = { properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
 
   async componentDidMount() {
     const fb = await import("./firebase-client.js");
@@ -146,7 +151,8 @@ class Component extends DCLogic {
     await fb.onAdminAuthReady();
     if (!fb.requireAdminAuth()) return;
     try {
-      const [properties, listers, suspects, reports] = await Promise.all([
+      const [allPhotos, properties, listers, suspects, reports] = await Promise.all([
+        fb.fetchAllPhotos().catch(() => []),
         fb.fetchCollection("properties"),
         fb.fetchCollection("listers"),
         fb.findDuplicateTrialSuspects(),
@@ -154,7 +160,13 @@ class Component extends DCLogic {
       ]);
       const listersById = {};
       listers.forEach((l) => { listersById[l.id] = l; });
-      this.setState({ properties: properties.filter((p) => p.listerId || p.source === "owner_submission"), listersById, suspects, reports, loaded: true });
+      const photosByProp = {};
+      (allPhotos || []).forEach((ph) => {
+        if (!ph.propertyId) return;
+        (photosByProp[ph.propertyId] = photosByProp[ph.propertyId] || []).push(ph);
+      });
+      Object.values(photosByProp).forEach((arr) => arr.sort((a, b) => (a.index || 0) - (b.index || 0)));
+      this.setState({ properties: properties.filter((p) => p.listerId || p.source === "owner_submission"), listersById, suspects, reports, photosByProp, loaded: true });
     } catch (e) {
       console.warn("fetch failed:", e);
       this.setState({ loaded: true });
@@ -231,7 +243,7 @@ class Component extends DCLogic {
         return {
           code: p.id, zone: p.zone || "-", priceLabel: "฿" + (Number(p.price) || 0).toLocaleString(),
           listerEmail: lister.email || p.listerId,
-          dateLabel: dateVal ? new Date(dateVal).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" }) : "-",
+          dateLabel: dateVal ? new Date(dateVal).toLocaleString("th-TH", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) + " น." : "-",
           statusLabel: st.label, statusBg: st.bg, statusColor: st.color,
           coverStyle: { width: "64px", height: "48px", borderRadius: "6px", flexShrink: 0, background: "oklch(93% 0.01 70)" },
           viewUrl: `Property Details.dc.html?id=${p.id}`,
@@ -244,7 +256,14 @@ class Component extends DCLogic {
           coordsLabel: p.coordsRaw || "-",
           ownerContactLabel: p.ownerContact || "— (ไม่ได้ระบุ)",
           detailsLabel: p.description || "— (ไม่มีรายละเอียดเพิ่มเติม)",
-          photoCountLabel: (p.photoCount != null ? p.photoCount : "?") + " รูป (ดูได้ใน Firebase Console → propertyPhotos)",
+          photoCountLabel: ((this.state.photosByProp[p.id] || []).length) + " รูป",
+          submissionPhotos: (this.state.photosByProp[p.id] || []).map((ph, i) => ({
+            key: ph.id || String(i),
+            style: { width: "88px", height: "66px", borderRadius: "6px", flexShrink: 0, backgroundImage: ph.url ? `url('${ph.url}')` : "none", backgroundColor: "oklch(92% 0.01 70)", backgroundSize: "cover", backgroundPosition: "center", cursor: "pointer" },
+            onClick: () => { if (ph.url) window.open(ph.url, "_blank", "noopener"); },
+          })),
+          phoneHref: p.contactPhone ? "tel:" + String(p.contactPhone).replace(/[^0-9+]/g, "") : "",
+          hasPhone: !!p.contactPhone,
           showApprove: this.state.adminRole === "owner" && (p.listingStatus === "pending" || p.listingStatus === "pending_owner"),
           showReject: this.state.adminRole === "owner" && (p.listingStatus === "pending" || p.listingStatus === "pending_owner"),
           showOffline: p.listingStatus === "live",
