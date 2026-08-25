@@ -26,7 +26,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-40 (บัญชี Staff เห็นแค่งานที่ต้องทำ ซ่อนตั้งค่าเว็บ/คอลเลกชัน/มินิไซต์) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-41 (ซ่อนแบนเนอร์ทดลองใช้ฟรีสำหรับบัญชีทีมงาน) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -2707,7 +2707,7 @@ class Component extends DCLogic {
       profileCompletePct: this.profileCompleteness(lister, tier2Plus).pct,
       profileMissingText: this.profileCompleteness(lister, tier2Plus).missing.join(" · "),
       agentCodeLabel: lister.agentCode ? `รหัส Agent: ${lister.agentCode}` : "",
-      showTrialOffer: !lister.tier && !lister.trialUsed,
+      showTrialOffer: !lister.tier && !lister.trialUsed && !(this.state.adminRole === "owner" || this.state.adminRole === "staff"),
       trialStartLabel: this.state.trialStarting ? "กำลังเริ่ม…" : "เริ่มทดลองใช้ฟรี",
       trialError: this.state.trialError,
       onStartTrial: () => this.startTrialNow(),
