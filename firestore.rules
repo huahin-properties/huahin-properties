@@ -95,7 +95,22 @@ service cloud.firestore {
         // Public view-count increment (Property Details page, any visitor,
         // no auth) — restricted to ONLY the viewCount field changing so
         // this can't be abused to alter price/status/etc.
-        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount']);
+        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['viewCount'])
+        // STEP 2B.2 — Property Contact reply via private tracking link.
+        // A visitor holding the unguessable trackToken of THIS submission may
+        // write ONLY the three reply fields, and only when the token they
+        // present matches the stored one and is left unchanged. Everything
+        // else (price, status, contact, the Staff's original request) is
+        // untouchable through this path. Enforced here, not in the UI.
+        || (resource.data.source == "owner_submission"
+            && resource.data.trackToken is string
+            && resource.data.trackToken.size() > 20
+            && request.resource.data.trackToken == resource.data.trackToken
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['infoResponseMessage', 'infoResponseAt', 'infoResponseStatus'])
+            && request.resource.data.infoResponseMessage is string
+            && request.resource.data.infoResponseMessage.size() > 0
+            && request.resource.data.infoResponseMessage.size() < 4000);
       allow delete: if isOwner() || (request.auth != null && resource.data.listerId == request.auth.uid);
     }
     // Public reporting channel (Aug 2026): anyone, signed in or not, can
