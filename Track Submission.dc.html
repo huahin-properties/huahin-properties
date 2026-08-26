@@ -109,16 +109,18 @@ class Component extends DCLogic {
         photoCount = (photos || []).filter((ph) => ph.propertyId === id).length;
       } catch (e) {}
       let msgs = [];
-      try { msgs = await fb.fetchCaseMessages(id, true); } catch (e) { console.warn("case messages read failed:", e); }
+      let msgsFailed = false;
+      try { msgs = await fb.fetchCaseMessages(id, true); }
+      catch (e) { msgsFailed = true; console.warn("case messages read failed:", e); }
       // Legacy compatibility: a case created before caseMessages existed still
       // has its request/response in the old fields. Show them as the first two
       // entries WITHOUT writing anything (idempotent — nothing is duplicated
       // on refresh, and no migration write is ever performed here).
-      if (!msgs.length) {
+      if (!msgs.length && !msgsFailed) {
         if (p.infoRequestMessage) msgs.push({ id: "legacy-req", direction: "outbound", createdAt: p.infoRequestAt || p.submittedAt, customerText: p.infoRequestMessage, thaiText: p.infoRequestMessage, originalText: p.infoRequestMessage });
         if (p.infoResponseMessage) msgs.push({ id: "legacy-res", direction: "inbound", createdAt: p.infoResponseAt || Date.now(), customerText: p.infoResponseMessage, thaiText: p.infoResponseMessage, originalText: p.infoResponseMessage });
       }
-      this.setState({ phase: "ok", prop: p, photoCount, msgs });
+      this.setState({ phase: "ok", prop: p, photoCount, msgs, msgsFailed });
     } catch (e) {
       console.warn("track load failed:", e);
       this.setState({ phase: "denied" });
@@ -205,7 +207,9 @@ class Component extends DCLogic {
         isTeam: m.direction === "outbound",
         who: m.direction === "outbound" ? "ทีมงาน huahin.properties" : "คุณ",
         // The customer always reads their own language.
-        text: m.direction === "outbound" ? (m.customerText || m.thaiText || m.originalText || "") : (m.originalText || m.customerText || ""),
+        text: m.direction === "outbound"
+          ? (m.customerText || m.originalText || "")
+          : (m.originalText || ""),
         atLabel: fmt(m.createdAt),
         rowStyle: m.direction === "outbound"
           ? { background: "oklch(97% 0.03 85)", border: "1px solid oklch(89% 0.05 85)", borderRadius: "10px", padding: "14px 16px" }

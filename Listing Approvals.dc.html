@@ -425,8 +425,12 @@ class Component extends DCLogic {
         channel: "tracking", visibility: "customer", createdAt: Date.now(),
         // The tracking token must travel WITH the message: the customer-side
         // read rule matches it against the property's trackToken.
-        caseToken: p.trackToken || "",
+        caseToken: p.trackToken,
       };
+      if (!p.trackToken || String(p.trackToken).length <= 20) {
+        this.setState({ convSending: false, convError: "รายการนี้ไม่มีลิงก์ติดตาม จึงส่งข้อความถึงลูกค้าไม่ได้ (รายการเก่าก่อนระบบติดตาม)" });
+        return;
+      }
       await this._fb.addCaseMessage(p.id, rec);
       await this._fb.logActivity({ type: "case_message_sent", propertyId: p.id, summary: `ส่งข้อความถึงผู้ติดต่อทรัพย์ ${p.id}` });
       this.setState((st) => ({
