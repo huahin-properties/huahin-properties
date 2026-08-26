@@ -137,6 +137,18 @@
                   <div>อัปเดตล่าสุด: <span style="color:oklch(30% 0.02 60); font-weight:600;">{{ r.lastUpdateLabel }}</span></div>
                   <div>ขั้นต่อไป: <span style="color:oklch(30% 0.02 60); font-weight:600;">{{ r.nextStepLabel }}</span></div>
                 </div>
+                <sc-if value="{{ r.hasTrackLink }}" hint-placeholder-val="{{ false }}">
+                  <div style="background:oklch(97% 0.01 85); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:10px 12px; margin-bottom:10px;">
+                    <div style="font-size:11.5px; font-weight:600; color:oklch(38% 0.02 60); margin-bottom:7px;">🔗 ลิงก์ติดตามสำหรับผู้ฝากทรัพย์</div>
+                    <div style="display:flex; gap:7px; flex-wrap:wrap;">
+                      <div onClick="{{ r.onCopyTrack }}" style="border:1px solid oklch(82% 0.02 70); color:oklch(32% 0.02 60); padding:6px 12px; border-radius:100px; font-size:11.5px; cursor:pointer; white-space:nowrap;">{{ r.copyTrackLabel }}</div>
+                      <div onClick="{{ r.onCopyTrackMsg }}" style="border:1px solid oklch(82% 0.02 70); color:oklch(32% 0.02 60); padding:6px 12px; border-radius:100px; font-size:11.5px; cursor:pointer; white-space:nowrap;">{{ r.copyTrackMsgLabel }}</div>
+                    </div>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ r.isLegacyNoToken }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:11px; color:oklch(58% 0.02 60); margin-bottom:10px;">รายการเก่านี้ไม่มีลิงก์ติดตาม</div>
+                </sc-if>
                 <sc-if value="{{ r.hasInfoReq }}" hint-placeholder-val="{{ false }}">
                   <div style="background:oklch(97% 0.04 85); border:1px solid oklch(88% 0.08 85); border-radius:8px; padding:11px 13px; margin-bottom:10px;">
                     <div style="font-size:11.5px; font-weight:700; color:oklch(42% 0.13 75); margin-bottom:5px;">⏳ คำขอข้อมูลเพิ่มเติม · {{ r.infoReqStatusLabel }}</div>
@@ -230,7 +242,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { infoReqFor: null, infoReqText: "", infoReqBusy: false, lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
+  state = { copiedFor: "", infoReqFor: null, infoReqText: "", infoReqBusy: false, lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
 
   async componentDidMount() {
     const fb = await import("./firebase-client.js");
@@ -315,6 +327,20 @@ class Component extends DCLogic {
     } catch (e) {
       this.setState({ infoReqBusy: false, actionError: "บันทึกคำขอไม่สำเร็จ: " + (e.message || e) });
     }
+  }
+
+  // Builds the customer's tracking URL from the token already stored on the
+  // submission. Never generates a token, never touches assignedTo — the link
+  // belongs to the case, so it stays valid across staff hand-offs.
+  copyTrack(p, asMessage) {
+    if (!p.trackToken) return;
+    const base = location.origin + location.pathname.replace(/[^/]*$/, "");
+    const url = base + "Track Submission.dc.html?id=" + encodeURIComponent(p.id) + "&t=" + p.trackToken;
+    const text = asMessage
+      ? "สวัสดีครับ\nคุณสามารถติดตามสถานะทรัพย์และตอบกลับทีมงาน huahin.properties ได้จากลิงก์นี้:\n\n" + url
+      : url;
+    try { navigator.clipboard.writeText(text); } catch (e) {}
+    this.setState({ copiedFor: p.id + (asMessage ? ":msg" : ":link") });
   }
 
   async claimCase(p) {
@@ -409,7 +435,7 @@ class Component extends DCLogic {
           })(),
           viewUrl: `Property Details.dc.html?id=${p.id}`,
           isOwnerSub: p.source === "owner_submission",
-          reviewLabel: ({ submitted: "🆕 ใหม่", reviewing: "🔍 กำลังตรวจ", need_info: "⏳ รอข้อมูลเพิ่มเติม", data_complete: "✅ ข้อมูลครบ", ready: "📝 พร้อมเตรียมประกาศ" })[p.reviewStatus || "submitted"],
+          reviewLabel: p.infoResponseStatus === "responded" && (p.reviewStatus || "") === "need_info" ? "📥 ได้รับข้อมูลเพิ่มเติมแล้ว" : ({ submitted: "🆕 ใหม่", reviewing: "🔍 กำลังตรวจ", need_info: "⏳ รอข้อมูลเพิ่มเติม", data_complete: "✅ ข้อมูลครบ", ready: "📝 พร้อมเตรียมประกาศ" })[p.reviewStatus || "submitted"],
           assignedLabel: p.assignedToEmail ? "ผู้รับผิดชอบ: " + p.assignedToEmail : "ยังไม่มีผู้รับผิดชอบ",
           isBusy: this.state.wfBusy === p.id,
           // Claim is a Staff action. The Owner's job is to see who has it, not
@@ -425,7 +451,7 @@ class Component extends DCLogic {
             const time = d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
             return sameDay ? "วันนี้ " + time + " น." : d.toLocaleDateString("th-TH", { day: "numeric", month: "short" }) + " " + time + " น.";
           })(),
-          nextStepLabel: ({ submitted: "รอผู้ช่วยรับงาน", reviewing: "ตรวจข้อมูล / ติดตามเจ้าของ", need_info: "รอข้อมูลจากเจ้าของ", data_complete: "เตรียมประกาศ", ready: "รอ CEO อนุมัติ" })[p.reviewStatus || "submitted"],
+          nextStepLabel: p.infoResponseStatus === "responded" && (p.reviewStatus || "") === "need_info" ? "ตรวจสอบข้อมูลที่ตอบกลับ" : ({ submitted: "รอผู้ช่วยรับงาน", reviewing: "ตรวจข้อมูล / ติดตามเจ้าของ", need_info: "รอข้อมูลจากเจ้าของ", data_complete: "เตรียมประกาศ", ready: "รอ CEO อนุมัติ" })[p.reviewStatus || "submitted"],
           caseOpen: this.state.openCaseId === p.id,
           onToggleCase: () => this.setState((st) => ({ openCaseId: st.openCaseId === p.id ? "" : p.id })),
           caseToggleLabel: this.state.openCaseId === p.id ? "ซ่อนรายละเอียด ›" : "ดูรายละเอียด ›",
@@ -442,6 +468,12 @@ class Component extends DCLogic {
           onClaim: () => this.claimCase(p),
           onReviewing: () => this.setReview(p, "reviewing"),
           onNeedInfo: () => this.setState({ infoReqFor: p, infoReqText: "" }),
+          hasTrackLink: p.source === "owner_submission" && !!p.trackToken,
+          isLegacyNoToken: p.source === "owner_submission" && !p.trackToken,
+          onCopyTrack: () => this.copyTrack(p, false),
+          onCopyTrackMsg: () => this.copyTrack(p, true),
+          copyTrackLabel: this.state.copiedFor === p.id + ":link" ? "✓ คัดลอกแล้ว" : "คัดลอกลิงก์",
+          copyTrackMsgLabel: this.state.copiedFor === p.id + ":msg" ? "✓ คัดลอกแล้ว" : "คัดลอกข้อความส่งลูกค้า",
           hasInfoReq: !!p.infoRequestMessage,
           infoReqMessage: p.infoRequestMessage || "",
           infoReqByLabel: p.infoRequestByEmail ? "ผู้ขอ: " + p.infoRequestByEmail : "",
