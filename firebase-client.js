@@ -1745,9 +1745,13 @@ export function currentAdminUser() {
 // existing trackToken authorises the customer side. Append-only: every
 // send is a NEW doc, so a later round can never overwrite an earlier one.
 
-export async function fetchCaseMessages(propertyId) {
-  const snap = await db().collection("properties").doc(String(propertyId))
-    .collection("caseMessages").get();
+export async function fetchCaseMessages(propertyId, customerOnly) {
+  // A customer (not signed in) may only read messages marked visible to
+  // them, so the QUERY itself has to carry that filter — an unfiltered read
+  // is rejected outright by the security rules. Staff/Owner read everything.
+  let q = db().collection("properties").doc(String(propertyId)).collection("caseMessages");
+  if (customerOnly) q = q.where("visibility", "==", "customer");
+  const snap = await q.get();
   return snap.docs
     .map((d) => ({ ...d.data(), id: d.id }))
     .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));

@@ -109,7 +109,7 @@ class Component extends DCLogic {
         photoCount = (photos || []).filter((ph) => ph.propertyId === id).length;
       } catch (e) {}
       let msgs = [];
-      try { msgs = await fb.fetchCaseMessages(id); } catch (e) {}
+      try { msgs = await fb.fetchCaseMessages(id, true); } catch (e) { console.warn("case messages read failed:", e); }
       // Legacy compatibility: a case created before caseMessages existed still
       // has its request/response in the old fields. Show them as the first two
       // entries WITHOUT writing anything (idempotent — nothing is duplicated
