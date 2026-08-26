@@ -129,7 +129,23 @@ class Component extends DCLogic {
     const msg = (this.state.replyText || "").trim();
     if (!msg) return;
     this.setState({ sending: true, replyError: "" });
-    const lang = (this.state.prop && this.state.prop.customerLanguage) || "th";
+    const p = this.state.prop || {};
+    // The customer's REAL language comes from what they actually typed, not
+    // from a page setting. Detect once on the first real message, then lock it
+    // for the case so later messages can't flip the language back and forth.
+    let lang = p.customerLanguage || "th";
+    let confirmed = p.customerLanguageConfirmed === true;
+    if (!confirmed) {
+      const detected = await this._fb.detectLanguage(msg);
+      if (detected) { lang = detected; confirmed = true; }
+      try {
+        await this._fb.setDoc("properties", this._id, {
+          customerLanguage: lang,
+          customerLanguageConfirmed: confirmed,
+          customerLanguageSource: confirmed ? "message_detected" : "provisional",
+        }, { merge: true });
+      } catch (e) { console.warn("could not save detected language:", e); }
+    }
     try {
       // Customer writes in their own language; we store the original AND a Thai
       // translation so Staff read Thai and the original stays auditable.

@@ -138,7 +138,7 @@
                   <div>ขั้นต่อไป: <span style="color:oklch(30% 0.02 60); font-weight:600;">{{ r.nextStepLabel }}</span></div>
                 </div>
                 <sc-if value="{{ r.isOwnerSub }}" hint-placeholder-val="{{ false }}">
-                  <div onClick="{{ r.onToggleThread }}" style="font-size:12px; font-weight:600; color:oklch(40% 0.13 25); cursor:pointer; margin-bottom:10px;">💬 การสนทนากับลูกค้า · 🌐 ภาษาลูกค้า: {{ r.custLangLabel }} ›</div>
+                  <div onClick="{{ r.onToggleThread }}" style="font-size:12px; font-weight:600; color:oklch(40% 0.13 25); cursor:pointer; margin-bottom:10px;">💬 การสนทนากับลูกค้า · 🌐 {{ r.custLangStatus }}: {{ r.custLangLabel }} ›</div>
                   <sc-if value="{{ r.threadOpen }}" hint-placeholder-val="{{ false }}">
                     <div style="background:oklch(98% 0.005 85); border:1px solid oklch(91% 0.01 70); border-radius:9px; padding:12px 13px; margin-bottom:11px;">
                       <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:11px;">
@@ -565,6 +565,7 @@ class Component extends DCLogic {
           onNeedInfo: () => this.setState({ infoReqFor: p, infoReqText: "" }),
           onToggleThread: () => { this.loadThread(p); this.setState((st) => ({ openCaseId: st.openCaseId === p.id ? "" : p.id })); },
           threadOpen: this.state.openCaseId === p.id,
+          custLangStatus: p.customerLanguageConfirmed === true ? "ภาษาลูกค้า" : "ภาษาที่คาดไว้",
           custLangLabel: ({ th: "ไทย", en: "English", zh: "中文", ru: "Русский", de: "Deutsch", no: "Norsk", fr: "Français", it: "Italiano" })[p.customerLanguage || "th"] || "ไทย",
           thread: (this.state.caseMsgs[p.id] || []).map((m) => ({
             key: m.id || String(m.createdAt),

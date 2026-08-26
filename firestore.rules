@@ -107,7 +107,8 @@ service cloud.firestore {
             && resource.data.trackToken.size() > 20
             && request.resource.data.trackToken == resource.data.trackToken
             && request.resource.data.diff(resource.data).affectedKeys()
-                 .hasOnly(['infoResponseMessage', 'infoResponseAt', 'infoResponseStatus'])
+                 .hasOnly(['infoResponseMessage', 'infoResponseAt', 'infoResponseStatus',
+                           'customerLanguage', 'customerLanguageConfirmed', 'customerLanguageSource'])
             && request.resource.data.infoResponseMessage is string
             && request.resource.data.infoResponseMessage.size() > 0
             && request.resource.data.infoResponseMessage.size() < 4000);

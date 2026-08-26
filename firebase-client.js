@@ -1767,6 +1767,29 @@ export async function addCaseMessage(propertyId, msg) {
 // already uses — the API key stays a Firebase secret, never in the browser.
 // Returns the translated text, or the original if translation fails (never
 // blocks a message from being sent).
+// Detect which language a customer actually wrote in, via the same
+// server-side Claude proxy (API key stays a Firebase secret). Returns a
+// 2-letter code, or "" when unsure so the caller keeps its fallback.
+export async function detectLanguage(text) {
+  const allowed = ["th", "en", "zh", "ru", "de", "no", "fr", "it"];
+  try {
+    const res = await fetch("https://claudecomplete-3j4ldf4pja-as.a.run.app", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        system: "Identify the language of the user's message. Reply with ONLY one lowercase 2-letter code from this list: th, en, zh, ru, de, no, fr, it. If the text mixes languages, pick the dominant one. If genuinely unsure, reply: unknown",
+        messages: [{ role: "user", content: String(text).slice(0, 600) }],
+        max_tokens: 8, model: "claude-haiku-4-5",
+      }),
+    });
+    const data = await res.json();
+    const code = String(data.reply || data.completion || "").trim().toLowerCase().slice(0, 2);
+    return allowed.includes(code) ? code : "";
+  } catch (e) {
+    console.warn("language detection failed:", e);
+    return "";
+  }
+}
+
 export async function translateMessage(text, targetLang) {
   const names = { th: "Thai", en: "English", zh: "Chinese (Simplified)", ru: "Russian", de: "German", no: "Norwegian", fr: "French", it: "Italian" };
   const target = names[targetLang] || "Thai";
