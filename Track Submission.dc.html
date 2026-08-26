@@ -137,14 +137,19 @@ class Component extends DCLogic {
     let confirmed = p.customerLanguageConfirmed === true;
     if (!confirmed) {
       const detected = await this._fb.detectLanguage(msg);
-      if (detected) { lang = detected; confirmed = true; }
-      try {
-        await this._fb.setDoc("properties", this._id, {
-          customerLanguage: lang,
-          customerLanguageConfirmed: confirmed,
-          customerLanguageSource: confirmed ? "message_detected" : "provisional",
-        }, { merge: true });
-      } catch (e) { console.warn("could not save detected language:", e); }
+      if (detected) {
+        lang = detected;
+        confirmed = true;
+        // Only written once, and only when detection actually succeeded — the
+        // Firestore rule for this path accepts nothing else.
+        try {
+          await this._fb.setDoc("properties", this._id, {
+            customerLanguage: lang,
+            customerLanguageConfirmed: true,
+            customerLanguageSource: "message_detected",
+          }, { merge: true });
+        } catch (e) { console.warn("could not save detected language:", e); }
+      }
     }
     try {
       // Customer writes in their own language; we store the original AND a Thai

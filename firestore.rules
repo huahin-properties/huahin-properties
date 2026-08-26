@@ -111,7 +111,24 @@ service cloud.firestore {
                            'customerLanguage', 'customerLanguageConfirmed', 'customerLanguageSource'])
             && request.resource.data.infoResponseMessage is string
             && request.resource.data.infoResponseMessage.size() > 0
-            && request.resource.data.infoResponseMessage.size() < 4000);
+            && request.resource.data.infoResponseMessage.size() < 4000)
+
+        // STEP 2B.2 — Language lock (separate branch on purpose).
+        // Detecting the customer's real language happens on their FIRST chat
+        // message, which is not an infoResponse reply, so that branch above
+        // (which demands infoResponseMessage) can never authorise it. This
+        // branch lets the same token holder write ONLY the three language
+        // fields — nothing else, token still unchanged, value still from the
+        // supported list, and the flag can only ever be set to true.
+        || (resource.data.source == "owner_submission"
+            && resource.data.trackToken is string
+            && resource.data.trackToken.size() > 20
+            && request.resource.data.trackToken == resource.data.trackToken
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['customerLanguage', 'customerLanguageConfirmed', 'customerLanguageSource'])
+            && request.resource.data.customerLanguage in ['th','en','zh','ru','de','no','fr','it']
+            && request.resource.data.customerLanguageConfirmed == true
+            && request.resource.data.customerLanguageSource == 'message_detected');
       allow delete: if isOwner() || (request.auth != null && resource.data.listerId == request.auth.uid);
 
       // STEP 2B.2 — Case conversation for owner-submission cases.
