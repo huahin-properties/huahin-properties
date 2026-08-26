@@ -115,12 +115,10 @@
 class Component extends DCLogic {
   state = {
     loaded: false, allowed: false, myEmail: "", myUid: "",
-    props: [], photosByProp: {}, filter: "new", showDevBar: false,
+    props: [], photosByProp: {}, filter: "new",
   };
 
   async componentDidMount() {
-    const isPreviewEnv = !/huahin\.properties$/.test(window.location.hostname);
-    this.setState({ showDevBar: isPreviewEnv || (() => { try { return localStorage.getItem("hhDevBar") === "1"; } catch (e) { return false; } })() });
     const fb = await import("./firebase-client.js");
     this._fb = fb;
     await fb.onAdminAuthReady();
@@ -182,7 +180,6 @@ class Component extends DCLogic {
       return same ? "วันนี้ " + hm + " น." : d.toLocaleDateString("th-TH", { day: "numeric", month: "short" }) + " " + hm + " น.";
     };
     return {
-      showDevBar: this.state.showDevBar,
       allowed: this.state.allowed,
       notAllowed: this.state.loaded && !this.state.allowed,
       myEmail: this.state.myEmail,

@@ -378,8 +378,16 @@ class Component extends DCLogic {
   // New signup or returning login with no package chosen yet → the package
   // page (4-column ladder) first; once a tier is set, straight to the
   // workspace. Shared by social sign-in, email/password signup, and login.
-  goToWorkspaceOrPackages(doc) {
+  async goToWorkspaceOrPackages(doc) {
     try { sessionStorage.removeItem("hh_auth_redirect_pending"); } catch (e) {}
+    // Role first (STEP 2A.2): a team member is NOT a paying member. Owner goes
+    // to the approvals working view, Staff to their own workspace, and only a
+    // real member without any admin role continues down the legacy flow below.
+    try {
+      const role = this._fb ? await this._fb.fetchAdminRole() : null;
+      if (role === "owner") { window.location.href = "Listing Approvals.dc.html"; return; }
+      if (role === "staff") { window.location.href = "Staff Workspace.dc.html"; return; }
+    } catch (e) { console.warn("role routing failed, using member flow:", e); }
     // Land on the lister's own public site (Agent Profile) after they have a
     // package — not the settings/work dashboard — so they see the overview
     // first and only go to Lister Dashboard deliberately via its settings

@@ -1421,6 +1421,15 @@ class Component extends DCLogic {
   THEME_COLORS = ["#7A2E22", "#2F6B3A", "#1F4E8C", "#B8860B"];
 
   async componentDidMount() {
+    // STAFF_GUARD_2A2 — Staff never belongs in the member package/billing flow.
+    (async () => {
+      try {
+        const g = await import("./firebase-client.js");
+        await g.onAdminAuthReady();
+        const gr = await g.fetchAdminRole();
+        if (gr === "staff") { window.location.replace("Staff Workspace.dc.html"); }
+      } catch (e) {}
+    })();
     const fb = await import("./firebase-client.js");
     this._fb = fb;
     const mod = await import("./data.js");

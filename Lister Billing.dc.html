@@ -214,6 +214,15 @@ class Component extends DCLogic {
   state = { lister: null, prices: { pro: "", agency: "", level3: "" }, vipPrices: { silver: "", gold: "", diamond: "" }, rolloutLevel: 1, loaded: false, notSignedIn: false, error: "", busyTier: null, vipStats: null, lang: "th", billingCycle: "monthly" };
 
   async componentDidMount() {
+    // STAFF_GUARD_2A2 — Staff never belongs in the member package/billing flow.
+    (async () => {
+      try {
+        const g = await import("./firebase-client.js");
+        await g.onAdminAuthReady();
+        const gr = await g.fetchAdminRole();
+        if (gr === "staff") { window.location.replace("Staff Workspace.dc.html"); }
+      } catch (e) {}
+    })();
     const fb = await import("./firebase-client.js");
     this._fb = fb;
     try {
