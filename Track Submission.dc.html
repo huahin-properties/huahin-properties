@@ -56,41 +56,38 @@
         </div>
       </div>
 
-      <sc-if value="{{ hasRequest }}" hint-placeholder-val="{{ false }}">
-        <div style="background:oklch(97% 0.04 85); border:1px solid oklch(87% 0.08 85); border-radius:10px; padding:18px 20px; margin-bottom:14px;">
-          <div style="font-size:14px; font-weight:700; color:oklch(40% 0.13 75); margin-bottom:7px;">ทีมงานขอข้อมูลเพิ่มเติม</div>
-          <div style="font-size:13.5px; color:oklch(26% 0.02 60); line-height:1.7; white-space:pre-wrap;">{{ requestMessage }}</div>
-          <div style="font-size:11px; color:oklch(52% 0.02 60); margin-top:8px;">{{ requestAtLabel }}</div>
+      <sc-if value="{{ hasThread }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:13.5px; font-weight:700; color:oklch(30% 0.02 60); margin-bottom:10px;">การติดต่อกับทีมงาน</div>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+          <sc-for list="{{ thread }}" as="m" hint-placeholder-count="2">
+            <div style="{{ m.rowStyle }}">
+              <div style="font-size:11.5px; font-weight:700; color:oklch(38% 0.06 80); margin-bottom:5px;">{{ m.who }}</div>
+              <div style="font-size:13.5px; color:oklch(24% 0.02 60); line-height:1.7; white-space:pre-wrap;">{{ m.text }}</div>
+              <div style="font-size:10.5px; color:oklch(55% 0.02 60); margin-top:7px;">{{ m.atLabel }}</div>
+            </div>
+          </sc-for>
         </div>
+      </sc-if>
 
-        <sc-if value="{{ hasResponse }}" hint-placeholder-val="{{ false }}">
-          <div style="background:oklch(97% 0.03 150); border:1px solid oklch(86% 0.06 150); border-radius:10px; padding:18px 20px; margin-bottom:14px;">
-            <div style="font-size:13px; font-weight:700; color:oklch(38% 0.11 150); margin-bottom:6px;">✓ คุณส่งข้อมูลกลับแล้ว</div>
-            <div style="font-size:13px; color:oklch(26% 0.02 60); line-height:1.7; white-space:pre-wrap;">{{ responseMessage }}</div>
-            <div style="font-size:11px; color:oklch(52% 0.02 60); margin-top:8px;">{{ responseAtLabel }}</div>
-          </div>
+      <sc-if value="{{ noThread }}" hint-placeholder-val="{{ true }}">
+        <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:20px; margin-bottom:16px; font-size:13px; color:oklch(48% 0.02 60); line-height:1.7;">ขณะนี้ทีมงานยังไม่ได้ส่งข้อความ — หากต้องการข้อมูลเพิ่มเติม ทีมงานจะแจ้งผ่านหน้านี้ กรุณาเก็บลิงก์นี้ไว้</div>
+      </sc-if>
+
+      <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:18px 20px;">
+        <div style="font-size:13.5px; font-weight:700; color:oklch(30% 0.02 60); margin-bottom:8px;">ส่งข้อความให้ทีมงาน</div>
+        <textarea rows="4" value="{{ replyText }}" onChange="{{ onReplyText }}" placeholder="พิมพ์ข้อความหรือข้อมูลที่ต้องการส่ง…" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:13.5px; font-family:inherit; resize:vertical; line-height:1.6;"></textarea>
+        <div onClick="{{ onReplySend }}" style="display:inline-block; margin-top:12px; background:oklch(40% 0.13 25); color:white; padding:10px 20px; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer;">{{ sendLabel }}</div>
+        <sc-if value="{{ replyError }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:10px; font-size:12.5px; color:oklch(50% 0.18 30);">{{ replyError }}</div>
         </sc-if>
-
-        <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:18px 20px;">
-          <div style="font-size:13.5px; font-weight:700; color:oklch(30% 0.02 60); margin-bottom:8px;">ส่งข้อมูลกลับให้ทีมงาน</div>
-          <textarea rows="4" value="{{ replyText }}" onChange="{{ onReplyText }}" placeholder="พิมพ์ข้อมูลที่ทีมงานขอ…" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:13.5px; font-family:inherit; resize:vertical; line-height:1.6;"></textarea>
-          <div onClick="{{ onReplySend }}" style="display:inline-block; margin-top:12px; background:oklch(40% 0.13 25); color:white; padding:10px 20px; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer;">{{ sendLabel }}</div>
-          <sc-if value="{{ replyError }}" hint-placeholder-val="{{ false }}">
-            <div style="margin-top:10px; font-size:12.5px; color:oklch(50% 0.18 30);">{{ replyError }}</div>
-          </sc-if>
-        </div>
-      </sc-if>
-
-      <sc-if value="{{ noRequest }}" hint-placeholder-val="{{ true }}">
-        <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:20px; font-size:13px; color:oklch(48% 0.02 60); line-height:1.7;">ขณะนี้ทีมงานยังไม่ได้ขอข้อมูลเพิ่มเติม — หากต้องการข้อมูลใด ทีมงานจะแจ้งผ่านหน้านี้ กรุณาเก็บลิงก์นี้ไว้</div>
-      </sc-if>
+      </div>
     </sc-if>
   </div>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:700,&quot;height&quot;:800}}">
 class Component extends DCLogic {
-  state = { phase: "loading", prop: null, photoCount: 0, replyText: "", sending: false, replyError: "" };
+  state = { phase: "loading", prop: null, photoCount: 0, replyText: "", sending: false, replyError: "", msgs: [] };
 
   async componentDidMount() {
     const q = new URLSearchParams(window.location.search);
@@ -111,7 +108,17 @@ class Component extends DCLogic {
         const photos = await fb.fetchAllPhotos();
         photoCount = (photos || []).filter((ph) => ph.propertyId === id).length;
       } catch (e) {}
-      this.setState({ phase: "ok", prop: p, photoCount });
+      let msgs = [];
+      try { msgs = await fb.fetchCaseMessages(id); } catch (e) {}
+      // Legacy compatibility: a case created before caseMessages existed still
+      // has its request/response in the old fields. Show them as the first two
+      // entries WITHOUT writing anything (idempotent — nothing is duplicated
+      // on refresh, and no migration write is ever performed here).
+      if (!msgs.length) {
+        if (p.infoRequestMessage) msgs.push({ id: "legacy-req", direction: "outbound", createdAt: p.infoRequestAt || p.submittedAt, customerText: p.infoRequestMessage, thaiText: p.infoRequestMessage, originalText: p.infoRequestMessage });
+        if (p.infoResponseMessage) msgs.push({ id: "legacy-res", direction: "inbound", createdAt: p.infoResponseAt || Date.now(), customerText: p.infoResponseMessage, thaiText: p.infoResponseMessage, originalText: p.infoResponseMessage });
+      }
+      this.setState({ phase: "ok", prop: p, photoCount, msgs });
     } catch (e) {
       console.warn("track load failed:", e);
       this.setState({ phase: "denied" });
@@ -122,16 +129,25 @@ class Component extends DCLogic {
     const msg = (this.state.replyText || "").trim();
     if (!msg) return;
     this.setState({ sending: true, replyError: "" });
+    const lang = (this.state.prop && this.state.prop.customerLanguage) || "th";
     try {
+      // Customer writes in their own language; we store the original AND a Thai
+      // translation so Staff read Thai and the original stays auditable.
+      const thai = lang === "th" ? msg : await this._fb.translateMessage(msg, "th");
+      const rec = {
+        senderType: "customer", direction: "inbound", messageType: "response",
+        originalLanguage: lang, originalText: msg, thaiText: thai,
+        customerLanguage: lang, customerText: msg,
+        channel: "tracking", visibility: "customer",
+        caseToken: this._token, createdAt: Date.now(),
+      };
+      await this._fb.addCaseMessage(this._id, rec);
+      // Keep the legacy summary fields in step so the existing Staff card
+      // (and the "reply received" state it drives) keeps working unchanged.
       await this._fb.updateDocFields("properties", this._id, {
-        infoResponseMessage: msg,
-        infoResponseAt: Date.now(),
-        infoResponseStatus: "responded",
+        infoResponseMessage: thai, infoResponseAt: Date.now(), infoResponseStatus: "responded",
       });
-      this.setState((s) => ({
-        sending: false, replyText: "",
-        prop: { ...s.prop, infoResponseMessage: msg, infoResponseAt: Date.now(), infoResponseStatus: "responded" },
-      }));
+      this.setState((s) => ({ sending: false, replyText: "", msgs: [...s.msgs, rec] }));
     } catch (e) {
       this.setState({ sending: false, replyError: "ส่งไม่สำเร็จ: " + (e.message || e) });
     }
@@ -161,13 +177,19 @@ class Component extends DCLogic {
       txnLabel: p.status === "rent" ? "ฝากเช่า" : "ฝากขาย",
       priceLabel: "฿" + (Number(p.price) || 0).toLocaleString(),
       photoCountLabel: this.state.photoCount + " รูป",
-      hasRequest: !!p.infoRequestMessage,
-      noRequest: !p.infoRequestMessage,
-      requestMessage: p.infoRequestMessage || "",
-      requestAtLabel: p.infoRequestAt ? "ขอเมื่อ " + fmt(p.infoRequestAt) : "",
-      hasResponse: !!p.infoResponseMessage,
-      responseMessage: p.infoResponseMessage || "",
-      responseAtLabel: p.infoResponseAt ? "ส่งเมื่อ " + fmt(p.infoResponseAt) : "",
+      hasThread: this.state.msgs.length > 0,
+      noThread: this.state.msgs.length === 0,
+      thread: this.state.msgs.map((m) => ({
+        key: m.id || String(m.createdAt),
+        isTeam: m.direction === "outbound",
+        who: m.direction === "outbound" ? "ทีมงาน huahin.properties" : "คุณ",
+        // The customer always reads their own language.
+        text: m.direction === "outbound" ? (m.customerText || m.thaiText || m.originalText || "") : (m.originalText || m.customerText || ""),
+        atLabel: fmt(m.createdAt),
+        rowStyle: m.direction === "outbound"
+          ? { background: "oklch(97% 0.03 85)", border: "1px solid oklch(89% 0.05 85)", borderRadius: "10px", padding: "14px 16px" }
+          : { background: "oklch(97% 0.02 150)", border: "1px solid oklch(88% 0.04 150)", borderRadius: "10px", padding: "14px 16px" },
+      })),
       replyText: this.state.replyText,
       onReplyText: (e) => this.setState({ replyText: e.target.value }),
       onReplySend: () => this.sendReply(),

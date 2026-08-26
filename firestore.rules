@@ -112,6 +112,41 @@ service cloud.firestore {
             && request.resource.data.infoResponseMessage.size() > 0
             && request.resource.data.infoResponseMessage.size() < 4000);
       allow delete: if isOwner() || (request.auth != null && resource.data.listerId == request.auth.uid);
+
+      // STEP 2B.2 — Case conversation for owner-submission cases.
+      // Append-only history. The customer has no account: their private
+      // trackToken (stored on the parent property doc) is what authorises
+      // them, and it must be presented on every message they write. They can
+      // only ever ADD a customer-visible inbound message — never read an
+      // internal note, never edit or delete anything, never touch the parent
+      // property. Staff/Owner use the existing isAdmin() role.
+      match /caseMessages/{msgId} {
+        function parent() {
+          return get(/databases/$(database)/documents/properties/$(id)).data;
+        }
+        function tokenOk(t) {
+          return parent().source == "owner_submission"
+            && parent().trackToken is string
+            && parent().trackToken.size() > 20
+            && t == parent().trackToken;
+        }
+        // Reads: team sees everything; a token-holder sees only messages
+        // marked visible to the customer. Client queries MUST filter on
+        // visibility == "customer" for a customer-side list to succeed.
+        allow read: if isAdmin()
+          || (resource.data.visibility == "customer" && resource.data.caseToken is string && tokenOk(resource.data.caseToken));
+        allow create: if isAdmin()
+          || (request.resource.data.senderType == "customer"
+              && request.resource.data.direction == "inbound"
+              && request.resource.data.visibility == "customer"
+              && request.resource.data.caseToken is string
+              && tokenOk(request.resource.data.caseToken)
+              && request.resource.data.originalText is string
+              && request.resource.data.originalText.size() > 0
+              && request.resource.data.originalText.size() < 4000);
+        // History is immutable — no edits, no deletes, by anyone.
+        allow update, delete: if false;
+      }
     }
     // Public reporting channel (Aug 2026): anyone, signed in or not, can
     // flag a listing for admin review — create-only, no read/update/delete,

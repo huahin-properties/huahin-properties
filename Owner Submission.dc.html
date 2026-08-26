@@ -266,6 +266,13 @@ class Component extends DCLogic {
         contactEmail: this.state.f_email,
         submittedAt: Date.now(),
         trackToken: token,
+        // Which language the customer used, so every later reply reaches them
+        // in that language. Reuses the site's existing language preference.
+        customerLanguage: (() => {
+          try { const l = localStorage.getItem("hh_lang"); if (l) return l; } catch (e) {}
+          const n = (navigator.language || "th").slice(0, 2).toLowerCase();
+          return ["th", "en", "zh", "ru", "de", "no", "fr", "it"].includes(n) ? n : "th";
+        })(),
       });
       await Promise.all(this.state.photos.map((p, i) => this._fb.savePhoto(id, i, p.url)));
       this.setState({ submitted: true, submitting: false, submittedId: id, trackUrl: location.origin + location.pathname.replace(/[^/]*$/, "") + "Track Submission.dc.html?id=" + encodeURIComponent(id) + "&t=" + token });

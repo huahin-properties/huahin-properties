@@ -1737,3 +1737,71 @@ export function currentAdminUser() {
   const user = a && a.currentUser;
   return user ? { uid: user.uid, email: user.email || "" } : null;
 }
+
+
+// ── Case conversation (STEP 2B.2) ────────────────────────────────────────
+// Multi-round message history for an owner-submission case, stored as a
+// subcollection of the property so it inherits the case's identity and the
+// existing trackToken authorises the customer side. Append-only: every
+// send is a NEW doc, so a later round can never overwrite an earlier one.
+
+export async function fetchCaseMessages(propertyId) {
+  const snap = await db().collection("properties").doc(String(propertyId))
+    .collection("caseMessages").get();
+  return snap.docs
+    .map((d) => ({ ...d.data(), id: d.id }))
+    .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+}
+
+export async function addCaseMessage(propertyId, msg) {
+  const ref = await db().collection("properties").doc(String(propertyId))
+    .collection("caseMessages").add({ createdAt: Date.now(), ...msg });
+  return ref.id;
+}
+
+// Translate one message via the SAME server-side Claude proxy the chatbot
+// already uses — the API key stays a Firebase secret, never in the browser.
+// Returns the translated text, or the original if translation fails (never
+// blocks a message from being sent).
+export async function translateMessage(text, targetLang) {
+  const names = { th: "Thai", en: "English", zh: "Chinese (Simplified)", ru: "Russian", de: "German", no: "Norwegian", fr: "French", it: "Italian" };
+  const target = names[targetLang] || "Thai";
+  try {
+    const res = await fetch("https://claudecomplete-3j4ldf4pja-as.a.run.app", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        system: `Translate the user's message into ${target}. This is a real-estate enquiry between a property owner and an agency in Hua Hin, Thailand. Reply with ONLY the translation — no notes, no quotes, no explanation. Keep property codes, numbers, prices and proper nouns exactly as written.`,
+        messages: [{ role: "user", content: text }],
+        max_tokens: 1500, model: "claude-haiku-4-5",
+      }),
+    });
+    const data = await res.json();
+    const out = (data.reply || data.completion || "").trim();
+    return out || text;
+  } catch (e) {
+    console.warn("translateMessage failed:", e);
+    return text;
+  }
+}
+
+// AI drafts a Thai reply for Staff. Sends only the case essentials and the
+// recent conversation — never the whole database — to keep cost predictable.
+export async function draftCaseReply(caseSummary, recentThaiMessages) {
+  const convo = (recentThaiMessages || []).slice(-8)
+    .map((m) => (m.direction === "inbound" ? "ลูกค้า: " : "ทีมงาน: ") + (m.thaiText || m.originalText || "")).join("\n");
+  try {
+    const res = await fetch("https://claudecomplete-3j4ldf4pja-as.a.run.app", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        system: "คุณเป็นผู้ช่วยของทีมงาน huahin.properties (นายหน้าอสังหาริมทรัพย์ หัวหิน/ปราณบุรี/ชะอำ) ช่วยร่างข้อความภาษาไทยที่สุภาพ กระชับ เป็นมืออาชีพ เพื่อส่งให้เจ้าของทรัพย์ที่ฝากขาย/ฝากเช่า โดยดูจากข้อมูลเคสและบทสนทนาที่ผ่านมา ถ้ายังขาดข้อมูลสำคัญ ให้ถามอย่างชัดเจนทีละข้อ ตอบกลับเป็นข้อความที่พร้อมส่งเท่านั้น ไม่ต้องอธิบายเพิ่ม ไม่ต้องใส่เครื่องหมายคำพูด ห้ามสัญญาเรื่องราคา ค่าคอมมิชชั่น หรือเงื่อนไขทางกฎหมายแทนทีมงาน",
+        messages: [{ role: "user", content: "ข้อมูลเคส:\n" + caseSummary + "\n\nบทสนทนาที่ผ่านมา:\n" + (convo || "(ยังไม่มี)") + "\n\nช่วยร่างข้อความถัดไปที่ควรส่งให้ลูกค้า" }],
+        max_tokens: 700, model: "claude-haiku-4-5",
+      }),
+    });
+    const data = await res.json();
+    return (data.reply || data.completion || "").trim();
+  } catch (e) {
+    console.warn("draftCaseReply failed:", e);
+    throw e;
+  }
+}
