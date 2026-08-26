@@ -112,6 +112,31 @@
                   <div style="background:white; border:1px solid oklch(88% 0.01 70); border-radius:100px; padding:3px 10px; font-size:11.5px; font-weight:600;">{{ r.reviewLabel }}</div>
                   <div style="font-size:11.5px; color:oklch(55% 0.02 60);">{{ r.assignedLabel }}</div>
                 </div>
+                <div style="display:flex; gap:14px; flex-wrap:wrap; font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:8px;">
+                  <div>อัปเดตล่าสุด: <span style="color:oklch(30% 0.02 60); font-weight:600;">{{ r.lastUpdateLabel }}</span></div>
+                  <div>ขั้นต่อไป: <span style="color:oklch(30% 0.02 60); font-weight:600;">{{ r.nextStepLabel }}</span></div>
+                </div>
+                <sc-if value="{{ r.waitingClaim }}" hint-placeholder-val="{{ false }}">
+                  <div style="background:oklch(96% 0.05 85); border:1px solid oklch(88% 0.09 85); border-radius:6px; padding:7px 12px; font-size:11.5px; color:oklch(42% 0.12 75); margin-bottom:8px;">⏱ ยังไม่มีผู้ช่วยรับงานนี้</div>
+                </sc-if>
+                <div onClick="{{ r.onToggleCase }}" style="display:inline-block; font-size:12px; color:oklch(40% 0.13 25); font-weight:600; cursor:pointer; margin-bottom:8px;">{{ r.caseToggleLabel }}</div>
+                <sc-if value="{{ r.caseOpen }}" hint-placeholder-val="{{ false }}">
+                  <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:12px 14px; margin-bottom:10px;">
+                    <div style="font-size:11.5px; font-weight:700; color:oklch(40% 0.13 25); margin-bottom:8px;">ประวัติการทำงานของเคสนี้</div>
+                    <sc-for list="{{ r.caseTimeline }}" as="ev" hint-placeholder-count="0">
+                      <div style="display:flex; gap:10px; padding:6px 0; border-bottom:1px solid oklch(95% 0.01 70); font-size:11.5px;">
+                        <div style="color:oklch(55% 0.02 60); white-space:nowrap; min-width:96px;">{{ ev.when }}</div>
+                        <div style="flex:1; min-width:0;">
+                          <div style="color:oklch(30% 0.02 60);">{{ ev.what }}</div>
+                          <div style="color:oklch(60% 0.02 60); font-size:10.5px;">{{ ev.who }}</div>
+                        </div>
+                      </div>
+                    </sc-for>
+                    <sc-if value="{{ r.noTimeline }}" hint-placeholder-val="{{ false }}">
+                      <div style="font-size:11.5px; color:oklch(58% 0.02 60);">ยังไม่มีประวัติการทำงานสำหรับเคสนี้</div>
+                    </sc-if>
+                  </div>
+                </sc-if>
                 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
                   <sc-if value="{{ r.showClaim }}" hint-placeholder-val="{{ false }}">
                     <div onClick="{{ r.onClaim }}" style="background:oklch(35% 0.1 250); color:white; padding:6px 14px; border-radius:6px; font-size:12px; cursor:pointer;">✋ รับงาน</div>
@@ -170,7 +195,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { lightboxUrls: [], lightboxIndex: 0, wfBusy: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
+  state = { lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
 
   async componentDidMount() {
     const fb = await import("./firebase-client.js");
@@ -179,8 +204,9 @@ class Component extends DCLogic {
     if (!fb.requireAdminAuth()) return;
     try { const role = await fb.fetchAdminRole(); if (role) this.setState({ adminRole: role }); } catch (e) {}
     try {
-      const [allPhotos, properties, listers, suspects, reports] = await Promise.all([
+      const [allPhotos, activityAll, properties, listers, suspects, reports] = await Promise.all([
         fb.fetchAllPhotos().catch(() => []),
+        fb.fetchActivityLog(Date.now() - 1000 * 60 * 60 * 24 * 120).catch(() => []),
         fb.fetchCollection("properties"),
         fb.fetchCollection("listers"),
         fb.findDuplicateTrialSuspects(),
@@ -194,7 +220,13 @@ class Component extends DCLogic {
         (photosByProp[ph.propertyId] = photosByProp[ph.propertyId] || []).push(ph);
       });
       Object.values(photosByProp).forEach((arr) => arr.sort((a, b) => (a.index || 0) - (b.index || 0)));
-      this.setState({ properties: properties.filter((p) => p.listerId || p.source === "owner_submission"), listersById, suspects, reports, photosByProp, loaded: true });
+      const actByProp = {};
+      (activityAll || []).forEach((a) => {
+        if (!a.propertyId) return;
+        (actByProp[a.propertyId] = actByProp[a.propertyId] || []).push(a);
+      });
+      Object.values(actByProp).forEach((arr) => arr.sort((a, b) => (b.at || 0) - (a.at || 0)));
+      this.setState({ properties: properties.filter((p) => p.listerId || p.source === "owner_submission"), listersById, suspects, reports, photosByProp, actByProp, loaded: true });
     } catch (e) {
       console.warn("fetch failed:", e);
       this.setState({ loaded: true });
@@ -316,7 +348,30 @@ class Component extends DCLogic {
           reviewLabel: ({ submitted: "🆕 ใหม่", reviewing: "🔍 กำลังตรวจ", need_info: "⏳ รอข้อมูลเพิ่มเติม", data_complete: "✅ ข้อมูลครบ", ready: "📝 พร้อมเตรียมประกาศ" })[p.reviewStatus || "submitted"],
           assignedLabel: p.assignedToEmail ? "ผู้รับผิดชอบ: " + p.assignedToEmail : "ยังไม่มีผู้รับผิดชอบ",
           isBusy: this.state.wfBusy === p.id,
-          showClaim: p.source === "owner_submission" && !p.assignedToEmail,
+          // Claim is a Staff action. The Owner's job is to see who has it, not
+          // to take cases themselves (STEP 2A.1 role separation).
+          showClaim: p.source === "owner_submission" && !p.assignedToEmail && this.state.adminRole !== "owner",
+          waitingClaim: p.source === "owner_submission" && !p.assignedToEmail && this.state.adminRole === "owner",
+          lastUpdateLabel: (() => {
+            const t = p.reviewStatusAt || p.assignedAt || p.submittedAt;
+            if (!t) return "—";
+            const d = new Date(t);
+            const today = new Date();
+            const sameDay = d.toDateString() === today.toDateString();
+            const time = d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+            return sameDay ? "วันนี้ " + time + " น." : d.toLocaleDateString("th-TH", { day: "numeric", month: "short" }) + " " + time + " น.";
+          })(),
+          nextStepLabel: ({ submitted: "รอผู้ช่วยรับงาน", reviewing: "ตรวจข้อมูล / ติดตามเจ้าของ", need_info: "รอข้อมูลจากเจ้าของ", data_complete: "เตรียมประกาศ", ready: "รอ CEO อนุมัติ" })[p.reviewStatus || "submitted"],
+          caseOpen: this.state.openCaseId === p.id,
+          onToggleCase: () => this.setState((st) => ({ openCaseId: st.openCaseId === p.id ? "" : p.id })),
+          caseToggleLabel: this.state.openCaseId === p.id ? "ซ่อนรายละเอียด ›" : "ดูรายละเอียด ›",
+          caseTimeline: (this.state.actByProp[p.id] || []).map((a) => ({
+            key: a.id,
+            when: a.at ? new Date(a.at).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + " น." : "—",
+            who: a.actorEmail || "ระบบ",
+            what: a.summary || a.type || "",
+          })),
+          noTimeline: (this.state.actByProp[p.id] || []).length === 0,
           showReviewing: p.source === "owner_submission" && !!p.assignedToEmail && (p.reviewStatus || "submitted") !== "reviewing",
           showNeedInfo: p.source === "owner_submission" && ["reviewing", "data_complete"].includes(p.reviewStatus || ""),
           showComplete: p.source === "owner_submission" && ["reviewing", "need_info"].includes(p.reviewStatus || ""),
