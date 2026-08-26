@@ -44,7 +44,7 @@
 
     <sc-if value="{{ notAllowed }}" hint-placeholder-val="{{ false }}">
       <div style="background:white; border-radius:10px; padding:40px 24px; text-align:center; border:1px solid oklch(90% 0.01 70);">
-        <div style="font-size:15px; color:oklch(40% 0.02 60); margin-bottom:8px;">หน้านี้สำหรับทีมงานเท่านั้น</div>
+        <div style="font-size:15px; color:oklch(40% 0.02 60); margin-bottom:8px;">หน้านี้สำหรับเจ้าของกิจการเท่านั้น</div>
         <a href="Admin Login.dc.html" style="font-size:13px;">เข้าสู่ระบบ</a>
       </div>
     </sc-if>
@@ -176,7 +176,9 @@ class Component extends DCLogic {
     if (!user) { this.setState({ loaded: true, allowed: false }); return; }
     let role = null;
     try { role = await fb.fetchAdminRole(); } catch (e) {}
-    if (!role) { this.setState({ loaded: true, allowed: false }); return; }
+    // Owner-only page (STEP 2A-Security). The real gate is in firestore.rules —
+    // this check just avoids showing a broken screen full of permission errors.
+    if (role !== "owner") { this.setState({ loaded: true, allowed: false, adminRole: role }); return; }
     this.setState({ adminRole: role, allowed: true });
     await this.reload();
   }

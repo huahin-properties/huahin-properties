@@ -107,7 +107,25 @@
             <div style="font-size:11.5px; color:oklch(60% 0.02 60); margin-top:2px;">ส่งเมื่อ {{ r.dateLabel }}</div>
             <sc-if value="{{ r.isOwnerSub }}" hint-placeholder-val="{{ false }}">
               <div style="background:oklch(97% 0.01 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:12px 14px; margin-top:10px; font-size:12.5px; color:oklch(35% 0.02 60); line-height:1.7;">
-                <div style="font-weight:700; color:oklch(40% 0.13 25); margin-bottom:6px;">🏠 ทรัพย์ฝากขายจากลูกค้า</div>
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px;">
+                  <div style="font-weight:700; color:oklch(40% 0.13 25);">🏠 ทรัพย์ฝากขายจากลูกค้า</div>
+                  <div style="background:white; border:1px solid oklch(88% 0.01 70); border-radius:100px; padding:3px 10px; font-size:11.5px; font-weight:600;">{{ r.reviewLabel }}</div>
+                  <div style="font-size:11.5px; color:oklch(55% 0.02 60);">{{ r.assignedLabel }}</div>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
+                  <sc-if value="{{ r.showClaim }}" hint-placeholder-val="{{ false }}">
+                    <div onClick="{{ r.onClaim }}" style="background:oklch(35% 0.1 250); color:white; padding:6px 14px; border-radius:6px; font-size:12px; cursor:pointer;">✋ รับงาน</div>
+                  </sc-if>
+                  <sc-if value="{{ r.showReviewing }}" hint-placeholder-val="{{ false }}">
+                    <div onClick="{{ r.onReviewing }}" style="background:white; border:1px solid oklch(85% 0.02 70); color:oklch(35% 0.02 60); padding:6px 14px; border-radius:6px; font-size:12px; cursor:pointer;">🔍 กำลังตรวจ</div>
+                  </sc-if>
+                  <sc-if value="{{ r.showNeedInfo }}" hint-placeholder-val="{{ false }}">
+                    <div onClick="{{ r.onNeedInfo }}" style="background:oklch(96% 0.05 85); border:1px solid oklch(85% 0.1 85); color:oklch(40% 0.13 75); padding:6px 14px; border-radius:6px; font-size:12px; cursor:pointer;">⏳ รอข้อมูลเพิ่มเติม</div>
+                  </sc-if>
+                  <sc-if value="{{ r.showComplete }}" hint-placeholder-val="{{ false }}">
+                    <div onClick="{{ r.onComplete }}" style="background:oklch(94% 0.06 150); border:1px solid oklch(80% 0.12 150); color:oklch(35% 0.12 150); padding:6px 14px; border-radius:6px; font-size:12px; cursor:pointer;">✅ ข้อมูลครบ</div>
+                  </sc-if>
+                </div>
                 <div>ผู้ติดต่อ: {{ r.contactName }} · <sc-if value="{{ r.hasPhone }}" hint-placeholder-val="{{ true }}"><a href="{{ r.phoneHref }}" style="color:oklch(40% 0.13 25); font-weight:600;">📞 {{ r.contactPhone }}</a></sc-if> {{ r.contactEmailLabel }}</div>
                 <div>ธุรกรรม: {{ r.txnLabel }} · ประเภท: {{ r.typeLabel }} · สภาพ: {{ r.conditionLabel }}</div>
                 <div>พิกัด: {{ r.coordsLabel }}</div>
@@ -152,7 +170,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { lightboxUrls: [], lightboxIndex: 0, properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
+  state = { lightboxUrls: [], lightboxIndex: 0, wfBusy: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
 
   async componentDidMount() {
     const fb = await import("./firebase-client.js");
@@ -181,6 +199,37 @@ class Component extends DCLogic {
       console.warn("fetch failed:", e);
       this.setState({ loaded: true });
     }
+  }
+
+  // Staff workflow (STEP 2A). Reuses the reviewStatus field the owner-submission
+  // form already writes ("submitted"), plus assignedTo* so CEO can see who owns
+  // the case. Every transition writes to the existing activityLog via logActivity.
+  async setReview(p, next, extra) {
+    const labels = { submitted: "ใหม่", reviewing: "กำลังตรวจ", need_info: "รอข้อมูลเพิ่มเติม", data_complete: "ข้อมูลครบ", ready: "พร้อมเตรียมประกาศ" };
+    const prev = p.reviewStatus || "submitted";
+    this.setState({ wfBusy: p.id, actionError: "" });
+    const fields = { reviewStatus: next, reviewStatusAt: Date.now(), ...(extra || {}) };
+    try {
+      await this._fb.updateDocFields("properties", p.id, fields);
+      await this._fb.logActivity({
+        type: "submission_status", propertyId: p.id, from: prev, to: next,
+        summary: `ทรัพย์ฝากขาย ${p.id}: ${labels[prev] || prev} → ${labels[next] || next}`,
+      });
+      this.setState((st) => ({ wfBusy: "", properties: st.properties.map((x) => (x.id === p.id ? { ...x, ...fields } : x)) }));
+    } catch (e) {
+      console.warn("setReview failed:", e);
+      this.setState({ wfBusy: "", actionError: "เปลี่ยนสถานะไม่สำเร็จ: " + (e.message || e) });
+    }
+  }
+
+  async claimCase(p) {
+    const a = this._fb.currentAdminUser && this._fb.currentAdminUser();
+    const email = (a && a.email) || "";
+    const uid = (a && a.uid) || "";
+    await this.setReview(p, "reviewing", { assignedToUid: uid, assignedToEmail: email, assignedAt: Date.now() });
+    try {
+      await this._fb.logActivity({ type: "submission_claim", propertyId: p.id, summary: `รับงานทรัพย์ฝากขาย ${p.id}` });
+    } catch (e) {}
   }
 
   async approve(id) {
@@ -264,6 +313,17 @@ class Component extends DCLogic {
           })(),
           viewUrl: `Property Details.dc.html?id=${p.id}`,
           isOwnerSub: p.source === "owner_submission",
+          reviewLabel: ({ submitted: "🆕 ใหม่", reviewing: "🔍 กำลังตรวจ", need_info: "⏳ รอข้อมูลเพิ่มเติม", data_complete: "✅ ข้อมูลครบ", ready: "📝 พร้อมเตรียมประกาศ" })[p.reviewStatus || "submitted"],
+          assignedLabel: p.assignedToEmail ? "ผู้รับผิดชอบ: " + p.assignedToEmail : "ยังไม่มีผู้รับผิดชอบ",
+          isBusy: this.state.wfBusy === p.id,
+          showClaim: p.source === "owner_submission" && !p.assignedToEmail,
+          showReviewing: p.source === "owner_submission" && !!p.assignedToEmail && (p.reviewStatus || "submitted") !== "reviewing",
+          showNeedInfo: p.source === "owner_submission" && ["reviewing", "data_complete"].includes(p.reviewStatus || ""),
+          showComplete: p.source === "owner_submission" && ["reviewing", "need_info"].includes(p.reviewStatus || ""),
+          onClaim: () => this.claimCase(p),
+          onReviewing: () => this.setReview(p, "reviewing"),
+          onNeedInfo: () => this.setReview(p, "need_info"),
+          onComplete: () => this.setReview(p, "data_complete"),
           showViewLink: p.source !== "owner_submission",
           contactName: p.contactName || "-", contactPhone: p.contactPhone || "-",
           contactEmailLabel: p.contactEmail ? "· " + p.contactEmail : "",

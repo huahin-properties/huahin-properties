@@ -201,9 +201,15 @@ service cloud.firestore {
     // Leads captured from the public contact form / auto-bot engagement —
     // anyone can create one (that's the point of a lead form), but only the
     // admin can read/list them (contains a visitor's personal contact info).
+    // STEP 2A-Security (ส.ค. 2569): Need-to-Know — a Staff member working the
+    // owner-submission queue has no reason to read the whole buyer database, so
+    // reading/editing leads is now OWNER-only (was any admin, which included
+    // Staff). Creating is still open: that is the public contact form. Enforced
+    // here at the rules level, not just hidden in the UI, so it cannot be
+    // bypassed from devtools/console.
     match /leads/{id} {
       allow create: if true;
-      allow read, update, delete: if isAdmin();
+      allow read, update, delete: if isOwner();
     }
 
     // Team activity log (Aug 2026): written automatically by the app whenever

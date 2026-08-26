@@ -1727,3 +1727,13 @@ export async function findDuplicateTrialSuspects() {
   });
   return Object.values(byPhone).filter((group) => group.length > 1 && group.some((l) => l.trialUsed));
 }
+
+
+// STEP 2A — the Staff workflow needs to stamp "who claimed this case" on a
+// submission. Everything else already reads the signed-in admin through
+// fetchAdminRole(); this is the same lookup without the Firestore round-trip.
+export function currentAdminUser() {
+  const a = authApp();
+  const user = a && a.currentUser;
+  return user ? { uid: user.uid, email: user.email || "" } : null;
+}
