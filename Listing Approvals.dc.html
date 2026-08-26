@@ -31,7 +31,7 @@
       <span style="color:oklch(70% 0.02 70); font-size:14px;">| Listing Approvals</span>
     </a>
     <div style="display:flex; align-items:center; gap:16px;">
-      <a href="Admin Dashboard.dc.html" style="color:oklch(85% 0.02 70); font-size:13px; text-decoration:none;">← กลับแดชบอร์ด</a>
+      <a href="{{ backHref }}" style="color:oklch(85% 0.02 70); font-size:13px; text-decoration:none;">{{ backLabel }}</a>
       <div onClick="{{ onLogout }}" style="font-size:13px; color:oklch(85% 0.06 70); cursor:pointer; white-space:nowrap;">ออกจากระบบ</div>
     </div>
   </div>
@@ -297,6 +297,7 @@ class Component extends DCLogic {
   }
 
   renderVals() {
+    const isStaff = this.state.adminRole === "staff";
     const all = this.state.properties || [];
     const countAll = all.length;
     const countPending = all.filter((p) => p.listingStatus === "pending").length;

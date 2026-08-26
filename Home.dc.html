@@ -789,6 +789,12 @@ class Component extends DCLogic {
       const u = fb0.getCurrentAuthUser();
       if (u) {
         this.setState({ personHref: "Lister Dashboard.dc.html", isLoggedIn: true });
+        // Role decides where the account icon leads: staff → their work page,
+        // owner → approvals, plain member → the legacy lister dashboard.
+        fb0.fetchAdminRole().then((r) => {
+          if (r === "staff") this.setState({ personHref: "Staff Workspace.dc.html" });
+          else if (r === "owner") this.setState({ personHref: "Listing Approvals.dc.html" });
+        }).catch(() => {});
         const seenToday = (() => { try { return localStorage.getItem("hhWelcomeSeenDate") === new Date().toDateString(); } catch (e) { return false; } })();
         const forceWelcome = /[?&]welcome=1/.test(window.location.search);
         if (seenToday && !forceWelcome) { window.location.href = "Lister Dashboard.dc.html"; redirecting = true; }
