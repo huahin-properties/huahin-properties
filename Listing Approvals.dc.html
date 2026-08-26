@@ -38,6 +38,26 @@
   </div>
 
   <div style="max-width:1000px; margin:0 auto; padding:clamp(20px,4vw,40px);">
+    <sc-if value="{{ infoReqOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:210; display:flex; align-items:center; justify-content:center; padding:18px;">
+        <div style="background:white; border-radius:12px; padding:22px; max-width:520px; width:100%; max-height:88vh; overflow:auto;">
+          <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60); margin-bottom:4px;">ขอข้อมูลเพิ่มเติมจากผู้ติดต่อทรัพย์</div>
+          <div style="font-size:12px; color:oklch(52% 0.02 60); margin-bottom:14px;">รหัส: {{ infoReqPropId }}</div>
+          <div style="background:oklch(97% 0.008 85); border-radius:8px; padding:12px 14px; margin-bottom:14px; font-size:12.5px; color:oklch(32% 0.02 60); line-height:1.7;">
+            <div>ผู้ติดต่อ: {{ infoReqContactName }}</div>
+            <div>เบอร์โทร: {{ infoReqContactPhone }}</div>
+            <div>ช่องทางอื่น: {{ infoReqContactExtra }}</div>
+          </div>
+          <div style="font-size:12.5px; font-weight:600; color:oklch(30% 0.02 60); margin-bottom:6px;">ต้องการข้อมูลเพิ่มเติมอะไร?</div>
+          <textarea rows="4" value="{{ infoReqText }}" onChange="{{ onInfoReqText }}" placeholder="เช่น กรุณาส่งสำเนาโฉนด และยืนยันราคาขายสุทธิที่เจ้าของต้องการ" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:13.5px; font-family:inherit; resize:vertical; line-height:1.6;"></textarea>
+          <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px;">
+            <div onClick="{{ onInfoReqCancel }}" style="border:1px solid oklch(85% 0.01 70); color:oklch(38% 0.02 60); padding:9px 18px; border-radius:6px; font-size:13px; cursor:pointer;">ยกเลิก</div>
+            <div onClick="{{ onInfoReqSave }}" style="background:oklch(40% 0.13 25); color:white; padding:9px 18px; border-radius:6px; font-size:13px; font-weight:600; cursor:pointer;">{{ infoReqSaveLabel }}</div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
     <sc-if value="{{ lightboxOpen }}" hint-placeholder-val="{{ false }}">
       <div onClick="{{ onLightboxClose }}" style="position:fixed; inset:0; background:rgba(0,0,0,0.82); z-index:200; display:flex; align-items:center; justify-content:center; gap:14px; cursor:zoom-out;">
         <div onClick="{{ onLightboxPrev }}" style="background:rgba(255,255,255,0.16); color:white; width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; cursor:pointer; flex-shrink:0;">‹</div>
@@ -117,6 +137,13 @@
                   <div>อัปเดตล่าสุด: <span style="color:oklch(30% 0.02 60); font-weight:600;">{{ r.lastUpdateLabel }}</span></div>
                   <div>ขั้นต่อไป: <span style="color:oklch(30% 0.02 60); font-weight:600;">{{ r.nextStepLabel }}</span></div>
                 </div>
+                <sc-if value="{{ r.hasInfoReq }}" hint-placeholder-val="{{ false }}">
+                  <div style="background:oklch(97% 0.04 85); border:1px solid oklch(88% 0.08 85); border-radius:8px; padding:11px 13px; margin-bottom:10px;">
+                    <div style="font-size:11.5px; font-weight:700; color:oklch(42% 0.13 75); margin-bottom:5px;">⏳ คำขอข้อมูลเพิ่มเติม · {{ r.infoReqStatusLabel }}</div>
+                    <div style="font-size:12.5px; color:oklch(28% 0.02 60); line-height:1.55; white-space:pre-wrap;">{{ r.infoReqMessage }}</div>
+                    <div style="font-size:11px; color:oklch(52% 0.02 60); margin-top:6px;">{{ r.infoReqByLabel }} · {{ r.infoReqAtLabel }}</div>
+                  </div>
+                </sc-if>
                 <sc-if value="{{ r.waitingClaim }}" hint-placeholder-val="{{ false }}">
                   <div style="background:oklch(96% 0.05 85); border:1px solid oklch(88% 0.09 85); border-radius:6px; padding:7px 12px; font-size:11.5px; color:oklch(42% 0.12 75); margin-bottom:8px;">⏱ ยังไม่มีผู้ช่วยรับงานนี้</div>
                 </sc-if>
@@ -196,7 +223,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
+  state = { infoReqFor: null, infoReqText: "", infoReqBusy: false, lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
 
   async componentDidMount() {
     const fb = await import("./firebase-client.js");
@@ -252,6 +279,34 @@ class Component extends DCLogic {
     } catch (e) {
       console.warn("setReview failed:", e);
       this.setState({ wfBusy: "", actionError: "เปลี่ยนสถานะไม่สำเร็จ: " + (e.message || e) });
+    }
+  }
+
+  // STEP 2B.1 — the request is stored as fields on the property doc itself, so
+  // no new collection and no Firestore Rules change are needed (Staff already
+  // has write access to owner_submission properties).
+  async saveInfoRequest() {
+    const p = this.state.infoReqFor;
+    const msg = (this.state.infoReqText || "").trim();
+    if (!p || !msg) return;
+    const a = this._fb.currentAdminUser && this._fb.currentAdminUser();
+    this.setState({ infoReqBusy: true });
+    const fields = {
+      infoRequestMessage: msg,
+      infoRequestByUid: (a && a.uid) || "",
+      infoRequestByEmail: (a && a.email) || "",
+      infoRequestAt: Date.now(),
+      infoRequestStatus: "waiting",
+    };
+    try {
+      await this.setReview(p, "need_info", fields);
+      await this._fb.logActivity({
+        type: "submission_info_request", propertyId: p.id,
+        summary: `ขอข้อมูลเพิ่มเติมจากผู้ติดต่อทรัพย์ ${p.id}: ${msg}`,
+      });
+      this.setState({ infoReqFor: null, infoReqText: "", infoReqBusy: false });
+    } catch (e) {
+      this.setState({ infoReqBusy: false, actionError: "บันทึกคำขอไม่สำเร็จ: " + (e.message || e) });
     }
   }
 
@@ -379,7 +434,12 @@ class Component extends DCLogic {
           showComplete: p.source === "owner_submission" && ["reviewing", "need_info"].includes(p.reviewStatus || ""),
           onClaim: () => this.claimCase(p),
           onReviewing: () => this.setReview(p, "reviewing"),
-          onNeedInfo: () => this.setReview(p, "need_info"),
+          onNeedInfo: () => this.setState({ infoReqFor: p, infoReqText: "" }),
+          hasInfoReq: !!p.infoRequestMessage,
+          infoReqMessage: p.infoRequestMessage || "",
+          infoReqByLabel: p.infoRequestByEmail ? "ผู้ขอ: " + p.infoRequestByEmail : "",
+          infoReqAtLabel: p.infoRequestAt ? new Date(p.infoRequestAt).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + " น." : "",
+          infoReqStatusLabel: p.infoRequestStatus === "waiting" ? "รอคำตอบ" : "ได้รับข้อมูลแล้ว",
           onComplete: () => this.setReview(p, "data_complete"),
           showViewLink: p.source !== "owner_submission",
           contactName: p.contactName || "-", contactPhone: p.contactPhone || "-",
@@ -434,6 +494,16 @@ class Component extends DCLogic {
       onLogout: () => { this._fb.logoutAdmin(); window.location.href = "Admin Login.dc.html"; },
       countAll, countPending, countPendingOwner, countLive, countExpired, countRejected, countOffline, countReports,
       isOwnerRole: this.state.adminRole === "owner",
+      infoReqOpen: !!this.state.infoReqFor,
+      infoReqPropId: this.state.infoReqFor ? this.state.infoReqFor.id : "",
+      infoReqContactName: this.state.infoReqFor ? (this.state.infoReqFor.contactName || "—") : "",
+      infoReqContactPhone: this.state.infoReqFor ? (this.state.infoReqFor.contactPhone || "—") : "",
+      infoReqContactExtra: this.state.infoReqFor ? (this.state.infoReqFor.contactEmail || this.state.infoReqFor.contactLine || "—") : "",
+      infoReqText: this.state.infoReqText,
+      onInfoReqText: (e) => this.setState({ infoReqText: e.target.value }),
+      onInfoReqCancel: () => this.setState({ infoReqFor: null, infoReqText: "" }),
+      onInfoReqSave: () => this.saveInfoRequest(),
+      infoReqSaveLabel: this.state.infoReqBusy ? "กำลังบันทึก…" : "บันทึกคำขอข้อมูล",
       lightboxOpen: this.state.lightboxUrls.length > 0,
       lightboxImgStyle: { maxWidth: "92vw", maxHeight: "82vh", objectFit: "contain", borderRadius: "8px", boxShadow: "0 20px 60px rgba(0,0,0,0.5)" },
       lightboxSrc: this.state.lightboxUrls[this.state.lightboxIndex] || "",
