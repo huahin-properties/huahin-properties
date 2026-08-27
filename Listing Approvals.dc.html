@@ -138,18 +138,26 @@
                   <div>ขั้นต่อไป: <span style="color:oklch(30% 0.02 60); font-weight:600;">{{ r.nextStepLabel }}</span></div>
                 </div>
                 <sc-if value="{{ r.isOwnerSub }}" hint-placeholder-val="{{ false }}">
+                  <sc-if value="{{ r.hasUnread }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:inline-block; background:oklch(55% 0.20 25); color:white; font-size:10.5px; font-weight:700; padding:2px 9px; border-radius:100px; margin-bottom:7px;">🔔 ข้อความใหม่จากลูกค้า</div>
+                  </sc-if>
                   <div onClick="{{ r.onToggleThread }}" style="font-size:12px; font-weight:600; color:oklch(40% 0.13 25); cursor:pointer; margin-bottom:10px;">💬 การสนทนากับลูกค้า · 🌐 {{ r.custLangStatus }}: {{ r.custLangLabel }} ›</div>
                   <sc-if value="{{ r.threadOpen }}" hint-placeholder-val="{{ false }}">
                     <div style="background:oklch(98% 0.005 85); border:1px solid oklch(91% 0.01 70); border-radius:9px; padding:12px 13px; margin-bottom:11px;">
-                      <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:11px;">
+                      <div style="display:flex; flex-direction:column; gap:2px; margin-bottom:11px; max-height:340px; overflow-y:auto;">
                         <sc-for list="{{ r.thread }}" as="m" hint-placeholder-count="0">
+                          <sc-if value="{{ m.showDay }}" hint-placeholder-val="{{ false }}">
+                            <div style="text-align:center; font-size:10.5px; color:oklch(58% 0.02 60); margin:9px 0 4px;">{{ m.dayLabel }}</div>
+                          </sc-if>
                           <div style="{{ m.rowStyle }}">
-                            <div style="font-size:10.5px; font-weight:700; color:oklch(40% 0.05 80); margin-bottom:4px;">{{ m.who }}</div>
-                            <div style="font-size:12.5px; color:oklch(24% 0.02 60); line-height:1.6; white-space:pre-wrap;">{{ m.thai }}</div>
-                            <sc-if value="{{ m.showOrig }}" hint-placeholder-val="{{ false }}">
-                              <div style="font-size:10.5px; color:oklch(56% 0.02 60); margin-top:5px; white-space:pre-wrap;">{{ m.origLabel }}</div>
+                            <sc-if value="{{ m.showWho }}" hint-placeholder-val="{{ true }}">
+                              <div style="{{ m.whoStyle }}">{{ m.who }}</div>
                             </sc-if>
-                            <div style="font-size:10px; color:oklch(58% 0.02 60); margin-top:5px;">{{ m.atLabel }}</div>
+                            <div style="{{ m.bubbleStyle }}">{{ m.thai }}</div>
+                            <sc-if value="{{ m.showOrig }}" hint-placeholder-val="{{ false }}">
+                              <div style="font-size:10px; color:oklch(58% 0.02 60); margin-top:2px; max-width:85%;">{{ m.origLabel }}</div>
+                            </sc-if>
+                            <div style="{{ m.timeStyle }}">{{ m.atLabel }}</div>
                           </div>
                         </sc-for>
                         <sc-if value="{{ r.noThread }}" hint-placeholder-val="{{ true }}">
@@ -290,6 +298,10 @@
 class Component extends DCLogic {
   state = { copiedFor: "", caseMsgs: {}, replyDraft: {}, replyBusy: "", aiBusy: "", suggests: {}, suggestKey: {}, suggestBusy: "", caseErr: {}, infoReqFor: null, infoReqText: "", infoReqBusy: false, lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
 
+  componentWillUnmount() {
+    Object.values(this._unsubs || {}).forEach((fn) => { try { fn(); } catch (e) {} });
+  }
+
   async componentDidMount() {
     const fb = await import("./firebase-client.js");
     this._fb = fb;
@@ -395,6 +407,26 @@ class Component extends DCLogic {
   // duplicates anything.
   async loadThread(p) {
     if (this.state.caseMsgs[p.id]) return;
+    // Live thread, scoped to this one case. Staff sees customer replies without
+    // refreshing; a new inbound message also earns a fresh suggestion set.
+    try {
+      this._unsubs = this._unsubs || {};
+      if (!this._unsubs[p.id]) {
+        this._unsubs[p.id] = this._fb.watchCaseMessages(p.id, false, null, 50, (rows) => {
+          if (!rows) return;
+          const prev = this.state.caseMsgs[p.id] || [];
+          const lastPrev = prev.length ? prev[prev.length - 1] : null;
+          const lastNow = rows.length ? rows[rows.length - 1] : null;
+          const newInbound = lastNow && lastNow.direction === "inbound"
+            && (!lastPrev || lastPrev.id !== lastNow.id);
+          this.setState((st) => ({ caseMsgs: { ...st.caseMsgs, [p.id]: rows } }));
+          if (newInbound) {
+            this._fb.markCaseRead(p.id, "staff");
+            this.loadSuggestions(p, false);
+          }
+        });
+      }
+    } catch (e) { console.warn("staff watch failed:", e); }
     let msgs = [];
     try { msgs = await this._fb.fetchCaseMessages(p.id); } catch (e) {}
     if (!msgs.length) {
@@ -463,10 +495,7 @@ class Component extends DCLogic {
       }
       await this._fb.addCaseMessage(p.id, rec);
       await this._fb.logActivity({ type: "case_message_sent", propertyId: p.id, summary: `ส่งข้อความถึงผู้ติดต่อทรัพย์ ${p.id}` });
-      this.setState((st) => ({
-        replyBusy: "", replyDraft: { ...st.replyDraft, [p.id]: "" },
-        caseMsgs: { ...st.caseMsgs, [p.id]: [...(st.caseMsgs[p.id] || []), rec] },
-      }));
+      this.setState((st) => ({ replyBusy: "", replyDraft: { ...st.replyDraft, [p.id]: "" } }));
     } catch (e) {
       this.setState((st) => ({ replyBusy: "", caseErr: { ...st.caseErr, [p.id]: "ส่งไม่สำเร็จ: " + (e.message || e) } }));
     }
@@ -601,22 +630,43 @@ class Component extends DCLogic {
             const opening = this.state.openCaseId !== p.id;
             await this.loadThread(p);
             this.setState((st) => ({ openCaseId: st.openCaseId === p.id ? "" : p.id }));
-            if (opening) this.loadSuggestions(p, false);
+            if (opening) { this.loadSuggestions(p, false); this._fb.markCaseRead(p.id, "staff"); }
           },
           threadOpen: this.state.openCaseId === p.id,
+          hasUnread: !!(p.lastCustomerMessageAt && (!p.staffLastReadAt || p.lastCustomerMessageAt > p.staffLastReadAt)),
           custLangStatus: p.customerLanguageConfirmed === true ? "ภาษาลูกค้า" : "ภาษาที่คาดไว้",
           custLangLabel: ({ th: "ไทย", en: "English", zh: "中文", ru: "Русский", de: "Deutsch", no: "Norsk", fr: "Français", it: "Italiano" })[p.customerLanguage || "th"] || "ไทย",
-          thread: (this.state.caseMsgs[p.id] || []).map((m) => ({
-            key: m.id || String(m.createdAt),
-            who: m.direction === "outbound" ? ("ทีมงาน" + (m.senderEmail ? " · " + m.senderEmail : "")) : "ลูกค้า",
-            thai: m.thaiText || m.originalText || "",
-            showOrig: !!m.originalText && m.originalLanguage && m.originalLanguage !== "th",
-            origLabel: "ต้นฉบับ: " + (m.originalText || ""),
-            atLabel: m.createdAt ? new Date(m.createdAt).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + " น." : "",
-            rowStyle: m.direction === "outbound"
-              ? { background: "oklch(97% 0.03 85)", border: "1px solid oklch(90% 0.04 85)", borderRadius: "8px", padding: "10px 12px" }
-              : { background: "oklch(97% 0.02 150)", border: "1px solid oklch(89% 0.04 150)", borderRadius: "8px", padding: "10px 12px" },
-          })),
+          thread: (this.state.caseMsgs[p.id] || []).map((m, i, arr) => {
+            const prev = arr[i - 1];
+            const team = m.direction === "outbound";
+            const sameSender = prev && prev.direction === m.direction;
+            const dayOf = (t) => new Date(t || 0).toDateString();
+            const showDay = !prev || dayOf(prev.createdAt) !== dayOf(m.createdAt);
+            const d = new Date(m.createdAt || 0);
+            const dayLabel = dayOf(m.createdAt) === new Date().toDateString() ? "วันนี้"
+              : dayOf(m.createdAt) === new Date(Date.now() - 86400000).toDateString() ? "เมื่อวาน"
+              : d.toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" });
+            return {
+              key: m.id || String(m.createdAt),
+              showDay: showDay, dayLabel: dayLabel,
+              showWho: showDay || !sameSender,
+              who: team ? ("ทีมงาน" + (m.senderEmail ? " · " + m.senderEmail : "")) : "ลูกค้า",
+              thai: m.thaiText || m.originalText || "",
+              showOrig: !!m.originalText && m.originalLanguage && m.originalLanguage !== "th",
+              origLabel: "ต้นฉบับ: " + (m.originalText || ""),
+              atLabel: d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }) + " น.",
+              rowStyle: { display: "flex", flexDirection: "column", alignItems: team ? "flex-end" : "flex-start", marginTop: (showDay || !sameSender) ? "7px" : "0" },
+              whoStyle: { fontSize: "10px", fontWeight: "700", color: "oklch(52% 0.02 60)", marginBottom: "3px" },
+              bubbleStyle: {
+                maxWidth: "85%", padding: "8px 12px", fontSize: "12.5px", lineHeight: "1.55",
+                whiteSpace: "pre-wrap", wordBreak: "break-word", color: "oklch(25% 0.02 60)",
+                background: team ? "oklch(96% 0.04 85)" : "white",
+                border: team ? "1px solid oklch(89% 0.05 85)" : "1px solid oklch(89% 0.01 70)",
+                borderRadius: team ? "13px 13px 4px 13px" : "13px 13px 13px 4px",
+              },
+              timeStyle: { fontSize: "9.5px", color: "oklch(62% 0.02 60)", marginTop: "2px" },
+            };
+          }),
           noThread: (this.state.caseMsgs[p.id] || []).length === 0,
           draftText: this.state.replyDraft[p.id] || "",
           onDraftText: (e) => this.setState((st) => ({ replyDraft: { ...st.replyDraft, [p.id]: e.target.value } })),

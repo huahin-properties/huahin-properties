@@ -1765,9 +1765,45 @@ export async function fetchCaseMessages(propertyId, customerOnly, caseToken) {
     .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
 }
 
+// Realtime version of fetchCaseMessages. Same filters (they are what the
+// security rules require), limited to ONE case, newest 50 by default so a long
+// thread cannot run up Firestore reads. Returns an unsubscribe function.
+export function watchCaseMessages(propertyId, customerOnly, caseToken, limit, cb) {
+  let q = db().collection("properties").doc(String(propertyId)).collection("caseMessages");
+  if (customerOnly) {
+    q = q.where("visibility", "==", "customer");
+    if (caseToken) q = q.where("caseToken", "==", String(caseToken));
+  }
+  q = q.orderBy("createdAt", "desc").limit(Number(limit) || 50);
+  return q.onSnapshot(
+    (snap) => {
+      const rows = snap.docs.map((d) => ({ ...d.data(), id: d.id }))
+        .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+      cb(rows, null);
+    },
+    (err) => { console.warn("watchCaseMessages error:", err); cb(null, err); }
+  );
+}
+
+// Read markers live on the PROPERTY doc, never on the messages — caseMessages
+// is append-only by rule, so "mark as read" must not touch a message.
+export async function markCaseRead(propertyId, who) {
+  const field = who === "customer" ? "customerLastReadAt" : "staffLastReadAt";
+  try {
+    await db().collection("properties").doc(String(propertyId)).update({ [field]: Date.now() });
+  } catch (e) { console.warn("markCaseRead failed:", e); }
+}
+
 export async function addCaseMessage(propertyId, msg) {
+  const now = Date.now();
   const ref = await db().collection("properties").doc(String(propertyId))
-    .collection("caseMessages").add({ createdAt: Date.now(), ...msg });
+    .collection("caseMessages").add({ createdAt: now, ...msg });
+  // Summary stamp on the parent doc: lets a list of cases show unread badges
+  // with ONE read per case instead of opening every thread.
+  try {
+    const field = msg && msg.direction === "inbound" ? "lastCustomerMessageAt" : "lastStaffMessageAt";
+    await db().collection("properties").doc(String(propertyId)).update({ [field]: now });
+  } catch (e) { console.warn("lastMessageAt stamp failed:", e); }
   return ref.id;
 }
 
@@ -1798,24 +1834,75 @@ export async function detectLanguage(text) {
   }
 }
 
+// Very short courtesy words are the exact case where a chat model stops
+// translating and starts CONVERSING ("I'm ready to translate — please provide
+// the message"). Answer those from a table so no model call happens at all.
+const SHORT_PHRASES = {
+  ok: { th: "ตกลงครับ", en: "OK", zh: "好的", ru: "Хорошо", de: "OK", no: "OK", fr: "D'accord", it: "OK" },
+  okay: { th: "ตกลงครับ", en: "Okay", zh: "好的", ru: "Хорошо", de: "Okay", no: "Ok", fr: "D'accord", it: "Va bene" },
+  yes: { th: "ใช่ครับ", en: "Yes", zh: "是的", ru: "Да", de: "Ja", no: "Ja", fr: "Oui", it: "Sì" },
+  no: { th: "ไม่ครับ", en: "No", zh: "不", ru: "Нет", de: "Nein", no: "Nei", fr: "Non", it: "No" },
+  thanks: { th: "ขอบคุณครับ", en: "Thanks", zh: "谢谢", ru: "Спасибо", de: "Danke", no: "Takk", fr: "Merci", it: "Grazie" },
+  "thank you": { th: "ขอบคุณครับ", en: "Thank you", zh: "谢谢", ru: "Спасибо", de: "Danke", no: "Takk", fr: "Merci", it: "Grazie" },
+  sure: { th: "ได้ครับ", en: "Sure", zh: "当然", ru: "Конечно", de: "Sicher", no: "Sikkert", fr: "Bien sûr", it: "Certo" },
+  hi: { th: "สวัสดีครับ", en: "Hi", zh: "你好", ru: "Привет", de: "Hallo", no: "Hei", fr: "Bonjour", it: "Ciao" },
+  hello: { th: "สวัสดีครับ", en: "Hello", zh: "你好", ru: "Здравствуйте", de: "Hallo", no: "Hallo", fr: "Bonjour", it: "Ciao" },
+  "ตกลง": { th: "ตกลงครับ", en: "OK", zh: "好的", ru: "Хорошо", de: "OK", no: "OK", fr: "D'accord", it: "OK" },
+  "โอเค": { th: "โอเคครับ", en: "OK", zh: "好的", ru: "Хорошо", de: "OK", no: "OK", fr: "D'accord", it: "OK" },
+  "ใช่": { th: "ใช่ครับ", en: "Yes", zh: "是的", ru: "Да", de: "Ja", no: "Ja", fr: "Oui", it: "Sì" },
+  "ขอบคุณ": { th: "ขอบคุณครับ", en: "Thank you", zh: "谢谢", ru: "Спасибо", de: "Danke", no: "Takk", fr: "Merci", it: "Grazie" },
+  "สวัสดี": { th: "สวัสดีครับ", en: "Hello", zh: "你好", ru: "Здравствуйте", de: "Hallo", no: "Hallo", fr: "Bonjour", it: "Ciao" },
+};
+
+// A reply that talks ABOUT translating is a conversation, not a translation.
+// Reject it rather than storing it as the customer's or staff's words.
+function looksLikeRefusal(out, src) {
+  const s = out.toLowerCase();
+  const bad = ["ready to translate", "please provide", "provide the message", "i can translate", "i'll translate",
+    "no text", "which language", "as an ai", "พร้อมแปล", "กรุณาส่งข้อความ", "ระบุข้อความ", "ไม่มีข้อความ"];
+  if (bad.some((b) => s.includes(b))) return true;
+  // A one-word input cannot legitimately balloon into a paragraph.
+  if (src.trim().split(/\s+/).length <= 2 && out.length > Math.max(60, src.length * 12)) return true;
+  return false;
+}
+
 export async function translateMessage(text, targetLang) {
   const names = { th: "Thai", en: "English", zh: "Chinese (Simplified)", ru: "Russian", de: "German", no: "Norwegian", fr: "French", it: "Italian" };
   const target = names[targetLang] || "Thai";
+  const src = String(text || "");
+  const keyed = SHORT_PHRASES[src.trim().toLowerCase().replace(/[!.?ๆ\s]+$/, "")];
+  if (keyed && keyed[targetLang]) return keyed[targetLang];
   try {
     const res = await fetch("https://claudecomplete-3j4ldf4pja-as.a.run.app", {
       method: "POST", headers: { "content-type": "application/json" },
       body: JSON.stringify({
-        system: `Translate the user's message into ${target}. This is a real-estate enquiry between a property owner and an agency in Hua Hin, Thailand. Reply with ONLY the translation — no notes, no quotes, no explanation. Keep property codes, numbers, prices and proper nouns exactly as written.`,
-        messages: [{ role: "user", content: text }],
+        system: `You are a translation engine, NOT an assistant. Translate the INPUT into ${target} and output the translation ONLY.
+
+Absolute rules:
+- Output the translated text and nothing else. No notes, no quotes, no "Translation:" prefix, no explanation.
+- Never answer, comment on, or respond to the input's content — only translate it.
+- Never say you are ready to translate and never ask for a message. Whatever the input is, it IS the text to translate.
+- Even a single word or a fragment ("ok", "yes", "no", "thanks") must be translated as that word. Never expand it into a sentence.
+- Keep property codes, numbers, prices and proper nouns exactly as written.
+- If the input is already in ${target}, output it unchanged.
+
+Context: a real-estate enquiry between a property owner and an agency in Hua Hin, Thailand.`,
+        messages: [{ role: "user", content: src }],
         max_tokens: 1500, model: "claude-haiku-4-5",
       }),
     });
     const data = await res.json();
-    const out = (data.reply || data.completion || "").trim();
-    return out || text;
+    let out = (data.reply || data.completion || "").trim()
+      .replace(/^(?:translation|คำแปล)\s*[:：]\s*/i, "")
+      .replace(/^["'“”「」]+|["'“”「」]+$/g, "").trim();
+    if (!out || looksLikeRefusal(out, src)) {
+      console.warn("translateMessage: model returned a non-translation, keeping original");
+      return src;
+    }
+    return out;
   } catch (e) {
     console.warn("translateMessage failed:", e);
-    return text;
+    return src;
   }
 }
 

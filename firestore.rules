@@ -128,7 +128,19 @@ service cloud.firestore {
                  .hasOnly(['customerLanguage', 'customerLanguageConfirmed', 'customerLanguageSource'])
             && request.resource.data.customerLanguage in ['th','en','zh','ru','de','no','fr','it']
             && request.resource.data.customerLanguageConfirmed == true
-            && request.resource.data.customerLanguageSource == 'message_detected');
+            && request.resource.data.customerLanguageSource == 'message_detected')
+
+        // CASE MESSENGER PHASE 1 — read markers and last-message stamps.
+        // Unread state must NOT be stored on the messages (caseMessages is
+        // append-only), so it lives here as timestamps. The token holder may
+        // set only the customer-side markers; Staff/Owner set the staff side
+        // through the isAdmin() branch above. No content field is reachable.
+        || (resource.data.source == "owner_submission"
+            && resource.data.trackToken is string
+            && resource.data.trackToken.size() > 20
+            && request.resource.data.trackToken == resource.data.trackToken
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['customerLastReadAt', 'lastCustomerMessageAt']));
       allow delete: if isOwner() || (request.auth != null && resource.data.listerId == request.auth.uid);
 
       // STEP 2B.2 — Case conversation for owner-submission cases.

@@ -57,13 +57,23 @@
       </div>
 
       <sc-if value="{{ hasThread }}" hint-placeholder-val="{{ false }}">
-        <div style="font-size:13.5px; font-weight:700; color:oklch(30% 0.02 60); margin-bottom:10px;">การติดต่อกับทีมงาน</div>
-        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+          <div style="font-size:13.5px; font-weight:700; color:oklch(30% 0.02 60);">การติดต่อกับทีมงาน</div>
+          <sc-if value="{{ hasNewFromTeam }}" hint-placeholder-val="{{ false }}">
+            <div style="background:oklch(55% 0.20 25); color:white; font-size:10.5px; font-weight:700; padding:2px 9px; border-radius:100px;">มีข้อความใหม่</div>
+          </sc-if>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:3px; margin-bottom:16px;">
           <sc-for list="{{ thread }}" as="m" hint-placeholder-count="2">
+            <sc-if value="{{ m.showDay }}" hint-placeholder-val="{{ false }}">
+              <div style="text-align:center; font-size:11px; color:oklch(58% 0.02 60); margin:12px 0 6px;">{{ m.dayLabel }}</div>
+            </sc-if>
             <div style="{{ m.rowStyle }}">
-              <div style="font-size:11.5px; font-weight:700; color:oklch(38% 0.06 80); margin-bottom:5px;">{{ m.who }}</div>
-              <div style="font-size:13.5px; color:oklch(24% 0.02 60); line-height:1.7; white-space:pre-wrap;">{{ m.text }}</div>
-              <div style="font-size:10.5px; color:oklch(55% 0.02 60); margin-top:7px;">{{ m.atLabel }}</div>
+              <sc-if value="{{ m.showWho }}" hint-placeholder-val="{{ true }}">
+                <div style="{{ m.whoStyle }}">{{ m.who }}</div>
+              </sc-if>
+              <div style="{{ m.bubbleStyle }}">{{ m.text }}</div>
+              <div style="{{ m.timeStyle }}">{{ m.atLabel }}</div>
             </div>
           </sc-for>
         </div>
@@ -87,7 +97,9 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:700,&quot;height&quot;:800}}">
 class Component extends DCLogic {
-  state = { phase: "loading", prop: null, photoCount: 0, replyText: "", sending: false, replyError: "", msgs: [] };
+  state = { phase: "loading", prop: null, photoCount: 0, replyText: "", sending: false, replyError: "", msgs: [], msgsFailed: false, hasNewIncoming: false, atBottom: true };
+
+  componentWillUnmount() { if (this._unsub) { try { this._unsub(); } catch (e) {} } }
 
   async componentDidMount() {
     const q = new URLSearchParams(window.location.search);
@@ -112,6 +124,19 @@ class Component extends DCLogic {
       let msgsFailed = false;
       try { msgs = await fb.fetchCaseMessages(id, true, token); }
       catch (e) { msgsFailed = true; console.warn("case messages read failed:", e); }
+      // Live updates: staff replies appear without the customer refreshing.
+      // Scoped to THIS case only, newest 50, so reads stay predictable.
+      try {
+        this._unsub = fb.watchCaseMessages(id, true, token, 50, (rows) => {
+          if (!rows) return;
+          this.setState((s) => {
+            const seen = s.msgs.length;
+            const grew = rows.length > seen;
+            return { msgs: rows, msgsFailed: false, hasNewIncoming: grew && !s.atBottom ? true : s.hasNewIncoming };
+          });
+        });
+      } catch (e) { console.warn("watch failed:", e); }
+      try { await fb.markCaseRead(id, "customer"); } catch (e) {}
       // Legacy compatibility: a case created before caseMessages existed still
       // has its request/response in the old fields. Show them as the first two
       // entries WITHOUT writing anything (idempotent — nothing is duplicated
@@ -170,7 +195,8 @@ class Component extends DCLogic {
       await this._fb.updateDocFields("properties", this._id, {
         infoResponseMessage: thai, infoResponseAt: Date.now(), infoResponseStatus: "responded",
       });
-      this.setState((s) => ({ sending: false, replyText: "", msgs: [...s.msgs, rec] }));
+      this.setState({ sending: false, replyText: "" });
+      try { await this._fb.markCaseRead(this._id, "customer"); } catch (e) {}
     } catch (e) {
       this.setState({ sending: false, replyError: "ส่งไม่สำเร็จ: " + (e.message || e) });
     }
@@ -201,20 +227,42 @@ class Component extends DCLogic {
       priceLabel: "฿" + (Number(p.price) || 0).toLocaleString(),
       photoCountLabel: this.state.photoCount + " รูป",
       hasThread: this.state.msgs.length > 0,
+      hasNewFromTeam: !!(this.state.prop && this.state.prop.lastStaffMessageAt
+        && (!this.state.prop.customerLastReadAt || this.state.prop.lastStaffMessageAt > this.state.prop.customerLastReadAt)),
       noThread: this.state.msgs.length === 0,
-      thread: this.state.msgs.map((m) => ({
-        key: m.id || String(m.createdAt),
-        isTeam: m.direction === "outbound",
-        who: m.direction === "outbound" ? "ทีมงาน huahin.properties" : "คุณ",
-        // The customer always reads their own language.
-        text: m.direction === "outbound"
-          ? (m.customerText || m.originalText || "")
-          : (m.originalText || ""),
-        atLabel: fmt(m.createdAt),
-        rowStyle: m.direction === "outbound"
-          ? { background: "oklch(97% 0.03 85)", border: "1px solid oklch(89% 0.05 85)", borderRadius: "10px", padding: "14px 16px" }
-          : { background: "oklch(97% 0.02 150)", border: "1px solid oklch(88% 0.04 150)", borderRadius: "10px", padding: "14px 16px" },
-      })),
+      thread: this.state.msgs.map((m, i, arr) => {
+        const prev = arr[i - 1];
+        const mine = m.direction !== "outbound";
+        const sameSender = prev && (prev.direction === m.direction);
+        const dayOf = (t) => new Date(t || 0).toDateString();
+        const showDay = !prev || dayOf(prev.createdAt) !== dayOf(m.createdAt);
+        const d = new Date(m.createdAt || 0);
+        const today = new Date();
+        const yest = new Date(Date.now() - 86400000);
+        const dayLabel = dayOf(m.createdAt) === today.toDateString() ? "วันนี้"
+          : dayOf(m.createdAt) === yest.toDateString() ? "เมื่อวาน"
+          : d.toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" });
+        return {
+          key: m.id || String(m.createdAt),
+          showDay, dayLabel,
+          showWho: showDay || !sameSender,
+          who: mine ? "คุณ" : "ทีมงาน huahin.properties",
+          // The customer always reads their own language.
+          text: mine ? (m.originalText || "") : (m.customerText || m.originalText || ""),
+          atLabel: d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }) + " น.",
+          rowStyle: { display: "flex", flexDirection: "column", alignItems: mine ? "flex-end" : "flex-start", marginTop: (showDay || !sameSender) ? "8px" : "0" },
+          whoStyle: { fontSize: "10.5px", fontWeight: "700", color: "oklch(52% 0.02 60)", marginBottom: "3px" },
+          bubbleStyle: {
+            maxWidth: "82%", padding: "9px 13px", fontSize: "13px", lineHeight: "1.6",
+            whiteSpace: "pre-wrap", wordBreak: "break-word",
+            background: mine ? "oklch(94% 0.04 150)" : "white",
+            border: mine ? "1px solid oklch(87% 0.05 150)" : "1px solid oklch(89% 0.01 70)",
+            color: "oklch(25% 0.02 60)",
+            borderRadius: mine ? "14px 14px 4px 14px" : "14px 14px 14px 4px",
+          },
+          timeStyle: { fontSize: "10px", color: "oklch(62% 0.02 60)", marginTop: "3px" },
+        };
+      }),
       replyText: this.state.replyText,
       onReplyText: (e) => this.setState({ replyText: e.target.value }),
       onReplySend: () => this.sendReply(),
