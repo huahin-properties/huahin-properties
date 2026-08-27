@@ -110,7 +110,7 @@ class Component extends DCLogic {
       } catch (e) {}
       let msgs = [];
       let msgsFailed = false;
-      try { msgs = await fb.fetchCaseMessages(id, true); }
+      try { msgs = await fb.fetchCaseMessages(id, true, token); }
       catch (e) { msgsFailed = true; console.warn("case messages read failed:", e); }
       // Legacy compatibility: a case created before caseMessages existed still
       // has its request/response in the old fields. Show them as the first two

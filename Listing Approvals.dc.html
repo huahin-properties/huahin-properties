@@ -157,9 +157,24 @@
                         </sc-if>
                       </div>
                       <div style="font-size:11.5px; font-weight:600; color:oklch(35% 0.02 60); margin-bottom:6px;">พิมพ์ภาษาไทย — ระบบแปลเป็นภาษาลูกค้าให้อัตโนมัติ</div>
+                      <sc-if value="{{ r.hasSuggests }}" hint-placeholder-val="{{ false }}">
+                        <div style="margin-bottom:9px;">
+                          <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px;">
+                            <div style="font-size:11.5px; font-weight:700; color:oklch(35% 0.02 60);">✨ คำตอบแนะนำ</div>
+                            <div onClick="{{ r.onRefreshSuggests }}" style="font-size:11px; color:oklch(45% 0.13 25); cursor:pointer; white-space:nowrap;">↻ แนะนำใหม่</div>
+                          </div>
+                          <div style="display:flex; flex-direction:column; gap:6px;">
+                            <sc-for list="{{ r.suggestList }}" as="s" hint-placeholder-count="3">
+                              <div onClick="{{ s.onPick }}" style="background:white; border:1px solid oklch(88% 0.02 70); border-radius:8px; padding:9px 11px; font-size:12px; line-height:1.5; color:oklch(30% 0.02 60); cursor:pointer;">{{ s.text }}</div>
+                            </sc-for>
+                          </div>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ r.suggestBusyNow }}" hint-placeholder-val="{{ false }}">
+                        <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:8px;">✨ กำลังคิดคำตอบแนะนำ…</div>
+                      </sc-if>
                       <textarea rows="3" value="{{ r.draftText }}" onChange="{{ r.onDraftText }}" placeholder="พิมพ์ข้อความภาษาไทย…" style="width:100%; box-sizing:border-box; border:1px solid oklch(86% 0.01 70); border-radius:6px; padding:9px 11px; font-size:12.5px; font-family:inherit; resize:vertical; line-height:1.6;"></textarea>
                       <div style="display:flex; gap:7px; flex-wrap:wrap; margin-top:9px;">
-                        <div onClick="{{ r.onAiDraft }}" style="border:1px solid oklch(82% 0.02 70); color:oklch(32% 0.02 60); padding:7px 13px; border-radius:100px; font-size:11.5px; cursor:pointer; white-space:nowrap;">{{ r.aiLabel }}</div>
                         <div onClick="{{ r.onSendReply }}" style="background:oklch(40% 0.13 25); color:white; padding:7px 15px; border-radius:100px; font-size:11.5px; font-weight:600; cursor:pointer; white-space:nowrap;">{{ r.sendReplyLabel }}</div>
                       </div>
                       <sc-if value="{{ r.hasCaseErr }}" hint-placeholder-val="{{ false }}">
@@ -273,7 +288,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { copiedFor: "", caseMsgs: {}, replyDraft: {}, replyBusy: "", aiBusy: "", caseErr: {}, infoReqFor: null, infoReqText: "", infoReqBusy: false, lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
+  state = { copiedFor: "", caseMsgs: {}, replyDraft: {}, replyBusy: "", aiBusy: "", suggests: {}, suggestKey: {}, suggestBusy: "", caseErr: {}, infoReqFor: null, infoReqText: "", infoReqBusy: false, lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
 
   async componentDidMount() {
     const fb = await import("./firebase-client.js");
@@ -389,9 +404,8 @@ class Component extends DCLogic {
     this.setState((st) => ({ caseMsgs: { ...st.caseMsgs, [p.id]: msgs } }));
   }
 
-  async aiDraft(p) {
-    this.setState({ aiBusy: p.id });
-    const summary = [
+  _caseSummary(p) {
+    return [
       "รหัสทรัพย์: " + p.id,
       "ประเภท: " + (p.type || "-") + " · " + (p.status === "rent" ? "ฝากเช่า" : "ฝากขาย"),
       "ราคาที่แจ้ง: " + (Number(p.price) || 0).toLocaleString() + " บาท",
@@ -399,11 +413,27 @@ class Component extends DCLogic {
       "รายละเอียดที่ลูกค้าให้มา: " + (p.description || "(ไม่มี)"),
       "พิกัด: " + (p.coordsRaw || "(ไม่ได้ระบุ)"),
     ].join("\n");
+  }
+
+  // Suggestions are keyed by the id of the newest message in the thread, so a
+  // re-render never re-bills the API and a NEW customer message always earns a
+  // fresh set. Kept in memory only — an unsent suggestion is not a message.
+  _suggestKey(p) {
+    const msgs = this.state.caseMsgs[p.id] || [];
+    return p.id + ":" + (msgs.length ? (msgs[msgs.length - 1].id || msgs.length) : "0");
+  }
+
+  async loadSuggestions(p, force) {
+    const key = this._suggestKey(p);
+    if (!force && this.state.suggestKey[p.id] === key) return;
+    if (this.state.suggestBusy === p.id) return;
+    this.setState((st) => ({ suggestBusy: p.id, suggestKey: { ...st.suggestKey, [p.id]: key } }));
     try {
-      const text = await this._fb.draftCaseReply(summary, this.state.caseMsgs[p.id] || []);
-      this.setState((st) => ({ aiBusy: "", replyDraft: { ...st.replyDraft, [p.id]: text } }));
+      const list = await this._fb.suggestCaseReplies(this._caseSummary(p), this.state.caseMsgs[p.id] || []);
+      this.setState((st) => ({ suggestBusy: "", suggests: { ...st.suggests, [p.id]: list } }));
     } catch (e) {
-      this.setState((st) => ({ aiBusy: "", caseErr: { ...st.caseErr, [p.id]: "AI ร่างข้อความไม่สำเร็จ กรุณาพิมพ์เองหรือลองใหม่" } }));
+      console.warn("suggestCaseReplies failed:", e);
+      this.setState((st) => ({ suggestBusy: "", suggests: { ...st.suggests, [p.id]: [] } }));
     }
   }
 
@@ -567,7 +597,12 @@ class Component extends DCLogic {
           onClaim: () => this.claimCase(p),
           onReviewing: () => this.setReview(p, "reviewing"),
           onNeedInfo: () => this.setState({ infoReqFor: p, infoReqText: "" }),
-          onToggleThread: () => { this.loadThread(p); this.setState((st) => ({ openCaseId: st.openCaseId === p.id ? "" : p.id })); },
+          onToggleThread: async () => {
+            const opening = this.state.openCaseId !== p.id;
+            await this.loadThread(p);
+            this.setState((st) => ({ openCaseId: st.openCaseId === p.id ? "" : p.id }));
+            if (opening) this.loadSuggestions(p, false);
+          },
           threadOpen: this.state.openCaseId === p.id,
           custLangStatus: p.customerLanguageConfirmed === true ? "ภาษาลูกค้า" : "ภาษาที่คาดไว้",
           custLangLabel: ({ th: "ไทย", en: "English", zh: "中文", ru: "Русский", de: "Deutsch", no: "Norsk", fr: "Français", it: "Italiano" })[p.customerLanguage || "th"] || "ไทย",
@@ -585,8 +620,13 @@ class Component extends DCLogic {
           noThread: (this.state.caseMsgs[p.id] || []).length === 0,
           draftText: this.state.replyDraft[p.id] || "",
           onDraftText: (e) => this.setState((st) => ({ replyDraft: { ...st.replyDraft, [p.id]: e.target.value } })),
-          onAiDraft: () => this.aiDraft(p),
-          aiLabel: this.state.aiBusy === p.id ? "กำลังร่าง…" : "🤖 AI ช่วยร่างข้อความ",
+          suggestList: (this.state.suggests[p.id] || []).map((s, i) => ({
+            key: p.id + "-s" + i, text: s,
+            onPick: () => this.setState((st) => ({ replyDraft: { ...st.replyDraft, [p.id]: s } })),
+          })),
+          hasSuggests: (this.state.suggests[p.id] || []).length > 0,
+          suggestBusyNow: this.state.suggestBusy === p.id,
+          onRefreshSuggests: () => this.loadSuggestions(p, true),
           onSendReply: () => this.sendCaseReply(p),
           sendReplyLabel: this.state.replyBusy === p.id ? "กำลังส่ง…" : "ส่งข้อความให้ลูกค้า",
           caseErrText: this.state.caseErr[p.id] || "",

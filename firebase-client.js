@@ -1745,12 +1745,20 @@ export function currentAdminUser() {
 // existing trackToken authorises the customer side. Append-only: every
 // send is a NEW doc, so a later round can never overwrite an earlier one.
 
-export async function fetchCaseMessages(propertyId, customerOnly) {
+export async function fetchCaseMessages(propertyId, customerOnly, caseToken) {
   // A customer (not signed in) may only read messages marked visible to
   // them, so the QUERY itself has to carry that filter — an unfiltered read
   // is rejected outright by the security rules. Staff/Owner read everything.
   let q = db().collection("properties").doc(String(propertyId)).collection("caseMessages");
-  if (customerOnly) q = q.where("visibility", "==", "customer");
+  if (customerOnly) {
+    // Filter on caseToken IN THE QUERY, not just visibility. The security rule
+    // requires a matching token per document, and Firestore rejects an entire
+    // list query if even ONE returned doc fails the rule — an old message
+    // written before caseToken existed would otherwise wipe out the customer's
+    // whole conversation (and history is append-only, so it can't be repaired).
+    q = q.where("visibility", "==", "customer");
+    if (caseToken) q = q.where("caseToken", "==", String(caseToken));
+  }
   const snap = await q.get();
   return snap.docs
     .map((d) => ({ ...d.data(), id: d.id }))
@@ -1813,6 +1821,33 @@ export async function translateMessage(text, targetLang) {
 
 // AI drafts a Thai reply for Staff. Sends only the case essentials and the
 // recent conversation — never the whole database — to keep cost predictable.
+// Returns 3-5 SHORT Thai reply options that differ in PURPOSE (answer / ask for
+// more / acknowledge / propose next step / offer a call), not five rewordings of
+// one sentence. Staff picks one, edits it, and sends it themselves.
+export async function suggestCaseReplies(caseSummary, recentThaiMessages) {
+  const convo = (recentThaiMessages || []).slice(-10)
+    .map((m) => (m.direction === "inbound" ? "ลูกค้า: " : "ทีมงาน: ") + (m.thaiText || m.originalText || "")).join("\n");
+  const res = await fetch("https://claudecomplete-3j4ldf4pja-as.a.run.app", {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      system: "คุณเป็นผู้ช่วยของทีมงาน huahin.properties (นายหน้าอสังหาริมทรัพย์ หัวหิน/ปราณบุรี/ชะอำ) หน้าที่ของคุณคือเสนอ 'ตัวเลือกคำตอบ' ภาษาไทยให้ทีมงานเลือกส่งให้เจ้าของทรัพย์\n\nกฎ:\n- ตอบเป็น JSON array ของ string เท่านั้น เช่น [\"ข้อความ 1\",\"ข้อความ 2\"] ห้ามมีข้อความอื่นนอก array\n- ให้ 4 ตัวเลือก (อย่างน้อย 3 ไม่เกิน 5)\n- แต่ละตัวเลือกต้องมีจุดประสงค์ต่างกันจริง เช่น (1) ตอบตรงคำถามล่าสุด (2) ขอข้อมูลที่ยังขาด (3) รับทราบ/ยืนยัน (4) เสนอขั้นตอนต่อไป (5) ขอติดต่อกลับทางโทรศัพท์ — ห้ามเขียน 4 ประโยคที่ความหมายเหมือนกัน\n- สุภาพ เป็นธรรมชาติ สั้น พร้อมส่งทันที (1-3 ประโยค) ลงท้ายแบบสุภาพ\n- ใช้เฉพาะข้อมูลที่มีในเคส ห้ามแต่งราคา ขนาด เงื่อนไข หรือข้อมูลที่ไม่มี\n- ถ้าไม่ทราบราคา/เงื่อนไข ให้เขียนว่าจะตรวจสอบและแจ้งกลับ ห้ามเดา\n- ห้ามสัญญาเรื่องค่าคอมมิชชั่น ค่าโอน หรือข้อผูกพันทางกฎหมาย",
+      messages: [{ role: "user", content: "ข้อมูลเคส:\n" + caseSummary + "\n\nบทสนทนาที่ผ่านมา:\n" + (convo || "(ยังไม่มี)") + "\n\nเสนอตัวเลือกคำตอบถัดไปเป็น JSON array" }],
+      max_tokens: 900, model: "claude-haiku-4-5",
+    }),
+  });
+  const data = await res.json();
+  const raw = (data.reply || data.completion || "").trim();
+  // The model is asked for a bare JSON array; be tolerant of stray prose or a
+  // markdown fence around it rather than failing the whole feature.
+  const m = raw.match(/\[[\s\S]*\]/);
+  let out = [];
+  if (m) { try { out = JSON.parse(m[0]); } catch (e) { out = []; } }
+  if (!Array.isArray(out) || !out.length) {
+    out = raw.split(/\n+/).map((s) => s.replace(/^\s*(?:[-*\d.)\u2022]+)\s*/, "").replace(/^["']|["']$/g, "").trim()).filter((s) => s.length > 8);
+  }
+  return out.map((s) => String(s).trim()).filter(Boolean).slice(0, 5);
+}
+
 export async function draftCaseReply(caseSummary, recentThaiMessages) {
   const convo = (recentThaiMessages || []).slice(-8)
     .map((m) => (m.direction === "inbound" ? "ลูกค้า: " : "ทีมงาน: ") + (m.thaiText || m.originalText || "")).join("\n");
