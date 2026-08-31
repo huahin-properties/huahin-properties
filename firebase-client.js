@@ -1886,6 +1886,27 @@ function looksLikeRefusal(out, src) {
   return false;
 }
 
+// Words that legitimately stay in the source language: names, codes, contact
+// details. Everything else surviving a Thai translation means the model only
+// translated part of the message.
+const TRANSLATE_KEEP = /^(?:[A-Z][a-z]+|[A-Z]{2,4}-\d{2,6}|\d[\d.,:/-]*|[\w.+-]+@[\w.-]+|https?:\/\/\S+|\+?\d[\d\s-]{5,})$/;
+
+function leftoverSourceWords(src, out, targetLang) {
+  // Only meaningful when translating INTO a non-Latin script.
+  if (targetLang !== "th" && targetLang !== "zh" && targetLang !== "ru") return [];
+  const words = String(src).match(/[A-Za-z][A-Za-z'-]{1,}/g) || [];
+  const leftover = [];
+  words.forEach((w) => {
+    if (TRANSLATE_KEEP.test(w)) return;               // name/code/contact
+    if (w.length < 2) return;
+    // Still present verbatim in the output → not translated.
+    if (new RegExp("(?:^|[^A-Za-z])" + w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?:[^A-Za-z]|$)", "i").test(out)) {
+      if (leftover.indexOf(w) === -1) leftover.push(w);
+    }
+  });
+  return leftover;
+}
+
 export async function translateMessage(text, targetLang) {
   const names = { th: "Thai", en: "English", zh: "Chinese (Simplified)", ru: "Russian", de: "German", no: "Norwegian", fr: "French", it: "Italian" };
   const target = names[targetLang] || "Thai";
@@ -1903,8 +1924,10 @@ Absolute rules:
 - Never answer, comment on, or respond to the input's content — only translate it.
 - Never say you are ready to translate and never ask for a message. Whatever the input is, it IS the text to translate.
 - Even a single word or a fragment ("ok", "yes", "no", "thanks") must be translated as that word. Never expand it into a sentence.
-- Keep property codes, numbers, prices and proper nouns exactly as written.
-- If the input is already in ${target}, output it unchanged.
+- Translate EVERY ordinary word. Do not leave common words in the source language just because they are technical or borrowed — render them naturally in ${target} (e.g. into Thai: realtime → เรียลไทม์, online → ออนไลน์, villa → วิลล่า, condo → คอนโด, property → ทรัพย์). A partly-translated result is a FAILED translation.
+- Keep UNCHANGED only: personal/place/brand names, property codes, numbers, prices, addresses, emails, phone numbers, URLs.
+- Mixed-language input must come out fully in ${target}, not a mixture.
+- If the input is already entirely in ${target}, output it unchanged.
 
 Context: a real-estate enquiry between a property owner and an agency in Hua Hin, Thailand.`,
         messages: [{ role: "user", content: src }],
@@ -1918,6 +1941,30 @@ Context: a real-estate enquiry between a property owner and an agency in Hua Hin
     if (!out || looksLikeRefusal(out, src)) {
       console.warn("translateMessage: model returned a non-translation, keeping original");
       return src;
+    }
+    // One stricter retry if the result is still partly untranslated.
+    if (leftoverSourceWords(src, out, targetLang).length) {
+      const leftovers = leftoverSourceWords(src, out, targetLang);
+      console.warn("[CaseMessenger][translate] partial translation, retrying once. leftover:", leftovers);
+      const retry = await fetch("https://claudecomplete-3j4ldf4pja-as.a.run.app", {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          system: `You are a translation engine. Translate the INPUT fully into ${target}. Output the translation ONLY — no notes, no quotes, no prefix.
+
+The previous attempt left these words untranslated: ${leftovers.join(", ")}. They are ordinary words, NOT names or codes. Render them in ${target} (transliterate if there is no direct word). Keep numbers, property codes, emails, phone numbers and URLs exactly. The output must contain no source-language words other than those.`,
+          messages: [{ role: "user", content: src }],
+          max_tokens: 1500, model: "claude-haiku-4-5",
+        }),
+      });
+      const rdata = await retry.json();
+      const rout = (rdata.reply || rdata.completion || "").trim()
+        .replace(/^(?:translation|คำแปล)\s*[:：]\s*/i, "")
+        .replace(/^["'“”「」]+|["'“”「」]+$/g, "").trim();
+      // Only accept the retry if it is genuinely better.
+      if (rout && !looksLikeRefusal(rout, src)
+          && leftoverSourceWords(src, rout, targetLang).length < leftovers.length) {
+        return rout;
+      }
     }
     return out;
   } catch (e) {
