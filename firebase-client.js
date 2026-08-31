@@ -1774,7 +1774,9 @@ export function watchCaseMessages(propertyId, customerOnly, caseToken, limit, cb
     q = q.where("visibility", "==", "customer");
     if (caseToken) q = q.where("caseToken", "==", String(caseToken));
   }
-  q = q.orderBy("createdAt", "desc").limit(Number(limit) || 50);
+  // No orderBy in the query: combining it with the two equality filters the
+  // rules require would demand a composite index. Sorting happens below.
+  if (!customerOnly) q = q.orderBy("createdAt", "desc").limit(Number(limit) || 50);
   return q.onSnapshot(
     (snap) => {
       const now = Date.now();
@@ -1787,7 +1789,10 @@ export function watchCaseMessages(propertyId, customerOnly, caseToken, limit, cb
       }).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
       cb(rows, null);
     },
-    (err) => { console.warn("watchCaseMessages error:", err); cb(null, err); }
+    (err) => {
+      console.error("[CaseMessenger][snapshot] listener failed:", err && err.code, err && err.message, err);
+      cb(null, err);
+    }
   );
 }
 
@@ -1802,8 +1807,17 @@ export async function markCaseRead(propertyId, who) {
 
 export async function addCaseMessage(propertyId, msg) {
   const now = Date.now();
-  const ref = await db().collection("properties").doc(String(propertyId))
-    .collection("caseMessages").add({ createdAt: now, ...msg });
+  let ref;
+  try {
+    ref = await db().collection("properties").doc(String(propertyId))
+      .collection("caseMessages").add({ createdAt: now, ...msg });
+    console.log("[CaseMessenger][message-write] ok", propertyId, ref.id);
+  } catch (e) {
+    // Never swallow this: a rejected write is the difference between
+    // "message sent" and "message lost".
+    console.error("[CaseMessenger][message-write] FAILED", e && e.code, e && e.message, e);
+    throw e;
+  }
   // Summary stamp on the parent doc: lets a list of cases show unread badges
   // with ONE read per case instead of opening every thread.
   try {

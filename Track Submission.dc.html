@@ -226,18 +226,24 @@ class Component extends DCLogic {
         channel: "tracking", visibility: "customer",
         caseToken: this._token, createdAt: Date.now(),
       };
+      // The message itself is the only write that may block the send.
       await this._fb.addCaseMessage(this._id, rec);
-      // Keep the legacy summary fields in step so the existing Staff card
-      // (and the "reply received" state it drives) keeps working unchanged.
-      await this._fb.updateDocFields("properties", this._id, {
-        infoResponseMessage: thai, infoResponseAt: Date.now(), infoResponseStatus: "responded",
-      });
+      // Confirmed — now it is safe to clear what the customer typed.
       this._wasNearBottom = true;
-      this.setState({ sending: false, replyText: "", hasNewIncoming: false, atBottom: true });
+      this.setState({ sending: false, replyText: "", replyError: "", hasNewIncoming: false, atBottom: true });
       setTimeout(() => this._scrollToLatest(true), 60);
+      // Bookkeeping is best-effort: it keeps the legacy Staff card fields in
+      // step, but a rejection here must never look like a failed send.
+      try {
+        await this._fb.updateDocFields("properties", this._id, {
+          infoResponseMessage: thai, infoResponseAt: Date.now(), infoResponseStatus: "responded",
+        });
+      } catch (e) { console.error("[CaseMessenger][bookkeeping] failed (message WAS sent):", e && e.code, e && e.message); }
       try { await this._fb.markCaseRead(this._id, "customer"); } catch (e) {}
     } catch (e) {
-      this.setState({ sending: false, replyError: "ส่งไม่สำเร็จ: " + (e.message || e) });
+      console.error("[CaseMessenger][customer-send] failed:", e && e.code, e && e.message, e);
+      // Keep the text so the customer never loses what they wrote.
+      this.setState({ sending: false, replyError: "ส่งไม่สำเร็จ: " + (e.message || e) + " — ข้อความของคุณยังอยู่ กรุณาลองส่งอีกครั้ง" });
     }
   }
 

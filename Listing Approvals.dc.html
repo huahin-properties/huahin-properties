@@ -464,7 +464,11 @@ class Component extends DCLogic {
       if (p.infoRequestMessage) msgs.push({ id: "legacy-req", direction: "outbound", createdAt: p.infoRequestAt, thaiText: p.infoRequestMessage, originalText: p.infoRequestMessage, senderEmail: p.infoRequestByEmail });
       if (p.infoResponseMessage) msgs.push({ id: "legacy-res", direction: "inbound", createdAt: p.infoResponseAt, thaiText: p.infoResponseMessage, originalText: p.infoResponseMessage });
     }
-    this.setState((st) => ({ caseMsgs: { ...st.caseMsgs, [p.id]: msgs } }));
+    this.setState((st) => {
+      const live = st.caseMsgs[p.id];
+      if (live && live.length >= msgs.length) return {};
+      return { caseMsgs: { ...st.caseMsgs, [p.id]: msgs } };
+    });
   }
 
   _caseSummary(p) {
@@ -535,7 +539,9 @@ class Component extends DCLogic {
       }));
       setTimeout(() => this._scrollToLatest(p.id, true), 60);
     } catch (e) {
-      this.setState((st) => ({ replyBusy: "", caseErr: { ...st.caseErr, [p.id]: "ส่งไม่สำเร็จ: " + (e.message || e) } }));
+      console.error("[CaseMessenger][staff-send] failed:", e && e.code, e && e.message, e);
+      // Keep the draft — Staff must not lose an approved reply.
+      this.setState((st) => ({ replyBusy: "", caseErr: { ...st.caseErr, [p.id]: "ส่งไม่สำเร็จ: " + (e.message || e) + " — ข้อความยังอยู่ในช่องพิมพ์" } }));
     }
   }
 
