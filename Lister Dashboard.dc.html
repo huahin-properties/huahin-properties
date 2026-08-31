@@ -620,7 +620,12 @@
         <div style="background:white; border-radius:8px; padding:clamp(20px,4vw,30px);">
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
             <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60);">{{ editTitle }}</div>
-            <div onClick="{{ onBackToList }}" style="font-size:13px; color:oklch(50% 0.02 60); cursor:pointer;">← กลับไปหน้ารายการ</div>
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+              <sc-if value="{{ showBackToCase }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ onBackToCase }}" style="background:oklch(40% 0.13 25); color:white; padding:7px 15px; border-radius:100px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap;">← กลับไปการสนทนากับลูกค้า</div>
+              </sc-if>
+              <div onClick="{{ onBackToList }}" style="font-size:13px; color:oklch(50% 0.02 60); cursor:pointer; white-space:nowrap;">← กลับไปหน้ารายการ</div>
+            </div>
           </div>
 
           <div style="margin-bottom:18px;">
@@ -1495,6 +1500,23 @@ class Component extends DCLogic {
   // startNew()'s quota check reads stale/null state from before the big
   // setState in componentDidMount has flushed.
   componentDidUpdate() {
+    // Staff arriving from a case conversation: ?edit=<propertyId> opens that
+    // exact record in the existing editor, so nobody has to search a list.
+    if (this.state.loaded && this.state.signedIn && !this._handledEditParam) {
+      const ep = new URLSearchParams(window.location.search).get("edit");
+      if (ep) {
+        this._handledEditParam = true;
+        const target = (this.state.properties || []).find((x) => x.id === ep);
+        if (target) this.startEdit(target);
+        else {
+          // The case may belong to an owner_submission the dashboard list does
+          // not carry; fetch that one record directly.
+          this._fb.fetchDocById("properties", ep).then((doc) => {
+            if (doc) this.startEdit({ ...doc, id: ep });
+          }).catch((e) => console.warn("[CaseEdit] property not found:", ep, e && e.message));
+        }
+      }
+    }
     if (
       this.state.loaded && this.state.signedIn && this.state.lister && !this._handledNewParam &&
       new URLSearchParams(window.location.search).get("new") === "1"
@@ -2806,6 +2828,17 @@ class Component extends DCLogic {
       gridBtnBg: this.state.listLayout === "grid" ? "oklch(22% 0.02 60)" : "white",
       gridBtnColor: this.state.listLayout === "grid" ? "white" : "oklch(40% 0.02 60)",
       editTitle: this.state.editingId ? `แก้ไขทรัพย์ ${this.state.editingId}` : "เพิ่มทรัพย์ใหม่",
+      // Return-to-conversation control, shown only when Staff actually came
+      // from a case. The destination is a fixed internal page; only the case
+      // id is carried, so this can never become an open redirect.
+      showBackToCase: (() => {
+        const q = new URLSearchParams(window.location.search);
+        return q.get("from") === "case" && !!q.get("edit");
+      })(),
+      onBackToCase: () => {
+        const id = new URLSearchParams(window.location.search).get("edit") || "";
+        window.location.href = "Listing Approvals.dc.html?case=" + encodeURIComponent(id) + "&open=conversation";
+      },
       typeOptions: mod ? mod.TYPES.map((ty) => ({ id: ty.id, label: ty.label.th })) : [],
       areaOptions: mod ? mod.AREAS.map((a) => ({ id: a.id, label: a.label.th })) : [],
       featureOptions: mod ? Object.keys(mod.FEATURES).map((fid) => ({

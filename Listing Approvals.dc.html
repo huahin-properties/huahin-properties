@@ -120,7 +120,7 @@
     </sc-if>
     <div style="display:{{ rowsListDisplay }}; flex-direction:column; gap:10px;">
       <sc-for list="{{ rows }}" as="r" hint-placeholder-count="2">
-        <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:16px 18px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+        <div data-case-id="{{ r.code }}" style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:16px 18px; display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
           <div style="{{ r.coverStyle }}"></div>
           <div style="flex:1; min-width:200px;">
             <div style="font-size:14px; font-weight:700; color:oklch(40% 0.13 25);">{{ r.code }} <span style="font-weight:400; color:oklch(50% 0.02 60); font-size:12.5px;">— {{ r.zone }}</span></div>
@@ -250,6 +250,20 @@
 
                   <sc-if value="{{ r.hasUnread }}" hint-placeholder-val="{{ false }}">
                     <div style="display:inline-block; background:oklch(55% 0.20 25); color:white; font-size:10.5px; font-weight:700; padding:2px 9px; border-radius:100px; margin-bottom:7px;">🔔 ข้อความใหม่จากลูกค้า</div>
+                  </sc-if>
+                  <div style="display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin-bottom:10px;">
+                    <div onClick="{{ r.onToggleNote }}" style="background:oklch(97% 0.02 95); border:1px solid oklch(88% 0.05 95); color:oklch(42% 0.10 75); padding:4px 11px; border-radius:100px; font-size:11px; font-weight:600; cursor:pointer;">📝 โน้ตชั่วคราว</div>
+                    <div onClick="{{ r.onEditProperty }}" style="background:white; border:1px solid oklch(86% 0.02 70); color:oklch(35% 0.02 60); padding:4px 11px; border-radius:100px; font-size:11px; font-weight:600; cursor:pointer;">✏️ แก้ไขข้อมูลทรัพย์</div>
+                  </div>
+                  <sc-if value="{{ r.noteOpen }}" hint-placeholder-val="{{ false }}">
+                    <div style="background:oklch(99% 0.015 95); border:1px solid oklch(89% 0.05 95); border-radius:9px; padding:11px 12px; margin-bottom:11px;">
+                      <div style="font-size:10.5px; color:oklch(48% 0.06 75); margin-bottom:6px;">โน้ตชั่วคราว — ไม่บันทึกลงระบบ (หายเมื่อรีเฟรชหน้า)</div>
+                      <textarea rows="5" value="{{ r.noteText }}" onChange="{{ r.onNoteText }}" placeholder="จดข้อมูลที่ลูกค้าส่งมาไว้ก่อน เช่น&#10;ราคา 8.5 ล้าน&#10;3 ห้องนอน&#10;นัดโทรเย็น&#10;ยังขาดพื้นที่ใช้สอย" style="width:100%; box-sizing:border-box; border:1px solid oklch(88% 0.03 90); border-radius:6px; padding:9px 11px; font-size:12.5px; font-family:inherit; line-height:1.7; resize:vertical; background:white;"></textarea>
+                      <div style="display:flex; gap:7px; flex-wrap:wrap; margin-top:8px;">
+                        <div onClick="{{ r.onNoteCopy }}" style="background:oklch(22% 0.02 60); color:white; padding:5px 13px; border-radius:100px; font-size:11px; font-weight:600; cursor:pointer;">{{ r.noteCopyLabel }}</div>
+                        <div onClick="{{ r.onNoteClear }}" style="background:white; border:1px solid oklch(86% 0.02 70); color:oklch(45% 0.02 60); padding:5px 13px; border-radius:100px; font-size:11px; cursor:pointer;">ล้างโน้ต</div>
+                      </div>
+                    </div>
                   </sc-if>
                   <div onClick="{{ r.onToggleThread }}" style="font-size:12px; font-weight:600; color:oklch(40% 0.13 25); cursor:pointer; margin-bottom:10px;">💬 การสนทนากับลูกค้า · 🌐 {{ r.custLangStatus }}: {{ r.custLangLabel }} ›</div>
                   <sc-if value="{{ r.threadOpen }}" hint-placeholder-val="{{ false }}">
@@ -441,7 +455,7 @@ class Component extends DCLogic {
     el.scrollTop = el.scrollHeight;
   }
 
-  state = { wfOpen: {}, wfBusy: "", submissions: {}, reviewNote: {}, reviewStepKey: {}, reviewErr: {}, preview: {}, previewBusy: "", previewErr: {}, newIncoming: {}, copiedFor: "", caseMsgs: {}, replyDraft: {}, replyBusy: "", aiBusy: "", suggests: {}, suggestKey: {}, suggestBusy: "", caseErr: {}, infoReqFor: null, infoReqText: "", infoReqBusy: false, lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
+  state = { noteOpen: "", noteCopied: "", wfOpen: {}, wfBusy: "", submissions: {}, reviewNote: {}, reviewStepKey: {}, reviewErr: {}, preview: {}, previewBusy: "", previewErr: {}, newIncoming: {}, copiedFor: "", caseMsgs: {}, replyDraft: {}, replyBusy: "", aiBusy: "", suggests: {}, suggestKey: {}, suggestBusy: "", caseErr: {}, infoReqFor: null, infoReqText: "", infoReqBusy: false, lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
 
   componentWillUnmount() {
     Object.values(this._unsubs || {}).forEach((fn) => { try { fn(); } catch (e) {} });
@@ -481,6 +495,7 @@ class Component extends DCLogic {
       this.setState({ properties: properties.filter((p) => p.listerId || p.source === "owner_submission"), listersById, suspects, reports, photosByProp, actByProp, loaded: true });
     } catch (e) {
       console.warn("fetch failed:", e);
+      this._restoreCase();
       this.setState({ loaded: true });
     }
   }
@@ -767,6 +782,57 @@ class Component extends DCLogic {
     // decide (there is nobody above them) — the rule exists to stop a STAFF
     // submitter self-approving, which the capability check already prevents.
     return true;
+  }
+
+  // Deferred scroll-to-latest for a deliberate open. Not used for remote
+  // arrivals — those keep the existing near-bottom logic.
+  // Scratch notes live HERE — a plain instance field, deliberately outside
+  // this.state persistence and outside every storage API. Keyed by case id so
+  // two cases open on one page never mix.
+  _notes = {};
+
+  // Return context from Lister Dashboard: ?case=<id>&open=conversation.
+  // Only an id travels — never a free-form URL, never the customer's token.
+  _restoreCase() {
+    if (this._restored) return;
+    const q = new URLSearchParams(window.location.search);
+    const id = q.get("case");
+    if (!id || q.get("open") !== "conversation") return;
+    this._restored = true;
+    // Deferred: the case cards must exist before one can be scrolled to.
+    setTimeout(async () => {
+      const p = (this.state.properties || []).find((x) => x.id === id);
+      if (!p) return;
+      await this.loadThread(p);
+      this._stick[id] = true;
+      this.setState({ openCaseId: id });
+      this.loadSuggestions(p, false);
+      try { this._fb.markCaseRead(id, "staff"); } catch (e) {}
+      // Bring the card into view without scrollIntoView.
+      setTimeout(() => {
+        const card = document.querySelector('[data-case-id="' + id + '"]');
+        if (card) {
+          const top = card.getBoundingClientRect().top + window.pageYOffset - 80;
+          window.scrollTo({ top: top, behavior: "smooth" });
+        }
+        this._openScroll(id);
+      }, 220);
+    }, 300);
+  }
+
+  _openScroll(id) {
+    const go = () => {
+      const el = this._threadEls[id];
+      if (!el) return false;
+      el.scrollTop = el.scrollHeight;
+      return true;
+    };
+    requestAnimationFrame(() => {
+      if (!go()) setTimeout(go, 120);
+      // Heights settle as images/fonts land; re-pin once more.
+      setTimeout(go, 260);
+      setTimeout(go, 600);
+    });
   }
 
   _wfVals(p) {
@@ -1061,7 +1127,15 @@ class Component extends DCLogic {
             const opening = this.state.openCaseId !== p.id;
             await this.loadThread(p);
             this.setState((st) => ({ openCaseId: st.openCaseId === p.id ? "" : p.id }));
-            if (opening) { this.loadSuggestions(p, false); this._fb.markCaseRead(p.id, "staff"); }
+            if (opening) {
+              this.loadSuggestions(p, false);
+              this._fb.markCaseRead(p.id, "staff");
+              // An initial open always lands on the newest message. Scrolling
+              // is deferred until after the bubbles have actually rendered —
+              // scrolling first is what left the view part-way up before.
+              this._stick[p.id] = true;
+              this._openScroll(p.id);
+            }
           },
           threadOpen: this.state.openCaseId === p.id,
           hasUnread: !!(p.lastCustomerMessageAt && (!p.staffLastReadAt || p.lastCustomerMessageAt > p.staffLastReadAt)),
@@ -1140,6 +1214,26 @@ class Component extends DCLogic {
           suggestBusyNow: this.state.suggestBusy === p.id,
           onRefreshSuggests: () => this.loadSuggestions(p, true),
           ...this._wfVals(p),
+          // Staff-only scratchpad + direct edit. Neither exists on the
+          // customer's Track Submission page.
+          noteOpen: this.state.noteOpen === p.id,
+          onToggleNote: () => this.setState((st) => ({ noteOpen: st.noteOpen === p.id ? "" : p.id, noteCopied: "" })),
+          noteText: this._notes[p.id] || "",
+          onNoteText: (e) => { this._notes[p.id] = e.target.value; this.forceUpdate(); },
+          onNoteClear: () => { this._notes[p.id] = ""; this.setState({ noteCopied: "" }); },
+          onNoteCopy: () => {
+            const txt = this._notes[p.id] || "";
+            if (!txt) return;
+            try { navigator.clipboard.writeText(txt); } catch (e) {}
+            this.setState({ noteCopied: p.id });
+            setTimeout(() => this.setState((st) => (st.noteCopied === p.id ? { noteCopied: "" } : {})), 1600);
+          },
+          noteCopyLabel: this.state.noteCopied === p.id ? "คัดลอกแล้ว ✓" : "คัดลอก",
+          // Opens THIS property in the existing editor and carries only the
+          // case id back — no trackToken, no arbitrary return URL.
+          onEditProperty: () => {
+            window.location.href = "Lister Dashboard.dc.html?edit=" + encodeURIComponent(p.id) + "&from=case";
+          },
           onSendReply: () => this.sendCaseReply(p),
           onPreviewReply: () => this.previewReply(p),
           previewLabel: this.state.previewBusy === p.id ? "กำลังแปล…" : "ดูคำแปลก่อนส่ง",
