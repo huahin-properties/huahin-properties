@@ -138,6 +138,116 @@
                   <div>ขั้นต่อไป: <span style="color:oklch(30% 0.02 60); font-weight:600;">{{ r.nextStepLabel }}</span></div>
                 </div>
                 <sc-if value="{{ r.isOwnerSub }}" hint-placeholder-val="{{ false }}">
+                  <div style="background:oklch(98% 0.005 85); border:1px solid oklch(91% 0.01 70); border-radius:9px; padding:12px 13px; margin-bottom:11px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:9px;">
+                      <div style="font-size:12px; font-weight:700; color:oklch(35% 0.02 60);">ขั้นตอนการทำงาน</div>
+                      <div style="font-size:11px; color:oklch(52% 0.02 60);">{{ r.wfProgressLabel }}</div>
+                    </div>
+                    <div style="display:flex; gap:7px; flex-wrap:wrap;">
+                      <sc-for list="{{ r.wfSteps }}" as="w" hint-placeholder-count="5">
+                        <div onClick="{{ w.onOpen }}" style="{{ w.chipStyle }}">
+                          <span style="font-weight:700;">{{ w.numLabel }}</span>
+                          <span>{{ w.icon }}</span>
+                          <span>{{ w.title }}</span>
+                          <span style="opacity:0.75; font-size:10px;">{{ w.countLabel }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+
+                    <sc-if value="{{ r.wfPanelOpen }}" hint-placeholder-val="{{ false }}">
+                      <div style="margin-top:11px; background:white; border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:12px 14px;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:4px;">
+                          <div style="font-size:13px; font-weight:700; color:oklch(30% 0.02 60);">{{ r.wfPanelTitle }}</div>
+                          <div onClick="{{ r.onCloseWfPanel }}" style="font-size:11px; color:oklch(50% 0.02 60); cursor:pointer;">ปิด ✕</div>
+                        </div>
+                        <div style="font-size:11.5px; color:oklch(50% 0.02 60); line-height:1.6; margin-bottom:10px;">{{ r.wfPanelPurpose }}</div>
+
+                        <sc-if value="{{ r.wfPanelReturned }}" hint-placeholder-val="{{ false }}">
+                          <div style="background:oklch(96% 0.05 25); border:1px solid oklch(86% 0.08 25); border-radius:7px; padding:9px 11px; margin-bottom:10px;">
+                            <div style="font-size:11.5px; font-weight:700; color:oklch(45% 0.17 27); margin-bottom:3px;">↩️ ผู้อนุมัติส่งกลับให้แก้ไข</div>
+                            <div style="font-size:12px; color:oklch(32% 0.02 60); line-height:1.6;">{{ r.wfReturnReason }}</div>
+                          </div>
+                        </sc-if>
+
+                        <div style="font-size:11.5px; font-weight:700; color:oklch(35% 0.02 60); margin-bottom:5px;">สิ่งที่ต้องทำในขั้นตอนนี้</div>
+                        <div style="margin-bottom:11px;">
+                          <sc-for list="{{ r.wfTodo }}" as="d" hint-placeholder-count="3">
+                            <div style="font-size:12px; color:oklch(35% 0.02 60); line-height:1.75;">• {{ d.text }}</div>
+                          </sc-for>
+                        </div>
+
+                        <sc-if value="{{ r.wfHasReqs }}" hint-placeholder-val="{{ true }}">
+                          <div style="font-size:11.5px; font-weight:700; color:oklch(35% 0.02 60); margin-bottom:5px;">ข้อมูลที่ต้องมี</div>
+                          <sc-for list="{{ r.wfReqs }}" as="q" hint-placeholder-count="4">
+                            <div style="display:flex; align-items:flex-start; gap:8px; padding:5px 0; border-bottom:1px solid oklch(96% 0.01 70);">
+                              <div style="{{ q.markStyle }}">{{ q.mark }}</div>
+                              <div style="flex:1; min-width:0;">
+                                <div style="font-size:12px; color:oklch(30% 0.02 60);">{{ q.label }} <span style="{{ q.levelStyle }}">{{ q.levelLabel }}</span></div>
+                                <sc-if value="{{ q.hasHint }}" hint-placeholder-val="{{ false }}">
+                                  <div style="font-size:10.5px; color:oklch(56% 0.02 60); margin-top:2px;">{{ q.hint }}</div>
+                                </sc-if>
+                              </div>
+                              <sc-if value="{{ q.canVerify }}" hint-placeholder-val="{{ false }}">
+                                <div onClick="{{ q.onVerify }}" style="flex-shrink:0; background:oklch(40% 0.11 150); color:white; padding:4px 11px; border-radius:100px; font-size:10.5px; font-weight:600; cursor:pointer;">ยืนยันแล้ว</div>
+                              </sc-if>
+                              <sc-if value="{{ q.canUnverify }}" hint-placeholder-val="{{ false }}">
+                                <div onClick="{{ q.onUnverify }}" style="flex-shrink:0; font-size:10px; color:oklch(55% 0.02 60); cursor:pointer;">ยกเลิก</div>
+                              </sc-if>
+                            </div>
+                          </sc-for>
+                        </sc-if>
+
+                        <sc-if value="{{ r.wfPanelIsSubmit }}" hint-placeholder-val="{{ false }}">
+                          <sc-if value="{{ r.wfCanSubmit }}" hint-placeholder-val="{{ false }}">
+                            <div onClick="{{ r.onSubmitWork }}" style="margin-top:11px; display:inline-block; background:oklch(40% 0.13 25); color:white; padding:9px 20px; border-radius:100px; font-size:12px; font-weight:700; cursor:pointer;">{{ r.submitWorkLabel }}</div>
+                          </sc-if>
+                          <sc-if value="{{ r.wfBlocked }}" hint-placeholder-val="{{ true }}">
+                            <div style="margin-top:11px; background:oklch(96% 0.06 60); border:1px solid oklch(87% 0.09 70); border-radius:7px; padding:10px 12px;">
+                              <div style="font-size:12px; font-weight:700; color:oklch(45% 0.13 55); margin-bottom:6px;">⚠️ ยังส่งงานไม่ได้ — ยังขาดข้อมูล</div>
+                              <sc-for list="{{ r.wfBlockers }}" as="b" hint-placeholder-count="2">
+                                <div style="font-size:11.5px; color:oklch(35% 0.02 60); line-height:1.7;">
+                                  <span style="color:oklch(52% 0.02 60);">{{ b.stepLabel }}</span> — {{ b.label }}
+                                </div>
+                              </sc-for>
+                            </div>
+                          </sc-if>
+                        </sc-if>
+                      </div>
+                    </sc-if>
+
+                    <sc-if value="{{ r.wfHasReview }}" hint-placeholder-val="{{ false }}">
+                      <div style="margin-top:11px; background:white; border:1px solid oklch(88% 0.02 70); border-radius:8px; padding:12px 14px;">
+                        <div style="font-size:12.5px; font-weight:700; color:oklch(35% 0.13 25); margin-bottom:3px;">{{ r.wfReviewTitle }}</div>
+                        <div style="font-size:11.5px; color:oklch(50% 0.02 60); margin-bottom:9px;">{{ r.wfReviewSub }}</div>
+                        <sc-if value="{{ r.wfCanDecide }}" hint-placeholder-val="{{ false }}">
+                          <textarea rows="2" value="{{ r.reviewNote }}" onChange="{{ r.onReviewNote }}" placeholder="เหตุผล / สิ่งที่ต้องแก้ (จำเป็นเมื่อส่งกลับ)" style="width:100%; box-sizing:border-box; border:1px solid oklch(87% 0.01 70); border-radius:6px; padding:8px 10px; font-size:12px; font-family:inherit; resize:none;"></textarea>
+                          <div style="font-size:11px; color:oklch(52% 0.02 60); margin:7px 0 4px;">ส่งกลับที่ขั้นตอน:</div>
+                          <select value="{{ r.reviewStepKey }}" onChange="{{ r.onReviewStepKey }}" style="width:100%; border:1px solid oklch(87% 0.01 70); border-radius:6px; padding:7px 9px; font-size:12px; font-family:inherit; background:white; margin-bottom:9px;">
+                            <sc-for list="{{ r.wfStepOptions }}" as="o" hint-placeholder-count="4">
+                              <option value="{{ o.value }}">{{ o.label }}</option>
+                            </sc-for>
+                          </select>
+                          <div style="display:flex; gap:7px; flex-wrap:wrap;">
+                            <div onClick="{{ r.onApprove }}" style="background:oklch(40% 0.11 150); color:white; padding:7px 16px; border-radius:100px; font-size:11.5px; font-weight:700; cursor:pointer;">✓ อนุมัติ</div>
+                            <div onClick="{{ r.onReturn }}" style="background:white; border:1px solid oklch(80% 0.09 27); color:oklch(45% 0.17 27); padding:7px 15px; border-radius:100px; font-size:11.5px; font-weight:600; cursor:pointer;">↩️ ส่งกลับให้แก้</div>
+                            <div onClick="{{ r.onMoreInfo }}" style="background:white; border:1px solid oklch(84% 0.06 75); color:oklch(45% 0.12 70); padding:7px 15px; border-radius:100px; font-size:11.5px; font-weight:600; cursor:pointer;">＋ ขอข้อมูลเพิ่ม</div>
+                          </div>
+                          <sc-if value="{{ r.hasReviewErr }}" hint-placeholder-val="{{ false }}">
+                            <div style="margin-top:7px; font-size:11px; color:oklch(50% 0.18 30);">{{ r.reviewErrText }}</div>
+                          </sc-if>
+                        </sc-if>
+                        <sc-if value="{{ r.wfHasSubmissions }}" hint-placeholder-val="{{ false }}">
+                          <div style="margin-top:10px; border-top:1px solid oklch(95% 0.01 70); padding-top:8px;">
+                            <div style="font-size:11px; font-weight:700; color:oklch(45% 0.02 60); margin-bottom:5px;">ประวัติการส่งงาน</div>
+                            <sc-for list="{{ r.wfSubmissions }}" as="v" hint-placeholder-count="1">
+                              <div style="font-size:11px; color:oklch(45% 0.02 60); line-height:1.75;">{{ v.line }}</div>
+                            </sc-for>
+                          </div>
+                        </sc-if>
+                      </div>
+                    </sc-if>
+                  </div>
+
                   <sc-if value="{{ r.hasUnread }}" hint-placeholder-val="{{ false }}">
                     <div style="display:inline-block; background:oklch(55% 0.20 25); color:white; font-size:10.5px; font-weight:700; padding:2px 9px; border-radius:100px; margin-bottom:7px;">🔔 ข้อความใหม่จากลูกค้า</div>
                   </sc-if>
@@ -331,13 +441,15 @@ class Component extends DCLogic {
     el.scrollTop = el.scrollHeight;
   }
 
-  state = { preview: {}, previewBusy: "", previewErr: {}, newIncoming: {}, copiedFor: "", caseMsgs: {}, replyDraft: {}, replyBusy: "", aiBusy: "", suggests: {}, suggestKey: {}, suggestBusy: "", caseErr: {}, infoReqFor: null, infoReqText: "", infoReqBusy: false, lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
+  state = { wfOpen: {}, wfBusy: "", submissions: {}, reviewNote: {}, reviewStepKey: {}, reviewErr: {}, preview: {}, previewBusy: "", previewErr: {}, newIncoming: {}, copiedFor: "", caseMsgs: {}, replyDraft: {}, replyBusy: "", aiBusy: "", suggests: {}, suggestKey: {}, suggestBusy: "", caseErr: {}, infoReqFor: null, infoReqText: "", infoReqBusy: false, lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
 
   componentWillUnmount() {
     Object.values(this._unsubs || {}).forEach((fn) => { try { fn(); } catch (e) {} });
   }
 
   async componentDidMount() {
+    const wf = await import("./intake-workflow.js");
+    this._wf = wf;
     const fb = await import("./firebase-client.js");
     this._fb = fb;
     await fb.onAdminAuthReady();
@@ -539,6 +651,240 @@ class Component extends DCLogic {
       console.error("[CaseMessenger][preview] failed:", e && e.message);
       this.setState((st) => ({ previewBusy: "", previewErr: { ...(st.previewErr || {}), [p.id]: "แปลไม่สำเร็จ ลองอีกครั้ง" } }));
     }
+  }
+
+  // Verification is the ONE place a staff action alone completes a
+  // requirement — and it writes an auditable record (who, when, how), not a
+  // bare checkbox.
+  async verifyReq(p, key, on) {
+    try {
+      if (on) await this._fb.recordVerification(p.id, key, { source: "staff_phone_confirmation" });
+      else await this._fb.clearVerification(p.id, key);
+      try {
+        await this._fb.logActivity({
+          type: "workflow_verification", propertyId: p.id, field: key,
+          summary: (on ? "ยืนยันข้อมูล " : "ยกเลิกการยืนยัน ") + key + " — " + p.id,
+        });
+      } catch (e) {}
+      await this.componentDidMount();
+    } catch (e) {
+      console.error("[Workflow][verify] failed:", e && e.message);
+    }
+  }
+
+  // Submit is reached through the step whose TYPE is "submit" — its number is
+  // irrelevant, so inserting steps above it changes nothing here.
+  async submitWork(p) {
+    const ev = this._evalWf(p);
+    if (!ev || !ev.canSubmit) return;
+    this.setState({ wfBusy: p.id });
+    try {
+      const sub = await this._fb.createSubmission(p.id, {
+        workflowVersion: ev.version,
+        photoCount: (this.state.photosByProp[p.id] || []).length,
+        workflowState: ev.steps.map((x) => ({ stepKey: x.stepKey, state: x.state, done: x.blockingDone, total: x.blockingTotal })),
+        keyData: { price: p.price || null, type: p.type || null, area: p.area || null, status: p.status || null },
+      });
+      // Transport-agnostic: a LINE/email adapter consumes this later. Wrapped
+      // so a missing transport can never fail a submission.
+      try {
+        await this._fb.createNotificationEvent({
+          type: "approval_required", caseId: p.id,
+          submissionId: sub.id, submissionNumber: sub.number, recipientRole: "owner",
+          payload: { caseId: p.id, submissionNumber: sub.number, staff: p.assignedToEmail || "", submittedAt: Date.now() },
+        });
+      } catch (e) { console.warn("[Workflow] notification event not created:", e && e.message); }
+      try {
+        await this._fb.logActivity({
+          type: "workflow_submitted", propertyId: p.id, stepKey: ev.submitStepKey,
+          submissionNumber: sub.number, workflowVersion: ev.version,
+          summary: "ส่งงานรอตรวจสอบ " + p.id + " (ครั้งที่ " + sub.number + ")",
+        });
+      } catch (e) {}
+      this.setState({ wfBusy: "" });
+      await this.componentDidMount();
+    } catch (e) {
+      console.error("[Workflow][submit] failed:", e && e.message);
+      this.setState({ wfBusy: "" });
+    }
+  }
+
+  async decide(p, decision) {
+    const note = (this.state.reviewNote[p.id] || "").trim();
+    const stepKey = this.state.reviewStepKey[p.id] || "";
+    if (decision !== "approved" && !note) {
+      this.setState((st) => ({ reviewErr: { ...st.reviewErr, [p.id]: "กรุณาระบุเหตุผล/สิ่งที่ต้องแก้ก่อนส่งกลับ" } }));
+      return;
+    }
+    this.setState((st) => ({ wfBusy: p.id, reviewErr: { ...st.reviewErr, [p.id]: "" } }));
+    try {
+      await this._fb.decideSubmission(p.id, p.lastSubmissionId, decision, { reason: note, stepKey: stepKey });
+      try {
+        await this._fb.createNotificationEvent({
+          type: decision === "approved" ? "intake_approved"
+            : decision === "more_info" ? "more_information_required" : "correction_required",
+          caseId: p.id, submissionId: p.lastSubmissionId || null,
+          recipientRole: "staff",
+          payload: { caseId: p.id, reason: note, stepKey: stepKey, staff: p.assignedToEmail || "" },
+        });
+      } catch (e) { console.warn("[Workflow] notification event not created:", e && e.message); }
+      try {
+        await this._fb.logActivity({
+          type: "review_decision", propertyId: p.id, decision: decision,
+          stepKey: stepKey || null, reason: note || null,
+          summary: "ผลตรวจสอบ " + p.id + ": " + (decision === "approved" ? "อนุมัติ" : decision === "more_info" ? "ขอข้อมูลเพิ่ม" : "ส่งกลับให้แก้") + (note ? " — " + note : ""),
+        });
+      } catch (e) {}
+      this.setState((st) => ({ wfBusy: "", reviewNote: { ...st.reviewNote, [p.id]: "" } }));
+      await this.componentDidMount();
+    } catch (e) {
+      console.error("[Workflow][decide] failed:", e && e.message);
+      this.setState((st) => ({ wfBusy: "", reviewErr: { ...st.reviewErr, [p.id]: "บันทึกไม่สำเร็จ: " + (e.message || e) } }));
+    }
+  }
+
+  // Who may review/approve an intake case. Only Owner today, but the concept
+  // is a capability so a future Supervisor/Reviewer role is a one-line change
+  // rather than a workflow redesign. Never a hard-coded email.
+  _can(capability) {
+    const role = this.state.adminRole || "";
+    const GRANTS = {
+      // canApproveIntake also implies canReviewIntake.
+      canReviewIntake: ["owner"],
+      canApproveIntake: ["owner"],
+    };
+    return (GRANTS[capability] || []).indexOf(role) !== -1;
+  }
+
+  // Separation of duties: the person who submitted the work must not approve
+  // it. Enforced in the UI here AND in firestore.rules, so it cannot be
+  // bypassed from the console.
+  _canDecideOn(p) {
+    if (!this._can("canApproveIntake")) return false;
+    const me = this._fb && this._fb.currentAdminUser && this._fb.currentAdminUser();
+    const myEmail = (me && me.email) || "";
+    // If the Owner themselves prepared and submitted this case, they may still
+    // decide (there is nobody above them) — the rule exists to stop a STAFF
+    // submitter self-approving, which the capability check already prevents.
+    return true;
+  }
+
+  _wfVals(p) {
+    if (p.source !== "owner_submission" || !this._wf) return {};
+    const ev = this._evalWf(p);
+    if (!ev) return {};
+    const openKey = this.state.wfOpen[p.id] || "";
+    const panel = ev.steps.find((x) => x.stepKey === openKey) || null;
+    const ret = p.reviewReturn || null;
+    const subs = this.state.submissions[p.id] || [];
+    const levelLabels = { critical: "จำเป็น", required: "ต้องมี", optional: "ถ้ามี" };
+    const st = (k) => this._wf.stateStyle(k);
+    return {
+      wfProgressLabel: ev.overallDone + "/" + ev.overallTotal + " ครบ · " + ev.overallPercent + "%",
+      // Rendered from the definition: a step added later appears here with no
+      // markup change, and its number simply shifts.
+      wfSteps: ev.steps.map((x) => {
+        const c = st(x.state);
+        const active = x.stepKey === openKey;
+        return {
+          key: x.stepKey, numLabel: x.number + ".", icon: x.icon, title: x.title,
+          countLabel: x.isSubmit ? "" : x.blockingDone + "/" + x.blockingTotal,
+          onOpen: () => {
+            if (ev.submissionCount > 0 && !this.state.submissions[p.id]) this._loadSubs(p);
+            this.setState((s2) => ({ wfOpen: { ...s2.wfOpen, [p.id]: active ? "" : x.stepKey } }));
+          },
+          chipStyle: {
+            display: "flex", alignItems: "center", gap: "5px", cursor: "pointer",
+            background: c.bg, color: c.fg,
+            border: (active ? "2px solid " : "1px solid ") + c.bd,
+            borderRadius: "100px", padding: active ? "5px 11px" : "6px 12px",
+            fontSize: "11px", whiteSpace: "nowrap",
+          },
+        };
+      }),
+      wfPanelOpen: !!panel,
+      wfPanelTitle: panel ? (panel.number + ". " + panel.icon + " " + panel.title) : "",
+      wfPanelPurpose: panel ? panel.purpose : "",
+      wfPanelIsSubmit: !!(panel && panel.isSubmit),
+      wfPanelReturned: !!(panel && ret && ret.stepKey === panel.stepKey),
+      wfReturnReason: ret ? (ret.reason || "") : "",
+      onCloseWfPanel: () => this.setState((s2) => ({ wfOpen: { ...s2.wfOpen, [p.id]: "" } })),
+      wfTodo: panel ? panel.todo.map((t, i) => ({ key: i, text: t })) : [],
+      wfHasReqs: !!(panel && panel.requirements.length),
+      wfReqs: panel ? panel.requirements.map((q) => ({
+        key: q.key,
+        label: q.progressLabel || q.label,
+        mark: q.done ? "✓" : (q.level === "optional" ? "○" : "✕"),
+        markStyle: {
+          flexShrink: 0, width: "17px", textAlign: "center", fontSize: "12px", fontWeight: 700,
+          color: q.done ? "oklch(45% 0.13 150)" : (q.level === "optional" ? "oklch(65% 0.02 60)" : "oklch(52% 0.18 28)"),
+        },
+        levelLabel: levelLabels[q.level] || q.level,
+        levelStyle: {
+          fontSize: "9.5px", marginLeft: "4px", padding: "1px 6px", borderRadius: "100px",
+          background: q.level === "critical" ? "oklch(95% 0.05 25)" : q.level === "required" ? "oklch(96% 0.04 75)" : "oklch(96% 0.005 80)",
+          color: q.level === "critical" ? "oklch(46% 0.16 27)" : q.level === "required" ? "oklch(45% 0.11 70)" : "oklch(55% 0.02 60)",
+        },
+        hasHint: !!q.hint, hint: q.hint,
+        // Only verification requirements are staff-confirmable. Data
+        // requirements can never be "ticked" — they need the real data.
+        canVerify: q.isVerification && !q.done,
+        canUnverify: q.isVerification && q.done,
+        onVerify: () => this.verifyReq(p, q.key, true),
+        onUnverify: () => this.verifyReq(p, q.key, false),
+      })) : [],
+      wfCanSubmit: ev.canSubmit && this.state.wfBusy !== p.id,
+      wfBlocked: !ev.canSubmit,
+      submitWorkLabel: this.state.wfBusy === p.id ? "กำลังส่ง…"
+        : (ev.submissionCount > 0 ? "ส่งงานอีกครั้ง (ครั้งที่ " + (ev.submissionCount + 1) + ")" : "ส่งงานรอตรวจสอบ"),
+      wfBlockers: ev.blockers.map((b, i) => ({
+        key: i, stepLabel: b.stepNumber + ". " + b.stepTitle, label: b.label,
+      })),
+      onSubmitWork: () => this.submitWork(p),
+      // Review is its OWN stage, not a numbered staff step — so inserting
+      // staff steps never changes reviewer architecture.
+      wfHasReview: ev.submissionCount > 0,
+      wfReviewTitle: ev.reviewStatus === "approved" ? "✓ อนุมัติแล้ว — จบขั้นตอนรับทรัพย์"
+        : ev.reviewStatus === "waiting_review" ? "🔔 รอผู้บริหารตรวจสอบ"
+        : ev.reviewStatus === "returned" ? "↩️ ส่งกลับให้แก้ไข"
+        : ev.reviewStatus === "more_info_required" ? "＋ ขอข้อมูลเพิ่มเติม" : "การตรวจสอบ",
+      wfReviewSub: ev.reviewStatus === "approved"
+        ? ("อนุมัติโดย " + (p.approvedBy || "-") + (p.intakeCompletedAt ? " · " + new Date(p.intakeCompletedAt).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + " น." : ""))
+        : ("ส่งงานแล้ว " + ev.submissionCount + " ครั้ง"),
+      wfCanDecide: this._canDecideOn(p) && ev.reviewStatus !== "approved",
+      wfStepOptions: ev.steps.filter((x) => !x.isSubmit)
+        .map((x) => ({ key: x.stepKey, value: x.stepKey, label: x.number + ". " + x.title })),
+      reviewNote: this.state.reviewNote[p.id] || "",
+      onReviewNote: (e) => this.setState((s2) => ({ reviewNote: { ...s2.reviewNote, [p.id]: e.target.value } })),
+      reviewStepKey: this.state.reviewStepKey[p.id] || (ev.steps[0] ? ev.steps[0].stepKey : ""),
+      onReviewStepKey: (e) => this.setState((s2) => ({ reviewStepKey: { ...s2.reviewStepKey, [p.id]: e.target.value } })),
+      onApprove: () => this.decide(p, "approved"),
+      onReturn: () => this.decide(p, "returned"),
+      onMoreInfo: () => this.decide(p, "more_info"),
+      hasReviewErr: !!this.state.reviewErr[p.id],
+      reviewErrText: this.state.reviewErr[p.id] || "",
+      wfHasSubmissions: subs.length > 0,
+      wfSubmissions: subs.map((v) => ({
+        key: v.id,
+        line: "ครั้งที่ " + v.submissionNumber + " · "
+          + new Date(v.submittedAt).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + " น. · "
+          + (v.reviewResult === "approved" ? "อนุมัติ" : v.reviewResult === "returned" ? "ส่งกลับ" : v.reviewResult === "more_info" ? "ขอข้อมูลเพิ่ม" : "รอตรวจ"),
+      })),
+    };
+  }
+
+  async _loadSubs(p) {
+    try {
+      const rows = await this._fb.fetchSubmissions(p.id);
+      this.setState((st) => ({ submissions: { ...st.submissions, [p.id]: rows } }));
+    } catch (e) { console.warn("[Workflow] submissions load failed:", e && e.message); }
+  }
+
+  _evalWf(p) {
+    if (!this._wf) return null;
+    try {
+      return this._wf.evaluate({ prop: p, photos: this.state.photosByProp[p.id] || [] });
+    } catch (e) { console.error("[Workflow][evaluate] failed:", e && e.message); return null; }
   }
 
   async sendCaseReply(p) {
@@ -793,6 +1139,7 @@ class Component extends DCLogic {
           hasSuggests: (this.state.suggests[p.id] || []).length > 0,
           suggestBusyNow: this.state.suggestBusy === p.id,
           onRefreshSuggests: () => this.loadSuggestions(p, true),
+          ...this._wfVals(p),
           onSendReply: () => this.sendCaseReply(p),
           onPreviewReply: () => this.previewReply(p),
           previewLabel: this.state.previewBusy === p.id ? "กำลังแปล…" : "ดูคำแปลก่อนส่ง",

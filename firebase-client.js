@@ -2021,3 +2021,125 @@ export async function draftCaseReply(caseSummary, recentThaiMessages) {
     throw e;
   }
 }
+
+
+// ── Intake workflow (Aug 2026) ───────────────────────────────────────────
+// Submission versions, verification records and generic notification events.
+// The workflow engine itself (intake-workflow.js) is pure logic and reads only
+// the property record; these are the writes it needs.
+
+// Record a verification a staff member actually performed. Stored as a map on
+// the property so the workflow can read it with no extra query, and so an
+// approval stays auditable ("who confirmed the price, when, by what means").
+export async function recordVerification(propertyId, key, payload) {
+  const admin = currentAdminUser();
+  const rec = {
+    confirmed: payload && payload.confirmed === false ? false : true,
+    confirmedAt: Date.now(),
+    confirmedBy: (admin && admin.email) || "",
+    confirmedByUid: (admin && admin.uid) || "",
+    source: (payload && payload.source) || "staff_entry",
+    note: (payload && payload.note) || "",
+  };
+  await db().collection("properties").doc(String(propertyId))
+    .set({ verifications: { [key]: rec } }, { merge: true });
+  return rec;
+}
+
+export async function clearVerification(propertyId, key) {
+  await db().collection("properties").doc(String(propertyId))
+    .set({ verifications: { [key]: null } }, { merge: true });
+}
+
+// A submission version. Never overwritten: submission #1 stays on record even
+// after #2 is approved, which is what makes the review history meaningful.
+// Stores references, not copies of photos.
+export async function createSubmission(propertyId, snapshot) {
+  const admin = currentAdminUser();
+  const propRef = db().collection("properties").doc(String(propertyId));
+  const propSnap = await propRef.get();
+  const prev = Number((propSnap.data() || {}).submissionCount) || 0;
+  const number = prev + 1;
+  const doc = {
+    submissionNumber: number,
+    workflowVersion: (snapshot && snapshot.workflowVersion) || "intake_v1",
+    submittedAt: Date.now(),
+    submittedBy: (admin && admin.email) || "",
+    submittedByUid: (admin && admin.uid) || "",
+    // Enough workflow state to explain later why this was accepted, without
+    // duplicating the property record.
+    workflowState: (snapshot && snapshot.workflowState) || null,
+    keyData: (snapshot && snapshot.keyData) || null,
+    photoCount: (snapshot && snapshot.photoCount) || 0,
+    reviewResult: null, reviewedBy: null, reviewedAt: null, returnReason: null,
+  };
+  const ref = await propRef.collection("submissions").add(doc);
+  await propRef.set({
+    submissionCount: number,
+    reviewStatus: "waiting_review",
+    lastSubmittedAt: doc.submittedAt,
+    lastSubmissionId: ref.id,
+    workflowVersion: doc.workflowVersion,
+    reviewReturn: null,
+  }, { merge: true });
+  return { id: ref.id, number: number };
+}
+
+export async function fetchSubmissions(propertyId) {
+  const snap = await db().collection("properties").doc(String(propertyId))
+    .collection("submissions").get();
+  return snap.docs.map((d) => ({ ...d.data(), id: d.id }))
+    .sort((a, b) => (b.submissionNumber || 0) - (a.submissionNumber || 0));
+}
+
+// Review decision. "approve" ends the intake workflow; the other two send the
+// case back to a NAMED step so staff know exactly what to fix.
+export async function decideSubmission(propertyId, submissionId, decision, opts) {
+  const admin = currentAdminUser();
+  const now = Date.now();
+  const propRef = db().collection("properties").doc(String(propertyId));
+  await propRef.collection("submissions").doc(String(submissionId)).update({
+    reviewResult: decision,
+    reviewedBy: (admin && admin.email) || "",
+    reviewedAt: now,
+    returnReason: (opts && opts.reason) || null,
+    returnStepKey: (opts && opts.stepKey) || null,
+  });
+  if (decision === "approved") {
+    await propRef.set({
+      reviewStatus: "approved", intakeCompletedAt: now,
+      approvedBy: (admin && admin.email) || "", approvedSubmissionId: String(submissionId),
+      reviewReturn: null,
+    }, { merge: true });
+  } else {
+    await propRef.set({
+      reviewStatus: decision === "more_info" ? "more_info_required" : "returned",
+      reviewReturn: {
+        stepKey: (opts && opts.stepKey) || null,
+        reason: (opts && opts.reason) || "",
+        by: (admin && admin.email) || "", at: now, decision: decision,
+      },
+    }, { merge: true });
+  }
+  return true;
+}
+
+// Generic notification event. Deliberately transport-agnostic: a LINE (or
+// email, or web-push) adapter can consume these later without workflow code
+// changing. A submission must NEVER fail because no transport is configured,
+// so every caller wraps this in try/catch.
+export async function createNotificationEvent(evt) {
+  const doc = {
+    type: (evt && evt.type) || "generic",
+    caseId: (evt && evt.caseId) || "",
+    submissionId: (evt && evt.submissionId) || null,
+    submissionNumber: (evt && evt.submissionNumber) || null,
+    recipientRole: (evt && evt.recipientRole) || "owner",
+    payload: (evt && evt.payload) || null,
+    createdAt: Date.now(),
+    status: "pending",
+    attempts: 0, sentAt: null, error: null,
+  };
+  const ref = await db().collection("notificationEvents").add(doc);
+  return ref.id;
+}

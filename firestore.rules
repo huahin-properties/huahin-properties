@@ -150,6 +150,25 @@ service cloud.firestore {
       // only ever ADD a customer-visible inbound message — never read an
       // internal note, never edit or delete anything, never touch the parent
       // property. Staff/Owner use the existing isAdmin() role.
+      // INTAKE WORKFLOW (Aug 2026) — internal review history.
+      // Team-only in BOTH directions: the customer's tracking token grants no
+      // access here at all, so review reasons, reviewer names and internal
+      // workflow state stay internal. Submissions are never deleted, so the
+      // "#1 returned, #2 approved" history cannot be rewritten.
+      // canReviewIntake / canApproveIntake — expressed here as isOwner().
+      // To authorise a future Supervisor/Reviewer role, widen isOwner() (or
+      // add a capability helper beside it) in ONE place; nothing in the
+      // workflow references a specific account.
+      match /submissions/{subId} {
+        allow read: if isAdmin();
+        // Staff submit their own work…
+        allow create: if isAdmin();
+        // …but ONLY an authorized reviewer records the verdict. This is the
+        // database-level half of separation of duties: the submitter cannot
+        // approve their own case even by calling the client helper directly.
+        allow update: if isOwner();
+        allow delete: if false;
+      }
       match /caseMessages/{msgId} {
         function parent() {
           return get(/databases/$(database)/documents/properties/$(id)).data;
@@ -182,6 +201,16 @@ service cloud.firestore {
     // flag a listing for admin review — create-only, no read/update/delete,
     // so a reporter can never see or tamper with other people's reports.
     // Admin (Listing Approvals.dc.html "รายงานปัญหา" tab) reads/resolves.
+    // Transport-agnostic notification queue for the intake workflow.
+    // Team-only in both directions — a customer tracking token grants nothing
+    // here, so review reasons and reviewer identities never leak. A LINE /
+    // email adapter will consume these server-side later; nothing here is
+    // public, and a missing transport can never block a submission because
+    // creating the event is all the workflow ever does.
+    match /notificationEvents/{id} {
+      allow read, create, update: if isAdmin();
+      allow delete: if false;
+    }
     match /propertyReports/{id} {
       allow read, update, delete: if isAdmin();
       allow create: if request.resource.data.propertyId is string && request.resource.data.propertyId.size() > 0;
