@@ -98,13 +98,38 @@
           </sc-if>
         </div>
       </div>
+
+      <div style="margin-top:14px;">
+        <div onClick="{{ onToggleHistory }}" style="display:flex; align-items:center; gap:7px; font-size:13px; font-weight:600; color:oklch(40% 0.13 25); cursor:pointer;">
+          <span>{{ historyTitle }}</span>
+          <span style="font-size:11px;">{{ historyCaret }}</span>
+          <span style="font-size:11.5px; font-weight:400; color:oklch(55% 0.02 60);">{{ historyCountLabel }}</span>
+        </div>
+        <sc-if value="{{ historyOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top:10px; background:white; border:1px solid oklch(91% 0.01 70); border-radius:10px; padding:12px 14px; max-height:52vh; overflow-y:auto;">
+            <sc-for list="{{ historyRows }}" as="h" hint-placeholder-count="2">
+              <div style="padding:9px 0; border-bottom:1px solid oklch(95% 0.01 70);">
+                <div style="display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; margin-bottom:3px;">
+                  <div style="font-size:12px; font-weight:700; color:oklch(35% 0.02 60);">{{ h.who }}</div>
+                  <div style="font-size:11px; color:oklch(58% 0.02 60);">{{ h.at }}</div>
+                </div>
+                <div style="font-size:13px; line-height:1.65; color:oklch(28% 0.02 60); white-space:pre-wrap;">{{ h.text }}</div>
+              </div>
+            </sc-for>
+            <sc-if value="{{ historyEmpty }}" hint-placeholder-val="{{ true }}">
+              <div style="font-size:12.5px; color:oklch(56% 0.02 60);">{{ historyEmptyLabel }}</div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+
     </sc-if>
   </div>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:700,&quot;height&quot;:800}}">
 class Component extends DCLogic {
-  state = { phase: "loading", prop: null, photoCount: 0, replyText: "", sending: false, replyError: "", msgs: [], msgsFailed: false, hasNewIncoming: false, atBottom: true };
+  state = { phase: "loading", prop: null, photoCount: 0, replyText: "", sending: false, replyError: "", msgs: [], msgsFailed: false, hasNewIncoming: false, atBottom: true, historyOpen: false };
 
   componentWillUnmount() { if (this._unsub) { try { this._unsub(); } catch (e) {} } }
 
@@ -126,6 +151,9 @@ class Component extends DCLogic {
     el.scrollTop = el.scrollHeight;
   }
 
+  // true = follow the conversation; false = the reader scrolled up on purpose.
+  _stick = true;
+
   componentDidUpdate(prevProps, prevState) {
     const grew = (this.state.msgs || []).length > ((prevState && prevState.msgs) || []).length;
     // First paint of a thread always lands on the newest message.
@@ -134,7 +162,9 @@ class Component extends DCLogic {
       setTimeout(() => this._scrollToLatest(false), 0);
       return;
     }
-    if (grew && this._wasNearBottom !== false) setTimeout(() => this._scrollToLatest(true), 0);
+    // Only a genuinely new message may move the view, and only while the
+    // reader is still following along.
+    if (grew && this._stick) setTimeout(() => this._scrollToLatest(true), 0);
   }
 
   async componentDidMount() {
@@ -168,8 +198,7 @@ class Component extends DCLogic {
           this.setState((s) => {
             const seen = s.msgs.length;
             const grew = rows.length > seen;
-            if (grew) this._wasNearBottom = this._isNearBottom();
-            return { msgs: rows, msgsFailed: false, hasNewIncoming: grew && !s.atBottom ? true : s.hasNewIncoming };
+            return { msgs: rows, msgsFailed: false, hasNewIncoming: grew && !this._stick ? true : s.hasNewIncoming };
           });
         });
       } catch (e) { console.warn("watch failed:", e); }
@@ -229,7 +258,7 @@ class Component extends DCLogic {
       // The message itself is the only write that may block the send.
       await this._fb.addCaseMessage(this._id, rec);
       // Confirmed — now it is safe to clear what the customer typed.
-      this._wasNearBottom = true;
+      this._stick = true;
       this.setState({ sending: false, replyText: "", replyError: "", hasNewIncoming: false, atBottom: true });
       setTimeout(() => this._scrollToLatest(true), 60);
       // Bookkeeping is best-effort: it keeps the legacy Staff card fields in
@@ -271,16 +300,45 @@ class Component extends DCLogic {
       txnLabel: p.status === "rent" ? "ฝากเช่า" : "ฝากขาย",
       priceLabel: "฿" + (Number(p.price) || 0).toLocaleString(),
       photoCountLabel: this.state.photoCount + " รูป",
+      historyOpen: this.state.historyOpen,
+      onToggleHistory: () => this.setState((s) => ({ historyOpen: !s.historyOpen })),
+      historyCaret: this.state.historyOpen ? "▲" : "▼",
+      historyTitle: (this.state.prop && this.state.prop.customerLanguage === "en")
+        ? "Conversation History" : "ประวัติการสนทนา",
+      historyCountLabel: this.state.msgs.length
+        ? "(" + this.state.msgs.length + ")" : "",
+      historyEmpty: this.state.msgs.length === 0,
+      historyEmptyLabel: (this.state.prop && this.state.prop.customerLanguage === "en")
+        ? "No messages yet." : "ยังไม่มีข้อความ",
+      // Re-presentation of the SAME caseMessages the chat already streamed —
+      // no extra query, no duplicate storage, no re-translation. Internal
+      // fields (thaiText, sender email/uid, caseToken) are never read here.
+      historyRows: this.state.msgs.map((m) => {
+        const mine = m.direction !== "outbound";
+        const en = (this.state.prop && this.state.prop.customerLanguage === "en");
+        return {
+          key: m.id,
+          who: mine ? (en ? "You" : "คุณ") : "ทีมงาน huahin.properties",
+          at: m.createdAt
+            ? new Date(m.createdAt).toLocaleString(en ? "en-GB" : "th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })
+            : "—",
+          // Exactly what the customer sees in the chat: their own words as
+          // written, and the team's message in the customer's language.
+          text: mine ? (m.originalText || m.customerText || "") : (m.customerText || m.originalText || ""),
+        };
+      }),
       hasThread: this.state.msgs.length > 0,
       threadRef: this._threadRef,
       threadEndRef: this._threadEndRef,
       hasNewIncoming: this.state.hasNewIncoming,
       onThreadScroll: () => {
         const near = this._isNearBottom();
+        // Scrolling up stops the auto-follow; coming back resumes it.
+        this._stick = near;
         if (near !== this.state.atBottom) this.setState({ atBottom: near });
         if (near && this.state.hasNewIncoming) this.setState({ hasNewIncoming: false });
       },
-      onJumpLatest: () => { this.setState({ hasNewIncoming: false, atBottom: true }); this._scrollToLatest(true); },
+      onJumpLatest: () => { this._stick = true; this.setState({ hasNewIncoming: false, atBottom: true }); this._scrollToLatest(true); },
       hasNewFromTeam: !!(this.state.prop && this.state.prop.lastStaffMessageAt
         && (!this.state.prop.customerLastReadAt || this.state.prop.lastStaffMessageAt > this.state.prop.customerLastReadAt)),
       noThread: this.state.msgs.length === 0,

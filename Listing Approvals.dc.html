@@ -302,7 +302,8 @@
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
   _threadEls = {};
-  _nearBottom = {};
+  // true = following the conversation; false = reading history on purpose.
+  _stick = {};
   _didInitial = {};
 
   _isNearBottom(id) {
@@ -442,15 +443,15 @@ class Component extends DCLogic {
           const newInbound = lastNow && lastNow.direction === "inbound"
             && (!lastPrev || lastPrev.id !== lastNow.id);
           const grew = rows.length > prev.length;
-          // Was the reader following along, or scrolled up in history?
-          const wasNear = grew ? this._isNearBottom(p.id) : true;
+          // Follow only if the reader has not scrolled up. Default is follow.
+          const follow = this._stick[p.id] !== false;
           this.setState((st) => ({
             caseMsgs: { ...st.caseMsgs, [p.id]: rows },
-            newIncoming: grew && !wasNear
+            newIncoming: grew && !follow
               ? { ...(st.newIncoming || {}), [p.id]: true }
               : (st.newIncoming || {}),
           }));
-          if (grew && wasNear) setTimeout(() => this._scrollToLatest(p.id, true), 60);
+          if (grew && follow) setTimeout(() => this._scrollToLatest(p.id, true), 60);
           if (newInbound) {
             this._fb.markCaseRead(p.id, "staff");
             this.loadSuggestions(p, false);
@@ -531,7 +532,7 @@ class Component extends DCLogic {
       await this._fb.addCaseMessage(p.id, rec);
       await this._fb.logActivity({ type: "case_message_sent", propertyId: p.id, summary: `ส่งข้อความถึงผู้ติดต่อทรัพย์ ${p.id}` });
       // The sender always follows their own message down.
-      this._nearBottom[p.id] = true;
+      this._stick[p.id] = true;
       this.setState((st) => ({
         replyBusy: "",
         replyDraft: { ...st.replyDraft, [p.id]: "" },
@@ -691,13 +692,13 @@ class Component extends DCLogic {
           },
           onThreadScroll: () => {
             const near = this._isNearBottom(p.id);
-            this._nearBottom[p.id] = near;
+            this._stick[p.id] = near;
             if (near && (this.state.newIncoming || {})[p.id]) {
               this.setState((st) => ({ newIncoming: { ...(st.newIncoming || {}), [p.id]: false } }));
             }
           },
           onJumpLatest: () => {
-            this._nearBottom[p.id] = true;
+            this._stick[p.id] = true;
             this.setState((st) => ({ newIncoming: { ...(st.newIncoming || {}), [p.id]: false } }));
             this._scrollToLatest(p.id, true);
           },
