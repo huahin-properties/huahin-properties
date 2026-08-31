@@ -630,6 +630,15 @@ class Component extends DCLogic {
     return p.id + ":" + (msgs.length ? (msgs[msgs.length - 1].id || msgs.length) : "0");
   }
 
+  // Called after suggestions resolve: their chips add height below the
+  // history pane, so re-pin unless Staff is deliberately reading history.
+  _repinAfterGrow(id) {
+    if (this._stick[id] === false) return;
+    const go = () => { const el = this._threadEls[id]; if (el) el.scrollTop = el.scrollHeight; };
+    requestAnimationFrame(go);
+    setTimeout(go, 140);
+  }
+
   async loadSuggestions(p, force) {
     const key = this._suggestKey(p);
     if (!force && this.state.suggestKey[p.id] === key) return;
@@ -638,6 +647,7 @@ class Component extends DCLogic {
     try {
       const list = await this._fb.suggestCaseReplies(this._caseSummary(p), this.state.caseMsgs[p.id] || []);
       this.setState((st) => ({ suggestBusy: "", suggests: { ...st.suggests, [p.id]: list } }));
+      this._repinAfterGrow(p.id);
     } catch (e) {
       console.warn("suggestCaseReplies failed:", e);
       this.setState((st) => ({ suggestBusy: "", suggests: { ...st.suggests, [p.id]: [] } }));
@@ -662,6 +672,7 @@ class Component extends DCLogic {
         // the stale preview stops matching and is hidden automatically.
         preview: { ...(st.preview || {}), [p.id]: { src: thai, text: out } },
       }));
+      this._repinAfterGrow(p.id);
     } catch (e) {
       console.error("[CaseMessenger][preview] failed:", e && e.message);
       this.setState((st) => ({ previewBusy: "", previewErr: { ...(st.previewErr || {}), [p.id]: "แปลไม่สำเร็จ ลองอีกครั้ง" } }));
@@ -1142,8 +1153,25 @@ class Component extends DCLogic {
           custLangStatus: p.customerLanguageConfirmed === true ? "ภาษาลูกค้า" : "ภาษาที่คาดไว้",
           custLangLabel: ({ th: "ไทย", en: "English", zh: "中文", ru: "Русский", de: "Deutsch", no: "Norsk", fr: "Français", it: "Italiano" })[p.customerLanguage || "th"] || "ไทย",
           threadRef: (el) => {
-            if (!el) { delete this._threadEls[p.id]; return; }
+            if (!el) {
+              const ro = this._threadRO && this._threadRO[p.id];
+              if (ro) { ro.disconnect(); delete this._threadRO[p.id]; }
+              delete this._threadEls[p.id];
+              return;
+            }
             this._threadEls[p.id] = el;
+            // Anything that changes the box height (suggestions loading, the
+            // translation preview opening, the composer growing) must not
+            // silently move the view off the newest message.
+            if (!this._threadRO) this._threadRO = {};
+            if (!this._threadRO[p.id] && typeof ResizeObserver !== "undefined") {
+              const ro = new ResizeObserver(() => {
+                if (this._stick[p.id] === false) return; // Staff is reading history
+                el.scrollTop = el.scrollHeight;
+              });
+              ro.observe(el);
+              this._threadRO[p.id] = ro;
+            }
             // Opening a thread must land on the newest message.
             if (!this._didInitial[p.id]) {
               this._didInitial[p.id] = true;
