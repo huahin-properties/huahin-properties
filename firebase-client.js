@@ -1777,8 +1777,14 @@ export function watchCaseMessages(propertyId, customerOnly, caseToken, limit, cb
   q = q.orderBy("createdAt", "desc").limit(Number(limit) || 50);
   return q.onSnapshot(
     (snap) => {
-      const rows = snap.docs.map((d) => ({ ...d.data(), id: d.id }))
-        .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+      const now = Date.now();
+      const rows = snap.docs.map((d) => {
+        const data = d.data() || {};
+        // A pending server timestamp reads back as null until the server
+        // acknowledges the write; order it as the newest message.
+        const ts = data.createdAt == null ? now : data.createdAt;
+        return { ...data, id: d.id, createdAt: ts, pending: data.createdAt == null };
+      }).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
       cb(rows, null);
     },
     (err) => { console.warn("watchCaseMessages error:", err); cb(null, err); }

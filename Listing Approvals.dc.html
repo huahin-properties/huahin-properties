@@ -144,7 +144,8 @@
                   <div onClick="{{ r.onToggleThread }}" style="font-size:12px; font-weight:600; color:oklch(40% 0.13 25); cursor:pointer; margin-bottom:10px;">💬 การสนทนากับลูกค้า · 🌐 {{ r.custLangStatus }}: {{ r.custLangLabel }} ›</div>
                   <sc-if value="{{ r.threadOpen }}" hint-placeholder-val="{{ false }}">
                     <div style="background:oklch(98% 0.005 85); border:1px solid oklch(91% 0.01 70); border-radius:9px; padding:12px 13px; margin-bottom:11px;">
-                      <div style="display:flex; flex-direction:column; gap:2px; margin-bottom:11px; max-height:340px; overflow-y:auto;">
+                      <div style="position:relative; margin-bottom:11px;">
+                      <div ref="{{ r.threadRef }}" onScroll="{{ r.onThreadScroll }}" style="display:flex; flex-direction:column; gap:2px; height:min(44vh,340px); overflow-y:auto;">
                         <sc-for list="{{ r.thread }}" as="m" hint-placeholder-count="0">
                           <sc-if value="{{ m.showDay }}" hint-placeholder-val="{{ false }}">
                             <div style="text-align:center; font-size:10.5px; color:oklch(58% 0.02 60); margin:9px 0 4px;">{{ m.dayLabel }}</div>
@@ -163,6 +164,10 @@
                         <sc-if value="{{ r.noThread }}" hint-placeholder-val="{{ true }}">
                           <div style="font-size:12px; color:oklch(56% 0.02 60);">ยังไม่มีข้อความในเคสนี้</div>
                         </sc-if>
+                      </div>
+                      <sc-if value="{{ r.hasNewIncoming }}" hint-placeholder-val="{{ false }}">
+                        <div onClick="{{ r.onJumpLatest }}" style="position:absolute; left:50%; transform:translateX(-50%); bottom:10px; background:oklch(40% 0.13 25); color:white; font-size:11.5px; font-weight:600; padding:6px 14px; border-radius:100px; cursor:pointer; box-shadow:0 4px 14px oklch(20% 0.02 60 / 0.25);">↓ มีข้อความใหม่</div>
+                      </sc-if>
                       </div>
                       <div style="font-size:11.5px; font-weight:600; color:oklch(35% 0.02 60); margin-bottom:6px;">พิมพ์ภาษาไทย — ระบบแปลเป็นภาษาลูกค้าให้อัตโนมัติ</div>
                       <sc-if value="{{ r.hasSuggests }}" hint-placeholder-val="{{ false }}">
@@ -296,7 +301,24 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { copiedFor: "", caseMsgs: {}, replyDraft: {}, replyBusy: "", aiBusy: "", suggests: {}, suggestKey: {}, suggestBusy: "", caseErr: {}, infoReqFor: null, infoReqText: "", infoReqBusy: false, lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
+  _threadEls = {};
+  _nearBottom = {};
+  _didInitial = {};
+
+  _isNearBottom(id) {
+    const el = this._threadEls[id];
+    if (!el) return true;
+    return el.scrollHeight - el.scrollTop - el.clientHeight < 90;
+  }
+
+  _scrollToLatest(id, smooth) {
+    const el = this._threadEls[id];
+    if (!el) return;
+    if (smooth) { try { el.scrollTo({ top: el.scrollHeight, behavior: "smooth" }); return; } catch (e) {} }
+    el.scrollTop = el.scrollHeight;
+  }
+
+  state = { newIncoming: {}, copiedFor: "", caseMsgs: {}, replyDraft: {}, replyBusy: "", aiBusy: "", suggests: {}, suggestKey: {}, suggestBusy: "", caseErr: {}, infoReqFor: null, infoReqText: "", infoReqBusy: false, lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
 
   componentWillUnmount() {
     Object.values(this._unsubs || {}).forEach((fn) => { try { fn(); } catch (e) {} });
@@ -419,7 +441,16 @@ class Component extends DCLogic {
           const lastNow = rows.length ? rows[rows.length - 1] : null;
           const newInbound = lastNow && lastNow.direction === "inbound"
             && (!lastPrev || lastPrev.id !== lastNow.id);
-          this.setState((st) => ({ caseMsgs: { ...st.caseMsgs, [p.id]: rows } }));
+          const grew = rows.length > prev.length;
+          // Was the reader following along, or scrolled up in history?
+          const wasNear = grew ? this._isNearBottom(p.id) : true;
+          this.setState((st) => ({
+            caseMsgs: { ...st.caseMsgs, [p.id]: rows },
+            newIncoming: grew && !wasNear
+              ? { ...(st.newIncoming || {}), [p.id]: true }
+              : (st.newIncoming || {}),
+          }));
+          if (grew && wasNear) setTimeout(() => this._scrollToLatest(p.id, true), 60);
           if (newInbound) {
             this._fb.markCaseRead(p.id, "staff");
             this.loadSuggestions(p, false);
@@ -495,7 +526,14 @@ class Component extends DCLogic {
       }
       await this._fb.addCaseMessage(p.id, rec);
       await this._fb.logActivity({ type: "case_message_sent", propertyId: p.id, summary: `ส่งข้อความถึงผู้ติดต่อทรัพย์ ${p.id}` });
-      this.setState((st) => ({ replyBusy: "", replyDraft: { ...st.replyDraft, [p.id]: "" } }));
+      // The sender always follows their own message down.
+      this._nearBottom[p.id] = true;
+      this.setState((st) => ({
+        replyBusy: "",
+        replyDraft: { ...st.replyDraft, [p.id]: "" },
+        newIncoming: { ...(st.newIncoming || {}), [p.id]: false },
+      }));
+      setTimeout(() => this._scrollToLatest(p.id, true), 60);
     } catch (e) {
       this.setState((st) => ({ replyBusy: "", caseErr: { ...st.caseErr, [p.id]: "ส่งไม่สำเร็จ: " + (e.message || e) } }));
     }
@@ -636,6 +674,28 @@ class Component extends DCLogic {
           hasUnread: !!(p.lastCustomerMessageAt && (!p.staffLastReadAt || p.lastCustomerMessageAt > p.staffLastReadAt)),
           custLangStatus: p.customerLanguageConfirmed === true ? "ภาษาลูกค้า" : "ภาษาที่คาดไว้",
           custLangLabel: ({ th: "ไทย", en: "English", zh: "中文", ru: "Русский", de: "Deutsch", no: "Norsk", fr: "Français", it: "Italiano" })[p.customerLanguage || "th"] || "ไทย",
+          threadRef: (el) => {
+            if (!el) { delete this._threadEls[p.id]; return; }
+            this._threadEls[p.id] = el;
+            // Opening a thread must land on the newest message.
+            if (!this._didInitial[p.id]) {
+              this._didInitial[p.id] = true;
+              setTimeout(() => this._scrollToLatest(p.id, false), 0);
+            }
+          },
+          onThreadScroll: () => {
+            const near = this._isNearBottom(p.id);
+            this._nearBottom[p.id] = near;
+            if (near && (this.state.newIncoming || {})[p.id]) {
+              this.setState((st) => ({ newIncoming: { ...(st.newIncoming || {}), [p.id]: false } }));
+            }
+          },
+          onJumpLatest: () => {
+            this._nearBottom[p.id] = true;
+            this.setState((st) => ({ newIncoming: { ...(st.newIncoming || {}), [p.id]: false } }));
+            this._scrollToLatest(p.id, true);
+          },
+          hasNewIncoming: !!(this.state.newIncoming || {})[p.id],
           thread: (this.state.caseMsgs[p.id] || []).map((m, i, arr) => {
             const prev = arr[i - 1];
             const team = m.direction === "outbound";
