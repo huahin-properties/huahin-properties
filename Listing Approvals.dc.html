@@ -156,7 +156,7 @@
                             </sc-if>
                             <div style="{{ m.bubbleStyle }}">{{ m.thai }}</div>
                             <sc-if value="{{ m.showOrig }}" hint-placeholder-val="{{ false }}">
-                              <div style="font-size:10px; color:oklch(58% 0.02 60); margin-top:2px; max-width:85%;">{{ m.origLabel }}</div>
+                              <div style="{{ m.origStyle }}">{{ m.origLabel }}</div>
                             </sc-if>
                             <div style="{{ m.timeStyle }}">{{ m.atLabel }}</div>
                           </div>
@@ -187,7 +187,19 @@
                         <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-bottom:8px;">✨ กำลังคิดคำตอบแนะนำ…</div>
                       </sc-if>
                       <textarea rows="2" value="{{ r.draftText }}" onChange="{{ r.onDraftText }}" placeholder="พิมพ์ข้อความภาษาไทย…" style="flex-shrink:0; width:100%; box-sizing:border-box; border:1px solid oklch(86% 0.01 70); border-radius:6px; padding:9px 11px; font-size:12.5px; font-family:inherit; resize:none; line-height:1.6;"></textarea>
+                      <sc-if value="{{ r.hasPreview }}" hint-placeholder-val="{{ false }}">
+                        <div style="flex-shrink:0; margin-top:8px; background:oklch(96% 0.02 230); border:1px solid oklch(85% 0.05 230); border-radius:7px; padding:8px 11px;">
+                          <div style="font-size:10.5px; font-weight:700; color:oklch(42% 0.10 245); margin-bottom:3px;">🔍 {{ r.previewHeadLabel }}</div>
+                          <div style="font-size:12px; line-height:1.6; color:oklch(30% 0.02 60);">{{ r.previewText }}</div>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ r.hasPreviewErr }}" hint-placeholder-val="{{ false }}">
+                        <div style="flex-shrink:0; margin-top:7px; font-size:11px; color:oklch(50% 0.18 30);">{{ r.previewErrText }}</div>
+                      </sc-if>
                       <div style="flex-shrink:0; display:flex; gap:7px; flex-wrap:wrap; margin-top:9px;">
+                        <sc-if value="{{ r.canPreview }}" hint-placeholder-val="{{ false }}">
+                          <div onClick="{{ r.onPreviewReply }}" style="background:white; border:1px solid oklch(80% 0.06 245); color:oklch(42% 0.10 245); padding:7px 14px; border-radius:100px; font-size:11.5px; font-weight:600; cursor:pointer;">🔍 {{ r.previewLabel }}</div>
+                        </sc-if>
                         <div onClick="{{ r.onSendReply }}" style="background:oklch(40% 0.13 25); color:white; padding:7px 15px; border-radius:100px; font-size:11.5px; font-weight:600; cursor:pointer; white-space:nowrap;">{{ r.sendReplyLabel }}</div>
                       </div>
                       <sc-if value="{{ r.hasCaseErr }}" hint-placeholder-val="{{ false }}">
@@ -319,7 +331,7 @@ class Component extends DCLogic {
     el.scrollTop = el.scrollHeight;
   }
 
-  state = { newIncoming: {}, copiedFor: "", caseMsgs: {}, replyDraft: {}, replyBusy: "", aiBusy: "", suggests: {}, suggestKey: {}, suggestBusy: "", caseErr: {}, infoReqFor: null, infoReqText: "", infoReqBusy: false, lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
+  state = { preview: {}, previewBusy: "", previewErr: {}, newIncoming: {}, copiedFor: "", caseMsgs: {}, replyDraft: {}, replyBusy: "", aiBusy: "", suggests: {}, suggestKey: {}, suggestBusy: "", caseErr: {}, infoReqFor: null, infoReqText: "", infoReqBusy: false, lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
 
   componentWillUnmount() {
     Object.values(this._unsubs || {}).forEach((fn) => { try { fn(); } catch (e) {} });
@@ -507,14 +519,41 @@ class Component extends DCLogic {
 
   // Staff writes Thai; we translate to the customer's language and store BOTH.
   // AI drafts never reach here — only what Staff actually approved and sent.
+  // Translate the current draft for review only — nothing is written to the
+  // conversation until Staff presses send.
+  async previewReply(p) {
+    const thai = ((this.state.replyDraft[p.id] || "").trim());
+    if (!thai) return;
+    const lang = p.customerLanguage || "en";
+    if (lang === "th") return; // nothing to check
+    this.setState((st) => ({ previewBusy: p.id, previewErr: { ...(st.previewErr || {}), [p.id]: "" } }));
+    try {
+      const out = await this._fb.translateMessage(thai, lang);
+      this.setState((st) => ({
+        previewBusy: "",
+        // Keyed by the exact source text: if Staff edits the draft afterwards,
+        // the stale preview stops matching and is hidden automatically.
+        preview: { ...(st.preview || {}), [p.id]: { src: thai, text: out } },
+      }));
+    } catch (e) {
+      console.error("[CaseMessenger][preview] failed:", e && e.message);
+      this.setState((st) => ({ previewBusy: "", previewErr: { ...(st.previewErr || {}), [p.id]: "แปลไม่สำเร็จ ลองอีกครั้ง" } }));
+    }
+  }
+
   async sendCaseReply(p) {
     const thai = ((this.state.replyDraft[p.id] || "").trim());
     if (!thai) return;
+    const shown = (this.state.preview || {})[p.id];
+    const reviewed = shown && shown.src === thai ? shown.text : null;
     this.setState({ replyBusy: p.id, caseErr: { ...this.state.caseErr, [p.id]: "" } });
     const lang = p.customerLanguage || "th";
     const a = this._fb.currentAdminUser && this._fb.currentAdminUser();
     try {
-      const custText = lang === "th" ? thai : await this._fb.translateMessage(thai, lang);
+      // If Staff already proof-read this exact draft, send precisely what they
+      // saw (and skip a second translation call).
+      const custText = lang === "th" ? thai
+        : (reviewed || await this._fb.translateMessage(thai, lang));
       const rec = {
         senderType: "staff", direction: "outbound", messageType: "follow_up",
         senderUid: (a && a.uid) || "", senderEmail: (a && a.email) || "",
@@ -533,6 +572,7 @@ class Component extends DCLogic {
       await this._fb.logActivity({ type: "case_message_sent", propertyId: p.id, summary: `ส่งข้อความถึงผู้ติดต่อทรัพย์ ${p.id}` });
       // The sender always follows their own message down.
       this._stick[p.id] = true;
+      this.setState((st) => ({ preview: { ...(st.preview || {}), [p.id]: null } }));
       this.setState((st) => ({
         replyBusy: "",
         replyDraft: { ...st.replyDraft, [p.id]: "" },
@@ -699,6 +739,7 @@ class Component extends DCLogic {
           },
           onJumpLatest: () => {
             this._stick[p.id] = true;
+      this.setState((st) => ({ preview: { ...(st.preview || {}), [p.id]: null } }));
             this.setState((st) => ({ newIncoming: { ...(st.newIncoming || {}), [p.id]: false } }));
             this._scrollToLatest(p.id, true);
           },
@@ -719,8 +760,16 @@ class Component extends DCLogic {
               showWho: showDay || !sameSender,
               who: team ? ("ทีมงาน" + (m.senderEmail ? " · " + m.senderEmail : "")) : "ลูกค้า",
               thai: m.thaiText || m.originalText || "",
-              showOrig: !!m.originalText && m.originalLanguage && m.originalLanguage !== "th",
-              origLabel: "ต้นฉบับ: " + (m.originalText || ""),
+              // Inbound: the customer's own words. Outbound: what the customer
+              // actually received after translation — the Staff proof-check.
+              showOrig: team
+                ? (!!m.customerText && m.customerLanguage && m.customerLanguage !== "th"
+                   && m.customerText !== (m.thaiText || m.originalText))
+                : (!!m.originalText && m.originalLanguage && m.originalLanguage !== "th"),
+              origLabel: team
+                ? "ส่งให้ลูกค้า: " + (m.customerText || "")
+                : "ต้นฉบับ: " + (m.originalText || ""),
+              origStyle: { fontSize: "10px", color: "oklch(58% 0.02 60)", marginTop: "2px", maxWidth: "85%", textAlign: team ? "right" : "left" },
               atLabel: d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }) + " น.",
               rowStyle: { display: "flex", flexDirection: "column", alignItems: team ? "flex-end" : "flex-start", marginTop: (showDay || !sameSender) ? "7px" : "0" },
               whoStyle: { fontSize: "10px", fontWeight: "700", color: "oklch(52% 0.02 60)", marginBottom: "3px" },
@@ -745,6 +794,16 @@ class Component extends DCLogic {
           suggestBusyNow: this.state.suggestBusy === p.id,
           onRefreshSuggests: () => this.loadSuggestions(p, true),
           onSendReply: () => this.sendCaseReply(p),
+          onPreviewReply: () => this.previewReply(p),
+          previewLabel: this.state.previewBusy === p.id ? "กำลังแปล…" : "ดูคำแปลก่อนส่ง",
+          // Only offer/show the check when there is something to check.
+          canPreview: !!(this.state.replyDraft[p.id] || "").trim() && (p.customerLanguage || "en") !== "th",
+          hasPreview: !!((this.state.preview || {})[p.id]
+            && (this.state.preview || {})[p.id].src === ((this.state.replyDraft[p.id] || "").trim())),
+          previewText: ((this.state.preview || {})[p.id] || {}).text || "",
+          previewHeadLabel: "ลูกค้าจะได้รับข้อความนี้ (" + ({ en: "English", zh: "中文", ru: "Русский", de: "Deutsch", no: "Norsk", fr: "Français", it: "Italiano" }[p.customerLanguage] || p.customerLanguage || "English") + ")",
+          hasPreviewErr: !!(this.state.previewErr || {})[p.id],
+          previewErrText: (this.state.previewErr || {})[p.id] || "",
           sendReplyLabel: this.state.replyBusy === p.id ? "กำลังส่ง…" : "ส่งข้อความให้ลูกค้า",
           caseErrText: this.state.caseErr[p.id] || "",
           hasCaseErr: !!this.state.caseErr[p.id],
