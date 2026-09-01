@@ -2,41 +2,141 @@ rules_version = '2';
 
 // huahin.properties — Firebase Storage Security Rules
 //
-// Replaces the temporary open rule used to unblock the one-time photo
-// migration. Only the signed-in admin can upload/delete files; anyone can
-// view photos (needed for the public site to display them).
+// PHASE 1A.1 (Sept 2026) — security hardening ahead of case attachments.
+//
+// CORRECTION to the previous pass: Storage Rules CAN read Firestore via
+// firestore.get() / firestore.exists(). The earlier version wrongly assumed
+// they could not, and therefore fell back to a hardcoded Owner UID for every
+// private path. Team membership is now read from the SAME source of truth
+// Firestore uses — adminUsers/{uid} — so no second role database exists.
+//
+// What this file enforces:
+//   • Public read ONLY on the three paths the public site actually renders.
+//     Everything else, including any folder added in future, is private by
+//     default (the old `allow read: if true` catch-all is gone).
+//   • Anonymous owner-submission photos may be CREATED but never replaced,
+//     and must be genuine images under a size cap — the public rule can no
+//     longer be used to park PDFs, scripts or huge binaries in the bucket.
+//   • A lister can only write their OWN profile photos.
+//   • caseAttachments/ is private and Owner/Staff-only from day one.
+//
+// Firestore reads performed here (each counts toward Firestore quota):
+//   exists(/databases/(default)/documents/adminUsers/{uid})   — team check
+//   get(...adminUsers/{uid}).data.role                        — owner check
+// Both run only on non-public paths, so ordinary public page views trigger
+// no Firestore reads at all.
 service firebase.storage {
   match /b/{bucket}/o {
-    function isAdmin() {
-      return request.auth != null && request.auth.uid == "n7TZKSBscPXE1kRU8WzYpsqJh2g2";
+
+    // ── identity helpers ─────────────────────────────────────────────────
+    // Same model as firestore.rules: the original hardcoded UID is always
+    // Owner, and anyone with an adminUsers document is a team member.
+
+    function isSignedIn() {
+      return request.auth != null;
     }
+
+    function isTeamMember() {
+      return request.auth != null && (
+        request.auth.uid == "n7TZKSBscPXE1kRU8WzYpsqJh2g2" ||
+        firestore.exists(/databases/(default)/documents/adminUsers/$(request.auth.uid))
+      );
+    }
+
+    function isOwner() {
+      return request.auth != null && (
+        request.auth.uid == "n7TZKSBscPXE1kRU8WzYpsqJh2g2" ||
+        (firestore.exists(/databases/(default)/documents/adminUsers/$(request.auth.uid)) &&
+         firestore.get(/databases/(default)/documents/adminUsers/$(request.auth.uid)).data.role == "owner")
+      );
+    }
+
+    // True only when nothing exists at this path yet — the difference between
+    // "add a new photo" and "replace someone else's".
+    function isCreate() {
+      return resource == null;
+    }
+
+    // Owner Submission resizes every photo to WebP before upload, so a
+    // legitimate anonymous upload is always a modest image. Anything else
+    // arriving on that public rule is abuse.
+    function isSafeImage(maxBytes) {
+      return request.resource != null
+        && request.resource.size <= maxBytes
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+    }
+
+    // ── PUBLIC WEBSITE ASSETS ────────────────────────────────────────────
+    // Read by signed-out visitors on Home, Search, Property Details, Agent
+    // Profile and the SEO landing pages. Public read is required here;
+    // without it the live site shows broken images.
 
     match /propertyPhotos/{fileName} {
       allow read: if true;
-      // Any signed-in lister can upload/replace a property-photo file (the
-      // Firestore doc that actually links it to a listing is still gated by
-      // firestore.rules' listerId check) — needed for self-serve photo
-      // upload in Lister Dashboard. Storage rules can't easily parse the
-      // propertyId back out of the filename to check ownership precisely,
-      // so this is intentionally a bit looser than the Firestore rule.
-      // Aug 2026 — public owner-submission channel (Owner Submission.dc.html):
-      // a property owner with NO account must be able to attach photos when
-      // consigning a property to us. Files named "own-*" (the id prefix the
-      // owner-submission page generates) may therefore be written without
-      // auth. The parent Firestore doc is still forced to be an unpublished
-      // pending owner_submission by firestore.rules, so this cannot be used
-      // to publish anything — it only lets a real prospect send us photos.
-      allow write: if isAdmin() || request.auth != null || fileName.matches('own-.*');
+
+      // Signed-in listers manage listing photos. Ownership cannot be checked
+      // from the filename: the pattern is "<propertyId>-<index>.webp" and a
+      // propertyId itself contains hyphens, so the two cannot be separated
+      // without capture groups, which Storage Rules do not support. Splitting
+      // by hand would be fragile string surgery on live data. The safe fix is
+      // a future path shape (propertyPhotos/{propertyId}/{photoId}) — NOT a
+      // guess-parse today. Documented as a deferred item, not overlooked.
+      allow create, update, delete: if isSignedIn();
+
+      // Public owner-submission channel: a property owner with NO account
+      // must be able to attach photos when consigning a property.
+      //
+      // CREATE ONLY + IMAGE ONLY + SIZE CAP. Previously this was a blanket
+      // write of any file type or size, so it could be used both to overwrite
+      // another customer's photos and to store arbitrary files at our cost.
+      allow create: if isCreate()
+        && fileName.matches('own-[A-Za-z0-9]+-[A-Za-z0-9]+-[0-9]+\\.webp')
+        && isSafeImage(8 * 1024 * 1024);
     }
+
     match /profilePhotos/{fileName} {
       allow read: if true;
-      // Any signed-in lister can upload their own avatar/cover photo (used
-      // by Lister Dashboard profile settings → Agent Profile public page).
-      allow write: if isAdmin() || request.auth != null;
+
+      // Slot ids are "lister-avatar-<uid>" / "lister-cover-<uid>", so the
+      // owner IS derivable here — a lister may write only their own two
+      // files, not another lister's.
+      allow write: if isSignedIn() && (
+        fileName == 'lister-avatar-' + request.auth.uid + '.webp' ||
+        fileName == 'lister-cover-' + request.auth.uid + '.webp'
+      );
+
+      // Team members manage any profile slot (support / cleanup).
+      allow write: if isTeamMember();
     }
-    match /{allPaths=**} {
+
+    // Site-wide images (banners, area cards) rendered on public pages.
+    // Written from Site Content, which Staff operate as well as the Owner.
+    match /siteContent/{fileName} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isTeamMember();
+    }
+
+    // ── PRIVATE / INTERNAL ASSETS ────────────────────────────────────────
+    // Reserved for Case Messenger attachments. Nothing writes here yet; the
+    // path is declared now so it can never fall through to a permissive rule
+    // later. Title deeds and identity documents will live here, so it is
+    // private from the first day it exists.
+    //
+    // Owner AND Staff reach these directly through the Storage SDK — no
+    // Cloud Function is needed for team access. Customers are different:
+    // they are unauthenticated and hold only a trackToken, which must never
+    // appear in a Storage path or in object metadata, so their upload and
+    // download still go through the planned Cloud Function.
+    match /caseAttachments/{propertyId}/{allPaths=**} {
+      allow read, write: if isTeamMember();
+    }
+
+    // ── DEFAULT DENY ─────────────────────────────────────────────────────
+    // Anything not named above is private. This replaces the old
+    // `allow read: if true` catch-all: a new folder created in future is now
+    // secret by default instead of public by default.
+    match /{allPaths=**} {
+      allow read, write: if isTeamMember();
     }
   }
 }
