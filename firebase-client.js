@@ -2128,6 +2128,39 @@ export async function decideSubmission(propertyId, submissionId, decision, opts)
 // email, or web-push) adapter can consume these later without workflow code
 // changing. A submission must NEVER fail because no transport is configured,
 // so every caller wraps this in try/catch.
+// Assign the public listing code to an approved intake case. The internal
+// reference (the document id) is never touched: conversation, workflow,
+// submissions and audit history all hang off it and must stay attached.
+// A reverse-lookup doc lets an authorised user go public code → internal case.
+export async function assignPublicCode(internalCaseId, publicCode) {
+  const code = String(publicCode || "").trim();
+  if (!code) throw new Error("publicCode required");
+  await db().collection("properties").doc(String(internalCaseId)).set({
+    publicPropertyCode: code,
+    publicCodeAssignedAt: Date.now(),
+  }, { merge: true });
+  // Reverse index. Separate doc rather than a query so the lookup stays a
+  // single read and cannot be broken by a missing composite index.
+  await db().collection("propertyCodeMap").doc(code).set({
+    internalCaseId: String(internalCaseId),
+    publicPropertyCode: code,
+    createdAt: Date.now(),
+  }, { merge: true });
+  return code;
+}
+
+// Public code → internal case, for internal traceability only.
+export async function internalCaseForPublicCode(publicCode) {
+  const snap = await db().collection("propertyCodeMap").doc(String(publicCode)).get();
+  return snap.exists ? (snap.data() || {}).internalCaseId || null : null;
+}
+
+// The existing public-code format, unchanged: area prefix + timestamp tail.
+export function generatePublicCode(area) {
+  const prefix = { "hua-hin": "HH", "pranburi": "PB", "cha-am": "CA" }[area] || "LST";
+  return prefix + "-" + String(Date.now()).slice(-5);
+}
+
 export async function createNotificationEvent(evt) {
   const doc = {
     type: (evt && evt.type) || "generic",

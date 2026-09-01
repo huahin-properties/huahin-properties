@@ -248,6 +248,7 @@ class Component extends DCLogic {
         caseToken: this._token, createdAt: Date.now(),
       };
       // The message itself is the only write that may block the send.
+      rec.caseId = this._id;
       await this._fb.addCaseMessage(this._id, rec);
       // Confirmed — now it is safe to clear what the customer typed.
       this._stick = true;

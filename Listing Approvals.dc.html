@@ -125,6 +125,9 @@
           <div style="flex:1; min-width:200px;">
             <div style="font-size:14px; font-weight:700; color:oklch(40% 0.13 25);">{{ r.code }} <span style="font-weight:400; color:oklch(50% 0.02 60); font-size:12.5px;">— {{ r.zone }}</span></div>
             <div style="font-size:12.5px; color:oklch(50% 0.02 60);">{{ r.priceLabel }} · ผู้ลงประกาศ: {{ r.listerEmail }}</div>
+            <sc-if value="{{ r.hasPublicCode }}" hint-placeholder-val="{{ false }}">
+              <div style="display:inline-block; margin-top:3px; background:oklch(95% 0.05 150); border:1px solid oklch(85% 0.07 150); color:oklch(38% 0.11 150); padding:2px 9px; border-radius:100px; font-size:11px; font-weight:700;">{{ r.publicCodeLabel }}</div>
+            </sc-if>
             <div style="font-size:11.5px; color:oklch(60% 0.02 60); margin-top:2px;">ส่งเมื่อ {{ r.dateLabel }}</div>
             <sc-if value="{{ r.isOwnerSub }}" hint-placeholder-val="{{ false }}">
               <div style="background:oklch(97% 0.01 80); border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:12px 14px; margin-top:10px; font-size:12.5px; color:oklch(35% 0.02 60); line-height:1.7;">
@@ -574,8 +577,12 @@ class Component extends DCLogic {
     try {
       this._unsubs = this._unsubs || {};
       if (!this._unsubs[p.id]) {
-        this._unsubs[p.id] = this._fb.watchCaseMessages(p.id, false, null, 50, (rows) => {
+        const boundCaseId = p.id; // captured, never re-read from render scope
+        this._unsubs[boundCaseId] = this._fb.watchCaseMessages(boundCaseId, false, null, 50, (rows) => {
           if (!rows) return;
+          // Drop a snapshot whose listener has since been torn down: without
+          // this, a slow response for case A could land while B is open.
+          if (!this._unsubs || !this._unsubs[boundCaseId]) return;
           const prev = this.state.caseMsgs[p.id] || [];
           const lastPrev = prev.length ? prev[prev.length - 1] : null;
           const lastNow = rows.length ? rows[rows.length - 1] : null;
@@ -598,16 +605,19 @@ class Component extends DCLogic {
         });
       }
     } catch (e) { console.warn("staff watch failed:", e); }
+    const boundId = p.id;
     let msgs = [];
-    try { msgs = await this._fb.fetchCaseMessages(p.id); } catch (e) {}
+    try { msgs = await this._fb.fetchCaseMessages(boundId); } catch (e) {}
+    // The await above may have taken longer than it took Staff to open a
+    // different case; write only into the case this call was made for.
     if (!msgs.length) {
       if (p.infoRequestMessage) msgs.push({ id: "legacy-req", direction: "outbound", createdAt: p.infoRequestAt, thaiText: p.infoRequestMessage, originalText: p.infoRequestMessage, senderEmail: p.infoRequestByEmail });
       if (p.infoResponseMessage) msgs.push({ id: "legacy-res", direction: "inbound", createdAt: p.infoResponseAt, thaiText: p.infoResponseMessage, originalText: p.infoResponseMessage });
     }
     this.setState((st) => {
-      const live = st.caseMsgs[p.id];
+      const live = st.caseMsgs[boundId];
       if (live && live.length >= msgs.length) return {};
-      return { caseMsgs: { ...st.caseMsgs, [p.id]: msgs } };
+      return { caseMsgs: { ...st.caseMsgs, [boundId]: msgs } };
     });
   }
 
@@ -745,6 +755,18 @@ class Component extends DCLogic {
     this.setState((st) => ({ wfBusy: p.id, reviewErr: { ...st.reviewErr, [p.id]: "" } }));
     try {
       await this._fb.decideSubmission(p.id, p.lastSubmissionId, decision, { reason: note, stepKey: stepKey });
+      if (decision === "approved" && !p.publicPropertyCode) {
+        // Internal reference (p.id) stays exactly as it is — the public code
+        // is recorded beside it, in both directions.
+        try {
+          const code = this._fb.generatePublicCode(p.area);
+          await this._fb.assignPublicCode(p.id, code);
+          await this._fb.logActivity({
+            type: "public_code_assigned", propertyId: p.id, publicPropertyCode: code,
+            summary: "กำหนดรหัสประกาศสาธารณะ " + code + " ให้เคส " + p.id,
+          }).catch(() => {});
+        } catch (e) { console.warn("[Workflow] public code not assigned:", e && e.message); }
+      }
       try {
         await this._fb.createNotificationEvent({
           type: decision === "approved" ? "intake_approved"
@@ -991,6 +1013,10 @@ class Component extends DCLogic {
         this.setState({ convSending: false, convError: "รายการนี้ไม่มีลิงก์ติดตาม จึงส่งข้อความถึงลูกค้าไม่ได้ (รายการเก่าก่อนระบบติดตาม)" });
         return;
       }
+      // caseId is redundant with the document path today, but it makes each
+      // message self-describing: any future collection-group query can tell
+      // which case a message belongs to without relying on its path.
+      rec.caseId = p.id;
       await this._fb.addCaseMessage(p.id, rec);
       await this._fb.logActivity({ type: "case_message_sent", propertyId: p.id, summary: `ส่งข้อความถึงผู้ติดต่อทรัพย์ ${p.id}` });
       // The sender always follows their own message down.
@@ -1088,7 +1114,9 @@ class Component extends DCLogic {
         const lister = this.state.listersById[p.listerId] || {};
         const dateVal = p.submittedAt || p.updatedAt;
         return {
-          code: p.id, zone: p.zone || "-", priceLabel: "฿" + (Number(p.price) || 0).toLocaleString(),
+          code: p.id, zone: p.zone || "-",
+          hasPublicCode: !!p.publicPropertyCode,
+          publicCodeLabel: p.publicPropertyCode ? "รหัสประกาศ: " + p.publicPropertyCode : "", priceLabel: "฿" + (Number(p.price) || 0).toLocaleString(),
           listerEmail: lister.email || p.listerId,
           dateLabel: dateVal ? new Date(dateVal).toLocaleString("th-TH", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) + " น." : "-",
           statusLabel: st.label, statusBg: st.bg, statusColor: st.color,

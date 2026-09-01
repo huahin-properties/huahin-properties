@@ -207,6 +207,13 @@ service cloud.firestore {
     // email adapter will consume these server-side later; nothing here is
     // public, and a missing transport can never block a submission because
     // creating the event is all the workflow ever does.
+    // Public listing code → internal case reference. Team-only: the public
+    // site never needs this lookup, and exposing it would leak the internal
+    // reference for every listing.
+    match /propertyCodeMap/{code} {
+      allow read, create, update: if isAdmin();
+      allow delete: if false;
+    }
     match /notificationEvents/{id} {
       allow read, create, update: if isAdmin();
       allow delete: if false;
