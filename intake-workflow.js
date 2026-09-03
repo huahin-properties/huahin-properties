@@ -91,9 +91,17 @@ export const WORKFLOW_DEFS = {
             get: (c) => num(c.prop.price) },
           { key: "area", level: LEVEL.REQUIRED, label: "พื้นที่ / อำเภอ",
             get: (c) => str(c.prop.area) },
-          { key: "coords", level: LEVEL.REQUIRED, label: "พิกัดหรือลิงก์แผนที่",
-            get: (c) => str(c.prop.mapLink) || str(c.prop.coordinates) || str(c.prop.mapsLink),
-            hint: "กรอกพิกัดแบบ 12.5589,99.9090 หรือวางลิงก์ Google Maps" },
+          // PHASE 1A.2 (ก.ย. 2569): the customer-facing Owner Submission form
+          // no longer requires a coordinate — losing a whole consignment over
+          // a pin the owner cannot produce on their phone was costing real
+          // leads. It stays REQUIRED here on purpose: the obligation moved
+          // from the customer to Staff, it did not disappear. `coordsRaw` is
+          // what Owner Submission actually writes and was missing from this
+          // list, so a customer who DID supply a pin still showed as
+          // incomplete — fixed.
+          { key: "coords", level: LEVEL.REQUIRED, label: "พิกัดหรือลิงก์แผนที่ (ทีมงานต้องตามเก็บถ้าลูกค้าไม่ได้ให้)",
+            get: (c) => str(c.prop.coordsRaw) || str(c.prop.mapLink) || str(c.prop.coordinates) || str(c.prop.mapsLink),
+            hint: "ลูกค้าไม่จำเป็นต้องกรอกตอนส่งเรื่อง — ถ้าว่าง ให้ขอพิกัดผ่านแชทเคสหรือโทรกลับ แล้วบันทึกในหน้าแก้ไขทรัพย์" },
         ],
       },
       {

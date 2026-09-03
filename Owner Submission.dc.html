@@ -132,9 +132,12 @@
             </sc-if>
           </div>
           <div>
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">พิกัดตำแหน่งจริง (lat,lng — เช่น 12.558940,99.909039)</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">พิกัดตำแหน่งจริง (ไม่บังคับ — lat,lng เช่น 12.558940,99.909039)</div>
             <input value="{{ f_coords }}" onChange="{{ onFCoords }}" placeholder="12.558940,99.909039" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px;" />
             <div style="font-size:11px; color:oklch(55% 0.02 60); margin-top:4px;">เปิด Google Maps → กดค้างที่ตำแหน่งบ้าน → คัดลอกตัวเลขที่ขึ้นมาวางที่นี่</div>
+            <sc-if value="{{ noCoords }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:10px; background:oklch(96% 0.03 85); border:1px solid oklch(84% 0.07 85); border-radius:8px; padding:10px 12px; font-size:12px; line-height:1.55; color:oklch(38% 0.06 70);">ยังไม่มีพิกัดก็ส่งได้ครับ — ทีมงานจะติดต่อขอตำแหน่งกับคุณภายหลัง (ผ่านหน้าติดตามเรื่องหรือโทรกลับ)</div>
+            </sc-if>
             <sc-if value="{{ hasValidCoords }}" hint-placeholder-val="{{ false }}">
               <div style="margin-top:10px; border-radius:8px; overflow:hidden; border:1px solid oklch(85% 0.01 70); height:220px;">
                 <iframe src="{{ mapEmbedUrl }}" style="width:100%; height:100%; border:0;" loading="lazy"></iframe>
@@ -259,6 +262,12 @@ class Component extends DCLogic {
         price: Number(this.state.f_price) || 0,
         description: this.state.f_details,
         coordsRaw: this.state.f_coords,
+        // Location is optional for the CUSTOMER but still required internally.
+        // These two flags are the handover: the Staff intake workflow reads
+        // them so a submission with no pin shows up as an outstanding
+        // follow-up item instead of quietly looking complete.
+        locationProvided: /^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$/.test(this.state.f_coords),
+        locationFollowUpNeeded: !/^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$/.test(this.state.f_coords),
         ownerContact: this.state.f_ownerContact,
         ownershipDocUrl: this.state.ownershipDocUrl || null,
         contactName: this.state.f_name,
@@ -274,11 +283,43 @@ class Component extends DCLogic {
           return ["th", "en", "zh", "ru", "de", "no", "fr", "it"].includes(n) ? n : "th";
         })(),
       });
-      await Promise.all(this.state.photos.map((p, i) => this._fb.savePhoto(id, i, p.url)));
+      // PHASE 1A.2 — photo upload must never destroy a captured lead.
+      // Previously all photos went up in one Promise.all: a single rejected
+      // upload (one oversized file, one flaky connection, one rule mismatch)
+      // rejected the whole thing, the catch below fired, and the customer saw
+      // "ส่งข้อมูลไม่สำเร็จ" even though their property document had already
+      // been written successfully. They then either gave up or submitted
+      // again, creating a duplicate case. Uploads are now sequential and
+      // individually guarded; whatever fails is recorded on the case for Staff
+      // to chase, and the submission itself still completes.
+      const photoErrors = [];
+      for (let i = 0; i < this.state.photos.length; i++) {
+        try {
+          await this._fb.savePhoto(id, i, this.state.photos[i].url);
+        } catch (pe) {
+          photoErrors.push((pe && (pe.code || pe.message)) || String(pe));
+          console.warn("Owner submission photo " + i + " failed:", pe);
+        }
+      }
+      if (photoErrors.length) {
+        // Best-effort note on the case. If even this write is refused we still
+        // do not fail the submission — the lead is already saved.
+        try {
+          await this._fb.setDoc("properties", id, {
+            photoUploadFailedCount: photoErrors.length,
+            photoUploadFollowUpNeeded: true,
+            photoUploadLastError: photoErrors[0],
+          });
+        } catch (e2) { console.warn("could not record photo upload issue:", e2); }
+      }
       this.setState({ submitted: true, submitting: false, submittedId: id, trackUrl: location.origin + location.pathname.replace(/[^/]*$/, "") + "Track Submission.dc.html?id=" + encodeURIComponent(id) + "&t=" + token });
     } catch (e) {
       console.warn("Owner submission failed:", e);
-      this.setState({ submitting: false, step3Error: "ส่งข้อมูลไม่สำเร็จ: " + (e.message || e) });
+      // Show the machine code too. "Missing or insufficient permissions" alone
+      // never said WHICH layer refused; permission-denied (Firestore) and
+      // storage/unauthorized (Storage) are different bugs with different fixes.
+      const code = (e && e.code) ? " [" + e.code + "]" : "";
+      this.setState({ submitting: false, step3Error: "ส่งข้อมูลไม่สำเร็จ: " + (e.message || e) + code });
     }
   }
 
@@ -307,7 +348,14 @@ class Component extends DCLogic {
     const cardBase = "flex:1; text-align:center; padding:20px; border-radius:10px; cursor:pointer; border:2px solid ";
     const nextBase = "flex:1; text-align:center; padding:13px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; ";
     const canStep2Next = !!s.txnType;
-    const canStep3Next = s.f_price && s.f_details.trim() && s.photos.length >= 5 && s.f_coords.trim();
+    // STEP 1A.2 (Sept 2026) — location is NO LONGER a submission blocker.
+    // A property owner standing in front of the house often cannot produce
+    // coordinates on the spot; losing the whole submission over it costs a
+    // real lead. The coordinate is still tracked as an outstanding item on the
+    // Staff side (intake-workflow.js "coords" requirement + the
+    // locationFollowUpNeeded flag written below), so nothing is silently lost
+    // — it moves from "customer must supply now" to "staff must obtain".
+    const canStep3Next = s.f_price && s.f_details.trim() && s.photos.length >= 5;
     return {
       isStep1: s.step === 1, isStep2: s.step === 2, isStep3: s.step === 3, isStep4: s.step === 4,
       stepDots: stepColors.map((c) => ({ color: c })),
@@ -329,6 +377,7 @@ class Component extends DCLogic {
       f_details: s.f_details, onFDetails: (e) => this.setState({ f_details: e.target.value }),
       f_coords: s.f_coords, onFCoords: (e) => this.setState({ f_coords: e.target.value }),
       hasValidCoords: /^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$/.test(s.f_coords),
+      noCoords: !s.f_coords.trim(),
       mapEmbedUrl: `https://www.google.com/maps?q=${encodeURIComponent(s.f_coords.trim())}&hl=th&z=16&output=embed`,
       f_ownerContact: s.f_ownerContact, onFOwnerContact: (e) => this.setState({ f_ownerContact: e.target.value }),
       photoCount: s.photos.length, hasPhotos: s.photos.length > 0,

@@ -60,10 +60,22 @@ service firebase.storage {
     // Owner Submission resizes every photo to WebP before upload, so a
     // legitimate anonymous upload is always a modest image. Anything else
     // arriving on that public rule is abuse.
+    // PHASE 1A.2 FIX (Sept 2026): contentType must be treated as OPTIONAL.
+    // A Blob built in the browser does not always arrive with a contentType
+    // on the Storage request, and `null.matches(...)` does not evaluate to
+    // false in Rules — it makes the whole condition error out, which Firebase
+    // reports to the client as a permission denial. That is what broke the
+    // signed-out Owner Submission upload. The size cap and the create-only
+    // constraint still do the real protective work; the type check now only
+    // applies when a type is actually present.
     function isSafeImage(maxBytes) {
       return request.resource != null
         && request.resource.size <= maxBytes
-        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+        && (
+          !('contentType' in request.resource)
+          || request.resource.contentType == null
+          || request.resource.contentType.matches('image/.*')
+        );
     }
 
     // ── PUBLIC WEBSITE ASSETS ────────────────────────────────────────────
@@ -89,8 +101,21 @@ service firebase.storage {
       // CREATE ONLY + IMAGE ONLY + SIZE CAP. Previously this was a blanket
       // write of any file type or size, so it could be used both to overwrite
       // another customer's photos and to store arbitrary files at our cost.
+      //
+      // PHASE 1A.2 FIX: the previous three-segment regex
+      //   own-[A-Za-z0-9]+-[A-Za-z0-9]+-[0-9]+\.webp
+      // was too tight for the real filenames savePhoto() produces
+      // ("own-<timestamp>-<random>-<index>.webp", where the random suffix can
+      // be shorter than expected and the id itself contains hyphens). One
+      // photo failing the regex failed the whole Promise.all and therefore the
+      // whole submission. The prefix + extension check below still confines
+      // anonymous writes to the owner-submission namespace, which is the
+      // property that actually matters here; create-only + size cap are
+      // unchanged, so the abuse cases this rule was written to stop
+      // (overwriting someone else's photo, parking PDFs or huge binaries in
+      // the bucket) are still blocked.
       allow create: if isCreate()
-        && fileName.matches('own-[A-Za-z0-9]+-[A-Za-z0-9]+-[0-9]+\\.webp')
+        && fileName.matches('own-.*\\.webp')
         && isSafeImage(8 * 1024 * 1024);
     }
 

@@ -140,7 +140,19 @@ service cloud.firestore {
             && resource.data.trackToken.size() > 20
             && request.resource.data.trackToken == resource.data.trackToken
             && request.resource.data.diff(resource.data).affectedKeys()
-                 .hasOnly(['customerLastReadAt', 'lastCustomerMessageAt']));
+                 .hasOnly(['customerLastReadAt', 'lastCustomerMessageAt']))
+
+        // PHASE 1A.2 (ก.ย. 2569) — photo-upload follow-up markers.
+        // Owner Submission no longer aborts the whole submission when one
+        // photo upload fails; it records the failure on the case so Staff can
+        // chase the missing photos. That note is written by a signed-out
+        // visitor immediately after their own create, so it needs its own
+        // narrow branch. Three harmless boolean/count/string fields only —
+        // no price, status, contact or workflow field is reachable here.
+        || (resource.data.source == "owner_submission"
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['photoUploadFailedCount', 'photoUploadFollowUpNeeded', 'photoUploadLastError'])
+            && request.resource.data.photoUploadFollowUpNeeded == true);
       allow delete: if isOwner() || (request.auth != null && resource.data.listerId == request.auth.uid);
 
       // STEP 2B.2 — Case conversation for owner-submission cases.
