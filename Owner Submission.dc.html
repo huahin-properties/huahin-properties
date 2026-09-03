@@ -61,7 +61,10 @@
             <input value="{{ f_email }}" onChange="{{ onFEmail }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px;" />
           </div>
           <sc-if value="{{ hasPriorSubmission }}" hint-placeholder-val="{{ false }}">
-            <div style="background:oklch(95% 0.06 145); border:1px solid oklch(80% 0.08 145); border-radius:8px; padding:10px 12px; font-size:12.5px; color:oklch(30% 0.1 145);">พบข้อมูลติดต่อที่คุณเคยฝากทรัพย์ไว้ก่อนหน้า — ระบบดึงข้อมูลมาเติมให้แล้ว</div>
+            <div style="background:oklch(95% 0.06 145); border:1px solid oklch(80% 0.08 145); border-radius:8px; padding:10px 12px; display:flex; flex-wrap:wrap; align-items:center; gap:10px; font-size:12.5px; color:oklch(30% 0.1 145);">
+              <div style="flex:1; min-width:180px;">พบข้อมูลติดต่อที่คุณเคยฝากทรัพย์ไว้ก่อนหน้า — ระบบดึงข้อมูลมาเติมให้แล้ว</div>
+              <div onClick="{{ onClearPrior }}" style="background:white; border:1px solid oklch(75% 0.06 145); border-radius:6px; padding:7px 12px; font-size:12.5px; font-weight:600; color:oklch(35% 0.1 145); cursor:pointer; white-space:nowrap;">ไม่ใช่ฉัน — ล้างข้อมูล</div>
+            </div>
           </sc-if>
         </div>
         <div onClick="{{ onGoStep2 }}" style="margin-top:20px; background:oklch(22% 0.02 60); color:white; text-align:center; padding:13px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;">ถัดไป →</div>
@@ -235,6 +238,50 @@ class Component extends DCLogic {
         this.setState({ f_name: saved.name || "", f_phone: saved.phone || "", f_email: saved.email || "", hasPriorSubmission: true });
       }
     } catch (e) {}
+    this._suppressPrefillForStaff();
+  }
+
+  // Reported 3 Sept 2026. This page has ONE version — staff open the very same
+  // public form to copy the link or to file a listing on a walk-in owner's
+  // behalf. The remembered-contact prefill is meant for a returning OWNER on
+  // their own phone; on a staff browser it is pure noise, and worse, it
+  // invites filing a case under whatever name was last tested. So: if this
+  // browser has a signed-in team session, the form always starts blank.
+  //
+  // Firebase Auth restores its session asynchronously, so currentAdminUser()
+  // is usually still null at mount. Rather than delay the prefill for every
+  // real customer, prefill first and withdraw it if a team session shows up
+  // in the next few seconds — the customer path stays instant.
+  _suppressPrefillForStaff() {
+    let tries = 0;
+    const check = () => {
+      if (!this._fb || !this._fb.currentAdminUser) return;
+      let staff = null;
+      try { staff = this._fb.currentAdminUser(); } catch (e) {}
+      if (staff) {
+        if (this.state.hasPriorSubmission) {
+          this.setState({ f_name: "", f_phone: "", f_email: "", hasPriorSubmission: false });
+        }
+        return;
+      }
+      if (++tries < 8) this._staffCheckT = setTimeout(check, 400);
+    };
+    check();
+  }
+
+  componentWillUnmount() {
+    if (this._staffCheckT) clearTimeout(this._staffCheckT);
+  }
+
+  // Reported 3 Sept 2026: the remembered-contact prefill is correct behaviour
+  // (it saves a returning owner from retyping), but it has no escape hatch.
+  // Anyone opening the public form on a shared or staff computer inherits the
+  // previous person's name and phone, and an admin grabbing the link could
+  // submit a listing under a stale customer's identity by accident. The
+  // remembering stays; this clears it on demand, on the spot.
+  clearPrior() {
+    try { localStorage.removeItem("hhOwnerContact"); } catch (e) {}
+    this.setState({ f_name: "", f_phone: "", f_email: "", hasPriorSubmission: false });
   }
 
   goStep2() {
@@ -378,6 +425,7 @@ class Component extends DCLogic {
       f_coords: s.f_coords, onFCoords: (e) => this.setState({ f_coords: e.target.value }),
       hasValidCoords: /^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$/.test(s.f_coords),
       noCoords: !s.f_coords.trim(),
+      onClearPrior: () => this.clearPrior(),
       mapEmbedUrl: `https://www.google.com/maps?q=${encodeURIComponent(s.f_coords.trim())}&hl=th&z=16&output=embed`,
       f_ownerContact: s.f_ownerContact, onFOwnerContact: (e) => this.setState({ f_ownerContact: e.target.value }),
       photoCount: s.photos.length, hasPhotos: s.photos.length > 0,
