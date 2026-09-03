@@ -120,11 +120,14 @@
           <div style="font-size:14px; color:oklch(45% 0.1 150); padding:20px 0; text-align:center;">{{ thanksMsg }}</div>
         </sc-if>
         <sc-if value="{{ notSubmitted }}" hint-placeholder-val="{{ true }}">
-          <input placeholder="{{ t.name_label }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
-          <input placeholder="{{ t.email_label }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
-          <input placeholder="{{ t.phone_label }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
-          <textarea placeholder="{{ t.message_label }}" rows="4" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
-          <div onClick="{{ onSubmit }}" style="background:oklch(40% 0.13 25); color:oklch(98% 0.01 80); text-align:center; padding:13px; border-radius:4px; font-size:14px; font-weight:500; cursor:pointer;">{{ t.send }}</div>
+          <input value="{{ c_name }}" onChange="{{ onCName }}" placeholder="{{ t.name_label }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+          <input value="{{ c_email }}" onChange="{{ onCEmail }}" placeholder="{{ t.email_label }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+          <input value="{{ c_phone }}" onChange="{{ onCPhone }}" placeholder="{{ t.phone_label }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit;" />
+          <textarea value="{{ c_message }}" onChange="{{ onCMessage }}" placeholder="{{ t.message_label }}" rows="4" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; resize:vertical;"></textarea>
+          <sc-if value="{{ formError }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:13px; color:oklch(50% 0.18 30); background:oklch(97% 0.03 30); border:1px solid oklch(87% 0.07 30); border-radius:4px; padding:10px 12px;">{{ formError }}</div>
+          </sc-if>
+          <div onClick="{{ onSubmit }}" style="background:{{ sendBg }}; color:oklch(98% 0.01 80); text-align:center; padding:13px; border-radius:4px; font-size:14px; font-weight:500; cursor:{{ sendCursor }};">{{ sendLabel }}</div>
         </sc-if>
       </div>
     </div>
@@ -141,7 +144,13 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { lang: "en", isMobile: (typeof window !== "undefined" && window.innerWidth < 900), mobileMenuOpen: false, data: null, submitted: false, showGate: false, gatePassword: "", gateError: "" };
+  state = { lang: "en", isMobile: (typeof window !== "undefined" && window.innerWidth < 900), mobileMenuOpen: false, data: null, submitted: false, showGate: false, gatePassword: "", gateError: "",
+    // PHASE C0 (3 ก.ย. 2569) — these four fields did not exist. The Contact
+    // page's inputs were unbound (no value, no onChange) and the Send button
+    // only ran setState({submitted:true}), so it printed a thank-you message
+    // and discarded the enquiry. Every submission through this page since
+    // launch was lost. Nothing was written to Firestore, no lead, no email.
+    c_name: "", c_email: "", c_phone: "", c_message: "", sending: false, formError: "" };
 
   async componentDidMount() {
     const fb0 = await import("./firebase-client.js");
@@ -171,6 +180,104 @@ class Component extends DCLogic {
     }
   }
 
+  // Copy for the two states the form can now end in. Falls back to English
+  // for any language missing an entry rather than rendering an empty box —
+  // the old thanksMsg map only had en/th/ru/zh, so a German, Norwegian,
+  // French or Italian visitor saw a BLANK confirmation and could not tell
+  // whether the form had worked.
+  _copy(key) {
+    const M = {
+      thanks: {
+        en: "Thank you — we'll be in touch shortly.",
+        th: "ขอบคุณครับ/ค่ะ — เราจะติดต่อกลับโดยเร็วที่สุด",
+        ru: "Спасибо — мы скоро свяжемся с вами.",
+        zh: "谢谢，我们会尽快与您联系。",
+        de: "Vielen Dank — wir melden uns in Kürze bei Ihnen.",
+        no: "Takk — vi kontakter deg snart.",
+        fr: "Merci — nous vous contacterons très prochainement.",
+        it: "Grazie — la contatteremo a breve.",
+      },
+      need_name: {
+        en: "Please enter your name.", th: "กรุณากรอกชื่อของคุณ",
+        ru: "Пожалуйста, укажите ваше имя.", zh: "请填写您的姓名。",
+        de: "Bitte geben Sie Ihren Namen ein.", no: "Vennligst skriv inn navnet ditt.",
+        fr: "Veuillez saisir votre nom.", it: "Inserisci il tuo nome.",
+      },
+      need_contact: {
+        en: "Please leave a phone number or an email so we can reply.",
+        th: "กรุณากรอกเบอร์โทรหรืออีเมล เพื่อให้เราติดต่อกลับได้",
+        ru: "Укажите телефон или email, чтобы мы могли ответить.",
+        zh: "请留下电话或电子邮件，以便我们回复您。",
+        de: "Bitte hinterlassen Sie eine Telefonnummer oder E-Mail-Adresse.",
+        no: "Legg igjen telefonnummer eller e-post så vi kan svare.",
+        fr: "Laissez un numéro de téléphone ou un e-mail pour notre réponse.",
+        it: "Lascia un numero di telefono o un'email per poterti rispondere.",
+      },
+      need_message: {
+        en: "Please tell us how we can help.", th: "กรุณาเขียนข้อความที่ต้องการสอบถาม",
+        ru: "Напишите, чем мы можем помочь.", zh: "请告诉我们您需要什么帮助。",
+        de: "Bitte teilen Sie uns Ihr Anliegen mit.", no: "Fortell oss hva vi kan hjelpe med.",
+        fr: "Dites-nous comment nous pouvons vous aider.", it: "Dicci come possiamo aiutarti.",
+      },
+      failed: {
+        en: "Could not send — please check your connection and try again.",
+        th: "ส่งไม่สำเร็จ — กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง",
+        ru: "Не удалось отправить — проверьте соединение и попробуйте снова.",
+        zh: "发送失败 — 请检查网络后重试。",
+        de: "Senden fehlgeschlagen — bitte Verbindung prüfen und erneut versuchen.",
+        no: "Kunne ikke sende — sjekk tilkoblingen og prøv igjen.",
+        fr: "Envoi impossible — vérifiez votre connexion et réessayez.",
+        it: "Invio non riuscito — controlla la connessione e riprova.",
+      },
+      sending: {
+        en: "Sending…", th: "กำลังส่ง…", ru: "Отправка…", zh: "发送中…",
+        de: "Senden…", no: "Sender…", fr: "Envoi…", it: "Invio…",
+      },
+    };
+    const m = M[key] || {};
+    return m[this.state.lang] || m.en || "";
+  }
+
+  async submitContact() {
+    if (this.state.sending || this.state.submitted) return;
+    const name = this.state.c_name.trim();
+    const email = this.state.c_email.trim();
+    const phone = this.state.c_phone.trim();
+    const message = this.state.c_message.trim();
+    // Minimum to be actionable: who you are, one way to reach you, and what
+    // you want. Email OR phone is enough — demanding both loses enquiries.
+    if (!name) { this.setState({ formError: this._copy("need_name") }); return; }
+    if (!email && !phone) { this.setState({ formError: this._copy("need_contact") }); return; }
+    if (!message) { this.setState({ formError: this._copy("need_message") }); return; }
+    this.setState({ sending: true, formError: "" });
+    try {
+      // Reuses the EXISTING lead architecture (leads collection, created by
+      // saveLead which stamps createdAt + contacted:false). Firestore rules
+      // already allow anonymous create on /leads — that is what the public
+      // contact form is for — so C0 needs no rules change.
+      //
+      // Provenance per PO decision D3: a general contact enquiry is a LEAD,
+      // never an auto-created Property Case. channel/sourcePage record where
+      // it came in so a later "แปลงเป็นเคสฝากขาย/ฝากเช่า" conversion can keep
+      // the link back to this original enquiry.
+      await this._fb.saveLead({
+        name, email, phone, message,
+        propertyId: null,
+        leadType: "general_contact",
+        channel: "contact_page",
+        sourcePage: "Contact.dc.html",
+        lang: this.state.lang,
+        pageUrl: (typeof location !== "undefined" ? location.href : ""),
+      });
+      this.setState({ submitted: true, sending: false, formError: "" });
+    } catch (e) {
+      console.error("[Contact] lead save FAILED", e && e.code, e && e.message, e);
+      // Never show a thank-you when the write failed — that is the exact
+      // failure mode this phase exists to remove.
+      this.setState({ sending: false, formError: this._copy("failed") + ((e && e.code) ? " [" + e.code + "]" : "") });
+    }
+  }
+
   renderVals() {
     const gateVals = {
       showGate: this.state.showGate,
@@ -180,14 +287,26 @@ class Component extends DCLogic {
       onGateSubmit: () => this.submitGate(),
       gateError: this.state.gateError,
     };
+    const formVals = {
+      c_name: this.state.c_name, c_email: this.state.c_email,
+      c_phone: this.state.c_phone, c_message: this.state.c_message,
+      onCName: (e) => this.setState({ c_name: e.target.value, formError: "" }),
+      onCEmail: (e) => this.setState({ c_email: e.target.value, formError: "" }),
+      onCPhone: (e) => this.setState({ c_phone: e.target.value, formError: "" }),
+      onCMessage: (e) => this.setState({ c_message: e.target.value, formError: "" }),
+      formError: this.state.formError,
+      onSubmit: () => this.submitContact(),
+      sendBg: this.state.sending ? "oklch(70% 0.06 25)" : "oklch(40% 0.13 25)",
+      sendCursor: this.state.sending ? "default" : "pointer",
+    };
     const mod = this.state.data;
-    if (!mod) return { t: {}, isDesktopNav: true, isMobileNav: false, langOptions: [], submitted: false, notSubmitted: true, ...gateVals };
+    if (!mod) return { t: {}, isDesktopNav: true, isMobileNav: false, langOptions: [], submitted: false, notSubmitted: true, sendLabel: "", ...formVals, ...gateVals };
     const lang = this.state.lang;
     const t = mod.I18N[lang];
     const langValue = lang;
     const onLangChange = (code) => this.selectLang(code);
     const langOptions = mod.LANGS.map((l) => ({ code: l, label: mod.LANG_LABELS[l] }));
-    const thanksMsg = { en: "Thank you — we'll be in touch shortly.", th: "ขอบคุณค่ะ/ครับ เราจะติดต่อกลับโดยเร็ว", ru: "Спасибо — мы скоро свяжемся с вами.", zh: "谢谢，我们会尽快与您联系。" }[lang];
+    const thanksMsg = this._copy("thanks");
     return {
       t, lang,
       isDesktopNav: !this.state.isMobile, isMobileNav: this.state.isMobile,
@@ -195,7 +314,9 @@ class Component extends DCLogic {
       toggleMenu: () => this.setState((s) => ({ mobileMenuOpen: !s.mobileMenuOpen })),
       langValue, onLangChange, langOptions,
       submitted: this.state.submitted, notSubmitted: !this.state.submitted,
-      thanksMsg, onSubmit: () => this.setState({ submitted: true }),
+      thanksMsg,
+      sendLabel: this.state.sending ? this._copy("sending") : t.send,
+      ...formVals,
       ...gateVals,
     };
   }
