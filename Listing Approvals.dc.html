@@ -558,7 +558,13 @@ class Component extends DCLogic {
   copyTrack(p, asMessage) {
     if (!p.trackToken) return;
     const base = location.origin + location.pathname.replace(/[^/]*$/, "");
-    const url = base + "Track Submission.dc.html?id=" + encodeURIComponent(p.id) + "&t=" + p.trackToken;
+    // The space in the filename MUST be percent-encoded here. LINE, WhatsApp,
+    // Notes and most chat apps end their auto-detected link at the first
+    // literal space, so a raw space split the link into a dead
+    // "https://huahin.properties/Track" plus loose text — the customer got an
+    // unclickable link and a DNS error if they retyped it. Reported and fixed
+    // 3 Sept 2026. Do not "tidy" this back to a plain space.
+    const url = base + "Track%20Submission.dc.html?id=" + encodeURIComponent(p.id) + "&t=" + p.trackToken;
     const text = asMessage
       ? "สวัสดีครับ\nคุณสามารถติดตามสถานะทรัพย์และตอบกลับทีมงาน huahin.properties ได้จากลิงก์นี้:\n\n" + url
       : url;

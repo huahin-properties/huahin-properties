@@ -312,7 +312,7 @@ class Component extends DCLogic {
           });
         } catch (e2) { console.warn("could not record photo upload issue:", e2); }
       }
-      this.setState({ submitted: true, submitting: false, submittedId: id, trackUrl: location.origin + location.pathname.replace(/[^/]*$/, "") + "Track Submission.dc.html?id=" + encodeURIComponent(id) + "&t=" + token });
+      this.setState({ submitted: true, submitting: false, submittedId: id, trackUrl: location.origin + location.pathname.replace(/[^/]*$/, "") + "Track%20Submission.dc.html?id=" + encodeURIComponent(id) + "&t=" + token });
     } catch (e) {
       console.warn("Owner submission failed:", e);
       // Show the machine code too. "Missing or insufficient permissions" alone
