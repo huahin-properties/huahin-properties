@@ -53,6 +53,12 @@
       <div style="font-family:'Playfair Display',serif; font-size:clamp(21px,5vw,26px); color:oklch(20% 0.02 60); margin-bottom:4px;">จัดการลูกค้า</div>
       <div style="font-size:12.5px; color:oklch(50% 0.02 60); margin-bottom:18px;">โทรกลับทุกรายภายใน 2 ชั่วโมง · บันทึกทุกครั้งที่คุยเพื่อไม่ให้ข้อมูลหาย</div>
 
+      <sc-if value="{{ hasWriteError }}" hint-placeholder-val="{{ false }}">
+        <div style="background:oklch(94% 0.09 25); border:1px solid oklch(72% 0.17 25); border-radius:8px; padding:13px 16px; margin-bottom:16px; display:flex; gap:12px; align-items:flex-start;">
+          <div style="font-size:13px; color:oklch(38% 0.18 25); line-height:1.6; flex:1;">{{ writeError }}</div>
+          <div onClick="{{ onDismissWriteError }}" style="font-size:12px; color:oklch(38% 0.18 25); cursor:pointer; font-weight:700;">✕</div>
+        </div>
+      </sc-if>
       <sc-if value="{{ hasOverdue }}" hint-placeholder-val="{{ false }}">
         <div style="background:oklch(95% 0.06 30); border:1px solid oklch(80% 0.12 30); border-radius:8px; padding:13px 16px; margin-bottom:16px; font-size:13px; color:oklch(40% 0.16 30);">🔴 มีลูกค้า {{ overdueCount }} รายที่ยังไม่ได้โทรกลับเกิน 2 ชั่วโมง — ควรโทรทันที</div>
       </sc-if>
@@ -160,6 +166,9 @@ class Component extends DCLogic {
   state = {
     loaded: false, allowed: false, adminRole: null, showDevBar: false,
     leads: [], filter: "all", openNoteId: "", drafts: {}, savingId: "",
+    // C0.5 fix #2: last write failure, shown on screen so a failed save can
+    // never look successful to Staff.
+    writeError: "",
   };
 
   async componentDidMount() {
@@ -223,9 +232,40 @@ class Component extends DCLogic {
     return id;
   }
 
+  // Single write path for every lead update (C0.5 fix #2).
+  //
+  // updateDocFields() is a NEWER "explicit-intent alias" added to
+  // firebase-client.js in July 2026; setDoc() is the long-standing
+  // general-purpose function that has always existed and that both aliases
+  // delegate to (identical merge:true behavior). If the deployed
+  // firebase-client.js is older than the alias, this._fb.updateDocFields is
+  // undefined and calling it throws TypeError — which is why a status change
+  // could be permitted by the rules, hold a valid document id, and still
+  // never reach Firestore. Prefer the alias, fall back to setDoc, and refuse
+  // loudly if neither exists rather than failing silently.
+  async writeLead(id, patch) {
+    const fn = (typeof this._fb.updateDocFields === "function" && this._fb.updateDocFields)
+      || (typeof this._fb.setDoc === "function" && this._fb.setDoc);
+    if (!fn) throw new Error("firebase-client.js exposes neither updateDocFields() nor setDoc() — deployed client is incompatible");
+    return fn("leads", id, patch);
+  }
+
+  // Every failed lead write must be visible to Staff. Anything that throws
+  // lands here: the optimistic row is rolled back by the caller and this puts
+  // the real reason on screen, so a save can never LOOK successful.
+  writeFailed(where, e) {
+    console.error("Lead write FAILED (" + where + "):", e);
+    const msg = (e && (e.code || e.message)) ? String(e.code || e.message) : "unknown error";
+    this.setState({ writeError: "❌ บันทึกไม่สำเร็จ — ข้อมูลยังไม่ถูกบันทึกลงระบบ (" + where + ": " + msg + ") กรุณาลองใหม่ หรือแจ้งผู้ดูแลระบบ" });
+  }
+
   async changeStatus(lead, status) {
+    this.setState({ writeError: "" });
     const id = this.leadId(lead);
-    if (!id) return;
+    if (!id) {
+      this.setState({ writeError: "❌ บันทึกไม่สำเร็จ — ไม่พบรหัสเอกสารของลูกค้ารายนี้ กรุณารีเฟรชหน้าแล้วลองใหม่" });
+      return;
+    }
     const prev = lead.leadStatus || "new";
     // contacted-sync (C0.5): `contacted` and `leadStatus` are separate fields
     // (contacted drives the 2-hour overdue alert + Performance's uncontacted
@@ -246,34 +286,47 @@ class Component extends DCLogic {
     try {
       const patch = { leadStatus: status, statusChangedAt: Date.now() };
       if (implies && !lead.contacted) patch.contacted = true;
-      await this._fb.updateDocFields("leads", id, patch);
-      await this._fb.logActivity({
-        type: "lead_status", leadId: lead.id, leadName: lead.name || "",
-        from: prev, to: status,
-        summary: `เปลี่ยนสถานะลูกค้า ${lead.name || lead.id} เป็น ${(STATUS_MAP[status] || {}).label || status}`,
-      });
+      await this.writeLead(id, patch);
     } catch (e) {
-      console.warn("changeStatus failed:", e);
-      // Roll back BOTH fields we optimistically changed, not just the status.
+      // The lead write itself failed → roll back BOTH optimistic fields and
+      // tell Staff on screen. Nothing else runs.
       this.setState((s) => ({ leads: s.leads.map((l) => (l.id === id ? { ...l, leadStatus: prev, contacted: !!lead.contacted } : l)) }));
+      this.writeFailed("เปลี่ยนสถานะ", e);
+      return;
     }
+    // The lead is saved. activityLog is audit-only and MUST NOT be able to
+    // undo a successful save, so it gets its own non-fatal try.
+    try {
+      await this._fb.logActivity({
+        type: "lead_status", leadId: id, leadName: lead.name || "",
+        from: prev, to: status,
+        summary: `เปลี่ยนสถานะลูกค้า ${lead.name || id} เป็น ${(STATUS_MAP[status] || {}).label || status}`,
+      });
+    } catch (e) { console.warn("activityLog (lead_status) failed, lead itself saved:", e); }
+    // Server confirmation: re-read from Firestore so the pipeline counts show
+    // what is actually PERSISTED, never just what we optimistically set. This
+    // is what guarantees the UI can't say "กำลังคุย" while Firestore says new.
+    await this.reload();
   }
 
   async logCall(lead) {
+    this.setState({ writeError: "" });
     const id = this.leadId(lead);
     if (!id) return;
     try {
-      await this._fb.updateDocFields("leads", id, { contacted: true, lastCallAt: Date.now() });
-      await this._fb.logActivity({ type: "lead_call", leadId: lead.id, leadName: lead.name || "", summary: `โทรลูกค้า ${lead.name || lead.id}` });
-      this.setState((s) => ({ leads: s.leads.map((l) => (l.id === lead.id ? { ...l, contacted: true, lastCallAt: Date.now() } : l)) }));
-    } catch (e) { console.warn("logCall failed:", e); }
+      await this.writeLead(id, { contacted: true, lastCallAt: Date.now() });
+      this.setState((s) => ({ leads: s.leads.map((l) => (l.id === id ? { ...l, contacted: true, lastCallAt: Date.now() } : l)) }));
+    } catch (e) { this.writeFailed("บันทึกการโทร", e); return; }
+    try {
+      await this._fb.logActivity({ type: "lead_call", leadId: id, leadName: lead.name || "", summary: `โทรลูกค้า ${lead.name || id}` });
+    } catch (e) { console.warn("activityLog (lead_call) failed, lead itself saved:", e); }
   }
 
   async saveNote(lead) {
     if (this.state.savingId) return;
     const id = this.leadId(lead);
     if (!id) return;
-    this.setState({ savingId: lead.id });
+    this.setState({ savingId: id, writeError: "" });
     const noteText = (this.draft(lead.id, "noteDraft") || "").trim();
     const fields = {
       budget: this.draft(lead.id, "budget"),
@@ -286,30 +339,38 @@ class Component extends DCLogic {
       history.unshift({ text: noteText, at: Date.now(), by: (this._fb.currentAuthEmail && this._fb.currentAuthEmail()) || "" });
     }
     try {
-      await this._fb.updateDocFields("leads", id, { ...fields, callHistory: history, contacted: true });
-      if (noteText) {
-        await this._fb.logActivity({ type: "lead_note", leadId: lead.id, leadName: lead.name || "", summary: `บันทึกการคุยกับ ${lead.name || lead.id}` });
-      }
+      await this.writeLead(id, { ...fields, callHistory: history, contacted: true });
       this.setState((s) => ({
-        leads: s.leads.map((l) => (l.id === lead.id ? { ...l, ...fields, callHistory: history, contacted: true } : l)),
-        drafts: { ...s.drafts, [lead.id]: { ...(s.drafts[lead.id] || {}), noteDraft: "" } },
+        leads: s.leads.map((l) => (l.id === id ? { ...l, ...fields, callHistory: history, contacted: true } : l)),
+        drafts: { ...s.drafts, [id]: { ...(s.drafts[id] || {}), noteDraft: "" } },
         savingId: "",
       }));
     } catch (e) {
-      console.warn("saveNote failed:", e);
+      // Save failed → keep the typed note in the box so nothing is lost.
       this.setState({ savingId: "" });
+      this.writeFailed("บันทึกการคุย", e);
+      return;
+    }
+    if (noteText) {
+      try {
+        await this._fb.logActivity({ type: "lead_note", leadId: id, leadName: lead.name || "", summary: `บันทึกการคุยกับ ${lead.name || id}` });
+      } catch (e) { console.warn("activityLog (lead_note) failed, lead itself saved:", e); }
     }
   }
 
   async bookViewing(lead) {
     const id = this.leadId(lead);
     if (!id) return;
+    this.setState({ writeError: "" });
     try {
       // Booking a viewing is a confirmed real contact → contacted:true (C0.5).
-      await this._fb.updateDocFields("leads", id, { leadStatus: "booked", viewingBookedAt: Date.now(), contacted: true });
-      await this._fb.logActivity({ type: "viewing_booked", leadId: lead.id, leadName: lead.name || "", propertyId: lead.propertyId || "", summary: `นัดพาชมกับ ${lead.name || lead.id}` });
-      this.setState((s) => ({ leads: s.leads.map((l) => (l.id === lead.id ? { ...l, leadStatus: "booked", contacted: true } : l)) }));
-    } catch (e) { console.warn("bookViewing failed:", e); }
+      await this.writeLead(id, { leadStatus: "booked", viewingBookedAt: Date.now(), contacted: true });
+      this.setState((s) => ({ leads: s.leads.map((l) => (l.id === id ? { ...l, leadStatus: "booked", contacted: true } : l)) }));
+    } catch (e) { this.writeFailed("บันทึกนัดชม", e); return; }
+    try {
+      await this._fb.logActivity({ type: "viewing_booked", leadId: id, leadName: lead.name || "", propertyId: lead.propertyId || "", summary: `นัดพาชมกับ ${lead.name || id}` });
+    } catch (e) { console.warn("activityLog (viewing_booked) failed, lead itself saved:", e); }
+    await this.reload();
   }
 
   renderVals() {
@@ -406,6 +467,9 @@ class Component extends DCLogic {
       emptyLabel: this.state.leads.length === 0 ? "ยังไม่มีลูกค้าติดต่อเข้ามา" : "ไม่มีลูกค้าในหมวดนี้",
       hasOverdue: overdue.length > 0,
       overdueCount: overdue.length,
+      writeError: this.state.writeError || "",
+      hasWriteError: !!this.state.writeError,
+      onDismissWriteError: () => this.setState({ writeError: "" }),
     };
   }
 }
