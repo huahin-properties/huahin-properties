@@ -293,6 +293,22 @@ Listing Approvals.dc.html?case=<INTERNAL_PROPERTY_ID>&open=conversation&from=wor
 
 **Rules**: ไม่แก้ · **ไม่ต้อง publish ใหม่**
 
+**🐛 C3.1 FIX (4 ก.ย. 2569 — พบจาก production test)**: deep-link เปิดหน้าถูกเคสแต่ **บทสนทนายังพับอยู่** ต้องกดเปิดเองอีกครั้ง
+
+**Root cause**: `this._restoreCase()` ถูกเรียก **ใน catch block เท่านั้น** (บรรทัด 522) — path ที่โหลดสำเร็จ (คือ path ปกติ) **ไม่เคยเรียกมันเลย** ดังนั้น `openCaseId` ไม่ถูกตั้งค่า บทสนทนาจึงไม่ถูกเปิด · แก้โดยเรียก `_restoreCase()` หลัง `setState` ของ path สำเร็จด้วย (guard `_restored` กันทำงานซ้ำ)
+
+**ยืนยันว่าใช้ state เดียวกับการคลิกมือ**: บทสนทนาแสดงเมื่อ `threadOpen: this.state.openCaseId === p.id` · `_restoreCase()` ตั้ง `openCaseId` ตัวเดียวกันกับที่ `onToggleThread` ตั้ง → **ไม่มี component/listener/collection ชุดที่สอง**
+
+**พบซ้อน: back link ซ้ำ** — Listing Approvals มีลิงก์ "← หน้างานของฉัน" อยู่ใน header ถาวรแล้ว (บรรทัด 34) ตั้งแต่ก่อน C3.1 · ลิงก์แบบมีเงื่อนไข `from=workspace` ที่เพิ่มไปจึงเป็น UI ซ้ำซ้อน → **ถอดออก** เก็บของเดิมไว้ · `from=workspace` ยังอยู่ใน URL (ไม่มีผลเสีย เผื่อใช้ในอนาคต)
+
+**🎨 C3.1 UX CORRECTION (4 ก.ย. 2569 — PO locked)**: บทสนทนาต้องทำตัวเหมือน Messenger — **เปิดอยู่แล้ว** ไม่ต้องกดเปิด/พับ
+
+- **ถอดออก**: ปุ่ม toggle `💬 การสนทนากับลูกค้า` (คลิกได้) + handler `onToggleThread` → เหลือเป็น **หัวข้อธรรมดาคลิกไม่ได้** (คงข้อมูลภาษาลูกค้าไว้)
+- **เงื่อนไข mount ใหม่**: `threadOpen = openCaseId === p.id && p.source === "owner_submission"` — คือ **การเลือกเคส = เปิดห้องทำงานของเคสนั้น** และบทสนทนาเป็นส่วนหนึ่งของห้องทำงาน ไม่ใช่รายละเอียดที่ซ่อนได้
+- **รวม action**: `onToggleCase` (ปุ่ม "เปิดเคส + บทสนทนา") ทำงานแทน toggle เดิมทั้งหมด — `loadThread` + Suggested Replies + `markCaseRead` + scroll-to-latest
+- gate ไว้ที่ `owner_submission` เพราะประกาศของสมาชิก (lister) ไม่มี customer Case thread จึงต้องไม่ mount chat หรือ listener
+- **⚠️ listener**: mount ผูกกับ **การเลือกเคส** เท่านั้น → เปิดรายการ 50 เคส **ไม่ได้** สร้าง 50 listener · `loadThread` มี guard `_unsubs[p.id]` + `caseMsgs` cache → **1 listener ต่อเคสที่เลือก** · `watchCaseMessages` ยังมีจุดเรียกเดียวในไฟล์
+
 **C3.2 (workflow progress enrichment): เลื่อนไว้** รอ C3.1 ผ่าน production ก่อน
 
 ---
