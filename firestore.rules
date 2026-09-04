@@ -329,15 +329,28 @@ service cloud.firestore {
     // Leads captured from the public contact form / auto-bot engagement —
     // anyone can create one (that's the point of a lead form), but only the
     // admin can read/list them (contains a visitor's personal contact info).
-    // STEP 2A-Security (ส.ค. 2569): Need-to-Know — a Staff member working the
-    // owner-submission queue has no reason to read the whole buyer database, so
-    // reading/editing leads is now OWNER-only (was any admin, which included
-    // Staff). Creating is still open: that is the public contact form. Enforced
-    // here at the rules level, not just hidden in the UI, so it cannot be
-    // bypassed from devtools/console.
+    // STEP 2A-Security (ส.ค. 2569): Need-to-Know — reading/editing leads was
+    // made OWNER-only, on the reasoning that a Staff member working the
+    // owner-submission queue had no reason to read the whole buyer database.
+    //
+    // C0.5 (ก.ย. 2569) — Product Owner reversed that scope decision: the Lead
+    // Inbox (Leads.dc.html) is the ONE place incoming customer enquiries are
+    // worked, and Owner-only access meant a Contact submission sat unseen
+    // unless the Owner personally opened the page. Authorized internal team
+    // members (adminUsers — i.e. isAdmin(), which covers Staff and Owner) may
+    // now read and update leads so they can actually action them.
+    //
+    // Deliberately NOT broadened:
+    //   create → still `if true` (that IS the public contact form; anonymous
+    //            visitors must be able to submit and nothing more)
+    //   delete → still isOwner() (destroying customer records stays with the
+    //            Owner; Staff can work a lead but never erase it)
+    // Enforced here at the rules level, not just hidden in the UI, so it
+    // cannot be bypassed from devtools/console.
     match /leads/{id} {
       allow create: if true;
-      allow read, update, delete: if isOwner();
+      allow read, update: if isAdmin();
+      allow delete: if isOwner();
     }
 
     // Team activity log (Aug 2026): written automatically by the app whenever

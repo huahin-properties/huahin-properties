@@ -42,6 +42,133 @@ ContactRail (แถบข้าง + แชทบอท)
 
 ---
 
+## 26. Unified Lead → Match → Deal Architecture (4 ก.ย. 2569, 🔒 LOCKED PRODUCT DIRECTION, Product Owner Approved)
+
+**สถานะ**: ทิศทางผลิตภัณฑ์ที่ LOCKED — ผูกพันทุก CRM/Lead/Matching/Deal/Commission feature ในอนาคต **แต่ไม่ได้หมายความว่าต้องสร้างทั้งหมดตอนนี้** การพัฒนาต้องเป็นแบบ incremental + backward-compatible เสมอ
+
+### 26.1 นิยาม Lead (Lead Center เดียว)
+
+**Lead** = คน/ลูกค้า/ผู้สนใจที่แสดงความสนใจที่ actionable **ไม่ว่าจะเข้ามาทางช่องทางไหน**
+
+ช่องทางที่ต้องรองรับ: Contact form · AI Assistant · Staff สร้างเอง · LINE OA (อนาคต) · Facebook (อนาคต) · property inquiry · owner inquiry
+
+**Intent categories** (ขั้นต่ำ):
+
+| Intent | ความหมาย |
+|---|---|
+| `BUY` | ต้องการซื้อ |
+| `RENT` | ต้องการเช่า |
+| `SELL` | ต้องการขาย / ฝากขาย |
+| `LET` | ต้องการปล่อยเช่า / ฝากเช่า |
+| `OTHER` / `UNKNOWN` | ยังไม่จัดประเภท |
+
+ทั้งหมดนี้ต้องมองเห็นได้ใน **Lead Center เดียว** โดยใช้ filter/tab — **ไม่ใช่** แยก database หรือแยก Lead inbox
+
+### 26.2 Relationship Model เป้าหมาย
+
+```
+Customer / Lead
+        ↓
+Intent classification
+        ↓
+BUY / RENT / SELL / LET
+        ↓
+Demand Profile  หรือ  Property Case
+        ↓
+Matching Engine
+        ↓
+Match
+        ↓
+Participants
+        ↓
+Deal
+        ↓
+Revenue / Commission / Attribution
+```
+
+- **BUY / RENT** → อาจสร้าง **Demand Profile** (โครงสร้างบอกว่าลูกค้าต้องการอะไร)
+- **SELL / LET** → อาจยกระดับจาก Lead เป็น **canonical Property Case**
+- **Lead และ Property Case ไม่ใช่ object เดียวกัน**
+- เมื่อสร้าง Property Case ต้อง **คง Lead/history/provenance เดิมให้ traceable** เสมอ
+
+### 26.3 Matching (อนาคต — ยังไม่สร้าง)
+
+ต้อง match ได้: `BUY demand ↔ SALE properties` และ `RENT demand ↔ RENTAL properties`
+
+เกณฑ์ structured ที่ต้องรองรับในอนาคต: property type · location · price/budget · bedrooms · bathrooms · land/living size · pool · pet friendly · furnishing · other requirements
+
+**Match ต้องกลายเป็น object จริงที่ traceable** ไม่ใช่แค่ผลการค้นหาชั่วคราว
+
+Match lifecycle (อนาคต): `Suggested → Sent → Interested → Viewing → Negotiating → Won / Lost`
+
+> ⛔ **ห้ามสร้าง Matching Engine ตอนนี้ — Blueprint เท่านั้น**
+
+### 26.4 Participant / Attribution Principle
+
+สถาปัตยกรรมอนาคตต้องเก็บ identity + provenance พอที่จะตอบได้ว่า:
+
+- ใครพาลูกค้าซื้อ/เช่า (buyer/tenant Lead) เข้ามา
+- ใครพาทรัพย์เข้ามา
+- ใครดูแลทรัพย์/เจ้าของ
+- ใครดูแลผู้ซื้อ/ผู้เช่า
+- ใครเป็นคนพาชม
+- Agent/Staff/participant คนไหนเกี่ยวข้อง
+- ใครปิดดีล
+- แต่ละคน contribute อะไร
+
+เพื่อรองรับในอนาคต: Deal attribution · Commission shares · Revenue reporting · Participant shares
+
+> ⛔ **ห้ามสร้าง Participants / Deal / Commission ตอนนี้ — Blueprint เท่านั้น**
+
+### 26.5 Core Data Principle
+
+ทุก record ที่ future-compatible ควรเก็บ (เท่าที่เกี่ยวข้อง): **WHO · WHAT · SOURCE · RELATIONSHIP · STATUS · TIMESTAMP**
+
+**ช่องทาง/source ต้องไม่กำหนดว่า Lead ถูกเก็บไว้ที่ไหน** — Contact / AI / LINE / Facebook / Staff เป็นเพียง *acquisition channel* ทั้งหมดต้องไหลเข้าสถาปัตยกรรม Lead เดียวกัน
+
+สอดคล้องกับ **Source Field Safety Decision** (ดู §26.7): `source` เดิมห้ามแตะ, ใช้ `caseSource` สำหรับ provenance ระดับเคส และ `channel` สำหรับ delivery/source ระดับข้อความ
+
+### 26.6 สิ่งที่ห้ามสร้างก่อนได้รับอนุมัติเป็นเฟสแยก
+
+Matching Engine · Demand Profile engine · Lead → Case conversion · Participants collection · Deal engine · Commission engine
+
+### 26.7 การตัดสินใจที่ LOCKED แล้ว (อ้างอิงข้ามเฟส)
+
+| รหัส | การตัดสินใจ |
+|---|---|
+| D1 | AI owner intent สร้าง **Property Case จริง** แต่ต้องผ่าน **Minimal Intake Gate** ก่อน (intent ชัด + ชื่อ + ช่องทางติดต่อ + ขาย/เช่า) — ห้ามสร้างเคสจากประโยคเดียวที่อ่อน |
+| D2 | เมื่อ Staff รับเคส → AI **หยุด**ตอบลูกค้าเองในเคสนั้น เปลี่ยนเป็น **Staff Copilot** (สรุป / หาข้อมูลที่ขาด / ร่างคำตอบ / สกัดข้อมูล structured) Staff ต้องตรวจและกดส่งเอง |
+| D3 | Contact submission เป็น **Lead ก่อนเสมอ** ห้าม auto-create Property Case — Staff เท่านั้นที่ "แปลงเป็นเคสฝากขาย/ฝากเช่า" และต้องคง provenance |
+| D4 | `senderType` (`customer` / `ai` / `staff` / `system`) **บังคับและต้องมองเห็นได้** — AI ห้ามสวมรอยเป็น Staff |
+| D5 | Staff Workspace และ Listing Approvals แสดง Case Conversation ได้ทั้งคู่ แต่ต้องใช้ thread เดียวกัน: `properties/{internalPropertyId}/caseMessages` — ห้ามมีบทสนทนาซ้ำ |
+| Source safety | ห้าม overload/rename `source = "owner_submission"` (ผูกกับ application logic + Firestore security behavior) เพิ่ม `caseSource` แยก (`owner_form` / `ai_assistant` / `contact_conversion` / `line` / `facebook`) |
+
+### 26.8 ลำดับเฟสที่อนุมัติแล้ว
+
+`C0` (Contact form เก็บ Lead จริง) → **PASS** · `C0.5` (Lead visibility / Staff access) → **ทำแล้ว รอ PO review** · `C1` → รออนุมัติ · `C2` → รออนุมัติ · `C3+` → ต้องอนุมัติแยกทุกเฟส
+
+แต่ละเฟส: implement → report/test → **STOP** เพื่อ Product Owner review เสมอ
+
+### 26.9 C0.5 Implementation Record — Lead Visibility / Staff Access (4 ก.ย. 2569)
+
+**ปัญหาที่แก้**: C0 ทำให้ Contact submission ถูกเก็บลง `leads/` จริงแล้ว แต่ `leads` read/update เป็น **Owner-only** (STEP 2A-Security, ส.ค. 2569) ทำให้ Lead เข้ามาแล้ว **ไม่มีใครในทีมเห็น** นอกจาก Owner จะเปิดหน้าเอง — เปลี่ยนปัญหาจาก "ข้อมูลลูกค้าหาย" เป็น "ข้อมูลมีแต่ไม่มีใครรู้ว่ามาถึง"
+
+**การตัดสินใจ**: Product Owner **กลับ** scope ของ STEP 2A-Security — Lead access ให้ทีมงานภายในที่ได้รับอนุญาต (`isAdmin()` = Owner + Staff ใน `adminUsers`)
+
+**สิ่งที่พบว่ามีอยู่แล้ว (ไม่ต้องสร้างใหม่)**: `Leads.dc.html` เป็น Lead Inbox ที่สมบูรณ์อยู่แล้ว — pipeline 6 สถานะ (`new`/`talking`/`booked`/`hot`/`won`/`lost`), filter tabs + counts, ปุ่มโทร + auto-log, บันทึกการคุย + ประวัติ, ช่อง qualification (งบ/ต้องการ/timeline/การเงิน), แจ้งเตือน 🔴 ยังไม่โทรกลับเกิน 2 ชม. **จึงใช้หน้านี้เป็น Lead Inbox เดียว ไม่สร้างหน้าที่สอง**
+
+**สิ่งที่เปลี่ยน**:
+1. `firestore.rules` — `/leads`: `read, update: if isAdmin()` · `create: if true` (คงเดิม, คือ public contact form) · `delete: if isOwner()` (คงเดิม — Staff ทำงานกับ Lead ได้แต่ลบไม่ได้)
+2. `Leads.dc.html` — role gate เปิดให้ `staff` เพิ่มจาก `owner` + ข้อความ gate เปลี่ยนเป็น "หน้านี้สำหรับทีมงานเท่านั้น"
+3. `Staff Workspace.dc.html` — เพิ่ม **entry point เท่านั้น**: แบนเนอร์ 🔴 + ลิงก์ถาวร 👥 ลูกค้า → `Leads.dc.html` **ไม่ duplicate pipeline**
+4. **contacted sync** — `contacted` กลายเป็น `true` เมื่อเกิดการติดต่อจริง: กดโทร (มีอยู่แล้ว) · บันทึกการคุย (มีอยู่แล้ว) · เปลี่ยนสถานะเป็น `talking`/`booked`/`hot`/`won` (**ใหม่**) · บันทึกนัดชม (**ใหม่**) — **ยกเว้น** `new` (ยังไม่มีอะไรเกิด) และ `lost` (อาจ write off เพราะติดต่อไม่ได้เลย) · **การเปิด/อ่าน Lead ไม่ mark contacted**
+
+**Counter source of truth**: อ่าน Lead state ปัจจุบันตรง ๆ (`fetchLeads()`) — **ไม่ใช้ activityLog** ซึ่งคงบทบาท audit/history เท่านั้น
+
+**Future compatibility**: ไม่แตะ schema, ไม่แยก collection ใหม่, ไม่ทำ Lead → Case conversion — เปิดทางให้ §26.1 unified Lead Center ต่อได้
+
+---
+
 ## 25.2 Workspace Economy — WEM v1 (22 ก.ค. 2569, Architecture Approved for Prototype Refinement, builds on WEA v1.1)
 
 **Resource Philosophy**: Members do not buy raw storage, AI tokens, or infrastructure. They purchase a managed Workspace service that includes platform operation, development, support, security, and continued improvement. Every upgrade should feel like expanding a digital office, not paying to remove a limitation.

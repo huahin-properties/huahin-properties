@@ -29,7 +29,10 @@
       <div style="font-family:'Playfair Display',serif; font-size:clamp(15px,3.4vw,19px); color:oklch(97% 0.01 80); white-space:nowrap;">huahin . properties</div>
       <div style="font-size:12px; color:oklch(78% 0.02 70); white-space:nowrap;">| หน้างานของฉัน</div>
     </div>
-    <div onClick="{{ onLogout }}" style="font-size:13px; color:oklch(85% 0.02 70); cursor:pointer; white-space:nowrap;">ออกจากระบบ</div>
+    <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+      <a href="Leads.dc.html" style="color:oklch(85% 0.02 70); font-size:12.5px; text-decoration:none; white-space:nowrap;">👥 ลูกค้า</a>
+      <div onClick="{{ onLogout }}" style="font-size:13px; color:oklch(85% 0.02 70); cursor:pointer; white-space:nowrap;">ออกจากระบบ</div>
+    </div>
   </div>
 
   <div style="max-width:820px; margin:0 auto; padding:clamp(18px,4vw,32px);">
@@ -50,6 +53,12 @@
         <a href="Listing Approvals.dc.html" style="display:block; background:oklch(96% 0.05 25); border:1px solid oklch(85% 0.10 25); border-radius:10px; padding:11px 14px; margin-bottom:14px; text-decoration:none;">
           <div style="font-size:12.5px; font-weight:700; color:oklch(45% 0.18 25);">🔔 มีข้อความใหม่จากลูกค้า {{ unreadCount }} เคส</div>
           <div style="font-size:11px; color:oklch(50% 0.08 25); margin-top:2px;">แตะเพื่อเปิดหน้าตรวจสอบทรัพย์และตอบกลับ</div>
+        </a>
+      </sc-if>
+      <sc-if value="{{ hasNewLeads }}" hint-placeholder-val="{{ false }}">
+        <a href="Leads.dc.html" style="display:block; background:oklch(96% 0.05 25); border:1px solid oklch(85% 0.10 25); border-radius:10px; padding:11px 14px; margin-bottom:14px; text-decoration:none;">
+          <div style="font-size:12.5px; font-weight:700; color:oklch(45% 0.18 25);">🔴 ลูกค้าใหม่ที่ยังไม่ได้ติดต่อ {{ newLeadCount }} ราย</div>
+          <div style="font-size:11px; color:oklch(50% 0.08 25); margin-top:2px;">แตะเพื่อเปิดหน้าจัดการลูกค้าและโทรกลับ</div>
         </a>
       </sc-if>
       <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(132px,1fr)); gap:10px; margin-bottom:20px;">
@@ -125,6 +134,8 @@ class Component extends DCLogic {
   state = {
     loaded: false, allowed: false, myEmail: "", myUid: "",
     props: [], photosByProp: {}, filter: "new",
+    // C0.5: Lead count only — the Lead pipeline itself stays in Leads.dc.html.
+    newLeadCount: 0,
   };
 
   async componentDidMount() {
@@ -140,10 +151,21 @@ class Component extends DCLogic {
     if (role !== "staff" && role !== "owner") { this.setState({ loaded: true, allowed: false }); return; }
     this.setState({ allowed: true, myEmail: user.email || "", myUid: user.uid || "" });
     try {
-      const [all, photos] = await Promise.all([
+      // C0.5 — Lead visibility. Read CURRENT lead state (not activityLog,
+      // which stays audit/history only) so the badge always reflects reality.
+      // .catch(() => []) keeps this page fully working if the leads read is
+      // denied — e.g. before the C0.5 firestore.rules deploy lands — so the
+      // workspace degrades to "no badge" instead of breaking.
+      const [all, photos, leads] = await Promise.all([
         fb.fetchCollection("properties"),
         fb.fetchAllPhotos().catch(() => []),
+        fb.fetchLeads().catch(() => []),
       ]);
+      // Actionable = still sitting at "new" AND nobody has contacted them.
+      const newLeadCount = (leads || []).filter(
+        (l) => (l.leadStatus || "new") === "new" && !l.contacted
+      ).length;
+      this.setState({ newLeadCount });
       const photosByProp = {};
       (photos || []).forEach((ph) => {
         if (!ph.propertyId) return;
@@ -198,6 +220,10 @@ class Component extends DCLogic {
       unreadCount: (this.state.props || []).filter((p) => p.lastCustomerMessageAt && (!p.staffLastReadAt || p.lastCustomerMessageAt > p.staffLastReadAt)).length,
       hasUnreadAny: (this.state.props || []).some((p) => p.lastCustomerMessageAt && (!p.staffLastReadAt || p.lastCustomerMessageAt > p.staffLastReadAt)),
       onLogout: () => { try { this._fb.logoutAdmin(); } catch (e) {} window.location.href = "Agent Signup.dc.html"; },
+      // C0.5 Lead entry point — a link out to the one Lead Inbox, never a
+      // second pipeline here.
+      newLeadCount: this.state.newLeadCount,
+      hasNewLeads: this.state.newLeadCount > 0,
       // Six fixed counter cards instead of a loop — this project's runtime
       // choked on a looped object, and flat values also paint immediately.
       c1count: (b.new || []).length, c1active: active === "new", onC1: () => this.setState({ filter: "new" }),
