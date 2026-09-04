@@ -207,24 +207,46 @@ class Component extends DCLogic {
     this.setState((s) => ({ drafts: { ...s.drafts, [id]: { ...(s.drafts[id] || {}), [key]: value } } }));
   }
 
-  // C0.5 contacted-sync: `contacted` and `leadStatus` are separate fields
-  // (contacted drives the 2-hour overdue alert + Performance's uncontacted
-  // count; leadStatus drives the pipeline). Moving a lead to a status that
-  // can only be known BY HAVING SPOKEN to the customer implies real contact,
-  // so we stamp contacted:true then. Deliberately excluded: "new" (nothing
-  // happened yet) and "lost" (a lead can be written off precisely because
-  // they were never reachable). Merely opening/reading a lead never sets it.
-  static CONTACT_IMPLYING_STATUS = ["talking", "booked", "hot", "won"];
+  // Defensive ID guard (C0.5 fix). Every lead write goes through this first.
+  // updateDocFields uses .set(…, {merge:true}), and a merge write to a
+  // NON-EXISTENT document id silently CREATES that document — so a missing or
+  // malformed id would quietly manufacture a phantom lead (e.g. "leads/
+  // undefined") instead of erroring. fetchCollection always stamps `id: d.id`
+  // last, so a valid lead always has a real Firestore id here; anything else
+  // is a bug and must be refused loudly rather than written.
+  leadId(lead) {
+    const id = lead && lead.id;
+    if (typeof id !== "string" || !id.trim() || id === "undefined" || id === "null") {
+      console.error("Lead write BLOCKED — invalid document id:", id, lead);
+      return null;
+    }
+    return id;
+  }
 
   async changeStatus(lead, status) {
+    const id = this.leadId(lead);
+    if (!id) return;
     const prev = lead.leadStatus || "new";
-    const implies = Component.CONTACT_IMPLYING_STATUS.includes(status);
+    // contacted-sync (C0.5): `contacted` and `leadStatus` are separate fields
+    // (contacted drives the 2-hour overdue alert + Performance's uncontacted
+    // count; leadStatus drives the pipeline). Moving a lead to a status that
+    // can only be known BY HAVING SPOKEN to the customer implies real contact,
+    // so we stamp contacted:true then. Deliberately excluded: "new" (nothing
+    // happened yet) and "lost" (a lead can be written off precisely because
+    // they were never reachable). Merely opening/reading a lead never sets it.
+    //
+    // Declared as a plain local array, NOT a `static` class field referenced
+    // via `Component.…` — this project's DC runtime does not expose the class
+    // by that binding at method-call time, so `Component.X` threw a
+    // ReferenceError here and (being outside the try) aborted the whole write
+    // silently. That was the C0.5 "status change never reached Firestore" bug.
+    const implies = ["talking", "booked", "hot", "won"].indexOf(status) !== -1;
     const nowContacted = implies || !!lead.contacted;
-    this.setState((s) => ({ leads: s.leads.map((l) => (l.id === lead.id ? { ...l, leadStatus: status, contacted: nowContacted } : l)) }));
+    this.setState((s) => ({ leads: s.leads.map((l) => (l.id === id ? { ...l, leadStatus: status, contacted: nowContacted } : l)) }));
     try {
       const patch = { leadStatus: status, statusChangedAt: Date.now() };
       if (implies && !lead.contacted) patch.contacted = true;
-      await this._fb.updateDocFields("leads", lead.id, patch);
+      await this._fb.updateDocFields("leads", id, patch);
       await this._fb.logActivity({
         type: "lead_status", leadId: lead.id, leadName: lead.name || "",
         from: prev, to: status,
@@ -233,13 +255,15 @@ class Component extends DCLogic {
     } catch (e) {
       console.warn("changeStatus failed:", e);
       // Roll back BOTH fields we optimistically changed, not just the status.
-      this.setState((s) => ({ leads: s.leads.map((l) => (l.id === lead.id ? { ...l, leadStatus: prev, contacted: !!lead.contacted } : l)) }));
+      this.setState((s) => ({ leads: s.leads.map((l) => (l.id === id ? { ...l, leadStatus: prev, contacted: !!lead.contacted } : l)) }));
     }
   }
 
   async logCall(lead) {
+    const id = this.leadId(lead);
+    if (!id) return;
     try {
-      await this._fb.updateDocFields("leads", lead.id, { contacted: true, lastCallAt: Date.now() });
+      await this._fb.updateDocFields("leads", id, { contacted: true, lastCallAt: Date.now() });
       await this._fb.logActivity({ type: "lead_call", leadId: lead.id, leadName: lead.name || "", summary: `โทรลูกค้า ${lead.name || lead.id}` });
       this.setState((s) => ({ leads: s.leads.map((l) => (l.id === lead.id ? { ...l, contacted: true, lastCallAt: Date.now() } : l)) }));
     } catch (e) { console.warn("logCall failed:", e); }
@@ -247,6 +271,8 @@ class Component extends DCLogic {
 
   async saveNote(lead) {
     if (this.state.savingId) return;
+    const id = this.leadId(lead);
+    if (!id) return;
     this.setState({ savingId: lead.id });
     const noteText = (this.draft(lead.id, "noteDraft") || "").trim();
     const fields = {
@@ -260,7 +286,7 @@ class Component extends DCLogic {
       history.unshift({ text: noteText, at: Date.now(), by: (this._fb.currentAuthEmail && this._fb.currentAuthEmail()) || "" });
     }
     try {
-      await this._fb.updateDocFields("leads", lead.id, { ...fields, callHistory: history, contacted: true });
+      await this._fb.updateDocFields("leads", id, { ...fields, callHistory: history, contacted: true });
       if (noteText) {
         await this._fb.logActivity({ type: "lead_note", leadId: lead.id, leadName: lead.name || "", summary: `บันทึกการคุยกับ ${lead.name || lead.id}` });
       }
@@ -276,9 +302,11 @@ class Component extends DCLogic {
   }
 
   async bookViewing(lead) {
+    const id = this.leadId(lead);
+    if (!id) return;
     try {
       // Booking a viewing is a confirmed real contact → contacted:true (C0.5).
-      await this._fb.updateDocFields("leads", lead.id, { leadStatus: "booked", viewingBookedAt: Date.now(), contacted: true });
+      await this._fb.updateDocFields("leads", id, { leadStatus: "booked", viewingBookedAt: Date.now(), contacted: true });
       await this._fb.logActivity({ type: "viewing_booked", leadId: lead.id, leadName: lead.name || "", propertyId: lead.propertyId || "", summary: `นัดพาชมกับ ${lead.name || lead.id}` });
       this.setState((s) => ({ leads: s.leads.map((l) => (l.id === lead.id ? { ...l, leadStatus: "booked", contacted: true } : l)) }));
     } catch (e) { console.warn("bookViewing failed:", e); }
