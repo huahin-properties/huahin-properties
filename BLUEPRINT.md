@@ -309,6 +309,17 @@ Listing Approvals.dc.html?case=<INTERNAL_PROPERTY_ID>&open=conversation&from=wor
 - gate ไว้ที่ `owner_submission` เพราะประกาศของสมาชิก (lister) ไม่มี customer Case thread จึงต้องไม่ mount chat หรือ listener
 - **⚠️ listener**: mount ผูกกับ **การเลือกเคส** เท่านั้น → เปิดรายการ 50 เคส **ไม่ได้** สร้าง 50 listener · `loadThread` มี guard `_unsubs[p.id]` + `caseMsgs` cache → **1 listener ต่อเคสที่เลือก** · `watchCaseMessages` ยังมีจุดเรียกเดียวในไฟล์
 
+**📐 C3.1 CHAT PANEL RESIZE (4 ก.ย. 2569)**: เพิ่ม drag handle บน **ขอบบน** ของหน้าต่างแชท ลากปรับความสูงได้สด ๆ
+
+- **กลไก**: Pointer Events (`pointerdown` บน handle → `pointermove`/`pointerup`/`pointercancel` บน window) → `setState({chatH})` **ทุกครั้งที่ขยับ** ไม่รอปล่อยเมาส์ · รองรับทั้งเมาส์และ touch ในตัว (Pointer API + fallback `ev.touches[0].clientY`)
+- **ทิศทาง**: ลาก **ขึ้น = สูงขึ้น** (delta กลับด้าน: `startH - (y - startY)`)
+- **ความสูง**: default `min(560px, 72vh)` (เท่าเดิมที่อนุมัติแล้ว ไม่ลดลง) · min **260px** · max `min(900px, 90vh)`
+- **แยกจากการ scroll ข้อความชัดเจน**: handle เป็น **sibling** ของกล่องข้อความ ไม่ได้อยู่ข้างใน · resize เปลี่ยนเฉพาะความสูง **ชั้นนอก** · กล่องข้อความยัง `overflow-y:auto` ของตัวเอง · `preventDefault` + `stopPropagation` กันไม่ให้ลากไปเลื่อนข้อความ
+- **กัน text selection**: `body.userSelect = "none"` ระหว่างลาก แล้วคืนค่าเดิมตอนปล่อย · `touch-action:none` บน handle
+- **ไม่มี persistence** (ตามที่ PO ระบุ) — refresh กลับไป default
+- **⚠️ บทเรียนจาก C0.5**: ความสูงเก็บเป็น **instance method** ไม่ใช่ `static` field ที่อ้างผ่าน `Component.X` เพราะ DC runtime ของโปรเจกต์นี้ไม่ resolve binding นั้นตอน method ทำงาน (เคยทำให้การบันทึกสถานะ lead ล้มเงียบ ๆ)
+- **ไม่แตะ**: chat component / scroll container / realtime listener (ยัง 1 ตัวต่อเคสที่เลือก)
+
 **C3.2 (workflow progress enrichment): เลื่อนไว้** รอ C3.1 ผ่าน production ก่อน
 
 ---

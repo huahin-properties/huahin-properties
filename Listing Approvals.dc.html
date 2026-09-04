@@ -272,7 +272,10 @@
                     <div style="font-size:12px; font-weight:600; color:oklch(40% 0.13 25); margin-bottom:10px;">💬 การสนทนากับลูกค้า · 🌐 {{ r.custLangStatus }}: {{ r.custLangLabel }}</div>
                   </sc-if>
                   <sc-if value="{{ r.threadOpen }}" hint-placeholder-val="{{ false }}">
-                    <div style="background:oklch(98% 0.005 85); border:1px solid oklch(91% 0.01 70); border-radius:9px; padding:12px 13px; margin-bottom:11px; display:flex; flex-direction:column; height:min(72vh,560px); max-height:72vh;">
+                    <div style="{{ r.chatPanelStyle }}">
+                      <div onPointerDown="{{ r.onChatResizeStart }}" title="ลากขึ้น–ลงเพื่อปรับความสูงหน้าต่างแชท" style="height:16px; margin:-6px 0 4px; display:flex; align-items:center; justify-content:center; cursor:ns-resize; touch-action:none; flex-shrink:0;">
+                        <div style="width:46px; height:5px; border-radius:100px; background:oklch(80% 0.02 70);"></div>
+                      </div>
                       <div style="position:relative; flex:1; min-height:0; display:flex; flex-direction:column; margin-bottom:9px;">
                       <div ref="{{ r.threadRef }}" onScroll="{{ r.onThreadScroll }}" style="display:flex; flex-direction:column; gap:2px; flex:1; min-height:0; overflow-y:auto;">
                         <sc-for list="{{ r.thread }}" as="m" hint-placeholder-count="0">
@@ -475,10 +478,12 @@ class Component extends DCLogic {
     el.scrollTop = el.scrollHeight;
   }
 
-  state = { noteOpen: "", noteCopied: "", wfOpen: {}, wfBusy: "", submissions: {}, reviewNote: {}, reviewStepKey: {}, reviewErr: {}, preview: {}, previewBusy: "", previewErr: {}, newIncoming: {}, copiedFor: "", caseMsgs: {}, replyDraft: {}, replyBusy: "", aiBusy: "", suggests: {}, suggestKey: {}, suggestBusy: "", caseErr: {}, infoReqFor: null, infoReqText: "", infoReqBusy: false, lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "", assignable: [], assignOpen: "" };
+  state = { noteOpen: "", noteCopied: "", wfOpen: {}, wfBusy: "", submissions: {}, reviewNote: {}, reviewStepKey: {}, reviewErr: {}, preview: {}, previewBusy: "", previewErr: {}, newIncoming: {}, copiedFor: "", caseMsgs: {}, replyDraft: {}, replyBusy: "", aiBusy: "", suggests: {}, suggestKey: {}, suggestBusy: "", caseErr: {}, infoReqFor: null, infoReqText: "", infoReqBusy: false, lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "", assignable: [], assignOpen: "", chatH: 0 };
 
   componentWillUnmount() {
     Object.values(this._unsubs || {}).forEach((fn) => { try { fn(); } catch (e) {} });
+    // Drop a resize drag left mid-gesture so no window listener outlives us.
+    if (this._chatDragCleanup) { try { this._chatDragCleanup(); } catch (e) {} }
   }
 
   async componentDidMount() {
@@ -602,6 +607,64 @@ class Component extends DCLogic {
   // legacy infoRequest/infoResponse fields when a pre-2B.2 case has no
   // messages yet — read-only, nothing is written, so refreshing never
   // duplicates anything.
+  // C3.1 chat panel resize (ก.ย. 2569).
+  //
+  // Heights are plain instance methods, NOT `static` fields read via
+  // `Component.X` — this project's DC runtime does not expose the class under
+  // that binding at method-call time (that exact pattern silently broke the
+  // C0.5 lead status write), so it must never be used here.
+  //
+  // Default matches the accepted improved height (min(72vh, 560px)) and is
+  // only ever REPLACED by an explicit user drag; no persistence, so a refresh
+  // returns to default by design.
+  chatDefaultH() {
+    const vh = (window.innerHeight || 900) * 0.72;
+    return Math.round(Math.min(560, Math.max(this.chatMinH(), vh)));
+  }
+
+  chatMinH() { return 260; }
+
+  chatMaxH() {
+    return Math.round(Math.min(900, (window.innerHeight || 900) * 0.9));
+  }
+
+  // Drag the top edge: moving the pointer UP (negative dy) makes the panel
+  // TALLER, so the height delta is inverted. Height is committed to state on
+  // every pointermove, so the panel resizes live rather than on release.
+  startChatResize(e) {
+    if (e.button != null && e.button !== 0) return;
+    // Keep the gesture off the message list: no scroll, no text selection.
+    if (e.preventDefault) e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
+    const startY = e.clientY;
+    const startH = this.state.chatH || this.chatDefaultH();
+    const min = this.chatMinH();
+    const max = this.chatMaxH();
+    const prevSelect = document.body.style.userSelect;
+    const prevCursor = document.body.style.cursor;
+    document.body.style.userSelect = "none";
+    document.body.style.cursor = "ns-resize";
+    const move = (ev) => {
+      const y = ev.clientY != null ? ev.clientY
+        : (ev.touches && ev.touches[0] ? ev.touches[0].clientY : startY);
+      const next = Math.round(Math.min(max, Math.max(min, startH - (y - startY))));
+      if (next !== this.state.chatH) this.setState({ chatH: next });
+    };
+    const up = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+      document.body.style.userSelect = prevSelect;
+      document.body.style.cursor = prevCursor;
+      this._chatDragCleanup = null;
+    };
+    // Stored so componentWillUnmount can drop a drag left mid-gesture.
+    this._chatDragCleanup = up;
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
+  }
+
   async loadThread(p) {
     if (this.state.caseMsgs[p.id]) return;
     // Live thread, scoped to this one case. Staff sees customer replies without
@@ -1301,6 +1364,17 @@ class Component extends DCLogic {
           // Gated to owner_submission cases — lister listings have no customer
           // Case thread, so they must not mount a chat panel or a listener.
           threadOpen: this.state.openCaseId === p.id && p.source === "owner_submission",
+          // C3.1 chat resize: the OUTER panel height only. The inner message
+          // list keeps its own overflow-y:auto, so resizing and scrolling stay
+          // completely independent — the handle is a sibling of the scroll box,
+          // never inside it.
+          chatPanelStyle: {
+            background: "oklch(98% 0.005 85)", border: "1px solid oklch(91% 0.01 70)",
+            borderRadius: "9px", padding: "12px 13px", marginBottom: "11px",
+            display: "flex", flexDirection: "column",
+            height: (this.state.chatH || this.chatDefaultH()) + "px",
+          },
+          onChatResizeStart: (e) => this.startChatResize(e),
           hasUnread: !!(p.lastCustomerMessageAt && (!p.staffLastReadAt || p.lastCustomerMessageAt > p.staffLastReadAt)),
           custLangStatus: p.customerLanguageConfirmed === true ? "ภาษาลูกค้า" : "ภาษาที่คาดไว้",
           custLangLabel: ({ th: "ไทย", en: "English", zh: "中文", ru: "Русский", de: "Deutsch", no: "Norsk", fr: "Français", it: "Italiano" })[p.customerLanguage || "th"] || "ไทย",
