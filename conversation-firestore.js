@@ -70,6 +70,67 @@ export async function sendConversationTurn({ conversationId, system, messages, c
   return data;
 }
 
+// ── C4.1 Reception conversation (ก.ย. 2569) ─────────────────────────────
+//
+// Reception = the ordinary site-wide AI chat (NOT a share-link
+// conversation). It lives in the SAME `conversations` collection but is a
+// different KIND of document, distinguished additively:
+//     id      = "reception__<visitorUid>"   (deterministic)
+//     ownerId = "reception"
+//     kind    = "reception"
+// Agent-share docs keep id "<ownerId>__<visitorId>", a real ownerId and NO
+// `kind` field, so every legacy document and every existing query
+// (listenOwnerInbox is always scoped `where("ownerId","==",myUid)`) behaves
+// exactly as before — a Reception doc simply never matches them.
+//
+// Idempotency: because the id is derived from the visitor's Anonymous Auth
+// uid, a refresh (or ten refreshes) can only ever resolve to the SAME
+// document. There is no create-if-missing race and no way to end up with
+// two Reception docs for one visitor.
+//
+// Persistence threshold: NOTHING is written while the exchange is still a
+// general question. The server (receptionTurn) decides — it classifies and
+// replies in ONE model call and only writes once the visitor reaches
+// advisory/qualified (their own property, their own real search/sale).
+export function receptionConversationId(visitorId) {
+  return "reception__" + visitorId;
+}
+
+// The whole turn — Claude call AND both message writes — happens inside the
+// receptionTurn Callable (Admin SDK). The browser never writes a role:"ai"
+// message and never supplies the reply text it renders, so an AI message
+// cannot be spoofed client-side (firestore.rules also denies it outright).
+//
+// seedMessages is only consulted by the server on the turn that FIRST
+// crosses the threshold: a bounded slice (≤8) of the recent raw exchange,
+// never the full casual transcript.
+//
+// Returns { reply, meta, persisted, conversationId, stage }.
+// `persisted:false, conversationId:null` means the turn stayed general and
+// zero Firestore writes happened.
+export async function receptionTurn({ system, messages, customerText, seedMessages, propertyRefs, collectionIds }) {
+  await getVisitorId(); // callable requires an authenticated caller
+  const fn = functions().httpsCallable("receptionTurn");
+  const { data } = await fn({ system, messages, customerText, seedMessages, propertyRefs, collectionIds });
+  return data;
+}
+
+// Idempotent resume: returns the visitor's existing Reception conversation
+// or null. A single doc `get` by deterministic id — never a collection
+// query/scan. Returns null (rather than throwing) when the doc does not
+// exist OR is unreadable, so a first-time visitor and an offline visitor
+// both simply continue in local/lightweight mode.
+export async function findExistingReception() {
+  try {
+    const uid = await getVisitorId();
+    const snap = await db().collection("conversations").doc(receptionConversationId(uid)).get();
+    if (!snap.exists) return null;
+    return { id: snap.id, ...snap.data() };
+  } catch (e) {
+    return null;
+  }
+}
+
 // Direct client write — customer replying on the Human tab (talking to the
 // real sender/owner, not the AI). Firestore rules permit the authenticated
 // visitor to write role:"customer" directly (no AI call involved here).

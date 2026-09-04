@@ -488,6 +488,10 @@ class Component extends DCLogic {
         this._unsubOwnerInbox = fs.listenOwnerInbox(myOwnerId, (rows, err) => this._onOwnerInboxSnapshot(rows, err));
       }
       this._convBackend = "firestore";
+      // C4.1: if this visitor already crossed into a persisted Reception
+      // conversation on an earlier visit/refresh, pick that same document
+      // back up (deterministic id -> a refresh can never duplicate it).
+      if (!this.state.customerMode) await this._resumeReception();
     } catch (e) {
       console.warn("Firestore conversation backend unavailable — falling back to local (same-device only):", e);
       this._convBackend = "local";
@@ -495,6 +499,90 @@ class Component extends DCLogic {
       this._unsubConv = this._convStore.subscribe(() => this._onConversationsChangedLocal());
       this._onConversationsChangedLocal();
     }
+  }
+
+  // ── C4.1 Reception persistence ─────────────────────────────
+
+  async _resumeReception() {
+    try {
+      const existing = await this._convFS.findExistingReception();
+      if (existing) {
+        this._receptionConversationId = existing.id;
+        this._receptionStage = existing.conversationStage || "advisory";
+      }
+    } catch (e) { /* no persisted Reception yet — stay local */ }
+  }
+
+  // ONE customer turn must produce AT MOST ONE customer-facing AI
+  // generation. So the fallback to the old local chat path is allowed ONLY
+  // for errors that prove the server never generated anything:
+  //   functions/not-found   -> receptionTurn is not deployed (design preview)
+  //   unavailable           -> the call never reached the server
+  //   unauthenticated       -> rejected before the Claude call
+  //   invalid-argument      -> rejected before the Claude call
+  //   permission-denied     -> rejected before the Claude call
+  // Every other code (internal / deadline-exceeded / unknown / cancelled /
+  // aborted / resource-exhausted) is AMBIGUOUS: the server may have already
+  // called Claude and written the turn, and the rejection may just be the
+  // response being lost on the way back. In that case we must NOT generate
+  // a second answer — we show an error and let the visitor retry.
+  _receptionFallbackSafe(e) {
+    const code = String((e && e.code) || "").replace(/^functions\//, "");
+    return code === "not-found" || code === "unavailable" || code === "unauthenticated" ||
+           code === "invalid-argument" || code === "permission-denied" ||
+           // No Firebase error code at all = the callable was never invoked
+           // (module/SDK/init failure inside this method).
+           !(e && e.code);
+  }
+
+  // Returns true when this turn is finished (either answered server-side or
+  // ended with an error bubble). Returns false ONLY when it is provably
+  // safe for sendChat to fall through to the old local chat path.
+  async _sendReceptionTurn(text, lang, history) {
+    let called = false;
+    let data = null;
+    try {
+      const system = this._buildSystemPrompt(lang, text);
+      const messages = history.map((m) => ({ role: m.role, content: m.text }));
+      // Seed is only used by the server on the turn that first crosses the
+      // persistence threshold: the last <=8 raw messages BEFORE this one
+      // (the server writes this turn's pair itself). Never the whole
+      // casual transcript — raw messages stay the evidentiary record, the
+      // server's requirementsSummary is context only.
+      const seedMessages = this._receptionConversationId
+        ? []
+        : history.slice(0, -1).slice(-8).map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", text: m.text }));
+      called = true;
+      data = await this._convFS.receptionTurn({ system, messages, customerText: text, seedMessages });
+    } catch (e) {
+      if (!called || this._receptionFallbackSafe(e)) {
+        console.warn("receptionTurn not executed — falling back to local chat:", e);
+        return false;
+      }
+      console.warn("receptionTurn outcome unknown — NOT generating a second reply:", e);
+      const t = CHAT_I18N[lang] || CHAT_I18N.en;
+      const errMsg = { role: "assistant", text: "Sorry, something went wrong. Please try again or contact us directly.", links: [{ label: t.chat_contact_us || "Contact us", noThumb: true, onClick: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }) }], bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:7px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" };
+      this.setState({ chatMessages: [...history, errMsg], chatLoading: false });
+      return true;
+    }
+    // Past this point the server HAS produced this turn's answer, so we
+    // never fall through to a second generation — a rendering failure here
+    // can only ever cost us the bubble, never cause a duplicate AI call.
+    const reply = (data && data.reply) || "";
+    if (!reply) return false; // server responded with no text at all: safe to retry locally
+    try {
+      if (data.persisted && data.conversationId) {
+        this._receptionConversationId = data.conversationId;
+        this._receptionStage = data.stage || "advisory";
+      }
+      const aiMsg = { role: "assistant", text: reply, links: this._extractLinks(reply, this._detectLang(text)), bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:7px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
+      this.setState({ chatMessages: [...history, aiMsg], chatLoading: false });
+      this._persistHistory([...history, aiMsg]);
+    } catch (e) {
+      console.warn("receptionTurn reply received but rendering failed:", e);
+      this.setState({ chatLoading: false });
+    }
+    return true;
   }
 
   // ── Firestore realtime callbacks ────────────────────────────────────
@@ -968,6 +1056,15 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       }
       this._scrollChat();
       return;
+    }
+    // C4.1: the ordinary site chat. General questions stay local and
+    // lightweight; the SERVER decides when the exchange has become
+    // commercially meaningful (advisory/qualified — BUY and RENT count
+    // just as much as SELL and RENT_OUT) and only then persists a
+    // Reception conversation, resuming the same one on every later turn.
+    if (!this.state.customerMode && this._convBackend === "firestore" && this._convFS) {
+      const handled = await this._sendReceptionTurn(text, lang, history);
+      if (handled) { this._scrollChat(); return; }
     }
     try {
       const system = this._buildSystemPrompt(lang, text);
