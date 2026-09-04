@@ -1302,6 +1302,77 @@ export async function fetchTeam() {
   return { members, invites };
 }
 
+// ── C2: Case assignment (ก.ย. 2569) ─────────────────────────────────────
+// ONE place that changes who is responsible for a Case — and NOTHING else.
+//
+// Assignment is deliberately decoupled from review/workflow state: before C2,
+// claiming a case also forced reviewStatus → "reviewing", so "I am responsible
+// for this" and "review has started" were the same event and could not be
+// expressed separately. This function writes assignment fields ONLY. Callers
+// that genuinely mean a review transition still call setReview separately.
+//
+// Two distinct identities are recorded, and they must never be conflated:
+//   assignedTo*  — WHO IS RESPONSIBLE for the case from now on
+//   assignedBy*  — WHO PERFORMED this assignment (self-claim vs Owner
+//                  reassigning someone else); resolved from currentActor(),
+//                  the same C1 actor source used for message authorship
+//
+// Passing target = null unassigns (releases) the case.
+// Returns { previous, next } so the caller can log/display the transition.
+export async function assignCase(propertyId, target) {
+  if (!propertyId) throw new Error("assignCase: propertyId required");
+  const actor = await currentActor();
+  const snap = await db().collection("properties").doc(String(propertyId)).get();
+  const cur = snap.exists ? (snap.data() || {}) : {};
+  const previous = { uid: cur.assignedToUid || "", email: cur.assignedToEmail || "" };
+  const next = {
+    uid: (target && target.uid) || "",
+    email: ((target && target.email) || "").trim().toLowerCase(),
+  };
+  const fields = {
+    assignedToUid: next.uid,
+    assignedToEmail: next.email,
+    assignedAt: next.email || next.uid ? Date.now() : null,
+    // WHO DID THE ASSIGNING — not who is responsible.
+    assignedByUid: actor.senderId || "",
+    assignedByEmail: actor.senderEmail || "",
+    assignedByRole: actor.senderRole || "",
+  };
+  // merge:true — reviewStatus and every workflow field are untouched by design.
+  await setDoc("properties", String(propertyId), fields);
+  // Immutable internal record. Structured fields, not just summary text, so an
+  // assignment history can be reconstructed without parsing Thai prose.
+  await logActivity({
+    type: "submission_assign",
+    propertyId: String(propertyId), caseId: String(propertyId),
+    previousAssigneeUid: previous.uid, previousAssigneeEmail: previous.email,
+    newAssigneeUid: next.uid, newAssigneeEmail: next.email,
+    selfClaim: !!next.email && next.email === (actor.senderEmail || "").trim().toLowerCase(),
+    summary: next.email
+      ? (previous.email
+          ? `มอบหมายเคส ${propertyId} จาก ${previous.email} → ${next.email}`
+          : `รับงานเคส ${propertyId} (${next.email})`)
+      : `คืนเคส ${propertyId} เข้าคิวรอมอบหมาย`,
+  });
+  return { previous, next, fields };
+}
+
+// Authorized internal team members who may hold a Case. Owner-inclusive: an
+// Owner can legitimately be the responsible party. Derived from the existing
+// adminUsers collection — no new staff-management surface.
+export async function fetchAssignableStaff() {
+  const members = await fetchCollection("adminUsers");
+  return (members || [])
+    .filter((m) => m && m.email)
+    .map((m) => ({
+      uid: m.id || "",
+      email: String(m.email).trim().toLowerCase(),
+      role: m.role || "staff",
+      name: m.name || m.displayName || String(m.email).split("@")[0],
+    }))
+    .sort((a, b) => a.email.localeCompare(b.email));
+}
+
 export async function inviteStaff(email) {
   const key = email.trim().toLowerCase();
   await setDoc("staffInvites", key, { email: key, role: "staff", invitedAt: Date.now() });

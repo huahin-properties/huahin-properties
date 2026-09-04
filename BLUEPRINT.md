@@ -212,6 +212,57 @@ Case มอบหมายให้ Staff A แต่ Owner ตอบ → ลู
 **Rules**: ไม่แก้ · **ไม่ต้อง publish ใหม่**
 
 ---
+### 26.11 C2 Implementation Record — Assignment / Workflow / Review Decoupling (4 ก.ย. 2569)
+
+**ปัญหา**: `claimCase()` เดิมเขียน `reviewStatus: "reviewing"` พร้อมฟิลด์ assignment ในคลิกเดียว → "ฉันรับผิดชอบเคสนี้" กับ "เริ่มตรวจแล้ว" เป็นเหตุการณ์เดียวกัน แยกกันไม่ได้
+
+**สิ่งที่แก้**: `claimCase()` เขียน **assignment เท่านั้น** — ไม่แตะ `reviewStatus` อีก · การเปลี่ยน review/workflow ต้องเป็นการกดที่ชัดเจนเท่านั้น (กำลังตรวจ / ขอข้อมูล / ข้อมูลครบ)
+
+**Assignment schema** (property doc, additive):
+
+| ฟิลด์ | ความหมาย |
+|---|---|
+| `assignedToUid` / `assignedToEmail` / `assignedAt` | **ใครรับผิดชอบ** (เดิม) |
+| `assignedByUid` / `assignedByEmail` / `assignedByRole` | **ใครเป็นคนมอบหมาย** (ใหม่ — self-claim vs Owner มอบหมาย) |
+
+`assignedTo` ≠ actor · actor มาจาก `currentActor()` (C1) ตัวเดียวกับ message authorship
+
+**`assignCase(propertyId, target)`** ใน `firebase-client.js` = ทางเดียวที่เปลี่ยนผู้รับผิดชอบ · `target = null` = คืนเคสเข้าคิว · เขียน `activityLog` type `submission_assign` พร้อม `previousAssignee*` / `newAssignee*` / `caseId` / `selfClaim` + actor fields จาก C1 (ไม่พึ่ง summary text)
+
+**Owner/Admin override**: Owner มอบหมาย/เปลี่ยนผู้รับผิดชอบได้อย่างชัดเจน (ปุ่ม 👥 มอบหมาย) แต่การ **เปิดอ่าน / ตอบลูกค้า / แก้ข้อมูล / ช่วยงาน ไม่เปลี่ยน assignment** — Case ของ Staff A ที่ Owner ตอบ → assignedTo ยังเป็น Staff A, actor = Owner
+
+**Staff Workspace: ไม่แก้ไข** (ตามคำสั่ง PO) — semantic แยกจริง: เคสที่ `assignedToEmail = Staff A` + `reviewStatus = "submitted"` → NEW=false · MY WORK=true · REVIEWING=false ถูกต้องตามเจตนา **ห้าม**ปั้น review state จาก assignment
+
+⚠️ **Label ที่กำกวมหลังแยก (รายงานไว้ ยังไม่แก้)**: `nextSteps.submitted = "รับงาน"` ใน Staff Workspace — เคสที่รับงานแล้วแต่ยังไม่เริ่มตรวจจะยังขึ้นว่า "รับงาน" ทั้งที่มีผู้รับผิดชอบแล้ว ควรเป็น "เริ่มตรวจข้อมูล" — รอ PO อนุมัติก่อนแก้ UI
+
+**Backward compatibility**: ไม่ migrate · เคสเก่า (`assigned` + `reviewing`) ยังใช้ได้ · เคสใหม่ (`assigned` + `submitted`) ก็ใช้ได้ · ทุก reader รองรับทั้งสองแบบ (`reviewStatus || "submitted"` fallback เดิม)
+
+**Rules**: ไม่แก้ — `firestore.rules` ไม่อ้างถึงฟิลด์ assignment เลย (assignment เป็น operational convention ไม่ใช่ security boundary) · **ไม่ต้อง publish ใหม่**
+
+**`intake-workflow.js`: ไม่แก้** — requirement `assigned` อ่าน `assignedToEmail` อยู่แล้ว ซึ่งถูกต้องหลังแยก
+
+---
+
+#### 26.12 บันทึกข้อเท็จจริงเรื่อง Role Model (ตรวจจริง 4 ก.ย. 2569)
+
+**โปรเจกต์นี้มี operational role จริงเพียง 2 บทบาท: `owner` และ `staff`**
+
+`"admin"` **ไม่ใช่บทบาทที่มีอยู่จริง** — เป็นเพียง label สำหรับแสดงผลใน `actorRoleLabel()` ที่ไม่มีทางถูกกำหนดให้ใครได้ หลักฐาน:
+
+- `inviteStaff()` เขียน `role: "staff"` เท่านั้น
+- `completeStaffSignup()` เขียน `role: "staff"` เท่านั้น
+- `firestore.rules` (staffInvites) **บังคับ** `request.resource.data.role == "staff"`
+- `isOwner()` ตรวจ `role == "owner"` · `isStaffOnly() = isAdmin() && !isOwner()`
+- **ไม่มี code path ใดเลย**ที่เขียน `role: "admin"`
+
+ดังนั้นคำว่า "Owner/Admin" ในเอกสารเฟส C1/C2 หมายถึง **Owner** ในทางปฏิบัติ
+
+**การรองรับอนาคต**: C2 ใช้ capability `canAssignCase: ["owner", "admin"]` ใน `_can()` ไม่ใช่การเช็ค role ตรง ๆ — ถ้าวันหนึ่งมี operational admin role จริง จะได้สิทธิ์นี้ทันทีโดยไม่ต้องแก้โค้ด · ปัจจุบันให้สิทธิ์ Owner เท่านั้น · ordinary staff รับงานเคสที่ยังไม่มีผู้รับผิดชอบเองได้ (self-claim) แต่ไม่ได้สิทธิ์มอบหมาย
+
+**Label ที่แก้ (C2 correction)**: Staff Workspace `nextStepLabel` — เคส `reviewStatus = "submitted"` **ที่มีผู้รับผิดชอบแล้ว** แสดง "เริ่มตรวจข้อมูล" แทน "รับงาน" (เดิมกำกวมหลังแยก assignment/review) · **แก้เฉพาะข้อความแสดงผล** bucket logic ไม่แตะ
+
+---
+
 ## 25.2 Workspace Economy — WEM v1 (22 ก.ค. 2569, Architecture Approved for Prototype Refinement, builds on WEA v1.1)
 
 **Resource Philosophy**: Members do not buy raw storage, AI tokens, or infrastructure. They purchase a managed Workspace service that includes platform operation, development, support, security, and continued improvement. Every upgrade should feel like expanding a digital office, not paying to remove a limitation.

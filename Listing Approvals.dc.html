@@ -364,6 +364,18 @@
                 <sc-if value="{{ r.waitingClaim }}" hint-placeholder-val="{{ false }}">
                   <div style="background:oklch(96% 0.05 85); border:1px solid oklch(88% 0.09 85); border-radius:6px; padding:7px 12px; font-size:11.5px; color:oklch(42% 0.12 75); margin-bottom:8px;">⏱ ยังไม่มีผู้ช่วยรับงานนี้</div>
                 </sc-if>
+                <sc-if value="{{ r.assignOpen }}" hint-placeholder-val="{{ false }}">
+                  <div style="background:oklch(97% 0.012 250); border:1px solid oklch(88% 0.03 250); border-radius:8px; padding:11px 13px; margin-bottom:10px;">
+                    <div style="font-size:11.5px; color:oklch(45% 0.05 250); margin-bottom:7px;">มอบหมายเคสนี้ให้ทีมงาน — การเปิดอ่านหรือตอบลูกค้าไม่เปลี่ยนผู้รับผิดชอบ เฉพาะการเลือกที่นี่เท่านั้น</div>
+                    <select value="{{ r.assignValue }}" onChange="{{ r.onAssignPick }}" style="width:100%; padding:7px 9px; border:1px solid oklch(85% 0.02 250); border-radius:6px; font-size:12.5px; background:white; margin-bottom:7px;">
+                      <option value="">— ยังไม่มีผู้รับผิดชอบ —</option>
+                      <sc-for list="{{ r.assignOptions }}" as="o" hint-placeholder-count="2">
+                        <option value="{{ o.value }}">{{ o.label }}</option>
+                      </sc-for>
+                    </select>
+                    <div onClick="{{ r.onRelease }}" style="display:inline-block; font-size:11.5px; color:oklch(45% 0.13 25); cursor:pointer;">คืนเคสเข้าคิวรอมอบหมาย</div>
+                  </div>
+                </sc-if>
                 <div onClick="{{ r.onToggleCase }}" style="display:inline-block; font-size:12px; color:oklch(40% 0.13 25); font-weight:600; cursor:pointer; margin-bottom:8px;">{{ r.caseToggleLabel }}</div>
                 <sc-if value="{{ r.caseOpen }}" hint-placeholder-val="{{ false }}">
                   <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:8px; padding:12px 14px; margin-bottom:10px;">
@@ -385,6 +397,9 @@
                 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
                   <sc-if value="{{ r.showClaim }}" hint-placeholder-val="{{ false }}">
                     <div onClick="{{ r.onClaim }}" style="background:oklch(35% 0.1 250); color:white; padding:6px 14px; border-radius:6px; font-size:12px; cursor:pointer;">✋ รับงาน</div>
+                  </sc-if>
+                  <sc-if value="{{ r.showAssign }}" hint-placeholder-val="{{ false }}">
+                    <div onClick="{{ r.onToggleAssign }}" style="background:white; border:1px solid oklch(80% 0.02 250); color:oklch(38% 0.08 250); padding:6px 14px; border-radius:6px; font-size:12px; cursor:pointer;">👥 มอบหมาย / เปลี่ยนผู้รับผิดชอบ</div>
                   </sc-if>
                   <sc-if value="{{ r.showReviewing }}" hint-placeholder-val="{{ false }}">
                     <div onClick="{{ r.onReviewing }}" style="background:white; border:1px solid oklch(85% 0.02 70); color:oklch(35% 0.02 60); padding:6px 14px; border-radius:6px; font-size:12px; cursor:pointer;">🔍 กำลังตรวจ</div>
@@ -458,7 +473,7 @@ class Component extends DCLogic {
     el.scrollTop = el.scrollHeight;
   }
 
-  state = { noteOpen: "", noteCopied: "", wfOpen: {}, wfBusy: "", submissions: {}, reviewNote: {}, reviewStepKey: {}, reviewErr: {}, preview: {}, previewBusy: "", previewErr: {}, newIncoming: {}, copiedFor: "", caseMsgs: {}, replyDraft: {}, replyBusy: "", aiBusy: "", suggests: {}, suggestKey: {}, suggestBusy: "", caseErr: {}, infoReqFor: null, infoReqText: "", infoReqBusy: false, lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "" };
+  state = { noteOpen: "", noteCopied: "", wfOpen: {}, wfBusy: "", submissions: {}, reviewNote: {}, reviewStepKey: {}, reviewErr: {}, preview: {}, previewBusy: "", previewErr: {}, newIncoming: {}, copiedFor: "", caseMsgs: {}, replyDraft: {}, replyBusy: "", aiBusy: "", suggests: {}, suggestKey: {}, suggestBusy: "", caseErr: {}, infoReqFor: null, infoReqText: "", infoReqBusy: false, lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "", assignable: [], assignOpen: "" };
 
   componentWillUnmount() {
     Object.values(this._unsubs || {}).forEach((fn) => { try { fn(); } catch (e) {} });
@@ -472,6 +487,9 @@ class Component extends DCLogic {
     await fb.onAdminAuthReady();
     if (!fb.requireAdminAuth()) return;
     try { const role = await fb.fetchAdminRole(); if (role) this.setState({ adminRole: role }); } catch (e) {}
+    // C2: authorized team members who may hold a Case (Owner assign/reassign
+    // selector). Non-fatal — a failed read just leaves the selector empty.
+    try { const st = await fb.fetchAssignableStaff(); this.setState({ assignable: st }); } catch (e) { console.warn("fetchAssignableStaff failed:", e); }
     try {
       const [allPhotos, activityAll, properties, listers, suspects, reports] = await Promise.all([
         fb.fetchAllPhotos().catch(() => []),
@@ -818,6 +836,13 @@ class Component extends DCLogic {
       // canApproveIntake also implies canReviewIntake.
       canReviewIntake: ["owner"],
       canApproveIntake: ["owner"],
+      // C2: explicit assign / reassign of a Case to an authorized team member.
+      // "admin" is listed so that IF a real operational admin role is ever
+      // introduced it inherits this capability with no code change — today
+      // adminUsers only ever holds "owner" or "staff" (see BLUEPRINT §26.12),
+      // so in practice this grants Owner only. Ordinary staff self-claim
+      // unassigned cases instead and never gain this control.
+      canAssignCase: ["owner", "admin"],
     };
     return (GRANTS[capability] || []).indexOf(role) !== -1;
   }
@@ -1074,14 +1099,48 @@ class Component extends DCLogic {
     }
   }
 
+  // C2 (ก.ย. 2569): claim now writes ASSIGNMENT ONLY.
+  //
+  // Before C2 this called setReview(p, "reviewing", {assignedTo…}), so one
+  // click changed both "who is responsible" and "what stage the case is in".
+  // Receiving responsibility is NOT the same as starting review — a Case may
+  // legitimately be assigned to Staff A while reviewStatus is still
+  // "submitted". Review transitions are now only ever explicit (กำลังตรวจ /
+  // ขอข้อมูล / ข้อมูลครบ).
   async claimCase(p) {
     const a = this._fb.currentAdminUser && this._fb.currentAdminUser();
-    const email = (a && a.email) || "";
-    const uid = (a && a.uid) || "";
-    await this.setReview(p, "reviewing", { assignedToUid: uid, assignedToEmail: email, assignedAt: Date.now() });
+    this.setState({ wfBusy: p.id, actionError: "" });
     try {
-      await this._fb.logActivity({ type: "submission_claim", propertyId: p.id, summary: `รับงานทรัพย์ฝากขาย ${p.id}` });
-    } catch (e) {}
+      const res = await this._fb.assignCase(p.id, { uid: (a && a.uid) || "", email: (a && a.email) || "" });
+      this.setState((st) => ({
+        wfBusy: "",
+        properties: st.properties.map((x) => (x.id === p.id ? { ...x, ...res.fields } : x)),
+      }));
+    } catch (e) {
+      console.warn("claimCase failed:", e);
+      this.setState({ wfBusy: "", actionError: "รับงานไม่สำเร็จ: " + (e.message || e) });
+    }
+  }
+
+  // C2: explicit Owner/Admin assign / reassign / release. This is the ONLY
+  // way assignment changes other than a Staff self-claim — opening, messaging,
+  // editing or helping on a Case never touches it (Owner/Admin override
+  // principle: actor ≠ assignee).
+  async reassignCase(p, email) {
+    const list = this.state.assignable || [];
+    const pick = list.find((m) => m.email === email) || null;
+    this.setState({ wfBusy: p.id, actionError: "" });
+    try {
+      const res = await this._fb.assignCase(p.id, pick ? { uid: pick.uid, email: pick.email } : null);
+      this.setState((st) => ({
+        wfBusy: "",
+        assignOpen: "",
+        properties: st.properties.map((x) => (x.id === p.id ? { ...x, ...res.fields } : x)),
+      }));
+    } catch (e) {
+      console.warn("reassignCase failed:", e);
+      this.setState({ wfBusy: "", actionError: "มอบหมายไม่สำเรจ: " + (e.message || e) });
+    }
   }
 
   async approve(id) {
@@ -1175,6 +1234,17 @@ class Component extends DCLogic {
           // to take cases themselves (STEP 2A.1 role separation).
           showClaim: p.source === "owner_submission" && !p.assignedToEmail && this.state.adminRole !== "owner",
           waitingClaim: p.source === "owner_submission" && !p.assignedToEmail && this.state.adminRole === "owner",
+          // C2: assign/reassign is a CAPABILITY, not a hard-coded role test.
+          showAssign: p.source === "owner_submission" && this._can("canAssignCase"),
+          assignOpen: this.state.assignOpen === p.id,
+          onToggleAssign: () => this.setState((st) => ({ assignOpen: st.assignOpen === p.id ? "" : p.id })),
+          assignValue: p.assignedToEmail || "",
+          assignOptions: (this.state.assignable || []).map((m) => ({
+            key: m.email, value: m.email,
+            label: m.name + " (" + (m.role === "owner" ? "เจ้าของกิจการ" : "ทีมงาน") + ")",
+          })),
+          onAssignPick: (e) => this.reassignCase(p, e.target.value),
+          onRelease: () => this.reassignCase(p, ""),
           lastUpdateLabel: (() => {
             const t = p.reviewStatusAt || p.assignedAt || p.submittedAt;
             if (!t) return "—";

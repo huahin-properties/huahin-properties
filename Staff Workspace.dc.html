@@ -242,7 +242,12 @@ class Component extends DCLogic {
           priceLabel: "฿" + (Number(p.price) || 0).toLocaleString(),
           typeLabel: typeLabels[p.type] || p.type || "—",
           updatedLabel: fmtTime(p.reviewStatusAt || p.assignedAt || p.submittedAt),
-          nextStepLabel: nextSteps[rs] || "—",
+          // C2: after assignment/review decoupling a case can be assigned and
+          // still be reviewStatus "submitted", so the old flat "รับงาน" label was
+          // misleading once someone had already taken it. Display only — the
+          // bucket logic below is untouched and review state is NEVER inferred
+          // from assignment.
+          nextStepLabel: (rs === "submitted" && p.assignedToEmail) ? "เริ่มตรวจข้อมูล" : (nextSteps[rs] || "—"),
           assignedLabel: p.assignedToEmail ? "ผู้รับผิดชอบ: " + p.assignedToEmail : "ยังไม่มีผู้รับผิดชอบ",
           hasUnread: !!(p.lastCustomerMessageAt && (!p.staffLastReadAt || p.lastCustomerMessageAt > p.staffLastReadAt)),
           coverStyle: u
