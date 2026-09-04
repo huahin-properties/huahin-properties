@@ -38,6 +38,9 @@
   </div>
 
   <div style="max-width:1000px; margin:0 auto; padding:clamp(20px,4vw,40px);">
+    <sc-if value="{{ fromWorkspace }}" hint-placeholder-val="{{ false }}">
+      <a href="Staff Workspace.dc.html" style="display:inline-block; margin-bottom:14px; font-size:12.5px; color:oklch(40% 0.13 25); text-decoration:none;">← กลับหน้างานของฉัน</a>
+    </sc-if>
     <sc-if value="{{ infoReqOpen }}" hint-placeholder-val="{{ false }}">
       <div style="position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:210; display:flex; align-items:center; justify-content:center; padding:18px;">
         <div style="background:white; border-radius:12px; padding:22px; max-width:520px; width:100%; max-height:88vh; overflow:auto;">
@@ -473,7 +476,7 @@ class Component extends DCLogic {
     el.scrollTop = el.scrollHeight;
   }
 
-  state = { noteOpen: "", noteCopied: "", wfOpen: {}, wfBusy: "", submissions: {}, reviewNote: {}, reviewStepKey: {}, reviewErr: {}, preview: {}, previewBusy: "", previewErr: {}, newIncoming: {}, copiedFor: "", caseMsgs: {}, replyDraft: {}, replyBusy: "", aiBusy: "", suggests: {}, suggestKey: {}, suggestBusy: "", caseErr: {}, infoReqFor: null, infoReqText: "", infoReqBusy: false, lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "", assignable: [], assignOpen: "" };
+  state = { noteOpen: "", noteCopied: "", wfOpen: {}, wfBusy: "", submissions: {}, reviewNote: {}, reviewStepKey: {}, reviewErr: {}, preview: {}, previewBusy: "", previewErr: {}, newIncoming: {}, copiedFor: "", caseMsgs: {}, replyDraft: {}, replyBusy: "", aiBusy: "", suggests: {}, suggestKey: {}, suggestBusy: "", caseErr: {}, infoReqFor: null, infoReqText: "", infoReqBusy: false, lightboxUrls: [], lightboxIndex: 0, wfBusy: "", actByProp: {}, openCaseId: "", properties: [], photosByProp: {}, listersById: {}, suspects: [], reports: [], filter: "all", loaded: false, adminRole: null, actionError: "", assignable: [], assignOpen: "", fromWorkspace: false };
 
   componentWillUnmount() {
     Object.values(this._unsubs || {}).forEach((fn) => { try { fn(); } catch (e) {} });
@@ -875,6 +878,9 @@ class Component extends DCLogic {
     const id = q.get("case");
     if (!id || q.get("open") !== "conversation") return;
     this._restored = true;
+    // C3.1: return context. A flag only — never a stored free-form return URL,
+    // so this cannot become an open-redirect and carries no token.
+    if (q.get("from") === "workspace") this.setState({ fromWorkspace: true });
     // Deferred: the case cards must exist before one can be scrolled to.
     setTimeout(async () => {
       const p = (this.state.properties || []).find((x) => x.id === id);
@@ -1520,7 +1526,9 @@ class Component extends DCLogic {
       onLightboxPrev: (e) => { e.stopPropagation(); this.setState((st) => ({ lightboxIndex: (st.lightboxIndex - 1 + st.lightboxUrls.length) % st.lightboxUrls.length })); },
       onLightboxNext: (e) => { e.stopPropagation(); this.setState((st) => ({ lightboxIndex: (st.lightboxIndex + 1) % st.lightboxUrls.length })); },
       onLightboxStop: (e) => e.stopPropagation(),
-      actionError: this.state.actionError, hasActionError: !!this.state.actionError,
+      actionError: this.state.actionError,
+      // C3.1 back link, shown only when arriving from Staff Workspace.
+      fromWorkspace: !!this.state.fromWorkspace, hasActionError: !!this.state.actionError,
       tabAllStyle: this.state.filter === "all" ? tabActive : tabInactive,
       tabPendingStyle: this.state.filter === "pending" ? tabActive : tabInactive,
       tabOwnerSubStyle: this.state.filter === "owner_submission" ? tabActive : tabInactive,

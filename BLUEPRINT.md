@@ -239,6 +239,8 @@ Case มอบหมายให้ Staff A แต่ Owner ตอบ → ลู
 
 **Rules**: ไม่แก้ — `firestore.rules` ไม่อ้างถึงฟิลด์ assignment เลย (assignment เป็น operational convention ไม่ใช่ security boundary) · **ไม่ต้อง publish ใหม่**
 
+**✅ C2 = COMPLETE / PRODUCTION PASS (4 ก.ย. 2569)** — ทดสอบบนไซต์จริง: Staff รับงานได้ · Owner เข้าเคสเดียวกันตอบลูกค้าได้โดย assigned staff ยังเป็น madampim7@gmail.com · Owner คืนเคสเข้าคิวได้ → assignment หายแต่ `reviewStatus = reviewing` **คงเดิม** · Staff รับงานซ้ำได้ → assignment กลับมา, review state ยัง "กำลังตรวจ" · claim ไม่เขียนทับ reviewStatus · assignment กับ workflow/review **แยกกันจริงใน production**
+
 **`intake-workflow.js`: ไม่แก้** — requirement `assigned` อ่าน `assignedToEmail` อยู่แล้ว ซึ่งถูกต้องหลังแยก
 
 ---
@@ -260,6 +262,38 @@ Case มอบหมายให้ Staff A แต่ Owner ตอบ → ลู
 **การรองรับอนาคต**: C2 ใช้ capability `canAssignCase: ["owner", "admin"]` ใน `_can()` ไม่ใช่การเช็ค role ตรง ๆ — ถ้าวันหนึ่งมี operational admin role จริง จะได้สิทธิ์นี้ทันทีโดยไม่ต้องแก้โค้ด · ปัจจุบันให้สิทธิ์ Owner เท่านั้น · ordinary staff รับงานเคสที่ยังไม่มีผู้รับผิดชอบเองได้ (self-claim) แต่ไม่ได้สิทธิ์มอบหมาย
 
 **Label ที่แก้ (C2 correction)**: Staff Workspace `nextStepLabel` — เคส `reviewStatus = "submitted"` **ที่มีผู้รับผิดชอบแล้ว** แสดง "เริ่มตรวจข้อมูล" แทน "รับงาน" (เดิมกำกวมหลังแยก assignment/review) · **แก้เฉพาะข้อความแสดงผล** bucket logic ไม่แตะ
+
+---
+
+### 26.13 C3.1 Implementation Record — Staff Workspace → Canonical Case Navigation (4 ก.ย. 2569)
+
+**สถาปัตยกรรมที่ยืนยัน**: Staff Workspace **ไม่ต้องมี** Case system หรือ Messenger ชุดที่สอง — deep-link receiver `_restoreCase()` ใน Listing Approvals **มีอยู่แล้ว** (สร้างไว้ตอนทำ Lister Dashboard) และ production-proven จึงนำมาใช้ซ้ำ
+
+**ปัญหาเดิม**: ปุ่ม "เปิดงาน" และแบนเนอร์ 🔔 ใน Staff Workspace เป็น `<a href="Listing Approvals.dc.html">` เปล่า ๆ ไม่มี case id เลย → Staff ตกลงไปที่หัวรายการแล้วต้องไล่หาเคสเอง
+
+**Link format ที่ใช้**:
+
+```
+Listing Approvals.dc.html?case=<INTERNAL_PROPERTY_ID>&open=conversation&from=workspace
+```
+
+ส่งเฉพาะ **canonical internal property id** เท่านั้น — ไม่ส่ง `trackToken` / customer token / free-form return URL / public property code เป็น identity · `open=conversation` คือสิ่งที่ receiver เดิมมองหา · `from=workspace` แค่บอกให้แสดงลิงก์ย้อนกลับ
+
+**Unread banner**: เดิมเปิดรายการรวม → ตอนนี้ deep-link เข้าเคส unread ที่ **รอนานที่สุด (oldest-first)** โดยตรง · unread ยัง derive จาก case doc (`lastCustomerMessageAt` vs `staffLastReadAt`) ไม่เก็บ per-device เหมือนเดิม
+
+**Return context**: `from=workspace` → Listing Approvals แสดง "← กลับหน้างานของฉัน" กลับไป `Staff Workspace.dc.html` · เก็บเป็น **flag เท่านั้น** ไม่เก็บ return URL แบบอิสระ (กัน open-redirect) ไม่มี token
+
+**One Property Case = One Conversation**: ทุก view อ่าน/เขียน `properties/{internalPropertyId}` และ `properties/{internalPropertyId}/caseMessages` ชุดเดียวกัน · **ไม่มี** collection ที่สอง / Case object ที่สอง / workflow ซ้ำ / message listener ที่สอง (`watchCaseMessages` ยังมีจุดเรียกเดียว)
+
+**บทบาทของแต่ละหน้า (ล็อก)**: **Staff Workspace = primary Staff operational entry surface** (จุดเริ่มงานหลักของทีมงาน) · **Listing Approvals = Case/review operational surface เดิม** (รวม Owner approval) · **Track Submission = customer Case view**
+
+**C1/C2 safety**: Staff Workspace **ไม่มีคำสั่งเขียนข้อมูลเลย** (ตรวจแล้ว: ไม่มี setDoc/updateDocFields/assignCase/logActivity) · `_restoreCase()` เขียนเพียง `markCaseRead` เท่านั้น ไม่แตะ assignment หรือ reviewStatus → การเปิด/อ่าน/ตอบ **ไม่เปลี่ยนผู้รับผิดชอบและไม่เปลี่ยนสถานะตรวจ** โดยโครงสร้าง
+
+**ไม่แก้**: `firebase-client.js` · `firestore.rules` · `Leads.dc.html` · `Track Submission.dc.html` · `Owner Submission.dc.html` · `intake-workflow.js` · `functions/index.js`
+
+**Rules**: ไม่แก้ · **ไม่ต้อง publish ใหม่**
+
+**C3.2 (workflow progress enrichment): เลื่อนไว้** รอ C3.1 ผ่าน production ก่อน
 
 ---
 
