@@ -202,6 +202,204 @@ async function callClaudeMessages(system, messages, apiKey) {
   return (data.content || []).map((b) => b.text || "").join("");
 }
 
+// ── C4.1 Reception AI persistence (ก.ย. 2569) ──────────────────────
+//
+// Stages/intents are plain strings, never a rules-level enum, so new intent
+// types can be added later without a schema or rules change (BLUEPRINT 26.14.2).
+const RECEPTION_STAGES = ["general", "advisory", "qualified"];
+const RECEPTION_INTENTS = [
+  "SELL", "RENT_OUT", "BUY", "RENT", "VALUATION", "MARKET_ADVICE",
+  "PROPERTY_ADVICE", "LEGAL_GENERAL", "PROPERTY_SEARCH",
+  "SPECIFIC_PROPERTY_INTEREST", "OTHER",
+];
+
+// ONE model call returns the customer reply AND the classification. Forcing
+// tool_choice makes Anthropic validate the shape server-side, so the reply
+// text travels as a FIELD of the tool input rather than as prose - that is
+// what lets a single call do both jobs (no second summariser call).
+const RECEPTION_TOOL = {
+  name: "reception_reply",
+  description:
+    "Reply to the visitor AND classify the conversation. Classify conservatively: " +
+    "a general market/legal/browsing question stays general even when it mentions " +
+    "prices or properties. Use advisory only when the visitor discusses THEIR OWN " +
+    "property or THEIR OWN real search/sale. Use qualified only when they ask us to " +
+    "act for them. If intent is unclear, use OTHER and ask a short clarifying " +
+    "question in the reply instead of guessing.",
+  input_schema: {
+    type: "object",
+    properties: {
+      reply: { type: "string", description: "The reply to show the visitor, in their language." },
+      stage: { type: "string", enum: RECEPTION_STAGES },
+      primaryIntent: { type: "string", enum: RECEPTION_INTENTS },
+      secondaryIntents: { type: "array", items: { type: "string", enum: RECEPTION_INTENTS } },
+      requirementsSummary: {
+        type: "string",
+        description:
+          "One or two sentences of the visitor OWN stated situation/requirements " +
+          "(budget, zone, bedrooms, what they own, timing). Empty string when nothing " +
+          "was stated. Never invent facts the visitor did not say.",
+      },
+      customerName: { type: "string", description: "Only if the visitor actually gave a name, else empty." },
+      contact: { type: "string", description: "Only if the visitor actually gave a phone/email/LINE, else empty." },
+    },
+    required: ["reply", "stage", "primaryIntent"],
+  },
+};
+
+async function callClaudeReception(system, messages, apiKey) {
+  const body = {
+    model: "claude-haiku-4-5",
+    max_tokens: 900,
+    messages,
+    tools: [RECEPTION_TOOL],
+    tool_choice: { type: "tool", name: RECEPTION_TOOL.name },
+  };
+  if (system) body.system = system;
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || "Anthropic API error");
+  const block = (data.content || []).find((b) => b.type === "tool_use");
+  const out = (block && block.input) || {};
+  const stage = RECEPTION_STAGES.includes(out.stage) ? out.stage : "general";
+  return {
+    reply: out.reply || "",
+    stage,
+    primaryIntent: RECEPTION_INTENTS.includes(out.primaryIntent) ? out.primaryIntent : "OTHER",
+    secondaryIntents: Array.isArray(out.secondaryIntents)
+      ? out.secondaryIntents.filter((s) => RECEPTION_INTENTS.includes(s)).slice(0, 4) : [],
+    requirementsSummary: typeof out.requirementsSummary === "string" ? out.requirementsSummary.slice(0, 600) : "",
+    customerName: typeof out.customerName === "string" ? out.customerName.slice(0, 120) : "",
+    contact: typeof out.contact === "string" ? out.contact.slice(0, 160) : "",
+  };
+}
+
+// receptionTurn: the ONLY write path for Reception AI conversations.
+//
+// Why a callable and not a client write: firestore.rules sets
+// "allow create: if false" on /conversations (a client may never create one)
+// and role "ai" messages may never be written by a client. Doing the Claude
+// call and the persistence in the SAME server call is also what makes an AI
+// message unspoofable - the text the browser receives is the text the server
+// just wrote; the browser never supplies it.
+//
+// Reception docs are deliberately a DIFFERENT KIND in the SAME collection:
+//   id      = "reception__<visitorUid>"  (deterministic -> idempotent resume,
+//                                          refresh can never duplicate)
+//   ownerId = "reception"                (no lister/agent owns it)
+//   kind    = "reception"
+// Agent-share docs keep id "<ownerId>__<visitorId>", a real ownerId, and NO
+// kind field - they are untouched and behave exactly as before. Staff/Owner
+// can still read Reception docs because isConvOwner() already includes
+// isAdmin(), so NO rules change is required.
+//
+// Persistence begins ONLY at advisory/qualified. A general question performs
+// zero Firestore writes - the reply is returned and nothing is stored.
+exports.receptionTurn = onCall(
+  { secrets: [ANTHROPIC_API_KEY], region: "asia-southeast1", timeoutSeconds: 120, memory: "512MiB" },
+  async (request) => {
+    const auth = request.auth;
+    if (!auth) throw new HttpsError("unauthenticated", "Sign-in required.");
+    const visitorId = auth.uid;
+    const { system, messages, customerText, seedMessages, propertyRefs, collectionIds } = request.data || {};
+    if (!customerText || !Array.isArray(messages)) {
+      throw new HttpsError("invalid-argument", "Missing customerText or messages.");
+    }
+
+    // ONE model call: reply + classification together.
+    const out = await callClaudeReception(system, messages, ANTHROPIC_API_KEY.value());
+
+    const db = admin.firestore();
+    const conversationId = "reception__" + visitorId;
+    const convRef = db.collection("conversations").doc(conversationId);
+    const snap = await convRef.get();
+    const already = snap.exists;
+
+    // Still casual and nothing persisted yet -> store NOTHING.
+    if (!already && out.stage === "general") {
+      return { reply: out.reply, meta: out, persisted: false, conversationId: null };
+    }
+
+    const now = admin.firestore.FieldValue.serverTimestamp();
+
+    if (!already) {
+      // Crossing into advisory/qualified: create the doc and seed it with a
+      // BOUNDED slice of the recent raw exchange (the evidentiary record of
+      // what was actually said) - never the whole casual transcript.
+      const seed = (Array.isArray(seedMessages) ? seedMessages : []).slice(-8);
+      await convRef.set({
+        kind: "reception",
+        ownerId: "reception", ownerLabel: "huahin.properties",
+        visitorId, visitorLabel: "ผู้เยี่ยมชม " + visitorId.slice(-4),
+        conversationStage: out.stage,
+        primaryIntent: out.primaryIntent,
+        secondaryIntents: out.secondaryIntents,
+        requirementsSummary: out.requirementsSummary,
+        customerName: out.customerName || "",
+        contact: out.contact || "",
+        propertyRefs: Array.isArray(propertyRefs) ? propertyRefs.slice(0, 10) : [],
+        collectionIds: Array.isArray(collectionIds) ? collectionIds.slice(0, 10) : [],
+        // linkedCaseIds stays EMPTY in C4.1 - no Case/Demand is created here.
+        linkedCaseIds: [],
+        status: "ai_handling",
+        unreadByOwner: false,
+        stageEnteredAt: now, qualifiedAt: out.stage === "qualified" ? now : null,
+        lastCustomerActivityAt: now,
+        lastMessage: "", lastMessageAt: now, createdAt: now, updatedAt: now,
+      });
+      for (const m of seed) {
+        const role = m && m.role === "assistant" ? "ai" : "customer";
+        const text = (m && typeof m.text === "string") ? m.text.slice(0, 4000) : "";
+        if (!text) continue;
+        await convRef.collection("messages").add({
+          role, senderId: role === "ai" ? "ai" : visitorId,
+          senderLabel: role === "ai" ? "AI Assistant" : "",
+          text, seeded: true, createdAt: now, readByOwner: false, readByCustomer: true,
+        });
+      }
+    }
+
+    // This turn: customer message, then the AI reply the server just produced.
+    await convRef.collection("messages").add({
+      role: "customer", senderId: visitorId, senderLabel: "",
+      text: String(customerText).slice(0, 4000),
+      createdAt: now, readByOwner: false, readByCustomer: true,
+    });
+    await convRef.collection("messages").add({
+      role: "ai", senderId: "ai", senderLabel: "AI Assistant", text: out.reply,
+      createdAt: now, readByOwner: false, readByCustomer: true,
+    });
+
+    // Stage may only advance (general -> advisory -> qualified), never regress:
+    // one vague later question must not discard an established intent.
+    const prev = already ? (snap.data().conversationStage || "general") : out.stage;
+    const rank = (s) => RECEPTION_STAGES.indexOf(s);
+    const stage = rank(out.stage) > rank(prev) ? out.stage : prev;
+
+    const patch = {
+      kind: "reception",
+      conversationStage: stage,
+      primaryIntent: out.primaryIntent,
+      lastMessage: out.reply, lastMessageRole: "ai",
+      lastMessageAt: now, lastCustomerActivityAt: now, updatedAt: now,
+    };
+    if (out.secondaryIntents.length) patch.secondaryIntents = out.secondaryIntents;
+    // Never overwrite a real stored value with an empty extraction.
+    if (out.requirementsSummary) patch.requirementsSummary = out.requirementsSummary;
+    if (out.customerName) patch.customerName = out.customerName;
+    if (out.contact) patch.contact = out.contact;
+    if (stage !== prev) patch.stageEnteredAt = now;
+    if (stage === "qualified" && prev !== "qualified") patch.qualifiedAt = now;
+    await convRef.set(patch, { merge: true });
+
+    return { reply: out.reply, meta: out, persisted: true, conversationId, stage };
+  }
+);
+
 // startConversation: creates the conversation doc (if it doesn't already
 // exist) and writes the FIRST message as an AI-role greeting. Needed as a
 // separate entry point from sendConversationTurn because the very first
