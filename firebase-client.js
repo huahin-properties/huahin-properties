@@ -609,9 +609,25 @@ export async function fetchAppointments(listerId) {
   return rows.sort((a, b) => (a.when || 0) - (b.when || 0));
 }
 
+// Appointments for ONE property, regardless of who is currently assigned.
+// propertyId is the property relationship; listerId stays the "who is
+// responsible right now" field and must never be used to prove that an
+// appointment belongs to a property.
+export async function fetchAppointmentsForProperty(propertyId) {
+  if (!propertyId) return [];
+  const rows = await fetchWhere("appointments", "propertyId", String(propertyId));
+  return rows.sort((a, b) => (a.when || 0) - (b.when || 0));
+}
+
 export async function saveAppointment(listerId, appt) {
   const id = "appt-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
-  await setDoc("appointments", id, { ...appt, listerId, status: "upcoming", createdAt: Date.now() });
+  await setDoc("appointments", id, {
+    ...appt,
+    // Canonical property reference. Empty string = a legitimately
+    // property-less appointment; never invent an id to fill it.
+    propertyId: (appt && appt.propertyId) || "",
+    listerId, status: "upcoming", createdAt: Date.now(),
+  });
   return id;
 }
 
@@ -642,10 +658,26 @@ export async function logActivity(entry) {
     const a = authApp();
     const user = a && a.currentUser;
     const id = "act-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
+    // C1: actorRole/actorDisplayName are ADDITIVE. actorUid/actorEmail have
+    // always been written and are unchanged, so every existing reader keeps
+    // working; the two new fields let a log line say "Owner Somchai" instead
+    // of only an email, and preserve the REAL actor even when an Owner/Admin
+    // works a case assigned to someone else.
+    let actorRole = "";
+    let actorDisplayName = "";
+    if (user) {
+      try {
+        const act = await currentActor();
+        actorRole = act.senderRole || "";
+        actorDisplayName = act.senderDisplayName || "";
+      } catch (e) {}
+    }
     await setDoc("activityLog", id, {
       ...(entry || {}),
       actorUid: user ? user.uid : "",
       actorEmail: user ? (user.email || "") : "",
+      actorRole,
+      actorDisplayName,
       at: Date.now(),
     });
   } catch (e) { console.warn("logActivity failed (non-blocking):", e); }
@@ -1738,6 +1770,84 @@ export function currentAdminUser() {
   return user ? { uid: user.uid, email: user.email || "" } : null;
 }
 
+// ── C1: actor identity for message authorship + audit ────────────────────
+// ONE place that answers "who is actually performing this action right now".
+//
+// Returns the four authorship facts the Case Conversation needs:
+//   senderType        WHAT CLASS of author  — customer | ai | staff | system
+//   senderId          WHICH ACCOUNT         — Firebase Auth UID
+//   senderDisplayName WHAT HUMANS SEE       — real person's name
+//   senderRole        WHAT AUTHORIZED ROLE  — owner | admin | staff
+//
+// senderRole never REPLACES senderType: an Owner replying to a customer is
+// senderType "staff" (a human team member wrote it) with senderRole "owner".
+// This is what makes the Owner/Admin override principle recordable — an
+// Owner covering for an absent Staff member is logged as the Owner, never
+// rewritten to the assigned Staff member. Assignment (assignedToEmail) and
+// actor identity are separate concepts and stay separate.
+//
+// adminUsers documents carry { role, email, joinedAt } and no name field, so
+// the display name falls back to the email local-part ("somchai@…" →
+// "somchai"). If a `name` is ever added to adminUsers it is picked up here
+// automatically with no other code change.
+let _actorCache = null;
+export async function currentActor() {
+  const a = authApp();
+  const user = a && a.currentUser;
+  // Not signed in → a system/automated write. Never claim to be a human.
+  if (!user) {
+    return { senderType: "system", senderId: "", senderEmail: "", senderDisplayName: "ระบบ", senderRole: "system" };
+  }
+  if (_actorCache && _actorCache.senderId === user.uid) return _actorCache;
+  const email = user.email || "";
+  let role = "";
+  let name = "";
+  try {
+    const doc = await db().collection("adminUsers").doc(user.uid).get();
+    if (doc.exists) {
+      const d = doc.data() || {};
+      role = d.role || "";
+      name = d.name || d.displayName || "";
+    }
+  } catch (e) { console.warn("currentActor (uid) lookup failed:", e); }
+  // Same email fallback fetchAdminRole() uses: a team member signed in with a
+  // lister account has a different UID than their adminUsers doc id.
+  if (!role && email) {
+    try {
+      const snap = await db().collection("adminUsers").where("email", "==", email.trim().toLowerCase()).limit(1).get();
+      if (!snap.empty) {
+        const d = snap.docs[0].data() || {};
+        role = d.role || "";
+        name = name || d.name || d.displayName || "";
+      }
+    } catch (e) {}
+  }
+  // The original hardcoded account is always Owner (mirrors isOwner() in
+  // firestore.rules and fetchAdminRole's own special case).
+  if (user.uid === "n7TZKSBscPXE1kRU8WzYpsqJh2g2") role = "owner";
+  const actor = {
+    senderType: "staff",
+    senderId: user.uid,
+    senderEmail: email,
+    // Preference order, never fabricated: adminUsers.name → Firebase Auth
+    // displayName → email local-part.
+    senderDisplayName: name || (user.displayName || "") || (email.split("@")[0] || "") || "ทีมงาน",
+    senderRole: role || "staff",
+  };
+  _actorCache = actor;
+  return actor;
+}
+
+// Role label for display. Kept here so Staff Workspace, Listing Approvals and
+// any future Case view all label the same role identically.
+export function actorRoleLabel(role) {
+  if (role === "owner") return "เจ้าของกิจการ";
+  if (role === "admin") return "ผู้ดูแลระบบ";
+  if (role === "staff") return "ทีมงาน";
+  if (role === "system") return "ระบบ";
+  return "ทีมงาน";
+}
+
 
 // ── Case conversation (STEP 2B.2) ────────────────────────────────────────
 // Multi-round message history for an owner-submission case, stored as a
@@ -1803,6 +1913,39 @@ export async function markCaseRead(propertyId, who) {
   try {
     await db().collection("properties").doc(String(propertyId)).update({ [field]: Date.now() });
   } catch (e) { console.warn("markCaseRead failed:", e); }
+}
+
+// Case-message actor lookup (C1 security correction, ก.ย. 2569).
+//
+// Internal team identity is deliberately NOT stored on the message document:
+// a customer holding a valid trackToken can READ those message docs, and any
+// field in a readable document is readable in devtools regardless of what the
+// UI chooses to display. So the actor lives in activityLog, which is
+// isAdmin()-only in firestore.rules, and is linked back to the message by
+// messageId.
+//
+// Returns { [messageId]: { actorDisplayName, actorRole, actorEmail, actorUid } }
+// for one case. Team-only by construction: a customer calling this gets
+// permission-denied from the rules, not a filtered result.
+//
+// One equality filter only (caseId) so no composite index is required; the
+// type filter is applied client-side.
+export async function fetchCaseMessageActors(caseId) {
+  const out = {};
+  try {
+    const snap = await db().collection("activityLog").where("caseId", "==", String(caseId)).get();
+    snap.docs.forEach((d) => {
+      const a = d.data() || {};
+      if (a.type !== "case_message_sent" || !a.messageId) return;
+      out[a.messageId] = {
+        actorUid: a.actorUid || "",
+        actorEmail: a.actorEmail || "",
+        actorDisplayName: a.actorDisplayName || "",
+        actorRole: a.actorRole || "",
+      };
+    });
+  } catch (e) { console.warn("fetchCaseMessageActors failed (team-only):", e); }
+  return out;
 }
 
 export async function addCaseMessage(propertyId, msg) {

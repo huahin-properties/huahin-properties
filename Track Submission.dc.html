@@ -242,9 +242,16 @@ class Component extends DCLogic {
       const thai = lang === "th" ? msg : await this._fb.translateMessage(msg, "th");
       const rec = {
         senderType: "customer", direction: "inbound", messageType: "response",
+        // C1 SECURITY CORRECTION: no identity fields written here either.
+        // The customer is not an authenticated account, and their own name
+        // already lives on the Case document (contactName) where the team
+        // reads it — duplicating it onto every message adds no capability
+        // and only widens what a readable document contains.
+        // senderType "customer" is the whole authorship claim.
         originalLanguage: lang, originalText: msg, thaiText: thai,
         customerLanguage: lang, customerText: msg,
-        channel: "tracking", visibility: "customer",
+        // channel names the actual surface. Legacy messages carry "tracking".
+        channel: "track_submission", visibility: "customer",
         caseToken: this._token, createdAt: Date.now(),
       };
       // The message itself is the only write that may block the send.
@@ -302,7 +309,7 @@ class Component extends DCLogic {
       // no extra query, no duplicate storage, no re-translation. Internal
       // fields (thaiText, sender email/uid, caseToken) are never read here.
       historyRows: this.state.msgs.slice().reverse().map((m) => {
-        const mine = m.direction !== "outbound";
+        const mine = (m.senderType || (m.direction === "inbound" ? "customer" : "staff")) === "customer";
         const en = (this.state.prop && this.state.prop.customerLanguage === "en");
         return {
           key: m.id,
@@ -335,8 +342,12 @@ class Component extends DCLogic {
       noThread: this.state.msgs.length === 0,
       thread: this.state.msgs.map((m, i, arr) => {
         const prev = arr[i - 1];
-        const mine = m.direction !== "outbound";
-        const sameSender = prev && (prev.direction === m.direction);
+        // C1: senderType decides authorship when present; `direction` stays the
+        // fallback for historical messages (inbound → customer, outbound →
+        // team). Nothing historical is rewritten.
+        const sType = m.senderType || (m.direction === "inbound" ? "customer" : "staff");
+        const mine = sType === "customer";
+        const sameSender = prev && (prev.senderType || (prev.direction === "inbound" ? "customer" : "staff")) === sType;
         const dayOf = (t) => new Date(t || 0).toDateString();
         const showDay = !prev || dayOf(prev.createdAt) !== dayOf(m.createdAt);
         const d = new Date(m.createdAt || 0);
@@ -349,7 +360,15 @@ class Component extends DCLogic {
           key: m.id || String(m.createdAt),
           showDay, dayLabel,
           showWho: showDay || !sameSender,
-          who: mine ? "คุณ" : "ทีมงาน huahin.properties",
+          // Customer-facing labels stay deliberately generic for humans on the
+          // team: the customer sees "ทีมงาน huahin.properties", never a staff
+          // member's name, email or role (internal identity is not customer
+          // display data). AI and system messages ARE labelled explicitly, so
+          // a future AI reply can never pass as a person (D4).
+          who: mine ? "คุณ"
+            : sType === "ai" ? "🤖 ผู้ช่วยอัตโนมัติ huahin.properties"
+            : sType === "system" ? "⚙️ ข้อความอัตโนมัติ"
+            : "ทีมงาน huahin.properties",
           // The customer always reads their own language.
           text: mine ? (m.originalText || "") : (m.customerText || m.originalText || ""),
           atLabel: d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }) + " น.",

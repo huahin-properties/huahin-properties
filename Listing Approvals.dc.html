@@ -625,6 +625,18 @@ class Component extends DCLogic {
       if (live && live.length >= msgs.length) return {};
       return { caseMsgs: { ...st.caseMsgs, [boundId]: msgs } };
     });
+    this.loadCaseActors(boundId);
+  }
+
+  // Team-only actor lookup for this case's messages (C1 security correction).
+  // Reads activityLog (isAdmin()-only) and maps messageId → real actor, so the
+  // team UI can show who sent each message WITHOUT that identity ever being
+  // stored on a customer-readable document.
+  async loadCaseActors(caseId) {
+    try {
+      const map = await this._fb.fetchCaseMessageActors(caseId);
+      this.setState((st) => ({ caseActors: { ...(st.caseActors || {}), [caseId]: map } }));
+    } catch (e) { console.warn("loadCaseActors failed:", e); }
   }
 
   _caseSummary(p) {
@@ -1007,10 +1019,20 @@ class Component extends DCLogic {
         : (reviewed || await this._fb.translateMessage(thai, lang));
       const rec = {
         senderType: "staff", direction: "outbound", messageType: "follow_up",
-        senderUid: (a && a.uid) || "", senderEmail: (a && a.email) || "",
+        // C1 SECURITY CORRECTION (ก.ย. 2569): NO internal team identity on
+        // this document. The customer CAN read this message (trackToken +
+        // visibility == "customer"), and every field in a readable document
+        // is readable in devtools — so senderUid / senderEmail / senderId /
+        // senderDisplayName / senderRole are deliberately NOT written here.
+        // senderType is the only authorship claim the customer receives:
+        // "a human on the team wrote this" (vs ai / system / customer).
+        // The REAL actor goes to activityLog (isAdmin()-only), linked by
+        // messageId — see the logActivity call after the send below.
         originalLanguage: "th", originalText: thai, thaiText: thai,
         customerLanguage: lang, customerText: custText,
-        channel: "tracking", visibility: "customer", createdAt: Date.now(),
+        // channel names the surface the message was sent from. Legacy
+        // messages carry "tracking" — treated as "unspecified team surface".
+        channel: "listing_approvals", visibility: "customer", createdAt: Date.now(),
         // The tracking token must travel WITH the message: the customer-side
         // read rule matches it against the property's trackToken.
         caseToken: p.trackToken,
@@ -1023,8 +1045,19 @@ class Component extends DCLogic {
       // message self-describing: any future collection-group query can tell
       // which case a message belongs to without relying on its path.
       rec.caseId = p.id;
-      await this._fb.addCaseMessage(p.id, rec);
-      await this._fb.logActivity({ type: "case_message_sent", propertyId: p.id, summary: `ส่งข้อความถึงผู้ติดต่อทรัพย์ ${p.id}` });
+      const msgId = await this._fb.addCaseMessage(p.id, rec);
+      // Internal attribution lives HERE, not on the message: activityLog is
+      // team-only. messageId is the linkage that lets the team UI show who
+      // really sent each message. If the Case is assigned to Staff A and an
+      // Owner sends this reply, the actor recorded is the OWNER — assignment
+      // is never used as authorship.
+      await this._fb.logActivity({
+        type: "case_message_sent", propertyId: p.id, caseId: p.id, messageId: msgId,
+        summary: `ส่งข้อความถึงผู้ติดต่อทรัพย์ ${p.id}`,
+      });
+      // Refresh the actor map so the message just sent shows its real author
+      // immediately instead of only after the thread is reopened.
+      this.loadCaseActors(p.id);
       // The sender always follows their own message down.
       this._stick[p.id] = true;
       this.setState((st) => ({ preview: { ...(st.preview || {}), [p.id]: null } }));
@@ -1227,9 +1260,16 @@ class Component extends DCLogic {
           },
           hasNewIncoming: !!(this.state.newIncoming || {})[p.id],
           thread: (this.state.caseMsgs[p.id] || []).map((m, i, arr) => {
+            const actors = (this.state.caseActors || {})[p.id] || {};
+            const act = (m.id && actors[m.id]) || null;
             const prev = arr[i - 1];
-            const team = m.direction === "outbound";
-            const sameSender = prev && prev.direction === m.direction;
+            // C1 authorship-aware rendering. senderType is the source of
+            // truth when present; `direction` remains the fallback for every
+            // historical message written before senderType existed
+            // (inbound → customer, outbound → staff). Nothing is rewritten.
+            const sType = m.senderType || (m.direction === "inbound" ? "customer" : "staff");
+            const team = sType !== "customer";
+            const sameSender = prev && (prev.senderType || (prev.direction === "inbound" ? "customer" : "staff")) === sType;
             const dayOf = (t) => new Date(t || 0).toDateString();
             const showDay = !prev || dayOf(prev.createdAt) !== dayOf(m.createdAt);
             const d = new Date(m.createdAt || 0);
@@ -1240,7 +1280,21 @@ class Component extends DCLogic {
               key: m.id || String(m.createdAt),
               showDay: showDay, dayLabel: dayLabel,
               showWho: showDay || !sameSender,
-              who: team ? ("ทีมงาน" + (m.senderEmail ? " · " + m.senderEmail : "")) : "ลูกค้า",
+              // Who really wrote it. AI and system are labelled explicitly so
+              // an AI message can never look like a person wrote it (D4).
+              //
+              // For team messages the real identity comes from the TEAM-ONLY
+              // activityLog actor map (act), never from the message document
+              // — that is what keeps internal identity off a customer-readable
+              // doc. Fallbacks, in order: activityLog actor → legacy
+              // senderEmail already present on historical messages → plain
+              // "ทีมงาน" when nothing is known.
+              who: sType === "customer" ? "ลูกค้า"
+                : sType === "ai" ? "🤖 AI (ร่างอัตโนมัติ)"
+                : sType === "system" ? "⚙️ ระบบ"
+                : (act && (act.actorDisplayName || act.actorEmail))
+                    ? (this._fb.actorRoleLabel(act.actorRole) + " · " + (act.actorDisplayName || act.actorEmail))
+                    : ("ทีมงาน" + (m.senderEmail ? " · " + m.senderEmail : "")),
               thai: m.thaiText || m.originalText || "",
               // Inbound: the customer's own words. Outbound: what the customer
               // actually received after translation — the Staff proof-check.

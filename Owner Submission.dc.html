@@ -300,7 +300,18 @@ class Component extends DCLogic {
       (window.crypto || window.msCrypto).getRandomValues(rnd);
       const token = Array.from(rnd).map((b) => b.toString(36).padStart(2, "0")).join("").slice(0, 32);
       await this._fb.setDoc("properties", id, {
+        // DO NOT rename/overload `source` — application logic AND
+        // firestore.rules (isPublicOwnerSubmission, the trackToken reply
+        // branches, the caseMessages tokenOk check) all key off the exact
+        // string "owner_submission".
         source: "owner_submission",
+        // C1 additive Case provenance: WHICH CHANNEL created this Case.
+        // `source` says "this is an owner submission" (a security/logic
+        // marker); caseSource says how the Case actually arrived, so future
+        // channels (ai_assistant, contact_conversion, line, facebook) are
+        // distinguishable without touching `source`. Nothing reads caseSource
+        // yet — it is written now so historical data exists when C4/C7 need it.
+        caseSource: "owner_form",
         listingStatus: "pending",
         reviewStatus: "submitted",
         status: this.state.txnType,

@@ -169,6 +169,49 @@ Matching Engine · Demand Profile engine · Lead → Case conversion · Particip
 
 ---
 
+### 26.10 C1 Implementation Record — Message Authorship + Case Provenance (4 ก.ย. 2569, แก้ตามข้อสั่งความปลอดภัยของ Product Owner)
+
+**สิ่งที่พบว่ามีอยู่แล้ว**: `senderType` (`customer`/`staff`), `direction`, `visibility`, `caseToken`, `caseId`, `channel`, `senderUid`, `senderEmail` มีใน production แล้ว และ `firestore.rules` **บังคับ** `senderType == "customer"` สำหรับการเขียนฝั่งลูกค้าอยู่แล้ว → **ไม่ต้องแก้ Rules ในเฟสนี้**
+
+#### 🔒 หลักการความปลอดภัยที่ LOCKED
+
+ถ้าลูกค้ามีสิทธิ์ **อ่าน** document นั้น = ลูกค้าอ่านได้ **ทุกฟิลด์** ใน document นั้นผ่าน devtools โดยไม่สนใจว่า UI แสดงอะไร
+
+ดังนั้น **ห้ามเก็บตัวตนภายในของทีมงานบน message document ที่ลูกค้าอ่านได้** — ไม่ว่า UI จะซ่อนไว้ก็ตาม
+
+#### Public / customer-safe message schema (`properties/{caseId}/caseMessages`)
+
+`senderType` (customer/ai/staff/system) · `direction` · `visibility` · `channel` · `caseId` · `caseToken` · `messageType` · ฟิลด์ข้อความ/แปลภาษา · `createdAt`
+
+**ไม่มี** `senderUid` / `senderEmail` / `senderId` / `senderDisplayName` / `senderRole` — ลูกค้ารู้เพียง "มนุษย์ในทีมเขียน" vs AI vs ระบบ vs ตัวเอง
+
+#### Internal actor / audit schema (`activityLog` — `isAdmin()` เท่านั้น)
+
+`type: "case_message_sent"` · `caseId` · `messageId` ← **ตัวเชื่อม** · `actorUid` · `actorEmail` · `actorDisplayName` · `actorRole` · `at`
+
+Team UI (`Listing Approvals`) เรียก `fetchCaseMessageActors(caseId)` → map `messageId → actor` แล้วแสดง "เจ้าของกิจการ · ชื่อจริง" ลูกค้าเรียก function เดียวกันจะได้ **permission-denied** จาก Rules ไม่ใช่ผลลัพธ์ที่กรองแล้ว
+
+**Display name (ไม่แต่งชื่อขึ้นเอง)**: `adminUsers.name` → Firebase Auth `displayName` → email local-part
+
+#### Owner/Admin Override
+
+Case มอบหมายให้ Staff A แต่ Owner ตอบ → ลูกค้าเห็น "ทีมงาน huahin.properties" · audit ภายในเห็น **Owner ตัวจริง** · **ห้าม**บันทึกเป็น Staff A · `assignedToEmail` (ใครรับผิดชอบ) ≠ actor (ใครลงมือ)
+
+#### Backward compatibility
+
+ข้อความเก่าที่ไม่มี `senderType` → ใช้ `direction` เป็น fallback (`inbound`→customer, `outbound`→staff) ทั้งสองหน้า · ข้อความเก่าที่มี `senderEmail` ติดมา → Team UI ยังใช้แสดงได้เป็น fallback สุดท้าย · legacy `channel: "tracking"` ยังใช้ได้ · **ไม่เขียนทับข้อมูล production เก่าแม้แต่ record เดียว**
+
+#### ⚠️ Legacy exposure ที่ยังค้าง (ไม่แก้ใน C1 โดยเจตนา)
+
+ข้อความ **เก่า** ที่ส่งก่อน C1 ยังมี `senderUid`/`senderEmail` ฝังอยู่ใน document ที่ลูกค้าอ่านได้ → ยัง exposed ผ่าน devtools ได้
+
+- **C1 หยุดสร้างการรั่วใหม่แล้ว** (ข้อความใหม่ไม่มีฟิลด์เหล่านี้)
+- การล้างของเก่าต้องเป็น **migration แยกเฟส**: อ่าน caseMessages ทั้งหมด → เขียน actor ย้อนหลังเข้า activityLog (`messageId` linkage) → แล้วจึงลบฟิลด์ออกจาก message
+- ติดข้อจำกัด: Rules ปัจจุบัน `allow update, delete: if false` บน caseMessages (append-only ตั้งใจ) → migration ต้องทำ **server-side (Cloud Function / Admin SDK)** ไม่ใช่จากเบราว์เซอร์ และต้องได้รับอนุมัติแยก
+
+**Rules**: ไม่แก้ · **ไม่ต้อง publish ใหม่**
+
+---
 ## 25.2 Workspace Economy — WEM v1 (22 ก.ค. 2569, Architecture Approved for Prototype Refinement, builds on WEA v1.1)
 
 **Resource Philosophy**: Members do not buy raw storage, AI tokens, or infrastructure. They purchase a managed Workspace service that includes platform operation, development, support, security, and continued improvement. Every upgrade should feel like expanding a digital office, not paying to remove a limitation.
