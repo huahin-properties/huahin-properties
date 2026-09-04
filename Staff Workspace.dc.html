@@ -117,6 +117,14 @@
               <div style="font-size:11.5px; color:oklch(55% 0.02 60); margin-top:2px;">อัปเดต: {{ r.updatedLabel }}</div>
               <div style="font-size:11.5px; color:oklch(35% 0.02 60); margin-top:2px;">ขั้นต่อไป: {{ r.nextStepLabel }}</div>
               <div style="font-size:11px; color:oklch(60% 0.02 60); margin-top:2px;">{{ r.assignedLabel }}</div>
+              <sc-if value="{{ r.hasWf }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:7px;">
+                  <div style="font-size:11px; color:oklch(45% 0.02 60); margin-bottom:3px;">{{ r.wfLabel }}</div>
+                  <div style="height:4px; background:oklch(92% 0.01 70); border-radius:100px; overflow:hidden;">
+                    <div style="height:100%; width:{{ r.wfBarWidth }}; background:{{ r.wfBarColor }};"></div>
+                  </div>
+                </div>
+              </sc-if>
               <a href="{{ r.openHref }}" style="display:inline-block; margin-top:10px; background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:7px 16px; border-radius:6px; font-size:12px; font-weight:600; text-decoration:none;">เปิดงาน ›</a>
             </div>
           </div>
@@ -141,6 +149,10 @@ class Component extends DCLogic {
   async componentDidMount() {
     const fb = await import("./firebase-client.js");
     this._fb = fb;
+    // C3.2: the SAME workflow module Listing Approvals uses, so the progress
+    // number on a card can never disagree with the number inside the case.
+    // Non-fatal: if it fails to load, cards simply omit the progress line.
+    try { this._wf = await import("./intake-workflow.js"); } catch (e) { console.warn("intake-workflow load failed:", e); }
     await fb.onAdminAuthReady();
     const user = fb.currentAdminUser && fb.currentAdminUser();
     if (!user) { this.setState({ loaded: true, allowed: false }); return; }
@@ -211,6 +223,15 @@ class Component extends DCLogic {
       .sort((a, b) => (a.lastCustomerMessageAt || 0) - (b.lastCustomerMessageAt || 0));
   }
 
+  // C3.2: shared workflow evaluation, same module + same inputs as Listing
+  // Approvals (prop + its photos), so the two surfaces cannot drift apart.
+  wfEval(p) {
+    if (!this._wf) return null;
+    try {
+      return this._wf.evaluate({ prop: p, photos: this.state.photosByProp[p.id] || [] });
+    } catch (e) { console.warn("workflow evaluate failed:", e && e.message); return null; }
+  }
+
   renderVals() {
     const b = this.buckets();
     const unread = this.unreadCases();
@@ -260,12 +281,22 @@ class Component extends DCLogic {
       rows: list.map((p) => {
         const first = (this.state.photosByProp[p.id] || [])[0];
         const u = first && (first.dataUrl || first.url);
+        // C3.2 workflow progress. Computed from data ALREADY loaded (the
+        // property doc + its photos) by calling the shared evaluate() — no
+        // extra Firestore read, no second progress calculation, and identical
+        // to what Listing Approvals shows for the same case.
+        const ev = this.wfEval(p);
         const rs = p.reviewStatus || "submitted";
         return {
           key: p.id, code: p.id,
           // C3.1: opens the exact canonical Case + its existing conversation.
           openHref: this.caseHref(p.id),
           statusLabel: statusLabels[rs] || rs,
+          // C3.2: read-only progress line. Same numbers as the case's own panel.
+          hasWf: !!ev,
+          wfLabel: ev ? ("ข้อมูลครบ " + ev.overallDone + "/" + ev.overallTotal + " · " + ev.overallPercent + "%") : "",
+          wfBarWidth: ev ? ev.overallPercent + "%" : "0%",
+          wfBarColor: ev ? (ev.overallPercent >= 100 ? "oklch(62% 0.15 145)" : ev.overallPercent >= 50 ? "oklch(70% 0.13 85)" : "oklch(65% 0.16 30)") : "transparent",
           priceLabel: "฿" + (Number(p.price) || 0).toLocaleString(),
           typeLabel: typeLabels[p.type] || p.type || "—",
           updatedLabel: fmtTime(p.reviewStatusAt || p.assignedAt || p.submittedAt),

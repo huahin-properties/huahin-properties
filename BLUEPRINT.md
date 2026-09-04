@@ -337,7 +337,23 @@ Listing Approvals.dc.html?case=<INTERNAL_PROPERTY_ID>&open=conversation&from=wor
 
 **ไม่แตะ**: senderType / actor attribution / customer privacy / caseMessages / watchCaseMessages / loadThread / _stick / _scrollToLatest / _openScroll / unread / Suggested Replies / translation / composer / C1 / C2 / C3.1 deep-link / Track Submission / Firestore Rules
 
-**C3.2 (workflow progress enrichment): เลื่อนไว้** รอ C3.1 ผ่าน production ก่อน
+### C3.2 — Staff Workspace Enrichment (4 ก.ย. 2569) — ทำบางส่วน
+
+**✅ ส่วนที่ทำ: Workflow Progress** บนการ์ดทุกใบใน Staff Workspace แสดง `ข้อมูลครบ 9/19 · 47%` + แถบ progress
+
+- **ใช้ `intake-workflow.js` ตัวเดิม** import โมดูลเดียวกัน เรียก `evaluate({prop, photos})` ด้วย input ชุดเดียวกับที่ Listing Approvals เรียก → ตัวเลขสองหน้า **ไม่มีทางไม่ตรงกัน** และ **ไม่มีการคำนวณชุดที่สอง**
+- **ไม่เพิ่ม Firestore read แม้แต่ครั้งเดียว**: Staff Workspace โหลด properties + photos อยู่แล้ว → คำนวณจาก state ที่มีในมือ · read ยังเท่าเดิม **3 ครั้ง** (properties, photos, leads) · **0 listener** · `evaluate()` เป็น pure function ไม่เขียนอะไร
+
+**⛔ ส่วนที่ยังไม่ทำ: Latest Customer Message Preview — ติด blocker เชิงสถาปัตยกรรม**
+
+`addCaseMessage()` denormalize ลง property doc เพียง **timestamp** (`lastCustomerMessageAt` / `lastStaffMessageAt`) — **ไม่มีตัวข้อความ** ดังนั้นการโชว์ preview ต้องเลือกทางใดทางหนึ่ง:
+
+1. **อ่าน subcollection ต่อเคส** → N reads ต่อการเปิดหน้า 1 ครั้ง (50 เคส = 50 reads) → **ผิดกฎ cost safety ที่ PO ล็อกไว้**
+2. **เพิ่ม field denormalized** `lastCustomerMessageText` เขียนตอน `addCaseMessage` → **read เท่าเดิม** แต่ **ต้องแก้ production data model + `firebase-client.js`** จึงต้องขออนุมัติก่อนตามกฎ
+
+**ข้อควรพิจารณาด้านความปลอดภัยของทางเลือกที่ 2**: field นี้อยู่บน property doc ซึ่ง **ลูกค้าที่มี trackToken อ่านได้** → เก็บข้อความของ **ลูกค้าเอง** ยังพอรับได้ (เป็นข้อความตัวเอง) แต่ **ห้าม**เก็บข้อความฝั่งทีมงานลงไปด้วย · เคสเก่าจะไม่มี field นี้ ต้อง fallback แสดงเฉพาะเวลา
+
+**คำแนะนำ**: ทางเลือก 2 คือทางที่ถูก แต่ควรเป็นเฟสย่อยของตัวเอง (แก้ `firebase-client.js` + data model) — **รอ PO อนุมัติ** รอ C3.1 ผ่าน production ก่อน
 
 ---
 
