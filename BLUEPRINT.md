@@ -320,6 +320,23 @@ Listing Approvals.dc.html?case=<INTERNAL_PROPERTY_ID>&open=conversation&from=wor
 - **⚠️ บทเรียนจาก C0.5**: ความสูงเก็บเป็น **instance method** ไม่ใช่ `static` field ที่อ้างผ่าน `Component.X` เพราะ DC runtime ของโปรเจกต์นี้ไม่ resolve binding นั้นตอน method ทำงาน (เคยทำให้การบันทึกสถานะ lead ล้มเงียบ ๆ)
 - **ไม่แตะ**: chat component / scroll container / realtime listener (ยัง 1 ตัวต่อเคสที่เลือก)
 
+**🎨 C3.1 CHAT PANEL FINAL (4 ก.ย. 2569)** — แก้ 2 จุดใน `Listing Approvals.dc.html` เท่านั้น
+
+**1. ช่วงความสูงที่ลากได้**: `chatMaxH()` `min(900px, 90vh)` → **`min(1400px, 96vh)`** (เตี้ยเกินไป) · default `min(560px, 72vh)` และ min `260px` **คงเดิม** · ทิศทางลาก / live resize / การ clamp ไม่เปลี่ยน · 96vh เหลือขอบหน้าจอไว้เล็กน้อยจึงไม่ล้น viewport แบบใช้งานไม่ได้
+
+**2. พื้นหลังแชทเป็นสีขาวสนิท**:
+
+| ส่วน | สี |
+|---|---|
+| นอกพื้นที่แชท (หน้าเพจ) | `oklch(97% 0.01 80)` cream **(ไม่แตะ)** |
+| **chat panel** | **`#ffffff`** pure white + border `oklch(86% 0.015 70)` เข้มขึ้นเล็กน้อย + shadow บาง ๆ |
+| **team bubble** | `oklch(95% 0.045 85)` warm beige (โทนแบรนด์) |
+| **customer bubble** | `oklch(95.5% 0.004 260)` cool light gray |
+
+**ไม่มี bubble ไหนเป็นขาวสนิท** อีกแล้ว (เดิมฝั่งลูกค้าเป็น `white` ซึ่งจะกลืนกับ panel ใหม่) · ชื่อผู้ส่ง `52%→45%` · เวลา `62%→55%` · ป้ายข้อความต้นฉบับ `58%→52%` เพื่อ contrast บนพื้นขาว · grip ของ resize handle `80%→72%` ให้เห็นชัดบนพื้นขาว
+
+**ไม่แตะ**: senderType / actor attribution / customer privacy / caseMessages / watchCaseMessages / loadThread / _stick / _scrollToLatest / _openScroll / unread / Suggested Replies / translation / composer / C1 / C2 / C3.1 deep-link / Track Submission / Firestore Rules
+
 **C3.2 (workflow progress enrichment): เลื่อนไว้** รอ C3.1 ผ่าน production ก่อน
 
 ---

@@ -274,7 +274,7 @@
                   <sc-if value="{{ r.threadOpen }}" hint-placeholder-val="{{ false }}">
                     <div style="{{ r.chatPanelStyle }}">
                       <div onPointerDown="{{ r.onChatResizeStart }}" title="ลากขึ้น–ลงเพื่อปรับความสูงหน้าต่างแชท" style="height:16px; margin:-6px 0 4px; display:flex; align-items:center; justify-content:center; cursor:ns-resize; touch-action:none; flex-shrink:0;">
-                        <div style="width:46px; height:5px; border-radius:100px; background:oklch(80% 0.02 70);"></div>
+                        <div style="width:46px; height:5px; border-radius:100px; background:oklch(72% 0.02 70);"></div>
                       </div>
                       <div style="position:relative; flex:1; min-height:0; display:flex; flex-direction:column; margin-bottom:9px;">
                       <div ref="{{ r.threadRef }}" onScroll="{{ r.onThreadScroll }}" style="display:flex; flex-direction:column; gap:2px; flex:1; min-height:0; overflow-y:auto;">
@@ -625,7 +625,11 @@ class Component extends DCLogic {
   chatMinH() { return 260; }
 
   chatMaxH() {
-    return Math.round(Math.min(900, (window.innerHeight || 900) * 0.9));
+    // Near-full-screen is allowed: Staff work a case for long stretches and
+    // wanted far more room. 96vh keeps a sliver of page visible so the panel
+    // can never fill the viewport past the point of being usable, and the
+    // 1400px cap keeps it sane on very tall monitors.
+    return Math.round(Math.min(1400, (window.innerHeight || 900) * 0.96));
   }
 
   // Drag the top edge: moving the pointer UP (negative dy) makes the panel
@@ -1369,8 +1373,11 @@ class Component extends DCLogic {
           // completely independent — the handle is a sibling of the scroll box,
           // never inside it.
           chatPanelStyle: {
-            background: "oklch(98% 0.005 85)", border: "1px solid oklch(91% 0.01 70)",
+            // Pure white so the conversation reads instantly as "the chat
+            // area", against the warm cream page background outside it.
+            background: "#ffffff", border: "1px solid oklch(86% 0.015 70)",
             borderRadius: "9px", padding: "12px 13px", marginBottom: "11px",
+            boxShadow: "0 1px 3px oklch(70% 0.02 70 / 0.13)",
             display: "flex", flexDirection: "column",
             height: (this.state.chatH || this.chatDefaultH()) + "px",
           },
@@ -1464,18 +1471,21 @@ class Component extends DCLogic {
               origLabel: team
                 ? "ส่งให้ลูกค้า: " + (m.customerText || "")
                 : "ต้นฉบับ: " + (m.originalText || ""),
-              origStyle: { fontSize: "10px", color: "oklch(58% 0.02 60)", marginTop: "2px", maxWidth: "85%", textAlign: team ? "right" : "left" },
+              origStyle: { fontSize: "10px", color: "oklch(52% 0.02 60)", marginTop: "2px", maxWidth: "85%", textAlign: team ? "right" : "left" },
               atLabel: d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }) + " น.",
               rowStyle: { display: "flex", flexDirection: "column", alignItems: team ? "flex-end" : "flex-start", marginTop: (showDay || !sameSender) ? "7px" : "0" },
-              whoStyle: { fontSize: "10px", fontWeight: "700", color: "oklch(52% 0.02 60)", marginBottom: "3px" },
+              whoStyle: { fontSize: "10px", fontWeight: "700", color: "oklch(45% 0.02 60)", marginBottom: "3px" },
               bubbleStyle: {
                 maxWidth: "85%", padding: "8px 12px", fontSize: "12.5px", lineHeight: "1.55",
                 whiteSpace: "pre-wrap", wordBreak: "break-word", color: "oklch(25% 0.02 60)",
-                background: team ? "oklch(96% 0.04 85)" : "white",
-                border: team ? "1px solid oklch(89% 0.05 85)" : "1px solid oklch(89% 0.01 70)",
+                // Neither bubble may be pure white now that the panel is — the
+                // team side keeps the warm brand beige, the customer side a
+                // cool light gray, so the two are unmistakable on white.
+                background: team ? "oklch(95% 0.045 85)" : "oklch(95.5% 0.004 260)",
+                border: team ? "1px solid oklch(87% 0.055 85)" : "1px solid oklch(89% 0.005 260)",
                 borderRadius: team ? "13px 13px 4px 13px" : "13px 13px 13px 4px",
               },
-              timeStyle: { fontSize: "9.5px", color: "oklch(62% 0.02 60)", marginTop: "2px" },
+              timeStyle: { fontSize: "9.5px", color: "oklch(55% 0.02 60)", marginTop: "2px" },
             };
           }),
           noThread: (this.state.caseMsgs[p.id] || []).length === 0,
