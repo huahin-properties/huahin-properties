@@ -165,3 +165,130 @@ describe("Conversation Ownership — Security Rules (simplified v1)", () => {
     );
   });
 });
+
+// ── C4.1 Reception conversations ────────────────────────────────────────
+// Reception docs are the SAME collection, a different kind: deterministic
+// id "reception__<visitorUid>", ownerId "reception", kind "reception".
+// These tests assert the additive discriminator needs NO rules change and
+// leaves agent-share semantics untouched.
+
+const RECEPTION_A = `reception__${VISITOR_A}`;
+const RECEPTION_B = `reception__${VISITOR_B}`;
+
+function receptionConversation(visitorId) {
+  return {
+    kind: "reception",
+    ownerId: "reception", ownerLabel: "huahin.properties",
+    visitorId, visitorLabel: "ผู้เยี่ยมชม test",
+    conversationStage: "advisory",
+    primaryIntent: "BUY",
+    secondaryIntents: [],
+    requirementsSummary: "งบ 5 ล้าน โซนหัวหิน",
+    customerName: "", contact: "",
+    propertyRefs: [], collectionIds: [], linkedCaseIds: [],
+    status: "ai_handling", unreadByOwner: false,
+    stageEnteredAt: new Date(), qualifiedAt: null,
+    lastCustomerActivityAt: new Date(),
+    lastMessage: "", lastMessageAt: new Date(),
+    createdAt: new Date(), updatedAt: new Date(),
+  };
+}
+
+describe("C4.1 Reception conversations", () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      const db = ctx.firestore();
+      await db.collection("conversations").doc(RECEPTION_A).set(receptionConversation(VISITOR_A));
+      await db.collection("conversations").doc(RECEPTION_B).set(receptionConversation(VISITOR_B));
+      await db.collection("conversations").doc(RECEPTION_A).collection("messages").add({
+        role: "ai", senderId: "ai", senderLabel: "AI Assistant", text: "server-authored reply", createdAt: new Date(),
+      });
+    });
+  });
+
+  it("R1. Visitor A can read their own Reception conversation (idempotent resume)", async () => {
+    const asA = testEnv.authenticatedContext(VISITOR_A).firestore();
+    await assertSucceeds(asA.collection("conversations").doc(RECEPTION_A).get());
+  });
+
+  it("R2. Visitor A cannot read Visitor B's Reception conversation", async () => {
+    const asA = testEnv.authenticatedContext(VISITOR_A).firestore();
+    await assertFails(asA.collection("conversations").doc(RECEPTION_B).get());
+  });
+
+  it("R3. Visitor A can read the messages of their own Reception conversation", async () => {
+    const asA = testEnv.authenticatedContext(VISITOR_A).firestore();
+    await assertSucceeds(asA.collection("conversations").doc(RECEPTION_A).collection("messages").get());
+  });
+
+  it("R4. Visitor A cannot read Visitor B's Reception messages", async () => {
+    const asA = testEnv.authenticatedContext(VISITOR_A).firestore();
+    await assertFails(asA.collection("conversations").doc(RECEPTION_B).collection("messages").get());
+  });
+
+  it("R5. Visitor cannot create a Reception conversation directly (receptionTurn only)", async () => {
+    const asA = testEnv.authenticatedContext(VISITOR_A).firestore();
+    await assertFails(
+      asA.collection("conversations").doc(`reception__${VISITOR_A}-new`).set(receptionConversation(`${VISITOR_A}-new`))
+    );
+  });
+
+  it("R6. Visitor cannot spoof an AI message into their own Reception conversation", async () => {
+    const asA = testEnv.authenticatedContext(VISITOR_A).firestore();
+    await assertFails(
+      asA.collection("conversations").doc(RECEPTION_A).collection("messages").add({
+        role: "ai", senderId: "ai", text: "fake AI reply", createdAt: new Date(),
+      })
+    );
+  });
+
+  it("R7. Visitor cannot rewrite classification fields on their Reception doc", async () => {
+    const asA = testEnv.authenticatedContext(VISITOR_A).firestore();
+    await assertFails(
+      asA.collection("conversations").doc(RECEPTION_A).update({ conversationStage: "qualified" })
+    );
+  });
+
+  it("R8. Unauthenticated cannot read any Reception conversation", async () => {
+    const anon = testEnv.unauthenticatedContext().firestore();
+    await assertFails(anon.collection("conversations").doc(RECEPTION_A).get());
+  });
+
+  it("R9. Admin can read a Reception conversation (staff visibility, no rules change)", async () => {
+    const asAdmin = testEnv.authenticatedContext("n7TZKSBscPXE1kRU8WzYpsqJh2g2").firestore();
+    await assertSucceeds(asAdmin.collection("conversations").doc(RECEPTION_A).get());
+  });
+
+  it("R10. A lister/agent owner query (ownerId == their uid) never returns Reception docs", async () => {
+    const asOwnerA = testEnv.authenticatedContext(OWNER_A).firestore();
+    const snap = await asOwnerA.collection("conversations").where("ownerId", "==", OWNER_A).get();
+    if (snap.docs.some((d) => d.id.startsWith("reception__"))) {
+      throw new Error("Reception doc leaked into an agent-share owner inbox query");
+    }
+  });
+
+  it("R11. Visitor cannot list all conversations (unscoped query denied)", async () => {
+    const asA = testEnv.authenticatedContext(VISITOR_A).firestore();
+    await assertFails(asA.collection("conversations").get());
+  });
+
+  it("R12. Visitor cannot list all Reception docs by ownerId == 'reception'", async () => {
+    const asA = testEnv.authenticatedContext(VISITOR_A).firestore();
+    await assertFails(asA.collection("conversations").where("ownerId", "==", "reception").get());
+  });
+
+  it("R13. Legacy agent-share doc WITHOUT a `kind` field still reads normally", async () => {
+    const asVisitorA = testEnv.authenticatedContext(VISITOR_A).firestore();
+    const legacy = await asVisitorA.collection("conversations").doc(CONV_A).get();
+    if (legacy.data().kind !== undefined) throw new Error("legacy fixture unexpectedly has a kind field");
+    const asOwnerA = testEnv.authenticatedContext(OWNER_A).firestore();
+    await assertSucceeds(asOwnerA.collection("conversations").doc(CONV_A).get());
+    await assertSucceeds(asOwnerA.collection("conversations").doc(CONV_A).collection("messages").get());
+  });
+
+  it("R14. Agent-share owner inbox query still works while Reception docs exist", async () => {
+    const asOwnerA = testEnv.authenticatedContext(OWNER_A).firestore();
+    const snap = await asOwnerA.collection("conversations").where("ownerId", "==", OWNER_A).get();
+    if (snap.empty) throw new Error("agent-share owner inbox returned nothing");
+  });
+});
