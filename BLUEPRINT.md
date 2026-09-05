@@ -337,6 +337,14 @@ Listing Approvals.dc.html?case=<INTERNAL_PROPERTY_ID>&open=conversation&from=wor
 
 **ไม่แตะ**: senderType / actor attribution / customer privacy / caseMessages / watchCaseMessages / loadThread / _stick / _scrollToLatest / _openScroll / unread / Suggested Replies / translation / composer / C1 / C2 / C3.1 deep-link / Track Submission / Firestore Rules
 
+**✅ PHASE C3 = COMPLETE / PRODUCTION PASS (4 ก.ย. 2569)** — ทดสอบบนไซต์จริงทั้ง C3.1 และ C3.2
+
+**C3.1**: Staff Workspace → "เปิดงาน" เปิด canonical Property Case ตัวจริง · Listing Approvals เปิดเคสนั้นและ Case Conversation ให้อัตโนมัติ **ไม่ต้องกดเปิดบทสนทนาอีกครั้ง** · chat panel พื้นขาว แยกสายตาชัด สูงกว่าเดิม ลากปรับขนาดจากขอบบนได้ · scroll ข้อความด้านในยังแยกอิสระ · Suggested Replies / translation / composer / unread / actor identity / case isolation / scroll ครบ · **เปิด/อ่านเคสไม่เปลี่ยน assignment และ reviewStatus**
+
+**C3.2**: การ์ดแต่ละใบแสดง workflow completion (ทดสอบจริง: `ข้อมูลครบ 9/19 · 47%`) ตรงกับ Listing Approvals เพราะใช้ `intake-workflow.js` ตัวเดียวกัน · **ไม่เพิ่ม per-case read และไม่เพิ่ม realtime listener** · message preview เลื่อนไว้โดยเจตนา ไม่เพิ่ม field ใหม่
+
+---
+
 ### C3.2 — Staff Workspace Enrichment (4 ก.ย. 2569) — ทำบางส่วน
 
 **✅ ส่วนที่ทำ: Workflow Progress** บนการ์ดทุกใบใน Staff Workspace แสดง `ข้อมูลครบ 9/19 · 47%` + แถบ progress
@@ -354,6 +362,185 @@ Listing Approvals.dc.html?case=<INTERNAL_PROPERTY_ID>&open=conversation&from=wor
 **ข้อควรพิจารณาด้านความปลอดภัยของทางเลือกที่ 2**: field นี้อยู่บน property doc ซึ่ง **ลูกค้าที่มี trackToken อ่านได้** → เก็บข้อความของ **ลูกค้าเอง** ยังพอรับได้ (เป็นข้อความตัวเอง) แต่ **ห้าม**เก็บข้อความฝั่งทีมงานลงไปด้วย · เคสเก่าจะไม่มี field นี้ ต้อง fallback แสดงเฉพาะเวลา
 
 **คำแนะนำ**: ทางเลือก 2 คือทางที่ถูก แต่ควรเป็นเฟสย่อยของตัวเอง (แก้ `firebase-client.js` + data model) — **รอ PO อนุมัติ** รอ C3.1 ผ่าน production ก่อน
+
+---
+
+### 26.14 C4 REVISED BLUEPRINT — Reception AI → Case Lifecycle (4 ก.ย. 2569, 🔒 ARCHITECTURE LOCKED, ยังไม่ implement)
+
+#### 26.14.0 ⚠️ การแก้ข้อเท็จจริงจาก C4 Audit รอบแรก
+
+Audit รอบแรกสรุปว่า "บทสนทนา AI เก็บใน `conversations/`" — **ไม่ถูกต้องทั้งหมด**
+
+ตรวจโค้ดจริงพบว่า `_startFirestoreConversation()` ถูกเรียกจาก `_maybeAutoTriggerFromCollectionLink()` **เท่านั้น** และ `resolveSenderIdentity(senderId)` บนเซิร์ฟเวอร์ **throw** ถ้า senderId ไม่ใช่ `listers/{id}` หรือ `adminUsers/{id}` ที่มีจริง
+
+**สรุปสถานะจริง**:
+
+| ทราฟฟิก | ที่เก็บ | ทนทานข้ามอุปกรณ์? |
+|---|---|---|
+| เข้าจาก **share/collection link ของ agent** | `conversations/{ownerId}__{visitorId}` (Firestore) | ✅ |
+| **ผู้เยี่ยมชมทั่วไป** (Home, ContactRail ปกติ) | `localStorage` เท่านั้น (`hh_chat_history`) | ❌ **ไม่มีการเก็บฝั่งเซิร์ฟเวอร์เลย** |
+
+`conversations/` จึงเป็นระบบ **agent share-link** ไม่ใช่ Reception AI · **Reception AI ทั่วไปไม่มีที่เก็บถาวรอยู่เลยในวันนี้** → นี่คือช่องว่างที่แท้จริงของ C4 (Advisory context ทั้งหมดหายทุกครั้งที่ล้าง cache) และ `allow create: if false` บน `conversations` หมายความว่า client สร้างเองไม่ได้ ต้องผ่าน Cloud Function เท่านั้น
+
+#### 26.14.1 Lifecycle ที่ล็อก
+
+`general → advisory → qualified → case` (คงอยู่ที่ general/advisory ตลอดไปได้ — **ไม่ใช่ทุกบทสนทนาต้องเป็น Case**)
+
+**ชื่อฟิลด์ที่แนะนำ**: `conversationStage` (ค่า `general`/`advisory`/`qualified`/`case`) — **ไม่ใช้ `status`** เพราะ `status: "ai_handling"` มีอยู่แล้วและมีความหมายอื่น (สถานะ handoff ไม่ใช่ lifecycle) การ overload จะซ้ำรอย `source` ที่เคยเตือนไว้
+
+#### 26.14.2 Intent taxonomy
+
+`primaryIntent` (string เดียว) + `secondaryIntents[]` (array) — **string ไม่ใช่ enum ใน rules** เพื่อเพิ่มประเภทใหม่ได้โดยไม่แก้ schema/rules
+
+`SELL` · `RENT_OUT` · `BUY` · `RENT` · `VALUATION` · `MARKET_ADVICE` · `PROPERTY_ADVICE` · `LEGAL_GENERAL` · `PROPERTY_SEARCH` · `SPECIFIC_PROPERTY_INTEREST` · `OTHER`
+
+#### 26.14.3 Minimum Case Gate แยกตามประเภท (ไม่ใช้ gate เดียวรวม)
+
+| Case | เกณฑ์ขั้นต่ำ |
+|---|---|
+| **SELL** | intent ชัด + ชื่อ + ช่องทางติดต่อ + **ระบุทรัพย์/ทำเลได้พอรู้ว่าเคสนี้คือทรัพย์ไหน** |
+| **RENT_OUT** | เหมือน SELL แต่ intent = ปล่อยเช่า |
+| **BUY** | intent ชัด + ชื่อ + ติดต่อ + **ความต้องการที่มีความหมาย หรือ** สนใจทรัพย์เจาะจง |
+| **RENT** | เหมือน BUY แต่ intent = เช่า |
+| **SPECIFIC_PROPERTY_INTEREST** | ทรัพย์ public ที่ระบุตัวได้ + ความสนใจที่ actionable + ติดต่อได้พอตามงาน |
+
+**ข้อสังเกตสำคัญ**: SELL/RENT_OUT map ลง `properties` ได้ตรง ๆ (มี `source="owner_submission"` + workflow อยู่แล้ว) แต่ **BUY/RENT ไม่มีที่อยู่ใน data model ปัจจุบันเลย** — `properties` คือทรัพย์ ไม่ใช่ความต้องการซื้อ ตรงนี้คือ Demand Profile ตาม §26.2 ที่ยังไม่ได้สร้าง → **BUY/RENT Case ต้องเลื่อนไปหลัง Demand Profile** ไม่ควรยัดลง `properties`
+
+#### 26.14.4 Lead vs Conversation vs Case
+
+`Conversation` (มีคนคุยกับเรา) → `Advisory Lead` (มีคุณค่าเชิงพาณิชย์ ยังไม่มีเคส) → `Qualified Lead` (intent actionable กำลังเก็บข้อมูลขั้นต่ำ) → `Case` (งานจริงที่ Staff ต้องดูแล)
+
+**ล็อก: ห้ามสร้าง record ใน `leads/` ให้ทุกบทสนทนา AI** — pre-Case qualification เก็บเป็น **metadata บน conversation** จนกว่าจะ convert จริง (เลี่ยงระบบ Lead ซ้ำกับ C0)
+
+#### 26.14.5 One customer / multiple Cases
+
+ล็อก: **เบอร์โทร / อีเมล / anonymous uid ไม่ใช่ Case key** · ลูกค้าเดียว + เรื่องเดิม → เคสเดิม · ลูกค้าเดียว + ทรัพย์/เรื่องใหม่ → **เคสใหม่** · กำกวม → AI ถามสั้น ๆ · Customer identity กับ Case identity แยกกันเด็ดขาด
+
+#### 26.14.6 Human handoff = ถาวร
+
+ฟิลด์ที่แนะนำ: **`humanHandlingStartedAt`** (timestamp, additive, บน property doc) เขียน **ครั้งแรกครั้งเดียว** ตอน Staff/Owner รับผิดชอบเคสครั้งแรก
+
+เงื่อนไขตัด AI = `humanHandlingStartedAt` **มีค่า** — **ไม่ใช่** `assignedToEmail` ที่ว่างได้ (C2 ให้ Owner คืนเคสได้ → assignment กลับเป็นค่าว่าง แต่ AI **ต้องไม่**กลับมาตอบเองอัตโนมัติ) และ **ไม่ใช่** `reviewStatus` (C2 แยกไว้แล้ว) · หลังจากนั้น AI เป็น **Staff Copilot** เท่านั้น
+
+#### 26.14.7 conversations ↔ caseMessages อยู่ร่วมกันอย่างไร
+
+**ก่อนมีเคส** → `conversations` (Reception thread) · **เมื่อสร้างเคส** → `properties/{id}/caseMessages` เป็น canonical ทันที · **ห้ามสร้างระบบที่สาม**
+
+`conversations` เก็บ `linkedCaseIds[]` (array — รองรับหลายเคสต่อ visitor โดยไม่ต้องแก้ id scheme `ownerId__visitorId`) · Reception thread **ยังอยู่ต่อ** เป็น "โต๊ะต้อนรับ" ไม่ใช่ที่คุยเคส · สำเนาบทสนทนาช่วง gate ลง `caseMessages` **ครั้งเดียว** เป็น `senderType:"system"` เพื่อ provenance (ไม่ replay ทุกข้อความ)
+
+**Case creation เปิดใช้ Case Conversation ทันที** — assignment ไม่ใช่ตัวเปิด (§15 ล็อก) เคสที่ยังไม่มีผู้รับผิดชอบรับข้อความลูกค้าได้แล้ว
+
+#### 26.14.8 ข้อควรระวังด้านความปลอดภัยที่พบ
+
+1. **`role` vs `senderType` ชนกัน**: `conversations` ใช้ `role: customer|ai|owner` โดย `owner` = เจ้าของทรัพย์/lister · `caseMessages` ใช้ `senderType: customer|ai|staff|system` โดยไม่มี `owner` → **ห้าม map `owner` → `staff` ตรง ๆ** จะทำให้ lister กลายเป็นทีมงาน
+2. **`isPublicOwnerSubmission()` ไม่มี field allow-list** → ผู้ไม่ล็อกอินตั้ง `assignedToEmail`/`reviewStatus`/`humanHandlingStartedAt` เองได้ · ปลอดภัยวันนี้เพราะมีแค่ฟอร์มเราเรียก แต่ถ้า AI สร้างเคสได้ต้อง **ปิดช่องนี้ก่อน** → เป็นเหตุผลหลักที่ Case creation ต้องทำฝั่งเซิร์ฟเวอร์
+3. **anonymous uid ไม่ทนทาน** (หายเมื่อล้าง cache/เปลี่ยนเบราว์เซอร์) → ต้องไม่เป็น Case identity ถาวร · `trackToken` ยังเป็นกุญแจ re-entry จริง และควรออกจาก **เซิร์ฟเวอร์** (วันนี้สร้างในเบราว์เซอร์)
+
+#### 26.14.9 CHANNEL ≠ CASE
+
+LINE / Facebook / Web ไม่ใช่เคสแยก · `channel` เป็น metadata ระดับข้อความ · `caseSource` เป็น provenance ระดับเคส · ทุกช่องทาง route เข้า canonical Case เดียวกัน
+
+#### 26.14.10 ลำดับ implementation ที่แนะนำใหม่
+
+| เฟส | เนื้อหา | ความเสี่ยง |
+|---|---|---|
+| **C4.1** | Reception AI persistence + `conversationStage`/`primaryIntent` classification **อ่าน/เขียน metadata เท่านั้น ไม่สร้างเคส** | ต่ำ — ย้อนกลับได้ |
+| **C4.2** | `humanHandlingStartedAt` (additive) + เงื่อนไขตัด AI | ต่ำ |
+| **C4.3** | `createCaseFromConversation` callable + ปิดช่อง `isPublicOwnerSubmission()` + server-side trackToken — **SELL/RENT_OUT เท่านั้น** | **สูงสุด** — แตะ rules ที่ Owner Submission ใช้จริง |
+| **C4.4** | Post-Case canonical messaging ผ่าน `addCaseMessage` | กลาง |
+| **C4.5** | Staff confirmation UI สำหรับข้อมูลที่ AI สกัดได้ | ต่ำ |
+| **เลื่อน** | BUY/RENT Case (ต้องมี Demand Profile ก่อน) · Case Selector · omnichannel · analytics · matching | — |
+
+**เลื่อนทั้งหมดจนกว่า PO อนุมัติทีละเฟส**
+
+---
+
+### 26.15 DEMAND PROFILE — ระบบแกนหลัก (Core System) (4 ก.ย. 2569, 🔒 ARCHITECTURE LOCKED, ยังไม่ implement)
+
+**หลักการธุรกิจที่ล็อก**: `DEMAND ↔ MATCHING ↔ SUPPLY` — ความต้องการซื้อ/เช่าเป็น **ข้อมูลธุรกิจแกนหลัก ไม่ใช่ metadata รอง** · `properties` = SUPPLY · `demands` = DEMAND · **ห้ามเก็บความต้องการซื้อ/เช่าใน `properties`**
+
+#### 26.15.1 การค้นพบสำคัญ: predicate สำหรับ matching มีอยู่แล้ว
+
+`Search Results.dc.html` มีฟังก์ชัน filter ที่ทำ comparison แบบเดียวกับที่ Matching Engine ต้องใช้อยู่แล้ว:
+
+```
+f.type && p.type !== f.type          → propertyTypes[]
+f.status && p.status !== f.status    → demandType (sale/rent)
+f.priceMax && p.price > priceMax     → budgetMax
+f.bedroomsMin / f.bathroomsMin       → bedroomsMin / bathroomsMin
+f.features.every(x => p.features.includes(x))  → mustHave[]
+```
+
+**ดังนั้น Demand field ต้อง mirror ชื่อ filter ที่มีอยู่ให้ตรงเป๊ะ** จะได้ reuse ตรรกะเดิมเป็น matcher รุ่นแรกโดยไม่เขียนใหม่ และไม่มีปัญหา field drift
+
+**Supply schema จริง** (จาก Search Results): `type` · `status` · `price` · `currency` · `area` · `zone` · `bedrooms` · `bathrooms` · `livingArea` · `features[]` · `collections`
+**Zone vocabulary จริง** (`ZONE_COORDS` ใน data.js, 17 โซน): Khao Tao, Hin Lek Fai, Khao Takiab, Thap Tai, Soi 88, Hua Hin Town, Dolphin Bay, Pak Nam Pran, Wang Phong, Pranburi Forest, Sam Roi Yot, Nong Chumsaeng, Pranburi Beach, Cha-am Beach, Nong Kae, Cha-am Hillside, Cha-am Town → `preferredZones[]` **ต้องใช้คำเดียวกันนี้** ไม่ใช่ free text
+
+#### 26.15.2 Demand Profile — minimum scalable set
+
+`demands/{demandId}` — id **สร้างใหม่** (เช่น `dem-<ts>-<rand>`) **ห้ามใช้เบอร์โทร/อีเมลเป็น id**
+
+**แกน**: `demandType` (`BUY`/`RENT`) · `demandStage` · `customerName` · `contact` · `contactMethod` · `createdAt` · `updatedAt`
+**Matching (mirror ชื่อ filter เดิม)**: `budgetMin` · `budgetMax` · `preferredZones[]` · `propertyTypes[]` · `bedroomsMin` · `bathroomsMin` · `livingAreaMin` · `landSizeMin`
+**ความแรงของเงื่อนไข**: `mustHave[]` · `niceToHave[]` · `exclude[]` (ใช้ feature vocabulary เดียวกับ `p.features`)
+**บริบท**: `specificPropertyIds[]` · `requirementSummary` (free text) · `moveInDate` · `timeline` · `leaseMonths`
+**Provenance/ops**: `caseSource` · `channel` · `conversationId` · `assignedToUid`/`assignedToEmail`/`assignedAt`/`assignedBy*` (pattern เดียวกับ C2) · `humanHandlingStartedAt` (pattern เดียวกับ §26.14.6) · `qualifiedAt` · `lastCustomerActivityAt` · `lastStaffActionAt` · `lastMatchedAt`
+
+**ไม่เก็บ**: สัญชาติ/ข้อจำกัดการถือครอง **เว้นแต่จำเป็นเชิงปฏิบัติการจริง** (ข้อมูลอ่อนไหว เก็บเมื่อมีเหตุผล)
+
+#### 26.15.3 Demand lifecycle
+
+`identified → collecting → qualified → active → matched → viewing → negotiating → converted` + `paused` / `closed` / `expired`
+
+ฟิลด์: **`demandStage`** (สอดคล้องกับ `conversationStage` ใน §26.14.1 — ไม่ใช้ `status` เพราะ `status` บน property มีความหมายอื่นแล้ว)
+
+**แยก 3 เรื่องให้ชัด**: *Demand created* (มี record) ≠ *Demand qualified* (ผ่าน gate) ≠ *Demand ready for Staff action* (ข้อมูลพอให้ทีมงานลงมือ)
+
+#### 26.15.4 จับ Demand ให้เร็ว (ล็อก)
+
+`"ผมหาบ้านซื้อ งบ 5 ล้าน"` = **Demand ที่มีค่าเชิงพาณิชย์แล้ว** → สร้าง `demands` doc ที่ `identified` ทันที **ไม่ต้องรอข้อมูลครบ** แล้วค่อยเก็บเพิ่มแบบธรรมชาติ (โซน? ห้องนอน? สระ? ช่วงเวลา?) · **ห้ามถามซ้ำสิ่งที่ลูกค้าบอกแล้ว**
+
+#### 26.15.5 BUY/RENT gate
+
+**BUY**: intent ชัด + ชื่อ + ติดต่อได้ + (ความต้องการที่มีความหมาย **หรือ** ทรัพย์เจาะจง)
+**RENT**: เหมือนกัน + intent = เช่า
+"ความต้องการที่มีความหมาย" ขั้นต่ำ = **งบ** หรือ **โซน** หรือ **ประเภททรัพย์** อย่างน้อยหนึ่งอย่าง (พอให้ match หยาบ ๆ ได้)
+
+#### 26.15.6 Specific property interest → Demand
+
+สนใจ `HH-12345` → `specificPropertyIds: ["HH-12345"]` · ถ้าลูกค้าบอกภายหลังว่า "ถ้าหลังนี้ขายแล้ว หาคล้ายกันให้ด้วย" → **ขยาย Demand เดิม** (เติม budget/zone/type จากทรัพย์นั้นเป็นค่าเริ่มต้น) **ห้ามสร้าง Demand ใหม่อัตโนมัติ**
+
+#### 26.15.7 Matching (อนาคต — ยังไม่สร้าง)
+
+**สองทิศทางบังคับ**: Demand ใหม่ → หา Property ที่ตรง · **Property ใหม่ → หา Demand ที่ตรง** ("ทรัพย์ใหม่นี้ตรงกับความต้องการผู้ซื้อ 14 ราย")
+
+`matches/{matchId}`: `demandId` · `propertyId` · `matchScore` · `reasons[]` · `matchedAt` · `source` · `staffReviewed` · `customerContacted` · `viewingId` · `outcome` · lifecycle `Suggested → Sent → Interested → Viewing → Negotiating → Won/Lost` (ตาม §26.3)
+
+**Score**: hard filter ก่อน (`demandType`↔`status`, `exclude`, `mustHave`, งบ) แล้วให้คะแนนถ่วงน้ำหนัก (budget fit / zone / type / beds / baths / size / niceToHave / timing) · ≥90% strong · ≥75% acceptable · ต่ำกว่า threshold ไม่แนะนำ
+
+**Viewing**: `Customer ↔ Demand ↔ Property ↔ Viewing` — เก็บ `demandId` + `matchId` บน viewing เพื่อตอบได้ว่า *ทำไม*ลูกค้ารายนี้ดูทรัพย์หลังนี้ และ match ไหนทำให้เกิด
+
+#### 26.15.8 Query/cost strategy
+
+**ห้าม scan ทั้ง collection** · Demand → Property: query `properties` ด้วย equality (`status`, `type`) + range เดียว (`price`) แล้วกรอง zone/features ฝั่ง client (Firestore จำกัด range filter ต่อ query) · Property → Demand: query `demands` ด้วย `demandStage == "active"` + `demandType` แล้วกรองในหน่วยความจำ — **จำนวน active demand เล็กกว่า property มาก จึงถูกกว่า** · ต้องมี composite index: `(demandStage, demandType, updatedAt)` และ `(status, type, price)`
+
+#### 26.15.9 Security / privacy
+
+`demands` มีข้อมูลติดต่อ + ความชอบของลูกค้า → **ห้าม public read** · Staff/Owner (`isAdmin()`) อ่าน/เขียนได้ · ลูกค้าเข้าถึง Demand ของตัวเองได้ผ่าน **capability token** แบบเดียวกับ `trackToken` (anonymous uid ไม่ทนทาน) · **ห้ามใส่ internal note ใน document ที่ลูกค้าอ่านได้** (บทเรียนจาก C1) · AI อ่านได้เท่าที่จำเป็นและต้องผ่าน Cloud Function เท่านั้น (เหมือน `role:"ai"` ใน conversations)
+
+#### 26.15.10 Supply/Demand umbrella (แนวคิด — ห้าม rename ของเดิม)
+
+```
+CUSTOMER
+├── SUPPLY CASE  (SELL / RENT_OUT)  → properties/{internalPropertyId}   ← ของจริงวันนี้
+└── DEMAND CASE  (BUY / RENT)       → demands/{demandId}                ← ใหม่
+```
+
+**Backward compatibility บังคับ**: ห้าม rename Property Case architecture ที่ใช้งานจริง · `source="owner_submission"` ไม่แตะ · `caseMessages` ยังเป็น canonical thread ของ Supply Case · Demand Case จะต้องมี thread ของตัวเองในอนาคต (`demands/{id}/caseMessages` — pattern เดียวกัน คนละ parent) **ไม่ใช่ระบบแชทที่สาม**
+
+#### 26.15.11 ผลต่อลำดับ implementation
+
+C4.1 (Reception persistence + classification) **เริ่มได้เลยก่อน Demand Profile** — เพราะ C4.1 เขียน metadata บน conversation เท่านั้น ไม่สร้าง Case/Demand · Demand Profile กลายเป็น **C5** (ระบบแกนหลัก ไม่ใช่ของเลื่อน) · BUY/RENT Case ขึ้นกับ C5 · Matching เป็น C6
 
 ---
 
@@ -1657,3 +1844,72 @@ Mission 01 (QA & Review Standard Framework) และ Mission 02 (SEO Foundation
   - No `addDoc`/`setDoc`/`updateDoc`/`deleteDoc`/`writeBatch`/`runTransaction`/`uploadBytes`/`deleteObject` exists anywhere in the file — confirmed by direct source search, not inference.
   - Real deletion remains locked pending: backup/export/snapshot verification, a rollback engine, and a separate Product Owner-approved execution phase.
   - See `RELEASE-NOTES-Step9.md` for full detail.
+
+---
+
+### 26.16 C4.2a Implementation Record — Permanent Human-Handoff Marker (5 ก.ย. 2569)
+
+**Product decision (ยืนยันแล้ว, ล็อก)**: `Qualified Reception → Property Case` **ต้องมีการยืนยันจากลูกค้าอย่างชัดเจน** — ห้ามสร้างเคสอัตโนมัติเพียงเพราะ `qualifiedAt` หรือเงื่อนไขข้อมูลครบ
+
+**ลำดับเฟส C4.2 (ล็อก)**:
+
+| เฟส | ขอบเขต | สถานะ |
+|---|---|---|
+| **C4.2a** | `humanHandlingStartedAt` + เงื่อนไขตัด AI ถาวร | ✅ implement แล้ว (เฟสนี้) |
+| **C4.2b** | `createCaseFromConversation` + provenance message (**ต้องมี customer confirmation**) | ยังไม่เริ่ม |
+| **C4.2c** | Canonical post-Case messaging ผ่าน `addCaseMessage` | ยังไม่เริ่ม |
+
+C4.2a ต้องมาก่อน C4.2b โดยเจตนา: วินาทีที่ C4.2b สร้างเคสได้ เคสนั้นถูกมนุษย์แตะได้ทันที — ถ้า marker ยังไม่มีอยู่ก่อน จะไม่มีบันทึกถาวรว่าเคยมีมนุษย์เข้ามา และ AI อาจกลับมาตอบเองเมื่อเคสถูกคืนคิว
+
+**ฟิลด์**: `humanHandlingStartedAt` (timestamp, additive, บน property doc) — ตาม §26.14.6
+
+**จุดเขียน**: `assignCase()` ใน `firebase-client.js` **ที่เดียว** (ตรวจแล้ว: `Listing Approvals.dc.html` เป็น caller เดียว ทั้ง claim/reassign/release · `Staff Workspace.dc.html` ไม่มีคำสั่งเขียนเลย) — ไม่มี write ซ้ำใน UI component ใด
+
+**ลำดับการเขียน (สำคัญ — legacy-release safety)**: stamp marker **ก่อน** setDoc ของ assignment
+
+เหตุผล: เคสเก่า (ถูกมอบหมายก่อนฟิลด์นี้เกิด) มี assignment fields แต่ไม่มี marker → **assignment fields คือหลักฐานเดียว**ที่บอกว่าเคยมีมนุษย์ดูแล · การคืนเคสจะลบหลักฐานนั้น · ถ้า stamp ทีหลังแล้วล้มเหลว เคสจะเหลือ "ไม่มีผู้รับผิดชอบ + ไม่มี marker" = หลักฐานหายและ AI autonomy กลับมามีสิทธิ์โดยผิดพลาด
+
+**เงื่อนไข stamp**: พยายาม stamp เมื่อมีมนุษย์อยู่ **ฝั่งใดฝั่งหนึ่ง** ของ transition
+
+```
+wasAssignedToHuman  = !!(previous.uid || previous.email)   ← ครอบคลุมเคสเก่า: release / reassign / claim ซ้ำ
+isBecomingAssigned  = !!(next.uid || next.email)           ← มอบหมายให้คนตอนนี้
+
+stamp เมื่อ  wasAssignedToHuman || isBecomingAssigned
+```
+
+เคสที่ไม่มีมนุษย์ทั้งสองฝั่ง (เช่นคืนเคสที่ว่างอยู่แล้ว) **ไม่ stamp** — ไม่มีหลักฐาน ไม่สร้าง marker ไม่ migrate
+
+**Fail closed เฉพาะทางเดียว**: `wasAssignedToHuman && !isBecomingAssigned && !markerPresent` → **throw ไม่ทำ setDoc** (คืนเคสไม่สำเร็จ ลองอีกครั้ง) · ทางอื่นเดินต่อได้แม้ stamp ล้มเหลว เพราะเคสยังลงเอยด้วยการมีผู้รับผิดชอบ → `isCurrentlyAssignedToHuman()` ปิด AI ให้อยู่แล้ว และ action มอบหมายครั้งถัดไปจะ stamp ให้
+
+**write-once (atomic)**: `_stampHumanHandling()` ใช้ **Firestore transaction** — อ่าน+เขียนเป็น operation เดียว · **เมื่อมีค่าแล้ว ไม่มีอะไรเขียนทับได้** (transaction แรกที่ commit ชนะ ที่เหลือเห็นค่าเดิมแล้วไม่แตะ) · แยกออกจาก `fields` โดยเจตนา ทำให้ assignment write คงรูปเดิมทุกฟิลด์ (C2 ไม่ถูกแตะ) และยังมี assignment writer เดียว
+
+**ข้อจำกัดที่ต้องพูดตรง ๆ**: invariant ที่รับประกันคือ **marker มีอยู่ถาวรและเขียนทับไม่ได้** — ไม่ได้รับประกันว่า timestamp คือ "event มอบหมายแรกสุดตามเวลาจริง" เป๊ะ ๆ ถ้ามี assignment write สองรายการแข่งกันก่อน marker transaction · ค่าที่สำคัญคือ **การมีอยู่** ของ marker ไม่ใช่ความแม่นระดับมิลลิวินาที
+
+**คืนเคส** (`target = null`) ไม่ stamp และไม่ลบ marker · **มอบหมายต่อ** ไม่ reset ค่าเดิม · `reviewStatus` ไม่เกี่ยวข้องกับฟิลด์นี้เลย
+
+**เงื่อนไขตัด AI** (export ใหม่, read-only, ไม่มี side effect) = **ที่เดียว** ที่ตอบว่า AI ยังตอบลูกค้าเองได้ไหม:
+
+```
+aiAutonomyAllowedForCase(prop) = !isHumanHandled(prop) && !isCurrentlyAssignedToHuman(prop)
+```
+
+| สถานะเคส | AI autonomy |
+|---|---|
+| marker มีค่า | **false ถาวร** (แม้คืนเคสแล้วก็ไม่กลับมา) |
+| marker ว่าง + มีผู้รับผิดชอบอยู่ | **false** (legacy safety) |
+| marker ว่าง + ไม่มีผู้รับผิดชอบ | อาจ true — ขึ้นกับกติกา C4.2c ต่อไป |
+
+**`isCurrentlyAssignedToHuman()` = backward-compatibility safety เท่านั้น** สำหรับเคสเก่าที่ถูกมอบหมายก่อนฟิลด์นี้เกิด (ไม่มี marker แต่มนุษย์ดูแลอยู่จริง) · **ห้ามใช้เป็นกติกาถาวร** เพราะ assignment fields ลบได้ (C2 ให้คืนเคสได้) → check นี้ปิดแล้วเปิดกลับได้ · ปลอดภัยเพราะมันทำได้แค่ **เพิ่ม** เหตุผลปิด AI ไม่เคย re-enable AI บนเคสที่มี marker
+
+ยังใช้ AI เป็น Staff copilot / suggested reply ภายในได้ — ฟิลด์นี้คุมเฉพาะ autonomous customer-facing reply
+
+**C2 คงเดิมทั้งหมด**: claim/release/reassign ไม่แตะ `reviewStatus` · assignment ↔ review ยังแยกกัน · `assignedTo*` ≠ actor
+
+**Backward compatibility**: เคสเก่าที่ไม่มี marker ใช้งานได้ปกติ · **ไม่มี bulk migration** · **ไม่สร้าง timestamp ย้อนหลัง** · เคสเก่าที่ถูก claim/reassign หลัง release นี้ จะได้ marker จาก action แรกนั้น
+
+**Firestore Rules**: **ไม่แก้** — `properties` `allow update` มีสาขา `isOwner()` และ `isStaffOnly() && staffStatusOk()` ที่อนุญาต field ใด ๆ อยู่แล้ว · การ hardening `isPublicOwnerSubmission()` allow-list (§26.14.8 ข้อ 2) **ยังเป็นงานแยก ยังไม่ทำ**
+
+**ไม่แตะในเฟสนี้**: Reception lifecycle · `receptionTurn` qualification · การสร้าง Property Case · `linkedCaseIds` · การย้าย message · `firestore.rules` · `functions/index.js` · Owner Submission · Leads · C0–C3
+
+**Finding (บันทึกไว้)**: `Owner Submission.dc.html` **ไม่เคยเขียน** `workflowVersion` — ทำงานได้เพราะ `intake-workflow.js` default เป็น `intake_v1` · เคสที่ AI สร้างใน C4.2b ควรเขียนค่านี้ตรง ๆ

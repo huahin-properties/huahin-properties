@@ -1338,6 +1338,54 @@ export async function assignCase(propertyId, target) {
     assignedByEmail: actor.senderEmail || "",
     assignedByRole: actor.senderRole || "",
   };
+  // ── C4.2a — PERMANENT HUMAN-HANDLING MARKER (write-once) ──────────────
+  // The first time a human ever takes responsibility for this Case, stamp
+  // humanHandlingStartedAt. From then on the Case is permanently "human
+  // handled": autonomous customer-facing AI replies for it must NEVER
+  // resume, even if it is later released and sits unassigned.
+  //
+  // Why a separate field instead of reading the assignment fields: C2
+  // deliberately lets an Owner RELEASE a case (target = null → assignedTo*
+  // back to empty) without that meaning "nobody was ever here". So
+  // assignedToUid/assignedToEmail/assignedAt are all legitimately
+  // clearable and can never express permanent history. reviewStatus and
+  // listingStatus are likewise mutable and mean something else entirely.
+  //
+  // ── C4.2a — stamp the permanent marker BEFORE the assignment write ──────
+  // Ordering matters. A legacy Case (assigned before this field existed) has
+  // assignment fields but no marker, so its assignment fields ARE the only
+  // surviving evidence that a human ever handled it. A release clears them.
+  // Stamping afterwards would mean a failed stamp leaves the Case unassigned
+  // AND unmarked — evidence destroyed, and AI autonomy wrongly eligible.
+  // So the marker is established first, and the release is refused if it
+  // could not be.
+  //
+  // Attempted whenever a human is involved on EITHER side of the transition:
+  //   next.*     — being assigned to a human now
+  //   previous.* — was already assigned to a human before this action
+  // The second condition is what covers legacy release / reassign / re-claim.
+  // A Case with no human on either side (e.g. release of something already
+  // unassigned) is never stamped — no evidence, no marker, no migration.
+  const wasAssignedToHuman = !!(previous.uid || previous.email);
+  const isBecomingAssigned = !!(next.uid || next.email);
+  let markerPresent = false;
+  let humanHandlingStarted = false;
+  if (wasAssignedToHuman || isBecomingAssigned) {
+    const r = await _stampHumanHandling(String(propertyId));
+    markerPresent = r.markerPresent;
+    humanHandlingStarted = r.stamped;
+  }
+  // Fail closed on the ONE path where proceeding would destroy the evidence:
+  // releasing a Case that a human held, with no marker successfully in place.
+  // Every other path is safe to proceed on even if the stamp failed, because
+  // the Case still ends up assigned to a human and
+  // isCurrentlyAssignedToHuman() keeps AI autonomy off until a later
+  // assignment action stamps it.
+  if (wasAssignedToHuman && !isBecomingAssigned && !markerPresent) {
+    throw new Error(
+      "assignCase: ไม่สามารถคืนเคสได้ในขณะนี้ (บันทึกประวัติการดูแลโดยทีมงานไม่สำเร็จ) — กรุณาลองอีกครั้ง"
+    );
+  }
   // merge:true — reviewStatus and every workflow field are untouched by design.
   await setDoc("properties", String(propertyId), fields);
   // Immutable internal record. Structured fields, not just summary text, so an
@@ -1354,7 +1402,74 @@ export async function assignCase(propertyId, target) {
           : `รับงานเคส ${propertyId} (${next.email})`)
       : `คืนเคส ${propertyId} เข้าคิวรอมอบหมาย`,
   });
-  return { previous, next, fields };
+  return { previous, next, fields, humanHandlingStarted };
+}
+
+// C4.2a — establish humanHandlingStartedAt exactly once, atomically.
+//
+// Runs in a Firestore transaction so the read and the conditional write are
+// one operation: once a value is stored it can never be replaced by a
+// concurrent or repeated assignment. The first transaction to commit wins;
+// the rest observe the stored value and leave it alone.
+//
+// Returns { markerPresent, stamped }:
+//   markerPresent — the Case carries a marker now (already did, or we wrote it)
+//   stamped       — THIS call is the one that wrote it
+// On failure returns markerPresent:false so the caller can decide whether
+// proceeding is safe (see the fail-closed release guard in assignCase).
+//
+// Kept OUT of assignCase's own setDoc on purpose — the assignment write keeps
+// its exact existing shape and blast radius, so C2 is untouched, and there is
+// still only one assignment writer.
+async function _stampHumanHandling(propertyId) {
+  try {
+    const ref = db().collection("properties").doc(propertyId);
+    return await db().runTransaction(async (t) => {
+      const snap = await t.get(ref);
+      const d = snap.exists ? (snap.data() || {}) : {};
+      if (d.humanHandlingStartedAt) return { markerPresent: true, stamped: false };
+      t.set(ref, { humanHandlingStartedAt: Date.now() }, { merge: true });
+      return { markerPresent: true, stamped: true };
+    });
+  } catch (e) {
+    console.warn("humanHandlingStartedAt stamp failed for " + propertyId + ":", e);
+    return { markerPresent: false, stamped: false };
+  }
+}
+
+// C4.2a — the ONE place that answers "may AI still reply to the customer on
+// its own for this Case?". Read-only, additive, no side effects. Kept here so
+// C4.2c and any later AI surface share a single definition instead of each
+// re-deriving it from assignment fields (which is exactly the mistake this
+// phase exists to prevent).
+//
+// Returns true once a human has EVER handled the Case — permanently. AI may
+// still be used as an internal Staff copilot / suggested-reply tool; these
+// flags govern AUTONOMOUS CUSTOMER-FACING replies only.
+export function isHumanHandled(prop) {
+  return !!(prop && prop.humanHandlingStartedAt);
+}
+
+// Backward-compatibility safety ONLY. Cases assigned before
+// humanHandlingStartedAt existed carry no marker, so the permanent rule alone
+// would wrongly treat them as never-touched. A Case that is assigned to a
+// human RIGHT NOW is being handled by a human right now, marker or not.
+//
+// This is deliberately NOT part of the permanent rule: assignment fields are
+// clearable (C2 lets an Owner release a case), so this check can turn off AND
+// BACK ON. That is safe here precisely because it can only ever ADD a reason
+// to disable AI — it can never re-enable AI on a Case that carries the marker.
+export function isCurrentlyAssignedToHuman(prop) {
+  return !!(prop && (prop.assignedToUid || prop.assignedToEmail));
+}
+
+// The single cutoff predicate. AI autonomous customer-facing handling is
+// allowed only when BOTH are false:
+//   • marker present            → disabled PERMANENTLY (forever, even after release)
+//   • currently assigned         → disabled while assigned (legacy safety)
+// marker absent + unassigned    → allowed, subject to later C4.2c rules.
+export function aiAutonomyAllowedForCase(prop) {
+  return !isHumanHandled(prop) && !isCurrentlyAssignedToHuman(prop);
 }
 
 // Authorized internal team members who may hold a Case. Owner-inclusive: an
