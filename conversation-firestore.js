@@ -8,8 +8,9 @@
 // Anonymous Auth is unreachable.
 //
 // REQUIRES (loaded in <helmet> before this module is imported):
-//   firebase-app-compat.js, firebase-auth-compat.js, firebase-firestore-compat.js,
-//   firebase-functions-compat.js
+//   firebase-app-compat.js, firebase-auth-compat.js, firebase-firestore-compat.js
+//   (firebase-functions-compat.js is loaded on demand by this module if the
+//    host page didn't include it — see loadFunctionsCompat below)
 //
 // IDENTITY MODEL:
 //   visitorId = the customer's Firebase Anonymous Auth uid (never a
@@ -38,7 +39,51 @@ function getApp() {
 }
 function auth() { return getApp().auth(); }
 function db() { return getApp().firestore(); }
-function functions() { return getApp().functions("asia-southeast1"); }
+// Firebase compat SDK, same version as every page's <helmet> tags.
+const FUNCTIONS_COMPAT_SRC = "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js";
+let _fnSdkPromise = null;
+
+// Only index.html and Home.dc.html load firebase-functions-compat.js in
+// <helmet>; Property Details / Search Results / Contact / About load only
+// app + firestore + storage + auth. ContactRail's chat runs on ALL of them,
+// so on those pages app.functions was undefined and every Callable threw
+// "getApp(...).functions is not a function" BEFORE the request ever left the
+// browser (which is why receptionTurn logged 0 requests while the chat kept
+// working via the claudeComplete fallback). Loading the missing compat
+// module here fixes every page at once, in the SAME SDK mode/version, and
+// is a no-op on pages that already have the tag.
+function loadFunctionsCompat() {
+  if (_fnSdkPromise) return _fnSdkPromise;
+  _fnSdkPromise = new Promise((resolve, reject) => {
+    const existing = document.querySelector('script[src="' + FUNCTIONS_COMPAT_SRC + '"]');
+    if (existing) {
+      if (typeof getApp().functions === "function") { resolve(); return; }
+      existing.addEventListener("load", () => resolve());
+      existing.addEventListener("error", () => reject(new Error("firebase-functions-compat.js failed to load")));
+      return;
+    }
+    const s = document.createElement("script");
+    s.src = FUNCTIONS_COMPAT_SRC;
+    s.async = false;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error("firebase-functions-compat.js failed to load"));
+    document.head.appendChild(s);
+  });
+  return _fnSdkPromise;
+}
+
+// Region is unchanged (asia-southeast1) and must keep matching the deployed
+// Functions. Any failure here throws a plain Error with no Firebase `.code`,
+// which ContactRail's _receptionFallbackSafe() correctly reads as "the
+// callable was never invoked" — the one-AI-call invariant still holds.
+async function functionsAsync() {
+  if (typeof getApp().functions !== "function") await loadFunctionsCompat();
+  const app = getApp();
+  if (typeof app.functions !== "function") {
+    throw new Error("firebase-functions-compat.js loaded but app.functions() is still unavailable");
+  }
+  return app.functions("asia-southeast1");
+}
 
 let _signInPromise = null;
 // Signs the visitor in anonymously (once) and returns their real,
@@ -57,7 +102,7 @@ export async function getVisitorId() {
 // (server resolves the real ownerId from senderId) and writes the AI's
 // first greeting. Returns { conversationId, ownerId, ownerLabel }.
 export async function startConversation({ senderId, collectionIds, propertyRefs, greetingText }) {
-  const fn = functions().httpsCallable("startConversation");
+  const fn = (await functionsAsync()).httpsCallable("startConversation");
   const { data } = await fn({ senderId, collectionIds, propertyRefs, greetingText });
   return data;
 }
@@ -65,7 +110,7 @@ export async function startConversation({ senderId, collectionIds, propertyRefs,
 // Calls the sendConversationTurn Callable Function — writes the customer's
 // message, calls Claude, writes the AI's reply. Returns { reply }.
 export async function sendConversationTurn({ conversationId, system, messages, customerText }) {
-  const fn = functions().httpsCallable("sendConversationTurn");
+  const fn = (await functionsAsync()).httpsCallable("sendConversationTurn");
   const { data } = await fn({ conversationId, system, messages, customerText });
   return data;
 }
@@ -110,7 +155,7 @@ export function receptionConversationId(visitorId) {
 // zero Firestore writes happened.
 export async function receptionTurn({ system, messages, customerText, seedMessages, propertyRefs, collectionIds }) {
   await getVisitorId(); // callable requires an authenticated caller
-  const fn = functions().httpsCallable("receptionTurn");
+  const fn = (await functionsAsync()).httpsCallable("receptionTurn");
   const { data } = await fn({ system, messages, customerText, seedMessages, propertyRefs, collectionIds });
   return data;
 }
