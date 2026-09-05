@@ -13,6 +13,10 @@ const { onDocumentCreated, onDocumentWritten } = require("firebase-functions/v2/
 const { defineSecret } = require("firebase-functions/params");
 const admin = require("firebase-admin");
 const Stripe = require("stripe");
+// C4.2b — trackToken generation. Node's CSPRNG, server-side only. The token
+// must never be predictable: it is the ONLY credential a customer holds for
+// their own Case (see the trackToken branches in firestore.rules).
+const nodeCrypto = require("crypto");
 
 if (!admin.apps.length) admin.initializeApp();
 
@@ -242,6 +246,29 @@ const RECEPTION_TOOL = {
       },
       customerName: { type: "string", description: "Only if the visitor actually gave a name, else empty." },
       contact: { type: "string", description: "Only if the visitor actually gave a phone/email/LINE, else empty." },
+      // C4.2b — the MINIMAL structured property context. Deliberately three
+      // short free-text facts, NOT a property schema: they exist only so the
+      // server can tell a real actionable SELL/RENT_OUT inquiry from a weak
+      // phrase like "อยากขายบ้าน" WITHOUT counting characters in
+      // requirementsSummary (an AI-authored string, so its length measures the
+      // model's verbosity, not what the customer said).
+      //
+      // Each field must be left EMPTY unless the visitor actually stated that
+      // fact. Emptiness is the signal - a blank area/scale is what refuses a
+      // vague inquiry, so inventing a plausible value defeats the only gate
+      // protecting the Staff queue from junk Cases.
+      propertyBasics: {
+        type: "object",
+        description:
+          "ONLY for a visitor discussing THEIR OWN property to sell or rent out. " +
+          "Each field: exactly what the visitor said, in their own words, or an " +
+          "empty string. NEVER guess, infer, or fill from context.",
+        properties: {
+          kind: { type: "string", description: "What the property is, as stated: e.g. บ้านเดี่ยว, condo, land, townhouse. Empty if not stated." },
+          area: { type: "string", description: "Where it is, as stated: e.g. หัวหิน ซอย 70, Pranburi, Cha-am. Empty if not stated." },
+          scale: { type: "string", description: "ONE concrete size or price fact as stated: e.g. 3 ห้องนอน, 8 ล้าน, 2 ไร่. Empty if not stated." },
+        },
+      },
     },
     required: ["reply", "stage", "primaryIntent"],
   },
@@ -275,7 +302,21 @@ async function callClaudeReception(system, messages, apiKey) {
     requirementsSummary: typeof out.requirementsSummary === "string" ? out.requirementsSummary.slice(0, 600) : "",
     customerName: typeof out.customerName === "string" ? out.customerName.slice(0, 120) : "",
     contact: typeof out.contact === "string" ? out.contact.slice(0, 160) : "",
+    // C4.2b — normalised to a 3-string object ALWAYS present in the return
+    // value (never undefined), so every caller can read .kind/.area/.scale
+    // without guarding. Missing/omitted -> empty strings, which the gate
+    // treats as "not stated" and refuses.
+    propertyBasics: normalisePropertyBasics(out.propertyBasics),
   };
+}
+
+// C4.2b — trim/cap the three property-context strings. Short caps on purpose:
+// these are short factual phrases, not descriptions. Anything non-string
+// becomes "", which the gate reads as "not stated".
+function normalisePropertyBasics(pb) {
+  const s = (v, max) => (typeof v === "string" ? v.trim().slice(0, max) : "");
+  const o = pb && typeof pb === "object" ? pb : {};
+  return { kind: s(o.kind, 80), area: s(o.area, 120), scale: s(o.scale, 80) };
 }
 
 // receptionTurn: the ONLY write path for Reception AI conversations.
@@ -341,6 +382,10 @@ exports.receptionTurn = onCall(
         requirementsSummary: out.requirementsSummary,
         customerName: out.customerName || "",
         contact: out.contact || "",
+        // C4.2b — additive. Always seeded (possibly with empty strings) so the
+        // field's SHAPE is stable from the first write; the C4.2b gate then
+        // reads it without existence checks.
+        propertyBasics: out.propertyBasics,
         propertyRefs: Array.isArray(propertyRefs) ? propertyRefs.slice(0, 10) : [],
         collectionIds: Array.isArray(collectionIds) ? collectionIds.slice(0, 10) : [],
         // linkedCaseIds stays EMPTY in C4.1 - no Case/Demand is created here.
@@ -392,11 +437,293 @@ exports.receptionTurn = onCall(
     if (out.requirementsSummary) patch.requirementsSummary = out.requirementsSummary;
     if (out.customerName) patch.customerName = out.customerName;
     if (out.contact) patch.contact = out.contact;
+    // C4.2b — accumulate property context across turns, NEVER erase it.
+    // Only non-empty extractions are written, and they go in as a PARTIAL map:
+    // set({merge:true}) merges nested maps field-by-field, so writing
+    // { propertyBasics: { area: "หัวหิน" } } leaves an earlier kind/scale
+    // intact. Writing the whole normalised object here instead would blank
+    // previously-captured facts on any later turn that restates only one of
+    // them - which would make the gate flap between pass and fail.
+    const pbPatch = {};
+    if (out.propertyBasics.kind) pbPatch.kind = out.propertyBasics.kind;
+    if (out.propertyBasics.area) pbPatch.area = out.propertyBasics.area;
+    if (out.propertyBasics.scale) pbPatch.scale = out.propertyBasics.scale;
+    if (Object.keys(pbPatch).length) patch.propertyBasics = pbPatch;
     if (stage !== prev) patch.stageEnteredAt = now;
     if (stage === "qualified" && prev !== "qualified") patch.qualifiedAt = now;
     await convRef.set(patch, { merge: true });
 
     return { reply: out.reply, meta: out, persisted: true, conversationId, stage };
+  }
+);
+
+// ── C4.2b Step 1 — Qualified Reception conversation → canonical Property Case
+//
+// NOT REACHABLE FROM CUSTOMER UI IN THIS STEP. ContactRail has no confirmation
+// button yet (Step 2, separately approved), so the only way to invoke this is a
+// direct callable invocation. That is deliberate: the server logic is proven in
+// isolation before any customer-facing surface can trigger it.
+//
+// WHY A CALLABLE: the Admin SDK bypasses firestore.rules, which is what lets
+// this create a Case whose fields (reviewStatus, caseSource, trackToken) a
+// client must never be trusted to set. NO Rules change is required by this
+// phase - same reasoning as receptionTurn.
+//
+// REQUEST CONTRACT - { confirmed: true } AND NOTHING ELSE.
+// Every other key in the payload is ignored. The conversation is derived from
+// request.auth.uid, exactly as receptionTurn derives it. This is the phase's
+// central security property: a caller cannot name a conversation, a Case, a
+// property id, or a token, and cannot supply customer or property data. The
+// only thing a hostile client can do by calling this repeatedly is create ONE
+// Case from ITS OWN already-AI-classified conversation.
+//
+// Accepting a client-supplied propertyId/caseId "for convenience" would turn
+// the token-recovery path into an IDOR. Do not add it later.
+const CASE_INTENTS_C42B = { SELL: "sale", RENT_OUT: "rent" };
+
+// A contact must be USABLE, not merely non-empty: "จะบอกทีหลัง" ("I'll tell you
+// later") satisfies a presence check and would let a Case reach the Staff queue
+// with no way to reach the customer. Phone (>=8 digits after stripping
+// separators) OR email OR a LINE id.
+function isUsableContact(raw) {
+  const s = String(raw || "").trim();
+  if (s.length < 5) return false;
+  const digits = s.replace(/[^0-9]/g, "");
+  if (digits.length >= 8) return true;
+  if (/[^\s@]+@[^\s@]+\.[^\s@]+/.test(s)) return true;
+  if (/(line|ไลน์)\s*[:：]?\s*\S{3,}/i.test(s)) return true;
+  return false;
+}
+
+// The five-condition gate, evaluated ONLY against fields the server itself read
+// from the Reception document. Returns "" when the conversation may become a
+// Case, or a refusal code. Refusal codes are internal: the caller maps them to
+// a natural follow-up question and must never surface which field was missing.
+function receptionCaseGate(d) {
+  if ((d.conversationStage || "") !== "qualified") return "not_qualified";
+  if (!CASE_INTENTS_C42B[d.primaryIntent || ""]) return "intent_out_of_scope";
+  if (String(d.customerName || "").trim().length < 2) return "missing_name";
+  if (!isUsableContact(d.contact)) return "missing_contact";
+  const pb = d.propertyBasics || {};
+  if (!String(pb.kind || "").trim()) return "insufficient_property_info";
+  if (!String(pb.area || "").trim()) return "insufficient_property_info";
+  if (!String(pb.scale || "").trim()) return "insufficient_property_info";
+  return "";
+}
+
+exports.createCaseFromConversation = onCall(
+  { region: "asia-southeast1" },
+  async (request) => {
+    const visitorId = request.auth && request.auth.uid;
+    if (!visitorId) throw new HttpsError("unauthenticated", "ต้องเข้าสู่ระบบก่อน");
+    // Consent is a USER ACTION, never an AI judgement. If this were inferred
+    // from the model's output, the AI would be able to create Staff work items
+    // on its own initiative - the one design error in this phase that would be
+    // hard to walk back.
+    if (request.data && request.data.confirmed === true) {
+      // ok
+    } else {
+      return { created: false, reason: "not_confirmed" };
+    }
+
+    const db = admin.firestore();
+    const conversationId = "reception__" + visitorId;
+    const convRef = db.collection("conversations").doc(conversationId);
+
+    // Generated BEFORE the transaction so the transaction body is a pure
+    // compare-and-set on linkedCaseIds. Same prefix as Owner Submission: the
+    // canonical id deliberately does NOT encode the intake channel (caseSource
+    // does that), and storage.rules gates public submission photo uploads on
+    // 'own-.*\.webp', so a different prefix would silently break attachments.
+    const propertyId = "own-" + Date.now() + "-" + nodeCrypto.randomBytes(4).toString("hex").slice(0, 5);
+    // 48 hex chars from the server CSPRNG. Never derived from the id, the uid,
+    // or the clock. Length is opaque downstream (Track Submission compares the
+    // whole string; firestore.rules tokenOk() enforces only size() > 20), so
+    // the approved 24-byte entropy is used with no compatibility concern.
+    const trackToken = nodeCrypto.randomBytes(24).toString("hex");
+    const now = Date.now();
+
+    let result;
+    try {
+      result = await db.runTransaction(async (t) => {
+        const snap = await t.get(convRef);
+        if (!snap.exists) return { created: false, reason: "not_qualified" };
+        const d = snap.data() || {};
+        // Ownership is structural - the id was built from the caller's own uid,
+        // so a mismatch is impossible today. Asserted anyway as defence in
+        // depth against a future change to the id scheme.
+        if (d.visitorId && d.visitorId !== visitorId) return { created: false, reason: "not_qualified" };
+
+        const linked = Array.isArray(d.linkedCaseIds) ? d.linkedCaseIds : [];
+        if (linked.length) {
+          // ── RECOVERY PATH (repeat call) — PURE READ, NO WRITES ────────────
+          // A double-tap, refresh, retry or network flake must return the
+          // customer's real track link, not a scary error. The Case id comes
+          // from the SERVER's own read of the conversation it derived from the
+          // caller's uid - never from the request - so this cannot be steered
+          // toward another customer's Case.
+          const existingId = String(linked[0]);
+          const caseSnap = await t.get(db.collection("properties").doc(existingId));
+          // Unreachable while creation stays atomic (below); fails closed
+          // anyway rather than returning a token for a Case we cannot see.
+          if (!caseSnap.exists) return { created: false, reason: "case_missing" };
+          const c = caseSnap.data() || {};
+          // BOTH ends of the link must agree before any token is released. A
+          // tampered or corrupted link returns no token at all.
+          if (c.conversationId !== conversationId) return { created: false, reason: "link_mismatch" };
+          // A recovered token must also be USABLE. Returning created:true with
+          // an empty/short token would hand back a trackPath that firestore.rules
+          // tokenOk() (size() > 20) refuses - a broken link presented to the
+          // customer as success. Fail closed instead; releases no token.
+          const recovered = typeof c.trackToken === "string" ? c.trackToken : "";
+          if (recovered.length <= 20) return { created: false, reason: "token_unavailable" };
+          return {
+            created: true, alreadyExisted: true,
+            propertyId: existingId, trackToken: recovered,
+          };
+        }
+
+        const reason = receptionCaseGate(d);
+        if (reason) return { created: false, reason };
+
+        const pb = d.propertyBasics || {};
+        // ── The canonical Property Case ───────────────────────────────────
+        t.create(db.collection("properties").doc(propertyId), {
+          // COMPATIBILITY, NOT LAZINESS. `source` is a capability key in
+          // firestore.rules (isPublicOwnerSubmission, the trackToken reply
+          // branches, the caseMessages tokenOk check) and gates ~15 behaviours
+          // in Listing Approvals. Writing anything else here would silently
+          // disable the customer's ability to communicate on their own Case.
+          source: "owner_submission",
+          // The additive channel marker - the ONLY field that says an AI
+          // conversation created this Case. C1 created this slot for exactly
+          // this value.
+          caseSource: "ai_assistant",
+          listingStatus: "pending",
+          reviewStatus: "submitted",
+          status: CASE_INTENTS_C42B[d.primaryIntent],
+          // A chat Case is lead-grade: thinner than a form Case by design.
+          description: String(d.requirementsSummary || "").slice(0, 600),
+          contactName: String(d.customerName || "").slice(0, 120),
+          // Kept verbatim. NOT regex-split into contactPhone/contactEmail:
+          // those columns are security-relevant downstream, and Staff fill
+          // them during review.
+          ownerContact: String(d.contact || "").slice(0, 160),
+          contactPhone: "", contactEmail: "",
+          // Structured property context, carried onto the Case so Staff see
+          // the three facts the gate was satisfied by.
+          aiPropertyKind: pb.kind || "",
+          aiPropertyArea: pb.area || "",
+          aiPropertyScale: pb.scale || "",
+          // No pin was collected in chat, so the EXISTING intake workflow must
+          // see this as an outstanding follow-up - same flags a form
+          // submission with no coordinates sets. Reuses existing machinery
+          // instead of inventing an "AI case is incomplete" concept.
+          locationProvided: false, locationFollowUpNeeded: true,
+          coordsRaw: "",
+          // Written EXPLICITLY. Owner Submission omits it and works only
+          // because intake-workflow.js defaults to intake_v1; a new writer
+          // should not inherit that fragility.
+          workflowVersion: "intake_v1",
+          trackToken,
+          submittedAt: now,
+          // Provenance / traceability back to the conversation.
+          conversationId,
+          receptionVisitorId: visitorId,
+          qualifiedAt: d.qualifiedAt || null,
+          aiPropertyRefs: Array.isArray(d.propertyRefs) ? d.propertyRefs.slice(0, 10) : [],
+          customerLanguage: d.customerLanguage || "th",
+          // humanHandlingStartedAt is DELIBERATELY ABSENT. C4.2a is locked: the
+          // marker is written once, by assignCase(), the first time a human
+          // takes responsibility. An AI-created Case has never been touched by
+          // a human, so writing it here would permanently disable AI on a Case
+          // no human has seen - and would forge the human-handoff record.
+        });
+        // Same commit as the Case. linkedCaseIds non-empty therefore IMPLIES
+        // the Case exists: the dangling-pointer state cannot occur.
+        t.update(convRef, {
+          linkedCaseIds: [propertyId],
+          caseCreatedAt: now,
+          status: "case_created",
+          updatedAt: now,
+        });
+        return { created: true, alreadyExisted: false, propertyId, trackToken };
+      });
+    } catch (e) {
+      // NEVER log the error alongside the Case object or the token. Id only.
+      console.error("createCaseFromConversation failed", conversationId, propertyId,
+        (e && e.message) || String(e));
+      throw new HttpsError("internal", "ไม่สามารถเปิดเคสได้ในขณะนี้ กรุณาลองอีกครั้ง");
+    }
+
+    if (!result.created) return result;
+
+    // ── Secondary writes — OUTSIDE the transaction, ON PURPOSE ──────────────
+    // The lead is already captured. A failed provenance message or activity
+    // entry must never roll back or block a created Case (the lesson recorded
+    // in Owner Submission's photo-upload handling). Both are best-effort.
+    if (!result.alreadyExisted) {
+      // ONE read, reused by both secondary writes.
+      let d2 = {};
+      try { d2 = (await convRef.get()).data() || {}; } catch (e) { d2 = {}; }
+      const pb2 = d2.propertyBasics || {};
+      try {
+        // ONE bounded internal message. The full Reception transcript is NOT
+        // copied: it stays at conversations/reception__<uid>/messages, which
+        // Staff/Owner can already read (isConvOwner includes isAdmin), so
+        // nothing is lost - it is merely not duplicated. Blind-copying would
+        // add unbounded writes, drag unrelated chit-chat into a formal work
+        // record, and risk mislabelling an internal turn as customer-visible.
+        //
+        // visibility "internal" is REQUIRED: this text contains the AI's
+        // classification and must not be readable by a token-holding customer.
+        // It carries NO caseToken for the same reason.
+        await db.collection("properties").doc(result.propertyId)
+          .collection("caseMessages").add({
+            senderType: "system", direction: "internal",
+            messageType: "case_provenance", channel: "reception_ai",
+            visibility: "internal",
+            text:
+              "เคสนี้สร้างจากการสนทนากับผู้ช่วย AI (ลูกค้ายืนยันเปิดเคสแล้ว)\n" +
+              "ประเภททรัพย์: " + (pb2.kind || "-") + "\n" +
+              "พื้นที่: " + (pb2.area || "-") + "\n" +
+              "ขนาด/ราคาที่ลูกค้าระบุ: " + (pb2.scale || "-") + "\n" +
+              "ความต้องการ: " + (d2.requirementsSummary || "-") + "\n" +
+              "ชื่อ: " + (d2.customerName || "-") + " · ติดต่อ: " + (d2.contact || "-") + "\n" +
+              "conversation: " + conversationId,
+            createdAt: now, readByStaff: false,
+          });
+      } catch (e) {
+        console.warn("case provenance message failed", result.propertyId,
+          (e && e.message) || String(e));
+      }
+      try {
+        // No trackToken field. A customer holding the token can read
+        // caseMessages, and activityLog is internal - neither may carry it.
+        await db.collection("activityLog").add({
+          type: "case_created_from_reception",
+          propertyId: result.propertyId, caseId: result.propertyId,
+          conversationId, caseSource: "ai_assistant",
+          primaryIntent: d2.primaryIntent || "",
+          at: now, createdAt: now,
+          summary: "สร้างเคส " + result.propertyId + " จากการสนทนากับผู้ช่วย AI",
+        });
+      } catch (e) {
+        console.warn("case activityLog failed", result.propertyId,
+          (e && e.message) || String(e));
+      }
+    }
+
+    // Only safe, customer-facing identifiers. No assignee, no reviewStatus, no
+    // classification, no conversation internals.
+    return {
+      created: true,
+      alreadyExisted: !!result.alreadyExisted,
+      propertyId: result.propertyId,
+      trackToken: result.trackToken,
+      trackPath: "Track%20Submission.dc.html?id=" +
+        encodeURIComponent(result.propertyId) + "&t=" + result.trackToken,
+    };
   }
 );
 
