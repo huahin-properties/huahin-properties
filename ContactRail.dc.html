@@ -857,20 +857,12 @@ class Component extends DCLogic {
       return;
     }
     this._caseCtaShown = true;
-    // Invitation TEXT only. The tappable control is the STICKY BAR above the
-    // input (caseOfferBarVisible): it cannot scroll out of reach, is never
-    // part of chatMessages, and therefore neither duplicates nor persists.
-    // On a rebuild, if the transcript already carries this text, say nothing.
-    if (transient && baseMsgs.some((m) => String((m && m.text) || "").indexOf(c.ask) !== -1)) {
-      this.setState({ caseReviewOpen: false, caseReview: null, caseAck: false });
-      return;
-    }
-    const intro = this._assistantBubble(c.ask + "\n" + c.note);
-    if (transient) intro.__transient = true;
-    const next = [...baseMsgs, intro];
-    this.setState((s) => ({ chatMessages: [...pickBase(s), intro], caseReviewOpen: false, caseReview: null, caseAck: false }));
-    if (!transient) this._persistHistory(next);
-    this._scrollChat();
+    // NO invitation bubble at all (Product Owner policy, 7 ก.ย. 2569): the
+    // sticky bar above the input is the single action surface for opening the
+    // Review Card, so a bubble here would be a second, competing CTA. Nothing
+    // is appended to chatMessages and nothing is persisted; the offer is pure
+    // state (caseOfferBarVisible), driven by the server-derived flags.
+    this.setState({ caseReviewOpen: false, caseReview: null, caseAck: false });
   }
 
   // Refresh / new-tab recovery (C4.2b Step 2). Reads nothing new from the
