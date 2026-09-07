@@ -319,6 +319,29 @@ function normalisePropertyBasics(pb) {
   return { kind: s(o.kind, 80), area: s(o.area, 120), scale: s(o.scale, 80) };
 }
 
+// ── C4.2b Step 1 diagnostics (7 ก.ย. 2569) — LOGGING ONLY ────────────
+//
+// Why this exists: production showed two successful (HTTP 200) receptionTurn
+// invocations that produced NO Reception document, and the platform logs
+// expose only the HTTP status - not the returned stage, not whether the
+// persistence gate refused. So the outcome of a turn was unobservable and the
+// cause could not be narrowed from logs alone.
+//
+// Structured single-line JSON so Cloud Logging parses it into jsonPayload and
+// each field is filterable (e.g. jsonPayload.component="receptionTurn").
+//
+// PRIVACY - HARD RULE: this function logs DECISIONS, never CONTENT. Never add
+// reply text, customerText, requirementsSummary, customerName, contact,
+// propertyBasics VALUES, trackToken, or the full visitor uid. Presence
+// booleans and lengths only. `uidTail` is the last 4 chars of the anonymous
+// uid - the same non-identifying fragment already shown in visitorLabel - so
+// one visitor's turns can be correlated without storing their identity.
+function rxLog(fields) {
+  try {
+    console.log(JSON.stringify({ component: "receptionTurn", ...fields }));
+  } catch (e) { /* logging must never break a turn */ }
+}
+
 // receptionTurn: the ONLY write path for Reception AI conversations.
 //
 // Why a callable and not a client write: firestore.rules sets
@@ -344,28 +367,78 @@ exports.receptionTurn = onCall(
   { secrets: [ANTHROPIC_API_KEY], region: "asia-southeast1", timeoutSeconds: 120, memory: "512MiB" },
   async (request) => {
     const auth = request.auth;
-    if (!auth) throw new HttpsError("unauthenticated", "Sign-in required.");
+    // rid = per-invocation correlation id. Returned to the caller so a browser
+    // console line and a Cloud Logging line can be tied to the SAME turn.
+    const rid = nodeCrypto.randomBytes(6).toString("hex");
+    if (!auth) {
+      rxLog({ rid, event: "reject", reason: "unauthenticated" });
+      throw new HttpsError("unauthenticated", "Sign-in required.");
+    }
     const visitorId = auth.uid;
+    const uidTail = String(visitorId).slice(-4);
     const { system, messages, customerText, seedMessages, propertyRefs, collectionIds } = request.data || {};
     if (!customerText || !Array.isArray(messages)) {
+      rxLog({ rid, event: "reject", reason: "invalid_argument", uidTail,
+        hasCustomerText: !!customerText, messagesIsArray: Array.isArray(messages) });
       throw new HttpsError("invalid-argument", "Missing customerText or messages.");
     }
 
+    // Shape of the inbound turn only - counts and roles, never text. The
+    // firstMessageRole field is here because Anthropic requires the first
+    // message to be a user turn and the client sends its rendered history
+    // verbatim; if that is ever the cause, this field shows it without
+    // logging a single character of the conversation.
+    rxLog({ rid, event: "turn_start", uidTail,
+      messagesCount: messages.length,
+      firstMessageRole: (messages[0] && messages[0].role) || null,
+      seedCount: Array.isArray(seedMessages) ? seedMessages.length : 0,
+      systemLen: typeof system === "string" ? system.length : 0 });
+
     // ONE model call: reply + classification together.
-    const out = await callClaudeReception(system, messages, ANTHROPIC_API_KEY.value());
+    let out;
+    try {
+      out = await callClaudeReception(system, messages, ANTHROPIC_API_KEY.value());
+    } catch (e) {
+      rxLog({ rid, event: "model_error", uidTail, name: (e && e.name) || null,
+        code: (e && e.code) || null, msgLen: e && e.message ? String(e.message).length : 0 });
+      throw e;
+    }
+
+    // Classification outcome BEFORE the gate runs - this is the datum the
+    // platform logs could not show. Property-basics fields are reported as
+    // presence booleans only, never values.
+    rxLog({ rid, event: "classified", uidTail,
+      stage: out.stage, primaryIntent: out.primaryIntent,
+      secondaryIntents: out.secondaryIntents,
+      replyLen: (out.reply || "").length,
+      hasRequirements: !!out.requirementsSummary,
+      hasName: !!out.customerName, hasContact: !!out.contact,
+      pbKind: !!out.propertyBasics.kind, pbArea: !!out.propertyBasics.area, pbScale: !!out.propertyBasics.scale });
 
     const db = admin.firestore();
     const conversationId = "reception__" + visitorId;
     const convRef = db.collection("conversations").doc(conversationId);
-    const snap = await convRef.get();
+    let snap;
+    try {
+      snap = await convRef.get();
+    } catch (e) {
+      rxLog({ rid, event: "read_error", uidTail, code: (e && e.code) || null, name: (e && e.name) || null });
+      throw e;
+    }
     const already = snap.exists;
+    const docAction = already ? "reused" : "created";
 
     // Still casual and nothing persisted yet -> store NOTHING.
     if (!already && out.stage === "general") {
-      return { reply: out.reply, meta: out, persisted: false, conversationId: null };
+      rxLog({ rid, event: "turn_done", uidTail, persisted: false, docAction: "none",
+        stage: out.stage, primaryIntent: out.primaryIntent,
+        reason: "gate_stage_general_and_no_existing_doc" });
+      return { reply: out.reply, meta: out, persisted: false, conversationId: null, rid };
     }
 
     const now = admin.firestore.FieldValue.serverTimestamp();
+    let stage = out.stage;
+    try {
 
     if (!already) {
       // Crossing into advisory/qualified: create the doc and seed it with a
@@ -423,7 +496,7 @@ exports.receptionTurn = onCall(
     // one vague later question must not discard an established intent.
     const prev = already ? (snap.data().conversationStage || "general") : out.stage;
     const rank = (s) => RECEPTION_STAGES.indexOf(s);
-    const stage = rank(out.stage) > rank(prev) ? out.stage : prev;
+    stage = rank(out.stage) > rank(prev) ? out.stage : prev;
 
     const patch = {
       kind: "reception",
@@ -452,8 +525,19 @@ exports.receptionTurn = onCall(
     if (stage !== prev) patch.stageEnteredAt = now;
     if (stage === "qualified" && prev !== "qualified") patch.qualifiedAt = now;
     await convRef.set(patch, { merge: true });
+    } catch (e) {
+      // A write failure previously surfaced only as a generic "internal" to the
+      // browser. The original error is rethrown unchanged - behavior is
+      // identical, the cause is merely now recorded.
+      rxLog({ rid, event: "persist_error", uidTail, docAction,
+        stage: out.stage, primaryIntent: out.primaryIntent,
+        code: (e && e.code) || null, name: (e && e.name) || null });
+      throw e;
+    }
 
-    return { reply: out.reply, meta: out, persisted: true, conversationId, stage };
+    rxLog({ rid, event: "turn_done", uidTail, persisted: true, docAction,
+      stage, modelStage: out.stage, primaryIntent: out.primaryIntent, reason: "persisted" });
+    return { reply: out.reply, meta: out, persisted: true, conversationId, stage, rid };
   }
 );
 
