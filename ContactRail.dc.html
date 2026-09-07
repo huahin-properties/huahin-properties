@@ -726,8 +726,56 @@ class Component extends DCLogic {
   // It simply closes the card and returns the customer to the AI; the next
   // qualified turn rebuilds the card from the LATEST server state.
   _onCaseEdit() {
-    this._caseCtaShown = false;
+    // The offer button stays in the transcript, so the customer can reopen
+    // the card at any time; _caseCtaShown is NOT reset (that would append a
+    // second identical offer on the next qualified turn).
     this.setState({ caseReviewOpen: false, caseAck: false, caseReview: null });
+  }
+
+  // Label of the light-touch offer button. Qualified state NEVER opens the
+  // Review Card by itself (Product Owner policy, 7 ก.ย. 2569): the card is a
+  // consent surface and must be opened by an explicit customer tap.
+  _caseOfferLabel() {
+    const L = {
+      th: "ตรวจสอบข้อมูลก่อนส่ง",
+      en: "Review before sending",
+      ru: "Проверить перед отправкой",
+      zh: "发送前查看信息",
+      de: "Vor dem Senden prüfen",
+      no: "Se over før sending",
+      fr: "Vérifier avant l'envoi",
+      it: "Rivedi prima di inviare",
+    };
+    return L[this.state.lang] || L.en;
+  }
+
+  // The explicit tap that opens the Review Card. Re-reads the Reception
+  // document so the card shows the ACCUMULATED server-held facts, then opens
+  // the card with acknowledgement unchecked. Creates nothing and writes
+  // nothing; createCaseFromConversation stays behind ack + Confirm.
+  async _openCaseReview() {
+    if (this._caseSubmitting) return;
+    let doc = null;
+    try { doc = this._convFS ? await this._convFS.findExistingReception() : null; } catch (e) { doc = null; }
+    if (doc) {
+      const linked = Array.isArray(doc.linkedCaseIds) ? doc.linkedCaseIds : [];
+      // A Case already exists (another tab confirmed, or an earlier session):
+      // never offer creation again - hand back the tracking route instead.
+      if (linked.length || doc.status === "case_created") {
+        this._caseCreated = true;
+        const cc = this._caseCopy();
+        const rr = this._reviewCopy();
+        const done = this._assistantBubble(cc.done,
+          [{ label: rr.track || cc.track, noThumb: true, onClick: () => this._recoverTrack() }]);
+        done.__transient = true;
+        this.setState((s) => ({ chatMessages: [...s.chatMessages, done], caseReviewOpen: false, caseReview: null, caseAck: false }));
+        this._scrollChat();
+        return;
+      }
+    }
+    const review = this._buildCaseReview(doc, this._receptionMeta);
+    this.setState({ caseReviewOpen: true, caseAck: false, caseReview: review });
+    this._scrollChat();
   }
 
   // opts.transient = this call is REBUILDING UI after a refresh/new tab, not
@@ -743,6 +791,10 @@ class Component extends DCLogic {
     // not flushed _restoreHistory's setState yet.
     const baseMsgs = (opts && Array.isArray(opts.baseMessages) && opts.baseMessages.length)
       ? opts.baseMessages : this.state.chatMessages;
+    // An explicitly passed transcript is authoritative (it already includes
+    // this turn's reply), so the CTA can never be built on a stale array.
+    const preferBase = !!(opts && Array.isArray(opts.baseMessages) && opts.baseMessages.length);
+    const pickBase = (s) => (preferBase ? baseMsgs : ((s.chatMessages && s.chatMessages.length) ? s.chatMessages : baseMsgs));
     const c = this._caseCopy();
     // A Case already exists for this conversation (e.g. after a refresh): do
     // NOT invite creation again - show the success state with a track button.
@@ -754,34 +806,38 @@ class Component extends DCLogic {
         [{ label: c.track, noThumb: true, onClick: () => this._recoverTrack() }]);
       if (transient) done.__transient = true;
       const nextD = [...baseMsgs, done];
-      this.setState((s) => ({ chatMessages: [...(s.chatMessages.length ? s.chatMessages : baseMsgs), done] }));
+      this.setState((s) => ({ chatMessages: [...pickBase(s), done] }));
       if (!transient) this._persistHistory(nextD);
       this._scrollChat();
       return;
     }
     this._caseCtaShown = true;
-    // Re-read the Reception document so the card shows the ACCUMULATED
-    // server-held facts, not just what this single turn extracted. A plain
-    // document read - no server change, no new field, no client write.
-    let doc = null;
-    try { doc = this._convFS ? await this._convFS.findExistingReception() : null; } catch (e) { doc = null; }
-    if (doc) {
-      const linked = Array.isArray(doc.linkedCaseIds) ? doc.linkedCaseIds : [];
-      if (linked.length || doc.status === "case_created") { this._caseCreated = true; this._caseCtaShown = false; this._maybeOfferCase(opts); return; }
+    // The offer is a BUTTON, not the card. No document read is needed here -
+    // the card re-reads the Reception document at the moment of the tap.
+    const btn = { label: this._caseOfferLabel(), noThumb: true, onClick: () => this._openCaseReview() };
+    // On a rebuild the persisted transcript usually ALREADY carries the offer
+    // text from before the reload (its button was lost, links are never
+    // persisted): re-attach the button to that message instead of repeating
+    // the text. The Review Card stays CLOSED either way.
+    if (transient) {
+      let idx = -1;
+      for (let i = baseMsgs.length - 1; i >= 0; i--) {
+        if (String((baseMsgs[i] && baseMsgs[i].text) || "").indexOf(c.ask) !== -1) { idx = i; break; }
+      }
+      if (idx >= 0) {
+        this.setState((s) => {
+          const msgs = [...pickBase(s)];
+          if (msgs[idx]) msgs[idx] = { ...msgs[idx], links: [btn] };
+          return { chatMessages: msgs, caseReviewOpen: false, caseReview: null, caseAck: false };
+        });
+        this._scrollChat();
+        return;
+      }
     }
-    const review = this._buildCaseReview(doc, this._receptionMeta);
-    // On a rebuild the persisted transcript usually ALREADY contains the
-    // invitation text from before the reload - reopen the card over it
-    // instead of repeating it. Acknowledgement always starts unchecked.
-    if (transient && baseMsgs.some((m) => String((m && m.text) || "").indexOf(c.ask) !== -1)) {
-      this.setState({ caseReviewOpen: true, caseAck: false, caseReview: review });
-      this._scrollChat();
-      return;
-    }
-    const intro = this._assistantBubble(c.ask + "\n" + c.note);
+    const intro = this._assistantBubble(c.ask + "\n" + c.note, [btn]);
     if (transient) intro.__transient = true;
     const next = [...baseMsgs, intro];
-    this.setState((s) => ({ chatMessages: [...(s.chatMessages.length ? s.chatMessages : baseMsgs), intro], caseReviewOpen: true, caseAck: false, caseReview: review }));
+    this.setState((s) => ({ chatMessages: [...pickBase(s), intro], caseReviewOpen: false, caseReview: null, caseAck: false }));
     if (!transient) this._persistHistory(next);
     this._scrollChat();
   }
@@ -1028,11 +1084,14 @@ class Component extends DCLogic {
         this._receptionMeta = data.meta || null;
       }
       const aiMsg = { role: "assistant", text: this._cleanReply(reply), links: this._extractLinks(reply, this._detectLang(text)), bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:7px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
-      this.setState({ chatMessages: [...history, aiMsg], chatLoading: false });
-      this._persistHistory([...history, aiMsg]);
+      const completed = [...history, aiMsg];
+      this.setState({ chatMessages: completed, chatLoading: false });
+      this._persistHistory(completed);
       // C4.2b Step 2: offer the confirmation CTA when the SERVER says this
       // conversation reached `qualified`. Never parsed from the reply text.
-      this._maybeOfferCase();
+      // `completed` is passed explicitly so the CTA is appended AFTER this
+      // turn's reply even though the setState above has not flushed yet.
+      await this._maybeOfferCase({ baseMessages: completed });
     } catch (e) {
       console.warn("receptionTurn reply received but rendering failed:", e);
       this.setState({ chatLoading: false });
