@@ -282,6 +282,45 @@
               <sc-if value="{{ isAiTabActive }}"><sc-if value="{{ chatLoading }}">
                 <div style="align-self:flex-start; background:oklch(93% 0.01 75); color:oklch(45% 0.02 60); padding:7px 14px; border-radius:14px 14px 14px 2px; font-size:14px;">{{ t.chat_thinking }}</div>
               </sc-if></sc-if>
+              <!-- C4.2b Step 2 — professional confirmation review. Shown only when the SERVER reported stage=qualified; every row below is a server-held Reception field. -->
+              <sc-if value="{{ caseReviewVisible }}">
+                <div style="align-self:stretch; background:white; border:1px solid oklch(88% 0.015 70); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:12px; box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+                  <div style="font-family:'Playfair Display',serif; font-size:16px; font-weight:600; color:oklch(25% 0.02 60); line-height:1.35;">{{ caseReview.title }}</div>
+                  <div style="display:flex; flex-direction:column; gap:9px;">
+                    <sc-for list="{{ caseReview.rows }}" as="row" hint-placeholder-count="4">
+                      <div style="display:flex; flex-direction:column; gap:2px;">
+                        <div style="font-size:11.5px; letter-spacing:0.04em; text-transform:uppercase; color:oklch(55% 0.02 60);">{{ row.label }}</div>
+                        <div style="font-size:14px; line-height:1.5; color:oklch(22% 0.02 60); word-break:break-word;">{{ row.value }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="border-top:1px solid oklch(92% 0.01 70); padding-top:11px; display:flex; flex-direction:column; gap:7px;">
+                    <div style="font-size:11.5px; letter-spacing:0.04em; text-transform:uppercase; color:oklch(55% 0.02 60);">{{ caseReview.afterTitle }}</div>
+                    <div style="font-size:13.5px; line-height:1.55; color:oklch(30% 0.02 60);">{{ caseReview.after }}</div>
+                    <div style="display:flex; flex-direction:column; gap:4px; margin-top:2px;">
+                      <sc-for list="{{ caseReview.disc }}" as="d" hint-placeholder-count="5">
+                        <div style="display:flex; gap:7px; font-size:12.5px; line-height:1.5; color:oklch(45% 0.02 60);">
+                          <span style="flex-shrink:0;">•</span>
+                          <span>{{ d.text }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div onClick="{{ onCaseAckToggle }}" style="display:flex; gap:10px; align-items:flex-start; background:oklch(97% 0.01 80); border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:11px; cursor:pointer;">
+                    <div style="flex-shrink:0; width:22px; height:22px; border-radius:5px; border:1.5px solid oklch(45% 0.02 60); background:white; color:oklch(25% 0.02 60); display:flex; align-items:center; justify-content:center; font-size:14px; line-height:1;">{{ caseAckMark }}</div>
+                    <div style="font-size:12.5px; line-height:1.55; color:oklch(30% 0.02 60);">{{ caseReview.ack }}</div>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:8px;">
+                    <sc-if value="{{ caseConfirmReady }}">
+                      <div onClick="{{ onCaseConfirm }}" style="background:oklch(38% 0.11 20); color:oklch(97% 0.01 80); border-radius:100px; padding:13px 18px; text-align:center; font-size:14px; font-weight:600; cursor:pointer; min-height:46px; box-sizing:border-box; line-height:1.45;">{{ caseReview.confirm }}</div>
+                    </sc-if>
+                    <sc-if value="{{ caseConfirmBlocked }}">
+                      <div style="background:oklch(90% 0.01 70); color:oklch(62% 0.015 60); border-radius:100px; padding:13px 18px; text-align:center; font-size:14px; font-weight:600; cursor:not-allowed; min-height:46px; box-sizing:border-box; line-height:1.45;">{{ caseReview.confirm }}</div>
+                    </sc-if>
+                    <div onClick="{{ onCaseEdit }}" style="background:white; border:1px solid oklch(80% 0.015 65); color:oklch(30% 0.02 60); border-radius:100px; padding:12px 18px; text-align:center; font-size:14px; cursor:pointer; min-height:46px; box-sizing:border-box; line-height:1.45;">{{ caseReview.edit }}</div>
+                  </div>
+                </div>
+              </sc-if>
             </div>
             <div style="flex-shrink:0; border-top:1px solid oklch(90% 0.01 70); padding:10px 12px 4px; display:flex; gap:8px;">
               <input value="{{ chatInput }}" onChange="{{ onChatInput }}" onKeyDown="{{ onChatKeyDown }}" placeholder="{{ t.chat_type_or_speak }}" style="flex:1; border:1px solid oklch(85% 0.01 70); border-radius:100px; padding:10px 16px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0;" />
@@ -395,6 +434,8 @@ class Component extends DCLogic {
     lang: "th",
     chatOpen: false, chatMinimized: false, chatMessages: [], chatInput: "", chatLoading: false,
     chatTab: "ai", chatMobileView: "conversation", convListCollapsed: true, customerMode: false, senderName: "", ownerConversations: [], ownerOpenMessages: [], ownerReplyInput: "", humanMessages: [],
+    // C4.2b Step 2 — confirmation review card
+    caseReviewOpen: false, caseReview: null, caseAck: false, caseSending: false,
   };
 
   chatScrollRef = React.createRef();
@@ -434,6 +475,15 @@ class Component extends DCLogic {
     await this._initConversationBackend();
     const restored = this._restoreHistory();
     if (!restored) await (this._maybeAutoTriggerFromCollectionLink() || this._maybeAutoTrigger());
+    // C4.2b Step 2 - refresh / new-tab UI recovery. Buttons and their
+    // callbacks cannot survive localStorage, so after a reload the Review
+    // Card and the Track button must be rebuilt from the SERVER-DERIVED
+    // Reception state that _resumeReception() just read back (stage /
+    // linkedCaseIds / status). Runs only once per mount and creates nothing.
+    if (!this.state.customerMode && this._convBackend === "firestore" &&
+        (this._receptionStage === "qualified" || this._caseCreated)) {
+      await this._rebuildCaseUiAfterRestore(Array.isArray(restored) ? restored : null);
+    }
     // Whether restored from local history or freshly greeted, a Customer
     // Mode visit must always land in the full-screen chat immediately —
     // never the plain homepage requiring an extra tap to find it.
@@ -520,6 +570,11 @@ class Component extends DCLogic {
       if (existing) {
         this._receptionConversationId = existing.id;
         this._receptionStage = existing.conversationStage || "advisory";
+        // A Case already linked to this conversation: never re-offer creation.
+        // The customer can still recover their track link by confirming again
+        // (the server returns alreadyExisted), but the CTA does not nag.
+        const linked = Array.isArray(existing.linkedCaseIds) ? existing.linkedCaseIds : [];
+        if (linked.length || existing.status === "case_created") this._caseCreated = true;
       }
     } catch (e) { /* no persisted Reception yet — stay local */ }
   }
@@ -545,6 +600,342 @@ class Component extends DCLogic {
         "persisted=" + (rec.persisted === undefined ? "-" : rec.persisted),
         "stage=" + (rec.stage || "-"), rec.code ? "code=" + rec.code : "");
     } catch (e) { /* diagnostics must never break the chat */ }
+  }
+
+  // ── C4.2b Step 2 — customer-confirmed Property Case ────────────────
+  //
+  // A Case is created ONLY by a real user tap. `qualified` alone does not
+  // create one, and the AI's words are never treated as consent - the server
+  // refuses anything without { confirmed: true }, and this client sends that
+  // key and nothing else. It cannot name a conversation, a Case, a property
+  // id or a token: everything is derived server-side from request.auth.uid.
+  //
+  // Wording rule (C4.2a): confirming means "the customer submitted this to
+  // us", NEVER "a person is handling it", "the listing is live", or "the price
+  // has been valued". humanHandlingStartedAt stays absent until a human claims
+  // the Case - this flow must not imply otherwise.
+  _assistantBubble(text, links) {
+    return {
+      role: "assistant", text, links: links || [],
+      bubbleWrapStyle: "align-self:flex-start; max-width:85%;",
+      bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:7px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap;",
+    };
+  }
+
+  // The callable lives in the same region as every other function. The
+  // functions compat module is loaded on demand with the SAME url/version the
+  // rest of the app uses, because several pages omit it from <helmet>; by the
+  // time this CTA can appear, receptionTurn has almost always loaded it
+  // already, so this is normally a no-op.
+  async _functionsSdk() {
+    const FN_SRC = "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js";
+    const app = window.firebase.app();
+    if (typeof app.functions !== "function") {
+      await new Promise((resolve, reject) => {
+        const existing = document.querySelector('script[src="' + FN_SRC + '"]');
+        if (existing) { existing.addEventListener("load", () => resolve()); existing.addEventListener("error", () => reject(new Error("fn sdk"))); return; }
+        const s = document.createElement("script");
+        s.src = FN_SRC; s.async = false;
+        s.onload = () => resolve(); s.onerror = () => reject(new Error("fn sdk"));
+        document.head.appendChild(s);
+      });
+    }
+    const app2 = window.firebase.app();
+    if (typeof app2.functions !== "function") throw new Error("functions sdk unavailable");
+    return app2.functions("asia-southeast1");
+  }
+
+  // Shown from SERVER-DERIVED state only (the stage receptionTurn returned, or
+  // the stage read back from the stored Reception document) - never inferred
+  // from the AI's reply text. The server remains the final authority: it can
+  // still refuse, and then the customer is asked to keep talking.
+  // All eight site languages. Deliberately submission-only wording in every
+  // one: "sent to the team", never "approved", "listed", "valued" or
+  // "assigned". Falls back to English for an unexpected lang code.
+  _caseCopy() {
+    const C = {
+      th: { ask: "ต้องการให้ทีมงานรับเรื่องนี้และดำเนินการต่อหรือไม่?", note: "ทีมงานจะได้รับข้อมูลที่คุณแจ้งไว้เพื่อดำเนินการต่อ", confirm: "ยืนยันส่งเรื่องให้ทีมงาน", sending: "กำลังส่งเรื่องให้ทีมงาน…", done: "ส่งเรื่องให้ทีมงานเรียบร้อยแล้ว ทีมงานจะติดต่อกลับตามข้อมูลที่คุณแจ้งไว้", track: "ติดตามสถานะเรื่องของฉัน", more: "ยังมีข้อมูลบางส่วนที่ต้องเพิ่มเติมก่อนส่งให้ทีมงาน กรุณาคุยกับผู้ช่วย AI ต่ออีกเล็กน้อย", retry: "ยังไม่สามารถส่งเรื่องได้ในขณะนี้ กรุณาลองอีกครั้ง" },
+      en: { ask: "Would you like our team to take this on and follow up?", note: "The team will receive the details you shared so they can continue from here.", confirm: "Send this to the team", sending: "Sending this to the team…", done: "Sent to our team. They will get back to you using the contact details you gave.", track: "Track my request", more: "A few details are still needed before this can go to the team. Please continue with the AI assistant for a moment.", retry: "This could not be sent right now. Please try again.", },
+      ru: { ask: "Передать этот запрос нашей команде для дальнейшей работы?", note: "Команда получит указанные вами данные и продолжит работу.", confirm: "Отправить команде", sending: "Отправляем команде…", done: "Отправлено нашей команде. С вами свяжутся по указанным контактам.", track: "Отследить мой запрос", more: "Не хватает некоторых данных. Пожалуйста, продолжите разговор с ИИ-ассистентом.", retry: "Сейчас отправить не удалось. Попробуйте ещё раз." },
+      zh: { ask: "需要我们的团队接手并继续跟进吗？", note: "团队会收到您提供的信息并继续处理。", confirm: "发送给团队", sending: "正在发送给团队…", done: "已发送给我们的团队，我们会通过您提供的联系方式与您联系。", track: "查询我的申请", more: "还需要补充一些信息才能发送给团队，请再与 AI 助手聊一下。", retry: "目前无法发送，请重试。" },
+      de: { ask: "Soll unser Team das übernehmen und sich darum kümmern?", note: "Das Team erhält die von Ihnen genannten Angaben zur weiteren Bearbeitung.", confirm: "An das Team senden", sending: "Wird an das Team gesendet…", done: "An unser Team gesendet. Wir melden uns über die angegebenen Kontaktdaten.", track: "Meine Anfrage verfolgen", more: "Es fehlen noch einige Angaben. Bitte sprechen Sie kurz weiter mit dem KI-Assistenten.", retry: "Senden ist derzeit nicht möglich. Bitte versuchen Sie es erneut." },
+      no: { ask: "Vil du at teamet vårt tar dette videre?", note: "Teamet får opplysningene du har oppgitt og følger opp.", confirm: "Send til teamet", sending: "Sender til teamet…", done: "Sendt til teamet vårt. Vi tar kontakt via opplysningene du oppgav.", track: "Følg saken min", more: "Noen opplysninger mangler ennå. Fortsett gjerne litt med AI-assistenten.", retry: "Kunne ikke sende nå. Prøv igjen." },
+      fr: { ask: "Souhaitez-vous que notre équipe prenne le relais ?", note: "L'équipe recevra les informations que vous avez indiquées pour poursuivre.", confirm: "Envoyer à l'équipe", sending: "Envoi à l'équipe…", done: "Envoyé à notre équipe. Nous vous recontacterons avec les coordonnées indiquées.", track: "Suivre ma demande", more: "Quelques informations manquent encore. Continuez un instant avec l'assistant IA.", retry: "Envoi impossible pour le moment. Merci de réessayer." },
+      it: { ask: "Vuoi che il nostro team se ne occupi e ti ricontatti?", note: "Il team riceverà i dati che hai indicato per proseguire.", confirm: "Invia al team", sending: "Invio al team…", done: "Inviato al nostro team. Ti ricontatteremo ai contatti che hai indicato.", track: "Segui la mia richiesta", more: "Mancano ancora alcune informazioni. Continua un momento con l'assistente IA.", retry: "Non è stato possibile inviare ora. Riprova." },
+    };
+    return C[this.state.lang] || C.en;
+  }
+
+  // Review-card copy, all eight site languages. Submission wording only:
+  // nothing here may read as approved / listed / valued / assigned.
+  _reviewCopy() {
+    const R = {
+      th: { title: "ตรวจสอบข้อมูลก่อนส่งให้ทีมงาน", s1: "ความต้องการของคุณ", s2: "ข้อมูลทรัพย์", s3: "ข้อมูลผู้ติดต่อ", s4: "สิ่งที่ต้องการให้ทีมงานดำเนินการ", s5: "หลังจากยืนยันจะเกิดอะไรขึ้น", after: "เมื่อยืนยัน ระบบจะส่งข้อมูลข้างต้นให้ทีมงานของ huahin.properties เพื่อรับเรื่องและตรวจสอบต่อไป", disc: ["ยังไม่ใช่การอนุมัติประกาศ", "ยังไม่ได้หมายความว่าทรัพย์ถูกลงขายหรือปล่อยเช่าแล้ว", "ยังไม่ใช่การรับรองราคาทรัพย์", "ยังไม่ได้หมายความว่ามีเจ้าหน้าที่รับผิดชอบแล้ว", "ทีมงานจะตรวจสอบข้อมูลและติดต่อกลับตามขั้นตอน"], ack: "ข้าพเจ้ายืนยันว่าข้อมูลข้างต้นถูกต้องตามที่ได้แจ้งไว้ และยินยอมให้ huahin.properties ใช้ข้อมูลนี้เพื่อรับเรื่อง ติดต่อกลับ และดำเนินการตามคำขอของข้าพเจ้า", confirm: "ยืนยันและส่งเรื่องให้ทีมงาน", edit: "แก้ไขข้อมูล", kind: "ประเภททรัพย์", area: "พื้นที่ / ทำเล", scale: "ขนาด / ราคาที่แจ้ง", req: "รายละเอียดที่คุณแจ้งไว้", name: "ชื่อ", contact: "ช่องทางติดต่อ", intentSell: "ต้องการขายทรัพย์", intentRent: "ต้องการฝากเช่า", action: "รับเรื่องเพื่อตรวจสอบข้อมูลและติดต่อกลับ", doneTitle: "ส่งเรื่องให้ทีมงานเรียบร้อยแล้ว", doneNote: "ทีมงานจะตรวจสอบข้อมูลและติดต่อกลับตามขั้นตอน คุณสามารถติดตามสถานะได้จากปุ่มด้านล่าง", ref: "หมายเลขเรื่อง", mName: "กรุณาแจ้งชื่อก่อนส่งเรื่อง", mContact: "กรุณาแจ้งช่องทางติดต่อก่อนส่งเรื่อง", mProp: "กรุณาเพิ่มประเภท ทำเล หรือขนาดของทรัพย์", mStage: "กรุณาคุยกับผู้ช่วย AI ต่ออีกเล็กน้อยก่อนส่งเรื่อง", mIntent: "เรื่องนี้ยังส่งผ่านแชทไม่ได้ กรุณาติดต่อทีมงานโดยตรง" },
+      en: { title: "Review before sending to the team", s1: "What you need", s2: "Property details", s3: "Contact details", s4: "What you are asking the team to do", s5: "What happens after you confirm", after: "On confirming, the details above are sent to the huahin.properties team to receive and review.", disc: ["This is not listing approval", "It does not mean the property is listed for sale or rent yet", "It is not a valuation of the property", "It does not mean a staff member is responsible for it yet", "The team will review the details and contact you in due course"], ack: "I confirm the details above are correct as I provided them, and I consent to huahin.properties using them to receive my request, contact me, and act on it.", confirm: "Confirm and send to the team", edit: "Edit details", kind: "Property type", area: "Area / location", scale: "Size / price stated", req: "What you told us", name: "Name", contact: "Contact", intentSell: "Wants to sell a property", intentRent: "Wants to rent out a property", action: "Receive the request, review the details and contact you", doneTitle: "Sent to our team", doneNote: "The team will review the details and contact you in due course. You can follow the status with the button below.", ref: "Reference", mName: "Please give your name before sending.", mContact: "Please give a contact method before sending.", mProp: "Please add the property type, location or size.", mStage: "Please continue with the AI assistant a little longer before sending.", mIntent: "This request cannot be sent through chat. Please contact the team directly." },
+      ru: { title: "Проверьте данные перед отправкой команде", s1: "Ваш запрос", s2: "Данные объекта", s3: "Контактные данные", s4: "Что вы просите сделать", s5: "Что будет после подтверждения", after: "После подтверждения указанные данные будут отправлены команде huahin.properties для приёма и проверки.", disc: ["Это не одобрение объявления", "Это не значит, что объект уже выставлен на продажу или аренду", "Это не оценка стоимости объекта", "Это не значит, что сотрудник уже отвечает за запрос", "Команда проверит данные и свяжется с вами"], ack: "Подтверждаю, что данные указаны верно, и даю согласие huahin.properties использовать их для приёма запроса, связи со мной и работы по запросу.", confirm: "Подтвердить и отправить команде", edit: "Изменить данные", kind: "Тип объекта", area: "Район / расположение", scale: "Размер / указанная цена", req: "Что вы сообщили", name: "Имя", contact: "Контакт", intentSell: "Хочет продать объект", intentRent: "Хочет сдать объект", action: "Принять запрос, проверить данные и связаться с вами", doneTitle: "Отправлено нашей команде", doneNote: "Команда проверит данные и свяжется с вами. Статус можно отследить кнопкой ниже.", ref: "Номер запроса", mName: "Укажите, пожалуйста, ваше имя.", mContact: "Укажите, пожалуйста, способ связи.", mProp: "Добавьте тип, район или размер объекта.", mStage: "Пожалуйста, продолжите разговор с ИИ-ассистентом.", mIntent: "Этот запрос нельзя отправить через чат. Свяжитесь с командой напрямую." },
+      zh: { title: "发送给团队前请核对信息", s1: "您的需求", s2: "房产信息", s3: "联系信息", s4: "希望团队处理的事项", s5: "确认后会发生什么", after: "确认后，以上信息将发送给 huahin.properties 团队以受理并核实。", disc: ["这不是房源审核通过", "并不表示房产已挂牌出售或出租", "这不是房产估价", "并不表示已有工作人员负责", "团队会核实信息并按流程与您联系"], ack: "本人确认以上信息与本人提供的一致，并同意 huahin.properties 使用这些信息受理请求、与本人联系并据此办理。", confirm: "确认并发送给团队", edit: "修改信息", kind: "房产类型", area: "区域 / 位置", scale: "面积 / 报价", req: "您提供的说明", name: "姓名", contact: "联系方式", intentSell: "希望出售房产", intentRent: "希望出租房产", action: "受理请求、核实信息并与您联系", doneTitle: "已发送给我们的团队", doneNote: "团队会核实信息并按流程与您联系。可通过下方按钮查询状态。", ref: "编号", mName: "发送前请提供您的姓名。", mContact: "发送前请提供联系方式。", mProp: "请补充房产类型、位置或面积。", mStage: "发送前请再与 AI 助手聊一下。", mIntent: "此请求无法通过聊天发送，请直接联系团队。" },
+      de: { title: "Angaben vor dem Senden prüfen", s1: "Ihr Anliegen", s2: "Objektangaben", s3: "Kontaktangaben", s4: "Worum Sie das Team bitten", s5: "Was nach der Bestätigung passiert", after: "Mit der Bestätigung werden die obigen Angaben an das Team von huahin.properties zur Annahme und Prüfung gesendet.", disc: ["Dies ist keine Freigabe eines Angebots", "Es bedeutet nicht, dass die Immobilie bereits zum Verkauf oder zur Miete angeboten wird", "Es ist keine Wertermittlung", "Es bedeutet nicht, dass bereits eine Mitarbeiterin oder ein Mitarbeiter zuständig ist", "Das Team prüft die Angaben und meldet sich bei Ihnen"], ack: "Ich bestätige, dass die obigen Angaben so korrekt sind, wie ich sie gemacht habe, und bin damit einverstanden, dass huahin.properties sie zur Annahme meiner Anfrage, zur Kontaktaufnahme und zur Bearbeitung verwendet.", confirm: "Bestätigen und an das Team senden", edit: "Angaben ändern", kind: "Objektart", area: "Gebiet / Lage", scale: "Größe / genannter Preis", req: "Ihre Angaben", name: "Name", contact: "Kontakt", intentSell: "Möchte eine Immobilie verkaufen", intentRent: "Möchte eine Immobilie vermieten", action: "Anfrage annehmen, Angaben prüfen und Sie kontaktieren", doneTitle: "An unser Team gesendet", doneNote: "Das Team prüft die Angaben und meldet sich bei Ihnen. Den Status können Sie über die Schaltfläche unten verfolgen.", ref: "Referenz", mName: "Bitte nennen Sie Ihren Namen.", mContact: "Bitte nennen Sie eine Kontaktmöglichkeit.", mProp: "Bitte ergänzen Sie Objektart, Lage oder Größe.", mStage: "Bitte sprechen Sie noch kurz mit dem KI-Assistenten.", mIntent: "Diese Anfrage kann nicht über den Chat gesendet werden. Bitte kontaktieren Sie das Team direkt." },
+      no: { title: "Se over opplysningene før du sender", s1: "Det du ønsker", s2: "Opplysninger om eiendommen", s3: "Kontaktopplysninger", s4: "Det du ber teamet gjøre", s5: "Hva skjer etter at du bekrefter", after: "Når du bekrefter, sendes opplysningene over til teamet i huahin.properties for mottak og gjennomgang.", disc: ["Dette er ikke godkjenning av en annonse", "Det betyr ikke at eiendommen er lagt ut for salg eller leie", "Det er ingen verdivurdering", "Det betyr ikke at en medarbeider har ansvaret ennå", "Teamet går gjennom opplysningene og kontakter deg"], ack: "Jeg bekrefter at opplysningene over er riktige slik jeg har oppgitt dem, og samtykker i at huahin.properties bruker dem til å motta henvendelsen, kontakte meg og følge den opp.", confirm: "Bekreft og send til teamet", edit: "Endre opplysninger", kind: "Eiendomstype", area: "Område / beliggenhet", scale: "Størrelse / oppgitt pris", req: "Det du har oppgitt", name: "Navn", contact: "Kontakt", intentSell: "Ønsker å selge en eiendom", intentRent: "Ønsker å leie ut en eiendom", action: "Motta henvendelsen, gå gjennom opplysningene og kontakte deg", doneTitle: "Sendt til teamet vårt", doneNote: "Teamet går gjennom opplysningene og kontakter deg. Du kan følge saken med knappen under.", ref: "Referanse", mName: "Oppgi navnet ditt før du sender.", mContact: "Oppgi en kontaktmåte før du sender.", mProp: "Legg til eiendomstype, beliggenhet eller størrelse.", mStage: "Fortsett gjerne litt med AI-assistenten først.", mIntent: "Denne henvendelsen kan ikke sendes via chat. Kontakt teamet direkte." },
+      fr: { title: "Vérifiez les informations avant l'envoi", s1: "Votre demande", s2: "Informations sur le bien", s3: "Coordonnées", s4: "Ce que vous demandez à l'équipe", s5: "Ce qui se passe après confirmation", after: "En confirmant, les informations ci-dessus sont transmises à l'équipe huahin.properties pour prise en charge et vérification.", disc: ["Il ne s'agit pas d'une validation d'annonce", "Cela ne signifie pas que le bien est déjà mis en vente ou en location", "Il ne s'agit pas d'une estimation du bien", "Cela ne signifie pas qu'un membre de l'équipe en est déjà responsable", "L'équipe vérifiera les informations et vous contactera"], ack: "Je confirme que les informations ci-dessus sont exactes telles que je les ai fournies et j'autorise huahin.properties à les utiliser pour prendre en charge ma demande, me contacter et y donner suite.", confirm: "Confirmer et envoyer à l'équipe", edit: "Modifier les informations", kind: "Type de bien", area: "Secteur / emplacement", scale: "Surface / prix indiqué", req: "Ce que vous avez indiqué", name: "Nom", contact: "Contact", intentSell: "Souhaite vendre un bien", intentRent: "Souhaite louer un bien", action: "Prendre en charge la demande, vérifier les informations et vous contacter", doneTitle: "Envoyé à notre équipe", doneNote: "L'équipe vérifiera les informations et vous contactera. Vous pouvez suivre l'avancement avec le bouton ci-dessous.", ref: "Référence", mName: "Merci d'indiquer votre nom.", mContact: "Merci d'indiquer un moyen de contact.", mProp: "Merci d'ajouter le type, l'emplacement ou la taille du bien.", mStage: "Merci de continuer un instant avec l'assistant IA.", mIntent: "Cette demande ne peut pas être envoyée via le chat. Merci de contacter l'équipe directement." },
+      it: { title: "Controlla i dati prima di inviarli", s1: "La tua richiesta", s2: "Dati dell'immobile", s3: "Dati di contatto", s4: "Cosa chiedi al team", s5: "Cosa accade dopo la conferma", after: "Con la conferma i dati sopra vengono inviati al team di huahin.properties per la presa in carico e la verifica.", disc: ["Non è l'approvazione di un annuncio", "Non significa che l'immobile sia già in vendita o in affitto", "Non è una valutazione dell'immobile", "Non significa che un incaricato se ne stia già occupando", "Il team verificherà i dati e ti contatterà"], ack: "Confermo che i dati sopra sono corretti come li ho forniti e acconsento che huahin.properties li usi per prendere in carico la richiesta, contattarmi e darvi seguito.", confirm: "Conferma e invia al team", edit: "Modifica i dati", kind: "Tipo di immobile", area: "Zona / posizione", scale: "Dimensione / prezzo indicato", req: "Quanto hai indicato", name: "Nome", contact: "Contatto", intentSell: "Vuole vendere un immobile", intentRent: "Vuole affittare un immobile", action: "Prendere in carico la richiesta, verificare i dati e contattarti", doneTitle: "Inviato al nostro team", doneNote: "Il team verificherà i dati e ti contatterà. Puoi seguire lo stato con il pulsante qui sotto.", ref: "Riferimento", mName: "Indica il tuo nome prima di inviare.", mContact: "Indica un contatto prima di inviare.", mProp: "Aggiungi tipo, zona o dimensione dell'immobile.", mStage: "Continua un momento con l'assistente IA.", mIntent: "Questa richiesta non può essere inviata via chat. Contatta il team direttamente." },
+    };
+    return R[this.state.lang] || R.en;
+  }
+
+  // Builds the review rows from SERVER-HELD Reception fields only. Every row
+  // is omitted when its field is empty - nothing is inferred, defaulted or
+  // parsed out of the AI's prose. Source of truth is the Reception document
+  // (accumulated across turns), re-read at the moment the card is offered;
+  // receptionTurn's own meta is used only as a fallback for this turn.
+  _buildCaseReview(doc, meta) {
+    const r = this._reviewCopy();
+    const d = doc || {};
+    const m = meta || {};
+    const pick = (a, b) => String((a !== undefined && a !== null && a !== "" ? a : b) || "").trim();
+    const pb = d.propertyBasics || m.propertyBasics || {};
+    const intent = pick(d.primaryIntent, m.primaryIntent);
+    const rows = [];
+    if (intent === "SELL") rows.push({ label: r.s1, value: r.intentSell, __k: "i" });
+    else if (intent === "RENT_OUT") rows.push({ label: r.s1, value: r.intentRent, __k: "i" });
+    const kind = pick(pb.kind, ""), area = pick(pb.area, ""), scale = pick(pb.scale, "");
+    if (kind) rows.push({ label: r.kind, value: kind, __k: "k" });
+    if (area) rows.push({ label: r.area, value: area, __k: "a" });
+    if (scale) rows.push({ label: r.scale, value: scale, __k: "s" });
+    const req = pick(d.requirementsSummary, m.requirementsSummary);
+    if (req) rows.push({ label: r.req, value: req, __k: "r" });
+    const nm = pick(d.customerName, m.customerName);
+    if (nm) rows.push({ label: r.name, value: nm, __k: "n" });
+    const ct = pick(d.contact, m.contact);
+    if (ct) rows.push({ label: r.contact, value: ct, __k: "c" });
+    rows.push({ label: r.s4, value: r.action, __k: "act" });
+    return { title: r.title, rows, afterTitle: r.s5, after: r.after, disc: r.disc.map((x, i) => ({ text: x, __k: "d" + i })), ack: r.ack, confirm: r.confirm, edit: r.edit };
+  }
+
+  _onCaseAckToggle() { this.setState((s) => ({ caseAck: !s.caseAck })); }
+
+  // "Edit details": never creates a Case, never writes any Reception field.
+  // It simply closes the card and returns the customer to the AI; the next
+  // qualified turn rebuilds the card from the LATEST server state.
+  _onCaseEdit() {
+    this._caseCtaShown = false;
+    this.setState({ caseReviewOpen: false, caseAck: false, caseReview: null });
+  }
+
+  // opts.transient = this call is REBUILDING UI after a refresh/new tab, not
+  // reacting to a live turn: the bubbles it appends are marked __transient so
+  // _persistHistory() drops them, otherwise every reload would append another
+  // copy of the same CTA/success text to the stored transcript.
+  async _maybeOfferCase(opts) {
+    if (this._caseCtaShown) return;
+    if (this._receptionStage !== "qualified") return;
+    const transient = !!(opts && opts.transient);
+    // On the rebuild path the restored transcript is passed in explicitly:
+    // this.state.chatMessages may still be the pre-restore value if React has
+    // not flushed _restoreHistory's setState yet.
+    const baseMsgs = (opts && Array.isArray(opts.baseMessages) && opts.baseMessages.length)
+      ? opts.baseMessages : this.state.chatMessages;
+    const c = this._caseCopy();
+    // A Case already exists for this conversation (e.g. after a refresh): do
+    // NOT invite creation again - show the success state with a track button.
+    // The token is not kept client-side, so the link is re-obtained from the
+    // server's recovery path at the moment of the tap.
+    if (this._caseCreated) {
+      this._caseCtaShown = true;
+      const done = this._assistantBubble(c.done,
+        [{ label: c.track, noThumb: true, onClick: () => this._recoverTrack() }]);
+      if (transient) done.__transient = true;
+      const nextD = [...baseMsgs, done];
+      this.setState((s) => ({ chatMessages: [...(s.chatMessages.length ? s.chatMessages : baseMsgs), done] }));
+      if (!transient) this._persistHistory(nextD);
+      this._scrollChat();
+      return;
+    }
+    this._caseCtaShown = true;
+    // Re-read the Reception document so the card shows the ACCUMULATED
+    // server-held facts, not just what this single turn extracted. A plain
+    // document read - no server change, no new field, no client write.
+    let doc = null;
+    try { doc = this._convFS ? await this._convFS.findExistingReception() : null; } catch (e) { doc = null; }
+    if (doc) {
+      const linked = Array.isArray(doc.linkedCaseIds) ? doc.linkedCaseIds : [];
+      if (linked.length || doc.status === "case_created") { this._caseCreated = true; this._caseCtaShown = false; this._maybeOfferCase(opts); return; }
+    }
+    const review = this._buildCaseReview(doc, this._receptionMeta);
+    // On a rebuild the persisted transcript usually ALREADY contains the
+    // invitation text from before the reload - reopen the card over it
+    // instead of repeating it. Acknowledgement always starts unchecked.
+    if (transient && baseMsgs.some((m) => String((m && m.text) || "").indexOf(c.ask) !== -1)) {
+      this.setState({ caseReviewOpen: true, caseAck: false, caseReview: review });
+      this._scrollChat();
+      return;
+    }
+    const intro = this._assistantBubble(c.ask + "\n" + c.note);
+    if (transient) intro.__transient = true;
+    const next = [...baseMsgs, intro];
+    this.setState((s) => ({ chatMessages: [...(s.chatMessages.length ? s.chatMessages : baseMsgs), intro], caseReviewOpen: true, caseAck: false, caseReview: review }));
+    if (!transient) this._persistHistory(next);
+    this._scrollChat();
+  }
+
+  // Refresh / new-tab recovery (C4.2b Step 2). Reads nothing new from the
+  // customer and writes nothing anywhere: it only re-renders what the server
+  // state already says. createCaseFromConversation is NEVER called from here
+  // - the only paths to it stay a real confirm tap and _recoverTrack().
+  async _rebuildCaseUiAfterRestore(restoredMessages) {
+    if (this._caseUiRebuilt || this._caseCtaShown) return;
+    this._caseUiRebuilt = true;
+    const c = this._caseCopy();
+    const r = this._reviewCopy();
+    // Deterministic source of truth for the transcript: the array
+    // _restoreHistory just built. No setTimeout, no state-flush assumption.
+    const restored = (Array.isArray(restoredMessages) && restoredMessages.length)
+      ? restoredMessages
+      : (Array.isArray(this._restoredMessages) ? this._restoredMessages : null);
+    if (this._caseCreated) {
+      this._caseCtaShown = true;
+      // The success TEXT was persisted when the Case was created; only its
+      // button was lost. Re-attach the button to that existing message rather
+      // than appending a second success bubble (links are never persisted, so
+      // this adds nothing to the stored transcript).
+      const marks = [c.done, r.doneTitle].filter(Boolean).map((s) => String(s).slice(0, 24));
+      const btn = { label: r.track || c.track, noThumb: true, onClick: () => this._recoverTrack() };
+      // The updater runs AFTER _restoreHistory's queued setState, so
+      // s.chatMessages is the restored transcript; `restored` covers the case
+      // where this component's state was replaced by a different path.
+      this.setState((s) => {
+        const msgs = [...((s.chatMessages && s.chatMessages.length) ? s.chatMessages : (restored || []))];
+        let idx = -1;
+        for (let i = msgs.length - 1; i >= 0; i--) {
+          const t = String((msgs[i] && msgs[i].text) || "");
+          if (marks.some((m) => m && t.indexOf(m) !== -1)) { idx = i; break; }
+        }
+        if (idx >= 0) msgs[idx] = { ...msgs[idx], links: [btn] };
+        else {
+          const done = this._assistantBubble(c.done, [btn]);
+          done.__transient = true;
+          msgs.push(done);
+        }
+        return { chatMessages: msgs, caseReviewOpen: false, caseReview: null, caseAck: false };
+      });
+      this._scrollChat();
+      return;
+    }
+    if (this._receptionStage !== "qualified") return;
+    await this._maybeOfferCase({ transient: true, baseMessages: restored || [] });
+  }
+
+  // Internal refusal codes never reach the customer. Missing-information
+  // refusals become an invitation to keep talking to the AI; integrity
+  // refusals fail closed with a neutral retry message and NO link.
+  _caseErrorText(reason) {
+    const c = this._caseCopy();
+    const r = this._reviewCopy();
+    // The deployed server's REAL codes are the source of truth
+    // (missing_name / missing_contact / insufficient_property_info /
+    // intent_out_of_scope / not_qualified); the brief's aliases are accepted
+    // too so neither spelling falls through to generic text. The customer is
+    // told WHICH CATEGORY is missing - never the code itself.
+    const map = {
+      missing_name: r.mName,
+      insufficient_customer_identity: r.mName,
+      missing_contact: r.mContact,
+      insufficient_contact: r.mContact,
+      insufficient_property_info: r.mProp,
+      not_qualified: r.mStage,
+      intent_out_of_scope: r.mIntent,
+      unsupported_intent: r.mIntent,
+    };
+    // not_confirmed, case_missing, link_mismatch, token_unavailable and any
+    // internal error fall through: neutral retry text, no link, no token.
+    return map[reason] || c.retry;
+  }
+
+  // Recovery-only: the customer already confirmed (possibly in an earlier
+  // session) and just needs their link back. Same callable, same single-key
+  // payload; the server's recovery path returns the EXISTING Case's trackPath
+  // after checking both ends of the link, or refuses and releases no token.
+  async _recoverTrack() {
+    if (this._caseSubmitting) return;
+    this._caseSubmitting = true;
+    const c = this._caseCopy();
+    try {
+      const fns = await this._functionsSdk();
+      const res = await fns.httpsCallable("createCaseFromConversation")({ confirmed: true });
+      const data = res && res.data;
+      this._caseSubmitting = false;
+      if (data && data.created && data.trackPath) { window.location.href = String(data.trackPath); return; }
+      const next = [...this.state.chatMessages, this._assistantBubble(this._caseErrorText((data && data.reason) || "internal"))];
+      this.setState({ chatMessages: next });
+      this._persistHistory(next);
+    } catch (e) {
+      console.warn("track recovery failed:", (e && e.code) || "error");
+      this._caseSubmitting = false;
+      const next = [...this.state.chatMessages, this._assistantBubble(c.retry)];
+      this.setState({ chatMessages: next });
+      this._persistHistory(next);
+    }
+  }
+
+  async _confirmCase() {
+    if (this._caseSubmitting || this._caseCreated) return; // double-tap guard
+    // Consent is the acknowledgement toggle - NEVER the card being open or
+    // read. Without it this returns without calling anything.
+    if (!this.state.caseAck) return;
+    this._caseSubmitting = true;
+    const c = this._caseCopy();
+    // The card is taken off screen for the duration of the request, so its
+    // button cannot be tapped a second time; a progress bubble replaces it.
+    const base = this.state.chatMessages;
+    const waiting = [...base, this._assistantBubble(c.sending)];
+    this.setState({ chatMessages: waiting, caseReviewOpen: false, caseSending: true });
+    this._scrollChat();
+    let data = null;
+    try {
+      const fns = await this._functionsSdk();
+      // THE ENTIRE PAYLOAD. Adding any other key here would be a security
+      // regression, not a convenience: the server derives everything else.
+      const res = await fns.httpsCallable("createCaseFromConversation")({ confirmed: true });
+      data = res && res.data;
+    } catch (e) {
+      // No token, no ids, no payload in logs - code only.
+      console.warn("createCaseFromConversation failed:", (e && e.code) || "error");
+      this._caseSubmitting = false;
+      const next = [...base, this._assistantBubble(this._caseErrorText("internal"))];
+      // Card comes back so the customer can retry; acknowledgement must be
+      // given again - a refused attempt does not carry consent forward.
+      this.setState({ chatMessages: next, caseSending: false, caseReviewOpen: true, caseAck: false });
+      this._persistHistory(next);
+      return;
+    }
+    this._caseSubmitting = false;
+    if (!data || !data.created) {
+      const next = [...base, this._assistantBubble(this._caseErrorText((data && data.reason) || "internal"))];
+      // Refused: tell them which CATEGORY is missing (never the code) and
+      // reopen the card. Missing information is fixed by talking to the AI.
+      this.setState({ chatMessages: next, caseSending: false, caseReviewOpen: true, caseAck: false });
+      this._persistHistory(next);
+      return;
+    }
+    // created:true covers BOTH a fresh Case and the recovery path. The
+    // customer sees one identical success - whether the system created it now
+    // or recovered it is an internal detail.
+    this._caseCreated = true;
+    const r = this._reviewCopy();
+    // FAIL CLOSED on the capability URL: the SERVER composes trackPath. The
+    // client never reconstructs it from propertyId + trackToken - doing so
+    // would make the browser an author of a capability link. No trackPath ->
+    // no link at all; the customer recovers it from the server on demand.
+    const path = data.trackPath ? String(data.trackPath) : "";
+    const refLine = data.propertyId ? "\n" + r.ref + ": " + String(data.propertyId) : "";
+    const success = path
+      ? this._assistantBubble(r.doneTitle + "\n" + r.doneNote + refLine,
+          [{ label: r.track || c.track, noThumb: true, onClick: () => { window.location.href = path; } }])
+      : this._assistantBubble(r.doneTitle + "\n" + r.doneNote + refLine,
+          [{ label: r.track || c.track, noThumb: true, onClick: () => this._recoverTrack() }]);
+    const next = [...base, success];
+    this.setState({ chatMessages: next, caseSending: false, caseReviewOpen: false, caseReview: null, caseAck: false });
+    this._persistHistory(next);
+    this._scrollChat();
   }
 
   // ONE customer turn must produce AT MOST ONE customer-facing AI
@@ -623,10 +1014,16 @@ class Component extends DCLogic {
       if (data.persisted && data.conversationId) {
         this._receptionConversationId = data.conversationId;
         this._receptionStage = data.stage || "advisory";
+        // Server-produced classification for this turn. Used ONLY as a
+        // fallback for review rows when the document read is unavailable.
+        this._receptionMeta = data.meta || null;
       }
       const aiMsg = { role: "assistant", text: this._cleanReply(reply), links: this._extractLinks(reply, this._detectLang(text)), bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:7px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
       this.setState({ chatMessages: [...history, aiMsg], chatLoading: false });
       this._persistHistory([...history, aiMsg]);
+      // C4.2b Step 2: offer the confirmation CTA when the SERVER says this
+      // conversation reached `qualified`. Never parsed from the reply text.
+      this._maybeOfferCase();
     } catch (e) {
       console.warn("receptionTurn reply received but rendering failed:", e);
       this.setState({ chatLoading: false });
@@ -768,7 +1165,10 @@ class Component extends DCLogic {
       if (!uid) return;
       localStorage.setItem("hh_chat_history", JSON.stringify({
         v: 2, uid,
-        messages: messages.map((m) => ({ role: m.role, text: m.text })),
+        // __transient bubbles are UI rebuilt from server state on every load
+        // (the Track button after a refresh). They must never be stored, or
+        // each refresh would accumulate another copy in the transcript.
+        messages: messages.filter((m) => !m.__transient).map((m) => ({ role: m.role, text: m.text })),
       }));
     } catch (e) {}
   }
@@ -833,8 +1233,13 @@ class Component extends DCLogic {
 
       const messages = Array.isArray(saved.messages) ? saved.messages : [];
       if (!messages.length) return false;
-      this.setState({ chatMessages: messages.map((m) => this._buildBubble(m.role, m.text)) });
-      return true;
+      // Returns the restored BUBBLES (truthy) rather than a bare `true`, so a
+      // caller that must reason about the transcript can use the real array
+      // instead of racing this setState (C4.2b Step 2 rebuild timing fix).
+      const bubbles = messages.map((m) => this._buildBubble(m.role, m.text));
+      this._restoredMessages = bubbles;
+      this.setState({ chatMessages: bubbles });
+      return bubbles;
     } catch (e) {}
     return false;
   }
@@ -1589,6 +1994,17 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
           onToggle: (e) => { e.preventDefault(); e.stopPropagation(); this.toggleDraftProperty(id); },
         };
       }),
+      // C4.2b Step 2 — review card (all values are server-held Reception
+      // fields; the card is only rendered when the server said `qualified`).
+      caseReviewVisible: !!(this.state.caseReviewOpen && this.state.caseReview) && this.state.chatTab === "ai",
+      caseReview: this.state.caseReview || {},
+      caseAck: !!this.state.caseAck,
+      caseAckMark: this.state.caseAck ? "✓" : "",
+      caseConfirmReady: !!this.state.caseAck && !this.state.caseSending,
+      caseConfirmBlocked: !(!!this.state.caseAck && !this.state.caseSending),
+      onCaseAckToggle: () => this._onCaseAckToggle(),
+      onCaseConfirm: () => this._confirmCase(),
+      onCaseEdit: () => this._onCaseEdit(),
       onChatInput: (e) => this.setState({ chatInput: e.target.value }),
       onChatSend: () => this.sendChat(),
       onChatKeyDown: (e) => { if (e.key === "Enter") { e.preventDefault(); this.sendChat(); } },
