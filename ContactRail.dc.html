@@ -480,9 +480,18 @@ class Component extends DCLogic {
     // Card and the Track button must be rebuilt from the SERVER-DERIVED
     // Reception state that _resumeReception() just read back (stage /
     // linkedCaseIds / status). Runs only once per mount and creates nothing.
-    if (!this.state.customerMode && this._convBackend === "firestore" &&
-        (this._receptionStage === "qualified" || this._caseCreated)) {
-      await this._rebuildCaseUiAfterRestore(Array.isArray(restored) ? restored : null);
+    // POLICY (7 ก.ย. 2569): a Review Card with no conversation above it reads
+    // as if the site "remembers a stranger". So the qualified card is rebuilt
+    // ONLY when this device also restored the transcript it belongs to. An
+    // already-submitted request is different - its Track button is recovered
+    // either way, because the customer needs their link back.
+    const hasRestoredTranscript = Array.isArray(restored) && restored.length > 0;
+    if (!this.state.customerMode && this._convBackend === "firestore") {
+      if (this._caseCreated) {
+        await this._rebuildCaseUiAfterRestore(hasRestoredTranscript ? restored : null);
+      } else if (this._receptionStage === "qualified" && hasRestoredTranscript) {
+        await this._rebuildCaseUiAfterRestore(restored);
+      }
     }
     // Whether restored from local history or freshly greeted, a Customer
     // Mode visit must always land in the full-screen chat immediately —
