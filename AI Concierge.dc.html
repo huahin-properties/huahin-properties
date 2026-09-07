@@ -11,6 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700&family=Work+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <title>huahin.properties — คุยกับผู้ช่วย AI</title>
   <style>
@@ -125,15 +126,55 @@ class Component extends DCLogic {
       this._aiRestrictions = await fb.fetchAiRestrictions();
       this._aiPersona = await fb.fetchAiPersona();
     } catch (e) { console.warn("AI Concierge: firebase load failed", e); }
-    this._restoreHistory();
+    await this._restoreHistory();
   }
 
   // Shared with ContactRail's chat panel — same localStorage key, so a
   // conversation started here continues seamlessly after navigating into a
   // property page (and vice versa), surviving back/forward navigation.
-  _persistHistory(messages) {
+  // ── Local transcript identity isolation (7 ก.ย. 2569) ──────────────
+  // hh_chat_history is a SHARED storage contract across Home, this page and
+  // ContactRail, so all three must read/write the identical v2 shape:
+  //     { v:2, uid, messages:[{role,text}] }
+  // The uid is the Firebase Auth uid (anonymous visitor) read straight from
+  // the SDK - never from storage - and no sign-in is triggered here.
+  _visitorUid() {
     try {
-      localStorage.setItem("hh_chat_history", JSON.stringify(messages.map((m) => ({ role: m.role, text: m.text }))));
+      const f = window.firebase;
+      if (!f || !f.apps || !f.apps.length) return null;
+      const a = typeof f.app().auth === "function" ? f.app().auth() : null;
+      return (a && a.currentUser && a.currentUser.uid) || null;
+    } catch (e) { return null; }
+  }
+
+  // Resolves the visitor identity, creating it if this browser does not have
+  // one yet, via the system's EXISTING mechanism: getVisitorId() in
+  // conversation-firestore.js (Firebase Anonymous Auth). Not modified, and no
+  // parallel visitor-id scheme - the uid stamped here is the SAME one
+  // ContactRail/Reception uses later, so continuity holds.
+  async _ensureVisitorUid() {
+    const uid = this._visitorUid();
+    if (uid) return uid;
+    try {
+      // firebase-client.js first - its module top level calls initializeApp(),
+      // and conversation-firestore.js throws without an initialized app. Both
+      // imports are idempotent (ES module cache).
+      await import("./firebase-client.js");
+      const fs = await import("./conversation-firestore.js");
+      return (await fs.getVisitorId()) || null;
+    } catch (e) { return null; }
+  }
+
+  // Never writes uid:null - an unstamped transcript would be discarded on the
+  // next load anyway and is what broke cross-page continuity.
+  async _persistHistory(messages) {
+    try {
+      const uid = await this._ensureVisitorUid();
+      if (!uid) return;
+      localStorage.setItem("hh_chat_history", JSON.stringify({
+        v: 2, uid,
+        messages: messages.map((m) => ({ role: m.role, text: m.text })),
+      }));
     } catch (e) {}
   }
 
@@ -149,13 +190,30 @@ class Component extends DCLogic {
     };
   }
 
-  _restoreHistory() {
+  // FAIL-CLOSED: a transcript is displayed ONLY when it is stamped with the
+  // uid that is signed in right now. Legacy v1 (bare array, no uid) has
+  // unprovable ownership and is discarded, not adopted. Unreadable identity
+  // shows nothing but deletes nothing.
+  // async for the same reason as Home: a synchronous currentUser read can be
+  // null while the Auth SDK is still restoring its persisted session, which
+  // would refuse to restore the visitor's OWN history. Identity is awaited
+  // ONLY when a v2 record exists - no stored transcript, no identity created.
+  async _restoreHistory() {
     try {
       const saved = JSON.parse(localStorage.getItem("hh_chat_history") || "null");
-      if (saved && saved.length) {
-        this.setState({ chatMessages: saved.map((m) => this._buildBubble(m.role, m.text)) });
-        setTimeout(() => { if (this.scrollRef.current) this.scrollRef.current.scrollTop = this.scrollRef.current.scrollHeight; }, 80);
+      if (!saved) return;
+      if (Array.isArray(saved)) { try { localStorage.removeItem("hh_chat_history"); } catch (e) {} return; }
+      const uid = await this._ensureVisitorUid();
+      if (!uid) return;
+      if (saved.uid !== uid) {
+        try { localStorage.removeItem("hh_chat_history"); } catch (e) {}
+        this.setState({ chatMessages: [] });
+        return;
       }
+      const messages = Array.isArray(saved.messages) ? saved.messages : [];
+      if (!messages.length) return;
+      this.setState({ chatMessages: messages.map((m) => this._buildBubble(m.role, m.text)) });
+      setTimeout(() => { if (this.scrollRef.current) this.scrollRef.current.scrollTop = this.scrollRef.current.scrollHeight; }, 80);
     } catch (e) {}
   }
 

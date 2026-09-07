@@ -702,9 +702,63 @@ class Component extends DCLogic {
     } catch (e) {}
   }
 
-  _persistHistory(messages) {
+  // ── C4.2b Step 1 follow-up — local transcript identity isolation ──
+  //
+  // The AI transcript in localStorage was not tied to any identity, so a
+  // browser profile whose Firebase Auth user changed (Auth lives in IndexedDB
+  // `firebaseLocalStorageDb`, the transcript in localStorage - two separate
+  // stores that can diverge) could show the PREVIOUS visitor's conversation to
+  // the next person on that device. Server-side Reception persistence is
+  // unaffected and unchanged: the conversation id is still
+  // "reception__" + request.auth.uid, resolved server-side.
+  //
+  // The uid is read straight from the Auth SDK, never from storage, and
+  // getVisitorId() is deliberately NOT called here - this must not trigger an
+  // anonymous sign-in as a side effect of restoring a transcript. By the time
+  // _restoreHistory runs, _initConversationBackend has already awaited
+  // _resumeReception(), so on the Firestore backend the uid is present.
+  _visitorUid() {
     try {
-      localStorage.setItem("hh_chat_history", JSON.stringify(messages.map((m) => ({ role: m.role, text: m.text }))));
+      const a = window.firebase && window.firebase.apps && window.firebase.apps.length
+        ? window.firebase.app().auth() : null;
+      return (a && a.currentUser && a.currentUser.uid) || null;
+    } catch (e) { return null; }
+  }
+
+  // Stored shape v2: { v:2, uid, messages:[{role,text}] }. The KEY is
+  // unchanged ("hh_chat_history") so nothing else in the app has to know
+  // about this, and a v1 array left by an earlier build is still readable
+  // (see _restoreHistory).
+  // Same contract as Home / AI Concierge: resolve (or create) the identity
+  // through the system's EXISTING mechanism - getVisitorId() in
+  // conversation-firestore.js, unmodified - so all three pages stamp the SAME
+  // anonymous uid that Reception uses server-side. Reuses the already-imported
+  // module when present and only falls back to a dynamic import.
+  async _ensureVisitorUid() {
+    const uid = this._visitorUid();
+    if (uid) return uid;
+    try {
+      let fs = this._convFS;
+      if (!fs) {
+        // firebase-client.js first - its module top level calls
+        // initializeApp(); conversation-firestore.js throws without an app.
+        await import("./firebase-client.js");
+        fs = await import("./conversation-firestore.js");
+      }
+      return (await fs.getVisitorId()) || null;
+    } catch (e) { return null; }
+  }
+
+  // Never writes uid:null (a record whose owner cannot be proven would be
+  // discarded on the next load under the fail-closed restore rule).
+  async _persistHistory(messages) {
+    try {
+      const uid = await this._ensureVisitorUid();
+      if (!uid) return;
+      localStorage.setItem("hh_chat_history", JSON.stringify({
+        v: 2, uid,
+        messages: messages.map((m) => ({ role: m.role, text: m.text })),
+      }));
     } catch (e) {}
   }
 
@@ -726,13 +780,50 @@ class Component extends DCLogic {
     };
   }
 
+  // Drops BOTH local transcripts (the Human-tab one carries the same exposure)
+  // and clears them from view. localStorage only - no Firestore write, no
+  // conversation document touched, ever.
+  _discardLocalTranscripts() {
+    try { localStorage.removeItem("hh_chat_history"); } catch (e) {}
+    try { localStorage.removeItem("hh_human_chat_history"); } catch (e) {}
+    this.setState({ chatMessages: [], humanMessages: [] });
+  }
+
   _restoreHistory() {
     try {
       const saved = JSON.parse(localStorage.getItem("hh_chat_history") || "null");
-      if (saved && saved.length) {
-        this.setState({ chatMessages: saved.map((m) => this._buildBubble(m.role, m.text)) });
-        return true;
+      if (!saved) return false;
+
+      // FAIL-CLOSED migration (Product Owner decision, 7 ก.ย. 2569).
+      // A legacy v1 payload is a bare array with NO uid, so its ownership can
+      // never be proven - and unprovable ownership on a shared device is the
+      // exact defect being closed here. It is therefore discarded, never
+      // adopted. Cost: a visitor mid-conversation at upgrade time loses the
+      // on-screen transcript once. Their Firestore Reception conversation is
+      // NOT touched - server persistence is untouched by this whole change.
+      if (Array.isArray(saved)) {
+        this._discardLocalTranscripts();
+        return false;
       }
+
+      const uid = this._visitorUid();
+      // Identity not readable (Auth/Firestore unreachable -> local fallback):
+      // display nothing, but do NOT delete either - ownership is unproven in
+      // BOTH directions, so the data is left for a later load that can verify
+      // it. Fail-closed on display, non-destructive on storage.
+      if (!uid) return false;
+
+      // Stamped with a different identity (or written before an identity
+      // existed): a previous visitor on this device. Never show it; discard.
+      if (saved.uid !== uid) {
+        this._discardLocalTranscripts();
+        return false;
+      }
+
+      const messages = Array.isArray(saved.messages) ? saved.messages : [];
+      if (!messages.length) return false;
+      this.setState({ chatMessages: messages.map((m) => this._buildBubble(m.role, m.text)) });
+      return true;
     } catch (e) {}
     return false;
   }

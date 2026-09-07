@@ -617,11 +617,45 @@ class Component extends DCLogic {
     this.setState({ welcomeDismissing: true });
     setTimeout(() => this.setState({ showWelcome: false }), 280);
   }
-  _restoreWelcomeHistory() {
+  // ── Local transcript identity isolation (7 ก.ย. 2569) ──────────────
+  // hh_chat_history is a SHARED storage contract across this page, AI
+  // Concierge and ContactRail, so all three read/write the identical v2
+  // shape: { v:2, uid, messages:[{role,text}] }. The uid is the Firebase
+  // Auth uid (anonymous visitor), read straight from the SDK - never from
+  // storage - and no sign-in is triggered here.
+  _visitorUid() {
+    try {
+      const f = window.firebase;
+      if (!f || !f.apps || !f.apps.length) return null;
+      const a = typeof f.app().auth === "function" ? f.app().auth() : null;
+      return (a && a.currentUser && a.currentUser.uid) || null;
+    } catch (e) { return null; }
+  }
+
+  // FAIL-CLOSED: displayed ONLY when stamped with the uid signed in right
+  // now. Legacy v1 (bare array, no uid) has unprovable ownership and is
+  // discarded, not adopted. Unreadable identity shows nothing, deletes
+  // nothing. No Firestore access of any kind in this method.
+  // async: on a refresh or a new tab the Auth SDK may still be re-opening its
+  // IndexedDB session, so a synchronous currentUser read can be null for a
+  // visitor who DOES have an identity - which would fail to restore their own
+  // history. Identity is resolved (awaited) ONLY AFTER a v2 record is found,
+  // so opening a page with no stored transcript never creates an identity.
+  async _restoreWelcomeHistory() {
     try {
       const saved = JSON.parse(localStorage.getItem("hh_chat_history") || "null");
-      if (saved && saved.length) {
-        const msgs = saved.map((m) => ({
+      if (!saved) return;
+      if (Array.isArray(saved)) { try { localStorage.removeItem("hh_chat_history"); } catch (e) {} return; }
+      const uid = await this._ensureVisitorUid();
+      if (!uid) return;
+      if (saved.uid !== uid) {
+        try { localStorage.removeItem("hh_chat_history"); } catch (e) {}
+        this.setState({ welcomeChatMessages: [] });
+        return;
+      }
+      const stored = Array.isArray(saved.messages) ? saved.messages : [];
+      if (stored.length) {
+        const msgs = stored.map((m) => ({
           role: m.role, text: m.text, align: m.role === "user" ? "flex-end" : "flex-start",
           bubbleStyle: m.role === "user"
             ? "background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); padding:7px 14px; border-radius:14px 14px 2px 14px; font-size:14px; line-height:1.5;"
@@ -635,8 +669,38 @@ class Component extends DCLogic {
     try { localStorage.removeItem("hh_chat_history"); } catch (e) {}
     this.setState({ welcomeChatMessages: [] });
   }
-  _persistWelcomeHistory(messages) {
-    try { localStorage.setItem("hh_chat_history", JSON.stringify(messages.map((m) => ({ role: m.role, text: m.text })))); } catch (e) {}
+  // Resolves the visitor identity, creating it if this browser does not have
+  // one yet, using the system's EXISTING mechanism: getVisitorId() in
+  // conversation-firestore.js (Firebase Anonymous Auth). That function is not
+  // modified, and no parallel visitor-id scheme is introduced - so the uid
+  // stamped here is the SAME uid ContactRail/Reception will use later, which
+  // is what keeps cross-page continuity intact.
+  async _ensureVisitorUid() {
+    const uid = this._visitorUid();
+    if (uid) return uid;
+    try {
+      // firebase-client.js first: its module top level is what calls
+      // initializeApp(), and conversation-firestore.js throws if the app does
+      // not exist yet. Both imports are idempotent (ES module cache), so this
+      // is safe to call before componentDidMount's own import.
+      await import("./firebase-client.js");
+      const fs = await import("./conversation-firestore.js");
+      return (await fs.getVisitorId()) || null;
+    } catch (e) { return null; }
+  }
+
+  // Never writes uid:null. Without a provable identity the transcript is not
+  // stored at all - an unstamped record would be discarded on the next load
+  // anyway, and writing one is what caused the cross-page regression.
+  async _persistWelcomeHistory(messages) {
+    try {
+      const uid = await this._ensureVisitorUid();
+      if (!uid) return;
+      localStorage.setItem("hh_chat_history", JSON.stringify({
+        v: 2, uid,
+        messages: messages.map((m) => ({ role: m.role, text: m.text })),
+      }));
+    } catch (e) {}
   }
   _buildWelcomeContext(props) {
     return props.map((p) => {
