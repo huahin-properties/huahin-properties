@@ -494,6 +494,7 @@ class Component extends DCLogic {
       if (!this.state.customerMode) await this._resumeReception();
     } catch (e) {
       console.warn("Firestore conversation backend unavailable — falling back to local (same-device only):", e);
+      this._recordReceptionDiag({ route: "backend_init_failed_local_only", code: String((e && e.code) || "no-code"), persisted: false });
       this._convBackend = "local";
       this._convStore = await import("./conversation-store.js");
       this._unsubConv = this._convStore.subscribe(() => this._onConversationsChangedLocal());
@@ -511,6 +512,29 @@ class Component extends DCLogic {
         this._receptionStage = existing.conversationStage || "advisory";
       }
     } catch (e) { /* no persisted Reception yet — stay local */ }
+  }
+
+  // C4.2b Step 1 diagnostics (7 ก.ย. 2569) — VISIBILITY ONLY, no behavior
+  // change. The bug this exists for: when the Reception turn does not persist
+  // (legacy fallback route, or the server refusing at the gate) the visitor
+  // still gets a perfectly normal answer, so the failure was invisible on
+  // both sides. Every outcome now leaves one line in the console and one
+  // entry in window.__hhReceptionDiag, carrying the server's `rid` so a
+  // browser line can be matched to its Cloud Logging line.
+  //
+  // PRIVACY: routes, codes and flags only — never message text.
+  _recordReceptionDiag(entry) {
+    try {
+      const rec = { at: new Date().toISOString(), ...entry };
+      if (typeof window !== "undefined") {
+        if (!Array.isArray(window.__hhReceptionDiag)) window.__hhReceptionDiag = [];
+        window.__hhReceptionDiag.push(rec);
+        if (window.__hhReceptionDiag.length > 20) window.__hhReceptionDiag.shift();
+      }
+      console.warn("[reception-diag]", rec.route, "rid=" + (rec.rid || "-"),
+        "persisted=" + (rec.persisted === undefined ? "-" : rec.persisted),
+        "stage=" + (rec.stage || "-"), rec.code ? "code=" + rec.code : "");
+    } catch (e) { /* diagnostics must never break the chat */ }
   }
 
   // ONE customer turn must produce AT MOST ONE customer-facing AI
@@ -557,9 +581,14 @@ class Component extends DCLogic {
     } catch (e) {
       if (!called || this._receptionFallbackSafe(e)) {
         console.warn("receptionTurn not executed — falling back to local chat:", e);
+        this._recordReceptionDiag({
+          route: called ? "legacy_fallback_after_call" : "legacy_fallback_before_call",
+          code: String((e && e.code) || "no-code"), persisted: false,
+        });
         return false;
       }
       console.warn("receptionTurn outcome unknown — NOT generating a second reply:", e);
+      this._recordReceptionDiag({ route: "ambiguous_error_no_second_reply", code: String((e && e.code) || "no-code") });
       const t = CHAT_I18N[lang] || CHAT_I18N.en;
       const errMsg = { role: "assistant", text: "Sorry, something went wrong. Please try again or contact us directly.", links: [{ label: t.chat_contact_us || "Contact us", noThumb: true, onClick: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }) }], bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:7px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" };
       this.setState({ chatMessages: [...history, errMsg], chatLoading: false });
@@ -568,6 +597,16 @@ class Component extends DCLogic {
     // Past this point the server HAS produced this turn's answer, so we
     // never fall through to a second generation — a rendering failure here
     // can only ever cost us the bubble, never cause a duplicate AI call.
+    // The server answered. Record its OWN verdict (rid + persisted + stage) —
+    // this is what distinguishes "the callable never ran" from "the callable
+    // ran and the gate refused", the exact ambiguity the 7 Sept production
+    // logs could not resolve.
+    this._recordReceptionDiag({
+      route: "receptionTurn", rid: (data && data.rid) || null,
+      persisted: !!(data && data.persisted), stage: (data && data.stage) || (data && data.meta && data.meta.stage) || null,
+      primaryIntent: (data && data.meta && data.meta.primaryIntent) || null,
+      replyLen: ((data && data.reply) || "").length,
+    });
     const reply = (data && data.reply) || "";
     if (!reply) return false; // server responded with no text at all: safe to retry locally
     try {
