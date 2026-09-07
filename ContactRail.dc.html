@@ -322,6 +322,11 @@
                 </div>
               </sc-if>
             </div>
+            <sc-if value="{{ caseOfferBarVisible }}">
+              <div style="flex-shrink:0; border-top:1px solid oklch(90% 0.01 70); background:oklch(97% 0.01 80); padding:10px 12px;">
+                <div onClick="{{ onCaseOfferTap }}" style="background:oklch(38% 0.11 20); color:oklch(97% 0.01 80); border-radius:100px; padding:12px 18px; text-align:center; font-size:14px; font-weight:600; cursor:pointer;">{{ caseOfferLabel }}</div>
+              </div>
+            </sc-if>
             <div style="flex-shrink:0; border-top:1px solid oklch(90% 0.01 70); padding:10px 12px 4px; display:flex; gap:8px;">
               <input value="{{ chatInput }}" onChange="{{ onChatInput }}" onKeyDown="{{ onChatKeyDown }}" placeholder="{{ t.chat_type_or_speak }}" style="flex:1; border:1px solid oklch(85% 0.01 70); border-radius:100px; padding:10px 16px; font-size:14px; font-family:inherit; box-sizing:border-box; min-width:0;" />
               <div onClick="{{ onChatSend }}" style="background:oklch(22% 0.02 60); color:oklch(97% 0.01 80); width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; font-size:16px;">➤</div>
@@ -436,6 +441,10 @@ class Component extends DCLogic {
     chatTab: "ai", chatMobileView: "conversation", convListCollapsed: true, customerMode: false, senderName: "", ownerConversations: [], ownerOpenMessages: [], ownerReplyInput: "", humanMessages: [],
     // C4.2b Step 2 — confirmation review card
     caseReviewOpen: false, caseReview: null, caseAck: false, caseSending: false,
+    // Sticky-CTA gate. Every one of these comes from SERVER-derived Reception
+    // state only (the persisted document or the stage receptionTurn returned)
+    // - never inferred from the AI's prose.
+    receptionQualified: false, receptionHasName: false, receptionHasContact: false, caseCreatedFlag: false,
   };
 
   chatScrollRef = React.createRef();
@@ -584,8 +593,42 @@ class Component extends DCLogic {
         // (the server returns alreadyExisted), but the CTA does not nag.
         const linked = Array.isArray(existing.linkedCaseIds) ? existing.linkedCaseIds : [];
         if (linked.length || existing.status === "case_created") this._caseCreated = true;
+        this._syncReceptionFlags(existing);
       }
     } catch (e) { /* no persisted Reception yet — stay local */ }
+  }
+
+  // Mirrors the SERVER-held Reception facts the sticky CTA gate needs into
+  // state (the template cannot read instance fields). A missing doc leaves the
+  // flags as the meta fallback allows; nothing here is parsed from AI text.
+  _syncReceptionFlags(doc, meta) {
+    const d = doc || {};
+    const m = meta || {};
+    const val = (a, b) => String((a !== undefined && a !== null && a !== "" ? a : b) || "").trim();
+    const name = val(d.customerName, m.customerName);
+    const contact = val(d.contact, m.contact);
+    this.setState({
+      receptionQualified: this._receptionStage === "qualified",
+      receptionHasName: !!name,
+      receptionHasContact: !!contact,
+      caseCreatedFlag: !!this._caseCreated,
+    });
+  }
+
+  // Called after every persisted turn. The turn's own meta is often partial,
+  // so while the CTA gate is still short of name/contact the document is
+  // re-read once per turn (a plain read, no write) to pick up the ACCUMULATED
+  // fields. Once both are known no further reads happen.
+  async _refreshReceptionFlags(meta) {
+    this._syncReceptionFlags(null, meta);
+    if (this._receptionStage !== "qualified" || this._caseCreated) return;
+    if (this.state.receptionHasName && this.state.receptionHasContact) return;
+    let doc = null;
+    try { doc = this._convFS ? await this._convFS.findExistingReception() : null; } catch (e) { doc = null; }
+    if (!doc) return;
+    const linked = Array.isArray(doc.linkedCaseIds) ? doc.linkedCaseIds : [];
+    if (linked.length || doc.status === "case_created") this._caseCreated = true;
+    this._syncReceptionFlags(doc, meta);
   }
 
   // C4.2b Step 1 diagnostics (7 ก.ย. 2569) — VISIBILITY ONLY, no behavior
@@ -763,6 +806,7 @@ class Component extends DCLogic {
       // never offer creation again - hand back the tracking route instead.
       if (linked.length || doc.status === "case_created") {
         this._caseCreated = true;
+        this._syncReceptionFlags(doc);
         const cc = this._caseCopy();
         const rr = this._reviewCopy();
         const done = this._assistantBubble(cc.done,
@@ -774,6 +818,7 @@ class Component extends DCLogic {
       }
     }
     const review = this._buildCaseReview(doc, this._receptionMeta);
+    this._syncReceptionFlags(doc, this._receptionMeta);
     this.setState({ caseReviewOpen: true, caseAck: false, caseReview: review });
     this._scrollChat();
   }
@@ -812,29 +857,15 @@ class Component extends DCLogic {
       return;
     }
     this._caseCtaShown = true;
-    // The offer is a BUTTON, not the card. No document read is needed here -
-    // the card re-reads the Reception document at the moment of the tap.
-    const btn = { label: this._caseOfferLabel(), noThumb: true, onClick: () => this._openCaseReview() };
-    // On a rebuild the persisted transcript usually ALREADY carries the offer
-    // text from before the reload (its button was lost, links are never
-    // persisted): re-attach the button to that message instead of repeating
-    // the text. The Review Card stays CLOSED either way.
-    if (transient) {
-      let idx = -1;
-      for (let i = baseMsgs.length - 1; i >= 0; i--) {
-        if (String((baseMsgs[i] && baseMsgs[i].text) || "").indexOf(c.ask) !== -1) { idx = i; break; }
-      }
-      if (idx >= 0) {
-        this.setState((s) => {
-          const msgs = [...pickBase(s)];
-          if (msgs[idx]) msgs[idx] = { ...msgs[idx], links: [btn] };
-          return { chatMessages: msgs, caseReviewOpen: false, caseReview: null, caseAck: false };
-        });
-        this._scrollChat();
-        return;
-      }
+    // Invitation TEXT only. The tappable control is the STICKY BAR above the
+    // input (caseOfferBarVisible): it cannot scroll out of reach, is never
+    // part of chatMessages, and therefore neither duplicates nor persists.
+    // On a rebuild, if the transcript already carries this text, say nothing.
+    if (transient && baseMsgs.some((m) => String((m && m.text) || "").indexOf(c.ask) !== -1)) {
+      this.setState({ caseReviewOpen: false, caseReview: null, caseAck: false });
+      return;
     }
-    const intro = this._assistantBubble(c.ask + "\n" + c.note, [btn]);
+    const intro = this._assistantBubble(c.ask + "\n" + c.note);
     if (transient) intro.__transient = true;
     const next = [...baseMsgs, intro];
     this.setState((s) => ({ chatMessages: [...pickBase(s), intro], caseReviewOpen: false, caseReview: null, caseAck: false }));
@@ -985,6 +1016,7 @@ class Component extends DCLogic {
     // customer sees one identical success - whether the system created it now
     // or recovered it is an internal detail.
     this._caseCreated = true;
+    this.setState({ caseCreatedFlag: true, receptionQualified: false });
     const r = this._reviewCopy();
     // FAIL CLOSED on the capability URL: the SERVER composes trackPath. The
     // client never reconstructs it from propertyId + trackToken - doing so
@@ -1087,6 +1119,9 @@ class Component extends DCLogic {
       const completed = [...history, aiMsg];
       this.setState({ chatMessages: completed, chatLoading: false });
       this._persistHistory(completed);
+      // Sticky-CTA gate: refresh the server-derived flags for THIS turn before
+      // the offer is considered (a plain read at most once per turn).
+      await this._refreshReceptionFlags(this._receptionMeta);
       // C4.2b Step 2: offer the confirmation CTA when the SERVER says this
       // conversation reached `qualified`. Never parsed from the reply text.
       // `completed` is passed explicitly so the CTA is appended AFTER this
@@ -2065,6 +2100,13 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       // C4.2b Step 2 — review card (all values are server-held Reception
       // fields; the card is only rendered when the server said `qualified`).
       caseReviewVisible: !!(this.state.caseReviewOpen && this.state.caseReview) && this.state.chatTab === "ai",
+      // Sticky offer bar: server-derived gate only, and it lives OUTSIDE
+      // chatMessages so it can never scroll away, duplicate, or persist.
+      caseOfferBarVisible: !!(this.state.receptionQualified && this.state.receptionHasName &&
+        this.state.receptionHasContact && !this.state.caseCreatedFlag &&
+        !this.state.caseReviewOpen && !this.state.caseSending && this.state.chatTab === "ai" && !this.state.customerMode),
+      caseOfferLabel: this._caseOfferLabel(),
+      onCaseOfferTap: () => this._openCaseReview(),
       caseReview: this.state.caseReview || {},
       caseAck: !!this.state.caseAck,
       caseAckMark: this.state.caseAck ? "✓" : "",
