@@ -152,14 +152,18 @@ class Component extends DCLogic {
   // conversation-firestore.js (Firebase Anonymous Auth). Not modified, and no
   // parallel visitor-id scheme - the uid stamped here is the SAME one
   // ContactRail/Reception uses later, so continuity holds.
+  // Order is load-bearing: initializeApp -> Auth warm-up -> read uid -> only
+  // then mint. A currentUser read taken before Auth restored its persisted
+  // session is what made a new tab mint a second identity.
   async _ensureVisitorUid() {
-    const uid = this._visitorUid();
-    if (uid) return uid;
     try {
       // firebase-client.js first - its module top level calls initializeApp(),
       // and conversation-firestore.js throws without an initialized app. Both
       // imports are idempotent (ES module cache).
-      await import("./firebase-client.js");
+      const fb = await import("./firebase-client.js");
+      if (fb.warmUpAuthPersistence) await fb.warmUpAuthPersistence();
+      const ready = this._visitorUid();
+      if (ready) return ready;
       const fs = await import("./conversation-firestore.js");
       return (await fs.getVisitorId()) || null;
     } catch (e) { return null; }

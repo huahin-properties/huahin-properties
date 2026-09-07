@@ -468,7 +468,17 @@ class Component extends DCLogic {
 
   async _initConversationBackend() {
     try {
-      await import("./firebase-client.js"); // ensures the Firebase app is initialized first
+      const fb = await import("./firebase-client.js"); // ensures the Firebase app is initialized first
+      // Firebase Auth restores its persisted session from IndexedDB
+      // ASYNCHRONOUSLY. Without waiting for its ready signal, getVisitorId()
+      // reads currentUser === null in a NEW TAB and signInAnonymously() mints
+      // a brand-new uid - forking the visitor identity, orphaning the local
+      // transcript AND creating a second Reception conversation. warmUpAuth-
+      // Persistence() awaits Auth's single onAuthStateChanged (4s cap) and is
+      // the mechanism firebase-client.js already provides for exactly this.
+      // Order is load-bearing: initialize -> auth warm-up -> conversation
+      // module -> getVisitorId/findExistingReception -> restore local history.
+      if (fb.warmUpAuthPersistence) await fb.warmUpAuthPersistence();
       const fs = await import("./conversation-firestore.js");
       this._convFS = fs;
       if (this.state.customerMode) {
@@ -734,17 +744,18 @@ class Component extends DCLogic {
   // conversation-firestore.js, unmodified - so all three pages stamp the SAME
   // anonymous uid that Reception uses server-side. Reuses the already-imported
   // module when present and only falls back to a dynamic import.
+  // Never decides "no identity" from a currentUser read taken before Auth has
+  // finished restoring its persisted session - that is what minted a new uid
+  // in a new tab. Warm up first, THEN read, and only mint as a last resort.
   async _ensureVisitorUid() {
-    const uid = this._visitorUid();
-    if (uid) return uid;
     try {
-      let fs = this._convFS;
-      if (!fs) {
-        // firebase-client.js first - its module top level calls
-        // initializeApp(); conversation-firestore.js throws without an app.
-        await import("./firebase-client.js");
-        fs = await import("./conversation-firestore.js");
-      }
+      // firebase-client.js first - its module top level calls initializeApp();
+      // conversation-firestore.js throws without an app.
+      const fb = await import("./firebase-client.js");
+      if (fb.warmUpAuthPersistence) await fb.warmUpAuthPersistence();
+      const ready = this._visitorUid();
+      if (ready) return ready;
+      const fs = this._convFS || (await import("./conversation-firestore.js"));
       return (await fs.getVisitorId()) || null;
     } catch (e) { return null; }
   }
