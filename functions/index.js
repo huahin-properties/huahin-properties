@@ -706,7 +706,20 @@ exports.receptionTurn = onCall(
     }
 
     const now = admin.firestore.FieldValue.serverTimestamp();
+    // C4.3 Phase 1 FIX 2 - an EXPLICIT millisecond clock for field-level
+    // precedence. `now` above is a serverTimestamp SENTINEL, not a number:
+    // passing it as buildDraftPatch's `at` made Number(sentinel) -> NaN, which
+    // fell through to Date.now() by accident. Document-level createdAt /
+    // updatedAt keep using the sentinel; only the per-field precedence clock
+    // is this value, and it is now intentional rather than incidental.
+    const nowMs = Date.now();
     let stage = out.stage;
+    // C4.3 Phase 1 FIX 1 - declared in the FUNCTION scope, not inside the
+    // persistence try block below. The Phase 1 draft block reads it after
+    // that block closes; a `const` inside the try was out of scope there and
+    // threw ReferenceError on every qualifying turn. Value and semantics are
+    // unchanged - only the declaration moved out.
+    let nextIntent = out.primaryIntent;
     try {
 
     if (!already) {
@@ -785,7 +798,7 @@ exports.receptionTurn = onCall(
     // is unchanged in both directions.
     const prevIntent = already ? (snap.data().primaryIntent || "") : "";
     const intentIsSupply = (i) => !!CASE_INTENTS_C42B[i || ""];
-    const nextIntent = (intentIsSupply(prevIntent) && !intentIsSupply(out.primaryIntent))
+    nextIntent = (intentIsSupply(prevIntent) && !intentIsSupply(out.primaryIntent))
       ? prevIntent : out.primaryIntent;
 
     const patch = {
@@ -834,19 +847,24 @@ exports.receptionTurn = onCall(
     //
     // Supply-side only. A BUY/RENT visitor has no property of their own to
     // draft, and creating an empty draft for every browser would be noise.
+    //
+    // FIX 3 - the try starts BEFORE the condition. Previously only the body
+    // was protected, so the condition itself (which referenced an
+    // out-of-scope binding) threw straight past the handler and cost the
+    // customer their turn. Everything the draft needs now sits inside.
     let draftApplied = [];
-    if (CASE_INTENTS_C42B[nextIntent] &&
-        (Object.keys(out.propertyFields).length || out.unclearFields.length)) {
-      try {
+    try {
+      if (CASE_INTENTS_C42B[nextIntent] &&
+          (Object.keys(out.propertyFields).length || out.unclearFields.length)) {
         const draftRef = db.collection("propertyDrafts").doc(draftIdForVisitor(visitorId));
         draftApplied = await db.runTransaction(async (t) => {
-          const snap = await t.get(draftRef);
-          const cur = snap.exists ? (snap.data() || {}) : {};
+          const dSnap = await t.get(draftRef);
+          const cur = dSnap.exists ? (dSnap.data() || {}) : {};
           // Ownership is structural (id built from the caller's own uid) but
           // asserted anyway: a draft owned by someone else is never touched.
-          if (snap.exists && cur.ownerUid && cur.ownerUid !== visitorId) return [];
+          if (dSnap.exists && cur.ownerUid && cur.ownerUid !== visitorId) return [];
           const built = buildDraftPatch(cur.fields, out.propertyFields, {
-            source: "ai_chat", at: now, unclear: out.unclearFields,
+            source: "ai_chat", at: nowMs, unclear: out.unclearFields,
             // Evidence classification: fields the customer stated outright in
             // THIS turn are recorded as customer_stated, everything else as
             // ai_chat. Without this split an explicit "เปลี่ยนราคาเป็น 7.5 ล้าน"
@@ -864,17 +882,20 @@ exports.receptionTurn = onCall(
             updatedAt: now,
             fields: built.patch,
           };
-          if (!snap.exists) doc.createdAt = now;
+          if (!dSnap.exists) doc.createdAt = now;
           // merge:true merges `fields` key-by-key, so untouched fields and
           // their provenance survive - the same accumulate-never-erase rule
           // propertyBasics already relies on.
           t.set(draftRef, doc, { merge: true });
           return built.applied;
         });
-      } catch (e) {
-        rxLog({ rid, event: "draft_error", uidTail, code: (e && e.code) || null, name: (e && e.name) || null });
-        draftApplied = [];
       }
+    } catch (e) {
+      // Non-fatal by contract: the customer's turn already succeeded. Log the
+      // cause (name included, so a ReferenceError is visible here instead of
+      // reaching the browser) and carry on with the normal response.
+      rxLog({ rid, event: "draft_error", uidTail, code: (e && e.code) || null, name: (e && e.name) || null });
+      draftApplied = [];
     }
     // Field NAMES only - never values. Same privacy rule as every other rxLog
     // call: this function logs decisions, not customer content.
