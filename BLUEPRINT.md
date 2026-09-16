@@ -1855,7 +1855,7 @@ Mission 01 (QA & Review Standard Framework) และ Mission 02 (SEO Foundation
 
 | เฟส | ขอบเขต | สถานะ |
 |---|---|---|
-| **C4.2a** | `humanHandlingStartedAt` + เงื่อนไขตัด AI ถาวร | ✅ implement แล้ว (เฟสนี้) |
+| **C4.2a** | `humanHandlingStartedAt` + เงื่อนไขตัด AI ถาวร | ✅ **CLOSED / PRODUCTION PASS** (5 ก.ย. 2569) |
 | **C4.2b** | `createCaseFromConversation` + provenance message (**ต้องมี customer confirmation**) | ยังไม่เริ่ม |
 | **C4.2c** | Canonical post-Case messaging ผ่าน `addCaseMessage` | ยังไม่เริ่ม |
 
@@ -1912,4 +1912,92 @@ aiAutonomyAllowedForCase(prop) = !isHumanHandled(prop) && !isCurrentlyAssignedTo
 
 **ไม่แตะในเฟสนี้**: Reception lifecycle · `receptionTurn` qualification · การสร้าง Property Case · `linkedCaseIds` · การย้าย message · `firestore.rules` · `functions/index.js` · Owner Submission · Leads · C0–C3
 
+#### 26.16.1 C4.2a Production Closure Record (5 ก.ย. 2569)
+
+**สถานะ: CLOSED / PRODUCTION PASS** — ทดสอบบนข้อมูลจริงใน production แล้ว **ห้ามแก้ `firebase-client.js` เรื่อง C4.2a ซ้ำ · ห้าม redesign `assignCase`**
+
+**Test Case จริง**: `own-1787743946552-u8gro` · `humanHandlingStartedAt = 1788614248803`
+
+| # | ขั้นตอนที่ทดสอบจริง | ผล |
+|---|---|---|
+| 1 | เคสเริ่มต้น = ไม่มีผู้รับผิดชอบ | ✅ |
+| 2 | Staff กด "รับงาน" → Firestore สร้าง `humanHandlingStartedAt = 1788614248803` | ✅ |
+| 3 | `reviewStatus` ยังเป็น `"submitted"` (ไม่ถูกแตะ) | ✅ |
+| 4 | Staff คืนเคสด้วย "— ยังไม่มีผู้รับผิดชอบ —" → UI กลับเป็นสถานะ "รับงาน" | ✅ |
+| 5 | marker **ยังอยู่** หลังคืนเคส (ไม่ถูกลบ) | ✅ |
+| 6 | Staff รับงานเคสเดิมซ้ำ → `assignedToUid`/`assignedToEmail` ถูกตั้งใหม่ | ✅ |
+| 7 | marker **ยังเป็นค่าเดิมเป๊ะ** `1788614248803` (ไม่ regenerate) | ✅ |
+| 8 | `reviewStatus` ยังเป็น `"submitted"` ตลอดทั้งรอบ | ✅ |
+
+**Locked invariant (ห้ามละเมิดในทุกเฟสต่อไป)**: เมื่อมนุษย์รับผิดชอบเคสไปแล้วครั้งหนึ่ง `humanHandlingStartedAt` บันทึกไว้ถาวรว่า human handling เริ่มแล้ว · **การคืนเคส / unassign / reassign ต้องไม่ทำให้เคสนั้นกลับมาเข้าเกณฑ์ autonomous customer-facing AI อีก** เพียงเพราะ `assignedToUid` หรือ `assignedToEmail` ว่างลง
+
+**DEFERRED / NOT TESTABLE WITH CURRENT PRODUCTION DATA** (ไม่ใช่ failure · ไม่ใช่ blocker):
+
+การทดสอบ **Staff (non-Owner) คืนเคสที่ `listingStatus = "live"`** — ตรวจข้อมูล production แล้วพบว่า **ปัจจุบันไม่มีเคสใดที่ `listingStatus = "live"`** เคสทดสอบทั้งหมดเป็น `"pending"` → เงื่อนไขทดสอบนี้ไม่มีอยู่จริงในข้อมูลปัจจุบัน · **ห้ามสร้างหรือแก้ Property Case เพื่อปั้นสภาพ "live" ขึ้นมาทดสอบ**
+
+เหตุผลทางเทคนิคที่ต้องทดสอบในอนาคต: `firestore.rules` บรรทัด 94 อนุญาต Staff ผ่าน `isStaffOnly() && staffStatusOk()` โดย `staffStatusOk()` = `request.resource.data.listingStatus != "live"` · การ stamp เป็น merge write ทำให้ `request.resource.data` = เอกสารหลัง merge → บนเคสที่ `listingStatus = "live"` การ stamp ของ Staff จะถูกปฏิเสธ → `markerPresent:false` → การคืนเคส throw ข้อความไทย (fail-closed ตามที่ออกแบบ) · **Owner ไม่กระทบ** · นี่คือข้อจำกัดเดิมของ C2 rules ไม่ใช่ regression ของ C4.2a
+
+**เมื่อไรให้รัน**: ทันทีที่มีเคส `listingStatus = "live"` เกิดขึ้นตามธรรมชาติจากงานจริง → ทดสอบ Staff claim + release แล้วตัดสินว่าจะขยาย rules หรือยอมรับพฤติกรรม fail-closed นี้
+
+**Deferred (optional, ยังไม่ต้องรัน)**: reassign human→human ตรง ๆ (A → B ไม่ผ่านสถานะว่าง) · release→reclaim รอบที่สอง · claim พร้อมกันสองเบราว์เซอร์ (transaction race) · คืนเคสที่ว่างอยู่แล้ว (ต้องไม่ stamp ไม่ throw)
+
+**หมายเหตุที่ไม่ใช่ defect**: `isHumanHandled()` / `aiAutonomyAllowedForCase()` **ยังไม่มี consumer** — ยังไม่มีหน้าไหนเรียกใช้ · เป็นไปตามการออกแบบ (C4.2c จะเป็นผู้ต่อสาย) · เฟสนี้มีหน้าที่ **บันทึกประวัติให้ถูกต้องไว้ก่อน** เพื่อให้ข้อมูลพร้อมเมื่อ consumer มาถึง
+
 **Finding (บันทึกไว้)**: `Owner Submission.dc.html` **ไม่เคยเขียน** `workflowVersion` — ทำงานได้เพราะ `intake-workflow.js` default เป็น `intake_v1` · เคสที่ AI สร้างใน C4.2b ควรเขียนค่านี้ตรง ๆ
+
+
+---
+
+## §27 C4.3 Phase 1 — Unified Draft Schema + Server Authority (17 ก.ย. 2569)
+
+**สถานะ**: implemented · **ยังไม่ deploy** · Phase 2 ยังไม่เริ่ม
+
+### สิ่งที่ทำ
+
+**1. `propertyDrafts/{draftId}` (collection ใหม่)** — พื้นที่ทำงานของลูกค้า **ไม่ใช่ Case**
+- id = `draft__<visitorUid>` (deterministic → retry ไม่แตกเอกสารที่สอง) · Phase 1 = หนึ่ง draft ต่อหนึ่ง visitor
+- `{ ownerUid, conversationId, status, createdAt, updatedAt, fields: { <canonical>: { value, source, updatedAt, confidence?, needsConfirmation } } }`
+- **คีย์ของ `fields` ใช้ชื่อฟิลด์ canonical ของ production** (`type`, `area`, `price`, `landSize`, `livingArea`, `bedrooms`, `bathrooms`, `ownership`, `floor`, `coordsRaw`) → ค่าใน draft โปรโมทขึ้น Case ได้โดยไม่มี translation layer และไม่เกิด schema ที่สอง · **ห้ามเปลี่ยนเป็นชื่อเฉพาะของ Workspace**
+
+**2. ขยาย AI extraction จาก 3 ช่องข้อความอิสระ → typed canonical fields**
+- `RECEPTION_TOOL` เพิ่ม `propertyFields` (typed) + `unclearFields` (array)
+- **`propertyBasics` ไม่ถูกแก้และไม่ถูกแทน** — C4.2b gate อ่าน 3 string นี้อยู่ · แก้คือย้าย gate ของ production
+- ประโยคทดสอบจริง `"บ้านเดี่ยว หัวหินซอย 70 ที่ดิน 100 ตารางวา 3 ห้องนอน 3 ห้องน้ำ ขาย 8 ล้านบาท มีโฉนด"` → แยกเป็น 7 ฟิลด์: `type/area/landSize/bedrooms/bathrooms/price/ownership` (ทดสอบผ่าน)
+
+**3. ไม่มีค่าปลอม** — `DRAFT_FIELD_SPECS` + `validateDraftField()`: ค่าที่ใช้ไม่ได้จะถูก **ทิ้ง ไม่ clamp** (clamp = แต่งข้อเท็จจริง) · ปฏิเสธ `0`, `-`, `n/a`, `ไม่ทราบ`, ค่านอกขอบเขต, พิกัดที่ไม่ใช่ decimal lat,lng · **การไม่มีฟิลด์คือสถานะที่มีความหมาย** ต้องรักษาไว้
+
+**4. Precedence / staleness (แก้ไขก่อน release — TIER ไม่ใช่ rank แบน)** — `DRAFT_SOURCE_TIER`: `ai_chat 1` · `customer_stated 2` · `customer_edit 2` · `staff_edit 3`
+- **`customer_stated` กับ `customer_edit` อยู่ tier เดียวกัน** — ทั้งคู่คือลูกค้าพูดถึง draft ของตัวเอง ไม่มีฝ่ายใดจริงกว่าถาวร · ภายใน tier ใช้ **ความใหม่** ตัดสิน → ลูกค้าพูดในแชทวันนี้ว่า "เปลี่ยนราคาขายเป็น 7.5 ล้าน" แก้ `customer_edit` ของเมื่อวานได้
+- tier สูงกว่าเขียนทับได้ · tier ต่ำกว่า **ปฏิเสธเสมอไม่ว่าเวลาใด** → `ai_chat` แตะค่าของลูกค้า/staff **ไม่ได้เลย** (แม้ extraction จะใหม่กว่า) และ `staff_edit` ไม่ถูกแทนเงียบ ๆ โดย AI/ลูกค้า (post-submit = Guarded Change, Phase 4)
+- ค่าเดิมซ้ำ = ไม่เขียน (กัน updatedAt churn) · entry ที่มีแต่ `needsConfirmation` ไม่มี value = คำถาม ไม่ใช่ค่า → ค่าจริงเขียนทับได้ · source ปลอม/ไม่รู้จัก → ตกลงมาเป็น `ai_chat` (tier ต่ำสุด)
+- **`confidence`: ไม่เขียนค่าคงที่** — เขียนเฉพาะเมื่อมี per-field signal จริง (Phase 1 ไม่มี → คีย์นี้ไม่ปรากฏ) · schema รองรับไว้ · `confidence: 0.8` ถูกถอดออกแล้ว เพราะค่าคงที่ที่ค้างใน Firestore จะถูกอ่านเป็น "โมเดลมั่นใจ 80%" จริง ๆ ในอนาคต
+
+**4b. Evidence classification — `customer_stated` มีผู้เขียนจริงแล้ว (แก้ไขก่อน release)** — `RECEPTION_TOOL` เพิ่ม `statedFields`: ชื่อฟิลด์ที่ลูกค้า **พูดเองตรง ๆ ในข้อความล่าสุด**
+- ฟิลด์ที่อยู่ใน `statedFields` → `customer_stated` · ที่เหลือ → `ai_chat` · ก่อนแก้ ทุกอย่างเป็น `ai_chat` → "เปลี่ยนราคาขายเป็น 7.5 ล้าน" ถูกปฏิเสธเพราะแพ้ `customer_edit` ของลูกค้าเอง (semantic error)
+- **การแปลงหน่วย/รูปแบบไม่ทำลาย provenance**: "8 ล้านบาท" → `price 8000000` · "100 ตารางวา" → `landSize 100` · "3 ห้องนอน" → `bedrooms 3` ทั้งหมดยังเป็น `customer_stated` — เป็นการแทนค่าคำพูดที่ชัดเจน ไม่ใช่การเดา · **การอนุมานจริง** (เดาจากบริบท/ฟิลด์อื่น/เทิร์นก่อน) ยังเป็น `ai_chat`
+- **การเลื่อนชั้นเป็นทางเดียวและแคบ**: `sourceFor()` เลื่อนได้เฉพาะ `ai_chat → customer_stated` เท่านั้น · ไปถึง `customer_edit` หรือ `staff_edit` **ไม่ได้** → ทั้ง caller และ output ของโมเดลอ้างสิทธิ์ staff ผ่านช่องนี้ไม่ได้ · ชื่อฟิลด์ที่ไม่รู้จักถูกกรองทิ้งสองชั้น (ตอน normalise และตอนเขียน draft)
+- `updatePropertyDraft` **ไม่อ่าน provenance จาก client เลย** — `request.data.source` ถูกเพิกเฉยทั้งหมด · callable นี้คือการแก้ด้วยมือใน Workspace จึงเป็น `customer_edit` โดยนิยาม
+
+**5. ความกำกวมไม่เดา** — `unclearFields`: ถ้ายังไม่มีค่า → `{ needsConfirmation: true }` **ไม่มี value** · ถ้ามีค่าชัดอยู่แล้ว → **คงค่า/source/updatedAt เดิมไว้ทั้งหมด** และยกเฉพาะ `needsConfirmation` ("ประมาณ 7-8 ล้าน" ไม่ลบ 8,000,000 แต่ก็ไม่ถูกทิ้งเงียบ)
+
+**6. Server authority** — `updatePropertyDraft` callable (ใหม่): client ส่งเฉพาะ **ค่า** ไม่เคยส่ง provenance · `source` ตัดสินที่ server → เบราว์เซอร์อ้าง `staff_edit` ไม่ได้ · ปฏิเสธเมื่อ draft มี `caseId` แล้ว (post-submit = Supplement/Guarded Change ใน Phase 4)
+
+**7. Rules** — `propertyDrafts`: **owner READ only** · `allow create, update, delete: if false` สำหรับทุกคนรวมทั้ง admin · การเขียนทั้งหมดผ่าน callable (Admin SDK bypass rules) · ตรวจสองชั้น: id ต้องเป็น `draft__<uid>` **และ** `resource.data.ownerUid == uid`
+
+### Product Owner decision — Option C: ไม่คำนวณ completeness ฝั่ง server ในเฟสนี้
+
+`intake-workflow.js` เป็น **ES module ที่ root** · `functions/index.js` เป็น **CommonJS** และ Firebase deploy เฉพาะโฟลเดอร์ `functions/` → `require()` ไฟล์ที่ใช้ `export` ไม่ได้ **และ** ไฟล์นั้นไม่ได้ถูก deploy ไปด้วย · การ reuse จริงต้องมีไฟล์ที่ 4 (`functions/intake-workflow.js`) = definition ที่สอง ซึ่งขัด lock
+
+**ตัดสิน**: completeness เป็นข้อมูลประกอบ (ไม่ใช่ gate/approval/publication) และ Phase 1 ยังไม่มีใครอ่าน → **เลื่อนออกไป** · ห้าม copy/port/mirror `WORKFLOW_DEFS` · Staff Workspace + Listing Approvals คำนวณเองเหมือนเดิม **ไม่แก้** · Option A **ไม่ถูก pre-approve** สำหรับ Phase 2 — ต้อง audit หาทาง shared canonical definition ก่อนและรายงานสถาปัตยกรรมนั้นก่อนลงมือ · photo-count สำหรับ `photos_5` เลื่อนตามไปด้วย
+
+### ไม่แตะในเฟสนี้
+
+`createCaseFromConversation` (พฤติกรรมเดิมทั้งหมด) · C4.2b gate · `propertyBasics` · `aiProperty*` บน Case · C4.2a `humanHandlingStartedAt` · Phase 0 truthfulness · trackPath/token · Reception lifecycle · Owner Submission · Staff Workspace · Listing Approvals · `caseMessages` · live listing pipeline · `intake-workflow.js` · `firebase-client.js`
+
+**ไม่ทำ**: Workspace UI · Submission Groups · multi-property · Supplements/Guarded Changes · My Properties · backfill เคสเก่า (`own-1789592841731-114b6` คง 4/19 ตามมติ)
+
+### Deploy ที่จะต้องทำ (ยังไม่ทำ)
+
+1. อัปโหลด `functions/index.js` → `functions/` · `firestore.rules` → root
+2. `firebase deploy --only functions:receptionTurn,functions:updatePropertyDraft`
+3. publish `firestore.rules` (collection ใหม่เท่านั้น — rules เดิมไม่ถูกแก้)

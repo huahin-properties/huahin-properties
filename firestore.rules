@@ -268,6 +268,30 @@ service cloud.firestore {
         exists(/databases/$(database)/documents/properties/$(resource.data.propertyId)) &&
         get(/databases/$(database)/documents/properties/$(resource.data.propertyId)).data.listerId == request.auth.uid);
     }
+    // C4.3 Phase 1 — customer property drafts (working data, NOT a Case).
+    //
+    // The document id is "draft__<uid>", so ownership is structural: a
+    // visitor can only name their own document. Two separate guards, because
+    // an id convention alone is not a security boundary — the stored
+    // ownerUid must agree too.
+    //
+    // READ-ONLY for the owner, BY DESIGN. Every authoritative mutation goes
+    // through the updatePropertyDraft / receptionTurn callables, which run on
+    // the Admin SDK and bypass these rules. "Owner-only" here means
+    // owner-READ-only: a browser that could write its own draft could forge
+    // staff_edit provenance, set a caseId, or bypass the precedence rules
+    // that stop a stale value overwriting a newer one — all of which are
+    // enforced in server code, not here.
+    //
+    // Admin read is allowed so Staff tooling can inspect a draft later; no
+    // client write path exists for anyone, including admins.
+    match /propertyDrafts/{draftId} {
+      allow read: if isAdmin() ||
+        (request.auth != null && draftId == "draft__" + request.auth.uid &&
+         resource.data.ownerUid == request.auth.uid);
+      allow create, update, delete: if false;
+    }
+
     // CEO Project Dashboard doc is internal-only (risks/decisions not meant
     // for public eyes) — carved out of the otherwise-public siteContent
     // rule below. Firestore evaluates ALL matching rules and allows the
