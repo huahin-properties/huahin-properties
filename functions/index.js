@@ -269,6 +269,81 @@ const RECEPTION_TOOL = {
           scale: { type: "string", description: "ONE concrete size or price fact as stated: e.g. 3 ห้องนอน, 8 ล้าน, 2 ไร่. Empty if not stated." },
         },
       },
+      // C4.3 Phase 1 - TYPED property fields, ADDITIVE to propertyBasics.
+      //
+      // propertyBasics above is NOT replaced and NOT changed: the C4.2b
+      // submission gate reads its three strings, so altering it would move a
+      // production gate. This object exists alongside it and feeds the
+      // customer's property DRAFT only - nothing here reaches a Case in
+      // Phase 1.
+      //
+      // Keys are the CANONICAL production property field names (the same ones
+      // Owner Submission writes and intake-workflow.js reads), so a draft
+      // value can later be promoted to the Case with no translation layer and
+      // no second schema. Do NOT rename these to workspace-specific names.
+      //
+      // ABSENCE IS MEANINGFUL AND MUST BE PRESERVED. Omit a key entirely
+      // unless the visitor actually stated that fact. Never emit 0, "0",
+      // "-", "n/a", "unknown", a guess, or a value inferred from another
+      // field. A wrong number here would become a canonical property fact.
+      propertyFields: {
+        type: "object",
+        description:
+          "ONLY for a visitor discussing THEIR OWN property to sell or rent out. " +
+          "One key per fact the visitor EXPLICITLY stated, using their own meaning. " +
+          "OMIT any field not stated - do not include it with an empty or zero " +
+          "value. Never guess or infer. If a statement is ambiguous (e.g. \"ประมาณ 100 " +
+          "ตารางวา\" or a size with no unit), omit the field and ask about it in " +
+          "the reply instead.",
+        properties: {
+          type: { type: "string", description: "Property type, normalised to one of: villa, house, townhouse, condo, land, commercial. บ้านเดี่ยว = house. Omit if not clearly stated." },
+          area: { type: "string", description: "Area/district/soi as stated, e.g. หัวหินซอย 70, Pranburi. Omit if not stated." },
+          price: { type: "number", description: "Price in THB as a plain number. ขาย 8 ล้านบาท -> 8000000. For RENT_OUT this is the monthly rent. Omit if no price was stated - never 0." },
+          landSize: { type: "number", description: "Land size in square wah (ตารางวา). 1 ไร่ = 400, 1 งาน = 100. Omit if not stated or if the unit is unclear." },
+          livingArea: { type: "number", description: "Living/usable area in square metres. Omit if not stated." },
+          bedrooms: { type: "number", description: "Number of bedrooms as an integer. Omit if not stated." },
+          bathrooms: { type: "number", description: "Number of bathrooms as an integer. Omit if not stated." },
+          ownership: { type: "string", description: "Title/ownership as stated, e.g. โฉนด, chanote, น.ส.3ก, leasehold, company. Omit if not stated." },
+          floor: { type: "string", description: "Floor number, condos only. Omit otherwise." },
+          coordsRaw: { type: "string", description: "Map coordinates ONLY if the visitor gave them as decimal lat,lng (e.g. 12.558940,99.909039). Omit anything else - never a place name." },
+        },
+      },
+      // Fields the visitor mentioned but did NOT state clearly enough to
+      // record. These become needsConfirmation markers on the draft so the
+      // Workspace can ask later; they never carry a value.
+      unclearFields: {
+        type: "array",
+        items: { type: "string" },
+        description:
+          "Canonical field names (from propertyFields) the visitor referred to " +
+          "ambiguously - a number with no unit, a vague size, a price range, a " +
+          "maybe. Listing a field here is how you say \"they mentioned it but I " +
+          "must not record a value\". Max 6.",
+      },
+      // C4.3 Phase 1 - EVIDENCE CLASSIFICATION, not a confidence score.
+      //
+      // This is the model's report of WHERE a value came from, and it decides
+      // the field's provenance: listed here -> customer_stated, otherwise
+      // ai_chat. Provenance governs precedence, so this list is the difference
+      // between the customer's own correction landing and being refused.
+      //
+      // Mechanical unit/format conversion does NOT disqualify a field: "8
+      // ล้านบาท" -> 8000000 and "3 ห้องนอน" -> 3 are representations of an
+      // explicit statement, not inferences. Only genuine inference is excluded.
+      statedFields: {
+        type: "array",
+        items: { type: "string" },
+        description:
+          "Canonical field names from propertyFields that the visitor stated " +
+          "DIRECTLY AND UNAMBIGUOUSLY IN THEIR CURRENT MESSAGE. Converting " +
+          "units or wording into the required format still counts as stated " +
+          "(\"ขาย 8 ล้านบาท\" -> price, \"ที่ดิน 100 ตารางวา\" -> landSize, \"3 " +
+          "ห้องนอน\" -> bedrooms, \"เปลี่ยนราคาเป็น 7.5 ล้าน\" -> price). OMIT a " +
+          "field if you worked the value out rather than being told it - " +
+          "inferred from an earlier turn, deduced from another field, assumed " +
+          "from the property type, or carried over from context. Do NOT list a " +
+          "field merely because you extracted it. Max 10.",
+      },
     },
     required: ["reply", "stage", "primaryIntent"],
   },
@@ -307,7 +382,201 @@ async function callClaudeReception(system, messages, apiKey) {
     // without guarding. Missing/omitted -> empty strings, which the gate
     // treats as "not stated" and refuses.
     propertyBasics: normalisePropertyBasics(out.propertyBasics),
+    // C4.3 Phase 1 - typed draft fields. Always an object (possibly empty);
+    // only keys the model actually supplied and that survive validation
+    // appear. Never normalised into "present but empty" keys: absence is a
+    // meaningful state that must reach the draft writer intact.
+    propertyFields: normalisePropertyFields(out.propertyFields),
+    unclearFields: Array.isArray(out.unclearFields)
+      ? out.unclearFields.filter((k) => DRAFT_FIELD_SPECS[k]).slice(0, 6) : [],
+    // Evidence classification. Filtered to known field names here; filtered
+    // again at the draft writer against the fields that actually survived
+    // validation, so a name listed without a usable value cannot promote
+    // anything.
+    statedFields: Array.isArray(out.statedFields)
+      ? out.statedFields.filter((k) => DRAFT_FIELD_SPECS[k]).slice(0, 10) : [],
   };
+}
+
+// ── C4.3 Phase 1 - canonical draft field specification ───────────────────
+//
+// The ONLY definition of which fields a property draft may hold. Keys are
+// canonical production property field names on purpose: a draft value is a
+// future Case value, so a rename here would silently create the parallel
+// schema the architecture lock forbids.
+//
+// `kind` drives validation, nothing else. Bounds are sanity limits against a
+// model typo becoming a canonical fact (a 9-bedroom villa is plausible; 900
+// is a hallucination). A value outside its bound is DISCARDED, not clamped -
+// clamping would invent a fact.
+const DRAFT_FIELD_SPECS = {
+  type: { kind: "enum", values: ["villa", "house", "townhouse", "condo", "land", "commercial"] },
+  area: { kind: "string", max: 120 },
+  price: { kind: "number", min: 1, max: 5000000000 },
+  landSize: { kind: "number", min: 1, max: 1000000 },
+  livingArea: { kind: "number", min: 1, max: 100000 },
+  bedrooms: { kind: "int", min: 1, max: 50 },
+  bathrooms: { kind: "int", min: 1, max: 50 },
+  ownership: { kind: "string", max: 80 },
+  floor: { kind: "string", max: 20 },
+  coordsRaw: { kind: "coords" },
+};
+
+const COORDS_RE = /^\s*-?\d{1,3}(\.\d+)?\s*,\s*-?\d{1,3}(\.\d+)?\s*$/;
+
+// Validate ONE field against its spec. Returns undefined for anything that
+// is not a usable stated value - and undefined means "do not write this
+// field at all", never "write an empty value".
+function validateDraftField(key, raw) {
+  const spec = DRAFT_FIELD_SPECS[key];
+  if (!spec) return undefined;
+  if (raw === null || raw === undefined) return undefined;
+  if (spec.kind === "enum") {
+    const v = String(raw).trim().toLowerCase();
+    return spec.values.includes(v) ? v : undefined;
+  }
+  if (spec.kind === "string") {
+    const v = String(raw).trim();
+    // Placeholder words are the model's way of saying "not stated". They must
+    // never be recorded as if the customer had said them.
+    if (!v || /^(-|--|n\/a|na|none|unknown|ไม่ทราบ|ไม่ระบุ)$/i.test(v)) return undefined;
+    return v.slice(0, spec.max);
+  }
+  if (spec.kind === "coords") {
+    const v = String(raw).trim();
+    return COORDS_RE.test(v) ? v : undefined;
+  }
+  // number / int
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return undefined;
+  if (n < spec.min || n > spec.max) return undefined;
+  return spec.kind === "int" ? Math.round(n) : n;
+}
+
+// Keep only keys that are known AND carry a usable stated value. An omitted
+// or rejected field is simply absent from the result.
+function normalisePropertyFields(pf) {
+  const o = pf && typeof pf === "object" ? pf : {};
+  const out = {};
+  for (const key of Object.keys(DRAFT_FIELD_SPECS)) {
+    const v = validateDraftField(key, o[key]);
+    if (v !== undefined) out[key] = v;
+  }
+  return out;
+}
+
+// ── C4.3 Phase 1 - draft identity, provenance and precedence ─────────────
+//
+// Phase 1 is single-draft by design: ONE working draft per visitor, id
+// derived from the caller's own uid. Multi-property (Phase 3) adds further
+// drafts; nothing here assumes this is the only one, and the id is
+// deterministic so a retry can never fork a second draft.
+function draftIdForVisitor(uid) { return "draft__" + uid; }
+
+// Source TIERS, not a flat rank ladder. Two customer-authored sources share
+// one tier on purpose.
+//
+//   1  ai_chat          - AI extraction from the transcript
+//   2  customer_stated  - the customer said it in chat, explicitly
+//   2  customer_edit    - the customer typed it into the Workspace
+//   3  staff_edit       - a staff member entered it
+//
+// Why customer_stated and customer_edit are EQUAL: both are the customer
+// speaking about their own pre-submit working draft, and neither is
+// permanently more true than the other. A flat ladder (edit > stated) would
+// mean a Workspace edit on Monday could never be corrected by "เปลี่ยนราคาขาย
+// เป็น 7.5 ล้าน" on Tuesday - the customer's own newer correction would be
+// silently refused. Inside this tier, RECENCY decides.
+const DRAFT_SOURCE_TIER = { ai_chat: 1, customer_stated: 2, customer_edit: 2, staff_edit: 3 };
+
+// Every source this code accepts. Used to reject an unknown/forged source
+// before it can reach a tier lookup.
+const DRAFT_SOURCES = Object.keys(DRAFT_SOURCE_TIER);
+
+// Decide whether an incoming value may replace what is stored.
+//
+// Rules, in order:
+//   1. Nothing stored -> accept.
+//   2. Identical value -> refuse, so updatedAt does not churn.
+//   3. Incoming tier HIGHER -> accept. A customer correcting an AI
+//      extraction, or staff correcting either, always lands.
+//   4. Incoming tier LOWER -> REFUSE, regardless of time. This is the stale-AI
+//      guard (ai_chat can never touch a customer or staff value) and the
+//      staff guard (neither the AI nor the customer silently replaces a
+//      staff_edit - post-submit that becomes a Guarded Change, Phase 4).
+//   5. SAME tier -> the newer timestamp wins. This is what lets a newer
+//      customer_stated correct an older customer_edit and vice versa.
+function draftFieldMayWrite(stored, incomingSource, incomingAt, incomingValue) {
+  if (!stored || typeof stored !== "object") return true;
+  if (stored.value === incomingValue) return false;
+  // A stored entry that carries needsConfirmation but no value is a question,
+  // not a value: any real value may replace it.
+  if (stored.value === undefined) return true;
+  const a = DRAFT_SOURCE_TIER[incomingSource] || 0;
+  const b = DRAFT_SOURCE_TIER[stored.source] || 0;
+  if (a > b) return true;
+  if (a < b) return false;
+  return Number(incomingAt || 0) > Number(stored.updatedAt || 0);
+}
+
+// Build the merge patch for a draft document. Pure function, no I/O, so it is
+// directly testable and is the single place precedence is enforced.
+//
+// Returns { patch, applied, refused, confirmations } where `applied` lists the
+// fields actually written - the Workspace uses it for the small "✓ เพิ่ม 3
+// ห้องนอน" feedback without re-reading the document.
+function buildDraftPatch(storedFields, incoming, opts) {
+  const o = opts || {};
+  const source = DRAFT_SOURCES.includes(o.source) ? o.source : "ai_chat";
+  const at = Number(o.at) || Date.now();
+  const stored = storedFields && typeof storedFields === "object" ? storedFields : {};
+  // Per-field evidence promotion. `stated` names fields the customer said
+  // outright in the current turn; those are recorded as customer_stated
+  // instead of the batch's default source.
+  //
+  // DELIBERATELY ONE-WAY AND NARROW: it can only promote ai_chat ->
+  // customer_stated. It can never reach customer_edit or staff_edit, so no
+  // caller - and no model output - can use it to claim staff authority.
+  const statedSet = new Set(Array.isArray(o.stated) ? o.stated.filter((k) => DRAFT_FIELD_SPECS[k]) : []);
+  const sourceFor = (key) => (source === "ai_chat" && statedSet.has(key) ? "customer_stated" : source);
+  const patch = {}, applied = [], refused = [];
+  for (const key of Object.keys(incoming || {})) {
+    const value = validateDraftField(key, incoming[key]);
+    if (value === undefined) { refused.push(key); continue; }
+    const src = sourceFor(key);
+    if (!draftFieldMayWrite(stored[key], src, at, value)) { refused.push(key); continue; }
+    const entry = { value, source: src, updatedAt: at };
+    // confidence is written ONLY when a GENUINE per-field signal was supplied,
+    // and only for AI-derived values. There is no such signal in Phase 1, so
+    // in practice this key is absent. A constant would be worse than nothing:
+    // a hardcoded 0.8 sitting in Firestore reads like a real 80% model
+    // confidence to anyone who finds it later. The schema supports the field;
+    // nothing invents it.
+    if (src === "ai_chat" && Number.isFinite(o.confidence)) entry.confidence = o.confidence;
+    // A recorded value is no longer awaiting confirmation.
+    entry.needsConfirmation = false;
+    patch[key] = entry;
+    applied.push(key);
+  }
+  // Ambiguous mentions ("ประมาณ 7-8 ล้าน"). An ambiguous statement must never
+  // replace a clear stored value - but it must not be silently dropped
+  // either, or the contradiction is lost. So:
+  //   - nothing stored -> a value-less question the Workspace can ask.
+  //   - a value stored -> KEEP the value, its source and its updatedAt
+  //     exactly, and only raise needsConfirmation on it.
+  const confirmations = [];
+  for (const key of (o.unclear || [])) {
+    if (!DRAFT_FIELD_SPECS[key] || patch[key]) continue;
+    const cur = stored[key];
+    if (cur && cur.value !== undefined) {
+      if (cur.needsConfirmation === true) continue; // already flagged
+      patch[key] = { ...cur, needsConfirmation: true };
+    } else {
+      patch[key] = { source, updatedAt: at, needsConfirmation: true };
+    }
+    confirmations.push(key);
+  }
+  return { patch, applied, refused, confirmations };
 }
 
 // C4.2b — trim/cap the three property-context strings. Short caps on purpose:
@@ -556,9 +825,66 @@ exports.receptionTurn = onCall(
       throw e;
     }
 
+    // ── C4.3 Phase 1 — typed property draft ──────────────────────────
+    //
+    // Written AFTER the Reception document and deliberately NON-FATAL: the
+    // draft is a working surface, the Reception document is the thing the
+    // C4.2b gate reads. A draft write failure must never cost the customer
+    // their turn or their submission, so it is logged and swallowed.
+    //
+    // Supply-side only. A BUY/RENT visitor has no property of their own to
+    // draft, and creating an empty draft for every browser would be noise.
+    let draftApplied = [];
+    if (CASE_INTENTS_C42B[nextIntent] &&
+        (Object.keys(out.propertyFields).length || out.unclearFields.length)) {
+      try {
+        const draftRef = db.collection("propertyDrafts").doc(draftIdForVisitor(visitorId));
+        draftApplied = await db.runTransaction(async (t) => {
+          const snap = await t.get(draftRef);
+          const cur = snap.exists ? (snap.data() || {}) : {};
+          // Ownership is structural (id built from the caller's own uid) but
+          // asserted anyway: a draft owned by someone else is never touched.
+          if (snap.exists && cur.ownerUid && cur.ownerUid !== visitorId) return [];
+          const built = buildDraftPatch(cur.fields, out.propertyFields, {
+            source: "ai_chat", at: now, unclear: out.unclearFields,
+            // Evidence classification: fields the customer stated outright in
+            // THIS turn are recorded as customer_stated, everything else as
+            // ai_chat. Without this split an explicit "เปลี่ยนราคาเป็น 7.5 ล้าน"
+            // would arrive as ai_chat and be refused against the customer's
+            // own earlier Workspace edit.
+            stated: out.statedFields,
+            // No confidence is passed: there is no genuine per-field signal in
+            // Phase 1 and a constant must never be persisted as if there were.
+          });
+          if (!Object.keys(built.patch).length) return [];
+          const doc = {
+            ownerUid: visitorId,
+            conversationId,
+            status: cur.status || "draft",
+            updatedAt: now,
+            fields: built.patch,
+          };
+          if (!snap.exists) doc.createdAt = now;
+          // merge:true merges `fields` key-by-key, so untouched fields and
+          // their provenance survive - the same accumulate-never-erase rule
+          // propertyBasics already relies on.
+          t.set(draftRef, doc, { merge: true });
+          return built.applied;
+        });
+      } catch (e) {
+        rxLog({ rid, event: "draft_error", uidTail, code: (e && e.code) || null, name: (e && e.name) || null });
+        draftApplied = [];
+      }
+    }
+    // Field NAMES only - never values. Same privacy rule as every other rxLog
+    // call: this function logs decisions, not customer content.
+    if (draftApplied.length) rxLog({ rid, event: "draft_updated", uidTail, fields: draftApplied });
+
     rxLog({ rid, event: "turn_done", uidTail, persisted: true, docAction,
       stage, modelStage: out.stage, primaryIntent: out.primaryIntent, reason: "persisted" });
-    return { reply: out.reply, meta: out, persisted: true, conversationId, stage, rid };
+    // draftApplied lets the client show "✓ เพิ่ม 3 ห้องนอน" without a read.
+    // Field names only; no values, no provenance.
+    return { reply: out.reply, meta: out, persisted: true, conversationId, stage, rid, draftApplied };
   }
 );
 
@@ -615,6 +941,65 @@ function receptionCaseGate(d) {
   if (!String(pb.scale || "").trim()) return "insufficient_property_info";
   return "";
 }
+
+// ── C4.3 Phase 1 — server-authoritative draft mutation ────────────────────
+//
+// The ONLY write path for a customer-originated draft change. The browser is
+// never granted write access to propertyDrafts (see firestore.rules): it may
+// read its own draft, and it must come through here to change one.
+//
+// The client sends field VALUES but never provenance: `source` is decided
+// here, so a browser cannot claim staff_edit precedence and overwrite a real
+// staff value. Unknown keys and unusable values are discarded, not stored.
+//
+// Phase 1 exposes this seam so the Phase 2 Workspace UI has an authoritative
+// writer to call. No UI calls it yet.
+exports.updatePropertyDraft = onCall(
+  { region: "asia-southeast1" },
+  async (request) => {
+    const uid = request.auth && request.auth.uid;
+    if (!uid) throw new HttpsError("unauthenticated", "Sign-in required.");
+    const fields = (request.data && request.data.fields) || {};
+    // PROVENANCE IS NEVER TAKEN FROM THE CLIENT. request.data.source (and any
+    // other provenance-shaped key) is ignored entirely: this callable IS the
+    // manual-Workspace-edit path, so its source is customer_edit by
+    // definition. A browser able to name its own source could claim
+    // staff_edit and overwrite real staff data.
+    if (typeof fields !== "object" || Array.isArray(fields)) {
+      return { updated: false, reason: "invalid_fields" };
+    }
+    if (Object.keys(fields).length > 20) return { updated: false, reason: "too_many_fields" };
+
+    const db = admin.firestore();
+    const ref = db.collection("propertyDrafts").doc(draftIdForVisitor(uid));
+    const now = Date.now();
+    try {
+      return await db.runTransaction(async (t) => {
+        const snap = await t.get(ref);
+        const cur = snap.exists ? (snap.data() || {}) : {};
+        // Ownership: structural via the id, asserted anyway.
+        if (snap.exists && cur.ownerUid && cur.ownerUid !== uid) {
+          return { updated: false, reason: "not_owner" };
+        }
+        // Once a draft has produced a Case, canonical data is staff-governed:
+        // post-submit changes are Supplements / Guarded Changes (Phase 4),
+        // NOT silent draft edits. Refuse rather than mutate.
+        if (cur.caseId) return { updated: false, reason: "already_submitted" };
+        const built = buildDraftPatch(cur.fields, fields, { source: "customer_edit", at: now });
+        if (!Object.keys(built.patch).length) {
+          return { updated: false, reason: "nothing_to_apply", refused: built.refused };
+        }
+        const doc = { ownerUid: uid, status: cur.status || "draft", updatedAt: now, fields: built.patch };
+        if (!snap.exists) doc.createdAt = now;
+        t.set(ref, doc, { merge: true });
+        return { updated: true, applied: built.applied, refused: built.refused };
+      });
+    } catch (e) {
+      console.warn("updatePropertyDraft failed:", (e && e.code) || "error");
+      throw new HttpsError("internal", "Could not update the draft.");
+    }
+  },
+);
 
 exports.createCaseFromConversation = onCall(
   { region: "asia-southeast1" },
