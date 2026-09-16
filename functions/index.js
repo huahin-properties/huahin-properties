@@ -498,10 +498,31 @@ exports.receptionTurn = onCall(
     const rank = (s) => RECEPTION_STAGES.indexOf(s);
     stage = rank(out.stage) > rank(prev) ? out.stage : prev;
 
+    // C4.2b FIX — primaryIntent must not be DOWNGRADED by a later turn.
+    //
+    // Every other accumulated field in this patch is already protected:
+    // conversationStage may only advance (above), and requirementsSummary /
+    // customerName / contact / propertyBasics are written only when non-empty.
+    // primaryIntent was the one unguarded field, so a process question
+    // ("ผมส่งข้อมูลให้ทีมงานแล้วใช่ไหม", "ค่าโอนคิดอย่างไร") classified as OTHER
+    // overwrote a stored SELL — and receptionCaseGate then refused the
+    // customer's own submission with intent_out_of_scope.
+    //
+    // The guard is deliberately NARROW: an established SUPPLY-side intent
+    // (the two in CASE_INTENTS_C42B) survives a turn that carries no real
+    // intent signal. It is NOT a freeze — an explicit switch to the other
+    // supply intent still applies (SELL -> RENT_OUT and back), and BUY /
+    // RENT / OTHER conversations are untouched, so out-of-scope protection
+    // is unchanged in both directions.
+    const prevIntent = already ? (snap.data().primaryIntent || "") : "";
+    const intentIsSupply = (i) => !!CASE_INTENTS_C42B[i || ""];
+    const nextIntent = (intentIsSupply(prevIntent) && !intentIsSupply(out.primaryIntent))
+      ? prevIntent : out.primaryIntent;
+
     const patch = {
       kind: "reception",
       conversationStage: stage,
-      primaryIntent: out.primaryIntent,
+      primaryIntent: nextIntent,
       lastMessage: out.reply, lastMessageRole: "ai",
       lastMessageAt: now, lastCustomerActivityAt: now, updatedAt: now,
     };
