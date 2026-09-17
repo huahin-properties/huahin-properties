@@ -385,6 +385,39 @@ const RECEPTION_TOOL = {
           "ALWAYS return this array. Return [] when there is nothing to report. " +
           "Do not omit the array. Max 10.",
       },
+      // C4.3 Phase 1 fix #3 - OBSERVATION, not judgement.
+      //
+      // Two prompt/schema attempts failed in production: the model correctly
+      // stopped choosing between "3 or 4 bedrooms", but then reported nothing
+      // at all (pfKeys [] / statedKeys [] / unclearKeys []) and explained the
+      // ambiguity in `reply`, where nothing reads it. JSON Schema can require
+      // an array to be PRESENT; it can never require it to be NON-EMPTY on a
+      // condition. So asking the model to judge ambiguity can never be
+      // enforced.
+      //
+      // This field asks a FACTUAL question instead - "which fields is the
+      // customer giving property data about right now?" - and the SERVER then
+      // derives the ambiguity itself: a field the customer is supplying but
+      // for which no value was recorded is, by definition, unresolved. The
+      // model's (already reliable) refusal to invent a value becomes the
+      // signal. No natural-language parsing anywhere.
+      mentionedFields: {
+        type: "array",
+        items: { type: "string" },
+        description:
+          "Canonical field names that the CUSTOMER'S CURRENT MESSAGE is " +
+          "actually supplying, correcting, confirming, or offering " +
+          "alternatives for, about THEIR OWN property. List the field even " +
+          "when you did not record a value for it - especially then. " +
+          "DO NOT list a field merely because: you mentioned it in your " +
+          "reply; an earlier turn discussed it; the customer asked a general " +
+          "question about that kind of thing; the field is still missing; or " +
+          "you intend to ask about it next. The test is whether THIS message " +
+          "from the customer is giving property data about that field. " +
+          "ALWAYS return this array. Return [] when the current customer " +
+          "message is not supplying, correcting, confirming or discussing any " +
+          "canonical property field as property data. Max 12.",
+      },
     },
     // C4.3 Phase 1 fix #2 - statedFields and unclearFields are STRUCTURALLY
     // REQUIRED, not merely described.
@@ -399,7 +432,7 @@ const RECEPTION_TOOL = {
     // Requiring the ARRAYS - never their contents - turns "you may report
     // ambiguity" into "you must state whether there is any". [] remains the
     // correct answer for a clear message.
-    required: ["reply", "stage", "primaryIntent", "statedFields", "unclearFields"],
+    required: ["reply", "stage", "primaryIntent", "statedFields", "unclearFields", "mentionedFields"],
   },
 };
 
@@ -449,6 +482,11 @@ async function callClaudeReception(system, messages, apiKey) {
     // anything.
     statedFields: Array.isArray(out.statedFields)
       ? out.statedFields.filter((k) => DRAFT_FIELD_SPECS[k]).slice(0, 10) : [],
+    // Observation feed for the server-side ambiguity derivation. Same
+    // allow-list filter as the other two arrays, so an unknown name can never
+    // reach the derivation.
+    mentionedFields: Array.isArray(out.mentionedFields)
+      ? out.mentionedFields.filter((k) => DRAFT_FIELD_SPECS[k]).slice(0, 12) : [],
   };
 }
 
@@ -778,6 +816,13 @@ exports.receptionTurn = onCall(
     // Classification outcome BEFORE the gate runs - this is the datum the
     // platform logs could not show. Property-basics fields are reported as
     // presence booleans only, never values.
+    // C4.3 Phase 1 fix #3 - derive the ambiguity BEFORE any logging, so the
+    // derivation is visible on every turn (including a general-stage turn
+    // that returns early) rather than only when a draft write happens.
+    const recorded = new Set(Object.keys(out.propertyFields));
+    const derivedUnclear = out.mentionedFields.filter((k) => !recorded.has(k));
+    const unclearIn = Array.from(new Set([...out.unclearFields, ...derivedUnclear]));
+
     rxLog({ rid, event: "classified", uidTail,
       stage: out.stage, primaryIntent: out.primaryIntent,
       secondaryIntents: out.secondaryIntents,
@@ -795,7 +840,9 @@ exports.receptionTurn = onCall(
       // actually processed rather than what arrived.
       pfKeys: Object.keys(out.propertyFields),
       statedKeys: out.statedFields,
-      unclearKeys: out.unclearFields });
+      unclearKeys: out.unclearFields,
+      mentionedKeys: out.mentionedFields,
+      derivedUnclearKeys: derivedUnclear });
 
     const db = admin.firestore();
     const conversationId = "reception__" + visitorId;
@@ -969,7 +1016,7 @@ exports.receptionTurn = onCall(
     let draftConfirmed = [];
     try {
       if (CASE_INTENTS_C42B[nextIntent] &&
-          (Object.keys(out.propertyFields).length || out.unclearFields.length)) {
+          (recorded.size || unclearIn.length)) {
         const draftRef = db.collection("propertyDrafts").doc(draftIdForVisitor(visitorId));
         const res = await db.runTransaction(async (t) => {
           const dSnap = await t.get(draftRef);
@@ -978,7 +1025,7 @@ exports.receptionTurn = onCall(
           // asserted anyway: a draft owned by someone else is never touched.
           if (dSnap.exists && cur.ownerUid && cur.ownerUid !== visitorId) return { applied: [], confirmed: [] };
           const built = buildDraftPatch(cur.fields, out.propertyFields, {
-            source: "ai_chat", at: nowMs, unclear: out.unclearFields,
+            source: "ai_chat", at: nowMs, unclear: unclearIn,
             // Evidence classification: fields the customer stated outright in
             // THIS turn are recorded as customer_stated, everything else as
             // ai_chat. Without this split an explicit "เปลี่ยนราคาเป็น 7.5 ล้าน"
@@ -1019,7 +1066,8 @@ exports.receptionTurn = onCall(
     // logged separately so a metadata-only confirmation (value unchanged,
     // needsConfirmation cleared) is visible instead of looking like a no-op.
     if (draftApplied.length || draftConfirmed.length) {
-      rxLog({ rid, event: "draft_updated", uidTail, fields: draftApplied, confirmed: draftConfirmed });
+      rxLog({ rid, event: "draft_updated", uidTail, fields: draftApplied, confirmed: draftConfirmed,
+        derivedUnclearKeys: derivedUnclear });
     }
 
     rxLog({ rid, event: "turn_done", uidTail, persisted: true, docAction,
