@@ -2138,4 +2138,32 @@ firebase deploy --only functions:receptionTurn,functions:updatePropertyDraft
 
 **ห้ามใช้ `firebase deploy --only functions` ทั้งชุด** เว้นแต่มีเหตุผลใหม่และตรวจร่วมกันก่อน — (หมายเหตุ: คำแนะนำก่อนหน้านี้ในแชทที่ให้ deploy ทั้งชุด **ถูกยกเลิกแล้ว** ด้วยข้อนี้)
 
-**ยังไม่เริ่ม**: Deploy · Phase 2A-2 · การแก้ source เพิ่ม
+**ยังไม่เริ่ม**: Phase 2A-2 · การแก้ source เพิ่ม
+
+### §29.3 C4.3 Phase 2A-1 = ✅ PRODUCTION PASS (18 ก.ย. 2569, 05:53–06:50 น.)
+
+ทดสอบบนโปรดักชันจริง (โดเมน huahin.properties, Reception AI chat, ลูกค้าใหม่แยก uid ต่อเคส, อ่านผลจาก response ของ callable `receptionTurn` ใน DevTools) **ครบ 10 ขั้น ผ่านทั้งหมด ไม่มี FAIL** · ไม่แก้ source ใด ๆ ระหว่างทดสอบ
+
+| # | สิ่งที่ทดสอบ | ผลที่ได้ |
+|---|---|---|
+| 1 | คำถามทั่วไป (general) | `persisted:false` · `conversationId:null` · ไม่มี `draftCompleteness` — ไม่เขียน Firestore ไม่คิดเปอร์เซ็นต์ |
+| 2 | HOUSE | requiredFields = 8 ฟิลด์ · percent 75 = 6/8 · missing [livingArea, ownership] |
+| 3 | TOWNHOUSE | requiredFields = 8 ฟิลด์เดียวกับบ้าน/วิลล่า (มติ LOCKED ยืนยันแล้ว) · percent 63 = 5/8 (62.5 → ปัดขึ้นได้แค่ 63) |
+| 4 | CONDO | requiredFields = 7 (มี floor, livingArea · **ไม่มี** landSize/ownership) · percent 86 = 6/7 · missing [floor] |
+| 5 | LAND | requiredFields = 5 (**ไม่มี** bedrooms/bathrooms/livingArea/floor) · percent 80 = 4/5 · missing [ownership] · `landSize 800` (2 ไร่) แปลงหน่วยถูก |
+| 6 | COMMERCIAL | requiredFields = **3 ฟิลด์เท่านั้น** (type, area, price) — conservative fallback ตามมติ LOCKED ยืนยันแล้ว · percent 67 = 2/3 |
+| 7 | needsConfirmation | ราคากำกวม → `unclearFields:[price]` · draft ไม่บันทึกค่าราคา → `price` อยู่ใน **missingFields** ไม่ใช่ completeFields · percent 88 = 7/8 → **ขาดข้อมูลแล้วไม่มีทางแสดง 100** · `confirmationFields` ว่างถูกต้อง (มีแต่ธง ไม่มีค่า = missing) ตรงกฎ §28.1 |
+| 8 | ยืนยันค่าเดิม | `draftApplied:[price]` เท่านั้น · price ย้ายไป completeFields · percent 88 → **100** · complete true · requiredFields คงที่ 8 |
+| 9 | optional fields | `coordsRaw` + ชื่อ + เบอร์โทร → percent ยัง **100** เท่าเดิม · requiredFields ไม่เปลี่ยน — ฟิลด์ไม่บังคับไม่ถูกนับ |
+| 10 | **100% ต้องไม่สร้างอะไรอัตโนมัติ** | Firestore: `properties` ตัวใหม่สุด `own-1789621389359` = 17 ก.ย. 12:03 (ก่อนการทดสอบ ~17 ชม.) ไม่มีเอกสารใหม่ · ไม่มี collection `cases` · draft อยู่ใน `propertyDrafts` แยกจาก `properties` · Listing Approvals: "รอฉันอนุมัติ (0)", ปฏิเสธ 0, รายการทั้ง 7 เป็นของเก่า — **ไม่มี Case / คิวอนุมัติ / ประกาศใหม่** |
+
+**หลักฐานเชิงข้อมูลเพิ่มเติม**: เอกสารใน `propertyDrafts` เก็บ `needsConfirmation` (true/false) และ `source: "customer_stated"` ต่อฟิลด์จริงตามสเปก Server Authority
+
+**ข้อสังเกตที่พบระหว่างทดสอบ (บันทึกไว้ ไม่ใช่งานของ 2A-1 และไม่ได้แก้)**
+1. `stage` ที่ตอบกลับอาจเป็น `qualified` ขณะที่ `meta.stage` ของโมเดลเป็น `general` เมื่อ visitor มีเอกสารสนทนาอยู่ก่อน — ตรรกะเดิมของ C4.2 ไม่ใช่ 2A-1
+2. ถ้าประโยคของลูกค้ากำกวมทั้งประโยค โมเดลอาจไม่ส่ง `propertyFields` เลยและไม่ตั้ง `unclearFields` → ไม่มีการเขียน draft (ตรรกะปลายทางถูก แต่เป็นพฤติกรรมฝั่งสกัดข้อมูล ไม่ใช่ evaluator)
+3. `draftCompleteness` **ยังไม่มี UI ใดแสดงผล** ตามเจตนาของเฟสนี้ — ตรวจได้เฉพาะทาง DevTools/Logs
+4. เพื่อทดสอบด้วยลูกค้าใหม่ ต้องปิดหน้าต่าง Incognito **ทุกบาน** ก่อนเปิดใหม่ (Chrome ใช้ session ร่วมกัน) มิฉะนั้นได้ uid เดิมและ draft ค้าง
+5. ระหว่างทดสอบต้องปิด "โหมดปิดปรับปรุงเว็บไซต์" (สีเขียว) เพราะ Incognito จะเห็นหน้าปรับปรุงและเข้าแชทไม่ได้ — **ต้องกลับไปเปิดโหมดปิด (สีแดง) หลังทดสอบเสร็จ**
+
+**ยังไม่เริ่ม**: Phase 2A-2 · การแก้ source เพิ่ม
