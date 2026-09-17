@@ -519,6 +519,29 @@ function draftFieldMayWrite(stored, incomingSource, incomingAt, incomingValue) {
   return Number(incomingAt || 0) > Number(stored.updatedAt || 0);
 }
 
+// C4.3 Phase 1 fix - the SAME authority test as above, minus the
+// identical-value short-circuit.
+//
+// Why it exists: an explicit confirmation ("ใช้ราคา 7.5 ล้านบาทเหมือนเดิม")
+// carries a value IDENTICAL to what is stored, so draftFieldMayWrite
+// correctly refuses it as "nothing to write" - and the field's
+// needsConfirmation flag was then stranded at true forever. The VALUE does
+// not need changing; the METADATA does. This helper answers the narrower
+// question "is this source allowed to touch this field at all?" so a
+// metadata-only transition can be authorised without weakening precedence.
+//
+// `>=` rather than `>` on the timestamp: a confirmation arriving in the same
+// millisecond as the stored write is still a confirmation.
+function draftFieldAuthorityAllows(stored, incomingSource, incomingAt) {
+  if (!stored || typeof stored !== "object") return true;
+  if (stored.value === undefined) return true;
+  const a = DRAFT_SOURCE_TIER[incomingSource] || 0;
+  const b = DRAFT_SOURCE_TIER[stored.source] || 0;
+  if (a > b) return true;
+  if (a < b) return false;
+  return Number(incomingAt || 0) >= Number(stored.updatedAt || 0);
+}
+
 // Build the merge patch for a draft document. Pure function, no I/O, so it is
 // directly testable and is the single place precedence is enforced.
 //
@@ -538,13 +561,38 @@ function buildDraftPatch(storedFields, incoming, opts) {
   // customer_stated. It can never reach customer_edit or staff_edit, so no
   // caller - and no model output - can use it to claim staff authority.
   const statedSet = new Set(Array.isArray(o.stated) ? o.stated.filter((k) => DRAFT_FIELD_SPECS[k]) : []);
+  const unclearSet = new Set(Array.isArray(o.unclear) ? o.unclear.filter((k) => DRAFT_FIELD_SPECS[k]) : []);
   const sourceFor = (key) => (source === "ai_chat" && statedSet.has(key) ? "customer_stated" : source);
-  const patch = {}, applied = [], refused = [];
+  const patch = {}, applied = [], refused = [], confirmed = [];
   for (const key of Object.keys(incoming || {})) {
     const value = validateDraftField(key, incoming[key]);
     if (value === undefined) { refused.push(key); continue; }
     const src = sourceFor(key);
-    if (!draftFieldMayWrite(stored[key], src, at, value)) { refused.push(key); continue; }
+    if (!draftFieldMayWrite(stored[key], src, at, value)) {
+      // EXPLICIT CONFIRMATION of an already-stored value. All five conditions
+      // are required, and each one blocks a specific wrong way to clear the
+      // flag:
+      //   • same value          - this is a confirmation, not a correction
+      //   • flag currently set  - nothing to do otherwise
+      //   • NOT listed unclear  - an ambiguous restatement must never resolve
+      //                           its own ambiguity
+      //   • src is not ai_chat  - an AI re-extraction repeating the number is
+      //                           not the customer confirming it
+      //   • authority allows    - a customer can never clear a staff_edit flag
+      const cur = stored[key];
+      if (cur && cur.value === value && cur.needsConfirmation === true &&
+          !unclearSet.has(key) && src !== "ai_chat" &&
+          draftFieldAuthorityAllows(cur, src, at)) {
+        // Metadata-only: value, source and updatedAt are kept EXACTLY as they
+        // were. The stored provenance is the original statement's, and a
+        // confirmation does not rewrite history.
+        patch[key] = { ...cur, needsConfirmation: false };
+        confirmed.push(key);
+      } else {
+        refused.push(key);
+      }
+      continue;
+    }
     const entry = { value, source: src, updatedAt: at };
     // confidence is written ONLY when a GENUINE per-field signal was supplied,
     // and only for AI-derived values. There is no such signal in Phase 1, so
@@ -565,8 +613,8 @@ function buildDraftPatch(storedFields, incoming, opts) {
   //   - a value stored -> KEEP the value, its source and its updatedAt
   //     exactly, and only raise needsConfirmation on it.
   const confirmations = [];
-  for (const key of (o.unclear || [])) {
-    if (!DRAFT_FIELD_SPECS[key] || patch[key]) continue;
+  for (const key of unclearSet) {
+    if (patch[key]) continue;
     const cur = stored[key];
     if (cur && cur.value !== undefined) {
       if (cur.needsConfirmation === true) continue; // already flagged
@@ -576,7 +624,7 @@ function buildDraftPatch(storedFields, incoming, opts) {
     }
     confirmations.push(key);
   }
-  return { patch, applied, refused, confirmations };
+  return { patch, applied, refused, confirmed, confirmations };
 }
 
 // C4.2b — trim/cap the three property-context strings. Short caps on purpose:
@@ -853,16 +901,17 @@ exports.receptionTurn = onCall(
     // out-of-scope binding) threw straight past the handler and cost the
     // customer their turn. Everything the draft needs now sits inside.
     let draftApplied = [];
+    let draftConfirmed = [];
     try {
       if (CASE_INTENTS_C42B[nextIntent] &&
           (Object.keys(out.propertyFields).length || out.unclearFields.length)) {
         const draftRef = db.collection("propertyDrafts").doc(draftIdForVisitor(visitorId));
-        draftApplied = await db.runTransaction(async (t) => {
+        const res = await db.runTransaction(async (t) => {
           const dSnap = await t.get(draftRef);
           const cur = dSnap.exists ? (dSnap.data() || {}) : {};
           // Ownership is structural (id built from the caller's own uid) but
           // asserted anyway: a draft owned by someone else is never touched.
-          if (dSnap.exists && cur.ownerUid && cur.ownerUid !== visitorId) return [];
+          if (dSnap.exists && cur.ownerUid && cur.ownerUid !== visitorId) return { applied: [], confirmed: [] };
           const built = buildDraftPatch(cur.fields, out.propertyFields, {
             source: "ai_chat", at: nowMs, unclear: out.unclearFields,
             // Evidence classification: fields the customer stated outright in
@@ -874,7 +923,7 @@ exports.receptionTurn = onCall(
             // No confidence is passed: there is no genuine per-field signal in
             // Phase 1 and a constant must never be persisted as if there were.
           });
-          if (!Object.keys(built.patch).length) return [];
+          if (!Object.keys(built.patch).length) return { applied: [], confirmed: [] };
           const doc = {
             ownerUid: visitorId,
             conversationId,
@@ -887,8 +936,10 @@ exports.receptionTurn = onCall(
           // their provenance survive - the same accumulate-never-erase rule
           // propertyBasics already relies on.
           t.set(draftRef, doc, { merge: true });
-          return built.applied;
+          return { applied: built.applied, confirmed: built.confirmed };
         });
+        draftApplied = (res && res.applied) || [];
+        draftConfirmed = (res && res.confirmed) || [];
       }
     } catch (e) {
       // Non-fatal by contract: the customer's turn already succeeded. Log the
@@ -896,10 +947,15 @@ exports.receptionTurn = onCall(
       // reaching the browser) and carry on with the normal response.
       rxLog({ rid, event: "draft_error", uidTail, code: (e && e.code) || null, name: (e && e.name) || null });
       draftApplied = [];
+      draftConfirmed = [];
     }
     // Field NAMES only - never values. Same privacy rule as every other rxLog
-    // call: this function logs decisions, not customer content.
-    if (draftApplied.length) rxLog({ rid, event: "draft_updated", uidTail, fields: draftApplied });
+    // call: this function logs decisions, not customer content. `confirmed` is
+    // logged separately so a metadata-only confirmation (value unchanged,
+    // needsConfirmation cleared) is visible instead of looking like a no-op.
+    if (draftApplied.length || draftConfirmed.length) {
+      rxLog({ rid, event: "draft_updated", uidTail, fields: draftApplied, confirmed: draftConfirmed });
+    }
 
     rxLog({ rid, event: "turn_done", uidTail, persisted: true, docAction,
       stage, modelStage: out.stage, primaryIntent: out.primaryIntent, reason: "persisted" });
@@ -1013,7 +1069,7 @@ exports.updatePropertyDraft = onCall(
         const doc = { ownerUid: uid, status: cur.status || "draft", updatedAt: now, fields: built.patch };
         if (!snap.exists) doc.createdAt = now;
         t.set(ref, doc, { merge: true });
-        return { updated: true, applied: built.applied, refused: built.refused };
+        return { updated: true, applied: built.applied, confirmed: built.confirmed, refused: built.refused };
       });
     } catch (e) {
       console.warn("updatePropertyDraft failed:", (e && e.code) || "error");
