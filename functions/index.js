@@ -17,6 +17,12 @@ const Stripe = require("stripe");
 // must never be predictable: it is the ONLY credential a customer holds for
 // their own Case (see the trackToken branches in firestore.rules).
 const nodeCrypto = require("crypto");
+// C4.3 Phase 2A-1 - the SINGLE customer-facing draft completeness evaluator.
+// Lives in functions/ so it is deployed with this file and the server stays
+// the only place the percentage is computed. It does NOT import, copy or
+// mirror intake-workflow.js: staff workflow completeness is a different
+// concept and remains untouched.
+const { evaluateDraftCompleteness } = require("./draft-completeness");
 
 if (!admin.apps.length) admin.initializeApp();
 
@@ -1014,6 +1020,10 @@ exports.receptionTurn = onCall(
     // customer their turn. Everything the draft needs now sits inside.
     let draftApplied = [];
     let draftConfirmed = [];
+    // ADDITIVE (C4.3 Phase 2A-1). Stays null on every path that does not write
+    // a draft this turn - a general question performs no draft work and gets
+    // no percentage, exactly as before. No existing response key changes.
+    let draftCompleteness = null;
     try {
       if (CASE_INTENTS_C42B[nextIntent] &&
           (recorded.size || unclearIn.length)) {
@@ -1048,10 +1058,16 @@ exports.receptionTurn = onCall(
           // their provenance survive - the same accumulate-never-erase rule
           // propertyBasics already relies on.
           t.set(draftRef, doc, { merge: true });
-          return { applied: built.applied, confirmed: built.confirmed };
+          // Evaluated on the POST-WRITE field map (stored merged with the
+          // patch), inside the transaction, so the number the customer is
+          // shown is the number implied by what was just persisted.
+          const after = Object.assign({}, cur.fields || {}, built.patch);
+          return { applied: built.applied, confirmed: built.confirmed,
+            completeness: evaluateDraftCompleteness(after, { validate: validateDraftField }) };
         });
         draftApplied = (res && res.applied) || [];
         draftConfirmed = (res && res.confirmed) || [];
+        draftCompleteness = (res && res.completeness) || null;
       }
     } catch (e) {
       // Non-fatal by contract: the customer's turn already succeeded. Log the
@@ -1060,6 +1076,7 @@ exports.receptionTurn = onCall(
       rxLog({ rid, event: "draft_error", uidTail, code: (e && e.code) || null, name: (e && e.name) || null });
       draftApplied = [];
       draftConfirmed = [];
+      draftCompleteness = null;
     }
     // Field NAMES only - never values. Same privacy rule as every other rxLog
     // call: this function logs decisions, not customer content. `confirmed` is
@@ -1074,7 +1091,11 @@ exports.receptionTurn = onCall(
       stage, modelStage: out.stage, primaryIntent: out.primaryIntent, reason: "persisted" });
     // draftApplied lets the client show "✓ เพิ่ม 3 ห้องนอน" without a read.
     // Field names only; no values, no provenance.
-    return { reply: out.reply, meta: out, persisted: true, conversationId, stage, rid, draftApplied };
+    // draftCompleteness is ADDITIVE and may be null. Information only: no
+    // client or server behaviour may gate submission, approval or publication
+    // on it.
+    return { reply: out.reply, meta: out, persisted: true, conversationId, stage, rid, draftApplied,
+      draftCompleteness };
   }
 );
 
@@ -1182,7 +1203,13 @@ exports.updatePropertyDraft = onCall(
         const doc = { ownerUid: uid, status: cur.status || "draft", updatedAt: now, fields: built.patch };
         if (!snap.exists) doc.createdAt = now;
         t.set(ref, doc, { merge: true });
-        return { updated: true, applied: built.applied, confirmed: built.confirmed, refused: built.refused };
+        // Same post-write evaluation as receptionTurn, from the same single
+        // evaluator: a Workspace edit and an AI extraction can never disagree
+        // about the percentage. ADDITIVE - `updated`/`applied`/`confirmed`/
+        // `refused` keep their existing meaning.
+        const after = Object.assign({}, cur.fields || {}, built.patch);
+        return { updated: true, applied: built.applied, confirmed: built.confirmed, refused: built.refused,
+          completeness: evaluateDraftCompleteness(after, { validate: validateDraftField }) };
       });
     } catch (e) {
       console.warn("updatePropertyDraft failed:", (e && e.code) || "error");
