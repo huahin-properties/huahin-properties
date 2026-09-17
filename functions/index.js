@@ -294,7 +294,22 @@ const RECEPTION_TOOL = {
           "OMIT any field not stated - do not include it with an empty or zero " +
           "value. Never guess or infer. If a statement is ambiguous (e.g. \"ประมาณ 100 " +
           "ตารางวา\" or a size with no unit), omit the field and ask about it in " +
-          "the reply instead.",
+          "the reply instead. " +
+          // C4.3 Phase 1 fix - MULTI-VALUE AMBIGUITY.
+          // Production: the customer said bedrooms could be counted as 3 or 4;
+          // the model picked 3 (the value it recommended in its own reply) and
+          // reported it as a stated fact, overwriting a clear stored 4. The
+          // schema had taught ambiguity only for ranges and missing units, so
+          // "A or B" read as "stated, with two candidates - choose one".
+          "ALSO OMIT the field whenever the customer presents TWO OR MORE " +
+          "plausible alternative values for that SAME field and has not yet " +
+          "chosen between them - no matter which language or wording they use. " +
+          "You must never pick one of the alternatives yourself. This holds " +
+          "even when one alternative seems more reasonable, more conservative, " +
+          "more marketable, or is the very value you recommend in your " +
+          "natural-language reply: your recommendation is advice to the " +
+          "customer, never a fact they stated. Put the field in unclearFields " +
+          "instead and ask them to choose.",
         properties: {
           type: { type: "string", description: "Property type, normalised to one of: villa, house, townhouse, condo, land, commercial. บ้านเดี่ยว = house. Omit if not clearly stated." },
           area: { type: "string", description: "Area/district/soi as stated, e.g. หัวหินซอย 70, Pranburi. Omit if not stated." },
@@ -316,9 +331,24 @@ const RECEPTION_TOOL = {
         items: { type: "string" },
         description:
           "Canonical field names (from propertyFields) the visitor referred to " +
-          "ambiguously - a number with no unit, a vague size, a price range, a " +
-          "maybe. Listing a field here is how you say \"they mentioned it but I " +
-          "must not record a value\". Max 6.",
+          "ambiguously. TWO KINDS of ambiguity both belong here. " +
+          "(1) IMPRECISE: a number with no unit, a vague size, an approximate " +
+          "amount, a range, a maybe. " +
+          "(2) UNRESOLVED ALTERNATIVES: the customer named two or more " +
+          "plausible values for the SAME field and has not selected one - " +
+          "for example a count that could be either of two numbers, a price " +
+          "that could be either of two figures, a property type or title type " +
+          "that could be either of two kinds, or any 'not sure whether X or Y' " +
+          "/ 'could be counted either way' statement. This rule is about " +
+          "MEANING, not about particular words: apply it in every language, " +
+          "however the customer phrases it. " +
+          "Listing a field here is how you say \"they mentioned it but I " +
+          "must not record a value\". " +
+          "It is NOT ambiguity merely because several numbers appear in the " +
+          "sentence. If the customer clearly settles on ONE value - correcting " +
+          "an earlier figure, describing a change over time, or choosing " +
+          "between options they just raised - that is a CLEAR value: put it in " +
+          "propertyFields and leave it out of this list. Max 6.",
       },
       // C4.3 Phase 1 - EVIDENCE CLASSIFICATION, not a confidence score.
       //
@@ -342,7 +372,14 @@ const RECEPTION_TOOL = {
           "field if you worked the value out rather than being told it - " +
           "inferred from an earlier turn, deduced from another field, assumed " +
           "from the property type, or carried over from context. Do NOT list a " +
-          "field merely because you extracted it. Max 10.",
+          "field merely because you extracted it. " +
+          // C4.3 Phase 1 fix - the AI's own judgement is not the customer's word.
+          "A value you INFERRED, SELECTED between alternatives, resolved by " +
+          "judgement, or RECOMMENDED is not customer-stated just because you " +
+          "mentioned it in your reply - mentioning a value never makes it a " +
+          "fact the customer gave you. List a field here only when the " +
+          "customer's CURRENT message itself states, selects or confirms ONE " +
+          "authoritative value for it. Max 10.",
       },
     },
     required: ["reply", "stage", "primaryIntent"],
