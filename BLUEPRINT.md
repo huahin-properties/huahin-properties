@@ -1950,7 +1950,7 @@ aiAutonomyAllowedForCase(prop) = !isHumanHandled(prop) && !isCurrentlyAssignedTo
 
 ## §27 C4.3 Phase 1 — Unified Draft Schema + Server Authority (17 ก.ย. 2569)
 
-**สถานะ**: implemented · **ยังไม่ deploy** · Phase 2 ยังไม่เริ่ม
+**สถานะ (แก้ไข 17 ก.ย. 2569)**: implemented · **deploy แล้ว · Production PASS · Phase 1 CLOSED** — ดู §28 สำหรับบันทึกการตรวจรับและมติ Phase 2 (บรรทัดเดิม "ยังไม่ deploy" ล้าสมัยแล้ว)
 
 ### สิ่งที่ทำ
 
@@ -2001,3 +2001,139 @@ aiAutonomyAllowedForCase(prop) = !isHumanHandled(prop) && !isCurrentlyAssignedTo
 1. อัปโหลด `functions/index.js` → `functions/` · `firestore.rules` → root
 2. `firebase deploy --only functions:receptionTurn,functions:updatePropertyDraft`
 3. publish `firestore.rules` (collection ใหม่เท่านั้น — rules เดิมไม่ถูกแก้)
+
+**ผลการตรวจรับ Production (17 ก.ย. 2569)**: ผ่านทั้งหมด — typed fields ทั้ง 10 ถูกเก็บแยกจริง · การแก้ค่าชัดเจนทำงาน (`price 8,000,000 → 7,500,000 → 7,800,000`, `bedrooms 3 → 4`) · ความกำกวมคงค่าเดิมและยก `needsConfirmation` (ทดสอบจริงทั้ง `price` "7.5 หรือ 7.8 ล้านบาท" และ `landSize` "ไม่แน่ใจ") · การยืนยันค่าเดิมล้าง flag โดยไม่เขียน provenance ทับ · draft ยังเป็น `status = "draft"`
+
+---
+
+## §28 C4.3 Phase 2 — Customer Property Workspace (17 ก.ย. 2569, 🔒 LOCKED PRODUCT DECISION, Product Owner Approved)
+
+**สถานะ**: มติผลิตภัณฑ์ LOCKED · **ยังไม่ implement** — ขั้นนี้บันทึกมติ + audit เท่านั้น ห้ามเขียน runtime code · completeness definition **ต้องรอ Product Owner approve ก่อน** จึงจะลงมือ
+
+### หลักการที่ LOCKED (ผูกพันทุกเฟสถัดไป)
+
+**ONE PROPERTY RECORD · ONE UNIFIED SCHEMA · MULTIPLE ROLES · CONTROLLED PUBLISHING**
+
+แชทและ Workspace คือ **สอง interface ของความจริงชุดเดียวกัน** (`propertyDrafts/draft__<uid>`) · **ห้ามสร้าง**: AI property schema, Workspace-only property schema, customer property record ที่สอง
+
+### Phase 2A — Persistent Property Progress
+
+ตัวบอกความครบถ้วนต้องเห็นได้ตลอดที่ด้านบนของประสบการณ์แชทลูกค้า ("ข้อมูลทรัพย์สินของคุณ 45%" / "Property information received: 45%") · **ยังเห็นอยู่แม้ Workspace ถูกพับ**
+
+ความหมายที่ต้องสื่อชัด = **ความครบถ้วนของข้อมูลทรัพย์สิน** เท่านั้น · **ไม่ได้หมายถึง** อนุมัติแล้ว / ประกาศแล้ว / ตรวจสอบแล้ว / พร้อมเผยแพร่ / ทีมงานรับเรื่องแล้ว / ประเมินราคาแล้ว · 100% = ครบตามมาตรฐานข้อมูลฝั่งลูกค้าที่นิยามไว้ · **ห้ามส่งเคสอัตโนมัติ** · ลูกค้าคุยต่อได้ที่ 100%
+
+**สถาปัตยกรรมที่ LOCKED**: เปอร์เซ็นต์ **ห้ามให้ AI ประเมินหรือคิดเอง** · ต้องมี **มาตรฐาน deterministic ชุดเดียว** ที่ใช้ร่วมกันโดย Progress UI / Workspace / AI awareness / ข้อความความพร้อมส่ง
+
+มติ Phase 1 ที่เลื่อน server-side completeness ยังถูกต้องในบริบทของ Phase 1 · Phase 2 เปลี่ยนความต้องการ: ต้องมี customer-facing deterministic completeness · แต่ **ห้าม** สร้าง schema ที่สอง / copy `WORKFLOW_DEFS` / import ES module ที่ root เข้า functions / เปลี่ยน semantics ความครบถ้วนของ staff approval โดยไม่ตั้งใจ
+
+### Phase 2B — Collapsible Editable Property Workspace
+
+"ข้อมูลทรัพย์สินของฉัน" / "My Property Information" · พับได้ · Desktop = drawer/side panel ผนวกกับแชทเดิม · Mobile = bottom sheet/panel ขยายได้ · แชทยังเป็น interface หลักและใช้งานได้ตลอด
+
+ต้องแยกให้ชัด 4 สถานะ: **ได้รับแล้ว / ยังขาด / ต้องยืนยัน (`needsConfirmation`) / ไม่บังคับ** · ทุกฟิลด์ใช้ label ภาษาลูกค้า + helper text สั้นเมื่อจำเป็น · ลูกค้ากรอก/แก้เองได้ ไม่ต้องรอ AI ถาม · **การแก้ทุกครั้งผ่าน `updatePropertyDraft` เท่านั้น** ห้ามเขียน Firestore จากเบราว์เซอร์
+
+### Phase 2C — AI ↔ Workspace Two-Way Sync
+
+ลูกค้าใช้ได้ทั้งสองทางตามธรรมชาติ: แชท → AI → server → draft → progress · หรือ Workspace → `updatePropertyDraft` → draft เดียวกัน → progress → AI เห็นความจริงล่าสุดในเทิร์นถัดไป · ค่าที่ชนะตัดสินด้วยกฎ authority/recency ของ Phase 1 (ไม่แก้)
+
+AI **ห้ามถามซ้ำ** ข้อมูลที่มีอยู่ชัดเจนใน draft แล้ว · AI บอกทางเลือกได้ ("บอกผมตรงนี้ได้เลยครับ หรือเปิด 'ข้อมูลทรัพย์สินของฉัน' แล้วกรอกเองก็ได้") · ห้ามทำบทสนทนาเป็นแบบสอบถามแข็ง ๆ · ปกติถาม 1–2 คำถามที่มีประโยชน์ต่อครั้ง · Workspace **ห้ามเปิดเองอัตโนมัติ** ทุกครั้งที่ AI ได้ฟิลด์ใหม่ — ใช้ badge/indicator บาง ๆ ได้
+
+### Phase 2D — Review + Explicit Submit
+
+ลูกค้าตรวจข้อมูลก่อนส่งได้ · ไม่ต้องรอ AI ถามครบทุกข้อจึงจะเข้าหน้า review ได้ · **การส่งยังเป็น explicit เท่านั้น**: ไม่สร้างเคสจากเปอร์เซ็นต์ ไม่อนุมัติอัตโนมัติ ไม่เผยแพร่อัตโนมัติ ไม่อ้างว่าทีมงานรับเรื่องแล้ว · protections ของ `createCaseFromConversation` คงเดิมทั้งหมด · ถ้อยคำใกล้ 100%: "ข้อมูลตามมาตรฐานที่ต้องการครบแล้ว / กรุณาตรวจสอบข้อมูลก่อนส่งให้ทีมงาน" · ลูกค้าแก้ฟิลด์/ถาม AI/คุยต่อได้ก่อนกดส่ง · **ต้อง reuse Review Card เดิมใน `ContactRail.dc.html`** ห้ามสร้างระบบ submit ที่สอง
+
+### Customer Journey Principle (🔒 LOCKED, 17 ก.ย. 2569 — หลัง UX/customer-psychology review)
+
+**ลำดับการเดินทางของลูกค้า**: AI FIRST → ตรวจพบ intent → Property Progress ปรากฏ → AI + "ข้อมูลทรัพย์สินของฉัน" → ลูกค้าตรวจสอบ → **Explicit Submit** → Case ถูกสร้าง → **Human Conversation เปิดใช้ได้** → Staff Case Handling
+
+**กฎที่ LOCKED**: การเข้าถึงเจ้าหน้าที่คือ **POST-SUBMISSION CASE FEATURE ไม่ใช่ทางเลือก navigation ก่อนส่ง** · ก่อน explicit submission ประสบการณ์ปกติคือ **AI CHAT + PROPERTY PROGRESS + PROPERTY WORKSPACE** เท่านั้น · **ห้ามแสดง "คุยกับเจ้าหน้าที่" เป็นแท็บหลักแข่งกับ AI** ระหว่างการรับข้อมูลทรัพย์ก่อนส่ง · หลังส่ง/สร้างเคสสำเร็จแล้ว Human Conversation จึงเป็นส่วนปกติของประสบการณ์ Case ได้
+
+**เมื่อลูกค้าขอคุยกับเจ้าหน้าที่ก่อนส่ง** — AI **ห้ามปฏิเสธแบบเย็นชา** ("ยังคุยกับเจ้าหน้าที่ไม่ได้" / "ต้องครบ 100% ก่อน" / "ต้องกรอกฟอร์มให้เสร็จก่อน") · ใช้จังหวะ **ACCEPT → EXPLAIN BENEFIT → ASSIST → SHOW PROGRESS → HANDOFF AFTER SUBMISSION**: รับคำขอ → อธิบายว่าการรวบรวมข้อมูลเบื้องต้นทำให้เจ้าหน้าที่รับช่วงต่อได้ทันทีโดยไม่ต้องเริ่มถามใหม่ → ช่วยเก็บข้อมูลต่อในแชท · เป็น **behavioral guidance ไม่ใช่สคริปต์ตายตัว** AI ปรับถ้อยคำตามบริบทได้ · ถ้าลูกค้าถามซ้ำ ให้ **รับรู้ความรู้สึก** ไม่ใช่พูดประโยคเดิมซ้ำแบบหุ่นยนต์
+
+**ห้ามบอกลูกค้าว่าต้องถึงเปอร์เซ็นต์ใด ๆ ก่อนเจ้าหน้าที่จะคุยด้วย** — เปอร์เซ็นต์คือความคืบหน้า/ความครบถ้วนของข้อมูล **ไม่ใช่คะแนนควบคุมสิทธิ์การเข้าถึง** · ความรู้สึกที่ต้องการคือ "ผมไม่ได้ถูกกั้นจากเจ้าหน้าที่ — AI กำลังช่วยเตรียมเรื่องให้ทีมงานทำงานต่อได้เร็ว"
+
+**Exception Principle**: **ห้าม** ออกแบบข้อห้ามทางเทคนิคแบบเด็ดขาดที่ปิดการติดต่อมนุษย์ทุกกรณีก่อนส่ง · กรณียกเว้นในอนาคต (ปัญหาระบบ/บัญชี · ความเป็นส่วนตัว/ความปลอดภัย · หาข้อมูลที่ส่งไปแล้วไม่พบ · เรื่อง support จริงที่ไม่ใช่การฝากขาย) คือ **SUPPORT EXCEPTION ไม่ใช่เส้นทาง sales/handoff ปกติ** · เฟสนี้ **ไม่สร้าง** ระบบ Contact Us และ **ไม่เพิ่ม** ทางลัดหาเจ้าหน้าที่ที่มองเห็นได้ — เพียงรักษาสถาปัตยกรรมให้รองรับกรณียกเว้นในอนาคตได้
+
+**Workspace Visibility — progressive disclosure**: ห้ามยัด AI / Staff / Workspace เป็นสามทางเลือกแข่งกันให้ผู้มาครั้งแรก · บทสนทนาทั่วไป → AI เป็นหลัก · เมื่อมี **intent SELL/RENT_OUT จริง + draft context** แล้ว → แสดง Property Progress และเปิดให้ใช้ "ข้อมูลทรัพย์สินของฉัน" · ลูกค้าเลือกได้ทั้งเล่าให้ AI ฟังต่อ **หรือ** เปิด Workspace กรอกเอง — ทั้งสองทางอัปเดต Property Draft ชุดเดียว · **ห้ามรอให้ถึง 100% ก่อนจึงเปิด Workspace** — Workspace คือเครื่องมือที่ช่วยให้ลูกค้า *ไปถึง* ความครบถ้วน
+
+**ความหมายของ 100%** (ย้ำอีกครั้ง): ทุกฟิลด์ข้อมูลทรัพย์สินที่จำเป็นและใช้บังคับกับทรัพย์นี้ **มีค่าที่ใช้ได้** และ **ไม่มีฟิลด์ใดในชุดนั้นที่ `needsConfirmation = true`** · ไม่ได้หมายถึง approved / verified / submitted / Case created / staff ยอมรับ / ราคาได้รับการรับรอง / พร้อมเผยแพร่ · การส่งยังเป็นการกระทำที่ชัดแจ้งของลูกค้าเท่านั้น
+
+### หกความหมายที่ห้ามยุบรวมเป็นเปอร์เซ็นต์เดียว
+
+1. Conversation qualification (`conversationStage`) · 2. Customer property-information completeness (**ใหม่ใน Phase 2**) · 3. Case creation minimum gate (`receptionCaseGate`) · 4. Staff workflow completeness (`intake-workflow.js`) · 5. Verification/approval · 6. Publication readiness — ทั้งหกเป็นแนวคิดแยกกันใน source จริงวันนี้ และต้องแยกต่อไป
+
+### Out of scope ของ Phase 2
+
+Phase 3 multi-property/Submission Groups · Phase 4 supplements/post-submit guarded changes · Phase 5 My Properties · C5 Demand Profile · C6 Matching · Participants/Deal/Commission · LINE OA · Facebook integration · backfill เคสเก่า
+
+### §28.1 Phase 2A-1 — Deterministic Customer Property Completeness (implemented 17 ก.ย. 2569, ยังไม่ deploy)
+
+**ไฟล์ใหม่ `functions/draft-completeness.js`** — evaluator ชุดเดียวที่มีอำนาจกำหนดเปอร์เซ็นต์ที่ลูกค้าเห็น · อยู่ใน `functions/` เพราะเป็นโฟลเดอร์เดียวที่ถูก deploy → **server คำนวณ เบราว์เซอร์ห้ามคำนวณเอง** จึงไม่มีทาง drift · **ไม่ import / ไม่ copy / ไม่ mirror `intake-workflow.js`** (staff completeness เป็นอีกความหมาย ไม่ถูกแตะ)
+
+**ชุดฟิลด์ที่นับ** — จำเป็นเสมอ: `type`, `area`, `price` · LAND เพิ่ม `landSize`, `ownership` · CONDO เพิ่ม `livingArea`, `bedrooms`, `bathrooms`, `floor` · HOUSE/VILLA เพิ่ม `landSize`, `livingArea`, `bedrooms`, `bathrooms`, `ownership` · **ไม่นับ**: `coordsRaw` (ไม่บังคับ) · `customerName`/`contact` (เป็นงานของ `receptionCaseGate`) · photos/description/features/verification/reviewStatus/listingStatus/staff workflow fields (เป็นฟิลด์ระดับ Case)
+
+**`townhouse` / `commercial` — LOCKED per-type decision (Product Owner, 17 ก.ย. 2569)**: การจับคู่เป็น **explicit ต่อ type** ไม่ใช่การอนุมานจาก `!isLand && !isCondo` อีกต่อไป · `villa`/`house`/**`townhouse`** → ชุด HOUSE/VILLA · `condo` → ชุด CONDO · `land` → ชุด LAND · **`commercial` → ชุด BASE เท่านั้น (`type`, `area`, `price`)**
+
+**เหตุผลที่ `commercial` ไม่รับชุด HOUSE/VILLA**: ทรัพย์เชิงพาณิชย์ไม่ได้เทียบเท่าบ้าน/วิลล่าเชิงโครงสร้าง — อาจเป็นตึกแถว/สำนักงาน/พื้นที่ค้าปลีก/โกดัง/อาคารพาณิชย์ หรือรูปแบบอื่น · จึง **ห้ามบังคับ** `bedrooms`/`bathrooms`/`livingArea`/`ownership` เพียงเพราะไม่ใช่ land และไม่ใช่ condo (จะได้เปอร์เซ็นต์ที่ไปไม่ถึง 100% ตลอดกาล) · เป็น **conservative fallback โดยเจตนา** จนกว่าจะมีมติออกแบบข้อกำหนดของ commercial โดยเฉพาะ · **ห้าม** เปลี่ยน type vocabulary · **ห้าม** เพิ่ม commercial subtype · **ห้าม** ขยาย Property Draft schema · **ห้าม** เริ่ม Commercial redesign · ใช้ตาราง `TYPE_EXTRA` แบบ exhaustive → type ที่ 7 ในอนาคตจะตกมาที่ชุด BASE เอง ไม่สืบทอดข้อกำหนดที่อยู่อาศัยแบบเงียบ ๆ
+
+**ข้อสังเกตเรื่องหน่วยของ `landSize` (ACKNOWLEDGED, ไม่แก้ในเฟสนี้)**: draft เก็บ `landSize` ตัวเดียวไม่มีหน่วยและไม่มี fallback ขณะที่ `intake-workflow.js` อ่าน `landSize || landRai || landNgan || landWah` · บันทึกเป็น **ข้อพิจารณาเรื่อง schema/การโปรโมทขึ้น Case ในอนาคตเท่านั้น** · Phase 2A-1 **ไม่แก้** `landSize` schema, `landRai`, `landNgan`, `landWah` หรือ Case promotion
+
+**เกณฑ์ complete ต่อฟิลด์**: มีค่า canonical ที่ใช้ได้ (ตรวจด้วย `validateDraftField` เดิม — evaluator ไม่นิยามความถูกต้องของค่าเอง) **และ** `needsConfirmation !== true` · มีค่า+ยืนยันแล้ว = complete · มีค่า+`needsConfirmation` = **ไม่ complete** อยู่ใน `confirmationFields` · ไม่มีค่า = อยู่ใน `missingFields` (entry ที่มีแต่ flag ไม่มี value ถือเป็น *missing* เพราะยังไม่มีอะไรให้ยืนยัน)
+
+**น้ำหนักเท่ากันทุกฟิลด์ที่ใช้บังคับ · ไม่มีคะแนนบางส่วน** · **กฎปัดเศษเดียวที่ documented**: `Math.round(complete/required*100)` + สองการ์ด — ครบทุกฟิลด์ → 100 เป๊ะ · เหลือฟิลด์ใดก็ตาม → **ไม่เกิน 99** (7/8 = 87.5 → 88 และไม่มีทางที่การปัดเศษจะแสดง 100 ขณะยังขาดข้อมูล)
+
+**`type` ที่ยังไม่รู้** → required = 3 ฟิลด์พื้นฐานเท่านั้น · ตัวหารจึง **โตขึ้น** เมื่อรู้ประเภททรัพย์ และเปอร์เซ็นต์อาจ **ลดลง** ได้ — เป็นผลที่ซื่อตรงของการรู้มากขึ้น ไม่ใช่บั๊กที่ต้องกลบ
+
+**Integration (additive ทั้งหมด ไม่เปลี่ยน semantics เดิม)** — `receptionTurn` เพิ่มคีย์ `draftCompleteness` (เป็น `null` ทุกเทิร์นที่ไม่มีการเขียน draft) · `updatePropertyDraft` เพิ่มคีย์ `completeness` ใน response ที่ `updated: true` · ทั้งสองคำนวณจาก **field map หลังเขียน** ภายใน transaction เดียวกัน → ตัวเลขตรงกับสิ่งที่เพิ่งบันทึกจริง · **ไม่เพิ่ม `getPropertyDraft`** (2A-1 ยังไม่ต้องใช้) · ค่า `standard: "customer_draft_v1"` ติดไปกับ payload เพื่อให้การเปลี่ยนชุดฟิลด์ในอนาคตมองเห็นได้ ไม่ใช่เปอร์เซ็นต์ที่ขยับอย่างไม่มีคำอธิบาย
+
+**ไม่แตะ**: `createCaseFromConversation` · `receptionCaseGate` · `propertyBasics` · `humanHandlingStartedAt` · C4.2a/C4.2b · Review Card · trackPath/trackToken · `firestore.rules` · Owner Submission · Staff Workspace · Listing Approvals · `intake-workflow.js` · **ไม่มี UI ใด ๆ ในขั้นนี้**
+
+---
+
+## §29 STANDARD DELIVERY WORKFLOW (18 ก.ย. 2569, 🔒 LOCKED PROCESS DECISION, Product Owner Approved)
+
+**สถานะ**: ล็อกเป็นมาตรฐานการส่งมอบงานของโปรเจกต์นี้ หลังใช้สำเร็จจริงในรอบ C4.2b Step 1 / §28.1 (วาง + commit `functions/index.js` และ `functions/draft-completeness.js` ผ่าน Viewer + GitHub Web) · **ห้ามแชทใหม่เปลี่ยน workflow นี้เอง** — เสนอได้ แต่ต้องอธิบายและได้รับการยืนยันจากเจ้าของก่อนเปลี่ยน
+
+**กติกา 12 ข้อ**
+
+1. **GitHub คือ Single Source of Truth** — ก่อนแก้หรือส่งมอบ ต้องถือไฟล์ปัจจุบันใน GitHub เป็นตัวจริง · ห้ามถือสำเนาใน `export-for-github/` เป็นตัวจริงโดยอัตโนมัติ
+2. **Claude รับผิดชอบงานเทคนิคและการเตรียมไฟล์ทั้งหมด** — เจ้าของไม่ต้องวิเคราะห์ source, หา anchor, ตรวจ hash, หา path หรือประกอบไฟล์เอง
+3. **ทุกครั้งที่มีไฟล์ต้องนำขึ้น GitHub ให้สร้างหน้า Viewer/คู่มือทางขวา** แบบเดียวกับ `Copy Code to GitHub.dc.html`
+4. **Viewer ใช้ภาษาไทยเข้าใจง่าย แบ่งการ์ดทีละไฟล์** · แต่ละการ์ดต้องมีอย่างน้อย: ชื่อไฟล์ · path ที่ต้องวางใน GitHub (ระบุชัดว่า root หรือโฟลเดอร์ไหน) · คำอธิบายสั้น ๆ ว่าไฟล์นี้คืออะไร · source ฉบับเต็มในกล่องที่เลือกได้ · ข้อความ **“เลือกโค้ดทั้งหมด → แล้วกด Ctrl + C”** — **ห้ามอ้างว่าปุ่ม Copy คัดลอกให้อัตโนมัติถ้าระบบทำไม่ได้จริง** (preview iframe เขียนคลิปบอร์ดไม่ได้) · Commit message ที่เตรียมไว้ให้ก็อป · ขั้นตอนคลิก GitHub สั้นและชัด
+5. **ทำทีละไฟล์** — เจ้าของส่ง screenshot ให้ตรวจได้ · Claude ต้องตรวจชื่อไฟล์ / path / จุดเริ่มต้น–ท้ายไฟล์ / ความครบถ้วนเท่าที่หลักฐานในภาพและ source รองรับ **ก่อน** บอกให้ commit
+6. **บอกเฉพาะ “ขั้นตอนถัดไป”** — ห้ามเทหลายขั้นพร้อมกันในแชท · Viewer แสดงภาพรวมได้ แต่แชทพาทำทีละขั้น
+7. **Deploy หลัง commit ครบทุกไฟล์แล้วเท่านั้น** · ก่อน deploy ต้องระบุชัด: deploy อะไร / ไม่ deploy อะไร / คำสั่งที่ใช้ / ผลกระทบที่คาดหมาย
+8. **ห้ามขยาย scope เอง** — พบปัญหานอกขอบเขต → STOP และรายงานก่อน
+9. **มี error หรือสิ่งผิดปกติ → เจ้าของหยุดและส่ง screenshot** · ห้ามให้เจ้าของเดา แก้ source เอง หรือทดลองหลายวิธีพร้อมกัน
+10. **ไม่ใช้การดาวน์โหลด ZIP/JS ลง Windows เป็นค่าเริ่มต้น** หาก Viewer + GitHub Web ส่งมอบได้ (Windows Defender บล็อก .js/.zip เป็น false positive ตั้งแต่ 18 ก.ย. 2569 — ไฟล์ .md ยังผ่าน) · ถ้าจำเป็นต้องมีไฟล์จริง ให้แนบเป็น `.txt` คู่ไว้
+11. **Codespace ใช้เฉพาะขั้นที่จำเป็นจริง เช่น deploy** — ไม่ใช้ Codespace ทำสิ่งที่ GitHub Web + Viewer ทำได้ง่ายกว่า
+12. **ห้ามเปลี่ยน workflow เอง** — เสนอวิธีที่ง่าย/ปลอดภัยกว่าได้ แต่ต้องได้รับการยืนยันจากเจ้าของก่อน
+
+**การแบ่งบทบาทหน้าจอ**: Viewer ทางขวา = คู่มือปฏิบัติงานของเจ้าของ · แชทด้านซ้าย = Claude วิเคราะห์ ตรวจ และบอกขั้นตอนถัดไป · ทั้งสองส่วนต้องทำงานคู่กันเสมอ
+
+**กติกาเพิ่มเติม (ยืนยันโดย Product Owner 18 ก.ย. 2569 — รอบขยาย)**
+
+13. **PROJECT EDIT IS NOT DELIVERY** — การที่ Claude แก้ไฟล์ใน Project ของ Claude **ไม่ได้** หมายความว่า GitHub ถูกแก้แล้ว · ถ้าไฟล์นั้นเป็นไฟล์ที่ต้องอยู่ใน GitHub งานนั้นมีสถานะ **"WAITING FOR DELIVERY"** จนกว่าการเปลี่ยนแปลงจะเข้า GitHub สำเร็จ · ห้ามรายงานว่า "เสร็จแล้ว" ก่อนถึงจุดนั้น
+14. **LIVE VIEWER / NEXT ACTION** — ทุกครั้งที่ Claude ทำงานเสร็จและมีสิ่งที่เจ้าของต้องทำต่อ **Viewer ด้านขวาต้องอัปเดตทันที** ห้ามรอให้เจ้าของถามว่า "ต้องทำอะไรต่อ" · Viewer = Dashboard ของงานปัจจุบัน แสดงลำดับ 1, 2, 3… ชัดเจน · แต่ละขั้นต้องแสดง: ชื่องาน/ชื่อไฟล์ · สถานะ (**DONE / CURRENT / WAIT / STOP**) · สิ่งที่ Claude ทำเสร็จแล้ว · สิ่งที่เจ้าของต้องทำ · GitHub path (ถ้ามี) · Commit message (ถ้าต้อง commit) · ขั้นต่อไป · สิ่งที่ยังห้ามทำ (เช่น DO NOT DEPLOY)
+15. **การ์ดส่งมอบเกิดทันทีที่มีไฟล์ใหม่/ไฟล์ที่ถูกแก้ซึ่งต้องขึ้น GitHub** — การ์ดต้องมี: ชื่อไฟล์ · GitHub path · เนื้อหาฉบับเต็มพร้อมใช้ · "เลือกโค้ดทั้งหมด → แล้วกด Ctrl + C" · Commit message พร้อมก็อป · ขั้นตอน GitHub แบบสั้น · **เจ้าของต้องไม่ต้องถามอีกว่า** "ไฟล์อยู่ไหน / ต้องก็อปอะไร / วางตรงไหน / ทำอะไรก่อนหลัง"
+16. **บทบาทสองหน้าจอ** — LEFT CHAT = Claude วิเคราะห์ ทำงาน ตรวจ พูดคุย · RIGHT VIEWER = Operational Dashboard แสดงสถานะจริงและลำดับปฏิบัติงานตลอดเวลา · **สถานะงานเปลี่ยน → Viewer ต้องเปลี่ยนตาม**
+
+**วงจรการทำงานที่ล็อกไว้**: Claude ทำงาน → Viewer อัปเดต → เจ้าของเห็นลำดับ → เจ้าของทำตาม → Claude ตรวจ → Viewer ขยับสถานะต่อ
+
+**Viewer หลักของโปรเจกต์ = `Copy Code to GitHub.dc.html`** — **reuse ไฟล์เดิมเสมอ** (เขียนทับเนื้อการ์ด/ลำดับขั้นต่อรอบงาน) · ห้ามสร้างไฟล์ Viewer ใหม่ต่อรอบ เพราะโปรเจกต์เคยใหญ่เกินจนเซฟไม่ได้
+
+**ข้อเสนอที่ Product Owner ปฏิเสธ (18 ก.ย. 2569)**: การให้เจ้าของตรวจจำนวนบรรทัดรวมของทุกไฟล์บน GitHub ด้วยมือหลัง commit — **ไม่รับเป็นขั้นตอนประจำ** เพราะเพิ่มภาระเจ้าของ · การตรวจความถูกต้องเป็นหน้าที่ของ Claude/ระบบให้มากที่สุด · ขอหลักฐานเพิ่มจากเจ้าของได้เฉพาะกรณีเสี่ยงเฉพาะเรื่อง
+
+### §29.1 สถานะ ณ วันที่ล็อก (18 ก.ย. 2569)
+
+`functions/index.js` และ `functions/draft-completeness.js` — **วางและ commit ขึ้น `main` แล้ว** ตาม workflow นี้ (ตรวจยืนยันร่วมกันจาก screenshot: index.js จบบรรทัด 2346 `);` ตรงกับ source 2347 บรรทัด · draft-completeness.js จบบรรทัด 196 `};` ตรงกับ source 197 บรรทัด) · **ยังไม่ deploy**
+
+### §29.2 ขอบเขต deploy ที่ตกลงไว้สำหรับ §28.1 Phase 2A-1
+
+```
+firebase deploy --only functions:receptionTurn,functions:updatePropertyDraft
+```
+
+**ห้ามใช้ `firebase deploy --only functions` ทั้งชุด** เว้นแต่มีเหตุผลใหม่และตรวจร่วมกันก่อน — (หมายเหตุ: คำแนะนำก่อนหน้านี้ในแชทที่ให้ deploy ทั้งชุด **ถูกยกเลิกแล้ว** ด้วยข้อนี้)
+
+**ยังไม่เริ่ม**: Deploy · Phase 2A-2 · การแก้ source เพิ่ม
