@@ -2126,7 +2126,9 @@ Phase 3 multi-property/Submission Groups · Phase 4 supplements/post-submit guar
 
 ### §29.1 สถานะ ณ วันที่ล็อก (18 ก.ย. 2569)
 
-`functions/index.js` และ `functions/draft-completeness.js` — **วางและ commit ขึ้น `main` แล้ว** ตาม workflow นี้ (ตรวจยืนยันร่วมกันจาก screenshot: index.js จบบรรทัด 2346 `);` ตรงกับ source 2347 บรรทัด · draft-completeness.js จบบรรทัด 196 `};` ตรงกับ source 197 บรรทัด) · **ยังไม่ deploy**
+`functions/index.js` และ `functions/draft-completeness.js` — **วางและ commit ขึ้น `main` แล้ว** ตาม workflow นี้ (ตรวจยืนยันร่วมกันจาก screenshot: index.js จบบรรทัด 2346 `);` ตรงกับ source 2347 บรรทัด · draft-completeness.js จบบรรทัด 196 `};` ตรงกับ source 197 บรรทัด) · `BLUEPRINT.md` + `HANDOFF-NEXT-CHAT.md` commit ขึ้น main แล้วเช่นกัน (pages build #691, #692 สำเร็จ)
+
+**✅ DEPLOYED — §28.1 Phase 2A-1 deploy สำเร็จ 18 ก.ย. 2569 (~05:20 น.)**: รันใน Codespace หลัง `git pull` (fast-forward e211aa7..328059b, 4 files changed) · คำสั่งที่ใช้ตามขอบเขต §29.2 เป๊ะ · ผลลัพธ์: `functions[receptionTurn(asia-southeast1)] Successful update operation` · `functions[updatePropertyDraft(asia-southeast1)] Successful update operation` · `✔ Deploy complete!` · ไม่มี error · **ไม่ได้ deploy** ฟังก์ชันอื่น / hosting / firestore.rules · หมายเหตุ: Codespace ที่ใช้เป็นตัวเก่า (อายุ 2 เดือน) — **รอบต่อไปต้อง `git pull` ก่อน deploy ทุกครั้ง** ไม่เช่นนั้นจะ deploy โค้ดเก่า (เพิ่มเป็นขั้นบังคับของ §29 ข้อ 7)
 
 ### §29.2 ขอบเขต deploy ที่ตกลงไว้สำหรับ §28.1 Phase 2A-1
 
