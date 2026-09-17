@@ -344,6 +344,8 @@ const RECEPTION_TOOL = {
           "however the customer phrases it. " +
           "Listing a field here is how you say \"they mentioned it but I " +
           "must not record a value\". " +
+          "ALWAYS return this array. Return [] when there is nothing to report. " +
+          "Do not omit the array. " +
           "It is NOT ambiguity merely because several numbers appear in the " +
           "sentence. If the customer clearly settles on ONE value - correcting " +
           "an earlier figure, describing a change over time, or choosing " +
@@ -379,10 +381,25 @@ const RECEPTION_TOOL = {
           "mentioned it in your reply - mentioning a value never makes it a " +
           "fact the customer gave you. List a field here only when the " +
           "customer's CURRENT message itself states, selects or confirms ONE " +
-          "authoritative value for it. Max 10.",
+          "authoritative value for it. " +
+          "ALWAYS return this array. Return [] when there is nothing to report. " +
+          "Do not omit the array. Max 10.",
       },
     },
-    required: ["reply", "stage", "primaryIntent"],
+    // C4.3 Phase 1 fix #2 - statedFields and unclearFields are STRUCTURALLY
+    // REQUIRED, not merely described.
+    //
+    // Production: after the multi-value ambiguity wording landed, the model
+    // correctly stopped picking one of "3 or 4 bedrooms" - but then reported
+    // NOTHING at all (propertyFields {} and unclearFields omitted entirely),
+    // explaining the ambiguity in `reply` instead. The draft block is gated on
+    // (propertyFields.length || unclearFields.length), so it never ran and the
+    // needsConfirmation flag was never raised.
+    //
+    // Requiring the ARRAYS - never their contents - turns "you may report
+    // ambiguity" into "you must state whether there is any". [] remains the
+    // correct answer for a clear message.
+    required: ["reply", "stage", "primaryIntent", "statedFields", "unclearFields"],
   },
 };
 
@@ -767,7 +784,18 @@ exports.receptionTurn = onCall(
       replyLen: (out.reply || "").length,
       hasRequirements: !!out.requirementsSummary,
       hasName: !!out.customerName, hasContact: !!out.contact,
-      pbKind: !!out.propertyBasics.kind, pbArea: !!out.propertyBasics.area, pbScale: !!out.propertyBasics.scale });
+      pbKind: !!out.propertyBasics.kind, pbArea: !!out.propertyBasics.area, pbScale: !!out.propertyBasics.scale,
+      // C4.3 Phase 1 fix #2 - extraction diagnostics. FIELD NAMES ONLY.
+      // Investigation #2 cost a full round because nothing recorded what the
+      // model had returned for these three, so "the model omitted it" could
+      // not be separated from "the server dropped it". Canonical field names
+      // are not customer content; the PRIVACY rule above still holds - no
+      // values, no message text, no name/phone/price/size, no raw payload.
+      // Read from the NORMALISED output, so the log describes what the server
+      // actually processed rather than what arrived.
+      pfKeys: Object.keys(out.propertyFields),
+      statedKeys: out.statedFields,
+      unclearKeys: out.unclearFields });
 
     const db = admin.firestore();
     const conversationId = "reception__" + visitorId;
