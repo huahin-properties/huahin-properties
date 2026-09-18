@@ -160,6 +160,23 @@ export async function receptionTurn({ system, messages, customerText, seedMessag
   return data;
 }
 
+// C4.3 Phase 2A-2 — READ-ONLY fetch of the visitor's own property draft.
+//
+// Used only to restore the Progress indicator after a page reload. Sends NO
+// arguments: the server derives the draft from the caller's uid, so this
+// cannot be pointed at anyone else's draft.
+//
+// The returned `completeness` object is passed through VERBATIM. This module
+// must never compute, round, re-derive or patch a percentage: the deterministic
+// standard lives server-side in functions/draft-completeness.js and exists in
+// exactly one place. Returns null completeness when the visitor has no draft.
+export async function getPropertyDraft() {
+  await getVisitorId(); // callable requires an authenticated caller
+  const fn = (await functionsAsync()).httpsCallable("getPropertyDraft");
+  const { data } = await fn({});
+  return data; // { exists, fields, completeness }
+}
+
 // Idempotent resume: returns the visitor's existing Reception conversation
 // or null. A single doc `get` by deterministic id — never a collection
 // query/scan. Returns null (rather than throwing) when the doc does not
