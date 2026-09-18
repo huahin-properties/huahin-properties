@@ -865,3 +865,109 @@ export async function getEffectiveProperties(mod) {
     return mod.PROPERTIES;
   }
 }
+
+// ─────────────────────────────────────────────────────────────────
+// C4.3 Phase 2A-3 — display labels for the canonical option sets.
+// The ids live in functions/property-options.js (the single definition);
+// THIS file only ever carries human labels. Never add an id here that does
+// not exist there, and never redefine an existing set — append only.
+//
+// TYPES above is intentionally left untouched: it drives the PUBLIC search
+// filters. Note that it lists 5 types while the property schema and the
+// staff form support 6 — TOWNHOUSE_LABEL below supplies the missing label so
+// a townhouse can be displayed correctly without changing the public filter
+// list (that decision is not part of Phase 2A-3).
+// ─────────────────────────────────────────────────────────────────
+
+export const TOWNHOUSE_LABEL = { en: "Townhouse", th: "ทาวน์เฮาส์", ru: "Таунхаус", zh: "联排别墅", de: "Reihenhaus", no: "Rekkehus", fr: "Maison de ville", it: "Casa a schiera" };
+
+export const COMMERCIAL_SUBTYPE_LABELS = {
+  shophouse: { en: "Shophouse", th: "อาคารพาณิชย์ / ตึกแถว", ru: "Шопхаус", zh: "商铺楼", de: "Ladenhaus", no: "Butikkhus", fr: "Maison de commerce", it: "Casa-negozio" },
+  retail: { en: "Retail Unit", th: "ร้านค้า", ru: "Торговое помещение", zh: "零售店面", de: "Ladenfläche", no: "Butikklokale", fr: "Local commercial", it: "Locale commerciale" },
+  office: { en: "Office", th: "สำนักงาน", ru: "Офис", zh: "办公室", de: "Büro", no: "Kontor", fr: "Bureau", it: "Ufficio" },
+  warehouse: { en: "Warehouse", th: "โกดัง / คลังสินค้า", ru: "Склад", zh: "仓库", de: "Lagerhalle", no: "Lager", fr: "Entrepôt", it: "Magazzino" },
+  hotel_resort: { en: "Hotel / Resort", th: "โรงแรม / รีสอร์ท", ru: "Отель / Курорт", zh: "酒店 / 度假村", de: "Hotel / Resort", no: "Hotell / Resort", fr: "Hôtel / Resort", it: "Hotel / Resort" },
+  other: { en: "Other Commercial", th: "เชิงพาณิชย์อื่น ๆ", ru: "Другая коммерция", zh: "其他商业", de: "Sonstiges Gewerbe", no: "Annen næring", fr: "Autre commercial", it: "Altro commerciale" },
+};
+
+export const PROJECT_STATUS_LABELS = {
+  in_project: { en: "In a project", th: "อยู่ในโครงการ", ru: "В проекте", zh: "项目内", de: "In einem Projekt", no: "I et prosjekt", fr: "Dans un projet", it: "In un progetto" },
+  outside_project: { en: "Outside a project", th: "นอกโครงการ", ru: "Вне проекта", zh: "项目外", de: "Außerhalb eines Projekts", no: "Utenfor prosjekt", fr: "Hors projet", it: "Fuori progetto" },
+  unknown: { en: "Not sure", th: "ไม่ทราบ", ru: "Не знаю", zh: "不确定", de: "Nicht sicher", no: "Vet ikke", fr: "Je ne sais pas", it: "Non so" },
+};
+
+export const TITLE_DEED_LABELS = {
+  chanote: { en: "Chanote (Nor Sor 4 Jor)", th: "โฉนดครุฑแดง (นส.4จ)", ru: "Чанот (Нор Сор 4)", zh: "红鹰地契 (Chanote)", de: "Chanote (Nor Sor 4)", no: "Chanote (Nor Sor 4)", fr: "Chanote (Nor Sor 4)", it: "Chanote (Nor Sor 4)" },
+  nor_sor_3_gor: { en: "Nor Sor 3 Gor", th: "นส.3ก", ru: "Нор Сор 3 Гор", zh: "Nor Sor 3 Gor 地权", de: "Nor Sor 3 Gor", no: "Nor Sor 3 Gor", fr: "Nor Sor 3 Gor", it: "Nor Sor 3 Gor" },
+  nor_sor_3: { en: "Nor Sor 3", th: "นส.3", ru: "Нор Сор 3", zh: "Nor Sor 3 地权", de: "Nor Sor 3", no: "Nor Sor 3", fr: "Nor Sor 3", it: "Nor Sor 3" },
+  por_bor_tor_5: { en: "Por Bor Tor 5", th: "ภบท.5", ru: "Пор Бор Тор 5", zh: "Por Bor Tor 5 地权", de: "Por Bor Tor 5", no: "Por Bor Tor 5", fr: "Por Bor Tor 5", it: "Por Bor Tor 5" },
+  leasehold: { en: "Leasehold", th: "เช่าระยะยาว (Leasehold)", ru: "Долгосрочная аренда", zh: "长期租约", de: "Pachtrecht", no: "Leiekontrakt", fr: "Bail emphytéotique", it: "Diritto di superficie" },
+  company: { en: "Held via Thai company", th: "ถือผ่านบริษัทไทย", ru: "Через тайскую компанию", zh: "通过泰国公司持有", de: "Über thailändische Firma", no: "Via thailandsk selskap", fr: "Via société thaïe", it: "Tramite società thailandese" },
+  other: { en: "Other", th: "อื่น ๆ", ru: "Другое", zh: "其他", de: "Sonstiges", no: "Annet", fr: "Autre", it: "Altro" },
+  unknown: { en: "Not sure", th: "ไม่ทราบ", ru: "Не знаю", zh: "不确定", de: "Nicht sicher", no: "Vet ikke", fr: "Je ne sais pas", it: "Non so" },
+};
+
+export const POOL_STATUS_LABELS = {
+  has_pool: { en: "Has a pool", th: "มีสระว่ายน้ำ", ru: "Есть бассейн", zh: "有泳池", de: "Mit Pool", no: "Har basseng", fr: "Avec piscine", it: "Con piscina" },
+  no_pool: { en: "No pool", th: "ไม่มีสระว่ายน้ำ", ru: "Бассейна нет", zh: "无泳池", de: "Kein Pool", no: "Ingen basseng", fr: "Sans piscine", it: "Senza piscina" },
+  unknown: { en: "Not sure", th: "ไม่ทราบ", ru: "Не знаю", zh: "不确定", de: "Nicht sicher", no: "Vet ikke", fr: "Je ne sais pas", it: "Non so" },
+};
+
+export const FURNISHING_LABELS = {
+  fully: { en: "Fully furnished", th: "เฟอร์นิเจอร์ครบ พร้อมอยู่", ru: "Полностью с мебелью", zh: "全套家具", de: "Voll möbliert", no: "Fullt møblert", fr: "Entièrement meublé", it: "Completamente arredato" },
+  partly: { en: "Partly furnished", th: "เฟอร์นิเจอร์บางส่วน", ru: "Частично с мебелью", zh: "部分家具", de: "Teilmöbliert", no: "Delvis møblert", fr: "Partiellement meublé", it: "Parzialmente arredato" },
+  unfurnished: { en: "Unfurnished", th: "ไม่มีเฟอร์นิเจอร์", ru: "Без мебели", zh: "无家具", de: "Unmöbliert", no: "Umøblert", fr: "Non meublé", it: "Non arredato" },
+  unknown: { en: "Not sure", th: "ไม่ทราบ", ru: "Не знаю", zh: "不确定", de: "Nicht sicher", no: "Vet ikke", fr: "Je ne sais pas", it: "Non so" },
+};
+
+export const KITCHEN_LABELS = {
+  thai_kitchen: { en: "Thai kitchen", th: "ครัวไทย", ru: "Тайская кухня", zh: "泰式厨房", de: "Thai-Küche", no: "Thaikjøkken", fr: "Cuisine thaïe", it: "Cucina thai" },
+  european_kitchen: { en: "European kitchen", th: "ครัวยุโรป", ru: "Европейская кухня", zh: "欧式厨房", de: "Europäische Küche", no: "Europeisk kjøkken", fr: "Cuisine européenne", it: "Cucina europea" },
+  no_separate_kitchen: { en: "No separate kitchen", th: "ไม่มีครัวแยก", ru: "Без отдельной кухни", zh: "无独立厨房", de: "Keine separate Küche", no: "Ingen eget kjøkken", fr: "Pas de cuisine séparée", it: "Nessuna cucina separata" },
+  unknown: { en: "Not sure", th: "ไม่ทราบ", ru: "Не знаю", zh: "不确定", de: "Nicht sicher", no: "Vet ikke", fr: "Je ne sais pas", it: "Non so" },
+};
+
+export const UTILITIES_LABELS = {
+  available: { en: "Water & power connected", th: "น้ำ-ไฟเข้าถึงแล้ว", ru: "Вода и свет подключены", zh: "水电已接通", de: "Wasser & Strom vorhanden", no: "Vann og strøm tilkoblet", fr: "Eau et électricité raccordées", it: "Acqua e luce allacciate" },
+  partial: { en: "Partly connected", th: "น้ำ-ไฟเข้าถึงบางส่วน", ru: "Подключено частично", zh: "部分接通", de: "Teilweise vorhanden", no: "Delvis tilkoblet", fr: "Partiellement raccordé", it: "Parzialmente allacciate" },
+  none: { en: "Not connected yet", th: "ยังไม่มีน้ำ-ไฟ", ru: "Пока не подключено", zh: "尚未接通", de: "Noch nicht vorhanden", no: "Ikke tilkoblet", fr: "Pas encore raccordé", it: "Non ancora allacciate" },
+  unknown: { en: "Not sure", th: "ไม่ทราบ", ru: "Не знаю", zh: "不确定", de: "Nicht sicher", no: "Vet ikke", fr: "Je ne sais pas", it: "Non so" },
+};
+
+export const LAND_CONDITION_LABELS = {
+  filled: { en: "Filled, build-ready", th: "ถมแล้ว พร้อมปลูกสร้าง", ru: "Отсыпан, готов к стройке", zh: "已填土可建", de: "Aufgefüllt, baureif", no: "Oppfylt, byggeklar", fr: "Remblayé, prêt à bâtir", it: "Riempito, pronto" },
+  not_filled: { en: "Not filled", th: "ยังไม่ถม", ru: "Не отсыпан", zh: "未填土", de: "Nicht aufgefüllt", no: "Ikke oppfylt", fr: "Non remblayé", it: "Non riempito" },
+  unknown: { en: "Not sure", th: "ไม่ทราบ", ru: "Не знаю", zh: "不确定", de: "Nicht sicher", no: "Vet ikke", fr: "Je ne sais pas", it: "Non so" },
+};
+
+export const ELECTRICAL_PHASE_LABELS = {
+  "1phase": { en: "Single phase", th: "ไฟ 1 เฟส", ru: "Однофазное", zh: "单相电", de: "Einphasig", no: "Enfas", fr: "Monophasé", it: "Monofase" },
+  "3phase": { en: "Three phase", th: "ไฟ 3 เฟส", ru: "Трёхфазное", zh: "三相电", de: "Dreiphasig", no: "Trefas", fr: "Triphasé", it: "Trifase" },
+  unknown: { en: "Not sure", th: "ไม่ทราบ", ru: "Не знаю", zh: "不确定", de: "Nicht sicher", no: "Vet ikke", fr: "Je ne sais pas", it: "Non so" },
+};
+
+// Enrichment only in this phase: stored and labelled, no UI, never counted.
+export const VIEW_LABELS = {
+  sea_view: { en: "Sea view", th: "วิวทะเล", ru: "Вид на море", zh: "海景", de: "Meerblick", no: "Sjøutsikt", fr: "Vue mer", it: "Vista mare" },
+  mountain_view: { en: "Mountain view", th: "วิวภูเขา", ru: "Вид на горы", zh: "山景", de: "Bergblick", no: "Fjellutsikt", fr: "Vue montagne", it: "Vista montagna" },
+  golf_view: { en: "Golf course view", th: "วิวสนามกอล์ฟ", ru: "Вид на гольф-поле", zh: "高尔夫球场景", de: "Golfplatzblick", no: "Golfbaneutsikt", fr: "Vue sur golf", it: "Vista golf" },
+  lake_view: { en: "Lake view", th: "วิวทะเลสาบ", ru: "Вид на озеро", zh: "湖景", de: "Seeblick", no: "Innsjøutsikt", fr: "Vue lac", it: "Vista lago" },
+  garden_view: { en: "Garden view", th: "วิวสวน", ru: "Вид на сад", zh: "花园景", de: "Gartenblick", no: "Hageutsikt", fr: "Vue jardin", it: "Vista giardino" },
+  city_view: { en: "City view", th: "วิวเมือง", ru: "Вид на город", zh: "城市景", de: "Stadtblick", no: "Byutsikt", fr: "Vue ville", it: "Vista città" },
+  none: { en: "No particular view", th: "ไม่มีวิวเฉพาะ", ru: "Без особого вида", zh: "无特别景观", de: "Kein besonderer Ausblick", no: "Ingen særlig utsikt", fr: "Pas de vue particulière", it: "Nessuna vista particolare" },
+  unknown: { en: "Not sure", th: "ไม่ทราบ", ru: "Не знаю", zh: "不确定", de: "Nicht sicher", no: "Vet ikke", fr: "Je ne sais pas", it: "Non so" },
+};
+
+export const FACILITIES_LABELS = {
+  communal_pool: { en: "Communal pool", th: "สระว่ายน้ำส่วนกลาง", ru: "Общий бассейн", zh: "共用泳池", de: "Gemeinschaftspool", no: "Fellesbasseng", fr: "Piscine commune", it: "Piscina comune" },
+  gym: { en: "Gym", th: "ฟิตเนส", ru: "Спортзал", zh: "健身房", de: "Fitnessraum", no: "Treningsrom", fr: "Salle de sport", it: "Palestra" },
+  security_24h: { en: "24h security", th: "รักษาความปลอดภัย 24 ชม.", ru: "Охрана 24 ч", zh: "24小时保安", de: "24h-Sicherheit", no: "Vakt 24t", fr: "Sécurité 24h", it: "Sicurezza 24h" },
+  gated_community: { en: "Gated community", th: "หมู่บ้านปิด", ru: "Закрытый посёлок", zh: "封闭社区", de: "Bewachte Siedlung", no: "Lukket boligområde", fr: "Résidence fermée", it: "Residence recintato" },
+  parking_building: { en: "Building parking", th: "ที่จอดรถในอาคาร", ru: "Парковка в здании", zh: "楼内停车", de: "Parken im Gebäude", no: "Parkering i bygg", fr: "Parking immeuble", it: "Parcheggio interno" },
+  elevator: { en: "Elevator", th: "ลิฟต์", ru: "Лифт", zh: "电梯", de: "Aufzug", no: "Heis", fr: "Ascenseur", it: "Ascensore" },
+  garden: { en: "Communal garden", th: "สวนส่วนกลาง", ru: "Общий сад", zh: "共用花园", de: "Gemeinschaftsgarten", no: "Fellesshage", fr: "Jardin commun", it: "Giardino comune" },
+  playground: { en: "Playground", th: "สนามเด็กเล่น", ru: "Детская площадка", zh: "儿童游乐场", de: "Spielplatz", no: "Lekeplass", fr: "Aire de jeux", it: "Parco giochi" },
+  clubhouse: { en: "Clubhouse", th: "คลับเฮาส์", ru: "Клубный дом", zh: "会所", de: "Clubhaus", no: "Klubbhus", fr: "Club house", it: "Club house" },
+  none: { en: "None", th: "ไม่มี", ru: "Нет", zh: "无", de: "Keine", no: "Ingen", fr: "Aucun", it: "Nessuno" },
+  unknown: { en: "Not sure", th: "ไม่ทราบ", ru: "Не знаю", zh: "不确定", de: "Nicht sicher", no: "Vet ikke", fr: "Je ne sais pas", it: "Non so" },
+};
