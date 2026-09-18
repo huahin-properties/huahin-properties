@@ -2167,3 +2167,55 @@ firebase deploy --only functions:receptionTurn,functions:updatePropertyDraft
 5. ระหว่างทดสอบต้องปิด "โหมดปิดปรับปรุงเว็บไซต์" (สีเขียว) เพราะ Incognito จะเห็นหน้าปรับปรุงและเข้าแชทไม่ได้ — **ต้องกลับไปเปิดโหมดปิด (สีแดง) หลังทดสอบเสร็จ**
 
 **ยังไม่เริ่ม**: Phase 2A-2 · การแก้ source เพิ่ม
+
+### §29.4 MAINTENANCE / PUBLIC TEST MODE (🔒 LOCKED, 18 ก.ย. 2569, Product Owner Approved)
+
+**เหตุผล**: จากการทดสอบจริงพบว่าเมื่อเว็บอยู่ในโหมดปิดปรับปรุง (สีแดง) การทดสอบเส้นทางลูกค้าอาจให้พฤติกรรมไม่สะอาด/ไม่เหมือนการใช้งานจริง — เจ้าของต้องไม่ต้องจำเรื่องนี้เอง
+
+1. **สีแดง = Maintenance ON / Public Hidden** — สถานะปกติระหว่างพัฒนา · เมื่อยังไม่ต้องทดสอบในฐานะลูกค้าทั่วไป ให้คงสีแดง
+2. **สีเขียว = Public Open** — ก่อน Production Test ที่ต้องเข้าเว็บแบบลูกค้าทั่วไป / Incognito / anonymous visitor **ต้องมีขั้นเปิดเป็นสีเขียวก่อนเริ่มทดสอบ**
+3. **ห้ามเริ่มวิเคราะห์ bug ของ Customer Production Flow ขณะเว็บเป็นสีแดง** ถ้าการทดสอบนั้นต้องการ public customer flow — ต้องตรวจ Maintenance/Public state ก่อนเสมอ
+4. **Viewer ต้องมีขั้นนี้เป็น Step จริง** ไม่ใช่เขียนแค่ในแชท: “เปิดเว็บไซต์สำหรับการทดสอบ — เปลี่ยนเป็นสีเขียว” พร้อมเส้นทาง Admin → Site Content → การ์ดโหมดปิดปรับปรุงเว็บไซต์ · PASS เมื่อเห็นสถานะสีเขียว “เปิดให้ทุกคนดูได้แล้ว”
+5. **หลัง Production Test ต้องมี Step สุดท้าย** “ปิดเว็บไซต์กลับ — เปลี่ยนเป็นสีแดง” · PASS เมื่อเห็น “ปิดกั้นอยู่ — เห็นเฉพาะคุณเท่านั้น”
+6. การเปิดสีเขียวเป็น **ช่วงทดสอบเท่านั้น** ไม่ได้หมายความว่าเว็บพร้อมเปิดตัวสาธารณะถาวร
+7. **Claude เตือนทั้งสองจังหวะ: OPEN → TEST → CLOSE** เจ้าของไม่ต้องจำเอง
+8. ถ้า Production Test มีอาการผิดปกติ **สิ่งแรกที่ต้องตรวจคือ Public/Maintenance state** ก่อนวิเคราะห์ source หรือเสนอแก้โค้ด
+
+### §29.5 C4.3 Phase 2A-2 — ขอบเขตที่อนุมัติแล้ว (18 ก.ย. 2569)
+
+**เป้าหมาย**: Persistent Customer Property Progress — แถบ “ข้อมูลทรัพย์สินของคุณ XX%” ค้างด้านบนแชทลูกค้า
+
+**สิ่งที่ตรวจพบจาก source (ยืนยันจากโค้ดจริง ไม่ใช่การสันนิษฐาน)**: `propertyDrafts/draft__<uid>` เก็บเพียง `ownerUid, conversationId, status, createdAt, updatedAt, fields` — **ไม่เก็บ completeness/percent** (คำนวณสดใน transaction แล้วส่งกลับใน response เท่านั้น) · ดังนั้นการให้เบราว์เซอร์อ่าน Firestore ตรงจะเหลือแค่ `fields` และต้องคำนวณเอง = ขัดกฎ single deterministic definition
+
+**วิธีที่อนุมัติ (เล็กและปลอดภัยที่สุด)**: เพิ่ม callable อ่านอย่างเดียว `getPropertyDraft` — รับเฉพาะตัวตนผู้เรียก (ไม่รับ id) → อ่าน draft ของ uid → เรียก `evaluateDraftCompleteness` **ตัวเดิม** → ส่ง `fields` + `completeness` กลับ · เบราว์เซอร์แสดงผลดิบ ห้ามคำนวณ · คือ seam ที่ §28.1 เว้นไว้
+
+**ไฟล์ที่แก้ (3)**: `functions/index.js` (เพิ่ม `getPropertyDraft` เท่านั้น) · `firebase-client.js` (เรียก callable) · `ContactRail.dc.html` (แถบ Progress + คีย์ภาษาในพจนานุกรมเดิม `I18N_RAIL`/`I18N` 8 ภาษา)
+**ไม่แตะ**: `functions/draft-completeness.js` · `firestore.rules` · `data.js` · `intake-workflow.js` · receptionTurn / updatePropertyDraft / createCaseFromConversation / receptionCaseGate / `humanHandlingStartedAt` · C4.2a/C4.2b · ไฟล์แอดมิน/สตาฟ
+**ทางเลือกที่ปฏิเสธ**: เก็บ snapshot เปอร์เซ็นต์ลง draft (สร้างข้อมูลซ้ำที่ค้างเก่าได้) · ไม่ทำ persistence เลย (ขัดเจตนา Persistent Property Progress)
+**ขอบเขต deploy ของรอบนี้**: `firebase deploy --only functions:getPropertyDraft` เท่านั้น
+**ไม่เริ่ม**: Phase 2B (Workspace UI) · 2C (two-way sync) · 2D (Submit flow)
+
+### §29.6 C4.3 Phase 2A-2 — ผลการทดสอบโปรดักชัน (18 ก.ย. 2569, 09:40–10:20 น.)
+
+**Deploy**: `firebase deploy --only functions:getPropertyDraft` → `functions[getPropertyDraft(asia-southeast1)] Successful create operation` · `Deploy complete!` · ไม่มีฟังก์ชันอื่นถูกแตะ · ก่อน deploy ทำ `git pull` ตามกฎ (fast-forward 328059b..3977583, 5 files changed)
+
+**ไฟล์ที่ commit ขึ้น main**: `functions/index.js` (2402 บรรทัด) · `conversation-firestore.js` · `ContactRail.dc.html` (ตามด้วยรอบแก้สีแถบให้เด่นขึ้นอีก 1 commit)
+
+| ข้อ | ทดสอบ | ผล |
+|---|---|---|
+| 10.1 | คำถามทั่วไป | PASS — ไม่มีแถบ Progress · `persisted:false` · ไม่มี `draftCompleteness` |
+| 10.2 | บอกข้อมูลทรัพย์ (house) | PASS — แถบขึ้น **“ข้อมูลทรัพย์สินของคุณ 63%”** ตรงกับ `draftCompleteness.percent: 63` เป๊ะ · ข้อความกำกับ “ความครบถ้วนของข้อมูลเท่านั้น — ไม่ใช่การอนุมัติหรือการเผยแพร่” แสดงถูกต้อง |
+| 10.3 | รีเฟรชหน้า (F5) | **PASS — จุดสำคัญที่สุดของเฟสนี้**: เปิดแชทใหม่โดยไม่พิมพ์อะไร แถบยังแสดง 63% = `getPropertyDraft` ทำงานจริง และเปอร์เซ็นต์มาจาก evaluator เดิมฝั่งเซิร์ฟเวอร์ |
+| 10.4 | 100% ต้องไม่สร้าง Case | **BLOCKED (ไม่ใช่ FAIL)** — ทดสอบต่อไม่ได้เพราะ **เครดิต Anthropic API หมด** · log ยืนยัน: `event:"model_error"` + “Your credit balance is too low to access the Anthropic API” · receptionTurn คืน 500 อย่างถูกต้องและบันทึกสาเหตุครบ |
+
+**ข้อสังเกตเชิงบวกจากเหตุเครดิตหมด**: ระบบ diagnostics ของ C4.2b Step 1 ทำงานได้จริงในโปรดักชัน — สาเหตุที่แท้จริงหาได้จาก log ภายในไม่กี่นาที โดยไม่ต้องเดาหรือแก้โค้ด (ยืนยันคุณค่าของกฎ §29.4 ข้อ 8: ตรวจสภาพแวดล้อมก่อนโทษโค้ด)
+
+**วิธีดู log ของ Cloud Functions 2nd Gen (บันทึกไว้ใช้ครั้งต่อไป)**: ตัวกรอง `resource.labels.function_name` **ใช้ไม่ได้** — ต้องใช้
+```
+resource.type="cloud_run_revision" resource.labels.service_name="receptionturn"
+```
+(ชื่อ service เป็นตัวพิมพ์เล็กทั้งหมด) และตั้ง severity เป็น All severities เพราะ `rxLog` เขียนที่ระดับ INFO/DEFAULT
+
+**Maintenance state**: เปิดเขียวก่อนทดสอบ และ **ปิดกลับเป็นแดงแล้ว** ตามกฎ §29.4 (OPEN → TEST → CLOSE ครบวงจร)
+
+**งานค้างของรอบนี้ (ไม่บล็อกการปิดรอบ)**: 1) เติมเครดิต Anthropic แล้วทดสอบข้อ 10.4 ให้จบ · 2) คำเตือน Node.js 20 จะหมดอายุ 30 ต.ค. 2569 — ควรวางแผนอัปเกรด runtime เป็นงานแยก
