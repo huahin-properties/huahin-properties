@@ -2219,3 +2219,287 @@ resource.type="cloud_run_revision" resource.labels.service_name="receptionturn"
 **Maintenance state**: เปิดเขียวก่อนทดสอบ และ **ปิดกลับเป็นแดงแล้ว** ตามกฎ §29.4 (OPEN → TEST → CLOSE ครบวงจร)
 
 **งานค้างของรอบนี้ (ไม่บล็อกการปิดรอบ)**: 1) เติมเครดิต Anthropic แล้วทดสอบข้อ 10.4 ให้จบ · 2) คำเตือน Node.js 20 จะหมดอายุ 30 ต.ค. 2569 — ควรวางแผนอัปเกรด runtime เป็นงานแยก
+
+
+---
+
+# §30 — C4.3 PROPERTY SCHEMA + CUSTOMER JOURNEY (18 ก.ย. 2569)
+
+## 30.1 LOCKED PRODUCT PRINCIPLES (เจ้าของโครงการตัดสินแล้ว)
+1. ONE PROPERTY RECORD · ONE UNIFIED SCHEMA · MULTIPLE CONTRIBUTORS · CONTROLLED PUBLISHING
+2. "100%" ห้ามหมายถึง approved / verified / price verified / staff accepted / ready to publish / published
+3. Submit **ไม่** ต้องรอ 100% — แยก PROPERTY COMPLETENESS ออกจาก SUFFICIENT TO SUBMIT
+4. Handoff gate ห้ามเป็นเปอร์เซ็นต์ — ต้องเป็น Minimum Sufficient Information + **Explicit Submit** โดยลูกค้า
+5. ก่อน Submit ห้ามมีแท็บ "คุยกับเจ้าหน้าที่" เท่ากับ "คุยกับ AI"; หลัง Submit จึงเปิด Human Conversation
+6. Progress ขึ้นได้และลงได้ — ต้องสะท้อนข้อมูลจริง
+7. Completeness มี deterministic definition ฝั่ง server ชุดเดียว · เบราว์เซอร์ห้ามคำนวณเปอร์เซ็นต์
+8. Submit ไม่ freeze record — เจ้าหน้าที่และลูกค้าเติมต่อได้ บน record เดียวกัน
+9. ทุก field ต้องมี provenance (value · source · actor · updatedAt); AI เก่าห้ามทับ human ล่าสุด
+10. Customer vs Staff conflict ห้าม silent overwrite
+11. ห้าม auto-publish / auto-approve / auto-certify price ไม่ว่าเปอร์เซ็นต์เท่าใด
+12. Guarantees เดิมต้องอยู่ครบ: C4.2a permanent handoff · C4.2b explicit-confirmation Case ·
+    Phase 1 server-authoritative draft · source tiers · no browser Firestore writes · server trackPath ·
+    no token reconstruction · C4.3 intake ไม่เขียน humanHandlingStartedAt
+
+## 30.2 สถานะรอบงาน
+- Phase 2A-2: **IMPLEMENTATION EXISTS BUT PRODUCT COMPLETENESS DEFINITION UNDER REVIEW**
+- Test 10.4: **PAUSED FOR PRODUCT / ARCHITECTURE REVIEW** (ไม่ใช่ FAIL)
+- Phase 2B / 2C / 2D: **NOT STARTED**
+- ห้ามประกาศ Phase 2A-2 PRODUCTION PASS จนกว่า Product Review นี้จะถูกตัดสิน
+
+## 30.3 PROPOSED ARCHITECTURE — PENDING OWNER APPROVAL
+ผล Audit ฉบับเต็ม (schema map · completeness map · gap analysis · 4 ชั้นข้อมูล ·
+property-type matrix · customer journey · authority/provenance · pre/post-submit data model ·
+conflict model · progress model · คำตอบ 20 ข้อ · ไฟล์ที่คาดว่าจะต้องแตะ) อยู่ที่
+**`docs/C4.3-PROPERTY-SCHEMA-AUDIT.md`**
+
+ข้อค้นพบหลัก: evaluator `customer_draft_v1` นับ 3–8 field ขณะที่ property record จริงมี ≈ 40 field
+และ `TYPE_EXTRA.commercial = []` ทำให้ ประเภท + ทำเล + ราคา = 3/3 = 100% ตามกฎที่เขียนไว้จริง
+— ถูกตามโค้ด แต่สื่อความหมายเกินจริงต่อลูกค้า
+
+**ยังไม่มีการ implement ข้อเสนอนี้** — ห้ามแก้ evaluator / source / deploy จนเจ้าของอนุมัติ
+
+
+---
+
+# §31 — MASTER PROPERTY INFORMATION STANDARD (Architecture Refinement, 18 ก.ย. 2569)
+
+รอบนี้เป็น **Architecture Refinement เท่านั้น** — ไม่แก้ source · ไม่แก้ evaluator · ไม่ deploy ·
+Phase 2B / 2C / 2D = NOT STARTED · Test 10.4 = PAUSED FOR PRODUCT REVIEW
+
+## 31.1 LOCKED (เจ้าของโครงการตัดสินแล้วในรอบนี้)
+1. สามมิติแยกกันเด็ดขาด: **Minimum Sufficient to Submit ≠ Property Information Completeness ≠
+   Case / Approval / Verification / Publishing Status** — ลูกค้าส่งเรื่องได้ก่อน 100%
+2. นิยาม 100%: “ข้อมูลสำคัญของทรัพย์ประเภทนั้นครบตามมาตรฐาน โดยไม่มีข้อมูลสำคัญที่ยังไม่ทราบหรือรอยืนยัน”
+   — ไม่ใช่กรอกทุก field ในฐานข้อมูล และไม่ใช่ Approved / Verified / Ready to Publish / Live
+3. **ห้ามใช้ ~40 fields ทั้งหมดเป็นตัวหาร** — แบ่งเป็น Minimum Submit · Core · Conditional ·
+   Optional/Enrichment · Internal/Staff-only
+4. วัดกันที่ **information concept** ไม่ใช่การนับ database field · “ไม่มี” = คำตอบที่สมบูรณ์ ·
+   “ไม่เกี่ยวข้อง” ถูกถอดออกจากตัวหาร · Not Applicable ต้องไม่ทำให้ทรัพย์ไปไม่ถึง 100% ตลอดกาล
+5. **ที่ดิน:** road access / road width และ utilities access เป็น Core (ไม่ใช่ enrichment)
+6. **วิลล่า:** ไม่บังคับ poolSize · ใช้ pool status เป็น concept แล้วเปิดรายละเอียดแบบมีเงื่อนไข
+7. **คอนโด:** ไม่ใช้ land fields แบบบ้าน (Not Applicable)
+8. **พาณิชย์:** อนุมัติทิศทางให้มี commercialSubtype และออกแบบ completeness ตาม subtype ·
+   3-phase / tenant-income-yield / license / frontage = Conditional หรือ Enrichment ตาม subtype
+9. **รูปภาพมีผลต่อความสมบูรณ์** แต่ยกเลิกกฎ “1 รูป = ครบ” · ต้องมี Photo Completeness Standard
+   ต่อประเภท · **Submit ทำได้ก่อน Photo Completeness 100%**
+10. **Contactability** อยู่ใน Minimum Submit Checklist ไม่อยู่ใน Property Information Percentage
+11. **Shared record:** 50% → Explicit Submit → staff 70% → customer เห็น 70% → customer 85% →
+    staff เห็น 85% · Case เป็น workflow ไม่ใช่ property truth ชุดที่สอง
+12. **Post-submit edit:** ลูกค้าเติม/เสนอแก้ได้ แต่ค่าที่ staff verified ห้ามถูก customer/AI
+    overwrite เงียบ ๆ — ใช้ proposed correction / needs review ตาม authority/provenance
+13. ผลการตัดสิน D1–D9: D1=(ค) · D2=รูปมีผล แต่ Photo Standard ยังต้องออกแบบ · D3=(ก) พร้อม audit
+    taxonomy · D4=ไม่บังคับ poolSize · D5=(ก) · D6=(ก) · D7=(ก) · D8=(ข) · D9=(ก)
+
+## 31.2 ผล AUDIT ที่กระทบการตัดสินใจ (ข้อเท็จจริงจาก source)
+- ประเภททรัพย์ในระบบมีเพียง 6 ค่า (`data.js` TYPES) และ **ไม่มีประเภทย่อยเชิงพาณิชย์เลย**
+- `villa` ในระบบมีป้ายชื่อว่า **“พูลวิลล่า / Pool Villa” ทั้ง 8 ภาษา** — ไม่ใช่คำกลาง ๆ
+- **ยังไม่มีช่องรองรับ 6 หัวข้อ** ที่มาตรฐานใหม่อ้างถึง: ชื่อโครงการ · เฟอร์นิเจอร์ · วิว ·
+  สิ่งอำนวยความสะดวกโครงการ · สถานะสระ (มี/ไม่มี) · ประเภทย่อยเชิงพาณิชย์
+  (ปัจจุบัน “ในโครงการ/นอกโครงการ” สื่อผ่านค่า condition เท่านั้น และสระเดาจากคุณสมบัติ private_pool)
+- ตัวตรวจค่าปัจจุบันกำหนด bedrooms ≥ 1 → **บันทึกสตูดิโอเป็น 0 ไม่ได้**
+
+## 31.3 PENDING OWNER DECISION (OD1–OD9 — ยังไม่อนุมัติ)
+OD1 อนุมัติช่องใหม่ 6 ช่อง · OD2 จำนวนหัวข้อ Core ของบ้าน/วิลล่า (17 หรือ 15) ·
+OD3 วิธีคิดกรณี “ไม่ทราบรายละเอียด” · OD4 สีผังเมืองของที่ดิน Core หรือ Conditional ·
+OD5 รับค่าห้องนอน = 0 สำหรับสตูดิโอ · OD6 วิลล่าที่ไม่มีสระ · OD7 จำนวนรูปที่ถือว่าครบ ·
+OD8 สูตร Equal-weight (A) หรือ Core-weighted (B) · OD9 ตำบล/โซน เป็น Core ทุกประเภทหรือบางประเภท
+
+รายละเอียดฉบับอ่านง่ายทั้งหมดแสดงใน Viewer `Copy Code to GitHub.dc.html`
+หัวข้อ **“MASTER PROPERTY INFORMATION STANDARD”** และผล Audit รอบแรกอยู่ใน
+`docs/C4.3-PROPERTY-SCHEMA-AUDIT.md`
+
+**ยังไม่มีการ implement ใด ๆ — STOP รอ OWNER REVIEW**
+
+
+---
+
+# §32 — MASTER UNIFIED PROPERTY STANDARD (Owner Decision, 18 ก.ย. 2569)
+
+รอบนี้ยังเป็น **Architecture Refinement + Implementation Planning** — ไม่แก้ source · ไม่แก้ evaluator ·
+ไม่ deploy · ไม่แก้ firestore.rules · Phase 2B/2C/2D = NOT STARTED
+
+## 32.1 LOCKED PRODUCT STANDARD
+
+> **“One Unified Property Form does not mean every role sees every field.
+> It means every role works on the same Property Record, using the same canonical schema
+> and option definitions, with role-based visibility, edit authority, conditional fields,
+> and provenance.”**
+
+> **“Customers are encouraged to provide as much information as they know, but are not required
+> to complete the entire property form before submission. Missing information becomes visible
+> follow-up work for staff and customer on the same Property Record.”**
+
+1. ONE PROPERTY RECORD · ONE UNIFIED SCHEMA · ONE INFORMATION STANDARD ·
+   ONE CANONICAL OPTION DEFINITION · ONE SERVER COMPLETENESS STANDARD ·
+   MULTIPLE CONTRIBUTORS · MULTIPLE ROLE-BASED VIEWS · CONTROLLED PUBLISHING
+2. ลูกค้าต้องได้ **ตัวเลือกให้กด** ไม่ต้องพิมพ์เองทุกช่อง (quick choice · radio · dropdown ·
+   checkbox · multi-select · yes/no/unknown · number+unit · date · map · photo upload)
+3. AI และ Unified Form = **สองวิธีเติม record เดียวกัน** ไม่ใช่สองระบบ
+4. ความหมายต่างกัน 5 สถานะ: **NO ≠ NOT APPLICABLE ≠ UNKNOWN ≠ MISSING ≠ NEEDS CONFIRMATION** ·
+   NO และ NOT APPLICABLE ถือว่า concept ได้คำตอบแล้ว
+5. **Parent Concept Rule** — poolStatus ตอบแล้ว = concept สระครบ แม้ไม่ทราบ poolSize ·
+   projectStatus=outside_project → projectName = Not Applicable
+6. **สูตร v1 = EQUAL WEIGHT PER APPLICABLE INFORMATION CONCEPT** (ไม่ใช่ต่อ database field
+   และยังไม่ใช้ core-weighted) — review ได้ในอนาคตเมื่อมี usage data
+7. สามมิติแยกกัน: Property Completeness · Minimum Sufficient to Submit · Case/Workflow Status ·
+   **ห้ามใช้เปอร์เซ็นต์แทน Case Status**
+8. **Submit ไม่ต้องรอ 100%** · Minimum Submit เป็น **checklist** ไม่ใช่ percent ≥ X
+9. **PHOTO MINIMUM STANDARD v1 (LOCKED)** — ขั้นต่ำเพื่อ Submit / ถือว่ารูปครบ:
+   ที่ดิน 1/3 · คอนโด 2/5 · บ้าน 2/6 · พูลวิลล่า 2/7 · ทาวน์เฮาส์ 2/5 · พาณิชย์ 2/5 ·
+   รูปเป็น **หนึ่ง information concept** · v1 ไม่ใช้ AI ตรวจภาพเพื่อบล็อก Submit ·
+   photo set เป็นชุดเดียวของ record เดียว (customer + staff) พร้อม uploader/timestamp/role
+10. **Contactability** อยู่ใน Minimum Submit เท่านั้น ไม่อยู่ใน Property Information Percentage
+11. **parking = CORE · kitchen = CONDITIONAL** (Owner Decision §19)
+12. **Location rule** — subdistrict/zone: ที่ดิน = Core · พาณิชย์ = Core ·
+    บ้าน/พูลวิลล่า/ทาวน์เฮาส์ = Conditional · คอนโดที่มี projectName ชัดเจน = ไม่บังคับ
+13. **Studio condo: bedrooms = 0 คือค่าที่ทราบ** ไม่ใช่ missing (validator ปัจจุบันบังคับ ≥ 1 — ต้องแก้ใน implementation)
+14. **Pool Villa** — ไม่สร้าง type ใหม่ “วิลล่าไม่มีสระ” · ถ้าลูกค้าบอกว่าไม่มีสระ AI ต้องไม่เดา
+    ไม่เปลี่ยน type อัตโนมัติ ให้เสนอ House แล้วรอลูกค้ายืนยัน · poolSize ไม่บังคับ
+15. **field/concept ใหม่ที่อนุมัติในหลักการ**: projectName · furnishing · view · facilities ·
+    poolStatus · commercialSubtype (view และ facilities เป็น Conditional/Enrichment ไม่บังคับเพื่อถึง 100%)
+16. Case = workflow/conversation/follow-up object **ไม่ใช่ property truth ชุดที่สอง**
+17. Post-submit: ลูกค้าเติม/เพิ่มรูป/เสนอ correction ได้ · ค่าที่ staff verified ห้ามถูก customer/AI
+    overwrite เงียบ ๆ → proposed correction / needs review / customer supplement / staff confirmation
+18. ยังห้าม browser เขียน Firestore ตรง · server เป็นผู้คำนวณ % และเขียน provenance
+19. Guarantees เดิมคงอยู่ครบ: C4.2a · C4.2b · Phase 1 server-authoritative draft · source tiers ·
+    trackPath authority · no token reconstruction · ไม่มี writer ของ humanHandlingStartedAt จาก C4.3
+20. เคส commercial 15 ล้าน: ถือว่า **ถูกตาม evaluator เดิม แต่ผิดความหมายทาง Product** ·
+    **ห้ามประกาศตัวเลขใหม่ (เช่น 33%)** จนกว่า Unified Concept Matrix และตัวหารต่อ subtype จะ lock
+
+## 32.2 ผล AUDIT ที่แก้ความเข้าใจผิดของเอกสารรอบก่อน
+- ค่า `condition` จริงคือ `new_in_project` · **`new_outside_project`** · `resale_in_project` ·
+  `resale_outside_project` (เอกสารรอบก่อนเขียน `new_out_project` — ผิด) และค่านี้ **มัดรวม**
+  “ใหม่/มือสอง” กับ “ในโครงการ/นอกโครงการ” ไว้ในค่าเดียว → จึงต้องมี `projectStatus` แยก
+- `mapDisplay` มี **3 ค่า**: `exact` · `area` · `none` (ไม่ใช่ 2 ค่า)
+- `titleDeed` มี 5 ค่า (`chanote` · `nor_sor_3_gor` · `nor_sor_3` · `por_bor_tor_5` · `other`) —
+  ยังไม่มี leasehold / company / unknown ตามที่คำสั่งขอ
+- `ownership` ฝั่ง AI เป็น **ข้อความอิสระ** แต่ฝั่งฟอร์มเป็น **enum** → จุดที่ละเมิด
+  ONE CANONICAL OPTION DEFINITION ชัดที่สุด ต้องมี mapping
+- AI รับได้เพียง 10 ช่อง — ช่องอย่าง floors · parking · titleDeed · furnishing · yearBuilt ·
+  utilities · roadWidth ยังไม่มีใน AI extraction เลย
+
+## 32.3 PROPOSED IMPLEMENTATION — PENDING OWNER APPROVAL
+Unified Field Matrix ฉบับเต็ม: `docs/C4.3-UNIFIED-FIELD-MATRIX.md`
+Implementation Plan (phase · ไฟล์ · compatibility · migration · security · test · rollback · risk):
+`docs/C4.3-IMPLEMENTATION-PLAN.md`
+
+Phase ที่เสนอ (ไม่เปลี่ยนชื่อ Phase เดิม): **2A-3** Schema/Option Foundation →
+**2A-4** Completeness v2 → **2B** Customer Unified Workspace → **2C** AI↔Workspace Sync →
+**2D** Submit/Handoff + Staff Shared Record
+
+### OD-A ถึง OD-F — **LOCKED / APPROVED** (เจ้าของอนุมัติ 18 ก.ย. 2569)
+- **OD-A APPROVED** — เพิ่ม `projectStatus` แยกจาก `condition` · ข้อมูลเก่า derive ย้อนหลัง **ไม่ลบ ไม่เขียนทับ**
+- **OD-B APPROVED** — เพิ่ม `leasehold` · `company` · `unknown` ใน titleDeed ·
+  หน้าลูกค้าใช้ข้อความเข้าใจง่าย แต่ **canonical value เป็นชุดกลางชุดเดียว** สำหรับ Customer / AI / Staff / Admin
+- **OD-C APPROVED** — เพิ่ม `no_separate_kitchen` · `unknown` · รักษาหลัก “ไม่มี” = ได้คำตอบแล้ว ·
+  “ไม่ทราบ” = ทราบว่าลูกค้ายังไม่ทราบ และเจ้าหน้าที่ติดตามได้ภายหลัง
+- **OD-D APPROVED** — `zoningColor` = **Staff Follow-up Core** · ไม่บังคับลูกค้า ·
+  เจ้าหน้าที่ต้องเห็นว่าเป็นข้อมูลที่ยังต้องตรวจ และเติมลง Property Record เดิมได้
+- **OD-E APPROVED WITH CONTROL** — สวิตช์สลับ completeness standard ได้ทันที
+  แต่เป็น **Admin/System configuration เท่านั้น** · Customer/Staff เปลี่ยนไม่ได้ ·
+  **ณ เวลาใดเวลาหนึ่งต้องมี standard ที่ active เพียงหนึ่งเดียว** เพื่อรักษา single deterministic definition
+- **OD-F APPROVED** — ลำดับ **2A-3 → 2A-4 → 2B → 2C → 2D**
+
+### Phase 2A-3 Scope — รออนุมัติ
+ขอบเขตฉบับเต็ม (canonical options · field ใหม่ · mapping · AI fields · ไฟล์ที่แก้ · ไฟล์ที่ห้ามแตะ ·
+compatibility · deploy · test · rollback · การตรวจสอดคล้องหลักที่ล็อก) อยู่ที่
+**`docs/C4.3-PHASE-2A-3-SCOPE.md`**
+
+**STOP — รอเจ้าของอนุมัติ Scope 2A-3 ก่อนเขียนโค้ด · ยังไม่ deploy**
+
+
+---
+
+# §33 — PHASE 2A-3 IMPLEMENTATION (18 ก.ย. 2569)
+
+Owner อนุมัติ Scope แล้ว → **implementation เสร็จในโปรเจกต์ · WAITING FOR DELIVERY**
+(ยังไม่ commit ขึ้น GitHub · ยังไม่ deploy → ตาม §29 ข้อ 4 งานนี้ยังไม่ถือว่าถึง production)
+
+## 33.1 ไฟล์ที่แก้จริง (4 ไฟล์ + เอกสาร)
+
+| ไฟล์ | สิ่งที่เปลี่ยน |
+|---|---|
+| `functions/property-options.js` | **ไฟล์ใหม่** — 18 canonical option sets · `VALUE_STATE` 6 สถานะ + `ANSWERED_STATES` · `FIELD_META` (OD-D staff follow-up, parent-concept links) · `canonical()` · derive: `deriveProjectStatus` `derivePoolStatus` `normaliseOwnershipText` `normaliseParking` `normaliseBedrooms` `withDerivedConcepts` · ไม่มีการคิด completeness ในไฟล์นี้ |
+| `functions/index.js` | `require("./property-options")` · ทุก enum spec อ้าง option module · **`bedrooms` min 1 → 0** (สตูดิโอ) · `DRAFT_FIELD_SPECS` 10 → **23 ช่อง** (+status, subdistrict, floors, parking, titleDeed, projectStatus, projectName, poolStatus, furnishing, yearBuilt, utilities, roadWidth, commercialSubtype) · tool schema เพิ่มคำอธิบายทั้ง 13 ช่อง · `normalisePropertyFields` เพิ่มสะพาน ownership→titleDeed (ไม่เดา) |
+| `data.js` | **เพิ่มท้ายไฟล์เท่านั้น** — 11 บล็อกป้ายชื่อ × 8 ภาษา + `TOWNHOUSE_LABEL` · ไม่แก้ `TYPES`/`FEATURES`/`I18N` เดิม |
+| `Lister Dashboard.dc.html` | 5 ช่องใหม่ในฟอร์ม (projectStatus · projectName · poolStatus · furnishing · commercialSubtype) · titleDeed +3 ค่า · kitchen +2 ค่า · conditional visibility (parent concept rule) · derive-on-read ตอนเปิดแก้ทรัพย์เก่า · save payload · Facebook post ไม่แสดงค่า unknown |
+| `docs/C4.3-PHASE-2A-3-SCOPE.md` | ขอบเขตที่อนุมัติ |
+
+**ไฟล์ที่ไม่ถูกแตะตามที่ล็อกไว้:** `functions/draft-completeness.js` · `ContactRail.dc.html` ·
+`firestore.rules` · `intake-workflow.js` · property-adapter/repositories/business-logic ·
+ไฟล์แอดมินทุกไฟล์ · Stripe ทุกไฟล์
+
+## 33.2 ข้อค้นพบใหม่จาก source ระหว่างเขียนโค้ด (สำคัญ)
+1. **`data.js` TYPES มีเพียง 5 ค่า** (villa · house · condo · land · commercial) — **ไม่มี `townhouse`**
+   ขณะที่ฟอร์มทรัพย์และ `DRAFT_FIELD_SPECS` รองรับ 6 ประเภท → ทาวน์เฮาส์ไม่มีป้ายชื่อแสดงผล
+   แก้แบบไม่รุกล้ำด้วย `TOWNHOUSE_LABEL` (ไม่แก้ TYPES เพราะกระทบตัวกรองหน้าค้นหาสาธารณะ —
+   **เป็นเรื่องที่ต้องตัดสินใจแยกในอนาคต ไม่อยู่ในขอบเขต 2A-3**)
+2. **feature id ของสระคือ `pool` ไม่ใช่ `private_pool`** (เอกสารรอบก่อนเขียน private_pool)
+   → `derivePoolStatus` รับทั้งสอง id เพื่อไม่ให้ทรัพย์ที่มีสระจริงถูกอ่านเป็น unknown
+
+## 33.3 การทดสอบที่ทำได้ในสภาพแวดล้อมนี้
+- ตรวจ syntax/โครงสร้างไฟล์ทั้ง 4 ไฟล์ — ผ่าน
+- เปิด `Lister Dashboard.dc.html` — เรนเดอร์ปกติ ไม่มี console error (ติดหน้าเข้าสู่ระบบตามปกติ
+  เพราะไม่มี auth ในสภาพแวดล้อมพรีวิว จึงยังทดสอบฟอร์มจริงไม่ได้)
+- **Cloud Functions ทดสอบจริงไม่ได้จากที่นี่** — ต้องทดสอบหลัง deploy ตามขั้น 22–23 ใน Viewer
+- **ยังไม่มี production test result** — Phase 2A-3 จึงยังไม่ใช่ PASS
+
+## 33.4 Regression risk ต่อหลักประกันเดิม
+- **C4.2a** (permanent human handoff) — ไม่มีไฟล์ที่เกี่ยวข้องถูกแตะ · ไม่มี writer ของ
+  `humanHandlingStartedAt` เพิ่มขึ้น · **ไม่มีความเสี่ยง**
+- **C4.2b** (explicit-confirmation Case creation) — `receptionCaseGate` · `normalisePropertyBasics` ·
+  `createCaseFromConversation` ไม่ถูกแก้ · **ไม่มีความเสี่ยง**
+- **Phase 1** (server-authoritative draft + source tiers + precedence) — `DRAFT_SOURCE_TIER` ·
+  `draftFieldMayWrite` · `draftFieldAuthorityAllows` · `buildDraftPatch` **ไม่ถูกแก้เลย** ·
+  การเพิ่มช่องเข้าไปใน `DRAFT_FIELD_SPECS` ใช้กลไก precedence เดิมทั้งหมด
+- **Phase 2A-1/2A-2** (เปอร์เซ็นต์) — `functions/draft-completeness.js` ไม่ถูกแตะ
+  แต่ **ต้องยืนยันด้วยการทดสอบข้อ 1 ของขั้น 23** ว่าเปอร์เซ็นต์ของทรัพย์เดิมไม่เปลี่ยน
+  (evaluator นับเฉพาะ requiredFields ตาม type เดิม — ช่องใหม่ไม่อยู่ในนั้น จึงไม่ควรเปลี่ยน)
+- **ไม่มี browser Firestore write เพิ่ม** · **ไม่มี migration** · **ไม่มี rules change**
+
+## 33.5 Deploy ที่อนุมัติไว้
+`firebase deploy --only functions:receptionTurn,functions:updatePropertyDraft`
+(ไม่ใช้ `--only functions` ทั้งชุด · hosting สำหรับ `data.js` และฟอร์มเจ้าหน้าที่ตามขั้นตอนเดิม)
+
+**สถานะ: WAITING FOR DELIVERY — Viewer ขั้น 18 เป็นขั้นที่ต้องทำต่อ · ห้ามเริ่ม Phase 2A-4**
+
+
+---
+
+# §34 — MINI WEBSITE / MY PROPERTIES / PARTNER WORKSPACE
+## FUTURE PRODUCT DECISION — LOCKED FOR FUTURE · ยังไม่ทำ (18 ก.ย. 2569)
+
+> **สถานะ: Architecture Note เท่านั้น** — ห้ามพัฒนา · ห้าม refactor · ห้ามแก้ source ในรอบ 2A-3
+> บันทึกไว้เพื่อให้รอบงานอนาคตไม่ตัดสินใจขัดกับข้อนี้
+
+## 34.1 LOCKED PRINCIPLES
+
+1. **Public contact ต้องเป็นช่องทางของ huahin.properties เท่านั้น**
+   ทั้งบน Public Listing และ Public Property Page — Lead ต้องเข้าระบบกลาง
+   **ไม่เปิดช่องทางให้ผู้ซื้อข้ามระบบไปติดต่อ Owner/Agent โดยตรง**
+2. **Private contact ≠ Public contact** — เบอร์/LINE/อีเมลของ Owner/Agent เก็บในระบบได้
+   เพื่อการดำเนินงานของ HQ/Staff แต่ไม่แสดงบนหน้าสาธารณะ
+3. **Lister Dashboard เดิมไม่ทิ้ง** — ถือเป็น **existing asset สำหรับ refactor ในอนาคต**
+   โดยเฉพาะส่วน Property List · Property Editing · Photos · Collection · Appointment
+4. **เจ้าของทรัพย์ → “My Properties” (อนาคต)** — ใช้หลัง submit เพื่อดูทรัพย์ของตน · สถานะ ·
+   ข้อมูลที่ยังขาด · รูปภาพ · และเพิ่มเติม/แก้ไขข้อมูลตามสิทธิ์
+5. **Agent/Partner → “Partner Workspace” (อนาคต)** — จัดการทรัพย์ · Collection · Attribution ·
+   Leads/Viewing · เครื่องมือแชร์ — **ไม่จำเป็นต้องเปิดเบอร์/LINE/อีเมลส่วนตัวบน Public Page**
+6. **Personal URL** (`huahin.properties/<agent>`) เก็บไว้ได้เป็นเครื่องมือ **Distribution + Attribution**
+   แต่ **Public CTA ยังคงเข้าสู่ huahin.properties** และระบบต้องรู้ว่า Lead มาจาก Agent/Partner คนใด
+7. **One Property Record / Unified Schema เดียวกันทั้งระบบ** — ห้ามสร้างฐานทรัพย์แยกระหว่าง
+   AI · My Properties · Agent Workspace · Staff (สอดคล้อง §32.1 ข้อ 1)
+8. **Features เดิมของ Mini Website** (Branding · Cover · Social Links · AI Persona ฯลฯ) =
+   **optional / package features ที่ต้องประเมินภายหลัง** ไม่ใช่ core ของ My Properties
+
+## 34.2 LIFECYCLE ที่ยึดไว้
+
+```
+AI Chat → Property Draft → Explicit Submit → Case → My Properties
+        → Staff Verification → Live Listing → Lead → Attribution/Deal
+```
+
+## 34.3 ผลต่อรอบงานปัจจุบัน
+**ไม่มี** — Phase 2A-3 ไม่แตะ Lister Dashboard นอกจากการเพิ่มช่องข้อมูลตาม Scope ที่อนุมัติ ·
+ข้อนี้เป็นข้อผูกพันสำหรับการตัดสินใจในอนาคตเท่านั้น
