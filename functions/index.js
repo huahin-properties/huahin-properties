@@ -23,6 +23,12 @@ const nodeCrypto = require("crypto");
 // mirror intake-workflow.js: staff workflow completeness is a different
 // concept and remains untouched.
 const { evaluateDraftCompleteness } = require("./draft-completeness");
+// C4.3 Phase 2A-3 - THE canonical option definition for the whole property
+// schema. Required here so AI extraction validates against exactly the same
+// allowed values the staff/admin forms use and the Phase 2B customer
+// Workspace will use (BLUEPRINT §32.1: ONE CANONICAL OPTION DEFINITION).
+// Pure module - no I/O, nothing about completeness (that stays 2A-4's job).
+const PROPERTY_OPTIONS = require("./property-options");
 
 if (!admin.apps.length) admin.initializeApp();
 
@@ -327,6 +333,19 @@ const RECEPTION_TOOL = {
           ownership: { type: "string", description: "Title/ownership as stated, e.g. โฉนด, chanote, น.ส.3ก, leasehold, company. Omit if not stated." },
           floor: { type: "string", description: "Floor number, condos only. Omit otherwise." },
           coordsRaw: { type: "string", description: "Map coordinates ONLY if the visitor gave them as decimal lat,lng (e.g. 12.558940,99.909039). Omit anything else - never a place name." },
+          status: { type: "string", description: "Intent for THIS property, normalised to: sale (ต้องการขาย) or rent (ต้องการปล่อยเช่า). Omit if the visitor has not said which." },
+          subdistrict: { type: "string", description: "Subdistrict/tambon as stated, e.g. หนองแก, ปากน้ำปราณ. Omit if not stated." },
+          floors: { type: "number", description: "Number of storeys of the BUILDING as an integer (บ้าน 2 ชั้น -> 2). Never use this for a condo's floor number - that is `floor`. Omit if not stated." },
+          parking: { type: "number", description: "Number of car parking spaces as an integer. 0 ONLY if the visitor said there is none (ไม่มีที่จอดรถ) - that is an answer. Omit if simply not mentioned." },
+          titleDeed: { type: "string", description: "Title document, normalised to one of: chanote (โฉนด/นส.4จ/ครุฑแดง), nor_sor_3_gor (นส.3ก), nor_sor_3 (นส.3), por_bor_tor_5 (ภบท.5), leasehold (เช่าระยะยาว), company (ถือผ่านบริษัท), other, unknown. Omit unless the visitor named it clearly - if they said something you cannot map, leave this out and put titleDeed in unclearFields instead." },
+          projectStatus: { type: "string", description: "Whether the property sits inside a named development: in_project (อยู่ในโครงการ) or outside_project (ที่ดิน/บ้านนอกโครงการ). Omit if not stated." },
+          projectName: { type: "string", description: "Name of the project/condominium/village as stated. Omit if not stated or if the property is outside a project." },
+          poolStatus: { type: "string", description: "has_pool if the visitor said there IS a pool, no_pool if they said there is NOT one (ไม่มีสระ - this is an answer, record it). Omit if pools were never discussed. Never infer from the property type." },
+          furnishing: { type: "string", description: "Furnishing, normalised to: fully (ครบพร้อมอยู่), partly (บางส่วน), unfurnished (ไม่มีเฟอร์นิเจอร์). Omit if not stated." },
+          yearBuilt: { type: "number", description: "Year the property was built, as a 4-digit Gregorian year (convert พ.ศ. by subtracting 543). Omit if the visitor only gave a vague age." },
+          utilities: { type: "string", description: "Mains water/electricity access, mainly for land and commercial: available (เข้าถึงแล้ว), partial (บางส่วน), none (ยังไม่มี). Omit if not stated." },
+          roadWidth: { type: "number", description: "Width in METRES of the road frontage / access road. Omit if no unit was given or the figure is vague." },
+          commercialSubtype: { type: "string", description: "For commercial property only, normalised to: shophouse (อาคารพาณิชย์/ตึกแถว), retail (ร้านค้า), office (สำนักงาน), warehouse (โกดัง/คลังสินค้า), hotel_resort (โรงแรม/รีสอร์ท), other. Omit if the visitor only said 'commercial' without saying which kind." },
         },
       },
       // Fields the visitor mentioned but did NOT state clearly enough to
@@ -507,17 +526,44 @@ async function callClaudeReception(system, messages, apiKey) {
 // model typo becoming a canonical fact (a 9-bedroom villa is plausible; 900
 // is a hallucination). A value outside its bound is DISCARDED, not clamped -
 // clamping would invent a fact.
+// Phase 2A-3: every `enum` spec now points at PROPERTY_OPTIONS instead of an
+// inline list, so a value the AI extracts and a value the staff form stores
+// can never drift apart.
 const DRAFT_FIELD_SPECS = {
-  type: { kind: "enum", values: ["villa", "house", "townhouse", "condo", "land", "commercial"] },
+  type: { kind: "enum", values: PROPERTY_OPTIONS.PROPERTY_TYPE },
   area: { kind: "string", max: 120 },
   price: { kind: "number", min: 1, max: 5000000000 },
   landSize: { kind: "number", min: 1, max: 1000000 },
   livingArea: { kind: "number", min: 1, max: 100000 },
-  bedrooms: { kind: "int", min: 1, max: 50 },
+  // Phase 2A-3, OD approved: min 0. A studio condo has ZERO bedrooms and
+  // that is a KNOWN value, not a missing one. The old min of 1 made "ไม่มี
+  // ห้องนอนแยก" unrecordable, which in turn made a studio unable ever to
+  // complete the bedrooms concept.
+  bedrooms: { kind: "int", min: 0, max: 50 },
   bathrooms: { kind: "int", min: 1, max: 50 },
+  // Free-text ownership as the customer says it. KEPT as-is (never deleted)
+  // for provenance; `titleDeed` below carries the canonical mapping.
   ownership: { kind: "string", max: 80 },
   floor: { kind: "string", max: 20 },
   coordsRaw: { kind: "coords" },
+
+  // ── Phase 2A-3 additions ───────────────────────────────────────
+  // Canonical names on purpose: a draft value is a future property value, so
+  // any rename here would create the parallel schema the lock forbids.
+  status: { kind: "enum", values: PROPERTY_OPTIONS.INTENT },
+  subdistrict: { kind: "string", max: 120 },
+  floors: { kind: "int", min: 1, max: 80 },
+  // Parking allows 0 = "no parking", an answer in its own right.
+  parking: { kind: "int", min: 0, max: 200 },
+  titleDeed: { kind: "enum", values: PROPERTY_OPTIONS.TITLE_DEED },
+  projectStatus: { kind: "enum", values: PROPERTY_OPTIONS.PROJECT_STATUS },
+  projectName: { kind: "string", max: 120 },
+  poolStatus: { kind: "enum", values: PROPERTY_OPTIONS.POOL_STATUS },
+  furnishing: { kind: "enum", values: PROPERTY_OPTIONS.FURNISHING },
+  yearBuilt: { kind: "int", min: 1900, max: 2100 },
+  utilities: { kind: "enum", values: PROPERTY_OPTIONS.UTILITIES },
+  roadWidth: { kind: "number", min: 1, max: 200 },
+  commercialSubtype: { kind: "enum", values: PROPERTY_OPTIONS.COMMERCIAL_SUBTYPE },
 };
 
 const COORDS_RE = /^\s*-?\d{1,3}(\.\d+)?\s*,\s*-?\d{1,3}(\.\d+)?\s*$/;
@@ -559,6 +605,18 @@ function normalisePropertyFields(pf) {
   for (const key of Object.keys(DRAFT_FIELD_SPECS)) {
     const v = validateDraftField(key, o[key]);
     if (v !== undefined) out[key] = v;
+  }
+  // Phase 2A-3 - the ownership -> titleDeed bridge. The audit found the ONE
+  // place two different option universes described the same concept: the AI
+  // collected ownership as free text while every form stored an enum.
+  //
+  // Only fills titleDeed when the model did NOT supply one itself, and only
+  // on a confident pattern match. An unrecognised phrase is deliberately
+  // dropped here rather than guessed - the reception turn's unclearFields
+  // path is what turns it into a question.
+  if (out.titleDeed === undefined && out.ownership !== undefined) {
+    const mapped = PROPERTY_OPTIONS.normaliseOwnershipText(out.ownership);
+    if (mapped.titleDeed) out.titleDeed = mapped.titleDeed;
   }
   return out;
 }
