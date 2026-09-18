@@ -1218,6 +1218,61 @@ exports.updatePropertyDraft = onCall(
   },
 );
 
+// ── C4.3 Phase 2A-2 ─────────────────────────────────────────────────────
+// getPropertyDraft: READ-ONLY. The single read path that lets the customer's
+// Progress indicator survive a page reload.
+//
+// Why a callable and not a client Firestore read: the draft document stores
+// ONLY `fields` - the completeness object (percent/requiredFields/
+// completeFields/missingFields/confirmationFields/complete) is never
+// persisted, it is derived. A browser reading the document directly would
+// therefore have to compute the percentage itself, which would duplicate the
+// deterministic standard and let the two definitions drift. This callable
+// evaluates with the SAME evaluator (draft-completeness.js) that receptionTurn
+// and updatePropertyDraft use, so there is exactly one definition of the
+// number a customer can ever see.
+//
+// REQUEST CONTRACT - nothing. The draft is derived from request.auth.uid
+// exactly as the write paths derive it: a caller cannot name a draft, a uid,
+// a conversation or a Case.
+//
+// Writes NOTHING: no draft mutation, no Case, no Reception document, no
+// conversation field. Does not touch C4.2a/C4.2b, humanHandlingStartedAt,
+// receptionCaseGate or firestore.rules.
+exports.getPropertyDraft = onCall(
+  { region: "asia-southeast1" },
+  async (request) => {
+    const uid = request.auth && request.auth.uid;
+    if (!uid) throw new HttpsError("unauthenticated", "Sign-in required.");
+
+    const db = admin.firestore();
+    try {
+      const snap = await db.collection("propertyDrafts").doc(draftIdForVisitor(uid)).get();
+      // No draft yet (e.g. the visitor only ever asked a general question) is
+      // a normal state, not an error: the client hides the indicator.
+      if (!snap.exists) return { exists: false, fields: {}, completeness: null };
+      const data = snap.data() || {};
+      // Ownership is structural (the id is built from the caller's own uid)
+      // but asserted anyway, mirroring the write paths.
+      if (data.ownerUid && data.ownerUid !== uid) {
+        return { exists: false, fields: {}, completeness: null };
+      }
+      const fields = data.fields || {};
+      return {
+        exists: true,
+        fields,
+        // Same evaluator, same validator, same standard marker as every other
+        // completeness number in the system. Informational only: no server or
+        // client path may gate submission, approval or publication on it.
+        completeness: evaluateDraftCompleteness(fields, { validate: validateDraftField }),
+      };
+    } catch (e) {
+      console.warn("getPropertyDraft failed:", (e && e.code) || "error");
+      throw new HttpsError("internal", "Could not read the draft.");
+    }
+  },
+);
+
 exports.createCaseFromConversation = onCall(
   { region: "asia-southeast1" },
   async (request) => {
