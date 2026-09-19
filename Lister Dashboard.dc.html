@@ -29,7 +29,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-43 (เชื่อมหน้าลูกค้า/ผลงาน + เขียน log เมื่อส่งทรัพย์อนุมัติ) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-44 (PENDING #3 แก้ชื่อทำเลหลายภาษา) — เดิม: LD-43 (เชื่อมหน้าลูกค้า/ผลงาน + เขียน log เมื่อส่งทรัพย์อนุมัติ) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -2796,7 +2796,11 @@ class Component extends DCLogic {
       // stored value to "live"/"paused" going forward.
       const isLive = lifecycle === "live" || lifecycle === "pending", isPaused = lifecycle === "paused", isLiveOrPaused = isLive || isPaused;
       return {
-        id: p.id, code: p.id, zone: p.zone || "-", areaLabel: areaLabels[p.area] || p.area || "-",
+        // zone is saved as either a plain string (legacy / untranslated) or an
+        // 8-language object after auto-translate — read it the same defensive
+        // way the public Property Details page does (PENDING #3, 19 Sep 2026).
+        id: p.id, code: p.id,
+        zone: ((p.zone && typeof p.zone === "object") ? (p.zone[this.state.lang] || p.zone.th || p.zone.en) : p.zone) || "-", areaLabel: areaLabels[p.area] || p.area || "-",
         typeLabel: typeLabels[p.type] || p.type || "-", bedBath,
         priceLabel: "฿" + (Number(p.price) || 0).toLocaleString() + (p.status === "rent" ? "/เดือน" : ""),
         statusLabel: st.label, statusBg: st.bg, statusColor: st.color,
