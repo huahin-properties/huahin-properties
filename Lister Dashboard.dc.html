@@ -86,6 +86,10 @@
       </div>
       <div style="font-size:12.5px; color:oklch(50% 0.02 60); margin-bottom:18px; word-break:break-all;">{{ listerEmail }}</div>
 
+      <sc-if value="{{ showEdit }}" hint-placeholder-val="{{ false }}">
+        <div onClick="{{ onBackToList }}" style="display:inline-flex; align-items:center; gap:8px; background:oklch(40% 0.13 25); color:white; padding:11px 20px; border-radius:100px; font-size:15px; font-weight:700; cursor:pointer; margin-bottom:18px; white-space:nowrap;" style-hover="background:oklch(33% 0.13 25);">← กลับไปหน้ารายการทรัพย์</div>
+      </sc-if>
+
       <div style="background:white; border-radius:8px; padding:14px 16px; margin-bottom:18px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
         <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
           <div style="flex-shrink:0;">
@@ -621,7 +625,6 @@
 
       <sc-if value="{{ showEdit }}">
         <div style="background:white; border-radius:8px; padding:clamp(20px,4vw,30px);">
-          <div onClick="{{ onBackToList }}" style="display:inline-flex; align-items:center; gap:8px; background:oklch(40% 0.13 25); color:white; padding:11px 20px; border-radius:100px; font-size:15px; font-weight:700; cursor:pointer; margin-bottom:18px; white-space:nowrap;" style-hover="background:oklch(33% 0.13 25);">← กลับไปหน้ารายการทรัพย์</div>
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;">
             <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(20% 0.02 60);">{{ editTitle }}</div>
             <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
