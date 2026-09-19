@@ -2678,3 +2678,161 @@ AI Chat → Property Draft → Explicit Submit → Case → My Properties
 ## 34.3 ผลต่อรอบงานปัจจุบัน
 **ไม่มี** — Phase 2A-3 ไม่แตะ Lister Dashboard นอกจากการเพิ่มช่องข้อมูลตาม Scope ที่อนุมัติ ·
 ข้อนี้เป็นข้อผูกพันสำหรับการตัดสินใจในอนาคตเท่านั้น
+
+
+---
+
+# §35 — PRODUCT REVIEW ก่อนปิด Phase 2A-2 (19 ก.ย. 2569)
+
+รอบนี้เป็น **Product/Architecture Decision เท่านั้น** — ไม่แก้ source · ไม่แก้ evaluator ·
+ไม่ deploy · Phase 2A-4 / 2B = ยังไม่เริ่ม
+
+## 35.1 STATUS RECONCILIATION — Test 10.4
+- วัตถุประสงค์เดิมของ 10.4 = พิสูจน์ guarantee **“100% ต้องไม่สร้าง Case / คิวอนุมัติ / ประกาศ”**
+  ไม่ใช่การพิสูจน์ความถูกต้องเชิงผลิตภัณฑ์ของตัวเลข %
+- ประวัติผล: 10.1 PASS · 10.2 PASS · 10.3 PASS · 10.4 เดิม BLOCKED (เครดิต Anthropic, §29.6)
+  → จัดสถานะใหม่เป็น PAUSED FOR PRODUCT / ARCHITECTURE REVIEW (§30.2)
+- 10.4 ส่วน (ก) **ผ่านทางเทคนิคแล้ว** (percent 100 · complete true · AI ตอบได้หลังเติมเครดิต)
+- **ยังไม่มีหลักฐาน** ว่าส่วน (ข) Firestore `properties` และ (ค) Listing Approvals ถูกตรวจ
+- **Anthropic API credit = RESTORED / NO LONGER A BLOCKER** (เจ้าของยืนยัน 19 ก.ย. 2569)
+- **ไม่พบ technical failure ใด ๆ** · blocker ที่เหลือคือ Product Review ข้อเดียว
+- เจ้าของเลือกแนวทาง **(ข)** — ปิด Product Review ให้จบก่อน แล้วจึง Re-test 10.4 ครั้งเดียว
+
+## 35.2 P-1 — COMMERCIAL COMPLETENESS · APPROVED IN PRINCIPLE (19 ก.ย. 2569)
+
+**มติหลัก:** ใช้แนวทาง **C — completeness แยกตาม `commercialSubtype`** (สอดคล้อง §31.1 ข้อ 8)
+ปฏิเสธแนวทาง B (ตัวหารเดียวชั่วคราว) เพราะจะต้องกลับมาแก้ใหม่ใน Phase 2A-4
+
+> **สถานะ: APPROVED IN PRINCIPLE = Product Standard สำหรับออกแบบ Phase 2A-4**
+> **ไม่ใช่คำสั่งแก้ source/evaluator ในรอบนี้**
+
+**ฐานร่วมทุก subtype = 4 concept:** ประเภททรัพย์ · ทำเล (area + ตำบล นับเป็น 1 concept ตาม
+§32.1 ข้อ 12 พาณิชย์ = Core) · ราคา · ประเภทย่อยพาณิชย์
+
+| subtype | Core เพิ่มจากฐาน 4 | ตัวหาร | Conditional | Enrichment (ไม่นับ) |
+|---|---|---|---|---|
+| shophouse | พื้นที่ใช้สอย · ที่ดิน · จำนวนชั้น · เอกสารสิทธิ์ | 8 | ที่จอดรถ · ปีที่สร้าง | วิว · facilities · เฟอร์นิเจอร์ |
+| retail | พื้นที่ใช้สอย · จำนวนชั้น · เอกสารสิทธิ์ | 7 | ที่ดิน (NA ได้) · ที่จอดรถ | เฟอร์นิเจอร์ · facilities |
+| office | พื้นที่ใช้สอย · ชั้นที่ตั้ง · เอกสารสิทธิ์ | 7 | ที่จอดรถ · เฟอร์นิเจอร์ | วิว · facilities |
+| warehouse | พื้นที่ใช้สอย · ที่ดิน · สาธารณูปโภค · ความกว้างถนน | 8 | เอกสารสิทธิ์ (NA ได้เมื่อเช่า) | ปีที่สร้าง |
+| hotel_resort | พื้นที่ใช้สอย · ที่ดิน · จำนวนห้องพัก · เอกสารสิทธิ์ | 8 | — | วิว · facilities |
+| other | พื้นที่ใช้สอย · ที่ดิน-หรือ-NA · เอกสารสิทธิ์ | 7 | ที่จอดรถ | ที่เหลือทั้งหมด |
+
+**กฎกัน `other` ยุบกลับเป็น 3:** `other` ห้ามมีตัวหารต่ำกว่า 7 · commercial ที่ยังไม่เลือก subtype
+ถือว่า concept “ประเภทย่อย” **ยังไม่ตอบ** (`unknown` ไม่อยู่ใน `ANSWERED_STATES`) → ไปไม่ถึง 100%
+
+**ไม่นับใน %:** เจตนาขาย/เช่า (Minimum Submit, §32.1 ข้อ 8) · ใบอนุญาตโรงแรม / รายได้ผู้เช่า
+(Staff follow-up แนว OD-D) · view · facilities · furnishing · yearBuilt · projectName · หมุดแผนที่
+
+### Q-1 — PARKING (ตัดสินแล้ว)
+`parking` ของพาณิชย์ = **Conditional / subtype-applicable** ไม่ใช่ Core ทุก subtype
+**Clarification ถาวร:** §32.1 ข้อ 11 (`parking = Core`) ใช้กับ **Residential Standard** ·
+Commercial ใช้ applicability ตาม subtype · retail / office / hotel_resort = applicable concept
+ตอบ “ไม่มี” ได้และถือว่าตอบแล้ว · subtype อื่นเปิดเมื่อเกี่ยวข้อง ·
+**ห้ามบวก parking +1 เข้าตัวหารของพาณิชย์ทุก subtype แบบเหมารวม**
+
+### Q-2 — FRONTAGE / ELECTRICAL PHASE (ตัดสินแล้ว)
+บันทึกเป็น **Phase 2A-4 Schema Work** · **ยังไม่เข้าตัวหารของ P-1 รอบนี้**
+เหตุผล: ยังไม่มี canonical field ที่สมบูรณ์ — ห้ามสร้างตัวหารที่ implementation ยังตอบไม่ได้
+- `frontage` (หน้ากว้างอาคาร) → candidate canonical field ของ Commercial
+- ระบบไฟ 3 เฟส → ต้องสร้าง canonical field ที่ผูกกับ option set `ELECTRICAL_PHASE` ที่มีอยู่แล้ว
+  (ปัจจุบันมีชุดตัวเลือกแต่ **ไม่มี field** ใน `DRAFT_FIELD_SPECS`)
+- warehouse ใช้ `roadWidth` + `utilities` ที่มีจริงไปก่อน
+- Phase 2A-4 ต้องกลับมาตรวจ applicability ของทั้งสองต่อ subtype **ก่อน** implement
+
+### Q-3 — จำนวนคูหา / number of units (บันทึกเพิ่ม)
+เหตุผลของ shophouse ที่อ้าง “กี่คูหา” **ยังไม่มี concept/field ในระบบ** ·
+**ห้ามถือเป็น requirement โดยปริยาย** · บันทึกเป็น **Phase 2A-4 Schema Review candidate**
+เช่นเดียวกับ `frontage` แล้วตัดสิน applicability ภายหลัง
+
+**P-1 = APPROVED (หลักการ + matrix + Q-1/Q-2/Q-3)** · ขั้นต่อไปคือ P-2
+
+## 35.3 P-2 — HOUSE / POOL VILLA CORE DENOMINATOR · APPROVED (19 ก.ย. 2569)
+
+**มติ: “ทางที่สาม” — ตัวหารผูกกับ `projectStatus` ตาม Parent Concept Rule (§32.1 ข้อ 5)**
+
+- House / Pool Villa **ในโครงการ** = **15 concepts**
+- House / Pool Villa **นอกโครงการ** = **17 concepts** (`utilities` + `roadWidth` เป็น applicable Core เพิ่ม)
+- บ้านในโครงการ **ไม่ต้อง** เพิ่ม 2 concept นี้เข้าตัวหาร
+- `projectStatus` = ยังไม่ทราบ → **ห้ามเดา** ว่าในหรือนอกโครงการ · ใช้สถานะ unanswered
+  (`unknown` ไม่อยู่ใน `ANSWERED_STATES`)
+
+**เหตุผลเชิงผลิตภัณฑ์:** 100% = “ข้อมูลที่จำเป็นสำหรับทรัพย์หลังนี้ครบ” —
+ทรัพย์ทุกหลัง **ไม่จำเป็นต้องมีตัวหารเท่ากัน**
+
+**ชุด 15 concept (ฐานร่วม):** 1 ประเภททรัพย์ · 2 ทำเล (area + ตำบล = 1 concept) · 3 ราคา ·
+4 พื้นที่ใช้สอย · 5 ขนาดที่ดิน · 6 ห้องนอน · 7 ห้องน้ำ · 8 จำนวนชั้น · 9 ที่จอดรถ (§32.1 ข้อ 11) ·
+10 สถานะสระ · 11 เอกสารสิทธิ์ · 12 projectStatus · 13 ใหม่/มือสอง (condition) · 14 เฟอร์นิเจอร์ ·
+15 ปีที่สร้าง
+**+2 สำหรับนอกโครงการ:** 16 สาธารณูปโภค (ไฟ/น้ำ) · 17 ความกว้างถนนเข้าออก
+
+**ที่มาของข้อขัดแย้ง 17 vs 15:** §31.3 OD2 บันทึกตัวเลขไว้โดย **ไม่เคยเขียนรายการจริง** และ
+บันทึกก่อน §32.1 จะ lock กฎรายข้อ · รายการข้างบนประกอบจาก concept ที่มีช่องข้อมูลจริงใน
+`DRAFT_FIELD_SPECS` เท่านั้น ไม่เพิ่ม concept ใหม่
+**เหตุผลที่ส่วนต่างคือ utilities + roadWidth:** §31.1 ข้อ 5 ล็อกให้ road access / utilities เป็น
+Core **ของที่ดิน** โดยเฉพาะ และไม่มีข้อใดขยายมาถึงบ้าน/พูลวิลล่า · concept อื่นถูกกฎที่ lock แล้ว
+จัดที่ชัดหมด (ครัว = Conditional ข้อ 11 · projectName = ลูกของ projectStatus ข้อ 5 ·
+poolSize ไม่บังคับ ข้อ 14 · view/facilities = Enrichment ข้อ 15 · ownership ซ้ำกับ titleDeed §32.2)
+
+**หมายเหตุ:** รูปภาพยังไม่อยู่ในทั้งสองชุด — ขึ้นกับผล P-3
+
+## 35.4 P-3 — PHOTOS vs INFORMATION COMPLETENESS · APPROVED (19 ก.ย. 2569)
+
+**มติ: แนวทาง B — แยก Information Completeness ออกจาก Photo Readiness อย่างเด็ดขาด**
+
+| มิติ | รูปแบบที่แสดง | รวมรูปภาพหรือไม่ |
+|---|---|---|
+| **Information Completeness** | เปอร์เซ็นต์ (“ข้อมูลทรัพย์สินของคุณ XX%”) | **ไม่** — รูปไม่อยู่ใน denominator |
+| **Photo Readiness** | **x / y** ตาม PHOTO STANDARD v1 | เป็นตัวชี้วัดของตัวเอง |
+| **Submit Readiness** | checklist / status | Submit ได้ก่อนรูปครบ (§32.1 ข้อ 9) |
+| **Approval / Verification / Publishing** | lifecycle ของเจ้าหน้าที่ | ไม่ผูกกับตัวเลขใด |
+
+- ข้อมูลครบทุก applicable concept แต่ยังไม่มีรูป → **แสดง “ข้อมูลทรัพย์สิน 100%” ได้**
+  และแสดง Photo Readiness เช่น **0 / 6** คู่กัน
+- Information 100% หรือ Photo Ready **ห้ามตีความว่า** approved / verified / published ·
+  **ห้าม auto-publish** (§30.1 ข้อ 2 · ข้อ 11)
+
+### CLARIFICATION ถาวร — ป้องกันการตีความผิดในอนาคต
+> **§31.1 ข้อ 9 (“รูปภาพมีผลต่อความสมบูรณ์”) และ §32.1 ข้อ 9 (“รูปเป็นหนึ่ง information concept”)
+> ต้องอ่านว่า: รูปมีผลต่อความสมบูรณ์ของ *ทรัพย์* และถูกวัดผ่าน **Photo Readiness (x/y)** ที่แยกออกมา
+> — ไม่ได้แปลว่ารูปต้องเข้า denominator ของ Information Completeness %**
+
+**เอกสารเก่าที่ถูกแก้ความหมายด้วย clarification นี้ (ไม่ลบของเดิม):**
+`§31.1 ข้อ 9` · `§32.1 ข้อ 9` — ถ้อยคำเดิมยังอยู่ครบ แต่การตีความยึดตาม §35.4 นี้
+
+## 35.5 CONSISTENCY AUDIT — P-1/P-2/P-3 เทียบข้อที่ lock ไว้ทั้งหมด
+
+| ข้อที่ lock | สอดคล้องกับมติใหม่หรือไม่ |
+|---|---|
+| §30.1 ข้อ 2 / 11 — 100% ≠ approved · ห้าม auto-publish | ✅ ไม่ขัด · §35.4 ย้ำซ้ำ |
+| §31.1 ข้อ 5 — road/utilities = Core ของที่ดิน | ✅ P-2 ขยายให้บ้าน **นอกโครงการ** เท่านั้น ไม่แตะกฎของที่ดิน |
+| §31.1 ข้อ 8 — commercial completeness ตาม subtype | ✅ P-1 ทำตามตรง ๆ |
+| §31.1 ข้อ 9 — รูปมีผลต่อความสมบูรณ์ | ⚠ ถ้อยคำกำกวม → **แก้ด้วย CLARIFICATION §35.4** |
+| §31.3 OD2 — “17 หรือ 15” ไม่มีรายการ | ✅ ปิดด้วย §35.3 (ระบุรายการครบ + เลือกทางที่สาม) |
+| §32.1 ข้อ 4 — 5 สถานะค่า · NO/NA = ตอบแล้ว | ✅ ใช้เป็นฐานของ P-1 (retail/warehouse ตอบ NA ได้) |
+| §32.1 ข้อ 5 — Parent Concept Rule | ✅ เป็นกลไกหลักของ P-2 |
+| §32.1 ข้อ 6 — equal weight ต่อ concept | ✅ ไม่เปลี่ยนสูตร เปลี่ยนเฉพาะ “ตัวหารมีอะไรบ้าง” |
+| §32.1 ข้อ 7 — ห้ามใช้ % แทนสถานะอื่น | ✅ P-3 = B บังคับเรื่องนี้ชัดขึ้น |
+| §32.1 ข้อ 9 — รูป = หนึ่ง information concept | ⚠ ถ้อยคำขัด → **แก้ด้วย CLARIFICATION §35.4** |
+| §32.1 ข้อ 11 — parking = Core | ⚠ ขัดบางส่วน → **แก้ด้วย Q-1 §35.2**: ข้อ 11 ใช้กับ Residential · Commercial ใช้ applicability ตาม subtype |
+| §32.1 ข้อ 12 — Location rule | ✅ พาณิชย์ = Core (ใช้ใน P-1) · บ้าน/วิลล่า = Conditional แต่ยังนับเป็น concept ใน P-2 ตามที่ lock |
+| §32.1 ข้อ 20 — ห้ามประกาศตัวเลขใหม่จนกว่า matrix lock | ✅ ปลดล็อกแล้วด้วย §35.2 + §35.3 |
+
+**ไม่พบข้อขัดแย้งอื่น** · ไม่มี issue ใหม่ที่ต้องตั้ง PENDING ตาม §33.13
+
+## 35.6 PRODUCT REVIEW CLOSURE + FINAL RE-TEST 10.4 PLAN
+
+**PRODUCT REVIEW = CLOSED (P-1 · P-2 · P-3 APPROVED ครบ)** ·
+สถานะการนำไปใช้: **DESIGN STANDARD สำหรับ Phase 2A-4 เท่านั้น — ยังไม่ implement**
+
+**ตรวจแล้วว่า Final Re-test 10.4 ทำได้ทันทีโดยไม่ต้อง implement P-1/P-2/P-3 ก่อน** เพราะ
+10.4 พิสูจน์ **guarantee** ว่า “ถึง 100% แล้วระบบไม่สร้าง Property / Case / Approval / Publish
+อัตโนมัติ” — เป็นคุณสมบัติของ pipeline ไม่ใช่ของสูตร · สูตรใหม่จะเปลี่ยนเพียง *เมื่อไร* ที่เลข
+ขึ้นถึง 100% ไม่ได้เปลี่ยน *สิ่งที่เกิดขึ้น* เมื่อถึง 100% · การรอ implement ก่อนทดสอบจะทำให้
+Phase 2A-2 ค้างโดยไม่จำเป็น
+
+**เหลือทดสอบจริงเพียง 2 ข้อ** (มีหลักฐาน PASS แล้ว: 10.1 · 10.2 · 10.3 · 10.4 ส่วน ก):
+- **(ข)** Firestore — คอลเลกชัน `properties` ต้องไม่มีเอกสารใหม่หลังลูกค้าถึง 100%
+- **(ค)** `Listing Approvals` — ต้องไม่มีคิวอนุมัติใหม่
+
+**กรอบบังคับ §29.4**: เปิดเว็บเขียว → ทดสอบ → **ปิดกลับแดงทันที**
