@@ -29,7 +29,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-45 (PENDING #1 ล้างค่าเดาแทนผู้ใช้ในฟอร์มใหม่) — เดิม: LD-44 (PENDING #3 แก้ชื่อทำเลหลายภาษา) — เดิม: LD-43 (เชื่อมหน้าลูกค้า/ผลงาน + เขียน log เมื่อส่งทรัพย์อนุมัติ) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-46 (PENDING #2 คลิกนอกกรอบปิด popup) — เดิม: LD-45 (PENDING #1 ล้างค่าเดาแทนผู้ใช้ในฟอร์มใหม่) — เดิม: LD-44 (PENDING #3 แก้ชื่อทำเลหลายภาษา) — เดิม: LD-43 (เชื่อมหน้าลูกค้า/ผลงาน + เขียน log เมื่อส่งทรัพย์อนุมัติ) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -917,9 +917,9 @@
             <div style="position:relative;">
               <sc-if value="{{ showKitchen }}" hint-placeholder-val="{{ true }}">
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ประเภทครัว</div>
-              <div onClick="{{ onToggleKitchenMenu }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ kitchenSummary }}</div>
+              <div onClick="{{ onToggleKitchenMenu }}" data-multiselect="1" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ kitchenSummary }}</div>
               <sc-if value="{{ kitchenMenuOpen }}" hint-placeholder-val="{{ false }}">
-                <div style="position:absolute; top:100%; left:0; right:0; z-index:5; background:white; border:1px solid oklch(80% 0.01 70); border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,0.12); padding:10px 12px; margin-top:4px;">
+                <div data-multiselect="1" style="position:absolute; top:100%; left:0; right:0; z-index:5; background:white; border:1px solid oklch(80% 0.01 70); border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,0.12); padding:10px 12px; margin-top:4px;">
                   <sc-for list="{{ kitchenOptions }}" as="kt" hint-placeholder-count="2">
                     <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(30% 0.02 60); cursor:pointer; padding:5px 0;">
                       <input type="checkbox" checked="{{ kt.checked }}" onChange="{{ kt.onToggle }}" />{{ kt.label }}
@@ -944,9 +944,9 @@
             <div style="position:relative;">
               <div style="position:relative;">
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">แสดงใน Collection หน้าแรก</div>
-              <div onClick="{{ onToggleCollectionMenu }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ collectionSummary }}</div>
+              <div onClick="{{ onToggleCollectionMenu }}" data-multiselect="1" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ collectionSummary }}</div>
               <sc-if value="{{ collectionMenuOpen }}" hint-placeholder-val="{{ false }}">
-                <div style="position:absolute; top:100%; left:0; right:0; z-index:5; background:white; border:1px solid oklch(80% 0.01 70); border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,0.12); padding:10px 12px; margin-top:4px;">
+                <div data-multiselect="1" style="position:absolute; top:100%; left:0; right:0; z-index:5; background:white; border:1px solid oklch(80% 0.01 70); border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,0.12); padding:10px 12px; margin-top:4px;">
                   <sc-for list="{{ collectionOptions }}" as="co" hint-placeholder-count="6">
                     <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(30% 0.02 60); cursor:pointer; padding:5px 0;">
                       <input type="checkbox" checked="{{ co.checked }}" onChange="{{ co.onToggle }}" />{{ co.label }}
@@ -956,9 +956,9 @@
               </sc-if>
             </div>
             <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ช่องทางการซื้อ/ผ่อน</div>
-              <div onClick="{{ onTogglePurchaseMenu }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ purchaseSummary }}</div>
+              <div onClick="{{ onTogglePurchaseMenu }}" data-multiselect="1" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ purchaseSummary }}</div>
               <sc-if value="{{ purchaseMenuOpen }}" hint-placeholder-val="{{ false }}">
-                <div style="position:absolute; top:100%; left:0; right:0; z-index:5; background:white; border:1px solid oklch(80% 0.01 70); border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,0.12); padding:10px 12px; margin-top:4px;">
+                <div data-multiselect="1" style="position:absolute; top:100%; left:0; right:0; z-index:5; background:white; border:1px solid oklch(80% 0.01 70); border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,0.12); padding:10px 12px; margin-top:4px;">
                   <sc-for list="{{ purchaseOptions }}" as="po" hint-placeholder-count="6">
                     <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:oklch(30% 0.02 60); cursor:pointer; padding:5px 0;">
                       <input type="checkbox" checked="{{ po.checked }}" onChange="{{ po.onToggle }}" />{{ po.label }}
@@ -984,9 +984,9 @@
 
           <div style="margin-bottom:20px; position:relative;">
             <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">🔍 แท็ก SEO — หน้ารวมคีย์เวิร์ดที่ทรัพย์นี้จะไปแสดง (เลือกได้หลายข้อ)</div>
-            <div onClick="{{ onToggleSeoTagMenu }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white; cursor:pointer;">{{ seoTagSummary }}</div>
+            <div onClick="{{ onToggleSeoTagMenu }}" data-multiselect="1" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white; cursor:pointer;">{{ seoTagSummary }}</div>
             <sc-if value="{{ seoTagMenuOpen }}" hint-placeholder-val="{{ false }}">
-              <div style="position:absolute; top:100%; left:0; right:0; z-index:6; background:white; border:1px solid oklch(80% 0.01 70); border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,0.12); padding:12px 14px; margin-top:4px; max-height:320px; overflow-y:auto;">
+              <div data-multiselect="1" style="position:absolute; top:100%; left:0; right:0; z-index:6; background:white; border:1px solid oklch(80% 0.01 70); border-radius:6px; box-shadow:0 4px 14px rgba(0,0,0,0.12); padding:12px 14px; margin-top:4px; max-height:320px; overflow-y:auto;">
                 <div style="font-size:11px; color:oklch(58% 0.02 60); line-height:1.5; margin-bottom:10px;">เลือกเฉพาะที่ตรงกับทรัพย์จริง 3–5 อัน — ทรัพย์จะไปแสดงในหน้ารวมคีย์เวิร์ดนั้น และหน้าทรัพย์จะมีลิงก์กลับ ช่วยอันดับ Google</div>
                 <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:4px 12px;">
                   <sc-for list="{{ seoTagOptions }}" as="st" hint-placeholder-count="15">
@@ -1552,10 +1552,25 @@ class Component extends DCLogic {
     }
     this._onPopState = () => this.setState({ view: "list", quotaMsg: "", openMenuId: "" });
     window.addEventListener("popstate", this._onPopState);
+
+    // PENDING #2 (19 Sep 2026): the four custom multi-select popups (kitchen,
+    // purchase options, collections, SEO tags) are plain divs, so nothing ever
+    // closed them on an outside click. One page-level listener closes whichever
+    // is open; clicks inside a popup are ignored so multi-select keeps working.
+    this._onDocClick = (e) => {
+      if (e.target && e.target.closest && e.target.closest("[data-multiselect]")) return;
+      this.setState((s) => (
+        (s.kitchenMenuOpen || s.purchaseMenuOpen || s.collectionMenuOpen || s.seoTagMenuOpen)
+          ? { kitchenMenuOpen: false, purchaseMenuOpen: false, collectionMenuOpen: false, seoTagMenuOpen: false }
+          : null
+      ));
+    };
+    document.addEventListener("mousedown", this._onDocClick);
   }
 
   componentWillUnmount() {
     window.removeEventListener("popstate", this._onPopState);
+    document.removeEventListener("mousedown", this._onDocClick);
   }
 
   // Agent Profile's "+" (เพิ่มทรัพย์) icon links here with ?new=1 so it opens
