@@ -2597,6 +2597,45 @@ rollback: Revert commit เดียวบน GitHub
 3. ระบุสถานะ **DISCOVERED / NOT FIXED** และลำดับว่าจะกลับมาแก้เมื่อใด
 4. **ห้ามขยาย scope ของรอบปัจจุบันโดยไม่ได้รับอนุมัติจาก Owner**
 
+## 33.14 PENDING #5 — แก้แล้วและ PRODUCTION PASS (19 ก.ย. 2569)
+
+**Root cause:** `Lister Dashboard.dc.html` บรรทัด 3088 — `purchaseSummary` ใช้เพียง `.length`
+สร้างข้อความ “เลือกแล้ว N รายการ” ไม่ได้หยิบ label มาต่อกันเหมือนกล่องอื่น
+(ครัว 3087 · SEO 2986 · คอลเลกชัน 2993–2995 ต่อ label ถูกอยู่แล้ว)
+ค้นทั้งไฟล์ด้วยคำว่า “เลือกแล้ว” พบจุดเดียว — เป็นกล่องนี้กล่องเดียวในทั้งหน้า
+
+**การแก้ (1 จุด ไฟล์เดียว):** แมป id → label แล้ว join ด้วยลูกน้ำ · id เก่าที่ไม่พบ label
+fallback เป็น id เดิม (ค่าไม่หาย) · ว่าง = “— เลือก —” ตามเดิม · เป็นการแก้ระดับแสดงผลล้วน —
+ค่าที่บันทึกลง Firestore ยังเป็นรหัสเดิม ไม่เปลี่ยน schema ไม่ migrate ไม่แตะ save logic ·
+ไม่ต้อง deploy functions · Actions #725 · ป้ายเวอร์ชัน **LD-47**
+
+**ผลทดสอบ (หน้าแอดมินล้วน ไม่กดบันทึก):** TEST-1 PASS (LD-47) · TEST-2 PASS (“เงินสด”) ·
+TEST-3 PASS (ติ๊กเพิ่มได้ popup ไม่ปิด → “เงินสด, ผ่อนกับธนาคาร”) · TEST-4 PASS (คลิกนอกกรอบ
+ปิด ข้อความคงอยู่ — **PENDING #2 ไม่ regress**) · TEST-5/6 PASS (กลับหน้ารายการโดยไม่บันทึก
+แล้วเปิด HH-80774 ใหม่ → ช่องกลับเป็น “— เลือก —”, ค่าเดิมอื่นครบ: ประกาศขาย · 1000000 ·
+มือสองในโครงการ · มีสระว่ายน้ำ · สระว่ายน้ำส่วนตัว) · rollback: Revert commit เดียว
+
+**หนี้ที่ค้นพบจาก Phase 2A-3 เคลียร์หมดแล้ว (PENDING #1–#5)**
+งานถัดไป: ตรวจ BLUEPRINT ยืนยันขอบเขต **Phase 2A-4** ก่อนเริ่ม (กันเผลอขยายเข้า 2B)
+
+## 33.15 กฎถาวร — VIEWER / CURRENT-WORK-ONLY RULE (ล็อก 19 ก.ย. 2569)
+
+`Copy Code to GitHub.dc.html` คือ **operational dashboard ไม่ใช่คลังประวัติ**
+
+1. ต้องอัปเดต Viewer **ทันที** ทุกครั้งที่สถานะงานเปลี่ยน — แก้ source → Copy GitHub →
+   Actions → TEST → PASS/FAIL → Documentation → Close Round · **ห้ามรอให้เจ้าของเตือน**
+2. Viewer แสดงเฉพาะ: **CURRENT** · **YOU DO NOW** (สิ่งเดียวที่เจ้าของต้องทำตอนนี้) ·
+   **PASS WHEN** · source/code เฉพาะเมื่อถึงขั้นนั้น · **NEXT เพียง 1 งาน** ·
+   BLOCKED/DISCOVERED เฉพาะ issue ที่ยัง OPEN
+3. งานที่ DONE และบันทึกลง BLUEPRINT/HANDOFF/GitHub ครบแล้ว **ให้นำออกจากหน้าจอ Viewer**
+   (ซ่อน presentation เท่านั้น — **ห้ามลบ** ประวัติจาก BLUEPRINT.md, HANDOFF-NEXT-CHAT.md,
+   GitHub history หรือ source code)
+4. **ห้ามลบ issue ที่ยัง OPEN เพียงเพื่อทำให้ Viewer สั้นลง**
+5. Source of truth: BLUEPRINT.md = รายละเอียดถาวร · HANDOFF-NEXT-CHAT.md = สถานะส่งต่อแชท ·
+   GitHub = source/history
+6. หน้า Viewer ในแผงพรีวิว ผู้ช่วยต้องรีเฟรชให้เองทุกครั้ง — เจ้าของไม่ต้องกด Ctrl+Shift+R
+   (ยกเว้นแท็บเว็บจริงใน Chrome หลัง commit ซึ่งผู้ช่วยเข้าถึงไม่ได้)
+
 **สถานะรอบ: Phase 2A-3 ปิดรอบแล้ว (19 ก.ย. 2569) — 23.1/23.2/23.3 PASS · 23.4 FAIL ·
 งานถัดไปที่แนะนำคือแก้ PENDING #4 ก่อนเปิดเว็บสาธารณะ · ห้ามเริ่ม Phase 2A-4 จนกว่าเจ้าของสั่ง**
 
