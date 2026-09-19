@@ -29,7 +29,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-46 (PENDING #2 คลิกนอกกรอบปิด popup) — เดิม: LD-45 (PENDING #1 ล้างค่าเดาแทนผู้ใช้ในฟอร์มใหม่) — เดิม: LD-44 (PENDING #3 แก้ชื่อทำเลหลายภาษา) — เดิม: LD-43 (เชื่อมหน้าลูกค้า/ผลงาน + เขียน log เมื่อส่งทรัพย์อนุมัติ) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-47 (PENDING #5 สรุปช่องทางการซื้อเป็นชื่อจริง) — เดิม: LD-46 (PENDING #2 คลิกนอกกรอบปิด popup) — เดิม: LD-45 (PENDING #1 ล้างค่าเดาแทนผู้ใช้ในฟอร์มใหม่) — เดิม: LD-44 (PENDING #3 แก้ชื่อทำเลหลายภาษา) — เดิม: LD-43 (เชื่อมหน้าลูกค้า/ผลงาน + เขียน log เมื่อส่งทรัพย์อนุมัติ) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -3088,7 +3088,16 @@ class Component extends DCLogic {
       kitchenMenuOpen: this.state.kitchenMenuOpen, onToggleKitchenMenu: () => this.setState((s) => ({ kitchenMenuOpen: !s.kitchenMenuOpen, purchaseMenuOpen: false })),
       purchaseMenuOpen: this.state.purchaseMenuOpen, onTogglePurchaseMenu: () => this.setState((s) => ({ purchaseMenuOpen: !s.purchaseMenuOpen, kitchenMenuOpen: false })),
       kitchenSummary: this.state.f_kitchenTypes.length ? this.state.f_kitchenTypes.map((k) => ({ thai_kitchen: "ครัวไทย", european_kitchen: "ครัวยุโรป" }[k] || k)).join(", ") : "— เลือก —",
-      purchaseSummary: this.state.f_purchaseOptions.length ? `เลือกแล้ว ${this.state.f_purchaseOptions.length} รายการ` : "— เลือก —",
+      // PENDING #5 (19 Sep 2026): show the picked labels like the kitchen, SEO
+      // and collection selects do — an unknown legacy id falls back to the raw
+      // id so no saved value can silently disappear from the summary.
+      purchaseSummary: this.state.f_purchaseOptions.length
+        ? this.state.f_purchaseOptions.map((id) => ({
+            cash: "เงินสด", developer_installment: "ผ่อนกับโครงการ", bank_mortgage: "ผ่อนกับธนาคาร",
+            company_transfer: "โอนผ่านบริษัท (Freehold Company)",
+            leasehold: "Leasehold (เช่าซื้อระยะยาว ~30 ปี)", freehold: "Freehold (ซื้อขาด/ถือกรรมสิทธิ์เต็ม)",
+          }[id] || id)).join(", ")
+        : "— เลือก —",
       f_mapsLink: this.state.f_mapsLink, onFMapsLink: (e) => this.setState({ f_mapsLink: e.target.value }),
       isAreaMode: this.state.f_mapDisplay === "area" || !this.state.f_mapDisplay, isExactMode: this.state.f_mapDisplay === "exact",
       isNoneMode: this.state.f_mapDisplay === "none",
