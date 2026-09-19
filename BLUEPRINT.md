@@ -2837,6 +2837,77 @@ Phase 2A-2 ค้างโดยไม่จำเป็น
 
 **กรอบบังคับ §29.4**: เปิดเว็บเขียว → ทดสอบ → **ปิดกลับแดงทันที**
 
+## 35.10 PENDING #6 — CONFIRMED ROOT CAUSE + FIX OPTION 1 (19 ก.ย. 2569)
+
+**สถานะ: CONFIRMED ROOT CAUSE** (ไม่ใช่การเดาจากอาการ) — ยืนยันด้วย rxLog จาก Production จริง
+
+### หลักฐานจาก log (ไม่แก้ source ก่อนได้หลักฐาน)
+| เวลา (ICT) | rid | หลักฐาน |
+|---|---|---|
+| 22:56:50.707 | — | `event: classified` · **`derivedUnclearKeys` มี `price`** และแผง Fields ระบุ **7 ค่า** (area · bathrooms · bedrooms · landSize · price · ฯลฯ) = **ตีธง 7 ช่องในเทิร์นเดียว** |
+| 22:57:42.053 | `761734ab12fd` | `event: draft_updated` · **`confirmed: ["type","price","landSize"]`** = ทั้งสามช่องเคยมี `needsConfirmation: true` แล้วเพิ่งถูกปลดธง · `fields: ["area","bathrooms"]` |
+| 22:58:04.204 | `13c31b215440` | `event: classified` · `unclearKeys: []` · `derivedUnclearKeys: []` · `mentionedKeys` = `pfKeys` = 8 ช่อง |
+| 22:58:04.431 | `13c31b215440` | `event: draft_updated` · `fields: ["ownership"]` · `confirmed: []` → ครบ 8/8 = 100% |
+
+**query ที่ใช้พิสูจน์ (แยกสาเหตุออกจากกันได้เด็ดขาด):**
+- `jsonPayload.unclearKeys="price"` → **0 results** ⇒ classifier **ไม่เคย** บอกว่าราคากำกวม
+- `jsonPayload.derivedUnclearKeys="price"` → **1 result** ⇒ ธงมาจาก `derivedUnclear` ทั้งหมด
+
+### ROOT CAUSE
+`functions/index.js:887` — `derivedUnclear = out.mentionedFields.filter(k => !recorded.has(k))`
+คือ “ถูกพูดถึงในเทิร์นนี้ แต่ไม่ได้ส่งค่าใหม่มาในเทิร์นนี้” · เนื่องจากผู้ช่วย AI **ทวนสรุป draft ทุกเทิร์น**
+เซ็ตนี้จึงมีฟิลด์ที่ลูกค้าบอกชัดแล้วเป็นปกติ → `buildDraftPatch` (บรรทัด 771–781) ยกธง
+`needsConfirmation: true` ทับฟิลด์เหล่านั้น → `draft-completeness.js` นับว่ายังไม่สมบูรณ์ →
+**เปอร์เซ็นต์ตกหลายช่องพร้อมกันโดยที่ไม่มีค่าใดสูญหาย**
+
+**ลำดับเหตุการณ์ 38% → 0% → 100%**
+38% (3/8) → 22:56:50 ตีธง 7 ช่อง + ช่องที่ 8 (`ownership`) ยังไม่มีค่า = **0/8 = 0%** →
+22:57:42 ปลดธง 3 ช่อง + เขียน area/bathrooms → 22:58:04 เขียน ownership = **100%**
+
+**ประเภท: server logic (evidence classification)** — ไม่ใช่ data problem · ไม่ใช่ identity/session
+(`draft__<uid>` deterministic, `receptionTurn` และ `getPropertyDraft` อ่านเอกสารเดียวกัน) ·
+ไม่ใช่ frontend display (client ไม่คำนวณเปอร์เซ็นต์ และคงค่าเดิมเมื่อ server ส่ง null) ·
+ไม่ใช่ race condition · **ข้อมูลลูกค้าไม่เคยสูญหาย**
+
+### FIX OPTION 1 — exact code change (อนุมัติแล้ว 19 ก.ย. 2569)
+ไฟล์เดียว: `functions/index.js` · แก้ **ภายใน transaction ของ draft** (จุดเดียวที่รู้ค่าที่เก็บไว้จริง)
+
+```js
+const derivedApplicable = derivedUnclear.filter((k) => {
+  const e = cur.fields && cur.fields[k];
+  return !(e && e.value !== undefined && e.needsConfirmation !== true);
+});
+derivedUnclearSuppressed = derivedUnclear.filter((k) => !derivedApplicable.includes(k));
+const unclearForPatch = Array.from(new Set([...out.unclearFields, ...derivedApplicable]));
+// buildDraftPatch(..., { unclear: unclearForPatch, ... })
+```
+พร้อมเพิ่ม `derivedUnclearSuppressed` (ชื่อฟิลด์เท่านั้น) เข้า rxLog event `draft_updated`
+เพื่อให้ตรวจสอบผลของ fix ได้ในโปรดักชันโดยไม่ต้องแก้โค้ดอีก
+
+**หลักการที่บังคับใช้:** ฟิลด์ที่มีค่าชัดเจนและไม่ติดธงอยู่แล้ว **ห้าม** กลายเป็น unclear
+เพียงเพราะถูกกล่าวถึงซ้ำโดยไม่มีค่าใหม่
+
+**กรณีกำกวมจริงไม่ถูกแตะ:** `out.unclearFields` (คำตัดสินของ classifier เช่น “ประมาณ 7–8 ล้าน”)
+ถูกต่อเข้า `unclearForPatch` **โดยไม่ผ่านตัวกรองใด ๆ** จึงยังยกธง `needsConfirmation` ได้เหมือนเดิม
+`derivedUnclear` บรรทัด 887 และค่า `derivedUnclearKeys` ใน log **คงเดิมทั้งหมด**
+
+**ไม่แตะ:** สูตร completeness · `draft-completeness.js` · schema · UI/ContactRail · P-1/P-2/P-3 ·
+firestore.rules · ไม่มี refactor อื่น
+
+### DEPLOY SCOPE (เมื่อถึงเวลา)
+`firebase deploy --only functions:receptionTurn` — **ฟังก์ชันเดียวเท่านั้น**
+ห้าม `--only functions` ทั้งชุด · ห้าม deploy hosting / rules ในรอบนี้
+
+### REGRESSION ที่ต้องผ่านก่อนปิด PENDING #6
+- **R1** ข้อมูลชัดเจนที่ AI ทวนซ้ำ → Progress **ต้องไม่ตก** เพราะ derivedUnclear และไปถึง 100%
+- **R2** ลูกค้าพูดกำกวมจริง (“ประมาณ 7–8 ล้าน”) → `unclearKeys` / `needsConfirmation` ยังทำงาน
+  และ Progress ลดได้อย่างถูกต้อง (พิสูจน์ว่าไม่ได้กลบอาการ)
+- **R3** Refresh/F5 → draft และ Progress คงตาม server truth (10.3 เดิม)
+- **R4** ทำ 10.4 ซ้ำ → ถึง 100% โดยไม่มี false reset **และ** ไม่ auto-create
+  Property / Case / คิวอนุมัติ / ประกาศ
+
+**สถานะ PENDING #6: FIX WRITTEN IN PROJECT — WAITING FOR DELIVERY** (ยังไม่ commit ยังไม่ deploy)
+
 ## 35.7 PENDING #6 — แถบเปอร์เซ็นต์ตกจาก 38% เป็น 0% กลางบทสนทนา (19 ก.ย. 2569)
 
 **บันทึกตาม Issue Capture Rule (§33.13) — ไม่แก้ในรอบนี้ ไม่ขยาย scope**
