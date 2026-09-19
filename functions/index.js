@@ -1078,6 +1078,9 @@ exports.receptionTurn = onCall(
     // customer their turn. Everything the draft needs now sits inside.
     let draftApplied = [];
     let draftConfirmed = [];
+    // PENDING #6 - names of derived mentions that were NOT allowed to re-open
+    // an already-clear field (see the filter inside the draft transaction).
+    let derivedUnclearSuppressed = [];
     // ADDITIVE (C4.3 Phase 2A-1). Stays null on every path that does not write
     // a draft this turn - a general question performs no draft work and gets
     // no percentage, exactly as before. No existing response key changes.
@@ -1092,8 +1095,29 @@ exports.receptionTurn = onCall(
           // Ownership is structural (id built from the caller's own uid) but
           // asserted anyway: a draft owned by someone else is never touched.
           if (dSnap.exists && cur.ownerUid && cur.ownerUid !== visitorId) return { applied: [], confirmed: [] };
+          // PENDING #6 FIX (Fix Option 1, 19 Sep 2026) - CONFIRMED ROOT CAUSE.
+          // derivedUnclear (above) is "mentioned but not re-sent as a value in
+          // THIS turn". Because the assistant recaps the draft every turn, that
+          // set routinely contains fields the customer already stated clearly -
+          // and buildDraftPatch would then raise needsConfirmation on them,
+          // dropping the customer's percentage even though NO value was lost.
+          // Production evidence (rid 761734ab12fd / 13c31b215440): one turn
+          // flagged 7 already-clear fields at once, taking the indicator from
+          // 38% to 0% before later turns cleared the flags again.
+          //
+          // So a DERIVED mention may no longer re-open a field that already
+          // holds a clear, unflagged value. Genuine ambiguity is untouched:
+          // out.unclearFields (the classifier's own judgement, e.g. "ประมาณ
+          // 7-8 ล้าน") still raises needsConfirmation exactly as before - which
+          // is why it is concatenated below without any filtering.
+          const derivedApplicable = derivedUnclear.filter((k) => {
+            const e = cur.fields && cur.fields[k];
+            return !(e && e.value !== undefined && e.needsConfirmation !== true);
+          });
+          derivedUnclearSuppressed = derivedUnclear.filter((k) => !derivedApplicable.includes(k));
+          const unclearForPatch = Array.from(new Set([...out.unclearFields, ...derivedApplicable]));
           const built = buildDraftPatch(cur.fields, out.propertyFields, {
-            source: "ai_chat", at: nowMs, unclear: unclearIn,
+            source: "ai_chat", at: nowMs, unclear: unclearForPatch,
             // Evidence classification: fields the customer stated outright in
             // THIS turn are recorded as customer_stated, everything else as
             // ai_chat. Without this split an explicit "เปลี่ยนราคาเป็น 7.5 ล้าน"
@@ -1103,6 +1127,7 @@ exports.receptionTurn = onCall(
             // No confidence is passed: there is no genuine per-field signal in
             // Phase 1 and a constant must never be persisted as if there were.
           });
+          void unclearIn;
           if (!Object.keys(built.patch).length) return { applied: [], confirmed: [] };
           const doc = {
             ownerUid: visitorId,
@@ -1141,8 +1166,12 @@ exports.receptionTurn = onCall(
     // logged separately so a metadata-only confirmation (value unchanged,
     // needsConfirmation cleared) is visible instead of looking like a no-op.
     if (draftApplied.length || draftConfirmed.length) {
+      // derivedUnclearSuppressed: field NAMES the PENDING #6 fix declined to
+      // re-open because they already held a clear value. Names only, same
+      // privacy rule as every other rxLog call - it makes the fix observable
+      // in production without a further code change.
       rxLog({ rid, event: "draft_updated", uidTail, fields: draftApplied, confirmed: draftConfirmed,
-        derivedUnclearKeys: derivedUnclear });
+        derivedUnclearKeys: derivedUnclear, derivedUnclearSuppressed });
     }
 
     rxLog({ rid, event: "turn_done", uidTail, persisted: true, docAction,
