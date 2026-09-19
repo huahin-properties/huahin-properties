@@ -2497,6 +2497,27 @@ Owner อนุมัติ Scope แล้ว → **implementation เสร็
 3. `onSetListTab` เรียก `goBackToList()` เมื่อ `view === "edit"` (แท็บ ② เคยไม่ออกจากโหมดแก้ไข
    เพราะฟอร์มแก้ไขเรนเดอร์อยู่ภายในบล็อกแท็บรายการทรัพย์)
 
+## 33.9 PENDING #4 — แก้แล้วและ PRODUCTION PASS (19 ก.ย. 2569)
+
+**อาการ:** `Property Details.dc.html` พังทั้งหน้าฝั่งลูกค้าเมื่อทรัพย์ไม่มีรูป —
+`Cannot read properties of undefined (reading 'url')`
+
+**Root cause:** บรรทัด 898 ฟังก์ชัน `bgOf` — เมื่อ `photosSrc` ว่าง `effectiveIndices` ว่างตาม
+ทำให้ `activeIndex` เป็น `undefined` แล้ว `photosSrc[undefined].url` จึง throw
+(บรรทัด 987–990 กันค่าว่างไว้ถูกแล้ว มีแต่ `bgOf` ที่ลืม)
+
+**การแก้ (1 บรรทัด ไฟล์เดียว):** `photosSrc[i].url` → `(photosSrc[i] && photosSrc[i].url)`
+ตกไปใช้ลายพื้นหลังสำรองเดิมของระบบ · ไม่แตะ `property-adapter.js` / functions / rules ·
+ไม่ต้อง deploy functions · commit ขึ้น GitHub เท่านั้น (Actions #714)
+
+**ผลทดสอบ:** OPEN-1 PASS · OPEN-2 PASS · **TEST-A PASS** (หน้ารายละเอียด HH-80774 เปิดได้ครบ
+ไม่มี error · เห็นลายสำรอง · คุณสมบัติ “สระว่ายน้ำส่วนตัว” · แผนที่ · ฟอร์มติดต่อ · ทรัพย์ใกล้เคียง) ·
+**TEST-B = NOT TESTABLE** (โปรดักชันมีทรัพย์เผยแพร่รายการเดียวคือทรัพย์ทดสอบที่ไม่มีรูป —
+ห้ามสร้างทรัพย์ปลอม รอทรัพย์จริงรายการแรกแล้วยืนยัน regression แกลเลอรี) ·
+CLOSE-1/2/3 PASS — HH-80774 = ปิดชั่วคราว · เว็บ = Maintenance RED · ยืนยันจาก Incognito
+
+**ยังค้าง:** PENDING #1 (ค่า default ฟอร์มใหม่) · #2 (popup ครัวไม่ปิด) · #3 (`[object Object]`)
+
 **สถานะรอบ: Phase 2A-3 ปิดรอบแล้ว (19 ก.ย. 2569) — 23.1/23.2/23.3 PASS · 23.4 FAIL ·
 งานถัดไปที่แนะนำคือแก้ PENDING #4 ก่อนเปิดเว็บสาธารณะ · ห้ามเริ่ม Phase 2A-4 จนกว่าเจ้าของสั่ง**
 
