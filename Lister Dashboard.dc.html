@@ -29,7 +29,7 @@
 
 <div style="min-height:100vh;">
   <sc-if value="{{ showDevBar }}">
-    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-44 (PENDING #3 แก้ชื่อทำเลหลายภาษา) — เดิม: LD-43 (เชื่อมหน้าลูกค้า/ผลงาน + เขียน log เมื่อส่งทรัพย์อนุมัติ) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
+    <div style="background:#ffe600; color:#000; font-size:12px; padding:6px 10px; font-family:monospace;">LD-45 (PENDING #1 ล้างค่าเดาแทนผู้ใช้ในฟอร์มใหม่) — เดิม: LD-44 (PENDING #3 แก้ชื่อทำเลหลายภาษา) — เดิม: LD-43 (เชื่อมหน้าลูกค้า/ผลงาน + เขียน log เมื่อส่งทรัพย์อนุมัติ) — DEBUG: view={{ debugView }} dashTab={{ debugDashTab }} loaded={{ debugLoaded }} signedIn={{ debugSignedIn }} hasLister={{ debugHasLister }} newParam={{ debugNewParam }}</div>
   </sc-if>
   <div style="background:oklch(22% 0.02 60); padding:22px clamp(20px,4vw,56px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
     <div style="display:flex; align-items:center; gap:9px;">
@@ -673,7 +673,7 @@
             <div>
               <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ตำบล</div>
               <select value="{{ f_subdistrict }}" onChange="{{ onFSubdistrict }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white;">
-                <sc-for list="{{ subdistrictOptions }}" as="sd" hint-placeholder-count="6"><option value="{{ sd }}">{{ sd }}</option></sc-for>
+                <sc-for list="{{ subdistrictOptions }}" as="sd" hint-placeholder-count="6"><option value="{{ sd.id }}">{{ sd.label }}</option></sc-for>
               </select>
             </div>
             <div>
@@ -763,6 +763,7 @@
               <div>
                 <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">สภาพทรัพย์</div>
                 <select value="{{ f_condition }}" onChange="{{ onFCondition }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:4px; padding:11px 12px; font-size:14px; font-family:inherit; background:white;">
+                  <option value="">— เลือก —</option>
                   <option value="new_in_project">ใหม่ในโครงการ</option>
                   <option value="new_outside_project">ใหม่นอกโครงการ</option>
                   <option value="resale_in_project">มือสองในโครงการ</option>
@@ -1456,14 +1457,14 @@ class Component extends DCLogic {
   state = {
     lang: (() => { try { return localStorage.getItem("hh_lang") || localStorage.getItem("hhDashLang") || "th"; } catch (e) { return "th"; } })(),
     loaded: false, signedIn: false, lister: null, properties: [], view: "list", dashTab: "settings", showDevBar: false,
-    editingId: null, f_type: "villa", f_area: "hua-hin", f_subdistrict: "", f_zone: "", f_status: "sale",
+    editingId: null, f_type: "", f_area: "", f_subdistrict: "", f_zone: "", f_status: "sale",
     f_price: "", f_bedrooms: "", f_bathrooms: "", f_poolSize: "", f_parking: "", f_livingArea: "", f_landSize: "", f_mapsLink: "", f_mapDisplay: "area",
     f_titleDeed: "", f_kitchenTypes: [], f_purchaseOptions: [], kitchenMenuOpen: false, purchaseMenuOpen: false, collectionMenuOpen: false,
     // C4.3 Phase 2A-3 — canonical concepts added so staff/lister can record
     // them too. Ids come from functions/property-options.js; labels from data.js.
     f_projectStatus: "", f_projectName: "", f_poolStatus: "", f_furnishing: "", f_commercialSubtype: "",
     f_title: "", showReviewNotice: false, adminRole: null,
-    f_condition: "resale_in_project", f_yearBuilt: "", f_floor: "", f_commonFee: "", f_foreignQuota: "",
+    f_condition: "", f_yearBuilt: "", f_floor: "", f_commonFee: "", f_foreignQuota: "",
     f_landShape: "", f_roadWidth: "", f_landCondition: "", f_utilities: "", f_zoningColor: "",
     f_floors: "", f_electricalPhase: "", f_internalNotes: "", f_landRai: "", f_landNgan: "", f_landWah: "",
     f_description: "", f_aiDraft: "", aiGenerating: false, f_features: [], f_collections: [], f_seoTags: [], seoTagMenuOpen: false, saveError: "", saving: false,
@@ -1705,12 +1706,16 @@ class Component extends DCLogic {
     }
     this.pushViewHistory();
     this.setState({
-      view: "edit", editingId: null, f_type: "villa", f_area: "hua-hin", f_subdistrict: this.subdistrictsFor("hua-hin")[0] || "", f_zone: "",
+      // PENDING #1 (19 Sep 2026): a brand-new listing must start with nothing
+      // answered on the user's behalf — type/area/subdistrict/condition are
+      // real property answers and were being pre-filled. Sale-vs-rent, the
+      // public map mode and the owner map zoom stay defaulted on purpose.
+      view: "edit", editingId: null, f_type: "", f_area: "", f_subdistrict: "", f_zone: "",
       f_status: "sale", f_price: "", f_bedrooms: "", f_bathrooms: "", f_poolSize: "", f_parking: "", f_livingArea: "",
       f_landSize: "", f_mapsLink: "", f_mapDisplay: "area", f_titleDeed: "", f_kitchenTypes: [], f_purchaseOptions: [],
       f_projectStatus: "", f_projectName: "", f_poolStatus: "", f_furnishing: "", f_commercialSubtype: "",
       f_title: "",
-      f_condition: "resale_in_project", f_yearBuilt: "", f_floor: "", f_commonFee: "", f_foreignQuota: "",
+      f_condition: "", f_yearBuilt: "", f_floor: "", f_commonFee: "", f_foreignQuota: "",
       f_landShape: "", f_roadWidth: "", f_landCondition: "", f_utilities: "", f_zoningColor: "",
       f_floors: "", f_electricalPhase: "", f_internalNotes: "", f_landRai: "", f_landNgan: "", f_landWah: "",
       f_description: "", f_aiDraft: "", f_features: [], f_collections: [], f_seoTags: [], seoTagMenuOpen: false, saveError: "", existingPhotos: [], newPhotos: [], quotaMsg: "",
@@ -2958,8 +2963,8 @@ class Component extends DCLogic {
         const id = new URLSearchParams(window.location.search).get("edit") || "";
         window.location.href = "Listing Approvals.dc.html?case=" + encodeURIComponent(id) + "&open=conversation";
       },
-      typeOptions: mod ? mod.TYPES.map((ty) => ({ id: ty.id, label: ty.label.th })) : [],
-      areaOptions: mod ? mod.AREAS.map((a) => ({ id: a.id, label: a.label.th })) : [],
+      typeOptions: mod ? [{ id: "", label: "— เลือก —" }].concat(mod.TYPES.map((ty) => ({ id: ty.id, label: ty.label.th }))) : [],
+      areaOptions: mod ? [{ id: "", label: "— เลือก —" }].concat(mod.AREAS.map((a) => ({ id: a.id, label: a.label.th }))) : [],
       featureOptions: mod ? Object.keys(mod.FEATURES).map((fid) => ({
         id: fid, label: mod.FEATURES[fid].th, checked: this.state.f_features.includes(fid),
         onToggle: () => this.toggleFeature(fid),
@@ -2980,9 +2985,12 @@ class Component extends DCLogic {
       f_type: this.state.f_type, onFType: (e) => this.setState({ f_type: e.target.value }),
       f_area: this.state.f_area, onFArea: (e) => {
         const area = e.target.value;
-        this.setState({ f_area: area, f_subdistrict: this.subdistrictsFor(area)[0] || "" });
+        // PENDING #1: changing the district must not answer "subdistrict" for
+        // the user — clear it and let them pick from the new district's list.
+        this.setState({ f_area: area, f_subdistrict: "" });
       },
-      subdistrictOptions: this.subdistrictsFor(this.state.f_area),
+      subdistrictOptions: [{ id: "", label: this.state.f_area ? "— เลือก —" : "— เลือกอำเภอก่อน —" }]
+        .concat(this.subdistrictsFor(this.state.f_area).map((sd) => ({ id: sd, label: sd }))),
       f_subdistrict: this.state.f_subdistrict, onFSubdistrict: (e) => this.setState({ f_subdistrict: e.target.value }),
       f_zone: this.state.f_zone, onFZone: (e) => this.setState({ f_zone: e.target.value }),
       f_poolSize: this.state.f_poolSize, onFPoolSize: (e) => this.setState({ f_poolSize: e.target.value }),
