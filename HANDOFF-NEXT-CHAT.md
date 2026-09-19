@@ -31,12 +31,14 @@
 **#2 — popup multi-select ไม่ปิดเมื่อคลิกนอกกรอบ:** แก้แล้ว (LD-46, Actions #722)
 TEST-2/3/4 PASS · เหลือ regression ขั้นสุดท้าย + ส่ง BLUEPRINT ขึ้น GitHub
 
-**#5 — Purchase/Installment Multi-select Summary Inconsistency
-— DISCOVERED / NOT FIXED / ROOT CAUSE NOT YET AUDITED**
-ช่อง “ช่องทางการซื้อ/ผ่อน” สรุปว่า `เลือกแล้ว 1 รายการ` ขณะที่ “ประเภทครัว” และ “แท็ก SEO”
-สรุปเป็นชื่อค่าจริง — UX/display issue **ยังไม่ได้ตรวจ root cause** ดู BLUEPRINT §33.12
+**#5 — Purchase/Installment Multi-select Summary Inconsistency — ปิดแล้ว PRODUCTION PASS**
+แก้ `purchaseSummary` ให้แสดงชื่อค่าจริงคั่นด้วยลูกน้ำ (LD-47, Actions #725) — ดู BLUEPRINT §33.14
+**หนี้ PENDING #1–#5 จาก Phase 2A-3 เคลียร์หมดแล้ว**
 
-**ลำดับงาน:** PENDING #2 close → **PENDING #5** → Phase 2A-4
+**กฎถาวรเพิ่ม (BLUEPRINT §33.15) — VIEWER / CURRENT-WORK-ONLY RULE:** Viewer คือ operational
+dashboard ไม่ใช่คลังประวัติ · ต้องอัปเดตทันทีทุกครั้งที่สถานะเปลี่ยน โดยไม่ต้องให้เจ้าของเตือน ·
+แสดงเฉพาะ CURRENT / YOU DO NOW / PASS WHEN / NEXT 1 งาน · งานที่ปิดแล้วนำออกจากหน้าจอ
+(ซ่อน presentation เท่านั้น ห้ามลบประวัติจริง) · ห้ามลบ issue ที่ยัง OPEN เพียงเพื่อให้ Viewer สั้นลง
 
 **กฎถาวร ISSUE CAPTURE RULE** (BLUEPRINT §33.13): พบปัญหาใหม่ระหว่างทดสอบ แม้นอก scope
 ต้องตั้งหมายเลข PENDING และบันทึกลง BLUEPRINT + HANDOFF ก่อนปิดรอบ ห้ามเก็บไว้ในแชท
