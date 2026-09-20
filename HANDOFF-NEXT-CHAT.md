@@ -1,4 +1,45 @@
 # HANDOFF — อ่านไฟล์นี้ก่อนเริ่มงานในแชทใหม่
+
+> ## ⛳ สถานะล่าสุด ณ 20 กันยายน 2569 (อ่านบล็อกนี้ก่อน ที่เหลือคือประวัติ)
+>
+> | รายการ | สถานะ |
+> |---|---|
+> | เว็บไซต์ | 🔴 **RED / Public Hidden** (โหมดปิดปรับปรุง) |
+> | PENDING #6 | CLOSED / PRODUCTION PASS |
+> | PENDING #7 | **CLOSED / PRODUCTION PASS** |
+> | PENDING #8 | CLOSED / PRODUCTION PASS |
+> | PENDING #9 | **OPEN / NOT FIXED** — ห้ามแก้ปนกับงานอื่น |
+> | PENDING #10 | **OPEN / NOT FIXED** — ห้ามแก้ปนกับงานอื่น |
+> | PENDING #11 | **CLOSED / PRODUCTION PASS** |
+> | R7-3 | **NOT TESTABLE** — ยังไม่มีทรัพย์เผยแพร่จริง · **ห้ามสร้างทรัพย์เพื่อให้ test ผ่าน** |
+> | Phase 2A-4 | **NOT STARTED** |
+> | Phase 2B | **NOT STARTED** |
+>
+> **สิ่งที่เพิ่งจบ (20 ก.ย. 2569)**: แก้ PENDING #7 (AI อ้างถึงปุ่มที่ไม่มีจริง) และ
+> PENDING #11 (โมเดลไม่ส่งโทเคน `[[LIST_PROPERTY]]`) · ทั้งสองปิดด้วย Regression
+> D1–D8 PASS ครบบน production · แก้ไฟล์เดียวคือ `ContactRail.dc.html` ·
+> **ไม่ได้ deploy functions เลยทั้งรอบ** (เป็นไฟล์ฝั่ง client)
+>
+> **ทางแก้ที่ใช้ (สำคัญสำหรับงานต่อ)**: ปุ่ม List property ไม่ได้มาจากการเดาคำที่ AI พูด
+> อีกต่อไป แต่มาจาก `data.meta.primaryIntent` ที่เซิร์ฟเวอร์จำแนกเป็น enum
+> (SELL / RENT_OUT เท่านั้นที่สร้างปุ่ม) — รายละเอียดเต็มใน **BLUEPRINT §35.24 – §35.26**
+> โทเคนและ regex เดิมยังอยู่ครบ ไม่ได้ลบ
+>
+> **ลำดับความน่าเชื่อถือของเอกสาร**: BLUEPRINT.md > HANDOFF-NEXT-CHAT.md > CLAUDE.md
+>
+> **กติกาที่ล็อกไว้ ห้ามฝ่าฝืน**
+> 1. ห้ามแก้ source โดยไม่ได้รับอนุมัติจากเจ้าของก่อน — เสนอขอบเขตแล้วรอคำว่า "อนุมัติ"
+> 2. ห้าม deploy จนกว่าจะระบุ scope ชัดและได้รับอนุมัติ (เช่น `--only functions:receptionTurn`)
+> 3. เปิดเว็บเป็นสีเขียวได้เฉพาะตอนทดสอบ และ **ต้องปิดกลับแดงทันทีที่เสร็จ** (กฎ §29.4)
+> 4. ส่งไฟล์ทุกไฟล์ผ่าน Viewer `Copy Code to GitHub.dc.html` เท่านั้น — ห้ามให้ดาวน์โหลด
+>    .zip/.js (Windows Defender ของเจ้าของบล็อก) · **แก้ไฟล์ในโปรเจกต์ ≠ ส่งมอบ**
+> 5. Viewer ต้องมีงานให้เจ้าของทำ **ครั้งละหนึ่งขั้นเท่านั้น**
+> 6. พบปัญหาใหม่ระหว่างทดสอบ → บันทึกเป็น PENDING ใหม่ **ห้ามแก้ปน**
+> 7. ถ้าข้อทดสอบใดไม่ผ่าน → **หยุดทันที** รายงาน ไม่ทดสอบข้อถัดไป
+>
+> **งานที่เจ้าของยังไม่ได้เลือกสำหรับรอบถัดไป**: PENDING #9 · PENDING #10 · Phase 2A-4
+> — **ห้ามเริ่มเอง** ต้องรอเจ้าของสั่ง
+
 **สร้าง: 18 กันยายน 2569** · ใช้สำหรับส่งต่อสถานะเมื่อเปิดแชทใหม่ในโปรเจกต์เดิม
 
 > ลำดับความน่าเชื่อถือของเอกสาร: **BLUEPRINT.md > ไฟล์นี้ > CLAUDE.md**
@@ -236,3 +277,71 @@ dashboard ไม่ใช่คลังประวัติ · ต้องอ
 
 ### รายละเอียดขอบเขตเดิม (BLUEPRINT §29.5)
 เพิ่ม callable อ่านอย่างเดียว `getPropertyDraft` (ใช้ evaluator เดิม) + แถบ Progress ในแชท · ไฟล์ที่แก้: `functions/index.js`, `firebase-client.js`, `ContactRail.dc.html` · deploy แคบ `--only functions:getPropertyDraft` · เบราว์เซอร์ห้ามคำนวณ percent · ไม่แก้ rules · ไม่เริ่ม 2B/2C/2D
+
+
+---
+
+## รอบ 20 ก.ย. 2569 (ต่อ) — PENDING #7 ยังไม่ปิด · PENDING #11 เกิดใหม่
+
+**เว็บไซต์ = 🔴 RED / Public Hidden** · ยังไม่ deploy อะไรในรอบนี้
+
+### สถานะ PENDING
+| # | สถานะ | สรุป |
+|---|---|---|
+| #6 | CLOSED / PRODUCTION PASS | — |
+| #7 | **PARTIALLY FIXED / NOT CLOSED** | อาการ "AI อ้างถึงปุ่มที่ไม่มี" ผ่านแล้ว แต่ยังไม่ปิดจนกว่าเอกสารจะแยก boundary กับ #11 ชัด |
+| #8 | CLOSED / PRODUCTION PASS | — |
+| #9 | OPEN / NOT FIXED | ห้ามแก้ปน |
+| #10 | OPEN / NOT FIXED | ห้ามแก้ปน |
+| #11 | **DISCOVERED / NOT FIXED** | LIST_PROPERTY token emission is not deterministic |
+
+### สิ่งที่ commit ขึ้น main แล้วในรอบนี้
+`ContactRail.dc.html` — LIST_PROPERTY regex ใน `_extractLinks()` (บรรทัด ~1584)
+เพิ่มแบบ additive สองครั้ง: วลีอังกฤษ 3 แบบ และคำไทย 3 คำ · **ไม่ deploy**
+(ไฟล์นี้เป็น client ไม่ต้อง deploy functions)
+
+### ผลสำคัญ
+- B1/B2/B3 PASS · B4 และ C1 ปุ่มไม่ขึ้น
+- `_extractLinks()` เห็นเฉพาะ **ข้อความที่ AI ตอบ** ไม่เห็นข้อความลูกค้า
+  → การเติมคำใน regex คือการเดาคำของโมเดล ไม่ใช่ทางออกเชิงระบบ
+- AUDIT #11 พบว่า **มี structured signal อยู่แล้ว**: `data.meta.primaryIntent`
+  (enum SELL / RENT_OUT / …) ส่งถึง client แล้ว แต่ใช้แค่เขียน log
+
+### งานค้าง — รอเจ้าของเลือก (ห้ามเริ่มเอง)
+1. เลือกแนวทางแก้ #11 (แนะนำ: ใช้ `meta.primaryIntent` แทนการเดาคำ — BLUEPRINT §35.25)
+2. #7 ปิดได้เมื่อ boundary กับ #11 ชัดในเอกสาร
+3. Phase 2A-4 / 2B = NOT STARTED
+
+### ข้อห้ามที่ล็อกไว้
+ห้ามแก้ source โดยไม่ได้รับอนุมัติ · ห้าม deploy · ห้ามเปิดเว็บเขียวค้าง ·
+ห้ามแก้ #9 / #10 ปน · ห้ามสร้างทรัพย์เพื่อให้ R7-3 ผ่าน · ห้ามเริ่ม Phase 2A-4 / 2B
+
+
+---
+
+## ปิดรอบ 20 ก.ย. 2569 — PENDING #7 + #11 CLOSED
+
+**เว็บไซต์ = 🔴 RED / Public Hidden** · ไม่ได้ deploy functions ในรอบนี้เลย
+
+| # | สถานะ |
+|---|---|
+| #6 | CLOSED / PRODUCTION PASS |
+| #7 | **CLOSED / PRODUCTION PASS** |
+| #8 | CLOSED / PRODUCTION PASS |
+| #9 | OPEN / NOT FIXED |
+| #10 | OPEN / NOT FIXED |
+| #11 | **CLOSED / PRODUCTION PASS** |
+
+### สรุปการแก้
+`ContactRail.dc.html` — 3 รอบ additive:
+prompt (กฎ ON-SCREEN ELEMENTS ทุกภาษา) → regex เพิ่มวลี EN/TH → **`meta.primaryIntent`**
+รอบสุดท้ายคือรอบที่แก้ตรงเหตุ: ปุ่มมาจากค่าเจตนาที่เซิร์ฟเวอร์จำแนก ไม่ใช่ถ้อยคำที่โมเดลเลือก
+
+### Regression D1–D8 = PASS ครบ (BLUEPRINT §35.26)
+มีปุ่ม: ไทย SELL · อังกฤษ SELL · RENT_OUT · ไม่มีปุ่ม: BUY · RENT · ราคาตลาด ·
+ปุ่มใบเดียวไม่ซ้อน · ไม่อ้างถึง UI ที่ไม่มี
+
+### งานค้างรอบถัดไป (ห้ามเริ่มเอง)
+1. PENDING #9 / #10 — ยังไม่แตะ
+2. R7-3 — NOT TESTABLE จนกว่าจะมีทรัพย์เผยแพร่จริง (ห้ามสร้างเพื่อให้ผ่าน)
+3. Phase 2A-4 / 2B — NOT STARTED
