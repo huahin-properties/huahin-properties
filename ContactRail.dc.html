@@ -1153,7 +1153,7 @@ class Component extends DCLogic {
       if (data && Object.prototype.hasOwnProperty.call(data, "draftCompleteness")) {
         if (data.draftCompleteness) this.setState({ draftCompleteness: data.draftCompleteness });
       }
-      const aiMsg = { role: "assistant", text: this._cleanReply(reply), links: this._extractLinks(reply, this._detectLang(text)), bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:7px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
+      const aiMsg = { role: "assistant", text: this._cleanReply(reply), links: this._extractLinks(reply, this._detectLang(text), (data && data.meta && data.meta.primaryIntent) || null), bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:7px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
       const completed = [...history, aiMsg];
       this.setState({ chatMessages: completed, chatLoading: false });
       this._persistHistory(completed);
@@ -1561,7 +1561,15 @@ class Component extends DCLogic {
     return out.trim();
   }
 
-  _extractLinks(text, lang) {
+  // PENDING #11 — the LIST_PROPERTY action may also be derived from the
+  // SERVER's structured classification (receptionTurn's meta.primaryIntent),
+  // because the model does not emit [[LIST_PROPERTY]] reliably. `intent` is
+  // optional: the token and the prose regex below are unchanged and still run
+  // first, so every path that worked before keeps working. Only the canonical
+  // supply-side intents (same pair as functions/index.js CASE_INTENTS_C42B)
+  // qualify, and the button stays pure navigation - no Case, no Firestore
+  // write, no confirmation bypass.
+  _extractLinks(text, lang, intent) {
     if (!text) return [];
     const props = this._properties || (this._mod ? this._mod.PROPERTIES : []) || [];
     const codes = [...new Set((text.match(/\b[A-Z]{2,4}-\d{2,6}\b/g) || []))];
@@ -1581,7 +1589,8 @@ class Component extends DCLogic {
     if (/\[\[\s*CONTACT\s*\]\]|contact us|ติดต่อเรา|связ|联系|kontakt|contattaci|contactez/i.test(text)) {
       links.push({ label: t.chat_contact_us || "Contact us", noThumb: true, onClick: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }) });
     }
-    if (/\[\[\s*LIST_PROPERTY\s*\]\]|list your property|ฝากขาย|ฝากเช่า|เผยแพร่ทรัพย์|разместить (свой )?объект|发布(您的)?房源|immobilie inserieren|legg ut din eiendom|publier votre bien|pubblica il tuo immobile|start the listing process|get .{0,30} listed|list (your|my) (villa|house|property|condo|land)|ลงประกาศ|ประกาศขายบ้าน|ประกาศขายทรัพย์/i.test(text)) {
+    if (/\[\[\s*LIST_PROPERTY\s*\]\]|list your property|ฝากขาย|ฝากเช่า|เผยแพร่ทรัพย์|разместить (свой )?объект|发布(您的)?房源|immobilie inserieren|legg ut din eiendom|publier votre bien|pubblica il tuo immobile|start the listing process|get .{0,30} listed|list (your|my) (villa|house|property|condo|land)|ลงประกาศ|ประกาศขายบ้าน|ประกาศขายทรัพย์/i.test(text)
+      || intent === "SELL" || intent === "RENT_OUT") {
       links.push({ label: t.chat_list_property || "List property", noThumb: true, onClick: () => this._navigate("Owner Submission.dc.html") });
     }
     return links;
@@ -1789,7 +1798,7 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       if (data && Object.prototype.hasOwnProperty.call(data, "draftCompleteness")) {
         if (data.draftCompleteness) this.setState({ draftCompleteness: data.draftCompleteness });
       }
-      const aiMsg = { role: "assistant", text: this._cleanReply(reply), links: this._extractLinks(reply, this._detectLang(text)), bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:7px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
+      const aiMsg = { role: "assistant", text: this._cleanReply(reply), links: this._extractLinks(reply, this._detectLang(text), (data && data.meta && data.meta.primaryIntent) || null), bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:7px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
         this.setState({ chatMessages: [...history, aiMsg], chatLoading: false });
         this._persistHistory([...history, aiMsg]);
       } catch (e) {
@@ -1835,7 +1844,7 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
       if (data && Object.prototype.hasOwnProperty.call(data, "draftCompleteness")) {
         if (data.draftCompleteness) this.setState({ draftCompleteness: data.draftCompleteness });
       }
-      const aiMsg = { role: "assistant", text: this._cleanReply(reply), links: this._extractLinks(reply, this._detectLang(text)), bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:7px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
+      const aiMsg = { role: "assistant", text: this._cleanReply(reply), links: this._extractLinks(reply, this._detectLang(text), (data && data.meta && data.meta.primaryIntent) || null), bubbleWrapStyle: "align-self:flex-start; max-width:85%;", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:7px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5; white-space:pre-wrap;" };
       this.setState({ chatMessages: [...history, aiMsg], chatLoading: false });
       this._persistHistory([...history, aiMsg]);
       if (this.state.customerMode && this._convBackend === "local" && this._convStore) {
