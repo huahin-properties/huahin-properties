@@ -618,6 +618,26 @@ function normalisePropertyFields(pf) {
     const mapped = PROPERTY_OPTIONS.normaliseOwnershipText(out.ownership);
     if (mapped.titleDeed) out.titleDeed = mapped.titleDeed;
   }
+  // PENDING #8 FIX (Fix Option A, 20 Sep 2026) - the RETURN leg of the same
+  // bridge. CONFIRMED ROOT CAUSE from production rxLog (rid f98b22069c47):
+  // the customer said "เอกสารสิทธิ์เป็นโฉนด นส.4 จ", the model returned it as
+  // `titleDeed` ONLY (statedKeys: ["titleDeed"], pfKeys had no `ownership`),
+  // and draft-completeness counts `ownership` - so the eighth required field
+  // stayed empty forever and the indicator stuck at 7/8 = 88%.
+  //
+  // Additive and value-preserving: fills `ownership` ONLY when the model did
+  // not supply one itself (an explicit customer phrasing always wins), and
+  // only from the canonical id the enum already carries - no new vocabulary,
+  // no guessed wording, no inferred meaning. The id round-trips: feeding it
+  // back through normaliseOwnershipText yields the same titleDeed.
+  //
+  // `unknown` is excluded on purpose: "ไม่ทราบ" is the absence of an answer,
+  // and must never be counted as a completed field.
+  if (out.ownership === undefined && out.titleDeed !== undefined &&
+      out.titleDeed !== "unknown") {
+    const v = validateDraftField("ownership", out.titleDeed);
+    if (v !== undefined) out.ownership = v;
+  }
   return out;
 }
 
