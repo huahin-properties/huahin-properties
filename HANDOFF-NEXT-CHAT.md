@@ -6,7 +6,33 @@
 
 ---
 
-## 0. รอบล่าสุด — **PHASE 2A-2 = CLOSED / PRODUCTION PASS** (19 กันยายน 2569)
+## 0.00 รอบล่าสุด — **PENDING #8 และ PENDING #6 = CLOSED / PRODUCTION PASS** (20 กันยายน 2569)
+
+**PENDING #8** (ค้าง 88% แม้ตอบโฉนดชัดเจน) — audit จาก rxLog โปรดักชันจริง (§35.14):
+เทิร์น `rid f98b22069c47` มี `statedKeys: ["titleDeed"]` · `pfKeys` **ไม่มี `ownership`** ·
+`unclearKeys: []` · `derivedUnclearKeys: []` · ไม่มี `draft_updated`/`draft_error`
+→ **ROOT CAUSE**: โมเดลส่งคำตอบลงช่อง `titleDeed` แต่ evaluator นับช่อง `ownership`
+และสะพานใน `normalisePropertyFields()` เป็นทางเดียว (ownership → titleDeed)
+
+**FIX OPTION A** (§35.15) — แก้ `functions/index.js` ไฟล์เดียว ฟังก์ชันเดียว: เพิ่มสะพาน
+**ขากลับ titleDeed → ownership** · additive · ไม่ทับค่าที่โมเดลส่งเอง · ยกเว้น `unknown` ·
+ไม่แตะ draft-completeness.js / สูตร / schema / validateDraftField / prompt / UI / rules
+· deploy แคบ `--only functions:receptionTurn` (สำเร็จ ไม่มี error)
+
+**ผลทดสอบ (§35.16) — R8-1 ถึง R8-5 PASS ครบ**: โฉนด → 100% · น.ส.3 ก map ถูก ไม่กลายเป็น
+โฉนด · กำกวมไม่ถูกเดา (ค้าง 88%) · #6 ไม่ถดถอย + F5 คงค่า · 100% ไม่สร้าง Property / Case /
+คิวอนุมัติ / ประกาศ (Firestore ไม่มีเอกสารใหม่ · Listing Approvals ทั้งหมด 8 เท่าเดิม)
+
+**ปิดได้ทั้งสองรายการ**: PENDING #8 = CLOSED · **PENDING #6 = CLOSED** (R4 ทำได้แล้วเมื่อตัวบล็อกถูกปลด)
+
+**🔴 ยังเปิดอยู่: PENDING #7** — AI อ้างถึง “ปุ่มด้านล่าง” ที่ยังไม่ปรากฏบนหน้าจอ (§35.12)
+พบซ้ำ 2 ครั้งในรอบนี้ · เป็นปัญหาถ้อยคำของ prompt · **ยังไม่แก้ รอเจ้าของสั่งเป็นรอบงานแยก**
+
+**เว็บ**: ปิดกลับ 🔴 Maintenance แล้วตามกฎ §29.4 · **Phase 2A-4 / 2B = ยังห้ามเริ่ม**
+
+---
+
+## 0. รอบก่อนหน้า — **PHASE 2A-2 = CLOSED / PRODUCTION PASS** (19 กันยายน 2569)
 
 **TEST 10.4 = PASS** (§35.8) — ทดสอบครบ 4 จังหวะในกรอบ §29.4 มีภาพหน้าจอยืนยันทุกจังหวะ:
 แถบขึ้น 100% จริง · `properties` ไม่มีเอกสารใหม่ · Listing Approvals ยังเป็น 7 รายการ ·
