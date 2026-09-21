@@ -10,7 +10,9 @@
 > | PENDING #8 | CLOSED / PRODUCTION PASS |
 > | PENDING #9 | ✅ **CLOSED / PRODUCTION PASS** (21 ก.ย. 2569) |
 > | PENDING #10 | **TRUTHFULNESS FIX EXISTS IN SOURCE / DOCUMENTATION STALE / VERIFICATION PENDING** — ขอบเขตเหลือเฉพาะ "AI ห้ามกล่าวอ้าง authoritative action ที่ไม่ได้เกิด" · ปิดได้เมื่อ R10-TRUTH ผ่าน · เรื่อง Product Flow ย้ายไป #14 (BLUEPRINT §35.34 · §36) |
-> | PENDING #14 | 🆕 **OPEN / PRODUCT DECISION APPROVED · NOT IMPLEMENTED** — Viewing / Handoff Product Flow Reconciliation · ขอบเขต 4 ข้อล็อกแล้ว แก้ `ContactRail.dc.html` → `_buildSystemPrompt()` เท่านั้น (BLUEPRINT §36.7) |
+> | PENDING #14 | **SOURCE ON MAIN / REGRESSION PAUSED / S-6 FAIL** — S-1 · S-2 · S-4 PASS แต่ S-6 ยังมีปุ่มติดต่อขึ้นในบทสนทนาฝากขายก่อนส่ง (BLUEPRINT §36.9) · **blocker = #15 ต้องแก้ก่อน** |
+> | PENDING #15 | 🆕 **OPEN / NOT FIXED** — Contact CTA เกิดจาก regex ใน `_replyLinks()` ไม่ใช่โทเคน → bypass PD-02 ได้ (BLUEPRINT §36.10) · **AUDIT ONLY ก่อน** |
+> | PENDING #16 | 🆕 **OPEN / NOT FIXED** — Female persona only (ไทย): ห้าม "ผม/ครับ" เป็นเสียง AI · พบผิด 4 ครั้งใน 4 เทิร์น (BLUEPRINT §36.11 · PD-16) |
 > | PENDING #11 | CLOSED / PRODUCTION PASS |
 > | PENDING #12 | 🆕 **OPEN / NOT FIXED** — `CHAT_I18N` ขาดคีย์ ~23 คีย์ต่อภาษาใน ru/zh/de/no/fr/it (BLUEPRINT §35.29) |
 > | PENDING #13 | 🆕 **OPEN / NOT FIXED** — ภาษาไม่ถูกส่งต่อไปหน้า `Owner Submission.dc.html` (BLUEPRINT §35.32) |
@@ -66,8 +68,10 @@
 > 8. ก่อนให้เจ้าของก็อปไฟล์จาก Viewer ต้องตรวจว่ากล่องโค้ดขึ้นต้นตรงกับบรรทัดแรกจริงของไฟล์
 >    และขนาดใกล้เคียงไฟล์จริง (BLUEPRINT §35.30 — เคยเกือบทำให้ BLUEPRINT ถูกตัดทิ้งบน main)
 >
-> **งานที่เจ้าของยังไม่ได้เลือกสำหรับรอบถัดไป**: PENDING #12 · PENDING #13 · PENDING #14 ·
-> Phase 2A-4 — **ห้ามเริ่มเอง** ต้องรอเจ้าของสั่ง
+> **ลำดับงานที่ล็อกไว้ (BLUEPRINT §36.12 — ห้ามข้ามลำดับ)**: #15 Contact CTA audit →
+> #16 Female persona → รัน #14 regression ใหม่ → sync เอกสาร · **แต่ละขั้นต้องรอเจ้าของอนุมัติก่อนเริ่ม**
+>
+> **งานอื่นที่ยังไม่ได้เลือก**: PENDING #12 · PENDING #13 · Phase 2A-4 — **ห้ามเริ่มเอง**
 >
 > **PENDING #10 ไม่ต้องเลือกเป็นรอบแก้แล้ว** — fix อยู่ใน source แล้ว เหลือเพียง verification
 > ด้วย R10-TRUTH · ส่วน R10 ที่ต้องใช้ทรัพย์เผยแพร่จริงยัง NOT TESTABLE (ไม่ใช่ FAIL)
