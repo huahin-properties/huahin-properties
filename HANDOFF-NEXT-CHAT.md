@@ -1,29 +1,53 @@
 # HANDOFF — อ่านไฟล์นี้ก่อนเริ่มงานในแชทใหม่
 
-> ## ⛳ สถานะล่าสุด ณ 20 กันยายน 2569 (อ่านบล็อกนี้ก่อน ที่เหลือคือประวัติ)
+> ## ⛳ สถานะล่าสุด ณ 21 กันยายน 2569 (อ่านบล็อกนี้ก่อน ที่เหลือคือประวัติ)
 >
 > | รายการ | สถานะ |
 > |---|---|
 > | เว็บไซต์ | 🔴 **RED / Public Hidden** (โหมดปิดปรับปรุง) |
 > | PENDING #6 | CLOSED / PRODUCTION PASS |
-> | PENDING #7 | **CLOSED / PRODUCTION PASS** |
+> | PENDING #7 | CLOSED / PRODUCTION PASS |
 > | PENDING #8 | CLOSED / PRODUCTION PASS |
-> | PENDING #9 | **OPEN / NOT FIXED** — ห้ามแก้ปนกับงานอื่น |
+> | PENDING #9 | ✅ **CLOSED / PRODUCTION PASS** (21 ก.ย. 2569) |
 > | PENDING #10 | **OPEN / NOT FIXED** — ห้ามแก้ปนกับงานอื่น |
-> | PENDING #11 | **CLOSED / PRODUCTION PASS** |
+> | PENDING #11 | CLOSED / PRODUCTION PASS |
+> | PENDING #12 | 🆕 **OPEN / NOT FIXED** — `CHAT_I18N` ขาดคีย์ ~23 คีย์ต่อภาษาใน ru/zh/de/no/fr/it (BLUEPRINT §35.29) |
+> | PENDING #13 | 🆕 **OPEN / NOT FIXED** — ภาษาไม่ถูกส่งต่อไปหน้า `Owner Submission.dc.html` (BLUEPRINT §35.32) |
 > | R7-3 | **NOT TESTABLE** — ยังไม่มีทรัพย์เผยแพร่จริง · **ห้ามสร้างทรัพย์เพื่อให้ test ผ่าน** |
 > | Phase 2A-4 | **NOT STARTED** |
 > | Phase 2B | **NOT STARTED** |
 >
-> **สิ่งที่เพิ่งจบ (20 ก.ย. 2569)**: แก้ PENDING #7 (AI อ้างถึงปุ่มที่ไม่มีจริง) และ
-> PENDING #11 (โมเดลไม่ส่งโทเคน `[[LIST_PROPERTY]]`) · ทั้งสองปิดด้วย Regression
-> D1–D8 PASS ครบบน production · แก้ไฟล์เดียวคือ `ContactRail.dc.html` ·
-> **ไม่ได้ deploy functions เลยทั้งรอบ** (เป็นไฟล์ฝั่ง client)
+> **สิ่งที่เพิ่งจบ (21 ก.ย. 2569) — PENDING #9 = CLOSED / PRODUCTION PASS**
+> อาการ: ปุ่มในแชทแสดง "List property" ภาษาอังกฤษขณะคุยภาษาไทย
+> ROOT CAUSE (จาก source จริง): คีย์ `chat_list_property` ถูกใช้ที่เดียวคือ
+> `ContactRail.dc.html` บรรทัด 1591 แต่ **ไม่มีในพจนานุกรม `CHAT_I18N` เลยแม้แต่ภาษาเดียว
+> ทั้ง 8 ภาษา** จึงตกไปใช้ค่าสำรอง hardcode `|| "List property"` เสมอ (ที่ EN ดูถูกเป็นเรื่องบังเอิญ)
+> MINIMAL FIX: เติมคีย์ `chat_list_property` ใน `CHAT_I18N` **ครบ 8 ภาษา จุดเดียว ไฟล์เดียว**
+> (en: List property · th: ฝากขาย / ฝากเช่าทรัพย์ · ru: Разместить объект · zh: 发布房源 ·
+> de: Immobilie inserieren · no: Legg ut eiendom · fr: Publier votre bien · it: Pubblica il tuo immobile)
+> **ไม่แตะ logic แม้บรรทัดเดียว** — ไม่แตะ `_extractLinks()` · regex LIST_PROPERTY ·
+> `primaryIntent` · navigation · Case logic · functions · firestore.rules
+> คงค่าสำรอง `t.chat_list_property || "List property"` ไว้ตามเดิม
 >
-> **ทางแก้ที่ใช้ (สำคัญสำหรับงานต่อ)**: ปุ่ม List property ไม่ได้มาจากการเดาคำที่ AI พูด
-> อีกต่อไป แต่มาจาก `data.meta.primaryIntent` ที่เซิร์ฟเวอร์จำแนกเป็น enum
-> (SELL / RENT_OUT เท่านั้นที่สร้างปุ่ม) — รายละเอียดเต็มใน **BLUEPRINT §35.24 – §35.26**
-> โทเคนและ regex เดิมยังอยู่ครบ ไม่ได้ลบ
+> **ผลทดสอบโปรดักชัน (หน้าต่าง Incognito · 🔴→🟢→TEST→🔴)**
+> TH → "ฝากขาย / ฝากเช่าทรัพย์" ✅ · EN → "List property" ✅ (เหมือนเดิม ไม่ถดถอย) ·
+> DE → "Immobilie inserieren" ✅ · FR → "Publier votre bien" ✅ ·
+> กดปุ่มแล้วไป `Owner Submission.dc.html` จริง ไม่สร้าง Case ไม่เขียน Firestore ✅ ·
+> ปิดเว็บกลับ 🔴 แดงแล้ว ✅ — รายละเอียดเต็ม BLUEPRINT §35.33
+> หมายเหตุ: ป้ายปุ่มในประวัติแชทเก่าคงภาษาเดิมตอนที่ตอบ = พฤติกรรมถูกต้อง ไม่ใช่ข้อบกพร่อง
+>
+> **ขึ้น GitHub main แล้วในรอบนี้**: `ContactRail.dc.html` (คีย์ 8 ภาษา) ·
+> `BLUEPRINT.md` (§35.27–§35.33 · 3709 บรรทัด 525 KB ยืนยันครบไฟล์)
+> **ไม่มี Functions deploy ในรอบนี้เลย** — แก้เฉพาะไฟล์ฝั่ง client
+>
+> **Viewer ไม่ใช่ไฟล์ส่งมอบ GitHub**: `Copy Code to GitHub.dc.html` เป็น Operational Viewer
+> ภายใน Claude Project **ไม่ได้อยู่ใน GitHub repository** · ห้ามตั้ง delivery step ให้เจ้าของ
+> commit ไฟล์นี้ (ขั้น 88 ของรอบนี้ = **CANCELLED / NOT REQUIRED** เพราะตั้ง delivery step ผิด
+> ไม่ใช่งานที่ค้าง) · ถ้าแก้ Viewer แล้ว ให้จบในโปรเจกต์เท่านั้น
+>
+> **ทางแก้เดิมที่ยังต้องรู้ (จากรอบ 20 ก.ย.)**: ปุ่ม List property มาจาก
+> `data.meta.primaryIntent` ที่เซิร์ฟเวอร์จำแนกเป็น enum (SELL / RENT_OUT เท่านั้นที่สร้างปุ่ม)
+> — BLUEPRINT §35.24–§35.26 · โทเคนและ regex เดิมยังอยู่ครบ
 >
 > **ลำดับความน่าเชื่อถือของเอกสาร**: BLUEPRINT.md > HANDOFF-NEXT-CHAT.md > CLAUDE.md
 >
@@ -33,12 +57,16 @@
 > 3. เปิดเว็บเป็นสีเขียวได้เฉพาะตอนทดสอบ และ **ต้องปิดกลับแดงทันทีที่เสร็จ** (กฎ §29.4)
 > 4. ส่งไฟล์ทุกไฟล์ผ่าน Viewer `Copy Code to GitHub.dc.html` เท่านั้น — ห้ามให้ดาวน์โหลด
 >    .zip/.js (Windows Defender ของเจ้าของบล็อก) · **แก้ไฟล์ในโปรเจกต์ ≠ ส่งมอบ**
-> 5. Viewer ต้องมีงานให้เจ้าของทำ **ครั้งละหนึ่งขั้นเท่านั้น**
-> 6. พบปัญหาใหม่ระหว่างทดสอบ → บันทึกเป็น PENDING ใหม่ **ห้ามแก้ปน**
+> 5. Viewer ต้องมีงานให้เจ้าของทำ **ครั้งละหนึ่งขั้นเท่านั้น** และต้องอัปเดตทันทีที่สถานะเปลี่ยน
+>    ก่อนพาเจ้าของไปขั้นถัดไป (§33.15) · ทุกขั้นต้องมี CURRENT · CLAUDE ทำอะไร ·
+>    YOU DO NOW (หนึ่ง action) · PASS WHEN · NEXT
+> 6. พบปัญหาใหม่ระหว่างทดสอบ → บันทึกเป็น PENDING ใหม่ **ห้ามแก้ปน** (§33.13)
 > 7. ถ้าข้อทดสอบใดไม่ผ่าน → **หยุดทันที** รายงาน ไม่ทดสอบข้อถัดไป
+> 8. ก่อนให้เจ้าของก็อปไฟล์จาก Viewer ต้องตรวจว่ากล่องโค้ดขึ้นต้นตรงกับบรรทัดแรกจริงของไฟล์
+>    และขนาดใกล้เคียงไฟล์จริง (BLUEPRINT §35.30 — เคยเกือบทำให้ BLUEPRINT ถูกตัดทิ้งบน main)
 >
-> **งานที่เจ้าของยังไม่ได้เลือกสำหรับรอบถัดไป**: PENDING #9 · PENDING #10 · Phase 2A-4
-> — **ห้ามเริ่มเอง** ต้องรอเจ้าของสั่ง
+> **งานที่เจ้าของยังไม่ได้เลือกสำหรับรอบถัดไป**: PENDING #10 · PENDING #12 · PENDING #13 ·
+> Phase 2A-4 — **ห้ามเริ่มเอง** ต้องรอเจ้าของสั่ง
 
 **สร้าง: 18 กันยายน 2569** · ใช้สำหรับส่งต่อสถานะเมื่อเปิดแชทใหม่ในโปรเจกต์เดิม
 
