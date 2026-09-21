@@ -1585,7 +1585,14 @@ class Component extends DCLogic {
         links.push({ label: (t.chat_view_property || "View") + " " + code, thumbBg, priceLabel, specsLabel, onClick: () => this._navigate(href) });
       }
     });
-    if (/\[\[\s*CONTACT\s*\]\]|contact us|ติดต่อเรา|связ|联系|kontakt|contattaci|contactez/i.test(text)) {
+    // PENDING #15 / PD-15 — the Contact CTA is created ONLY by the explicit
+    // [[CONTACT]] token from the AI reply. The former natural-language /
+    // keyword fallback (contact us · ติดต่อเรา · связ · 联系 · kontakt ·
+    // contattaci · contactez) let ordinary prose create a handoff CTA and so
+    // bypassed PD-02 (S-6 FAIL). Scope: journey-generated human-handoff CTA
+    // only — P3 API-error support fallback, P4 permanent ติดต่อเรา navigation
+    // tab and P5 LINE/WhatsApp/phone are untouched.
+    if (/\[\[\s*CONTACT\s*\]\]/i.test(text)) {
       links.push({ label: t.chat_contact_us || "Contact us", noThumb: true, onClick: () => this.setState({ chatOpen: false, formOpen: true, submitted: false }) });
     }
     if (/\[\[\s*LIST_PROPERTY\s*\]\]|list your property|ฝากขาย|ฝากเช่า|เผยแพร่ทรัพย์|разместить (свой )?объект|发布(您的)?房源|immobilie inserieren|legg ut din eiendom|publier votre bien|pubblica il tuo immobile|start the listing process|get .{0,30} listed|list (your|my) (villa|house|property|condo|land)|ลงประกาศ|ประกาศขายบ้าน|ประกาศขายทรัพย์/i.test(text)
