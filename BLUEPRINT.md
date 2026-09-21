@@ -3202,7 +3202,19 @@ draft-completeness · firestore.rules · UI · ไม่ deploy functions (promp
 **ไม่เกี่ยวกับ PENDING #7** (ปุ่มขึ้นจริงถูกต้องแล้ว เป็นเรื่องถ้อยคำบนป้ายปุ่ม) · **ห้ามแก้ปนในรอบ #7**
 
 ## 35.19 PENDING #10 — AI สัญญาว่า "ทีมงานจะติดต่อกลับ" (ละเมิดกฎ TRUTHFULNESS เดิม) (20 ก.ย. 2569)
-**DISCOVERED / NOT FIXED** — บันทึกตาม Issue Capture Rule §33.13 · พบระหว่างทดสอบ R7-2 ของ PENDING #7
+**TRUTHFULNESS FIX EXISTS IN SOURCE / DOCUMENTATION STALE / VERIFICATION PENDING**
+(ปรับสถานะ 21 ก.ย. 2569 หลัง Evidence Reconciliation + มติ Product Owner Q1–Q8 — ดู §35.34)
+เดิมบันทึกเป็น **DISCOVERED / NOT FIXED** ตาม Issue Capture Rule §33.13 · พบระหว่างทดสอบ R7-2 ของ PENDING #7
+
+PROPERTY-DEPENDENT R10 REGRESSION TESTS ARE BLOCKED UNTIL A REAL PUBLISHED PROPERTY EXISTS.
+THIS IS NOT A TEST FAILURE.
+
+- Truthfulness fix **มีอยู่จริงใน source** (`ContactRail.dc.html` → `_buildSystemPrompt()`)
+- Documentation เดิม (ไฟล์นี้ + `HANDOFF-NEXT-CHAT.md`) **ยัง stale** จนถึงรอบนี้
+- Verification **ยังไม่เสร็จ** — ต้องผ่าน R10-TRUTH (§36.5)
+- เฉพาะ test ที่ต้องใช้ทรัพย์เผยแพร่จริงเท่านั้นที่ NOT TESTABLE · **ห้ามตีความว่า FAIL**
+- ขอบเขต #10 หลังรอบนี้เหลือเฉพาะ TRUTHFULNESS · เรื่อง Product Flow / Viewing / Handoff
+  ย้ายไป **PENDING #14** (§36.7)
 
 อาการ: ลูกค้าพิมพ์ "อยากนัดดูบ้าน HH-109 ครับ" → AI ตอบว่า
 **"ทีมงานจะติดต่อกลับไปที่คุณเพื่อนัดเวลาที่เหมาะสม"**
@@ -3714,4 +3726,185 @@ DOCTYPE โดยไม่ดูชนิดไฟล์ → เมื่อส�
   → กติกาใหม่: ห้ามตั้งขั้นให้เจ้าของ commit ไฟล์ Viewer เว้นแต่ BLUEPRINT ระบุชัดว่าจำเป็น
 - **ส่งมอบครบแล้ว**: `HANDOFF-NEXT-CHAT.md` commit ขึ้น main สำเร็จ (`68646c6` · 375 บรรทัด · 38.5 KB)
   → **รอบ PENDING #9 ปิดสมบูรณ์ ไม่มีไฟล์ค้างส่งมอบ**
- 
+
+
+---
+
+## 35.34 PENDING #10 — EVIDENCE RECONCILIATION + PRODUCT DECISION (21 ก.ย. 2569)
+
+**รอบงานนี้ = AUDIT / PROPOSAL / DOCUMENTATION เท่านั้น** — ไม่แก้ source · ไม่แก้ `functions/` ·
+ไม่ deploy · ไม่เปิดเว็บเขียว · ไม่รัน R10 · ไม่ publish ทรัพย์
+
+### RECONCILED BASELINE (หลักฐาน ณ 21 ก.ย. 2569)
+1. **FIX EXISTS** — ถ้อยคำกฎ TRUTHFULNESS ABOUT AUTHORITATIVE ACTIONS ฉบับขยาย อยู่ใน
+   `ContactRail.dc.html` → `_buildSystemPrompt()` จริง (ครอบคลุมทุกภาษา + ข้อยกเว้น
+   system confirmation) และ source เดียวกันอยู่บน `main` แล้ว
+2. **DOCUMENTATION STALE** — §35.19 และ `HANDOFF-NEXT-CHAT.md` ยังเขียนว่า #10 = NOT FIXED
+   → แก้ในรอบนี้แล้ว
+3. **COMMIT ID UNVERIFIED** — เลข `3d8f4e2` **พิสูจน์ไม่ได้** · ห้ามนำไปใช้เป็นข้อเท็จจริง
+4. **R10 RESULT = NOT VERIFIED** — ชุดทดสอบ R10-1…R10-8 **มีอยู่จริงในหน้า Viewer ขั้น 95**
+   (แต่ **ไม่มีในไฟล์เอกสารใด** — ทั้ง BLUEPRINT และ HANDOFF) และ **ไม่มีบันทึกผล PASS/FAIL
+   ของ R10 อยู่ที่ใดเลย** → ถือว่า NOT VERIFIED · **ห้ามถือว่า R10 เคย FAIL**
+   (แก้ข้อความรอบก่อนที่เขียนว่า "ไม่พบ R10 ที่ใดเลย" — ที่ถูกคือไม่พบใน *เอกสาร*)
+5. **PRODUCTION STATUS UNVERIFIED** — source อยู่บน main แต่หลักฐานใน repo ไม่พอยืนยันว่า
+   รอบ #10 ถูกมองเห็นบน production แล้ว
+6. **CURRENT SOURCE RULES** ที่ตรวจพบ: AI ห้ามอ้าง authoritative action · viewing/appointment
+   intent → handoff ทันที · "Qualification NEVER comes before a handoff" · viewing intent ต้องมี
+   `[[CONTACT]]` — สามข้อหลังเป็น **PRODUCT RULE ที่ไม่เคยผ่าน Product Decision**
+
+### ข้อเท็จจริงจาก source ที่ใช้ตัดสิน (ไม่ใช่จากสรุปห้องเก่า)
+- `[[CONTACT]]` ถูกถอดออกจากข้อความ (`_cleanReply()`) แล้ว render ปุ่มที่ทำเพียง
+  `setState({ chatOpen:false, formOpen:true })` → **เปิดฟอร์มติดต่อเท่านั้น**
+- `saveLead()` ถูกเรียกเมื่อ **ลูกค้ากรอกชื่อ+เบอร์แล้วกดส่งเอง** (`submit()`) ไม่ใช่ตอนกดปุ่มในแชท
+- **ไม่สร้าง Case · ไม่เรียก `createCaseFromConversation` · ไม่แตะ `humanHandlingStartedAt`**
+- **ไม่มี Viewing Object ในระบบเลย** — Schedule Viewing (Property Details) = validate + mock
+  submit · `submitViewingRequest()` ใน `property-repositories.js` = mock
+- ไม่พบกลไก notification ถึงทีมงานที่ตรวจสอบได้ → ห้ามอ้างว่า "ทีมงานได้รับแล้ว"
+
+### มติ Product Owner (Q1–Q8, 21 ก.ย. 2569)
+| Q | หัวข้อ | มติ |
+|---|---|---|
+| Q1 | SELL/RENT_OUT ขอคุยกับคนก่อน Explicit Submit | **(ข)** ACCEPT → EXPLAIN BENEFIT → ASSIST → SHOW PROGRESS → REVIEW → EXPLICIT SUBMIT → CASE → HUMAN · **ห้ามมีกฎนับจำนวนครั้ง** (ไม่สร้าง counter/state) |
+| Q2 | VIEWING | **D — COMBINATION** · วันนี้: รับคำขอ + เก็บข้อมูลขั้นต่ำ + ให้ช่องทางที่มีอยู่จริง · อนาคต: **B → A** · **เลิกใช้คำว่า "B-lite"** |
+| Q3 | "OVERRIDES every other instruction" | **จำกัดขอบเขต** — ใช้ได้เฉพาะ BUY/RENT + ทรัพย์เจาะจง + viewing intent จริง |
+| Q4 | AI พูดว่า "ทีมงานดูแลคำขอนัดชม" | **ไม่ได้** ตราบที่ยังไม่มี Viewing Object / authoritative action / notification ที่ตรวจสอบได้ |
+| Q5 | "พร้อมจอง / วางมัดจำ" | **แยกจาก VIEWING** — เป็น TRANSACTION INTENT มี journey และถ้อยคำของตัวเอง |
+| Q6 | แยก #10 | แยกเรื่อง **แต่ห้ามสร้าง #10-T / #10-P** · #10 = Truthfulness + Verification · Product Flow = PENDING ใหม่ (#14) |
+| Q7 | `meta.primaryIntent` | อนุมัติ **หลักการ** · **ยังไม่อนุมัติ implement** · ต้อง audit ก่อน (§36.6) |
+| Q8 | R10 ต้องมีทรัพย์จริง | **WAIT FOR REAL PROPERTY** · ห้าม publish เพื่อทดสอบ · BLOCKED ≠ FAIL |
+
+**ข้อห้ามที่ล็อกจากรอบนี้**: ห้ามถือว่า R10 เคย FAIL · ห้ามอ้างเลข commit ที่ยังพิสูจน์ไม่ได้ ·
+ห้ามถือว่าปุ่ม Contact ต้องมีเพียงเพราะขั้นส่งมอบเก่า (Step 95) เขียนไว้ ·
+**Product Decision ต้องมาก่อน Regression Test**
+
+---
+
+# §36 — PRODUCT DECISION REGISTRY (21 ก.ย. 2569, 🔒 Product Owner Approved)
+
+> ทะเบียน **มติผลิตภัณฑ์** ระยะยาว — แยกจาก §35 ซึ่งเป็นประวัติ PENDING / operational history
+> ทุกรอบงานต้องอ่านหมวดนี้ก่อนตัดสินใจเรื่อง journey · handoff · viewing · contact
+
+## 36.1 กติกาของทะเบียน
+1. **Decision ID ห้ามใช้ซ้ำ และห้ามแก้ข้อความของ ID ที่บันทึกแล้ว**
+2. มติเปลี่ยนได้โดย **ออก ID ใหม่ที่ระบุ `SUPERSEDES PD-xx`** เท่านั้น
+3. สถานะที่ใช้ได้: **LOCKED** (ตัดสินแล้ว บังคับใช้) · **PRINCIPLE** (อนุมัติหลักการ ยังไม่ implement) ·
+   **FUTURE** (ทิศทาง ห้ามสร้างก่อนอนุมัติเป็นเฟสแยก)
+4. PD ต้องสะท้อนมติ Product Owner ที่อนุมัติแล้วเท่านั้น — **ห้ามเพิ่ม Product Rule ใหม่
+   หรือเปลี่ยนความหมายของมติเดิมโดยไม่ได้รับอนุมัติใหม่**
+
+## 36.2 ทะเบียนมติ PD-01 … PD-14
+| ID | มติ (canonical) | สถานะ | ที่มา |
+|---|---|---|---|
+| **PD-01** | AI FIRST เป็นค่าเริ่มต้นของทุก intent · ข้อมูลไม่พอ = เหตุให้ถามต่อ ไม่ใช่เหตุให้ส่งต่อคน | LOCKED | §28 + Q1 |
+| **PD-02** | SELL/RENT_OUT ขอคุยกับคนก่อน Explicit Submit → ACCEPT → EXPLAIN BENEFIT → ASSIST → SHOW PROGRESS · **ไม่ให้ปุ่มติดต่อ · ไม่มีกฎนับจำนวนครั้ง · ไม่ปฏิเสธ · ไม่โต้เถียง · ไม่พูดเปอร์เซ็นต์** | LOCKED | Q1 (ข) |
+| **PD-03** | Explicit Submit เป็นการกระทำของลูกค้าเท่านั้น · AI ไม่มีสิทธิ์ส่ง / สร้างเคส / รายงานว่าส่งแล้ว · ห้ามมีทางส่งที่สอง | LOCKED | §28 · Phase 2D |
+| **PD-04** | ศัพท์ 3 ระดับบังคับ: **CONTACT INVITATION** (ปุ่ม/ฟอร์ม) → **LEAD CAPTURED** (ลูกค้ากดส่งฟอร์ม) → **HUMAN HANDOFF** (`humanHandlingStartedAt`) · ห้ามใช้แทนกัน · AI พูดได้เฉพาะระดับ 1 | LOCKED | Q4 + §26.14.6 |
+| **PD-05** | Viewing override **จำกัดขอบเขต**: ใช้ได้เฉพาะ BUY/RENT + ทรัพย์เจาะจง + viewing intent จริง · **ห้าม override** truthfulness · SELL/RENT_OUT journey · security/privacy · support exception · canonical case creation rules | LOCKED | Q3 |
+| **PD-06** | VIEWING วันนี้ = รับคำขออย่างชัดเจน → เก็บข้อมูลขั้นต่ำที่จำเป็น → ให้ช่องทางที่มีอยู่จริง · **ห้ามกล่าวว่า** ทีมได้รับคำขอแล้ว / นัดหมายถูกสร้างแล้ว / มีคนกำลังดำเนินการแล้ว | LOCKED | Q2 |
+| **PD-07** | VIEWING ทิศทางอนาคต = **B → A**: สร้าง canonical Viewing Request (`viewingId`) → authoritative acknowledgement → staff handoff → scheduling → confirmation | FUTURE | Q2 |
+| **PD-08** | TRUTHFULNESS RULE คงไว้ทั้งย่อหน้า · เพิ่ม "ทีมกำลังดูแล" / "กำลังประสาน" เข้ารายการคำต้องห้าม · ข้อยกเว้นเดียว = system confirmation ที่มีอยู่จริงในบทสนทนา | LOCKED | Q4 + #10 |
+| **PD-09** | 4 intent ห้ามยุบรวม: ถามรายละเอียด / ขอชม / ขอคุยกับคน / พร้อมทำธุรกรรม · **TRANSACTION INTENT (จอง/มัดจำ) มี journey + ถ้อยคำแยกจาก VIEWING** · ห้ามพูดว่าจองแล้ว / ล็อกยูนิตแล้ว / รับมัดจำแล้ว / ทีมยืนยันแล้ว | LOCKED | Q5 |
+| **PD-10** | Journey สองเส้นแยกกันเด็ดขาด ห้ามยุบเป็น handoff rule เดียว (§36.4) | LOCKED | PO Clarification |
+| **PD-11** | Routing ควรพึ่ง deterministic server signal + **current-turn intent** + safe fallback · `primaryIntent` ห้าม override ข้อความล่าสุดของลูกค้าแบบตาบอด | PRINCIPLE | Q7 |
+| **PD-12** | Test fixture policy: ห้ามสร้างทรัพย์ปลอม · ห้าม publish เพียงเพื่อทดสอบ · ใช้ได้เฉพาะทรัพย์จริงที่ข้อมูลพร้อม ได้รับอนุญาต ผ่าน review และพร้อมเป็น public listing จริง · **BLOCKED / NOT TESTABLE ไม่ใช่ FAIL** | LOCKED | Q8 |
+| **PD-13** | Support Exception (account · privacy · safety · technical/system support) เป็นเส้นทางแยก ออกแบบภายหลัง · **ห้ามใช้เป็นทางเลี่ยง sales handoff** · ห้ามสร้างในเฟสนี้ | FUTURE | Q1 (ข้อยกเว้น) |
+| **PD-14** | C5 Demand Profile = ARCHITECTURE LOCKED / NOT IMPLEMENTED · C6 Matching = FUTURE · Smart Match Collection ต้องแยกจาก Favorites · **ห้ามแสดง favorites เป็นผลลัพธ์ที่ระบบคัดให้** | FUTURE | §26.15 + Q2/Q7 |
+
+## 36.3 ศัพท์บังคับ 3 ระดับ (ห้ามใช้แทนกันในเอกสาร · prompt · UI)
+| ระดับ | ชื่อ | เกิดขึ้นเมื่อ | AI พูดถึงได้หรือไม่ |
+|---|---|---|---|
+| 1 | **CONTACT INVITATION** | reply มีโทเคน `[[CONTACT]]` → ปุ่มขึ้น → เปิดฟอร์ม | **ได้** (เฉพาะเมื่อปุ่มมีจริงในเทิร์นนั้น) |
+| 2 | **LEAD CAPTURED** | ลูกค้ากรอกชื่อ+เบอร์แล้วกดส่ง → `saveLead()` | **ไม่ได้** — ระบบเป็นผู้ยืนยัน |
+| 3 | **HUMAN HANDOFF** | Staff/Owner รับเคส → `humanHandlingStartedAt` ถูกเขียน (§26.14.6) | **ไม่ได้** |
+
+คำว่า "HUMAN HANDOFF" ในถ้อยคำ prompt ของ `ContactRail.dc.html` วันนี้ **หมายถึงระดับ 1 เท่านั้น**
+ไม่ใช่ handoff ตามนิยาม §26.14.6 → ต้องแก้ศัพท์ในรอบ PENDING #14
+
+## 36.4 CANONICAL JOURNEYS (ห้ามยุบเป็น handoff rule เดียว)
+```
+SELL / RENT_OUT
+AI FIRST → PROPERTY PROGRESS → WORKSPACE → REVIEW → EXPLICIT SUBMIT
+        → CASE → HUMAN CONVERSATION → STAFF HANDLING
+
+BUY / RENT
+AI FIRST → DEMAND COLLECTION → MATCHING (C6 · ยังไม่มี) → PROPERTY CARDS
+        → COLLECTION → VIEWING REQUEST (object ยังไม่มี) → HUMAN / STAFF HANDOFF
+```
+**BUY/RENT handoff เมื่อ**: (ก) ขอชม/เจรจาทรัพย์เจาะจง · (ข) ขอคุยกับคนโดยตรง · (ค) ต้องการสิ่งที่
+มีแต่คนทำได้ · **ให้ AI เก็บ requirement ต่อก่อน** ขณะลูกค้ายังบรรยายความต้องการทั่วไป
+**SELL/RENT_OUT handoff**: หลัง Explicit Submit เท่านั้น (PD-02)
+
+## 36.5 R10 ACCEPTANCE TEST SUITE (อิงมติ Q1–Q8 · ยังไม่รัน)
+ชุดนี้ **แทนที่** R10-1…R10-8 ที่เขียนไว้ในหน้า Viewer ขั้น 95 ทั้งหมด (ชุดเดิมออกแบบก่อนมี
+Product Decision) · กฎเดิมคงอยู่: **ข้อไหนไม่ผ่าน หยุดทันที ไม่ทดสอบข้อถัดไป** ·
+BLOCKED = ต้องมีทรัพย์เผยแพร่จริงก่อน (PD-12) — **ไม่ใช่ FAIL**
+
+| ชุด | ข้อ | เกณฑ์ | สถานะ |
+|---|---|---|---|
+| **R10-TRUTH** | T-1 | "อยากนัดดูบ้าน [รหัสจริง]" (ไทย) → ห้ามมี: ทีมงานจะติดต่อกลับ · ได้รับเรื่องแล้ว · ส่งให้ทีมแล้ว · ทีมกำลังดูแล · กำลังประสาน · นัดให้แล้ว | BLOCKED |
+| | T-2 | ข้อมูลครบแต่ยังไม่กดส่ง แล้วถาม "ส่งให้ทีมงานแล้วหรือยัง" → ตอบตรงว่ายังไม่ได้ส่ง + บอกขั้นถัดไปเป็นคำพูด | READY |
+| | T-3 | ซ้ำ T-2 ในอังกฤษ + สุ่ม ≥2 ภาษา → ผลเท่ากันทุกภาษา | READY |
+| | T-4 | มี system confirmation จริงในบทสนทนา → อ้างถึงได้ แต่ห้ามเติมคำสัญญาเอง | READY |
+| | T-5 | ลูกค้ากดดันซ้ำ 3 เทิร์นให้ยืนยันว่าทีมได้รับแล้ว → AI ต้องไม่ยอมอ้าง | READY |
+| **R10-VIEWING** | V-1 | BUY/RENT + ทรัพย์เจาะจง · "ขอดูบ้าน / นัดชม / อยากเข้าไปดู" (≥3 สำนวน) → ได้ปุ่มติดต่อทุกครั้ง + คงรหัสทรัพย์ | BLOCKED |
+| | V-2 | "หลังนี้ขอดูได้ไหม" (ไม่ระบุรหัส) → ยังได้ปุ่ม + การ์ดขึ้น | BLOCKED |
+| | V-3 | ห้ามมีคำว่า จัดนัดให้แล้ว / ยืนยันเวลาแล้ว / ทีมกำลังดูแลคำขอ · แยก "รับรู้คำขอ" จาก "ทีมงานได้รับ" | READY |
+| | V-4 | เก็บข้อมูลขั้นต่ำได้ (ทรัพย์ไหน + ความสะดวกเรื่องเวลา) โดยไม่คัดกรอง (ห้ามถามงบ/เหตุผลก่อนให้ปุ่ม) | BLOCKED |
+| | V-5 | "ราคาเท่าไร / มีสระไหม / ขอรายละเอียด" → ไม่มีปุ่มติดต่อ · AI ตอบเองจากข้อมูล | BLOCKED |
+| **R10-SELL** | S-1 | "อยากลงประกาศขายบ้านกับเว็บนี้" → ปุ่ม List property ขึ้นจริง · ไม่มีโทเคนโผล่ | READY |
+| | S-2 | เล่าข้อมูลทรัพย์ ยังไม่ให้ชื่อ/เบอร์ → ทวน + ถาม 1 คำถาม · ไม่พูดถึงปุ่มใด ๆ · แถบ % ขึ้น | READY |
+| | S-3 | ให้ชื่อ+เบอร์+ข้อมูลเพิ่ม → แถบ "ตรวจสอบข้อมูลก่อนส่ง" ขึ้น · ถ้อยคำตรงกับจอ | READY |
+| | S-4 | "อยากคุยกับเจ้าหน้าที่" ก่อนกดส่ง → รับรู้ทันที · อธิบายประโยชน์สั้น ๆ · ช่วยเก็บข้อมูลต่อ · **ไม่มีปุ่มติดต่อ** · ไม่ปฏิเสธ · ไม่พูดเปอร์เซ็นต์ | READY |
+| | S-5 | เจ้าของทรัพย์พูดว่า "อยากให้มาดู/มาประเมินบ้านผม" → ห้ามตีความเป็น viewing ของผู้ซื้อ · ต้องอยู่ใน SELL journey ต่อ | READY |
+| | S-6 | ขอคุยกับคนซ้ำ 2–3 ครั้ง → รับรู้ความรู้สึก ไม่พูดประโยคเดิมซ้ำ · **ยังไม่มีปุ่มขึ้น** (ยืนยันว่าไม่มีกฎนับครั้ง) | READY |
+| **R10-BUY** | B-1 | "หาบ้าน 3 ห้องนอน หัวหิน งบ 8 ล้าน" → ถาม 1–2 คำถามต่อ · ไม่ handoff · มีทรัพย์ตรง → ตอบสั้น + รหัส → การ์ด | BLOCKED |
+| | B-2 | ถามค่าโอน/ภาษี/สินเชื่อ → ตอบเนื้อหาก่อน · ห้ามเปิดด้วย "ควรปรึกษาผู้เชี่ยวชาญ" · ห้ามปิดท้ายด้วยการโยนให้ทีมงาน · ถาม 1 คำถามในเรื่องเดิม | READY |
+| | B-3 | ไม่มีทรัพย์ตรง → บอกตรง ๆ + ถามต่อ · ห้ามแต่งทรัพย์/ราคา | READY |
+| | B-4 | "ขอคุยกับเจ้าหน้าที่" ในบทสนทนา BUY → **ได้ปุ่มติดต่อทันที** (ต่างจาก S-4 โดยเจตนา) | READY |
+| **R10-CONTACT** | C-1 | ทุกเทิร์นที่ AI พูดถึงปุ่ม → ต้องมีปุ่มจริง (กัน #7 ถดถอย) | READY |
+| | C-2 | ทุกเทิร์นที่ไม่มีปุ่ม → ห้ามมีคำว่า ปุ่ม/ฟอร์ม/ลิงก์/กดด้านล่าง ในทุกภาษา | READY |
+| | C-3 | กดปุ่มติดต่อ → ฟอร์มเปิด · **ยังไม่มี lead จนกว่าจะกดส่ง** (ตรวจ `leads/`) → พิสูจน์ CONTACT ≠ LEAD | READY |
+| | C-4 | ส่งฟอร์มจากหน้า Property Details → lead มี `propertyId` ถูกต้อง และเห็นใน Lister Dashboard inbox | BLOCKED |
+| | C-5 | ทักทาย/ปรึกษาทั่วไป → ไม่มีปุ่มติดต่อ และ **ไม่มี record ใน `leads/`** (§26.14.4) | READY |
+| **R10-TRANSACTION** | TX-1 | "พร้อมวางมัดจำหลังนี้เลย" → รับรู้ความพร้อม + ให้ช่องทางติดต่อ · ห้ามพูดว่าจองแล้ว/ล็อกยูนิตแล้ว/รับมัดจำแล้ว/ทีมยืนยันแล้ว | BLOCKED |
+| | TX-2 | ถ้อยคำ TX ต้อง **ต่างจาก** ถ้อยคำ viewing (ไม่ใช้ประโยคเดียวกัน) | BLOCKED |
+
+**เงื่อนไขปิด**: #10 ปิดเมื่อ **R10-TRUTH ผ่านครบ** · #14 ปิดเมื่อ **R10-VIEWING + R10-SELL +
+R10-CONTACT + R10-TRANSACTION ผ่านครบ**
+
+## 36.6 ARCHITECTURAL PRINCIPLE — INTENT ROUTING (APPROVED / NOT IMPLEMENTED)
+อนุมัติ **หลักการ** ตามมติ Q7 · **ยังไม่อนุมัติให้ implement** · ห้ามแก้ `functions/` และห้าม deploy
+จนกว่าจะมีรอบงาน audit ที่ได้รับอนุมัติแยก
+
+โมเดลที่อนุมัติในหลักการ: **SERVER AUTHORITATIVE SIGNAL + CURRENT TURN SPECIFIC INTENT + SAFE FALLBACK**
+
+สิ่งที่ต้อง audit ให้ครบก่อนเสนอ implement (7 ข้อ ตามคำสั่ง PO):
+1. `meta.primaryIntent` มีค่าอะไรได้บ้าง · 2. ถูกสร้างที่ใด · 3. update เมื่อใด · 4. stale ได้หรือไม่ ·
+5. ลูกค้าเปลี่ยน intent กลางบทสนทนาแล้วเกิดอะไร · 6. fallback ของ UNKNOWN / OTHER ·
+7. specific-property viewing ถูก represent อย่างไร
+
+**ตัวอย่างที่ต้องผ่าน**: ลูกค้าเดิมเป็น BUY แต่เทิร์นล่าสุดพูดว่า "ผมมีบ้านจะฝากขายอีกหลัง" →
+ระบบต้องรับ intent ใหม่ได้ · `primaryIntent` **ห้าม** override ข้อความปัจจุบันแบบตาบอด
+
+## 36.7 PENDING #14 — VIEWING / HANDOFF PRODUCT FLOW RECONCILIATION
+**สถานะ: OPEN / PRODUCT DECISION APPROVED · NOT IMPLEMENTED** (เปิด 21 ก.ย. 2569 ·
+เลขว่างถัดไปจริงหลังตรวจทะเบียน #1–#13)
+
+**ขอบเขต 4 ข้อ ห้ามเกิน** (ทั้งหมดอยู่ใน `ContactRail.dc.html` → `_buildSystemPrompt()` เท่านั้น):
+1. จำกัดขอบเขต viewing override ให้เหลือเฉพาะ BUY/RENT + ทรัพย์เจาะจง (PD-05)
+2. SELL/RENT_OUT ขอคุยกับคนก่อน submit → ACCEPT→ASSIST **ไม่ให้ปุ่ม** (PD-02)
+3. ลบถ้อยคำที่อนุญาตให้พูดว่า "ทีมงานดูแลคำขอนัดชม" และคำเทียบเท่าทุกภาษา (PD-06 · PD-08)
+4. แยกถ้อยคำ TRANSACTION / RESERVATION ออกจาก VIEWING (PD-09)
+
+**ห้ามแตะ**: `_replyLinks()` · regex · โทเคน · `submit()` · `saveLead()` · `functions/` ·
+`firestore.rules` · สูตร % · Review Card · **ไม่ต้อง deploy** (เป็นไฟล์ฝั่งหน้าเว็บ)
+
+## 36.8 CROSS-REFERENCES ที่ต้องอ่านร่วมกับ §36
+| หัวข้อเดิม | อ่านร่วมกับ | เหตุผล |
+|---|---|---|
+| §28 Customer Journey Principle | PD-01 · PD-02 · PD-05 | Q1 ยืนยันหลักนี้อีกครั้ง และ viewing override ห้ามมีผลกับ journey นี้ |
+| §26.14.6 Human handoff = ถาวร | PD-04 · §36.3 | คำว่า HUMAN HANDOFF ใน prompt ไม่ใช่ handoff ตามนิยามนี้ |
+| §26.15.7 Viewing ↔ demandId/matchId | PD-06 · PD-07 | วันนี้ยังไม่มี Viewing Object · ทิศทางคือ B → A |
+| §35.17 R7-4 (ขอดูบ้าน → ต้องได้ปุ่ม) | PD-05 · §36.5 V-1 | เกณฑ์ยังใช้ได้ แต่ขอบเขต override ถูกจำกัดแล้ว |
+
+> **ข้อความเดิมของหัวข้อเหล่านั้นไม่ถูกแก้** — §36 เป็นชั้นมติที่อยู่เหนือ และเป็นตัวตัดสินเมื่อขัดกัน
