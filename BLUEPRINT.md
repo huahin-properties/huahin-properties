@@ -3522,3 +3522,188 @@ client ใช้ `primaryIntent` อยู่แล้วในที่หน�
 - R7-3 = NOT TESTABLE (ยังไม่มีทรัพย์เผยแพร่จริง — ห้ามสร้างเพื่อให้ผ่าน)
 - Phase 2A-4 / 2B = NOT STARTED
 - เว็บไซต์ = 🔴 RED / Public Hidden (ปิดกลับตามกฎ §29.4 ทันทีหลังทดสอบ)
+
+
+## 35.27 PENDING #9 — AUDIT / ROOT CAUSE (21 ก.ย. 2569) — AUDIT DONE / ยังไม่แก้
+
+**ขอบเขต: AUDIT ONLY — ไม่แก้ source · ไม่ deploy · ไม่เปิดเว็บเขียว · ไม่แตะ PENDING #10 / Phase 2A-4 / 2B**
+
+### สิ่งที่ตรวจจาก source จริง (`ContactRail.dc.html` เวอร์ชันปัจจุบันในโปรเจกต์)
+1. **`chat_list_property` ถูกเรียกจากที่เดียวเท่านั้น** — บรรทัด **1591** ใน `_extractLinks(text, lang, intent)`
+   `links.push({ label: t.chat_list_property || "List property", noThumb: true, onClick: () => this._navigate("Owner Submission.dc.html") });`
+   (ไม่มีการอ้างคีย์นี้ที่อื่นในทั้งไฟล์ และไม่มีใน `functions/index.js`)
+2. **`CHAT_I18N` อยู่ที่ `ContactRail.dc.html` บรรทัด 411–420** — 1 บรรทัดต่อ 1 ภาษา:
+   en=412 · th=413 · ru=414 · zh=415 · de=416 · no=417 · fr=418 · it=419
+3. **ภาษาไทยขาดคีย์ `chat_list_property` จริง** — ยืนยันแล้ว (th มี 36 คีย์ ไม่มีคีย์นี้)
+4. **ขาดครบทั้ง 8 ภาษา ไม่ใช่เฉพาะไทย** — en · th · ru · zh · de · no · fr · it **ไม่มีคีย์นี้เลยแม้แต่ภาษาเดียว**
+   ที่ภาษาอังกฤษดู "ถูก" เป็นเรื่องบังเอิญ เพราะค่าสำรอง hardcode เป็นภาษาอังกฤษพอดี
+5. **`chat_contact_us` มีครบทั้ง 8 ภาษา** — ปุ่ม "ติดต่อเรา" ไม่มีปัญหานี้ (ตรวจตามที่ §35.18 กำหนด)
+   `chat_view_property` ก็มีครบ 8 ภาษาเช่นกัน
+6. **"List property" มาจาก logic ใด** — ไม่ได้มาจากเซิร์ฟเวอร์ ไม่ได้มาจากโมเดล แต่มาจาก
+   **ค่าสำรองฝั่ง client (`|| "List property"`) ที่บรรทัด 1591** เมื่อ `t.chat_list_property` เป็น `undefined`
+   (`const t = CHAT_I18N[lang] || CHAT_I18N.en;` บรรทัด 1573 เลือกพจนานุกรมถูกภาษาแล้ว — ไม่ใช่ปัญหา lang fallback)
+
+### ผลข้างเคียงที่พบเพิ่ม (บันทึกไว้ ยังไม่แก้ — ไม่อยู่ในขอบเขตรอบนี้)
+**ISSUE-A (ใหม่)**: 6 ภาษา (ru · zh · de · no · fr · it) มีเพียง **10 คีย์** ขณะที่ en/th มี 33/36 คีย์
+→ **ขาด 23 คีย์ต่อภาษา** ทำให้ข้อความ UI ของแชทอีกหลายจุด (เช่น `chat_tab_ai`, `chat_clear`,
+`chat_conversations_title`, `chat_human_soon_title`) ตกกลับเป็นภาษาอังกฤษในภาษาเหล่านั้น
+เป็นคนละเรื่องกับ #9 — เสนอเปิดเป็น **PENDING #12** แยกรอบ ไม่แก้ปนรอบนี้
+
+### Minimal fix ที่เสนอ (ยังไม่ทำ — รออนุมัติ)
+- **ไฟล์เดียว**: `ContactRail.dc.html`
+- **ตำแหน่งเดียว**: object `CHAT_I18N` บรรทัด 412–419 — เติมคีย์ `chat_list_property` เข้าไป **8 แห่ง แห่งละ 1 คีย์**
+  (en: "List property" · th: "ฝากขาย / ฝากเช่าทรัพย์" · ru · zh · de · no · fr · it ตามภาษา)
+- **ไม่แตะ**: บรรทัด 1591 และค่าสำรอง `|| "List property"` (คงไว้เป็นตาข่ายกันพัง) ·
+  ไม่แตะ regex LIST_PROPERTY · ไม่แตะ `intent === "SELL" | "RENT_OUT"` · ไม่แตะ `_extractLinks()` ·
+  ไม่แตะ `_navigate()` · ไม่แตะ functions / Firestore rules
+- **ขนาด**: เพิ่มข้อความล้วน 8 จุด ไม่มี logic เปลี่ยนแม้บรรทัดเดียว
+
+### ผลกระทบที่ยืนยันแล้ว (impact / regression risk)
+| ระบบ | ผลกระทบ |
+|---|---|
+| Navigation | **ไม่มี** — ปลายทางยังเป็น `Owner Submission.dc.html` (ไฟล์มีอยู่จริง ยืนยันแล้ว) เปลี่ยนแค่ข้อความบนป้าย |
+| `primaryIntent` (PENDING #11) | **ไม่มี** — เงื่อนไข `intent === "SELL" / "RENT_OUT"` ไม่ถูกแตะ |
+| `_extractLinks()` | **ไม่มี** — ไม่แก้ฟังก์ชัน แก้เฉพาะข้อมูลพจนานุกรมที่ฟังก์ชันอ่าน |
+| Case creation (C4.2b) | **ไม่มี** — ปุ่มนี้เป็น navigation ล้วน ไม่สร้าง Case ไม่เขียน Firestore (Guarantee §35.26 ข้อ 1) |
+| Server logic / functions | **ไม่มี** — ไม่แตะ `functions/index.js` · **ไม่ต้อง deploy functions** |
+| ภาษาอื่น | ดีขึ้น 7 ภาษา (เดิมเห็นอังกฤษหมด) · en เห็นข้อความเดิมเป๊ะ |
+
+### สถานะ
+**PENDING #9 = FIX READY / WAITING FOR DELIVERY** (เจ้าของอนุมัติ 21 ก.ย. 2569 · แก้แล้วในโปรเจกต์ · ยังไม่ขึ้น GitHub)
+PENDING #10 = OPEN / NOT FIXED (ไม่แตะ) · ISSUE-A = บันทึกใหม่ รอจัดเป็น PENDING #12
+Phase 2A-4 / 2B = NOT STARTED · เว็บไซต์ = 🔴 RED / Public Hidden
+
+
+## 35.28 PENDING #9 — MINIMAL FIX APPLIED (21 ก.ย. 2569) — FIX READY / WAITING FOR DELIVERY
+
+เจ้าของอนุมัติ minimal fix ตาม §35.27 · แก้แล้ว **ไฟล์เดียว จุดเดียว**: `ContactRail.dc.html` → object `CHAT_I18N` (บรรทัด 412–419)
+
+| ภาษา | ค่า `chat_list_property` |
+|---|---|
+| en | List property |
+| th | ฝากขาย / ฝากเช่าทรัพย์ |
+| ru | Разместить объект |
+| zh | 发布房源 |
+| de | Immobilie inserieren |
+| no | Legg ut eiendom |
+| fr | Publier votre bien |
+| it | Pubblica il tuo immobile |
+
+### ผลตรวจ diff (ยืนยันขอบเขต)
+- พบ `chat_list_property` ทั้งไฟล์ **9 จุด** = คีย์ใหม่ 8 จุด (บรรทัด 412–419 ภาษาละ 1) + จุดเดิมบรรทัด **1591** ที่ **ไม่ถูกแตะ**
+- ค่าสำรองเดิม `t.chat_list_property || "List property"` **คงไว้ตามเดิมทุกตัวอักษร**
+- จำนวนคีย์ต่อภาษาเพิ่ม **ภาษาละ 1 พอดี**: en 33→34 · th 36→37 · ru/zh/de/no/fr/it 10→11
+  → **ไม่มีคีย์แปลอื่นหรือ object แปลอื่นถูกเปลี่ยน**
+- ไม่แตะ: `_extractLinks()` · regex `LIST_PROPERTY` · `intent === "SELL"/"RENT_OUT"` (primaryIntent) ·
+  navigation `Owner Submission.dc.html` · Case logic · `functions/index.js` · `firestore.rules`
+- **รอบนี้ไม่ต้อง deploy functions**
+
+### สถานะ
+**PENDING #9 = DELIVERED / รอผล Production Regression** (commit ขึ้น main สำเร็จ 21 ก.ย. 2569 ยืนยันด้วยภาพหน้าจอ GitHub: ไฟล์ 2300 บรรทัด · บรรทัด 415–422 มีคีย์ครบ 8 ภาษา · ไม่มีโค้ด preview harness ปนเปื้อน) — ตาม §29 ข้อ 4 การแก้ในโปรเจกต์ยังไม่ใช่การส่งมอบ
+ส่งผ่าน Viewer ขั้น **85** (ก็อป → วางทับบน GitHub → commit) → จากนั้นขั้น **86** Production Regression
+(ไทย + อังกฤษ เป็นอย่างน้อย + สุ่มอีก ≥2 ภาษา + ตรวจไม่ถดถอย #6 / #11 / ไม่สร้าง Case) จึงประกาศ CLOSED ได้
+เว็บไซต์ยัง 🔴 RED / Public Hidden · PENDING #10 = OPEN / NOT FIXED (ไม่แตะ)
+
+---
+
+## 35.29 PENDING #12 — CHAT_I18N incomplete across supported languages (21 ก.ย. 2569) — OPEN / NOT FIXED
+
+**เปิดตาม Issue Capture Rule §33.13 จากสิ่งที่พบระหว่าง Audit #9 — ห้ามแก้ในรอบ #9**
+
+อาการ: พจนานุกรม `CHAT_I18N` ใน `ContactRail.dc.html` มีคีย์ไม่ครบใน 6 ภาษา
+- en = 34 คีย์ · th = 37 คีย์ (ครบ)
+- **ru · zh · de · no · fr · it = 11 คีย์ต่อภาษา → ขาดประมาณ 23 คีย์ต่อภาษา**
+
+คีย์ที่ขาดในหกภาษานั้น (ตัวอย่างจริง): `chat_type_or_speak` · `chat_tab_ai` · `chat_tab_human` ·
+`chat_conversations_title` · `chat_clear` · `chat_human_soon_title` · `chat_human_soon_desc` ·
+`chat_contact_form_btn` · `chat_ai_name` · `chat_ai_subtitle_small` · `chat_no_human_convos` ·
+`chat_demo_*` · `chat_note_placeholder` ฯลฯ
+
+ผลกระทบ: ผู้ใช้ภาษารัสเซีย/จีน/เยอรมัน/นอร์เวย์/ฝรั่งเศส/อิตาลี เห็นข้อความ UI ของแชทหลายจุด
+เป็นภาษาอังกฤษปนกับภาษาตัวเอง (ตกไปใช้ค่าสำรองแบบเดียวกับต้นเหตุ #9)
+**ไม่กระทบ logic ใด ๆ** — เป็นเรื่องความครบของคำแปลล้วน
+
+ขอบเขตแก้ที่คาดไว้ (ยังไม่ทำ): เติมคีย์ที่ขาดใน `CHAT_I18N` 6 ภาษาเท่านั้น · ไม่แตะ logic ·
+ไม่ต้อง deploy · ควรทำเป็นรอบแยกเพราะเป็นงานแปลจำนวนมาก (~138 ค่า) ที่ต้องทวนคุณภาพภาษา
+
+**สถานะ: PENDING #12 = OPEN / NOT FIXED**
+
+
+## 35.30 บันทึกความเสี่ยงที่ตรวจพบระหว่างส่งมอบ #9 — Viewer ปนโค้ด preview harness (21 ก.ย. 2569) — FIXED
+
+ขณะเตรียมส่ง `ContactRail.dc.html` (ไฟล์ `.dc.html` ไฟล์แรกที่ส่งผ่าน Viewer — รอบก่อน ๆ ส่งแต่ `.md`)
+พบว่า `loadFile()` ใน `Copy Code to GitHub.dc.html` ดึงไฟล์ผ่าน `fetch()` จาก preview host
+ซึ่ง **แทรก `<style data-omelette-injected>` และ `<script data-omelette-injected>` ~20KB ไว้หน้าไฟล์**
+→ ถ้าเจ้าของกด Ctrl+A/Ctrl+C จากกล่องนั้นจะ commit โค้ดขยะขึ้น main
+
+**แก้แล้ว**: เพิ่มเมท็อด `stripInjected()` ใน Viewer — ลบทุก tag ที่มี `data-omelette-injected`
+และตัดทุกอย่างก่อน `<!DOCTYPE html>` ออกก่อนแสดงในกล่องโค้ด
+**บั๊กซ้อนที่พบตอนตรวจ (แก้แล้วในรอบเดียวกัน)**: `stripInjected()` รุ่นแรกตัดทุกอย่างก่อนคำว่า
+DOCTYPE โดยไม่ดูชนิดไฟล์ → เมื่อส่ง `BLUEPRINT.md` ซึ่งตัวเอกสาร**เอ่ยถึงคำนั้นเป็นข้อความ**
+กล่องโค้ดจึงเหลือแค่ ~3.4KB ท้ายไฟล์ (จากหลายแสนอักขระ) · ถ้าเจ้าของก็อปไปวางจะลบ BLUEPRINT
+ทิ้งเกือบทั้งไฟล์บน main — อันตรายกว่าบั๊กเดิม
+**แก้แล้ว**: `stripInjected(t, name)` ทำงานกับไฟล์ `.html` เท่านั้น และตัดหัวไฟล์เฉพาะเมื่อ
+ตรวจพบเครื่องหมายโค้ดแทรกใน 64KB แรกจริง · ไฟล์ `.md` ส่งผ่านแบบไม่แตะเลย
+
+**กติกาใหม่ (ล็อก)**: ทุกครั้งที่ส่งไฟล์ผ่าน Viewer ต้องตรวจ 2 อย่างก่อนให้เจ้าของก็อป —
+(1) กล่องโค้ดขึ้นต้นตรงกับบรรทัดแรกจริงของไฟล์ และ (2) ขนาดใกล้เคียงไฟล์จริง
+
+
+## 35.32 PENDING #13 — ภาษาไม่ถูกส่งต่อเมื่อไปหน้า Owner Submission (21 ก.ย. 2569) — OPEN / NOT FIXED
+
+**เปิดตาม Issue Capture Rule §33.13 จากสิ่งที่พบระหว่าง Production Regression ของ #9 — ห้ามแก้ปนในรอบ #9**
+
+อาการ (ยืนยันด้วยภาพหน้าจอจริง): เว็บตั้งภาษา **Français** · แชทตอบภาษาฝรั่งเศส · ปุ่ม
+**"Publier votre bien"** ถูกต้อง · แต่เมื่อกดปุ่ม → หน้า `Owner Submission.dc.html` ที่เปิดขึ้น
+แสดงเป็น **ภาษาไทย** ทั้งหน้า ("ฝากขาย / ฝากเช่าทรัพย์กับเรา", "ขั้นตอนที่ 1 — ข้อมูลติดต่อของคุณ")
+
+สาเหตุที่คาด (ยังไม่ได้ audit): `_navigate("Owner Submission.dc.html")` ใน `ContactRail.dc.html`
+(บรรทัด 1591) เปิดปลายทาง **โดยไม่ส่งค่าภาษาไปด้วย** (ไม่มี `?lang=`) และหน้าปลายทาง
+ตกกลับไปใช้ภาษาเริ่มต้น (ไทย) — ต้องยืนยันด้วยการ audit `_navigate()` และหน้า Owner Submission ก่อน
+
+ผลกระทบ: ลูกค้าต่างชาติที่คลิกจากแชทภาษาตัวเอง เจอฟอร์มฝากขายภาษาไทยทั้งหน้า = จุดรั่วของ funnel
+**ไม่กระทบ #9** (ป้ายปุ่มถูกต้องแล้ว) · **ไม่กระทบ navigation** (ไปหน้าถูกต้อง) · เป็นเรื่องการส่งต่อภาษา
+
+ขอบเขตแก้ที่คาดไว้ (ยังไม่ทำ): ต้อง audit ก่อนว่า Owner Submission อ่านภาษาจากอะไร
+(localStorage / query param / default) แล้วจึงเลือกทางแก้ที่เล็กที่สุด · อาจเกี่ยวกับหน้าอื่นที่
+`_navigate()` พาไปด้วย (เช่น Property Details) → ต้องตรวจขอบเขตจริงก่อนเสนอแผน
+
+**สถานะ: PENDING #13 = OPEN / NOT FIXED**
+
+
+## 35.33 PENDING #9 — PRODUCTION PASS / CLOSED (21 ก.ย. 2569)
+
+ทดสอบบนโปรดักชันจริงด้วย **หน้าต่าง Incognito** (กันไฟล์เก่าค้างใน cache) · เว็บเปิดเขียวชั่วคราว
+แล้ว **ปิดกลับเป็น 🔴 แดงทันทีหลังทดสอบ** ตามกฎ §29.4 (เจ้าของยืนยันแล้ว)
+
+### ผลทดสอบ (ยืนยันด้วยภาพหน้าจอทุกข้อ)
+| ข้อ | ภาษา / ข้อความที่พิมพ์ | ป้ายปุ่มที่ได้ | ผล |
+|---|---|---|---|
+| R9-1 | ไทย — "ผมอยากฝากขายบ้าน" | **ฝากขาย / ฝากเช่าทรัพย์** | ✅ PASS (เดิมเป็น "List property") |
+| R9-2 | English — "I want to list my property" | **List property** | ✅ PASS (เหมือนเดิมเป๊ะ ไม่ถดถอย) |
+| R9-3 | Deutsch — "Ich möchte meine Immobilie inserieren" | **Immobilie inserieren** | ✅ PASS |
+| R9-4 | Français — "Je veux publier mon bien" | **Publier votre bien** | ✅ PASS |
+| R9-5 | กดปุ่ม 1 ครั้ง | เปิด `Owner Submission.dc.html` ฟอร์มขั้นที่ 1 | ✅ PASS — navigation ล้วน ไม่สร้าง Case |
+| R9-6 | ปิดเว็บกลับสีแดง | 🔴 RED / Public Hidden | ✅ DONE |
+
+หมายเหตุสำคัญ: ป้ายปุ่มในประวัติแชทเก่า **คงภาษาเดิมตอนที่ตอบ** (ปุ่มไทยยังเป็นไทยแม้สลับหน้าเว็บเป็น EN)
+= พฤติกรรมถูกต้อง ไม่ใช่ข้อบกพร่อง
+
+### ไม่ถดถอย
+- PENDING #11 ไม่ถดถอย — ปุ่มยังขึ้นจาก `meta.primaryIntent` ทุกภาษา
+- ไม่สร้าง Case · ไม่เขียน Firestore · ไม่ bypass explicit confirmation
+- **ไม่ได้ deploy อะไรเลยทั้งรอบ** (แก้เฉพาะไฟล์ฝั่งหน้าเว็บ)
+
+### ปัญหาใหม่ที่พบระหว่างทดสอบ (บันทึกแล้ว ไม่แก้ปน)
+- **PENDING #12** — `CHAT_I18N` ขาดคีย์ ~23 คีย์ต่อภาษาใน ru/zh/de/no/fr/it (§35.29)
+  อาการที่เห็นจริง: ชื่อแท็บด้านบนแชทว่างเปล่าในภาษาเยอรมัน/ฝรั่งเศส
+- **PENDING #13** — ภาษาไม่ถูกส่งต่อไปหน้า `Owner Submission.dc.html` (§35.32)
+
+### สถานะหลังรอบนี้
+- **PENDING #9 = CLOSED / PRODUCTION PASS**
+- PENDING #10 · #12 · #13 = OPEN / NOT FIXED
+- Phase 2A-4 / 2B = NOT STARTED · C4.2c = ยังไม่เริ่ม
+- เว็บไซต์ = 🔴 RED / Public Hidden
+- ไฟล์ที่ commit ขึ้น main รอบนี้: `ContactRail.dc.html` (คีย์ 8 ภาษา)
+- **ยังค้างส่งมอบ**: `BLUEPRINT.md` (§35.27–§35.33) และ `Copy Code to GitHub.dc.html`
+  (เพิ่ม `stripInjected()`) — ยังไม่ขึ้น GitHub
