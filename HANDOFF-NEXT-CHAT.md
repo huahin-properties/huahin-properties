@@ -9,7 +9,8 @@
 > | PENDING #7 | CLOSED / PRODUCTION PASS |
 > | PENDING #8 | CLOSED / PRODUCTION PASS |
 > | PENDING #9 | ✅ **CLOSED / PRODUCTION PASS** (21 ก.ย. 2569) |
-> | PENDING #10 | **OPEN / NOT FIXED** — ห้ามแก้ปนกับงานอื่น |
+> | PENDING #10 | **TRUTHFULNESS FIX EXISTS IN SOURCE / DOCUMENTATION STALE / VERIFICATION PENDING** — ขอบเขตเหลือเฉพาะ "AI ห้ามกล่าวอ้าง authoritative action ที่ไม่ได้เกิด" · ปิดได้เมื่อ R10-TRUTH ผ่าน · เรื่อง Product Flow ย้ายไป #14 (BLUEPRINT §35.34 · §36) |
+> | PENDING #14 | 🆕 **OPEN / PRODUCT DECISION APPROVED · NOT IMPLEMENTED** — Viewing / Handoff Product Flow Reconciliation · ขอบเขต 4 ข้อล็อกแล้ว แก้ `ContactRail.dc.html` → `_buildSystemPrompt()` เท่านั้น (BLUEPRINT §36.7) |
 > | PENDING #11 | CLOSED / PRODUCTION PASS |
 > | PENDING #12 | 🆕 **OPEN / NOT FIXED** — `CHAT_I18N` ขาดคีย์ ~23 คีย์ต่อภาษาใน ru/zh/de/no/fr/it (BLUEPRINT §35.29) |
 > | PENDING #13 | 🆕 **OPEN / NOT FIXED** — ภาษาไม่ถูกส่งต่อไปหน้า `Owner Submission.dc.html` (BLUEPRINT §35.32) |
@@ -65,8 +66,14 @@
 > 8. ก่อนให้เจ้าของก็อปไฟล์จาก Viewer ต้องตรวจว่ากล่องโค้ดขึ้นต้นตรงกับบรรทัดแรกจริงของไฟล์
 >    และขนาดใกล้เคียงไฟล์จริง (BLUEPRINT §35.30 — เคยเกือบทำให้ BLUEPRINT ถูกตัดทิ้งบน main)
 >
-> **งานที่เจ้าของยังไม่ได้เลือกสำหรับรอบถัดไป**: PENDING #10 · PENDING #12 · PENDING #13 ·
+> **งานที่เจ้าของยังไม่ได้เลือกสำหรับรอบถัดไป**: PENDING #12 · PENDING #13 · PENDING #14 ·
 > Phase 2A-4 — **ห้ามเริ่มเอง** ต้องรอเจ้าของสั่ง
+>
+> **PENDING #10 ไม่ต้องเลือกเป็นรอบแก้แล้ว** — fix อยู่ใน source แล้ว เหลือเพียง verification
+> ด้วย R10-TRUTH · ส่วน R10 ที่ต้องใช้ทรัพย์เผยแพร่จริงยัง NOT TESTABLE (ไม่ใช่ FAIL)
+>
+> **มติผลิตภัณฑ์ทั้งหมดอยู่ที่ BLUEPRINT §36 PRODUCT DECISION REGISTRY (PD-01…PD-14)**
+> ห้ามตัดสินใจเรื่อง journey / viewing / handoff ขัดกับ PD ใด ๆ โดยไม่ได้รับอนุมัติใหม่
 
 **สร้าง: 18 กันยายน 2569** · ใช้สำหรับส่งต่อสถานะเมื่อเปิดแชทใหม่ในโปรเจกต์เดิม
 
