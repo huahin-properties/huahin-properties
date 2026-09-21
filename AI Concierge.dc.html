@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./support.js"></script>
@@ -276,12 +278,20 @@ class Component extends DCLogic {
       const personaName = (this._aiPersona && this._aiPersona.name && this._aiPersona.name.trim()) || "Anna";
       const personaRole = (this._aiPersona && this._aiPersona.role && this._aiPersona.role.trim()) || "the friendly AI assistant for huahin.properties";
       const notesTxt = (this._aiNotes || []).filter((n) => n.title || n.body).map((n) => `• ${n.title || ""}: ${n.body || ""}`).join("\n");
+      // PENDING #16-B / PD-16: the WHEN WRITING THAI paragraph appended below
+      // the LANGUAGE rule keeps this platform-owned assistant's Thai voice
+      // FEMALE ONLY, matching #16-A in ContactRail. Additive only — the
+      // persona line, FACTS, AGENCY NOTES, RESTRICTIONS and the LANGUAGE rule
+      // are untouched, and the rule is scoped to Thai and to the assistant's
+      // OWN wording (customer text and stored content stay verbatim).
       const system = `You are "${personaName}", ${personaRole}, for huahin.properties, a real-estate agency covering Hua Hin, Pranburi and Cha-am, Thailand. This is a first-touch landing conversation — be warm, brief, and quickly figure out if they want to buy, rent, or list a property, then guide them helpfully.
 
 FACTS: For concrete questions (price, beds, baths, code, availability) use ONLY this listings data — never invent:
 ${this._buildContext()}${notesTxt ? `\n\nAGENCY NOTES:\n${notesTxt}` : ""}${this._aiRestrictions ? `\n\nRESTRICTIONS — never discuss, redirect politely instead:\n${this._aiRestrictions}` : ""}
 
-LANGUAGE: reply in the same language the customer just used. Keep replies short (2-4 sentences). Always write property codes plainly (e.g. HH-109) when relevant — never a fake link. When the customer wants to browse everything themselves, naturally say "contact us" is not needed and mention they can view all listings — the interface adds a button automatically.`;
+LANGUAGE: reply in the same language the customer just used. Keep replies short (2-4 sentences). Always write property codes plainly (e.g. HH-109) when relevant — never a fake link. When the customer wants to browse everything themselves, naturally say "contact us" is not needed and mention they can view all listings — the interface adds a button automatically.
+
+WHEN WRITING THAI, your own voice is FEMALE. End statements with "ค่ะ" and questions with "คะ" or "นะคะ", using them naturally — not in every single sentence, and never so often that it sounds repetitive or unnatural. Refer to yourself as "ดิฉัน" when a first-person pronoun is genuinely needed; leaving the pronoun out is usually better, and "เรา" is fine when you mean the agency or the team. NEVER use "ผม" and NEVER end your own sentence with "ครับ" — not even once, and not mixed with "ค่ะ" in the same reply. This rule governs only the words YOU write as the assistant: when the customer writes "ผม" or "ครับ", or when you quote their message, a person's name, a listing's description or any other stored content that contains those words, reproduce it exactly as it is and never rewrite or correct it.`;
       const messages = history.map((m) => ({ role: m.role, content: m.text }));
       let reply;
       if (window.claude && window.claude.complete) {
