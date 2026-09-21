@@ -3705,5 +3705,12 @@ DOCTYPE โดยไม่ดูชนิดไฟล์ → เมื่อส�
 - Phase 2A-4 / 2B = NOT STARTED · C4.2c = ยังไม่เริ่ม
 - เว็บไซต์ = 🔴 RED / Public Hidden
 - ไฟล์ที่ commit ขึ้น main รอบนี้: `ContactRail.dc.html` (คีย์ 8 ภาษา)
-- **ยังค้างส่งมอบ**: `BLUEPRINT.md` (§35.27–§35.33) และ `Copy Code to GitHub.dc.html`
-  (เพิ่ม `stripInjected()`) — ยังไม่ขึ้น GitHub
+- **ส่งมอบแล้ว**: `ContactRail.dc.html` และ `BLUEPRINT.md` ขึ้น main ครบ (ยืนยัน 3709 บรรทัด 525 KB)
+- **ขั้นส่งมอบ `Copy Code to GitHub.dc.html` = CANCELLED / NOT REQUIRED** (21 ก.ย. 2569)
+  เหตุผล: ไฟล์ Viewer เป็น Operational Viewer ภายใน Claude Project **ไม่ได้อยู่ใน GitHub repository**
+  (ยืนยันจากรายชื่อไฟล์บน main: หลัง `ContactRail.dc.html` ข้ามไป `DEPLOYMENT.md`) และ
+  `stripInjected()` มีผลเฉพาะกล่องก็อปโค้ดในโปรเจกต์ ไม่กระทบเว็บจริง · §29 ข้อ 15 ให้สร้าง
+  การ์ดส่งมอบเฉพาะไฟล์ที่ต้องอยู่บน GitHub · **เกิดจากผู้ช่วยตั้ง delivery step ผิด ไม่ใช่งานค้าง**
+  → กติกาใหม่: ห้ามตั้งขั้นให้เจ้าของ commit ไฟล์ Viewer เว้นแต่ BLUEPRINT ระบุชัดว่าจำเป็น
+- **ส่งมอบครบแล้ว**: `HANDOFF-NEXT-CHAT.md` commit ขึ้น main สำเร็จ (`68646c6` · 375 บรรทัด · 38.5 KB)
+  → **รอบ PENDING #9 ปิดสมบูรณ์ ไม่มีไฟล์ค้างส่งมอบ**
