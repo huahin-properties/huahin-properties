@@ -461,7 +461,76 @@ const RECEPTION_TOOL = {
   },
 };
 
+// PENDING #16 / PD-16 SECOND LAYER — OPTION 1 (VALIDATION + ONE RETRY).
+// Approved 22 ก.ย. 2569. Minimum server guard: no response-contract change, no
+// segment architecture, no regex rewriting of the reply. The reply text is
+// never edited here — it is either accepted as the model wrote it, or the model
+// is asked ONCE to write it again.
+//
+// A violation is a MALE assistant voice in a Thai reply: "ครับ" or "ผม" written
+// by the assistant. Text inside quotation marks is masked out first (" " ' '
+// “ ” ‘ ’ 「」 « »), so a customer's own words, a name, or quoted listing
+// content containing ครับ/ผม is NOT a violation.
+const PD16_QUOTES = /"[^"\n]*"|'[^'\n]*'|“[^”\n]*”|‘[^’\n]*’|「[^」\n]*」|«[^»\n]*»/g;
+function pd16Violation(reply) {
+  const s = String(reply || "");
+  if (!/[\u0E00-\u0E7F]/.test(s)) return false;
+  return /ครับ|ผม/.test(s.replace(PD16_QUOTES, " "));
+}
+
+const PD16_RETRY_NOTE = "REWRITE YOUR LAST REPLY. It used a male Thai assistant voice, which is not allowed: you must never write \"ผม\" as your own pronoun and never end your own sentence with \"ครับ\". Write the SAME reply again with a female Thai voice (\"ค่ะ\" / \"คะ\" / \"นะคะ\", or no pronoun at all). Change NOTHING else: keep the same meaning, the same facts, every number exactly as it was, every property code exactly as it was, every quoted passage exactly as it was (a quotation that contains ผม or ครับ stays untouched), and keep the [[CONTACT]] or [[LIST_PROPERTY]] token if your reply had one. Do not add any new claim that anything was submitted, sent, received, created, arranged, or that anyone will contact the customer. Return the corrected reply in the same tool fields as before.";
+
+// The retry must not be able to change the facts. Only the reply STRING is
+// taken from it — the whole classification (stage, intents, draft fields,
+// propertyBasics …) stays exactly as the FIRST call returned it, so the draft /
+// gate path is bit-for-bit unaffected. Six safeguards; any one of them failing
+// means the ORIGINAL reply is used and the turn ends (never a second retry):
+//   1. the retry must itself pass PD-16 (no male assistant voice left);
+//   2. [[CONTACT]] presence must match in BOTH directions — a retry may not
+//      add a token either, so it can never change journey / handoff state;
+//   3. same symmetric rule for [[LIST_PROPERTY]];
+//   4. every property code of the first reply must still be present;
+//   5. the multiset of numbers must be identical (no unit parsing — a plain
+//      safeguard that the retry did not alter a figure);
+//   6. the quoted spans (PD16_QUOTES) must be identical, in the same order.
+function pd16ReplyIsSafe(first, retried) {
+  if (!retried || !String(retried).trim()) return false;
+  if (pd16Violation(retried)) return false;
+  for (const re of [/\[\[\s*CONTACT\s*\]\]/i, /\[\[\s*LIST_PROPERTY\s*\]\]/i]) {
+    if (re.test(first) !== re.test(retried)) return false;
+  }
+  const codes = String(first).match(/\b[A-Z]{2,4}-\d{2,6}\b/g) || [];
+  for (const c of codes) if (!String(retried).includes(c)) return false;
+  const nums = (s) => (String(s).match(/\d+(?:[.,]\d+)*/g) || []).slice().sort();
+  const a = nums(first), b = nums(retried);
+  if (a.length !== b.length || a.some((n, i) => n !== b[i])) return false;
+  const quotes = (s) => String(s).match(PD16_QUOTES) || [];
+  const qa = quotes(first), qb = quotes(retried);
+  if (qa.length !== qb.length || qa.some((q, i) => q !== qb[i])) return false;
+  return true;
+}
+
+// ONE retry maximum, and only when the first reply actually violates PD-16.
+// No loop, no second retry, no change to what this function returns.
 async function callClaudeReception(system, messages, apiKey) {
+  const first = await callClaudeReceptionOnce(system, messages, apiKey);
+  if (!pd16Violation(first.reply)) return first;
+  let retried;
+  try {
+    retried = await callClaudeReceptionOnce(
+      system,
+      [...messages, { role: "assistant", content: first.reply }, { role: "user", content: PD16_RETRY_NOTE }],
+      apiKey
+    );
+  } catch (e) {
+    return first; // a failed retry must never break the turn
+  }
+  if (!pd16ReplyIsSafe(first.reply, retried.reply)) return first;
+  // Reply string only; everything else stays from the first call.
+  return { ...first, reply: retried.reply };
+}
+
+async function callClaudeReceptionOnce(system, messages, apiKey) {
   const body = {
     model: "claude-haiku-4-5",
     max_tokens: 900,
