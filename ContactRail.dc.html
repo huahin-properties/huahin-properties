@@ -1596,7 +1596,14 @@ class Component extends DCLogic {
     if (!CTA.test(masked)) return text;
     const bySentence = masked.split(/(?<=[.!?…。！？\n])/).filter((p) => !CTA.test(p)).join("");
     if (bySentence.trim()) return restore(bySentence);
-    const byClause = masked.replace(new RegExp("(?:" + CTA.source + ")[^.!?…。！？\\n]*", "gi"), "").trim();
+    const byClause = masked.replace(new RegExp("(?:" + CTA.source + ")[^.!?…。！？\\n]*", "gi"), "")
+      // DANGLING CONNECTOR (22 ก.ย. 2569, STEP 99 rerun H-2): the removed clause
+      // often had a connector in front of it ("…ส่งคำขอนัดดู HH-80774 ผ่าน|ปุ่ม…"),
+      // and cutting only the clause left that word stranded at the end. Trimmed
+      // ONLY at the very end of what remains (never mid-text), and only from a
+      // short fixed list of connector words, so ordinary prose is untouched.
+      .replace(/[\s,;:·–—-]*(?:ผ่าน|ทาง|โดย|ด้วย|จาก|ที่|กับ|via|through|using|by|with|from|at|on|in|to)[\s,;:]*$/i, "")
+      .trim();
     if (byClause) return restore(byClause);
     // CTA-ONLY REPLY (22 ก.ย. 2569, PO review): the whole reply was nothing but
     // the false claim, so returning it unchanged would break the contract. No
