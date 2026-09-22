@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="google-site-verification" content="C9fJ87hFrHAyUH7DjPlzBCHg0Ac_hHJhMycdTbCuYl0" />
@@ -746,7 +748,7 @@ class Component extends DCLogic {
       const lang = this.state.lang;
       const props = this.state.effProps || (this._mod ? this._mod.PROPERTIES : []) || [];
       const listingsBlock = this._buildWelcomeContext(props);
-      const system = `You are a helpful, warm real-estate assistant for huahin.properties (Hua Hin, Pranburi, Cha-am, Thailand). Reply in the customer's language (${lang}), and always in the SAME language the customer just wrote in regardless of this setting. Use ONLY the listings below — never invent facts. Whenever you mention a specific property, always include its exact property code (e.g. HH-109) written plainly in your reply — the interface automatically turns it into a clickable card, so never write a fake link yourself.\n\nWHEN A LISTING MATCHES what the customer asked for: keep your reply VERY short — 1 sentence max — then just state the property code(s) plainly. The interface shows a photo card with price/beds/location for each code automatically, so do NOT restate price, bedrooms, size, or other specs in your text. List every matching code, not just one. Only write a longer answer when NO listing matches or for general questions unrelated to a specific property.\n\nCURRENT LISTINGS (code | title | area | subdistrict | zone/soi | type | status | condition | yearBuilt | price | beds | baths | land size | land rai/ngan/wah | living area | pool | parking | floor | commonFee | foreignQuota | titleDeed | kitchenTypes | purchaseOptions | features | collections | landShape | roadWidth | landCondition | utilities | zoningColor | floors | electricalPhase | description):\n${listingsBlock}`;
+      const system = `You are a helpful, warm real-estate assistant for huahin.properties (Hua Hin, Pranburi, Cha-am, Thailand). Reply in the customer's language (${lang}), and always in the SAME language the customer just wrote in regardless of this setting. Use ONLY the listings below — never invent facts. Whenever you mention a specific property, always include its exact property code (e.g. HH-109) written plainly in your reply — the interface automatically turns it into a clickable card, so never write a fake link yourself.\n\nWHEN A LISTING MATCHES what the customer asked for: keep your reply VERY short — 1 sentence max — then just state the property code(s) plainly. The interface shows a photo card with price/beds/location for each code automatically, so do NOT restate price, bedrooms, size, or other specs in your text. List every matching code, not just one. Only write a longer answer when NO listing matches or for general questions unrelated to a specific property.\n\nCURRENT LISTINGS (code | title | area | subdistrict | zone/soi | type | status | condition | yearBuilt | price | beds | baths | land size | land rai/ngan/wah | living area | pool | parking | floor | commonFee | foreignQuota | titleDeed | kitchenTypes | purchaseOptions | features | collections | landShape | roadWidth | landCondition | utilities | zoningColor | floors | electricalPhase | description):\n${listingsBlock}\n\nWHEN WRITING THAI: you are a female Thai assistant. Never write "ผม" as your own pronoun and never end your own sentence with "ครับ" — use "ค่ะ" / "คะ" / "นะคะ", or no pronoun at all. A quotation of the customer's own words that contains ผม or ครับ stays exactly as they wrote it.\n\nPLAIN TEXT ONLY: never use markdown — no **bold**, no *italics*, no #headings, no [link](url), no backticks. Write plain sentences.\n\nNEVER invent or state a phone number, LINE ID, WhatsApp number or email address, and never claim there is a contact button, contact form or link for the customer to press — you cannot see the interface. If the customer asks for a person, acknowledge the request naturally and continue helping them in this chat. Do not claim that a staff member will contact them, do not promise a callback, and do not invent any phone number, LINE ID, WhatsApp number, email address, contact button, form or link.`;
       const messages = history.map((m) => ({ role: m.role, content: m.text }));
       let reply;
       if (window.claude && window.claude.complete) {
@@ -759,8 +761,9 @@ class Component extends DCLogic {
         const data = await res.json();
         reply = data.reply || data.completion || "";
       }
+      const shown = this._cleanWelcomeReply(reply);
       const links = this._extractWelcomeLinks(reply, props, this._detectLang(reply));
-      const aiMsg = { role: "assistant", text: reply, align: "flex-start", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:7px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" };
+      const aiMsg = { role: "assistant", text: shown, align: "flex-start", bubbleStyle: "background:oklch(93% 0.01 75); color:oklch(25% 0.02 60); padding:7px 14px; border-radius:14px 14px 14px 2px; font-size:14px; line-height:1.5;" };
       const finalHistory = [...history, aiMsg];
       this.setState({ welcomeChatMessages: finalHistory, welcomeChatLoading: false });
       this._persistWelcomeHistory(finalHistory);
@@ -772,6 +775,30 @@ class Component extends DCLogic {
       this._persistWelcomeHistory(finalHistory);
     }
     this._scrollWelcomeChat();
+  }
+  // PENDING #16 — HOME PATH MINIMUM CLEAN (Option 2, approved 22 ก.ย. 2569).
+  // MARKDOWN ONLY. Removes leaked markdown markers and normalizes whitespace.
+  // NO gender / pronoun / politeness replacement — deliberately excluded by
+  // Product Owner decision: the source cannot prove which words are the
+  // assistant's own and which are unquoted listing/customer content, so no
+  // deterministic rewrite of Thai voice runs on the client. Female Thai voice
+  // is enforced by the system prompt only (PROMPT FIRST).
+  // Only ever REMOVES markers; never adds text, never links, never invents
+  // contact details. Quoted spans are masked first so a marker-looking
+  // character inside a quotation is left untouched.
+  _cleanWelcomeReply(text) {
+    if (!text) return text;
+    const store = [];
+    let s = String(text).replace(/"[^"\n]*"|'[^'\n]*'|“[^”\n]*”|‘[^’\n]*’|「[^」\n]*」|«[^»\n]*»/g,
+      (m) => { store.push(m); return "\u0000Q" + (store.length - 1) + "\u0000"; });
+    s = s
+      .replace(/\*\*([^*\n]+)\*\*/g, "$1")
+      .replace(/(^|[^*])\*([^*\n]+)\*/g, "$1$2")
+      .replace(/`{1,3}([^`\n]+)`{1,3}/g, "$1")
+      .replace(/^\s{0,3}#{1,6}\s+/gm, "")
+      .replace(/\[([^\]\n]+)\]\((?:[^)\n]*)\)/g, "$1");
+    s = s.replace(/\u0000Q(\d+)\u0000/g, (m, i) => store[Number(i)]);
+    return s.replace(/[ \t]{2,}/g, " ").replace(/\n{3,}/g, "\n\n").trim();
   }
   _detectLang(text) {
     if (!text) return this.state.lang;
