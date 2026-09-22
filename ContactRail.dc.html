@@ -1575,16 +1575,23 @@ class Component extends DCLogic {
   // content by authoritative structure.
 
   // PENDING #17 / PD-17-F2 — NO [[CONTACT]] = NO CLAIM ABOUT A CONTACT CTA.
-  // Only ever REMOVES a false claim; it never creates a token, a link or a
-  // button (buttons are still made solely by _extractLinks from the raw token).
+  // WHOLE-SENTENCE RULE (22 ก.ย. 2569, approved after STEP 99 rerun): a sentence
+  // that claims a contact button is DROPPED ENTIRELY. The earlier approach
+  // (cut the CTA clause, then trim a connector word) was proven unfixable —
+  // the stranded word changed every time ("ผ่าน", then "คุณสามารถ") and the
+  // customer saw broken prose; both the clause cut and the connector list are
+  // REMOVED, not kept.
+  // Only ever REMOVES; never creates a token, a link or a button (buttons are
+  // still made solely by _extractLinks from the raw token).
   //   • runs only when the raw reply carried NO [[CONTACT]] token;
-  //   • quoted spans are masked first, so a CTA phrase inside a quotation
-  //     (customer's words, stored content) is never matched or removed;
+  //   • quoted spans are masked first, so a CTA phrase inside a quotation is
+  //     never matched or removed;
   //   • bullet / list lines are NOT protected — they may be assistant voice;
-  //   • removes the individual sentence carrying the claim; if that would empty
-  //     the reply it falls back to removing only the offending clause; if even
-  //     that empties it, the reply is PRESERVED UNCHANGED (answer wins, the
-  //     limitation is documented rather than guessed).
+  //   • sentences without a CTA claim (prices, property facts, questions) are
+  //     kept verbatim;
+  //   • if nothing survives, the reply becomes the EXISTING translated
+  //     chat_autobot_help string (no new i18n), which reads as a complete
+  //     sentence and carries no CTA wording.
   _stripUnbackedCtaClaims(text, hasContactToken) {
     if (!text || hasContactToken) return text;
     const CTA = /(?:tap|click|press|hit|use)\s+(?:on\s+)?(?:the\s+)?["'“”]?contact(?:\s+us)?["'“”]?(?:\s+(?:button|link))?|contact\s+(?:button|link)\s+below|(?:button|link|form)\s+below|below\s+to\s+(?:reach|contact)\s+(?:the\s+)?(?:team|us)|กดปุ่ม|คลิกปุ่ม|แตะปุ่ม|ปุ่มด้านล่าง|ปุ่มติดต่อ|กรอกฟอร์ม|ฟอร์มด้านล่าง|нажмите[^.!?\n]{0,40}кнопк|кнопк[^.!?\n]{0,20}ниже|(?:点击|下方)[^。！？\n]{0,20}按钮|(?:den\s+)?button\s+unten|knappen\s+nedenfor|bouton\s+ci-dessous|pulsante\s+(?:qui\s+sotto|in\s+basso)/i;
@@ -1592,24 +1599,9 @@ class Component extends DCLogic {
     const masked = String(text).replace(/"[^"\n]*"|'[^'\n]*'|“[^”\n]*”|‘[^’\n]*’|「[^」\n]*」|«[^»\n]*»/g, (m) => {
       store.push(m); return "\u0000Q" + (store.length - 1) + "\u0000";
     });
-    const restore = (s) => s.replace(/\u0000Q(\d+)\u0000/g, (m, i) => store[Number(i)]);
     if (!CTA.test(masked)) return text;
-    const bySentence = masked.split(/(?<=[.!?…。！？\n])/).filter((p) => !CTA.test(p)).join("");
-    if (bySentence.trim()) return restore(bySentence);
-    const byClause = masked.replace(new RegExp("(?:" + CTA.source + ")[^.!?…。！？\\n]*", "gi"), "")
-      // DANGLING CONNECTOR (22 ก.ย. 2569, STEP 99 rerun H-2): the removed clause
-      // often had a connector in front of it ("…ส่งคำขอนัดดู HH-80774 ผ่าน|ปุ่ม…"),
-      // and cutting only the clause left that word stranded at the end. Trimmed
-      // ONLY at the very end of what remains (never mid-text), and only from a
-      // short fixed list of connector words, so ordinary prose is untouched.
-      .replace(/[\s,;:·–—-]*(?:ผ่าน|ทาง|โดย|ด้วย|จาก|ที่|กับ|via|through|using|by|with|from|at|on|in|to)[\s,;:]*$/i, "")
-      .trim();
-    if (byClause) return restore(byClause);
-    // CTA-ONLY REPLY (22 ก.ย. 2569, PO review): the whole reply was nothing but
-    // the false claim, so returning it unchanged would break the contract. No
-    // new i18n table is introduced — this reuses the EXISTING translated
-    // CHAT_I18N.chat_autobot_help string (present in all 8 languages), which
-    // carries no CTA wording and moves the conversation forward.
+    const kept = masked.split(/(?<=[.!?…。！？\n])/).filter((p) => !CTA.test(p)).join("").trim();
+    if (kept) return kept.replace(/\u0000Q(\d+)\u0000/g, (m, i) => store[Number(i)]);
     const t = CHAT_I18N[this._detectLang(String(text))] || CHAT_I18N.en;
     return t.chat_autobot_help || CHAT_I18N.en.chat_autobot_help;
   }
