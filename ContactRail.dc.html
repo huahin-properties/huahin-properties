@@ -3,6 +3,8 @@
 <head>
 
 
+
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./support.js"></script>
@@ -472,6 +474,9 @@ class Component extends DCLogic {
   ownerScrollRef = React.createRef();
 
   async componentDidMount() {
+    // PENDING #18 — one shared gate: resolves only after the conversation
+    // backend has been CHOSEN (firestore, or local after a real failure).
+    this._convInitPromise = new Promise((resolve) => { this._convInitResolve = resolve; });
     try {
       const collapsed = localStorage.getItem("contactRailCollapsed");
       this.setState({ railOpen: collapsed === "0" });
@@ -493,16 +498,26 @@ class Component extends DCLogic {
     this._onStorage = syncLang;
     window.addEventListener("storage", this._onStorage);
     window.addEventListener("langchange", this._onStorage);
-    await this._loadProperties();
-    // Real conversation ownership must be initialized BEFORE building any
-    // greeting, so the customer's Anonymous Auth uid / conversationId
-    // already exist when the first message is written. Firestore is the
-    // cross-device Source of Truth (Technical Plan, approved); if
-    // Firebase Auth/Firestore is unreachable, this falls back to the
-    // localStorage prototype so chat never breaks outright — see
-    // conversation-store.js header for the honest same-device-only scope.
-    this._parseCollectionParams();
-    await this._initConversationBackend();
+    try {
+      // PENDING #18 — data load is capped (not a routing decision; a late
+      // result only fills _properties). The gate below must always resolve.
+      await Promise.race([this._loadProperties(), new Promise((r) => setTimeout(r, 10000))]);
+      // Real conversation ownership must be initialized BEFORE building any
+      // greeting, so the customer's Anonymous Auth uid / conversationId
+      // already exist when the first message is written. Firestore is the
+      // cross-device Source of Truth (Technical Plan, approved); if
+      // Firebase Auth/Firestore is unreachable, this falls back to the
+      // localStorage prototype so chat never breaks outright — see
+      // conversation-store.js header for the honest same-device-only scope.
+      this._parseCollectionParams();
+      await this._initConversationBackend();
+    } finally {
+      if (this._convBackend !== "firestore" && this._convBackend !== "local") {
+        this._convBackend = "local";
+        try { this._recordReceptionDiag({ route: "backend_init_forced_local", code: "no-decision", persisted: false }); } catch (e) {}
+      }
+      if (this._convInitResolve) this._convInitResolve();
+    }
     const restored = this._restoreHistory();
     if (!restored) await (this._maybeAutoTriggerFromCollectionLink() || this._maybeAutoTrigger());
     // C4.2b Step 2 - refresh / new-tab UI recovery. Buttons and their
@@ -555,9 +570,19 @@ class Component extends DCLogic {
     }
   }
 
+  // PENDING #18 — rejects (code "init-timeout") if p has not settled by the
+  // shared deadline, so a stalled step lands in the existing catch → local.
+  _initStep(p, deadline) {
+    const ms = Math.max(0, deadline - Date.now());
+    return Promise.race([p, new Promise((_, rej) => setTimeout(() => {
+      const e = new Error("backend init step timed out"); e.code = "init-timeout"; rej(e);
+    }, ms))]);
+  }
+
   async _initConversationBackend() {
+    const deadline = Date.now() + 15000; // PENDING #18 — whole decision phase
     try {
-      const fb = await import("./firebase-client.js"); // ensures the Firebase app is initialized first
+      const fb = await this._initStep(import("./firebase-client.js"), deadline); // ensures the Firebase app is initialized first
       // Firebase Auth restores its persisted session from IndexedDB
       // ASYNCHRONOUSLY. Without waiting for its ready signal, getVisitorId()
       // reads currentUser === null in a NEW TAB and signInAnonymously() mints
@@ -567,11 +592,12 @@ class Component extends DCLogic {
       // the mechanism firebase-client.js already provides for exactly this.
       // Order is load-bearing: initialize -> auth warm-up -> conversation
       // module -> getVisitorId/findExistingReception -> restore local history.
-      if (fb.warmUpAuthPersistence) await fb.warmUpAuthPersistence();
-      const fs = await import("./conversation-firestore.js");
+      if (fb.whenFirebaseReady) await this._initStep(fb.whenFirebaseReady(), deadline); // PENDING #18
+      if (fb.warmUpAuthPersistence) await this._initStep(fb.warmUpAuthPersistence(), deadline);
+      const fs = await this._initStep(import("./conversation-firestore.js"), deadline);
       this._convFS = fs;
       if (this.state.customerMode) {
-        await fs.getVisitorId(); // Anonymous Auth sign-in happens here; the
+        await this._initStep(fs.getVisitorId(), deadline); // Anonymous Auth sign-in happens here; the
         // conversationId itself is only known once startConversation
         // resolves the real ownerId server-side — that call (and its
         // listenMessages subscription) happens in
@@ -582,7 +608,7 @@ class Component extends DCLogic {
         // has this site open — Admin or a Lister/Agent), never a
         // hardcoded id, so every member's own shared links reach THEIR
         // own inbox, not a shared "admin" one.
-        const myOwnerId = await this._resolveMyOwnerId();
+        const myOwnerId = await this._initStep(this._resolveMyOwnerId(), deadline);
         this._myOwnerId = myOwnerId;
         this._unsubOwnerInbox = fs.listenOwnerInbox(myOwnerId, (rows, err) => this._onOwnerInboxSnapshot(rows, err));
       }
@@ -590,14 +616,16 @@ class Component extends DCLogic {
       // C4.1: if this visitor already crossed into a persisted Reception
       // conversation on an earlier visit/refresh, pick that same document
       // back up (deterministic id -> a refresh can never duplicate it).
-      if (!this.state.customerMode) await this._resumeReception();
+      if (!this.state.customerMode) { try { await this._initStep(this._resumeReception(), Date.now() + 5000); } catch (e) {} }
     } catch (e) {
       console.warn("Firestore conversation backend unavailable — falling back to local (same-device only):", e);
       this._recordReceptionDiag({ route: "backend_init_failed_local_only", code: String((e && e.code) || "no-code"), persisted: false });
       this._convBackend = "local";
-      this._convStore = await import("./conversation-store.js");
-      this._unsubConv = this._convStore.subscribe(() => this._onConversationsChangedLocal());
-      this._onConversationsChangedLocal();
+      try {
+        this._convStore = await this._initStep(import("./conversation-store.js"), Date.now() + 5000);
+        this._unsubConv = this._convStore.subscribe(() => this._onConversationsChangedLocal());
+        this._onConversationsChangedLocal();
+      } catch (e2) { console.warn("Local conversation store unavailable:", e2); }
     }
   }
 
@@ -1837,6 +1865,9 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
     this.setState({ chatMessages: history, chatInput: "", chatLoading: true });
     this._persistHistory(history);
     this._scrollChat();
+    // PENDING #18 — wait for the backend decision; the init lifecycle itself is
+    // bounded (≤30s worst case) and always ends at "firestore" or "local".
+    if (this._convInitPromise) await this._convInitPromise;
     if (this.state.customerMode && this._convBackend === "local" && this._convStore) {
       const visitorId = this._convStore.getVisitorId();
       this._convStore.appendMessage(this.state.senderName, visitorId, "customer", text);
