@@ -51,6 +51,40 @@ function getApp() {
   return _app;
 }
 
+// PENDING #18 — the SDK <script> tags in <helmet> are inserted async by the
+// runtime and nothing waits for them, so the one-shot init at line 35 can run
+// before window.firebase exists. Conversation callers await this before
+// touching Auth/Firestore. Same 50ms / 8s budget as onAdminAuthReady().
+// Functions is NOT awaited: conversation-firestore.js loads it itself.
+// Success is cached; ANY rejection clears the cache (cleared in a .catch
+// attached after assignment, so it can never be overwritten by the executor).
+let _readyPromise = null;
+export function whenFirebaseReady() {
+  if (_readyPromise) return _readyPromise;
+  const p = new Promise((resolve, reject) => {
+    let waited = 0;
+    const poll = () => {
+      const f = window.firebase;
+      if (f && typeof f.auth === "function" && typeof f.firestore === "function") {
+        try { resolve(getApp()); } catch (e) { reject(e); }
+        return;
+      }
+      waited += 50;
+      if (waited >= 8000) {
+        const err = new Error("Firebase SDK not ready after 8s");
+        err.code = "sdk-timeout";
+        reject(err);
+        return;
+      }
+      setTimeout(poll, 50);
+    };
+    poll();
+  });
+  _readyPromise = p;
+  p.catch(() => { if (_readyPromise === p) _readyPromise = null; });
+  return p;
+}
+
 function db() { return getApp().firestore(); }
 function storageRef() { return getApp().storage(); }
 
