@@ -1,0 +1,35 @@
+{
+  "name": "Villa M17 · CoCo Hua Hin 88 Luxury Home",
+  "short_name": "Villa M17",
+  "description": "Neue, voll möblierte Poolvilla mit 3 Schlafzimmern in CoCo Hua Hin 88 Luxury Home: 187 m², privater Salzwasserpool, 24-h-Sicherheit. Einzug ab 70 %, 2 Jahre Bauträgerfinanzierung.",
+  "lang": "de",
+  "start_url": "./",
+  "scope": "../",
+  "display": "standalone",
+  "background_color": "#F7F7F4",
+  "theme_color": "#0E7F80",
+  "icons": [
+    {
+      "src": "../img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "../img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "../img/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "../img/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

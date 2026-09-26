@@ -1,0 +1,35 @@
+{
+  "name": "Villa M17 · CoCo Hua Hin 88 Luxury Home",
+  "short_name": "Villa M17",
+  "description": "Новая меблированная вилла с 3 спальнями в CoCo Hua Hin 88 Luxury Home: 187 м², собственный бассейн с солёной водой, охрана 24/7. Заселение после оплаты 70%, рассрочка 2 года.",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "../",
+  "display": "standalone",
+  "background_color": "#F7F7F4",
+  "theme_color": "#0E7F80",
+  "icons": [
+    {
+      "src": "../img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "../img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "../img/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "../img/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

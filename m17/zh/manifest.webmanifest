@@ -1,0 +1,35 @@
+{
+  "name": "Villa M17 · CoCo Hua Hin 88 Luxury Home",
+  "short_name": "Villa M17",
+  "description": "CoCo Hua Hin 88 Luxury Home 全新精装三卧泳池别墅，187平方米，私人盐水泳池，24小时安保。付70%即可入住，开发商分期2年。",
+  "lang": "zh-Hans",
+  "start_url": "./",
+  "scope": "../",
+  "display": "standalone",
+  "background_color": "#F7F7F4",
+  "theme_color": "#0E7F80",
+  "icons": [
+    {
+      "src": "../img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "../img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "../img/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "../img/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

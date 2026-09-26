@@ -1,0 +1,35 @@
+{
+  "name": "Villa M17 · CoCo Hua Hin 88 Luxury Home",
+  "short_name": "Villa M17",
+  "description": "พูลวิลล่าสร้างใหม่ ตกแต่งครบ 3 ห้องนอน โครงการ CoCo Hua Hin 88 Luxury Home พื้นที่ 187 ตร.ม. สระเกลือส่วนตัว รปภ. 24 ชม. จ่าย 70% เข้าอยู่ได้ ผ่อนตรงกับโครงการ 2 ปี",
+  "lang": "th",
+  "start_url": "./",
+  "scope": "../",
+  "display": "standalone",
+  "background_color": "#F7F7F4",
+  "theme_color": "#0E7F80",
+  "icons": [
+    {
+      "src": "../img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "../img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "../img/icon-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "../img/icon-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
