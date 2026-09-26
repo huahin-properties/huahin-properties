@@ -448,7 +448,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
         <button type="button" class="btn btn-primary" id="mp-open2" data-t="mp_open">查看总体规划</button>
       </div>
       <button type="button" class="mp-thumb" id="mp-open">
-        <img id="mp-img" src="../img/masterplan.jpg" alt="CoCo Hua Hin 88 Luxury Home总体规划图，标示M17地块" width="1414" height="2000" loading="lazy">
+        <img id="mp-img" src="../img/masterplan-v2.jpg" alt="CoCo Hua Hin 88 Luxury Home总体规划图，标示M17地块" width="1414" height="2000" loading="lazy">
         <span class="pill"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4M11 8v6M8 11h6"></path></svg><span data-t="full">全屏</span></span>
       </button>
     </div>
@@ -754,11 +754,11 @@ function swipe(el, onTap){
 swipe($("#stage"), openLB); swipe($("#lb-mid"));
 
 // master plan viewer
-$("#mp-img").src = ROOT + "img/masterplan.jpg";
+$("#mp-img").src = ROOT + "img/masterplan-v2.jpg";
 $("#logo-img").src = ROOT + "img/logo.png";
 let pz = 1;
 function planZoom(z){ pz = Math.max(1, Math.min(3, z)); $("#pscroll").className = "plan-scroll z" + pz; }
-function openPlan(){ $("#pimg").src = ROOT + "img/masterplan.jpg"; $("#pimg").alt = t("mp_alt"); planZoom(1); $("#plb").hidden = false; $("#p-close").focus(); document.documentElement.style.overflow = "hidden"; }
+function openPlan(){ $("#pimg").src = ROOT + "img/masterplan-v2.jpg"; $("#pimg").alt = t("mp_alt"); planZoom(1); $("#plb").hidden = false; $("#p-close").focus(); document.documentElement.style.overflow = "hidden"; }
 function closePlan(){ $("#plb").hidden = true; document.documentElement.style.overflow = ""; $("#mp-open").focus(); }
 $("#mp-open").onclick = openPlan; $("#mp-open2").onclick = openPlan; $("#mp-open3").onclick = openPlan; $("#mp-open4").onclick = openPlan;
 $("#p-close").onclick = closePlan; $("#pz-in").onclick = () => planZoom(pz+1); $("#pz-out").onclick = () => planZoom(pz-1);
