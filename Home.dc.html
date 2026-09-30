@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-
-
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="google-site-verification" content="C9fJ87hFrHAyUH7DjPlzBCHg0Ac_hHJhMycdTbCuYl0" />
@@ -687,6 +685,7 @@ class Component extends DCLogic {
       // not exist yet. Both imports are idempotent (ES module cache), so this
       // is safe to call before componentDidMount's own import.
       const fb = await import("./firebase-client.js");
+      if (fb.whenFirebaseReady) await fb.whenFirebaseReady(); // PENDING #18
       if (fb.warmUpAuthPersistence) await fb.warmUpAuthPersistence();
       const ready = this._visitorUid();
       if (ready) return ready;
