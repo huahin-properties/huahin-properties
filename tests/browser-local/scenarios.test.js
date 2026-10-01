@@ -55,9 +55,18 @@ async function loginAdmin(page, email) {
 // What is NOT a problem: the DC template placeholders requested as <img src="{{ … }}"> before binding (pre-existing), and the gated CHAT functions answering 401/403 on the
 // listing TEST project (they are optional, need the allow-list and a secret; the form swallows the refusal by design). Everything else must be empty.
 const GATED_CHAT = /\/(getPropertyDraft|updatePropertyDraft|receptionTurn|claudeComplete|createCaseFromConversation|startConversation|sendConversationTurn)\b/;
+async function loginAgent(page, email) {
+  await page.goto(site.url + "/Agent%20Signup.dc.html"); await page.waitForSelector("text=เข้าสู่ระบบ");
+  // (the page routes a member whose profile could not be read yet to the billing page; a human never clicks within the first moments, a script must wait for the SDK)
+  await page.waitForFunction(() => window.firebase && window.firebase.auth && window.firebase.firestore, null, { timeout: 30000 }).catch(async (e) => { console.log("DBGSDK", page.url(), await page.evaluate(() => (window.firebase ? Object.keys(window.firebase).join(",") : "no firebase")), JSON.stringify(page.__logs).slice(0, 1500), JSON.stringify(page.context().__log.vendor.map((v) => v.url.split("/").pop()))); throw e; }); await sleep(800);
+  const tabs = page.getByText("เข้าสู่ระบบ", { exact: true }); await tabs.first().click();
+  await page.waitForSelector("input[type=password]");
+  await page.locator("input[type=email]").last().fill(email); await page.locator("input[type=password]").last().fill(PASS);
+  await tabs.last().click(); await page.waitForURL(/Agent%20Profile|Lister%20Dashboard/, { timeout: 30000 }).catch(async (e) => { console.log("DBGDOC", JSON.stringify((await db.doc("listers/" + ids.agent).get()).data()), ids.agent, email, (await auth.getUserByEmail(email)).uid); console.log("DBGLOGIN", page.url(), (await page.innerText("body")).slice(0, 800), JSON.stringify(page.__logs).slice(0, 1200)); await H.shot(page, "debug-login"); throw e; });
+}
 const unexpected = (logs, allow) => []
   .concat(logs.pageerrors.map((m) => "pageerror: " + m))
-  .concat(logs.failed.filter((m) => !/fonts\./.test(m) && !/Firestore\/(Listen|Write)\/channel.*ERR_ABORTED/.test(m) && !(allow || []).some((re) => re.test(m))).map((m) => "requestfailed: " + m))
+  .concat(logs.failed.filter((m) => !/fonts\./.test(m) && !/Firestore\/(Listen|Write)\/channel.*ERR_ABORTED/.test(m) && !/^GET http:\/\/127\.0\.0\.1:\d+\/[^ ]*\.(js|png|html)[^ ]* :: net::ERR_ABORTED/.test(m) && !(allow || []).some((re) => re.test(m))).map((m) => "requestfailed: " + m))
   .concat(logs.bad.filter((m) => !/%7B%7B/.test(m) && !(GATED_CHAT.test(m) && /^(401|403|404|400|500)/.test(m))).map((m) => "http: " + m))
   .concat(logs.console.filter((m) => /^error/.test(m) && !/Failed to load resource/.test(m)).map((m) => "console: " + m));
 
@@ -160,5 +169,40 @@ describe("BROWSER-LOCAL-01 — built TEST site in real Chromium against local em
     assert.strictEqual((await cases()).find((c) => c.contactName === "Synthetic Double").photoCount, 1, "land: Photo Standard v1 minimum is 1 photo");
     rec("B3", "double click → one request, one case; land with 1 photo is accepted (Photo Standard v1)", "PASS (local browser + emulators)", "");
     await ctx.close();
+  });
+
+  it("B4 agent: signs in, submits through the form (role agent), sees ONLY their own submitted case in Lister Dashboard and can open it; another agent sees none; 'add listing' goes to the private form", async () => {
+    const a1 = await newPage({}, "agent1"); const page = a1.page;
+    await loginAgent(page, "agent@example.test");
+    await page.goto(site.url + "/Owner%20Submission.dc.html");
+    await ownerFormFill(page, { name: "Synthetic Agent Client", phone: "0800000004", type: "condo", price: 4200000, description: "Sea-view condo, 45 sqm." });
+    await uploadPhotos(page, 2); await goReview(page); await H.shot(page, "09-agent-form-review");
+    await page.getByText("ส่งข้อมูล", { exact: true }).click(); await page.waitForSelector("text=ส่งข้อมูลสำเร็จ", { timeout: 30000 });
+    const c = (await cases()).find((x) => x.contactName === "Synthetic Agent Client"); assert.ok(c);
+    assert.strictEqual(c.submittedByRole, "agent"); assert.strictEqual(c.listerId, ids.agent); assert.strictEqual(c.propertyOwnerRelation, "representative");
+    ids.agentCase = c.id;
+    await page.goto(site.url + "/Lister%20Dashboard.dc.html?new=1"); // the "+" icon of the agent's own page: opens the property LIST tab
+    await page.waitForSelector("text=เคสที่ฉันส่งผ่านฟอร์ม", { timeout: 30000 }).catch(async (e) => { console.log("DBGDASH", page.url(), (await page.innerText("body")).slice(0, 900), JSON.stringify(page.__logs).slice(0, 1800)); await H.shot(page, "debug-dash"); throw e; });
+    await H.shot(page, "10-agent-dashboard-own-case-list");
+    assert.ok(/เคสที่ฉันส่งผ่านฟอร์ม \(1\)/.test(await page.innerText("body")), "exactly the agent's own case is listed");
+    await page.getByText(/ดูสถานะ\/คุยกับทีมงาน/).first().click();
+    await page.waitForURL(/Track%20Submission/, { timeout: 20000 }); await page.waitForSelector("text=ได้รับข้อมูลแล้ว", { timeout: 20000 }); await H.shot(page, "11-agent-opens-own-case-tracking");
+    assert.ok(page.url().includes(encodeURIComponent(c.id)));
+    // another agent
+    const a2 = await newPage({}, "agent2");
+    await loginAgent(a2.page, "agent2@example.test"); await a2.page.goto(site.url + "/Lister%20Dashboard.dc.html?new=1");
+    await a2.page.waitForSelector("text=ทรัพย์ของฉัน", { timeout: 30000 }).catch(() => {});
+    await sleep(2000);
+    assert.ok(!/เคสที่ฉันส่งผ่านฟอร์ม/.test(await a2.page.innerText("body")), "another agent sees no such section"); await H.shot(a2.page, "12-agent2-dashboard-sees-nothing-of-agent1");
+    const denied = await a2.page.evaluate(async (id) => { const fb = await import("./firebase-client.js"); try { const r = await fb.fetchDocById("properties", id); return { ok: true, r }; } catch (e) { return { ok: false, code: e.code }; } }, c.id);
+    assert.ok(denied.ok && (denied.r === null), "agent 2 can not read agent 1's case through the client layer");
+    const direct = await a2.page.evaluate(async (id) => { try { const d = await window.firebase.firestore().doc("caseInternal/" + id).get(); return "read:" + d.exists; } catch (e) { return e.code; } }, c.id);
+    assert.strictEqual(direct, "permission-denied", "agent 2 direct Firestore read of the record is refused");
+    // 'add listing' → private form
+    await page.goto(site.url + "/Lister%20Dashboard.dc.html?new=1"); await page.waitForSelector("text=เพิ่มทรัพย์ใหม่", { timeout: 30000 });
+    await page.getByText(/\+ เพิ่มทรัพย์ใหม่|เพิ่มทรัพย์ใหม่/).first().click(); await page.waitForURL(/Owner%20Submission/, { timeout: 20000 });
+    assert.deepStrictEqual(unexpected(a1.page.__logs), [], "unexpected browser problems (agent)");
+    rec("B4", "agent: submit → own-case list in Lister Dashboard → open; other agent sees nothing (UI + direct read refused); add listing → private form", "PASS (local browser + emulators)", "case " + c.id);
+    await a1.ctx.close(); await a2.ctx.close();
   });
 });

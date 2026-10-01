@@ -170,7 +170,7 @@ function build(config, outDir, root, opts) {
 
   out["listing-test-config.js"] = Buffer.from("window.__CHAT_LIVE__ = " + JSON.stringify({ projectId: pid, apiKey: config.apiKey, appId: config.appId, messagingSenderId: config.messagingSenderId,
     authDomain: config.authDomain, storageBucket: config.storageBucket, region: config.region, claudeCompleteUrl: ccUrl, allowedHosts: [pid + ".web.app", pid + ".firebaseapp.com"] }, null, 2) + ";\n");
-  out["listing-test-guard.js"] = fs.readFileSync(path.join(__dirname, "chat-live", "guard.js"));
+  out["listing-test-guard.js"] = fs.readFileSync(path.join(__dirname, "listing-test", "guard.js"));
   out["firebase.json"] = Buffer.from(JSON.stringify({ hosting: { public: ".", ignore: ["firebase.json", "MANIFEST.json", "**/.*"], headers: [{ source: "**", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] }] } }, null, 2) + "\n");
 
   const bad = [];
