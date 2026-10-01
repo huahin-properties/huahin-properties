@@ -50,10 +50,13 @@ function install() {
     if (u.startsWith("https://api.anthropic.com/")) {
       const headers = (opts && opts.headers) || {};
       const body = JSON.parse((opts && opts.body) || "{}");
-      state.anthropicCalls.push({ apiKey: headers["x-api-key"], messageCount: (body.messages || []).length, lastUserText: lastUserText(body.messages) });
+      state.anthropicCalls.push({ apiKey: headers["x-api-key"], messageCount: (body.messages || []).length, lastUserText: lastUserText(body.messages), body });
       const next = state.script.shift();
       if (next === undefined) throw new Error("stub script exhausted (test asked for more model calls than scripted)");
       if (next && next.__throw) throw new Error(next.__throw);
+      // CHAT-FIX-02: plain-text completion (claudeComplete chat mode) and simulated HTTP errors.
+      if (next && typeof next.__text === "string") return { ok: true, status: 200, json: async () => ({ content: [{ type: "text", text: next.__text }] }) };
+      if (next && next.__http) return { ok: false, status: next.__http, json: async () => ({ error: { message: "stub http " + next.__http } }) };
       return { ok: true, status: 200, json: async () => ({ content: [{ type: "tool_use", name: "reception_reply", input: next }] }) };
     }
     if (LOOPBACK.test(hostOfUrl(u))) return saved.fetch.apply(this, arguments);
@@ -95,7 +98,8 @@ function install() {
     FAKE_KEY,
     blocked: state.blocked,
     anthropicCalls: state.anthropicCalls,
-    // Each entry is the tool-input object the "model" returns, or { __throw: "message" } to simulate a failed call.
+    // Each entry is the tool-input object the "model" returns (receptionTurn), { __text: "..." } for a plain-text
+    // completion (claudeComplete), { __http: 500 } for an HTTP error answer, or { __throw: "message" } to simulate a failed call.
     setScript(entries) { state.script.length = 0; state.script.push(...entries); },
     scriptRemaining() { return state.script.length; },
     resetCalls() { state.anthropicCalls.length = 0; },
