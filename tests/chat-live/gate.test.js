@@ -357,13 +357,20 @@ describe("CHAT-LIVE-01 gate: allow-list, ID token, atomic AI-call cap (emulators
     let cur = fsx.readFileSync(pathx.join(ROOT, "functions/index.js"), "utf8");
     const a = cur.indexOf("// LISTING-E2E-01"), b = cur.indexOf("// startConversation (Callable)");
     if (a !== -1 && b > a) cur = cur.slice(0, a) + cur.slice(b);
+    // LISTING-E2E-01 also rewrote the BODY of createCaseFromConversation (split public/internal, draft link). That function is cut
+    // out of both sides here (its behaviour is covered by test:chat + the characterization tests), and the gate call inside it is
+    // asserted separately so it cannot be lost.
+    const cutFn = (src) => { const i = src.indexOf("exports.createCaseFromConversation = onCall("); if (i === -1) return src; const j = src.indexOf("\nexports.", i + 10); return src.slice(0, i) + (j === -1 ? "" : src.slice(j)); };
+    const fnSrc = cur.slice(cur.indexOf("exports.createCaseFromConversation = onCall("));
+    assert.ok(/await chatGate\.enforceCallable\(request\);/.test(fnSrc.slice(0, 1500)), "the gate call in createCaseFromConversation is still there");
+    cur = cutFn(cur);
     const tmp = pathx.join(os.tmpdir(), "gt17-index-" + process.pid + ".js"); fsx.writeFileSync(tmp, cur);
-    fsx.writeFileSync(tmp + ".base", execFileSync("git", ["show", "8c549c6:functions/index.js"], { cwd: ROOT, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 }));
+    fsx.writeFileSync(tmp + ".base", cutFn(execFileSync("git", ["show", "8c549c6:functions/index.js"], { cwd: ROOT, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 })));
     let d; try { d = execFileSync("git", ["diff", "--no-index", "--unified=0", tmp + ".base", tmp], { cwd: ROOT, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 }); } catch (e) { d = e.stdout; }
     const removed = d.split("\n").filter((l) => /^-[^-]/.test(l)), added = d.split("\n").filter((l) => /^\+[^+]/.test(l));
     // The only removed lines are the 4 signatures/calls that gain an argument.
     assert.strictEqual(removed.length, 4, removed.join("\n"));
     assert.ok(removed.every((l) => /callClaudeReception\(|pd16GuardChatText\(/.test(l)), removed.join("\n"));
-    assert.ok(added.every((l) => /chatGate|beforeCall|beforeRetry|CHAT-LIVE-01|emulator namespace|test project; false|callClaudeReception|pd16GuardChatText|gateUid/.test(l)), added.filter((l) => !/chatGate|beforeCall|beforeRetry|CHAT-LIVE-01|gateUid/.test(l)).join("\n"));
+    assert.ok(added.every((l) => /chatGate|require\("\.\/case-fields"\)|beforeCall|beforeRetry|CHAT-LIVE-01|emulator namespace|test project; false|callClaudeReception|pd16GuardChatText|gateUid/.test(l)), added.filter((l) => !/chatGate|require\("\.\/case-fields"\)|beforeCall|beforeRetry|CHAT-LIVE-01|gateUid/.test(l)).join("\n"));
   });
 });
