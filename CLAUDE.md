@@ -1,4 +1,11 @@
-> 🔒 **PHS-CLOSE-1 — 8 สิงหาคม 2569 (2026-08-08)** — ปิดงานรอบสุดท้าย: ไฟล์นี้ตรวจสอบแล้วว่าเป็นเวอร์ชันล่าสุดที่ใช้งานจริง ณ รอบส่งมอบนี้ ไม่มีเนื้อหาล้าสมัยหรือขัดแย้งกับไฟล์อื่นในชุดส่งมอบ (ตรวจสอบพร้อมกันทั้ง 23 ไฟล์ในชุด Handoff Package)
+> 🔄 **อัปเดต 1 ต.ค. 2569 (ชุดงาน DOC-01)** — ข้อความ "PHS-CLOSE-1 (8 ส.ค. 2569)" เดิมที่อ้างว่าไฟล์นี้ไม่มีเนื้อหาล้าสมัยหรือขัดแย้ง **ใช้ไม่ได้แล้ว** ตรวจพบหลายข้อที่ล้าสมัยและแก้ตามหลักฐานในไฟล์นี้แล้ว · ข้อที่ยังไม่ยืนยันถูกระบุว่า "ไม่ทราบ" ชัดเจน
+
+---
+
+> ⚠️ **เริ่มแชท/เซสชันใหม่: อ่าน `HANDOFF-NEXT-CHAT.md` (บล็อกบนสุด) ก่อนเสมอ**
+> ลำดับความน่าเชื่อถือ: **BLUEPRINT.md > HANDOFF-NEXT-CHAT.md > CLAUDE.md** · ถ้าขัดกัน ให้ตรวจโค้ดและ `origin/main` จริงก่อนสรุป
+> **เว็บสาธารณะ:** บันทึกล่าสุด = 🔴 RED / Public Hidden (โหมดปิดปรับปรุง · ปิดแดงล่าสุดที่มีบันทึกคือ 23 ก.ย. 2569 · **สถานะปัจจุบันไม่ทราบ**) · เปิดเขียวเฉพาะตอนทดสอบและต้องปิดแดงทันที (BLUEPRINT §29.4)
+> **วิธีทำงาน = WORKFLOW v2 (BLUEPRINT §29.0)** ดูหัวข้อ "Working workflow" ด้านล่าง
 
 ---
 
@@ -6,9 +13,11 @@
 
 Real-estate marketplace + admin CMS for a Hua Hin / Pranburi / Cha-am property
 agency. Built as Design Components (.dc.html), data lives in Firebase
-(Firestore), deployed by the owner (non-technical) via manual GitHub
-upload + Firebase Hosting/Functions. Owner cannot code — every change must
-ship as ready-to-upload files with plain-language, step-by-step instructions.
+(Firestore), published from the GitHub `main` branch (GitHub Pages) with
+Cloud Functions/rules deployed by the owner (non-technical). Owner cannot
+code — every change ships as a branch + Pull Request (see "Working workflow"
+below) with plain-language, step-by-step instructions for anything the owner
+must do themselves (merge, deploy, testing on the live domain).
 
 ## Brand
 - Name: huahin.properties (styled "huahin . properties")
@@ -35,12 +44,16 @@ fields; each page's logic class reads `this.state.lang`.
   property-aware) — now routed through `property-adapter.js` (normalized
   read model) and `property-repositories.js` (reviews/media/viewing-request
   seams, still mock-backed, no Firestore writes yet)
-- `Sell.dc.html` — list-your-property / consignment page
+- `Sell.dc.html` — **not present in the repo** (no such file at `4e358a5`);
+  the "list your property / consign" entry points are `Agent Signup.dc.html`
+  (self-serve listers) and `Owner Submission.dc.html` (see below)
 - `About.dc.html` — agency story; area cards (Hua Hin/Pranburi/Cha-am) pull
   photos uploaded via admin (same card component reused across site)
 - `Contact.dc.html` — general contact page
 - `Admin Login.dc.html` — hardcoded-initially credentials, now editable by
-  admin (Site Content page has a change-password/email flow)
+  admin (Site Content page has a change-password/email flow). The password
+  field is `type="text"` (line 40; plaintext on screen) — recorded as a
+  deliberate design; the owner has not decided whether to keep it.
 - `Admin Dashboard.dc.html` — KPI counts (total/for sale/for rent/sold/
   reserved/new/rented), rental-expiry tracker sorted soonest-first
   (MM/DD/YYYY numeric format), links out to sub-tools
@@ -90,10 +103,12 @@ fields; each page's logic class reads `this.state.lang`.
 - `Agent Signup.dc.html` — signup/login for listers: email+password, Google
   Sign-In, Facebook Sign-In, Phone/OTP — all implemented and wired to
   Firebase Auth (not just email+password as previously documented here).
-  KNOWN BUG: password input fields (signup and login) use `type="text"`,
-  not `type="password"` — passwords are visible in plaintext on screen.
-  Not yet confirmed whether this is intentional (cf. Admin Login's
-  deliberate plaintext design) or a defect — flagged, unresolved.
+  Password fields (signup and login): the code now uses
+  `type="{{ signupPasswordType }}"` / `type="{{ loginPasswordType }}"` that
+  default to `"password"` with an eye toggle (lines 149, 171, 552–557) — the
+  older "type=text plaintext" note is outdated. Verified from source only;
+  the rendered page was NOT re-tested (e.g. whether the field briefly shows
+  as text while the template loads).
 - `Agent Profile.dc.html` — public lister mini-site (`?id=` a lister uid):
   bio, social icons, property list, Share modal (Facebook/LINE/copy link).
 - `Agent Approvals.dc.html` — admin view of signed-up listers (approval is
@@ -106,7 +121,23 @@ fields; each page's logic class reads `this.state.lang`.
 - `Mission Control.dc.html` / `CEO Guide.dc.html` / `Launch Readiness
   Dashboard.dc.html` / `Developer Maintenance Center.dc.html` — internal
   project-management/admin-only tooling (status tracking, knowledge base,
-  release readiness, diagnostics) — not part of the public site.
+  release readiness, diagnostics) — not part of the public site. Their data
+  can be stale (e.g. Launch Readiness Dashboard has an empty `blockers` list
+  at line 525); do not read it as "no blockers".
+- **Added after this file was first written** (present in the repo):
+  `Owner Submission.dc.html` (list-your-property form, writes a pending
+  `properties` doc with `source="owner_submission"`), `Track Submission.dc.html`
+  (customer tracking via `trackToken`), `Leads.dc.html`, `Team.dc.html`,
+  `Member Management.dc.html`, `AI Concierge.dc.html` (assistant page),
+  `index.html` (see the note below) and `m17/` (Villa M17 listing in 8
+  languages, a separate static page added 26 Sep 2026 that has no
+  maintenance gate and no Firebase).
+- **`index.html` vs `Home.dc.html` are two different files.** `index.html`
+  (default document of GitHub Pages) is an older copy of the home page: it
+  lacks `_ensureVisitorUid` and `whenFirebaseReady` and its welcome flow
+  navigates to Search Results instead of chatting. Both import `ContactRail`.
+  Which one visitors get at `/` is not verified; whether they should be
+  merged is an open owner decision.
 
 ## Shared components
 - `PropertyCard.dc.html` — listing card (used in Home, Search Results,
@@ -142,11 +173,22 @@ fields; each page's logic class reads `this.state.lang`.
     "Contact us" button that opens the inquiry form.
   - The model is instructed to just state property codes / say "contact
     us" in prose — never fabricate URLs — the UI does the linking.
+  - Later additions (all in `functions/index.js`, verified present in source;
+    deployed versions NOT verified): the reception chat runs through
+    `receptionTurn` / `startConversation` / `sendConversationTurn`;
+    `updatePropertyDraft` / `getPropertyDraft` hold the owner-listing draft;
+    `createCaseFromConversation` creates a Case (a `properties` doc) only on
+    the customer's explicit submit. The "Contact us" button now appears only
+    when the reply carries the `[[CONTACT]]` token (PD-15), and Thai replies
+    must use a female voice (PD-16, with a server guard `pd16Violation`).
+    Product decisions are in BLUEPRINT §36 (PD-01…PD-16) — do not contradict
+    them without new approval.
 
 ## Data / backend
-- `data.js` — static seed data: 24 sample properties across Hua Hin,
-  Pranburi, Cha-am (sale/rent/land/commercial), full i18n dictionary,
-  `getEffectiveProperties()` merges live Firestore listings + admin edits
+- `data.js` — the i18n dictionary and label tables. `PROPERTIES`, `OWNERS`
+  and `TENANTS` are now empty arrays (the old "24 sample properties" were
+  removed), so listings come only from Firestore. `getEffectiveProperties()`
+  merges live Firestore listings + admin edits
   on top of the static base at runtime (Home/Search Results/Property
   Details all call this) — replaced the older `applyLiveEdits()` approach.
 - `property-adapter.js` / `property-repositories.js` / 
@@ -160,44 +202,96 @@ fields; each page's logic class reads `this.state.lang`.
   admin account, inquiries/leads, banners, Stripe checkout/portal session
   creation. Photos are stored in **Firebase Storage** (migrated off
   Firestore data-URLs — see Known open items below for what's now current).
-- `firebase.json` + `functions/` — Cloud Functions config: Claude API
-  proxy, Stripe (`createCheckoutSession`, `createPortalSession`,
-  `stripeWebhook`) — all deployed and live. Must be redeployed via
-  `firebase deploy --only functions` whenever `functions/index.js`
-  changes. Owner deploys via GitHub Codespaces terminal (no local dev
-  environment) — walk through commands one at a time, confirm each output
-  before the next, since owner is non-technical.
-- Firebase project: `huahin-properties-5f1b5`. **Firestore Security Rules
-  are role-based + deny-by-default, verified deployed and live (16 July
-  2026)** — the rules are NOT the old temporary open rules anymore; see
-  BLUEPRINT.md §5 item 1 and §11 ชุด B ข้อ 1 for the full verification
-  record. (An earlier version of this file said rules were still
-  temporary/open — that was corrected 22 July 2026 after BLUEPRINT.md's
-  own record showed otherwise; always trust BLUEPRINT.md over this file if
-  they ever disagree again.)
+- `firebase.json` + `functions/` — Cloud Functions config (20 exported
+  functions in `functions/index.js`): Claude API proxy (`claudeComplete`),
+  reception/conversation/case functions (see above), Stripe
+  (`createCheckoutSession`, `createPortalSession`, `createFeatured…`,
+  `createBanner…`, `createVip…`, `stripeWebhook`), LINE login, share/meta
+  and notification functions. **Which versions are deployed is NOT verified**
+  (the latest recorded deploy is `receptionTurn`, with no date or commit —
+  "recorded, unconfirmed"). **Only the owner deploys**, from a GitHub
+  Codespace terminal (no local dev environment): `git pull` first, then a
+  scoped command such as `firebase deploy --only functions:<name>` (never
+  assume the whole `--only functions` bundle). Walk the owner through one
+  command at a time and confirm each output before the next. `functions/`
+  runs on Node 20 (`functions/package.json`); the upgrade deadline recorded
+  in BLUEPRINT (30 Oct 2026) must be checked against the official
+  Firebase/Google Cloud announcement before it is treated as confirmed.
+- Firebase project: `huahin-properties-5f1b5`. **Firestore Security Rules**:
+  the repo's `firestore.rules` is role-based + deny-by-default and BLUEPRINT
+  §5 records "deployed 16 July 2026" — **recorded, not re-verified**; the
+  rules actually deployed now are unknown. Source review of `firestore.rules`
+  found two open issues (public create of `properties` has no allowed-field
+  list; `properties` is publicly readable while Cases with contact info and
+  `trackToken` live in it) — details in the HANDOFF top block; do NOT edit
+  rules without an approved task. Emulator tests (`npm run test:rules`) cover
+  `conversations` only. Always trust BLUEPRINT.md over this file if they
+  disagree, then check the real code.
 
-## Deployment workflow (owner's actual process — keep this in mind)
-Owner cannot run local dev tools. Workflow every time code changes:
-1. I copy changed files into `export-for-github/` and call
-   `present_fs_item_for_download`.
-2. Owner downloads the zip, extracts, and manually re-uploads the changed
-   files to the GitHub repo via the GitHub web UI (Add file → Upload
-   files) — NOT git commands, no local git repo, no CLI on their machine.
-3. Static site changes go live automatically (GitHub Pages/Hosting).
-4. Cloud Function changes additionally require opening a GitHub Codespace
-   and running `firebase deploy --only functions` in its browser terminal
-   (Firebase CLI + login done fresh each time since it's a cloud sandbox).
-   Explain every terminal step explicitly and confirm screenshots — owner
+## Working workflow (WORKFLOW v2, from 1 Oct 2026 — BLUEPRINT.md §29.0)
+Roles: **Owner** sets goals, approves each work package, and alone decides
+merge / deploy / switching the site GREEN, and tests on the live domain ·
+**ChatGPT Work** defines the scope of a package and reviews every PR before
+merge (during the transition) · **Claude Code** works on the branch named in
+the package, opens the PR, and reports with evidence.
+
+1. A work package states: name, branch, files that may be edited, what is
+   forbidden, definition of done. The owner approves it **as a package** —
+   once approved, finish the whole package without asking again per file.
+2. Before starting, check `origin/main`; if it differs from the stated base,
+   inspect the difference before reusing earlier information.
+3. Edit → review the diff → commit → push **only the package's branch** →
+   open a PR. Never push to `main`, never merge, never deploy, never switch
+   the site GREEN, never edit files outside the package. Anything outside
+   scope: stop, report, propose a new package. New problems found along the
+   way become a new PENDING item, not a mixed-in fix.
+4. Report three statuses separately: **(1) code on main** (merged, commit
+   hash) · **(2) published** (Pages build `success` for that commit; Functions
+   / rules only after the owner's deploy, with output + date + commit) ·
+   **(3) production PASS** (tested on the real domain, with evidence and the
+   commit tested). A note without evidence (e.g. "deployed") is
+   "recorded, unconfirmed" — never count it as published or PASS. Preview PASS
+   is not production PASS. DONE is not CLOSED.
+5. Split every report into **verified by me** / **recorded** / **unknown**;
+   test results as TEST / EXPECTED / ACTUAL / EVIDENCE with the commit tested.
+   No secrets (names of secrets only) and no customer data in docs, PRs or
+   comments.
+   **Testing follows impact:** a docs-only package is checked for correctness
+   and consistency of the documents (against source/git and against each
+   other) and needs no GREEN switch or production test; a package that
+   changes the system states its tests (what, where, pass criteria, whether
+   GREEN is needed) up front.
+6. The old Viewer flow (`Copy Code to GitHub.dc.html`, copy-paste file by
+   file, `export-for-github/`, zip downloads) is retired and kept as history
+   only. The Viewer is not a website file — never commit it to the repo root.
+   **Still in force:** guide the owner **one step at a time** — wait for the
+   result, then give the next step — and always name the window. Retiring
+   the Viewer did not retire this way of helping the owner.
+7. Cloud Function / rules changes additionally need the owner to deploy from
+   a GitHub Codespace (see the Data/backend section for scope and `git pull`).
+   Explain every terminal step and say which window it applies to — owner
    easily gets lost between "the black screen" (Codespace terminal) and
    "the white screen" (GitHub web page).
 
 ## Known open items / next steps (check before assuming done)
-- **Firestore Security Rules**: locked down and deployed (role-based +
-  deny-by-default) as of 16 July 2026 — this is DONE, not an open item.
-  Do not re-flag it as "wide-open" without re-checking `firestore.rules`
-  directly first.
-- **Stripe**: fully connected and live (subscriptions, Featured Listing
-  boost, banner purchases) — this is DONE, not "not yet added."
+- **Firestore Security Rules**: the repo file is role-based + deny-by-default
+  and was recorded as deployed on 16 July 2026 (unconfirmed since). Two source
+  issues are open and need a separate approved package: public create of
+  `properties` has no allowed-field list, and `properties` is publicly
+  readable while Cases (contact info + `trackToken`) are stored there.
+  Source review only; not tested against real Firestore.
+- **Stripe**: the code for subscriptions, Featured Listing boost and banner
+  purchases exists and is connected. **Test vs Live mode is unknown** —
+  BLUEPRINT (line 1288) records the Product being created in Test mode and
+  `docs/ceo-handoff/KNOWN_ISSUES.md` says Sandbox. Do not assume real payments
+  until the owner confirms in the Stripe Dashboard.
+- **Site status**: last recorded RED (23 Sep 2026); current state unknown.
+  **#18 (Firebase init race)**: source for all three files is on `main` and
+  the Pages build succeeded, but it has NOT passed production testing after
+  the fix (STEP 99 S-3 not re-run).
+- **Node.js 20 → newer for Cloud Functions**: check the official Firebase /
+  Google Cloud announcement before treating the 30 Oct 2026 date as
+  confirmed; do not upgrade without an approved package.
 - Facebook auto-post integration discussed conceptually (Make.com/n8n or
   Graph API) — NOT built yet, owner deferred it.
 - LINE Official Account chat integration discussed conceptually only — NOT
@@ -221,18 +315,19 @@ Owner cannot run local dev tools. Workflow every time code changes:
   already consistent.
 - Chatbot cost/usage guardrails — owner asked about Anthropic API costs
   and rate-limiting; no hard spending cap implemented yet, just discussed.
-- **Agent Signup.dc.html password fields use `type="text"`** (both signup
-  and login) — visible plaintext on screen. Unconfirmed whether intentional
-  (cf. Admin Login's deliberate plaintext design) or a defect.
+- **Agent Signup.dc.html password fields**: code uses `password` with an eye
+  toggle (outdated "type=text" note removed). Source-verified only; the live
+  page was not re-tested. **Admin Login.dc.html** still uses `type="text"`
+  (line 40); keep-or-change is an owner decision.
 
 ## Working conventions specific to this owner
 - Owner is non-technical, communicates in Thai, gets easily confused by
   multi-window workflows (GitHub tab vs. Codespace terminal vs. Firebase
   console) — always name which window/screen an instruction applies to.
-- Always confirm scope verbally before large changes; owner often asks
-  "explain first, don't code yet."
-- After any code change, ALWAYS re-export to `export-for-github/` and
-  present for download — owner cannot get updated code any other way.
-- Prefer targeted dc_html_str_replace / dc_js_str_replace edits over
-  rewrites — owner has tested/validated specific existing behavior (e.g.
-  photo upload persistence, rental-expiry sorting) that must not regress.
+- Confirm scope before changes: propose the work package and wait for the
+  owner's "อนุมัติ"; owner often asks "explain first, don't code yet."
+- Deliver code changes as a branch + PR (WORKFLOW v2 above) — no zip,
+  `export-for-github/`, or Viewer copy-paste for new work.
+- Prefer targeted edits over rewriting whole files — owner has
+  tested/validated specific existing behavior (e.g. photo upload
+  persistence, rental-expiry sorting) that must not regress.
