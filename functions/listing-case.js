@@ -415,7 +415,7 @@ async function previewListingCase({ admin, HttpsError, request }) {
   if (!wouldRefuse && rec.listingStatus !== "live" && photos.length < std.min) wouldRefuse = "photos_below_minimum";
   const live = rec.listingStatus === "live" ? ((await db.collection("properties").doc(id).get()).data() || null) : null;
   return {
-    propertyId: id, listingStatus: rec.listingStatus || null, publicDocument: doc, photoCount: photos.length, photoIndexes: photos.map((p) => p.index), photoStandard: std,
+    propertyId: id, listingStatus: rec.listingStatus || null, publicDocument: doc, photoCount: photos.length, photoIndexes: photos.map((p) => p.index), photoPaths: photos.map((p) => p.storagePath), photoStandard: std,
     problems, wouldRefuse, publishSig: publishSig(rec, photos), updateSig: projectionSig(rec), currentPublicDocument: live ? projectPublic(live) : null, publicUpdatePending: !!rec.publicUpdatePending,
   };
 }
@@ -680,6 +680,20 @@ async function reconcileListingFiles({ admin, HttpsError, request }) {
   return { removed, skippedYoung, failed: failures.map((x) => x.path), propertyId: id };
 }
 
+// The submitter's OWN cases (an agent resumes and follows what they sent through the form). Only cases whose recorded submitter is the caller, and only
+// the minimal view the tracking page needs — never another person's case, never internal notes, assignment, verification or approval details.
+async function listMyCases({ admin, HttpsError, request }) {
+  assertEnabled(HttpsError);
+  const actor = await resolveActor(admin, request, HttpsError);
+  const snap = await admin.firestore().collection("caseInternal").where("submittedByUid", "==", actor.uid).get();
+  const rows = snap.docs.map((d) => { const c = d.data() || {}; return {
+    id: d.id, type: c.type || "", status: c.status || "", listingStatus: c.listingStatus || "", reviewStatus: c.reviewStatus || "submitted", submittedAt: c.submittedAt || null,
+    photoCount: Number(c.photoCount) || 0, price: Number(c.price) || 0, priceMode: c.priceMode || "fixed", publicPropertyCode: c.publicPropertyCode || "", trackToken: c.trackToken || "",
+    needsReply: !!(c.reviewReturn || c.infoRequestMessage) && !c.infoResponseAt,
+  }; }).sort((a, b) => (b.submittedAt || 0) - (a.submittedAt || 0)).slice(0, 50);
+  return { cases: rows };
+}
+
 // ── trackListingCase — the customer's token-checked view and conversation (no account, no public read) ─────────
 // The token is the whole authorisation, and it is checked HERE: customers can not read caseMessages (or anything else) from the
 // browser. Not found and wrong token look identical. Works for a Case record (caseInternal) and for an older Case whose token is
@@ -755,4 +769,4 @@ async function trackListingCase({ admin, HttpsError, request }) {
   };
 }
 
-module.exports = { isEnabled, hooks, submitListingCase, previewListingCase, publishListingCase, unpublishListingCase, syncListingCase, addCasePhotos, reconcileListingFiles, trackListingCase, resolveActor, caseIdFor, validateSubmission, PHOTO_STANDARD, OWNER_UID, TYPES, MAX_PHOTOS };
+module.exports = { isEnabled, hooks, listMyCases, submitListingCase, previewListingCase, publishListingCase, unpublishListingCase, syncListingCase, addCasePhotos, reconcileListingFiles, trackListingCase, resolveActor, caseIdFor, validateSubmission, PHOTO_STANDARD, OWNER_UID, TYPES, MAX_PHOTOS };

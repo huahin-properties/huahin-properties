@@ -362,7 +362,7 @@ describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, 
       process.env.GCLOUD_PROJECT = "huahin-properties-prod-like"; delete process.env.GOOGLE_CLOUD_PROJECT; process.env.FIREBASE_CONFIG = "{}"; delete process.env.LISTING_E2E_ENABLED;
       const key = newKey(); const photos = await putStaging(A.extA, key, [0, 1]);
       assert.strictEqual(await errReason(call("submitListingCase", A.extA, payload(key, "house", photos))), "not_enabled");
-      for (const fn of ["previewListingCase", "publishListingCase", "unpublishListingCase", "syncListingCase", "reconcileListingFiles"]) assert.strictEqual(await errReason(call(fn, A.owner, { propertyId: "x" })), "not_enabled", fn);
+      for (const fn of ["previewListingCase", "publishListingCase", "unpublishListingCase", "syncListingCase", "reconcileListingFiles", "listMyCases"]) assert.strictEqual(await errReason(call(fn, A.owner, { propertyId: "x" })), "not_enabled", fn);
       assert.strictEqual(await errReason(call("addCasePhotos", A.staff, { propertyId: "x", paths: ["a"] })), "not_enabled");
       assert.strictEqual(await errReason(call("trackListingCase", null, { id: "x", token: "t".repeat(30) })), "not_enabled");
       assert.strictEqual(await count("caseInternal"), 0);
@@ -574,5 +574,20 @@ describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, 
     const atts = await H.listFiles("caseAttachments/");
     assert.deepStrictEqual(atts, [rec.ownershipDocPath], "only the winner's document exists, and the record references exactly it");
     assert.strictEqual((await H.listFiles("casePhotos/" + r1.propertyId + "/")).length, 2);
+  });
+
+  it("S24 an agent (or any submitter) lists and resumes ONLY their own cases through the server; nobody sees another person's case; the view is minimal (no owner contact, notes, assignment or approval details)", async () => {
+    const a1 = await submit(A.agent, { n: 2 }); const a2 = await submit(A.agent, { n: 2, type: "land" }); const other = await submit(A.agent2, { n: 2 }); const ext = await submit(A.extA, { n: 2 });
+    await db.doc("caseInternal/" + a1.r.propertyId).update({ internalNotes: "synthetic internal note", assignedToEmail: "staff@example.test", reviewReturn: { reason: "please send the deed" }, verifications: { x: 1 } });
+    const mine = await call("listMyCases", A.agent, {});
+    assert.deepStrictEqual(mine.cases.map((c) => c.id).sort(), [a1.r.propertyId, a2.r.propertyId].sort());
+    const one = mine.cases.find((c) => c.id === a1.r.propertyId);
+    assert.strictEqual(one.trackToken, a1.r.trackToken, "the submitter gets the link to follow their own case"); assert.strictEqual(one.needsReply, true);
+    const txt = JSON.stringify(mine);
+    for (const secret of ["synthetic internal note", "staff@example.test", H.FIX.phone, H.FIX.owner, other.r.propertyId, other.r.trackToken, ext.r.propertyId, A.agent2.uid, "approvedBy"]) assert.ok(!txt.includes(secret), "list leaks " + secret);
+    assert.deepStrictEqual((await call("listMyCases", A.agent2, {})).cases.map((c) => c.id), [other.r.propertyId]);
+    assert.deepStrictEqual((await call("listMyCases", A.extA, {})).cases.map((c) => c.id), [ext.r.propertyId]);
+    assert.deepStrictEqual((await call("listMyCases", A.extB, {})).cases, []);
+    assert.strictEqual(await errCode(call("listMyCases", null, {})), "unauthenticated");
   });
 });

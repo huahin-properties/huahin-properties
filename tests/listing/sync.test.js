@@ -60,4 +60,18 @@ describe("LISTING-E2E-01 sync + Staff photo gate", () => {
     assert.deepStrictEqual(s.missingForSubmit(base, 1), ["photos"], "house: 1 photo is not enough");
     assert.deepStrictEqual(s.missingForSubmit(Object.assign({}, base, { type: "commercial" }), 2), ["commercialSubtype"]);
   });
+  it("Y6 source guards for the page wiring (the pages are not run here): new listings leave the Lister Dashboard for the private form; publishing and public updates go through the Owner preview; private photos use the authenticated loader; no page reads a Case or its messages straight from Firestore as a customer", () => {
+    const fs = require("fs"); const read = (f) => fs.readFileSync(path.join(ROOT, f), "utf8");
+    const dash = read("Lister Dashboard.dc.html");
+    assert.ok(/startNew\(\) \{[\s\S]*?window\.location\.href = "Owner%20Submission\.dc\.html";\s*return;/.test(dash), "startNew must send new listings to the private form");
+    assert.ok(/listMyCases\(\)/.test(dash), "the agent's own submitted cases are listed");
+    const fc = read("firebase-client.js");
+    assert.ok(/publishCaseWithPreview\(propertyId, \{ confirm/.test(fc) && !/callFn\("publishListingCase", \{ propertyId: String\(propertyId\) \}\)/.test(fc), "no publish without the preview/reviewedSig");
+    assert.ok(/applyPublicUpdate/.test(fc) && /reviewedSig: pv\.updateSig/.test(fc));
+    assert.ok(/createPrivatePhotoLoader/.test(fc) && !/getDownloadURL\(\)/.test(fc.slice(fc.indexOf("async function _resolvePrivate"), fc.indexOf("export async function fetchPhotosFor"))), "private photos must not use getDownloadURL (it would mint a bearer token)");
+    const appr = read("Listing Approvals.dc.html");
+    assert.ok(/applyUpdate\(id\)/.test(appr) && /publish_not_confirmed/.test(appr));
+    const track = read("Track Submission.dc.html");
+    assert.ok(!/fetchCaseMessages|watchCaseMessages|addCaseMessage|fetchDocById|fetchCollection/.test(track));
+  });
 });

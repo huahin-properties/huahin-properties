@@ -150,8 +150,18 @@ async function _refForPrivateWrite(propertyId) {
   return (await _isSplitCase(propertyId)) ? db().collection("caseInternal").doc(String(propertyId)) : db().collection("properties").doc(String(propertyId));
 }
 // After a team member edits a Case that is LIVE, the server re-projects the public page from the record (allow-list + public-text check).
+// A team member's edit never changes the public page by itself: Staff's request is recorded for the Owner; the Owner sees the preview (what changes) and approves it.
 async function _syncIfLive(propertyId) {
-  try { await callFn("syncListingCase", { propertyId: String(propertyId) }); } catch (e) { console.warn("public page not re-projected:", e && (e.code || e.message)); }
+  try {
+    const r = await callFn("syncListingCase", { propertyId: String(propertyId) });
+    if (r && r.reason === "owner_approval_required") console.info("public page update is waiting for the Owner's approval:", propertyId);
+  } catch (e) { console.warn("public page not re-projected:", e && (e.code || e.message)); }
+}
+export async function applyPublicUpdate(propertyId) {
+  const pv = await previewListingCase(propertyId);
+  const ok = await confirmPublicPreview(pv, "ตรวจก่อนอัปเดตหน้าเว็บ — เปรียบเทียบกับที่ขึ้นอยู่ตอนนี้");
+  if (!ok) return { synced: false, reason: "not_confirmed" };
+  return callFn("syncListingCase", { propertyId: String(propertyId), reviewedSig: pv.updateSig });
 }
 export { PRIVATE_FIELDS };
 
@@ -2001,7 +2011,7 @@ export async function setPropertyOffline(propertyId, reason) {
 
 // Admin-only: reverses setPropertyOffline, putting the listing back live.
 export async function reinstateProperty(propertyId) {
-  if (await _isSplitCase(propertyId)) { await callFn("publishListingCase", { propertyId: String(propertyId) }); return; }
+  if (await _isSplitCase(propertyId)) { await publishCaseWithPreview(propertyId, { confirm: (pv) => confirmPublicPreview(pv) }); return; }
   await updateDocFields("properties", propertyId, { listingStatus: "live", offlineAt: null, offlineReason: null });
 }
 
@@ -2021,10 +2031,24 @@ export async function resolveReport(reportId) {
   await updateDocFields("propertyReports", reportId, { resolved: true, resolvedAt: Date.now() });
 }
 
-export async function approveListing(propertyId) {
-  // A Case created by submitListingCase is published by the server (checks the Owner role, the intake
-  // decision and the photo standard; copies the photos to the public path; records who approved).
-  if (await _isSplitCase(propertyId)) { await callFn("publishListingCase", { propertyId: String(propertyId) }); return; }
+// Publishing a Case that went through submitListingCase is a two-step, Owner-only act: the server previews EXACTLY what would become public, the Owner
+// confirms that preview (opts.confirm(preview) → true), and the server publishes only if the content is still the one that was reviewed.
+export async function publishCaseWithPreview(propertyId, opts) {
+  const pv = await previewListingCase(propertyId);
+  const ok = opts && opts.confirm ? await opts.confirm(pv) : false;
+  if (!ok) { const e = new Error("publish_not_confirmed"); e.code = "publish_not_confirmed"; throw e; }
+  return publishListingCase(propertyId, pv.publishSig);
+}
+// Shows the preview dialog (public-preview.js) with the private photos loaded through the authenticated transport.
+export async function confirmPublicPreview(pv, heading) {
+  const { showPublicPreview } = await import("./public-preview.js");
+  const loader = await _privatePhotoLoader();
+  return showPublicPreview(pv, { loadPhoto: (p) => loader.load(p), heading });
+}
+export async function approveListing(propertyId, opts) {
+  // A Case created by submitListingCase is published by the server (checks the Owner role, the intake decision, the photo standard, the public text and
+  // the reviewed content; copies the photos to the public path; records who approved). The caller passes opts.confirm to show the preview.
+  if (await _isSplitCase(propertyId)) { await publishCaseWithPreview(propertyId, { confirm: (opts && opts.confirm) || ((pv) => confirmPublicPreview(pv)) }); return; }
   const now = Date.now();
   await updateDocFields("properties", propertyId, { listingStatus: "live", publishedAt: now, expiresAt: now + LISTING_DURATION_DAYS * 86400000, approvedAt: now, expiredAt: null, photosDeletedAt: null });
 }
@@ -2735,8 +2759,10 @@ async function _stagingPhotoExists(path) {
   try { await storageRef().ref().child(path).getMetadata(); return true; } catch (e) { return false; }
 }
 export const submitListingCase = (data) => callFn("submitListingCase", data);
+export const listMyCases = () => callFn("listMyCases", {});
+export const previewListingCase = (propertyId) => callFn("previewListingCase", { propertyId: String(propertyId) });
 export const getPropertyDraft = () => callFn("getPropertyDraft", {});
 export const updatePropertyDraft = (fields) => callFn("updatePropertyDraft", { fields });
-export const publishListingCase = (propertyId) => callFn("publishListingCase", { propertyId: String(propertyId) });
+export const publishListingCase = (propertyId, reviewedSig) => callFn("publishListingCase", { propertyId: String(propertyId), reviewedSig });
 export const unpublishListingCase = (propertyId, reason) => callFn("unpublishListingCase", { propertyId: String(propertyId), reason: reason || "" });
 export const trackListingCase = (id, token, extra) => callFn("trackListingCase", Object.assign({ id, token }, extra || {}));

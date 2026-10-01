@@ -128,9 +128,11 @@ service cloud.firestore {
           && listerStatusOk()
           && !request.resource.data.diff(resource.data).affectedKeys().hasAny(approvalKeys());
       }
+      // LISTING-E2E-01: a lister/agent can no longer CREATE a listing document from a browser (that made a publicly readable "pending" record and
+      // wrote photos through the member-writable legacy path). New submissions go through Owner Submission → submitListingCase (private Case).
+      // Existing listings stay editable by their owner (update rule below).
       allow create: if !splitCase() && (isOwner()
-        || (isStaffOnly() && staffStatusOk() && staffMayNotApproveOnCreate())
-        || listerCreateOk());
+        || (isStaffOnly() && staffStatusOk() && staffMayNotApproveOnCreate()));
       allow update: if (!splitCase() && (isOwner()
         || (isStaffOnly() && staffStatusOk() && staffMayNotApprove())
         || listerUpdateOk()))

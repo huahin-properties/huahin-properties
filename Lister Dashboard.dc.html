@@ -488,6 +488,18 @@
         </div>
       </sc-if>
 
+      <sc-if value="{{ showMyCases }}">
+        <div style="background:white; border-radius:8px; padding:14px 18px; margin-bottom:16px;">
+          <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60); margin-bottom:4px;">เคสที่ฉันส่งผ่านฟอร์ม ({{ myCaseCount }})</div>
+          <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:8px;">เป็นข้อมูลส่วนตัว — เห็นเฉพาะคุณและทีมงาน จนกว่าเจ้าของเว็บจะอนุมัติเผยแพร่</div>
+          <sc-for list="{{ myCaseRows }}" as="c" hint-placeholder-count="0">
+            <a href="{{ c.href }}" style="display:flex; justify-content:space-between; gap:10px; padding:9px 0; border-top:1px solid oklch(94% 0.01 70); text-decoration:none; color:inherit; font-size:13px;">
+              <span>{{ c.title }} · {{ c.statusText }}</span><span style="color:oklch(40% 0.13 25); white-space:nowrap;">{{ c.action }}</span>
+            </a>
+          </sc-for>
+        </div>
+      </sc-if>
+
       <sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:10px;">
           <div style="font-size:15px; font-weight:600; color:oklch(25% 0.02 60);">ทรัพย์ของฉัน ({{ propCount }})</div>
@@ -1455,6 +1467,7 @@ const SEO_TAGS = [
 
 class Component extends DCLogic {
   state = {
+    myCases: [],
     lang: (() => { try { return localStorage.getItem("hh_lang") || localStorage.getItem("hhDashLang") || "th"; } catch (e) { return "th"; } })(),
     loaded: false, signedIn: false, lister: null, properties: [], view: "list", dashTab: "settings", showDevBar: false,
     editingId: null, f_type: "", f_area: "", f_subdistrict: "", f_zone: "", f_status: "sale",
@@ -1516,6 +1529,7 @@ class Component extends DCLogic {
     try {
       const lister = await fb.fetchMyListerDoc();
       if (!lister) { this.setState({ loaded: true, signedIn: false }); return; }
+      this.loadMyCases();
       let properties = await this.loadPropertiesWithCovers(lister.id);
       try {
         const { expiredCount } = await fb.runExpirySweep(properties);
@@ -1672,6 +1686,12 @@ class Component extends DCLogic {
   async refreshProperties() {
     const properties = await this.loadPropertiesWithCovers(this.state.lister.id);
     this.setState({ properties, openMenuId: "" });
+    this.loadMyCases();
+  }
+
+  // Cases this person submitted through the form (private until the Owner publishes): their own list, from the server — never anyone else's.
+  async loadMyCases() {
+    try { const r = await this._fb.listMyCases(); this.setState({ myCases: (r && r.cases) || [] }); } catch (e) { console.warn("my cases not loaded:", e && (e.code || e.message)); }
   }
 
   onLogout() { this._fb.logoutAdmin(); window.location.href = "Home.dc.html"; }
@@ -1719,6 +1739,11 @@ class Component extends DCLogic {
       this.setState({ quotaMsg: `คุณใช้โควตาแพ็กเกจปัจจุบันครบแล้ว (${this.state.properties.length}/${limit} รายการ) — อัปเกรดแพ็กเกจเพื่อเพิ่มทรัพย์ได้อีก` });
       return;
     }
+    // LISTING-E2E-01: new listings are no longer created here (that made a publicly readable "pending" record and wrote photos through a path any member
+    // could overwrite). They are sent through the form, which creates a PRIVATE Case that only the team and the submitter (via the tracking link) can see.
+    window.location.href = "Owner%20Submission.dc.html";
+    return;
+    // eslint-disable-next-line no-unreachable
     this.pushViewHistory();
     this.setState({
       // PENDING #1 (19 Sep 2026): a brand-new listing must start with nothing
@@ -2927,6 +2952,13 @@ class Component extends DCLogic {
       debugSignedIn: String(this.state.signedIn), debugHasLister: String(!!this.state.lister),
       showDevBar: this.state.showDevBar,
       debugNewParam: new URLSearchParams(window.location.search).get("new") || "none",
+      showMyCases: this.state.view === "list" && (this.state.myCases || []).length > 0, myCaseCount: (this.state.myCases || []).length,
+      myCaseRows: (this.state.myCases || []).map((c) => {
+        const typeTh = { villa: "พูลวิลล่า", house: "บ้านเดี่ยว", townhouse: "ทาวน์เฮาส์", condo: "คอนโด", land: "ที่ดิน", commercial: "เชิงพาณิชย์" }[c.type] || c.type || "ทรัพย์";
+        const statusText = c.listingStatus === "live" ? "ขึ้นเว็บแล้ว" : c.listingStatus === "offline" ? "ปิดประกาศ" : ({ submitted: "รอทีมงานตรวจ", reviewing: "ทีมงานกำลังตรวจ", more_info_required: "รอข้อมูลเพิ่มจากคุณ", returned: "ส่งกลับให้แก้" }[c.reviewStatus] || "อยู่ระหว่างดำเนินการ");
+        return { title: typeTh + " · " + (c.priceMode === "appraisal" ? "ขอประเมินราคา" : "฿" + Number(c.price || 0).toLocaleString()) + " · " + c.photoCount + " รูป", statusText, action: c.needsReply ? "ตอบทีมงาน ›" : "ดูสถานะ/คุยกับทีมงาน ›",
+          href: "Track%20Submission.dc.html?id=" + encodeURIComponent(c.id) + "&t=" + encodeURIComponent(c.trackToken) };
+      }),
       showList: this.state.view === "list", showEdit: this.state.view === "edit", showSaved: this.state.view === "saved",
       propCount: properties.length, hasNoProps: properties.length === 0,
       showFirstTimeCta: properties.length === 0,

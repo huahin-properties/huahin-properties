@@ -75,13 +75,11 @@ describe("LISTING-E2E-01 rules (real firestore.rules + storage.rules, emulators)
     assert.strictEqual(await allowed(F(member(UID.google)).doc("properties/new-g").set({ listerId: UID.lister, listingStatus: "pending", price: 1 })), false, "cannot create for someone else's lister id");
   });
 
-  it("F2 an agent/lister (existing self-serve flow) can create+edit their OWN pending or draft listing — including the internalNotes field the Lister Dashboard always sends — but can never make anything live or write approval fields", async () => {
+  it("F2 an agent/lister can no longer CREATE a listing document from a browser; they can still edit their EXISTING listings (including the internalNotes field the Lister Dashboard always sends) but can never make anything live or write approval fields", async () => {
     const L = F(member(UID.lister));
-    assert.strictEqual(await allowed(L.doc("properties/new-p").set({ listerId: UID.lister, listingStatus: "pending", price: 1, internalNotes: null })), true, "dashboard payload with internalNotes");
-    assert.strictEqual(await allowed(L.doc("properties/new-d").set({ listerId: UID.lister, isDraft: true, price: 1, internalNotes: "my own note" })), true);
+    // new listings are no longer created from a browser by an agent (they go through the private Case path); the old "create" shapes are refused
+    for (const d of [{ listerId: UID.lister, listingStatus: "pending", price: 1, internalNotes: null }, { listerId: UID.lister, isDraft: true, price: 1, internalNotes: "my own note" }]) assert.strictEqual(await allowed(L.doc("properties/new-x").set(d)), false, "agent creates a listing document: " + JSON.stringify(d));
     assert.strictEqual(await allowed(L.doc("properties/new-live").set({ listerId: UID.lister, listingStatus: "live", price: 1 })), false, "create live");
-    assert.strictEqual(await allowed(L.doc("properties/new-nostatus").set({ listerId: UID.lister, isDraft: false, price: 1 })), false, "the 'grandfathered live' loophole");
-    assert.strictEqual(await allowed(L.doc("properties/new-appr").set({ listerId: UID.lister, listingStatus: "pending", approvedAt: 1 })), false, "approval field on create");
     assert.strictEqual(await allowed(L.doc("properties/PENDING-L1").update({ description: "edited", internalNotes: "n" })), true, "edit own pending");
     assert.strictEqual(await allowed(L.doc("properties/PENDING-L1").update({ listingStatus: "live" })), false, "pending → live");
     assert.strictEqual(await allowed(L.doc("properties/DRAFT-L1").update({ listingStatus: "live", isDraft: false })), false, "draft → live");

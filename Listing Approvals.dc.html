@@ -441,6 +441,9 @@
             <sc-if value="{{ r.showReject }}">
               <div onClick="{{ r.onReject }}" style="background:oklch(95% 0.02 30); color:oklch(45% 0.15 30); padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">✕ ปฏิเสธ</div>
             </sc-if>
+            <sc-if value="{{ r.showApplyUpdate }}">
+              <div onClick="{{ r.onApplyUpdate }}" style="background:oklch(94% 0.06 85); color:oklch(35% 0.1 70); padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap; font-weight:700;">📝 มีการแก้ไขรออนุมัติ — ตรวจและอัปเดตหน้าเว็บ</div>
+            </sc-if>
             <sc-if value="{{ r.showOffline }}">
               <div onClick="{{ r.onOffline }}" style="background:oklch(95% 0.02 30); color:oklch(45% 0.15 30); padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">⛔ ปิดประกาศ</div>
             </sc-if>
@@ -1218,14 +1221,34 @@ class Component extends DCLogic {
     }
   }
 
+  // Publishing a new-style Case is a two-step act (Owner only): the server previews EXACTLY what will become public, the Owner confirms it, and the
+  // server publishes only if nothing changed since. A cancelled preview changes nothing.
+  _publishErrorText(e) {
+    const r = (e && e.details && e.details.reason) || "";
+    const map = { public_text_has_contact_info: "ข้อความที่จะขึ้นเว็บมีเบอร์/อีเมล/ลิงก์/ไอดีติดต่อ — แก้ข้อความของเคสก่อน", price_required_to_publish: "เคสนี้ยังไม่มีราคา — ใส่ราคาก่อนเผยแพร่",
+      intake_not_approved: "ยังไม่ได้บันทึกผลอนุมัติการรับเรื่อง", photos_below_minimum: "รูปยังไม่ถึงขั้นต่ำตามประเภททรัพย์", reviewed_content_changed: "ข้อมูลเปลี่ยนหลังจากที่คุณตรวจ — กดอนุมัติใหม่เพื่อดูตัวอย่างล่าสุด",
+      publish_in_progress: "กำลังเผยแพร่อยู่ รอสักครู่", photos_changed: "รูปเปลี่ยนระหว่างเผยแพร่ — ลองใหม่", publish_cancelled: "การเผยแพร่ถูกยกเลิก (มีการปิดประกาศ)" };
+    return map[r] || "";
+  }
   async approve(id) {
     const prev = this.state.properties;
     this.setState((s) => ({ actionError: "", properties: s.properties.map((p) => (p.id === id ? { ...p, listingStatus: "live" } : p)) }));
     try { await this._fb.approveListing(id); } catch (e) {
       console.warn("approve failed:", e);
-      this.setState({ properties: prev, actionError: "อนุมัติไม่สำเร็จ — เฉพาะ Owner เท่านั้นที่อนุมัติประกาศได้ (บัญชี Staff ทำได้แค่เตรียมข้อมูล)" });
+      const known = this._publishErrorText(e);
+      this.setState({ properties: prev, actionError: e && e.code === "publish_not_confirmed" ? "" : (known || "อนุมัติไม่สำเร็จ — เฉพาะ Owner เท่านั้นที่อนุมัติประกาศได้ (บัญชี Staff ทำได้แค่เตรียมข้อมูล)") });
       return;
     }
+    try { const fresh = await this._fb.fetchDocById("properties", id); if (fresh) this.setState((s) => ({ properties: s.properties.map((p) => (p.id === id ? { ...p, ...fresh } : p)) })); } catch (e) {}
+  }
+
+  async applyUpdate(id) {
+    this.setState({ actionError: "" });
+    try {
+      const r = await this._fb.applyPublicUpdate(id);
+      if (r && r.synced === false && r.reason !== "not_confirmed") this.setState({ actionError: r.reason === "public_text_has_contact_info" ? "ข้อความมีเบอร์/อีเมล/ลิงก์ — แก้ก่อน หน้าเว็บยังเป็นข้อความเดิม" : "ยังไม่ได้อัปเดตหน้าเว็บ (" + (r.reason || "") + ")" });
+      const fresh = await this._fb.fetchDocById("properties", id); if (fresh) this.setState((s) => ({ properties: s.properties.map((p) => (p.id === id ? { ...p, ...fresh } : p)) }));
+    } catch (e) { console.warn("applyUpdate failed:", e); this.setState({ actionError: this._publishErrorText(e) || "อัปเดตหน้าเว็บไม่สำเร็จ" }); }
   }
 
   async reject(id) {
@@ -1241,8 +1264,12 @@ class Component extends DCLogic {
   }
 
   async reinstate(id) {
-    this.setState((s) => ({ properties: s.properties.map((p) => (p.id === id ? { ...p, listingStatus: "live" } : p)) }));
-    try { await this._fb.reinstateProperty(id); } catch (e) { console.warn("reinstate failed:", e); }
+    const prev = this.state.properties;
+    this.setState((s) => ({ actionError: "", properties: s.properties.map((p) => (p.id === id ? { ...p, listingStatus: "live" } : p)) }));
+    try { await this._fb.reinstateProperty(id); } catch (e) {
+      console.warn("reinstate failed:", e);
+      this.setState({ properties: prev, actionError: e && e.code === "publish_not_confirmed" ? "" : (this._publishErrorText(e) || "เปิดใช้งานไม่สำเร็จ") });
+    }
   }
 
   async resolveReport(id, propertyId) {
@@ -1568,6 +1595,8 @@ class Component extends DCLogic {
           showApprove: this.state.adminRole === "owner" && (p.listingStatus === "pending" || p.listingStatus === "pending_owner"),
           showReject: this.state.adminRole === "owner" && (p.listingStatus === "pending" || p.listingStatus === "pending_owner"),
           showOffline: p.listingStatus === "live",
+          showApplyUpdate: this.state.adminRole === "owner" && p.listingStatus === "live" && p.publicUpdatePending === true,
+          onApplyUpdate: () => this.applyUpdate(p.id),
           showReinstate: p.listingStatus === "offline",
           onApprove: () => this.approve(p.id),
           onReject: () => this.reject(p.id),
