@@ -106,6 +106,29 @@
               <option value="commercial">อาคารพาณิชย์</option>
             </select>
           </div>
+          <sc-if value="{{ isCommercial }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ประเภทอาคารพาณิชย์</div>
+              <select value="{{ f_subtype }}" onChange="{{ onFSubtype }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px; background:white;">
+                <option value="">— เลือก —</option>
+                <option value="shophouse">ตึกแถว/อาคารพาณิชย์</option>
+                <option value="retail">ร้านค้า</option>
+                <option value="office">สำนักงาน</option>
+                <option value="warehouse">โกดัง/โรงงาน</option>
+                <option value="hotel_resort">โรงแรม/รีสอร์ท</option>
+                <option value="other">อื่น ๆ</option>
+              </select>
+            </div>
+          </sc-if>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ทำเลหลัก (อำเภอ) — หรือปักหมุดแผนที่ด้านล่างแทนก็ได้</div>
+            <select value="{{ f_area }}" onChange="{{ onFArea }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px; background:white;">
+              <option value="">— เลือก —</option>
+              <option value="hua-hin">หัวหิน</option>
+              <option value="pranburi">ปราณบุรี</option>
+              <option value="cha-am">ชะอำ</option>
+            </select>
+          </div>
           <div>
             <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">สภาพทรัพย์</div>
             <select value="{{ f_condition }}" onChange="{{ onFCondition }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px; background:white;">
@@ -116,9 +139,10 @@
           <div>
             <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ราคา (บาท)</div>
             <input type="number" value="{{ f_price }}" onChange="{{ onFPrice }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px;" />
+            <label style="display:flex; gap:8px; align-items:center; font-size:12.5px; margin-top:6px; color:oklch(40% 0.02 60);"><input type="checkbox" checked="{{ isAppraisal }}" onChange="{{ onAppraisal }}" /> ยังไม่ทราบราคา — ขอให้ทีมงานช่วยประเมินราคา</label>
           </div>
           <div>
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รายละเอียดทรัพย์ (ห้องนอน/ห้องน้ำ/พื้นที่/สิ่งอำนวยความสะดวก ฯลฯ)</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รายละเอียดทรัพย์ (ไม่บังคับ — ห้องนอน/ห้องน้ำ/พื้นที่/สิ่งอำนวยความสะดวก ฯลฯ · อย่าใส่เบอร์โทร/ไลน์/อีเมลในช่องนี้ เพราะข้อความนี้อาจขึ้นเว็บ)</div>
             <textarea rows="4" value="{{ f_details }}" onChange="{{ onFDetails }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px; resize:vertical;"></textarea>
           </div>
           <div>
@@ -127,6 +151,7 @@
             <div style="font-size:12px; color:oklch(45% 0.1 150);">{{ uploadingLabel }}</div>
             <div style="font-size:12px; color:oklch(45% 0.16 30);">{{ photoError }}</div>
             <div style="font-size:12px; color:oklch(45% 0.1 150);">{{ prefilledNote }}</div>
+            <div style="font-size:12px; color:oklch(45% 0.16 30);">{{ missingText }}</div>
             <sc-if value="{{ hasPhotos }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
                 <sc-for list="{{ photoThumbs }}" as="ph" hint-placeholder-count="0">
@@ -227,7 +252,7 @@ class Component extends DCLogic {
   state = {
     step: 1, f_name: "", f_phone: "", f_email: "", hasPriorSubmission: false,
     txnType: "", f_type: "villa", f_condition: "resale", f_price: "", f_details: "",
-    f_coords: "", f_ownerContact: "", photos: [], ownershipDocUrl: "",
+    f_coords: "", f_ownerContact: "", f_area: "", f_subtype: "", f_appraisal: false, photos: [], ownershipDocUrl: "",
     step3Error: "", submitting: false, submitted: false, showDevBar: false, uploading: false, photoError: "", prefilledNote: "", submittedId: "", trackUrl: "", copied: false,
   };
 
@@ -320,7 +345,7 @@ class Component extends DCLogic {
     const f = this.flow.state.fields, st = this.flow.state;
     this.setState({
       f_name: f.name, f_phone: f.phone, f_email: f.email, txnType: f.txnType, f_type: f.type, f_condition: f.condition, f_price: f.price,
-      f_details: f.description, f_coords: f.coords, f_ownerContact: f.ownerContact,
+      f_details: f.description, f_coords: f.coords, f_ownerContact: f.ownerContact, f_area: f.area, f_subtype: f.commercialSubtype, f_appraisal: f.priceMode === "appraisal",
       photos: st.slots.map((x) => ({ url: x.thumb, path: x.path })), ownershipDocUrl: st.doc ? "uploaded" : "",
       step3Error: st.lostPhotos ? "รูปที่อัปโหลดไว้ก่อนหน้าใช้ไม่ได้แล้ว (เปลี่ยนอุปกรณ์/ล้างข้อมูลเบราว์เซอร์) กรุณาเลือกรูปใหม่อีกครั้ง" : this.state.step3Error,
     });
@@ -392,7 +417,10 @@ class Component extends DCLogic {
     // locationFollowUpNeeded flag written below), so nothing is silently lost
     // — it moves from "customer must supply now" to "staff must obtain".
     const std = this._ps ? this._ps.photoStandardFor(s.f_type) : { min: 2, target: 5 };
-    const canStep3Next = s.f_price && s.f_details.trim() && s.photos.length >= std.min;
+    // ONE checklist (submission-checklist.js — the server's own): the type/area/price/photos items gate step 3; contactability gates step 1; a description is not required.
+    const missing = this.flow ? this.flow.missing() : [];
+    const step3Items = ["type", "commercialSubtype", "price", "location", "photos"];
+    const canStep3Next = !!this.flow && !missing.some((m) => step3Items.includes(m));
     return {
       isStep1: s.step === 1, isStep2: s.step === 2, isStep3: s.step === 3, isStep4: s.step === 4,
       stepDots: stepColors.map((c) => ({ color: c })),
@@ -408,6 +436,9 @@ class Component extends DCLogic {
       onBackStep1: () => this.setState({ step: 1 }),
       onGoStep3: () => { if (canStep2Next) { this.setState({ step: 3 }); this.flow.saveToDraft(); } },
       step2NextStyle: nextBase + (canStep2Next ? "background:oklch(22% 0.02 60); color:white;" : "background:oklch(92% 0.01 70); color:oklch(65% 0.01 70); cursor:not-allowed;"),
+      isCommercial: s.f_type === "commercial", f_subtype: s.f_subtype, onFSubtype: (e) => this._setField("commercialSubtype", e.target.value),
+      f_area: s.f_area, onFArea: (e) => this._setField("area", e.target.value),
+      isAppraisal: !!s.f_appraisal, onAppraisal: (e) => this._setField("priceMode", e.target.checked ? "appraisal" : "fixed"),
       f_type: s.f_type, onFType: (e) => this._setField("type", e.target.value),
       f_condition: s.f_condition, onFCondition: (e) => this._setField("condition", e.target.value),
       f_price: s.f_price, onFPrice: (e) => this._setField("price", e.target.value),
@@ -419,6 +450,7 @@ class Component extends DCLogic {
       mapEmbedUrl: `https://www.google.com/maps?q=${encodeURIComponent(s.f_coords.trim())}&hl=th&z=16&output=embed`,
       f_ownerContact: s.f_ownerContact, onFOwnerContact: (e) => this._setField("ownerContact", e.target.value),
       photoRule: "ขั้นต่ำ " + std.min + " รูป · แนะนำ " + std.target + " รูปขึ้นไป",
+      missingText: (() => { const t = { type: "ประเภททรัพย์", commercialSubtype: "ประเภทอาคารพาณิชย์", price: "ราคา (หรือติ๊กขอประเมินราคา)", location: "ทำเลหลัก (อำเภอ หรือปักหมุด)", photos: "รูปให้ถึงขั้นต่ำ" }; const m = missing.filter((x) => t[x]).map((x) => t[x]); return m.length ? "ยังขาด: " + m.join(" · ") : ""; })(),
       photoError: s.photoError, prefilledNote: s.prefilledNote, uploadingLabel: s.uploading ? "กำลังอัปโหลดรูป…" : "",
       photoCount: s.photos.length, hasPhotos: s.photos.length > 0,
       photoThumbs: s.photos.map((p, i) => ({ url: p.url, onRemove: () => this.removePhoto(i) })),

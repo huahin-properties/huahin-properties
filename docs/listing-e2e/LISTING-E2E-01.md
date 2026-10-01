@@ -1,4 +1,4 @@
-# LISTING-E2E-01 — ลงประกาศพร้อมรูปให้ใช้งานได้จริง (รอบ 2 — แก้ตามรีวิวของ Work 6 ข้อ)
+# LISTING-E2E-01 — ลงประกาศพร้อมรูปให้ใช้งานได้จริง (รอบ 3 — แก้ตามรีวิวรอบสองของ Work 8 ข้อ ต่อจากรอบ 2)
 
 **สถานะ:** โค้ดพร้อมในสาขา · ทดสอบจำลองผ่าน (emulator + ข้อมูลสังเคราะห์) · **ยังไม่เคยลองใน browser จริง/โปรเจกต์ TEST** · **ข้อ 2 (ความเป็นส่วนตัว) ยัง BLOCKED สำหรับ production** เพราะข้อมูลเคสเดิมยังไม่ถูกย้าย (§7)
 ไม่มี merge / deploy / แตะ production / ข้อมูลลูกค้าจริง / secret ในงานนี้
@@ -24,6 +24,18 @@
 | 5 | เคส pending เป็นสาธารณะ / blacklist | เคส pending/draft/offline **ไม่มีเอกสารสาธารณะ**; หน้าสาธารณะสร้างจาก **allow-list** (`PUBLIC_FIELDS`, ฟิลด์ใหม่ในอนาคตไม่เป็นสาธารณะโดยอัตโนมัติ); ข้อความสาธารณะ (title/description/…) ถูกตรวจหาเบอร์/อีเมล/ลิงก์/LINE ก่อน publish และตอน sync (ผิด → ปฏิเสธ `public_text_has_contact_info` Owner แก้แล้วเผยแพร่ใหม่); แก้เคสที่เผยแพร่แล้วต้องผ่าน `syncListingCase` เท่านั้น | core S9 (ฟิลด์นอก allow-list/ข้อมูลภายในไม่ขึ้นสาธารณะ), S9b, S14 · rules F2b/F5 · e2e |
 | 6 | Hosting build TEST-only | `tools/build-listing-test.js` + `tests/listing/hosting-build.test.js` (§5) | H1–H6 |
 
+## 2b) รีวิวรอบสอง (8 ข้อ) — แก้อย่างไร / ทดสอบอะไร
+| # | ประเด็น | การแก้ | หลักฐาน |
+|---|---|---|---|
+| 1 | cleanup ชนกัน (take-down→republish, publish เก่า vs ใหม่, reconcile ระหว่าง copy) | ไม่มี sweep prefix รวมอีกต่อไป: take-down ลบเฉพาะ prefix ของ operation ที่ "จับไว้ใน transaction เดียวกับที่ลบเอกสาร"; publish ลบเฉพาะ prefix ของตัวเองเมื่อล้ม; republish ใช้ operation ใหม่เสมอ; reconcile ลบเฉพาะไฟล์ที่ไม่มีเรคคอร์ดอ้างถึง **และเก่ากว่า grace period (10 นาที)** และไม่แตะ operation ที่ live / lease ยังไม่หมด | S18 (take-down→republish→cleanup เก่าทำงาน: รูปใหม่ยัง 200), S19 (publish เก่าจบช้าหลัง lease หมด+publish ใหม่ live: ลบเฉพาะของตัวเอง), S20 (reconcile ระหว่าง copy ไม่ลบไฟล์ที่กำลังใช้/ไฟล์ใหม่) |
+| 2 | type/minimum/title ใน transaction สุดท้ายคำนวณจากข้อมูลเก่า | ทุกอย่างคำนวณใหม่จาก record ใน transaction (type, ขั้นต่ำรูป, ราคา, อนุมัติ, ข้อความสาธารณะ, ชุดรูป, **title/projection สร้างจาก record ปัจจุบันด้วยฟังก์ชันเดียว `buildPublicDoc`**); การอนุมัติผูกกับ "เนื้อหาที่ Owner ตรวจ": publish ต้องส่ง `reviewedSig` จาก `previewListingCase` — ถ้าเนื้อหา/รูปเปลี่ยนหลังตรวจ → `reviewed_content_changed` | S21 (ที่ดิน 1 รูป→บ้านระหว่าง copy: ปฏิเสธ; แก้ข้อมูลหลัง preview: ปฏิเสธ; ไม่มี preview: ปฏิเสธ; title ถูกประเภท) |
+| 3 | abandon ลบ path ผิด / swallow error | แก้ให้ลบ path จริงของ attempt (`caseAttachments/<id>/ownership-<attempt>.webp`); `safeDelete` แยก not-found ออกจาก error จริง, error ถูกรายงาน (`publicFilesRemoved:false`, `cleanupFailed`) และจดไว้ใน `cleanupPending` ให้ reconcile ลองใหม่ — ไม่อ้างว่าลิงก์ถูกเพิกถอนถ้าลบไม่สำเร็จ | S22 (storage ล่ม: ปลดประกาศรายงานจริง ลิงก์เก่ายังเปิดได้ → reconcile ลบแล้วตาย), S23 (เอกสารกรรมสิทธิ์: attempt ที่ล้ม/แพ้ไม่ทิ้งไฟล์, ผู้ชนะอ้างถึงไฟล์เดียว) |
+| 4 | แสดงรูป private ต้องไม่มี bearer token | เลิกใช้ `getDownloadURL` (จะสร้าง token ถาวร) → เบราว์เซอร์ทีมงาน fetch ด้วย ID token ของตัวเอง (`Authorization: Firebase <idToken>` → Storage REST, rules ตัดสิน) แล้วสร้าง object URL ในหน้า (`private-photo.js`); ไม่มี fallback เป็น URL เปล่า | PP1 (ทดสอบด้วย ID token จริงจาก Auth emulator + storage.rules จริง + ไฟล์จริง: Owner โหลดได้ ไบต์ตรง; signed-in ที่ไม่ใช่ทีม/anonymous/ผู้ส่ง/ไม่มี token = 401/403; URL เปล่าไม่โหลด; ไม่มี token ในไฟล์/เรคคอร์ด/URL), PP2 · **ยังไม่ได้ทดสอบ UI/browser จริง** |
+| 5 | เอเจนต์ไม่เห็นเคส / dashboard ยังสร้าง public pending + path เขียนทับ | `listMyCases` (server): เฉพาะเคสที่ตัวเองส่ง (view ขั้นต่ำ + ลิงก์ติดตามของตัวเอง) แสดงใน Lister Dashboard พร้อมเข้าไปตอบทีมงานต่อ; "+ เพิ่มทรัพย์ใหม่" ส่งไปฟอร์ม private; **rules ปิดการสร้างเอกสาร `properties` โดยเอเจนต์** (แก้ประกาศเดิมยังได้) | S24 (เห็นเฉพาะของตัวเอง, ไม่รั่วของคนอื่น/ข้อมูลภายใน), rules F2, source guard Y6 · ข้อจำกัด: ประกาศเดิมที่เป็นเอกสาร `properties` และรูปใน `propertyPhotos` ของ flow เดิมยังมีอยู่ (ไม่ migrate) |
+| 6 | Owner preview + นโยบายแก้ไขหลังเผยแพร่ | `previewListingCase` คืน projection ที่จะขึ้นเว็บทั้งหมด + จำนวน/รูปจริง + เหตุที่จะปฏิเสธ + (ถ้า live) เทียบกับของปัจจุบัน; หน้า Approvals แสดง dialog พร้อมรูปก่อนยืนยันทุกครั้ง; **การแก้ของ Staff หลังเผยแพร่ไม่เปลี่ยนหน้าเว็บ** — เป็นคำขอ `publicUpdatePending` ที่ Owner ตรวจ preview แล้วอนุมัติ (`syncListingCase` + `reviewedSig`) | S14, S21 · UI dialog ยังไม่ได้เรนเดอร์ใน browser |
+| 7 | checklist ส่งเรื่องไม่ตรง spec | ชุดเดียว `submission-checklist.js` (ฝั่ง server เป็นผู้ตัดสิน, ฟอร์มใช้ mirror): ประเภท, ขาย/เช่า, ราคา **หรือ "ขอประเมินราคา"**, ทำเลหลัก (อำเภอ **หรือ** หมุด), commercialSubtype ถ้าพาณิชย์, ผู้ติดต่อ, รูปขั้นต่ำตาม Photo Standard; คำอธิบายไม่บังคับ; เปอร์เซ็นต์ความครบแยกต่างหาก (ไม่คำนวณที่นี่); เคสขอประเมินส่งได้ แต่เผยแพร่ไม่ได้จนมีราคา (`price_required_to_publish`) | sync Y5 (server เทียบ mirror หลายสิบกรณี), S6/S17, recovery R5b |
+| 8 | PR description ขัดแย้ง | เขียนใหม่ทั้งฉบับ (ดู PR) | — |
+
 ## 3) บทบาท/สิทธิ์ (ทดสอบแล้ว)
 ผู้ส่ง ≠ เจ้าของทรัพย์จริง ≠ ผู้รับผิดชอบ ≠ ผู้อนุมัติ — แยกเก็บใน record. บทบาทมาจาก token ฝั่ง server (`resolveActor`) ไม่ใช่ body; Owner เท่านั้นเผยแพร่/ปลดประกาศ/reconcile; ทีมงานเท่านั้น sync/เพิ่มรูป; ไม่มีใคร (รวม Owner) เขียน `listingStatus:"live"`/ตราประทับอนุมัติจากเบราว์เซอร์.
 
@@ -35,15 +47,14 @@
 **ยังไม่ได้ทดสอบ:** หน้าที่ build ออกมาทำงานใน browser จริงหรือไม่ (ทดสอบแค่: ไฟล์ครบตาม import, parse ผ่าน, ไม่มีสตริง production).
 
 ## 6) หลักฐานการทดสอบ
-`npm run test:listing` = **65 passing / 1 pending** (core 27 · rules 14 รวม ST3 ที่ pending · e2e 5 · recovery 10 · sync 4 · hosting-build 6) · test:sec 96 (5 pending) · test:chat 55 (8 pending) · test:chat-live 34 (12 pending = ชุด browser ที่ไม่ได้รัน) · test:chat-live-gate 21 · test:chat-live-combined 174 (13 pending). expectation เดิมที่ช่องโหว่ถูกปิด (S2a, C5/C6, B1, callsite, GT17, B6) ถูกอัปเดตและระบุในคอมมิต.
+`npm run test:listing` = **78 passing / 1 pending** (core 35 · rules 14 รวม ST3 ที่ pending · e2e 5 · recovery 11 · private-photo 2 · sync 6 · hosting-build 6) · test:sec 96 (5 pending) · test:chat 55 (8 pending) · test:chat-live 34 (12 pending = ชุด browser ที่ไม่ได้รัน) · test:chat-live-gate 21 · test:chat-live-combined 174 (13 pending). expectation เดิมที่ช่องโหว่ถูกปิด (S2a, C5/C6, B1, callsite, GT17, B6) ถูกอัปเดตและระบุในคอมมิต.
 **Pending ที่ตั้งใจ:** ST3 — Storage rules ที่ใช้ lookup ข้าม service (ทีมงาน/lister เขียน `propertyPhotos` เดิม) emulator แก้ค่าไม่ได้ ต้องยืนยันบน TEST จริง.
 
 ## 7) สิ่งที่ยังไม่ครบ / BLOCKED (ห้ามอ้างว่าเสร็จ)
-1. **BLOCKED (ข้อ 2 ก่อนใช้งานจริง):** เคสเดิมใน production ยังมีผู้ติดต่อ+trackToken ใน `properties/{id}` ที่สาธารณะอ่านได้ และรูปรอตรวจแบบเดิมยังอยู่ใน `propertyPhotos` สาธารณะ → ต้อง migration (LEGACY-DATA-PLAN.md) — ห้ามทำบน production ในรอบนี้
-2. **ไม่ได้ทดสอบใน browser จริง** ทั้งหน้าฟอร์ม/Track/Approvals/Staff Workspace (แก้โค้ดแล้ว ตรวจ syntax + ตรรกะผ่านชุดทดสอบ แต่ไม่เคยเรนเดอร์); ชุด browser เดิม (SDK 10.14.1 vs 10.12.2) ไม่ได้รัน
-3. **Storage cross-service access** (ทีมงาน/lister) ยืนยันไม่ได้ใน emulator
-4. หน้าจอ Staff/Owner ยังไม่มี **ตัวอย่างข้อความสาธารณะก่อนกดเผยแพร่** (server บังคับตรวจเบอร์/อีเมล/ลิงก์แล้ว แต่ Owner ยังต้องเห็นข้อความที่จะขึ้นเว็บใน UI — งานถัดไป)
-5. เอเจนต์ที่ส่งผ่านฟอร์ม **ไม่เห็นเคสของตัวเองใน Lister Dashboard** (เคสอยู่ใน record ทีมงาน; เห็นได้ผ่านลิงก์ติดตามเท่านั้น); ประกาศที่เอเจนต์สร้างจาก Lister Dashboard (flow เดิม) ยังเป็นเอกสาร `properties` แบบ pending ที่สาธารณะอ่านได้ — ไม่อยู่ใน flow นี้
-6. `trackListingCase` ยังไม่มี rate limit ต่อ IP (มีเพดาน 500 ข้อความ/เคส) · รูป/อัปโหลดที่ไม่ถูกส่ง (staging กำพร้า) ยังไม่มี lifecycle rule ของ bucket
-7. การลบ/เรียงรูปของเคสที่เป็น record จาก Lister Dashboard ยังไม่รองรับ (เพิ่มได้ผ่าน `addCasePhotos`) · รูปที่ Staff เพิ่มหลังเผยแพร่ขึ้นหน้าสาธารณะเมื่อ Owner ปลด/เผยแพร่ใหม่
-8. `profilePhotos` (Firestore) ยังเขียนได้โดยผู้ล็อกอินใดๆ (ช่องโหว่เดิม ไม่เกี่ยวกับ flow นี้)
+1. **BLOCKED (ข้อ 2 ก่อนใช้งานจริง):** เคสเดิมใน production ยังมีผู้ติดต่อ+trackToken ใน `properties/{id}` ที่สาธารณะอ่านได้ และรูปรอตรวจแบบเดิมอยู่ใน `propertyPhotos` สาธารณะ → ต้อง migration (LEGACY-DATA-PLAN.md) — ห้ามทำบน production · (ไม่ขัดขวางการทดสอบ browser แบบสังเคราะห์บนโปรเจกต์ TEST ตามที่ Work ระบุ)
+2. **ไม่ได้ทดสอบใน browser จริง**: ฟอร์ม, Track, Approvals + dialog preview, Staff Workspace, Lister Dashboard, การแสดงรูป private ด้วย object URL (โปรโตคอลทดสอบแล้ว แต่ `<img>` ไม่เคยเรนเดอร์), หน้าที่ build ออกมา; ชุด browser เดิม (SDK 10.14.1 vs 10.12.2) ไม่ได้รัน
+3. **Storage cross-service access** (ทีมงาน Staff/lister ผ่าน lookup ใน Firestore) ยืนยันไม่ได้ใน emulator (ทดสอบ Owner uid ที่ฝังใน rules เท่านั้น)
+4. ประกาศเดิมของ Lister Dashboard (เอกสาร `properties` ที่มีอยู่แล้ว + `propertyPhotos` ที่สมาชิกเขียนทับกันได้) ยังอยู่ — แค่ **สร้างใหม่ไม่ได้แล้ว**; โควตา tier ของเอเจนต์ยังนับเฉพาะประกาศเดิม ไม่นับเคสที่ส่งผ่านฟอร์ม
+5. รูปที่ Staff เพิ่มหลังเผยแพร่ขึ้นหน้าสาธารณะเมื่อ Owner ปลด/เผยแพร่ใหม่เท่านั้น; การลบ/เรียงรูปของเคสจาก Lister Dashboard ยังไม่รองรับ
+6. `trackListingCase` ยังไม่มี rate limit ต่อ IP (เพดาน 500 ข้อความ/เคส) · staging ที่ไม่ถูกส่งยังไม่มี lifecycle rule ของ bucket (reconcile ล้างได้เฉพาะเคสที่มีเรคคอร์ด)
+7. `profilePhotos` (Firestore) ยังเขียนได้โดยผู้ล็อกอินใดๆ (ช่องโหว่เดิม ไม่เกี่ยวกับ flow นี้)
