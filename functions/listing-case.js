@@ -123,6 +123,22 @@ function validateSubmission(data, actor, HttpsError) {
   return { key, txnType: d.txnType, type: d.type, condition, price, description, area, coordsRaw, submitter, propertyOwner, language, photoPaths, ownershipDocPath };
 }
 
+// ── TEST-PROJECT-ONLY guard ─────────────────────────────────────────────────
+// LISTING-E2E-01 is deploy-ready for a TEST project only. If these functions are ever deployed to another project by
+// mistake they refuse every call, so production behaviour cannot change until someone sets LISTING_E2E_ENABLED=1
+// on purpose (a go-live decision that also requires the legacy-data migration — docs/listing-e2e/LEGACY-DATA-PLAN.md).
+const TEST_PROJECT_RE = /^(huahin-chat-test-|huahin-listing-test-|demo-)/;
+function isEnabled() {
+  let pid = process.env.GCLOUD_PROJECT || process.env.GOOGLE_CLOUD_PROJECT || "";
+  if (!pid) { try { pid = (JSON.parse(process.env.FIREBASE_CONFIG || "{}") || {}).projectId || ""; } catch (e) { pid = ""; } }
+  if (process.env.LISTING_E2E_ENABLED === "0") return false; // explicit off, even in a test project
+  return process.env.LISTING_E2E_ENABLED === "1" || TEST_PROJECT_RE.test(pid);
+}
+function assertEnabled(HttpsError) {
+  if (isEnabled()) return;
+  throw new HttpsError("failed-precondition", "not_enabled", { reason: "not_enabled" });
+}
+
 // ── storage helpers (Admin SDK) ─────────────────────────────────────────────
 function bucketFor(admin) {
   let name = process.env.LISTING_STORAGE_BUCKET || "";
@@ -167,6 +183,7 @@ const okResult = (id, c, extra) => Object.assign({ created: false, alreadyExiste
 
 // ── submitListingCase ──────────────────────────────────────────────────────
 async function submitListingCase({ admin, HttpsError, request }) {
+  assertEnabled(HttpsError);
   const actor = await resolveActor(admin, request, HttpsError);
   const v = validateSubmission(request.data, actor, HttpsError);
   const db = admin.firestore();
@@ -308,6 +325,7 @@ function requireId(HttpsError, request) {
 }
 
 async function publishListingCase({ admin, HttpsError, request }) {
+  assertEnabled(HttpsError);
   const actor = await requireOwner(admin, HttpsError, request);
   const id = requireId(HttpsError, request);
   const db = admin.firestore();
@@ -367,6 +385,7 @@ async function publishListingCase({ admin, HttpsError, request }) {
 // listing is not enough, because a photo URL keeps working after the page stops linking to it. The
 // private originals stay, so the Owner can publish again (new copies, new tokens).
 async function unpublishListingCase({ admin, HttpsError, request }) {
+  assertEnabled(HttpsError);
   const actor = await requireOwner(admin, HttpsError, request);
   const id = requireId(HttpsError, request);
   const reason = clean(request.data && request.data.reason, 500);
@@ -399,6 +418,7 @@ async function unpublishListingCase({ admin, HttpsError, request }) {
 // ── trackListingCase — the customer's token-checked view (no account, no public read) ─────────
 // The token is the whole authorisation. Not found and wrong token look identical.
 async function trackListingCase({ admin, HttpsError, request }) {
+  assertEnabled(HttpsError);
   const d = request.data || {};
   const id = d.id, token = d.token;
   const denied = () => new HttpsError("permission-denied", "not_available");
@@ -434,4 +454,4 @@ async function trackListingCase({ admin, HttpsError, request }) {
   };
 }
 
-module.exports = { submitListingCase, publishListingCase, unpublishListingCase, trackListingCase, resolveActor, caseIdFor, validateSubmission, PHOTO_STANDARD, OWNER_UID, TYPES, MAX_PHOTOS };
+module.exports = { isEnabled, submitListingCase, publishListingCase, unpublishListingCase, trackListingCase, resolveActor, caseIdFor, validateSubmission, PHOTO_STANDARD, OWNER_UID, TYPES, MAX_PHOTOS };

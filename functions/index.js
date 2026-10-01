@@ -1691,14 +1691,20 @@ exports.createCaseFromConversation = onCall(
         };
         // LISTING-E2E-01: the SAME split the form path uses — contact, token and conversation link never go on the
         // publicly readable document.
-        const split = caseSplit.splitCaseFields(caseDoc);
-        // The chat summary is free text written by a customer talking to an AI: it can contain names or phone numbers,
-        // so it is kept in the internal record (team pages show it as the description until Staff write their own).
-        const chatSummary = split.pub.description || "";
-        split.pub.description = "";
-        t.create(db.collection("properties").doc(propertyId), Object.assign({}, split.pub, { internalSplit: true }));
-        t.create(db.collection("caseInternal").doc(propertyId), Object.assign({ propertyId, createdAt: now, chatRequirementsSummary: chatSummary }, split.priv));
-        if (draftLink) t.set(draftRef, { caseId: propertyId, status: "submitted", submittedAt: now, updatedAt: now }, { merge: true });
+        if (listingCase.isEnabled()) {
+          const split = caseSplit.splitCaseFields(caseDoc);
+          // The chat summary is free text written by a customer talking to an AI: it can contain names or phone numbers,
+          // so it is kept in the internal record (team pages show it as the description until Staff write their own).
+          const chatSummary = split.pub.description || "";
+          split.pub.description = "";
+          t.create(db.collection("properties").doc(propertyId), Object.assign({}, split.pub, { internalSplit: true }));
+          t.create(db.collection("caseInternal").doc(propertyId), Object.assign({ propertyId, createdAt: now, chatRequirementsSummary: chatSummary }, split.priv));
+          if (draftLink) t.set(draftRef, { caseId: propertyId, status: "submitted", submittedAt: now, updatedAt: now }, { merge: true });
+        } else {
+          // Not a LISTING-E2E-01 project: exactly the previous shape (single document), nothing new written.
+          const legacy = Object.assign({}, caseDoc); delete legacy.submittedByUid; delete legacy.submittedByRole; delete legacy.draftId;
+          t.create(db.collection("properties").doc(propertyId), legacy);
+        }
         // Same commit as the Case. linkedCaseIds non-empty therefore IMPLIES
         // the Case exists: the dangling-pointer state cannot occur.
         t.update(convRef, {

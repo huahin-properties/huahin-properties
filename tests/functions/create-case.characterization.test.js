@@ -135,4 +135,20 @@ describe("SEC-TEST-01 B: createCaseFromConversation characterization (synthetic,
     record_("B6", "gate rejects a conversation without a usable contact", ok ? "CONTROL" : "CONTROL-FAILED", "reason=" + res.reason);
     assert.ok(ok);
   });
+
+  it("B8 outside a LISTING-E2E-01 test project the Function writes exactly the previous single-document shape (so an accidental deploy changes nothing)", async () => {
+    needFns();
+    const saved = { e: process.env.LISTING_E2E_ENABLED };
+    try {
+      process.env.LISTING_E2E_ENABLED = "0"; // explicit off (the chat gate keeps looking at the real project id)
+      const res = await callCreate(VISITOR, { confirmed: true });
+      assert.strictEqual(res.created, true);
+      const pub = (await admin.firestore().doc("properties/" + res.propertyId).get()).data();
+      const int = await admin.firestore().doc("caseInternal/" + res.propertyId).get();
+      assert.ok(pub.trackToken && pub.conversationId && !pub.internalSplit && !("submittedByUid" in pub) && !("draftId" in pub), "previous shape");
+      assert.strictEqual(int.exists, false);
+      const again = await callCreate(VISITOR, { confirmed: true });
+      assert.strictEqual(again.alreadyExisted, true); assert.strictEqual(again.trackToken, res.trackToken);
+    } finally { for (const [k, v] of [["LISTING_E2E_ENABLED", saved.e]]) { if (v === undefined) delete process.env[k]; else process.env[k] = v; } }
+  });
 });

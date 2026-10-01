@@ -27,7 +27,7 @@ Take-down ──► unpublishListingCase: ลบไฟล์+เอกสาร�
 - บทบาทมาจาก token ที่ server ตรวจ (`resolveActor`): anonymous→external, `uid=OWNER`→owner, `adminUsers`→owner/staff, `listers`→agent; ค่าที่ client ส่ง (role/approvedBy/live) ถูกเมินและมีการทดสอบ
 - id ของเคส = `own-` + sha256(uid:submissionKey) → กดซ้ำ/รีเฟรช/ส่งพร้อมกัน 8 ครั้ง = 1 เคส; ผูกกับ draft ด้วย `draft__<uid>` (ไม่ผูกด้วยชื่อ/เบอร์)
 
-## 3) เกณฑ์รูป (Photo Standard v1, BLOCKED ไม่ได้แก้ — ใช้ตาม BLUEPRINT §32 LOCKED)
+## 3) เกณฑ์รูป (Photo Standard v1 — LOCKED ไม่ได้แก้ ใช้ตาม BLUEPRINT §32 LOCKED)
 ขั้นต่ำส่งเรื่อง / เป้าหมาย "รูปครบ": ที่ดิน 1/3 · คอนโด 2/5 · บ้านเดี่ยว 2/6 · พูลวิลล่า 2/7 · ทาวน์เฮาส์ 2/5 · เชิงพาณิชย์ 2/5
 - ฟอร์ม: ปุ่มถัดไปปลดเมื่อถึง "ขั้นต่ำ" ของประเภทนั้น (เดิมบังคับ 5 รูปทุกประเภท → ที่ดิน 3 รูปถูกบล็อก)
 - server (`submitListingCase`/`publishListingCase`): ตรวจขั้นต่ำซ้ำ

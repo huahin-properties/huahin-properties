@@ -242,4 +242,19 @@ describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, 
     assert.strictEqual((await getDoc("caseInternal/" + r.propertyId)).customerLanguage, "en", "language is locked once confirmed");
     assert.strictEqual(await errReason(call("trackListingCase", null, { id: r.propertyId, token: r.trackToken, action: "delete" })), "bad_action");
   });
+
+  // ── S13 test-project-only guard ─────────────────────────────────────────
+  it("S13 outside a test project the four functions refuse every call (so an accidental production deploy changes nothing); LISTING_E2E_ENABLED=1 is the deliberate switch", async () => {
+    const saved = { g: process.env.GCLOUD_PROJECT, c: process.env.GOOGLE_CLOUD_PROJECT, f: process.env.FIREBASE_CONFIG, e: process.env.LISTING_E2E_ENABLED };
+    try {
+      process.env.GCLOUD_PROJECT = "huahin-properties-prod-like"; delete process.env.GOOGLE_CLOUD_PROJECT; process.env.FIREBASE_CONFIG = "{}"; delete process.env.LISTING_E2E_ENABLED;
+      const key = newKey(); const photos = await putStaging(A.extA, key, [0, 1]);
+      assert.strictEqual(await errReason(call("submitListingCase", A.extA, payload(key, "house", photos))), "not_enabled");
+      for (const fn of ["publishListingCase", "unpublishListingCase"]) assert.strictEqual(await errReason(call(fn, A.owner, { propertyId: "x" })), "not_enabled", fn);
+      assert.strictEqual(await errReason(call("trackListingCase", null, { id: "x", token: "t".repeat(30) })), "not_enabled");
+      assert.strictEqual(await count("properties"), 0, "nothing was written");
+      process.env.LISTING_E2E_ENABLED = "1";
+      assert.strictEqual((await call("submitListingCase", A.extA, payload(key, "house", photos))).created, true, "the deliberate switch enables it");
+    } finally { for (const [k, v] of [["GCLOUD_PROJECT", saved.g], ["GOOGLE_CLOUD_PROJECT", saved.c], ["FIREBASE_CONFIG", saved.f], ["LISTING_E2E_ENABLED", saved.e]]) { if (v === undefined) delete process.env[k]; else process.env[k] = v; } }
+  });
 });
