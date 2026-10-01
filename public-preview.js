@@ -11,8 +11,9 @@ export function previewRows(pv) {
   const keys = Object.keys(pv.publicDocument || {}).filter((k) => pv.publicDocument[k] !== null && pv.publicDocument[k] !== undefined && pv.publicDocument[k] !== "");
   keys.forEach((k) => {
     const v = pv.publicDocument[k];
-    const text = typeof v === "object" ? JSON.stringify(v) : String(v);
-    const before = cur ? (cur[k] === undefined ? "" : typeof cur[k] === "object" ? JSON.stringify(cur[k]) : String(cur[k])) : null;
+    const show = (x) => (x && typeof x === "object" && !Array.isArray(x) && (x.th || x.en) ? [x.th, x.en].filter(Boolean).join(" / ") : x && typeof x === "object" ? JSON.stringify(x) : k === "price" && Number(x) > 0 ? Number(x).toLocaleString("en-US") : String(x));
+    const text = show(v);
+    const before = cur ? (cur[k] === undefined ? "" : show(cur[k])) : null;
     rows.push({ key: k, label: FIELD_LABELS[k] || k, text, before, changed: before !== null && before !== text });
   });
   return rows;

@@ -6,7 +6,7 @@ const os = require("os");
 const path = require("path");
 const crypto = require("crypto");
 const { spawnSync } = require("child_process");
-const { build, closure, FORBIDDEN, MARKER, REQUIRED_FUNCTIONS, OPTIONAL_CHAT_FUNCTIONS, deployFunctionsCommand } = require("../../tools/build-listing-test");
+const { build, closure, FORBIDDEN, MARKER, REQUIRED_FUNCTIONS, OPTIONAL_CHAT_FUNCTIONS, deployFunctionsCommand, EXCLUDED_NAV, ADMIN_TOOLS_NOT_IN_TEST } = require("../../tools/build-listing-test");
 
 const ROOT = path.join(__dirname, "..", "..");
 const CFG = { projectId: "huahin-listing-test-abc", apiKey: "SYNTHETIC-KEY", appId: "1:123:web:synthetic", messagingSenderId: "123", authDomain: "huahin-listing-test-abc.firebaseapp.com", storageBucket: "huahin-listing-test-abc.appspot.com", region: "asia-southeast1" };
@@ -129,5 +129,20 @@ describe("LISTING-E2E-01 TEST-only hosting build (no network, nothing deployed)"
     assert.ok(root.rewrites && root.rewrites.length, "sanity: the root hosting config has production rewrites");
     assert.deepStrictEqual([built.public, built.rewrites], [".", undefined]);
     assert.ok(!JSON.stringify(built).includes("agentProfileMeta") && !fs.readFileSync(path.join(d, "listing-test-config.js"), "utf8").includes("5f1b5"));
+  });
+
+  it("H8 navigation closure: every page / script a built file points at exists in the build, except the explicit, named lists (dead-by-design admin tool links; pages the build deliberately removes)", () => {
+    const d = fs.mkdtempSync(path.join(ROOT, "build", "closure-")); made.push(d);
+    build(CFG, path.join(d, "o"), ROOT, { outputBases: [path.join(ROOT, "build"), d] });
+    const out = path.join(d, "o"); const have = new Set(fs.readdirSync(out)); const dangling = {};
+    for (const f of fs.readdirSync(out).filter((x) => /\.(html|js)$/.test(x))) {
+      const txt = fs.readFileSync(path.join(out, f), "utf8");
+      for (const m of txt.matchAll(/["'`=(]\s*\.?\/?([A-Za-z][A-Za-z0-9 %_-]*\.dc\.html)/g)) { const n = decodeURIComponent(m[1]); if (!have.has(n) && !EXCLUDED_NAV.includes(n) && !ADMIN_TOOLS_NOT_IN_TEST.includes(n)) (dangling[n] = dangling[n] || []).push(f); }
+      for (const m of txt.matchAll(/from\s+["']\.\/([A-Za-z0-9._-]+\.js)["']|import\(\s*["']\.\/([A-Za-z0-9._-]+\.js)["']\s*\)/g)) { const n = m[1] || m[2]; if (!have.has(n)) (dangling[n] = dangling[n] || []).push(f); }
+    }
+    assert.deepStrictEqual(dangling, {}, "links/imports that resolve nowhere in the build");
+    // negative control: the check really sees a dangling link
+    fs.writeFileSync(path.join(out, "zz.html"), '<a href="Nowhere Page.dc.html">x</a>');
+    const again = /["'`=(]\s*\.?\/?([A-Za-z][A-Za-z0-9 %_-]*\.dc\.html)/.exec(fs.readFileSync(path.join(out, "zz.html"), "utf8")); assert.ok(again && !have.has(again[1]), "negative control");
   });
 });

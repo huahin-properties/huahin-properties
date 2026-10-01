@@ -18,6 +18,9 @@ const ENTRIES = ["index.html", "Owner Submission.dc.html", "Track Submission.dc.
 // Pages the built site links to but deliberately does NOT ship (a link to one of them is a 404 on the test site — by design, listed so nobody mistakes it for a bug):
 //   Lister Billing (Stripe checkout/portal), Performance, Collection View, and the static SEO landing pages (baan-*.html, condo-*.html, pool-villa-*.html, thidin-*.html, ...).
 const EXCLUDED_NAV = ["Lister Billing.dc.html", "Performance.dc.html", "Collection View.dc.html"];
+// Admin tool pages that the Admin Dashboard links to but that are NOT part of the listing TEST site (they are other products' tools; their links 404 there, by design).
+// Listed explicitly so any OTHER link that does not resolve inside the build is caught by tests/listing/hosting-build.test.js (H8).
+const ADMIN_TOOLS_NOT_IN_TEST = ["Property Map.dc.html", "Owners.dc.html", "Site Content.dc.html", "Member Management.dc.html", "Team.dc.html", "Product Development Dashboard.dc.html", "CEO Dashboard.dc.html", "Mission Control.dc.html", "Developer Maintenance Center.dc.html", "AI Quick Add.dc.html"];
 const EXCLUDED_NAV_RE = /^(baan-|condo-|pool-villa-|thidin-|hua-hin-|pranburi-|cha-am-)[a-z0-9-]*\.html$/;
 // The Cloud Functions the listing TEST site needs — by name. NEVER `firebase deploy --only functions` (that deploys every export, including Stripe / LINE /
 // e-mail / triggers and their unrelated secrets). The chat functions are optional: they need the Anthropic secret and are deployed only when the chat widget is tested.
@@ -191,7 +194,7 @@ function build(config, outDir, root, opts) {
   return manifest;
 }
 
-module.exports = { build, validate, closure, ENTRIES, EXCLUDED_NAV, EXCLUDED_NAV_RE, REQUIRED_FUNCTIONS, OPTIONAL_CHAT_FUNCTIONS, deployFunctionsCommand, FORBIDDEN, PRODUCTION_PROJECT, MARKER };
+module.exports = { build, validate, closure, ENTRIES, EXCLUDED_NAV, ADMIN_TOOLS_NOT_IN_TEST, EXCLUDED_NAV_RE, REQUIRED_FUNCTIONS, OPTIONAL_CHAT_FUNCTIONS, deployFunctionsCommand, FORBIDDEN, PRODUCTION_PROJECT, MARKER };
 
 if (require.main === module) {
   const a = process.argv.slice(2);

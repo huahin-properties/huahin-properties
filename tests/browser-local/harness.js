@@ -79,12 +79,18 @@ async function newContext(browser, site, opts) {
   const E = emulators();
   const ctx = await browser.newContext(Object.assign({ viewport: { width: 1180, height: 860 } }, opts || {}));
   await ctx.addInitScript((e) => { window.__LOCAL_EMU__ = e; }, E);
-  const log = { external: [], prodHits: [], vendor: [], fonts: [], local: [] };
+  const log = { mapped: [], external: [], prodHits: [], vendor: [], fonts: [], local: [] };
   ctx.__log = log;
   await ctx.route("**/*", async (route) => {
     const url = route.request().url();
     let host = ""; try { host = new URL(url).hostname; } catch (e) { /* data:, blob: */ }
     if (/^(data|blob|about):/.test(url) || !host || host === "127.0.0.1" || host === "localhost") { log.local.push(url); return route.continue(); }
+    // The page fetches PRIVATE photos with the member's ID token from the Storage REST host (private-photo.js). Locally that host is mapped onto the Storage EMULATOR
+    // (same path, same Authorization header, storage.rules still decide); nothing leaves the machine. Recorded in log.mapped.
+    if (host === "firebasestorage.googleapis.com" && /^\/v0\/b\//.test(new URL(url).pathname)) {
+      const u = new URL(url); const target = "http://" + E.stHost + ":" + E.stPort + u.pathname + u.search; log.mapped.push(url);
+      try { const res = await route.fetch({ url: target }); return route.fulfill({ response: res, headers: Object.assign({}, res.headers(), { "access-control-allow-origin": "*" }) }); } catch (e) { return route.abort("failed"); }
+    }
     if (PROD.test(url) || PROD.test(host)) log.prodHits.push(url);
     const v = vendorFor(url);
     if (v && fs.existsSync(v.file)) { log.vendor.push({ url, note: v.note || "" }); return route.fulfill({ status: 200, contentType: "application/javascript", headers: { "access-control-allow-origin": "*" }, body: fs.readFileSync(v.file) }); }

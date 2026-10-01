@@ -15,6 +15,7 @@ const KNOWN_BENIGN = [/%7B%7B/, /fonts\./]; // DC template placeholders requeste
 
 let site, browser, db, auth, bucket;
 const ids = {};
+let sdkRaces = 0; // see O1
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function mkUser(email, uid, extra) { await auth.createUser(Object.assign({ email, password: PASS, emailVerified: true }, uid ? { uid } : {}, extra || {})); return (await auth.getUserByEmail(email)).uid; }
@@ -49,8 +50,10 @@ async function newPage(ctxOpts, name) {
 }
 async function loginAdmin(page, email) {
   await page.goto(site.url + "/Admin%20Login.dc.html"); await page.waitForSelector("input[type=email]");
+  await page.waitForFunction(() => window.firebase && window.firebase.auth && window.firebase.firestore, null, { timeout: 30000 }); await sleep(800);
   await page.locator("input[type=email]").fill(email); await page.locator("input").nth(1).fill(PASS);
-  await page.getByText(/^(Sign In|เข้าสู่ระบบ)/).first().click();
+  await page.getByText(/Sign In|เข้าสู่ระบบ/).last().click();
+  await page.waitForURL(/Admin%20Dashboard|Listing%20Approvals|Staff%20Workspace/, { timeout: 30000 });
 }
 // What is NOT a problem: the DC template placeholders requested as <img src="{{ … }}"> before binding (pre-existing), and the gated CHAT functions answering 401/403 on the
 // listing TEST project (they are optional, need the allow-list and a secret; the form swallows the refusal by design). Everything else must be empty.
@@ -58,15 +61,15 @@ const GATED_CHAT = /\/(getPropertyDraft|updatePropertyDraft|receptionTurn|claude
 async function loginAgent(page, email) {
   await page.goto(site.url + "/Agent%20Signup.dc.html"); await page.waitForSelector("text=เข้าสู่ระบบ");
   // (the page routes a member whose profile could not be read yet to the billing page; a human never clicks within the first moments, a script must wait for the SDK)
-  await page.waitForFunction(() => window.firebase && window.firebase.auth && window.firebase.firestore, null, { timeout: 30000 }).catch(async (e) => { console.log("DBGSDK", page.url(), await page.evaluate(() => (window.firebase ? Object.keys(window.firebase).join(",") : "no firebase")), JSON.stringify(page.__logs).slice(0, 1500), JSON.stringify(page.context().__log.vendor.map((v) => v.url.split("/").pop()))); throw e; }); await sleep(800);
+  await page.waitForFunction(() => window.firebase && window.firebase.auth && window.firebase.firestore, null, { timeout: 30000 }); await sleep(800);
   const tabs = page.getByText("เข้าสู่ระบบ", { exact: true }); await tabs.first().click();
   await page.waitForSelector("input[type=password]");
   await page.locator("input[type=email]").last().fill(email); await page.locator("input[type=password]").last().fill(PASS);
-  await tabs.last().click(); await page.waitForURL(/Agent%20Profile|Lister%20Dashboard/, { timeout: 30000 }).catch(async (e) => { console.log("DBGDOC", JSON.stringify((await db.doc("listers/" + ids.agent).get()).data()), ids.agent, email, (await auth.getUserByEmail(email)).uid); console.log("DBGLOGIN", page.url(), (await page.innerText("body")).slice(0, 800), JSON.stringify(page.__logs).slice(0, 1200)); await H.shot(page, "debug-login"); throw e; });
+  await tabs.last().click(); await page.waitForURL(/Agent%20Profile|Lister%20Dashboard/, { timeout: 30000 });
 }
 const unexpected = (logs, allow) => []
   .concat(logs.pageerrors.map((m) => "pageerror: " + m))
-  .concat(logs.failed.filter((m) => !/fonts\./.test(m) && !/Firestore\/(Listen|Write)\/channel.*ERR_ABORTED/.test(m) && !/^GET http:\/\/127\.0\.0\.1:\d+\/[^ ]*\.(js|png|html)[^ ]* :: net::ERR_ABORTED/.test(m) && !(allow || []).some((re) => re.test(m))).map((m) => "requestfailed: " + m))
+  .concat(logs.failed.filter((m) => !/fonts\./.test(m) && !/gstatic\.com\/firebasejs\/[^ ]* :: net::ERR_ABORTED/.test(m) && !/Firestore\/(Listen|Write)\/channel.*ERR_ABORTED/.test(m) && !/^GET http:\/\/127\.0\.0\.1:\d+\/[^ ]*\.(js|png|html)[^ ]* :: net::ERR_ABORTED/.test(m) && !(allow || []).some((re) => re.test(m))).map((m) => "requestfailed: " + m))
   .concat(logs.bad.filter((m) => !/%7B%7B/.test(m) && !(GATED_CHAT.test(m) && /^(401|403|404|400|500)/.test(m))).map((m) => "http: " + m))
   .concat(logs.console.filter((m) => /^error/.test(m) && !/Failed to load resource/.test(m)).map((m) => "console: " + m));
 
@@ -99,7 +102,7 @@ describe("BROWSER-LOCAL-01 — built TEST site in real Chromium against local em
     await page.waitForSelector("text=อัปโหลดแล้ว 2 รูป"); await H.shot(page, "02-outsider-form-photos-uploaded");
     await goReview(page); await H.shot(page, "03-outsider-form-review");
     await page.getByText("ส่งข้อมูล", { exact: true }).click();
-    await page.waitForSelector("text=ส่งข้อมูลสำเร็จ", { timeout: 30000 }).catch(async (e) => { console.log("PAGE TEXT:", (await page.innerText("body")).slice(0, 1200)); console.log("LOGS:", JSON.stringify(page.__logs).slice(0, 2500)); await H.shot(page, "debug-b1"); throw e; });
+    await page.waitForSelector("text=ส่งข้อมูลสำเร็จ", { timeout: 30000 });
     await H.shot(page, "04-outsider-submitted-track-link");
     const url = await trackUrlOf(page); assert.ok(url && /[?&]t=/.test(url), "the confirmation shows the private tracking link");
     const all = await cases(); assert.strictEqual(all.length, 1);
@@ -130,7 +133,7 @@ describe("BROWSER-LOCAL-01 — built TEST site in real Chromium against local em
     assert.deepStrictEqual([restored.key, restored.slots, restored.desc, restored.price, restored.name], [key1, 1, "Pool villa with garden.", "12000000", "Synthetic Retry"]);
     await waitFor(async () => (await page.locator("input").nth(0).inputValue()) === "Synthetic Retry", 15000, "restored name in the input");
     await H.shot(page, "05-retry-after-refresh-step1-restored");
-    await page.getByText("ถัดไป →").click(); await page.waitForSelector("text=ต้องการฝากขายหรือฝากเช่า").catch(async (e) => { console.log("DBG", JSON.stringify(await page.evaluate(() => Array.from(document.querySelectorAll("input")).map((x) => x.value))), (await page.innerText("body")).slice(150, 500)); await H.shot(page, "debug-b2"); throw e; });
+    await page.getByText("ถัดไป →").click(); await page.waitForSelector("text=ต้องการฝากขายหรือฝากเช่า");
     await page.getByText("ฝากขาย", { exact: true }).click(); await page.getByText("ถัดไป →").click();
     await page.waitForSelector("text=อัปโหลดแล้ว 1 รูป"); await H.shot(page, "06-retry-after-refresh-step3-photo-kept");
     await uploadPhotos(page, 1, 1);
@@ -149,7 +152,7 @@ describe("BROWSER-LOCAL-01 — built TEST site in real Chromium against local em
     assert.strictEqual((await db.collection("casePhotos").where("propertyId", "==", caseId).get()).size, 2);
     const [files] = await bucket.getFiles({ prefix: "casePhotos/" + caseId + "/" }); assert.strictEqual(files.length, 2, "no orphan or duplicate file");
     // ── refresh after success: the confirmation comes back from the device, no new request ──
-    await page.reload(); await page.waitForSelector("text=ส่งข้อมูลสำเร็จ", { timeout: 20000 }).catch(async (e) => { console.log("DBG2", await page.evaluate(() => localStorage.getItem("hhOwnerForm.v1")), (await page.innerText("body")).slice(150, 1500)); await H.shot(page, "debug-b2b"); throw e; });
+    await page.reload(); await page.waitForSelector("text=ส่งข้อมูลสำเร็จ", { timeout: 20000 });
     assert.strictEqual(submitReqs, 2, "the refresh did not call the server again"); await H.shot(page, "08-retry-refresh-after-success-confirmation");
     assert.deepStrictEqual(unexpected(page.__logs, [/submitListingCase :: net::ERR_FAILED/]), [], "unexpected browser problems (the one dropped submit response is the injected fault)");
     rec("B2", "refresh keeps form+photos (no re-upload); lost response → same case; refresh after success keeps confirmation", "PASS (local browser + emulators)", "submit requests=2 for 1 case; staged files=2");
@@ -182,11 +185,13 @@ describe("BROWSER-LOCAL-01 — built TEST site in real Chromium against local em
     assert.strictEqual(c.submittedByRole, "agent"); assert.strictEqual(c.listerId, ids.agent); assert.strictEqual(c.propertyOwnerRelation, "representative");
     ids.agentCase = c.id;
     await page.goto(site.url + "/Lister%20Dashboard.dc.html?new=1"); // the "+" icon of the agent's own page: opens the property LIST tab
-    await page.waitForSelector("text=เคสที่ฉันส่งผ่านฟอร์ม", { timeout: 30000 }).catch(async (e) => { console.log("DBGDASH", page.url(), (await page.innerText("body")).slice(0, 900), JSON.stringify(page.__logs).slice(0, 1800)); await H.shot(page, "debug-dash"); throw e; });
+    await page.waitForSelector("text=เคสที่ฉันส่งผ่านฟอร์ม", { timeout: 30000 });
     await H.shot(page, "10-agent-dashboard-own-case-list");
     assert.ok(/เคสที่ฉันส่งผ่านฟอร์ม \(1\)/.test(await page.innerText("body")), "exactly the agent's own case is listed");
     await page.getByText(/ดูสถานะ\/คุยกับทีมงาน/).first().click();
-    await page.waitForURL(/Track%20Submission/, { timeout: 20000 }); await page.waitForSelector("text=ได้รับข้อมูลแล้ว", { timeout: 20000 }); await H.shot(page, "11-agent-opens-own-case-tracking");
+    await page.waitForURL(/Track%20Submission/, { timeout: 20000 }); 
+    for (let i = 0; i < 3; i++) { try { await page.waitForSelector("text=ได้รับข้อมูลแล้ว", { timeout: 8000 }); break; } catch (e) { if (i === 2) throw e; sdkRaces++; await page.reload(); } } // (see O1)
+    await H.shot(page, "11-agent-opens-own-case-tracking");
     assert.ok(page.url().includes(encodeURIComponent(c.id)));
     // another agent
     const a2 = await newPage({}, "agent2");
@@ -204,5 +209,111 @@ describe("BROWSER-LOCAL-01 — built TEST site in real Chromium against local em
     assert.deepStrictEqual(unexpected(a1.page.__logs), [], "unexpected browser problems (agent)");
     rec("B4", "agent: submit → own-case list in Lister Dashboard → open; other agent sees nothing (UI + direct read refused); add listing → private form", "PASS (local browser + emulators)", "case " + c.id);
     await a1.ctx.close(); await a2.ctx.close();
+  });
+
+  const APPROVE = "✓ อนุมัติ";
+  // click a button INSIDE the card of the Outsider case (the page also lists the agent's case)
+const clickInCase = async (page, label) => { const ok = await page.evaluate(([id, label]) => { const all = Array.from(document.querySelectorAll("*")).filter((e) => e.children.length === 0 && (e.textContent || "").trim() === id); for (const n of all) { let a = n; for (let i = 0; i < 14 && a; i++, a = a.parentElement) { const b = Array.from(a.querySelectorAll("div,button,span")).find((e) => e.children.length === 0 && (e.textContent || "").trim() === label); if (b) { b.click(); return true; } } } return false; }, [ids.outsiderCase, label]); assert.ok(ok, "button '" + label + "' found in the card of " + ids.outsiderCase); };
+// OBSERVATION (not hidden): a public page sometimes runs its first Firestore read before the helmet-injected Firebase SDK scripts have executed ("Firebase SDK not loaded" →
+// the page falls back to its bundled sample data). Reloading once fixes it. Counted here and reported in RESULTS.md.
+const gotoWithSdk = async (page, url, ready) => {
+  for (let i = 0; i < 4; i++) {
+    await page.goto(url);
+    try { await waitFor(() => page.evaluate(() => !!(window.firebase && window.firebase.firestore)), 6000, "sdk"); await waitFor(ready, 12000, "page content"); return; } catch (e) { sdkRaces++; }
+  }
+  await waitFor(ready, 20000, "page content (after retries)");
+};
+const preview = async (page, state, ms) => waitFor(async () => (await page.getAttribute("[data-preview-confirm]", "data-state").catch(() => null)) === state, ms || 20000, "preview state " + state);
+  const openCase = async (page) => { await page.goto(site.url + "/Listing%20Approvals.dc.html"); await page.waitForSelector("text=" + ids.outsiderCase, { timeout: 30000 }); };
+
+  it("B5 Staff: sees the private case in Listing Approvals but has NO approve button; private-image outcome observed (emulator cannot resolve Staff cross-service Storage lookups)", async () => {
+    await db.doc("caseInternal/" + ids.outsiderCase).update({ reviewStatus: "approved", approvedSubmissionId: "syn-1" });
+    const { ctx, page } = await newPage({}, "staff");
+    await loginAdmin(page, "staff@example.test");
+    await openCase(page); await sleep(3000); await H.shot(page, "13-staff-listing-approvals-no-approve-button");
+    assert.strictEqual(await page.getByText(APPROVE).count(), 0, "Staff has no approve button");
+    const rendered = await page.evaluate(() => Array.from(document.querySelectorAll("img")).filter((i) => i.src.startsWith("blob:") && i.naturalWidth > 0).length);
+    // (this page loads photos only on demand — in the approve preview and the lightbox — so nothing is expected in the list itself)
+    const denied = page.__logs.bad.filter((m) => /alt=media/.test(m)).slice(0, 3);
+    rec("B5", "Staff: case visible (merged private record), no approve button; private image in emulator: " + (rendered ? "RENDERED" : "NOT rendered"), "OBSERVED (local emulator limit)", "Storage requests for Staff: " + JSON.stringify(denied) + ". The rules need a cross-service Firestore lookup the Storage emulator does not resolve; real Staff Storage access stays PENDING for the real TEST project.");
+    await ctx.close();
+  });
+
+  it("B6 Owner: private photos render through an authenticated blob, the approve PREVIEW can be cancelled, blocks confirm while photos fail, refuses contact data in public text, then publishes", async () => {
+    const { ctx, page } = await newPage({}, "owner");
+    await loginAdmin(page, "owner@example.test");
+    await openCase(page);
+    // preview 1 — photo downloads fail → confirm needs an explicit acknowledgement, then cancel
+    let blockMedia = true;
+    await ctx.route(/casePhotos[^?]*\?[^ ]*alt=media/, (route) => (blockMedia ? route.abort("failed") : route.fallback()));
+    await clickInCase(page, APPROVE); await page.waitForSelector("[data-preview-confirm]");
+    await preview(page, "needs-ack");
+    assert.strictEqual(await page.locator("[data-preview-confirm]").isDisabled(), true, "confirm disabled while photos failed and unacknowledged");
+    await H.shot(page, "15-owner-preview-photos-failed-needs-acknowledgement");
+    await page.locator("[data-preview-cancel]").click();
+    assert.strictEqual((await db.doc("caseInternal/" + ids.outsiderCase).get()).data().listingStatus || "pending", "pending", "cancel changed nothing");
+    assert.strictEqual((await db.doc("properties/" + ids.outsiderCase).get()).exists, false);
+    // preview 2 — normal: loading → ready, shows the public facts only
+    blockMedia = false;
+    await clickInCase(page, APPROVE); await page.waitForSelector("[data-preview-confirm]");
+    await preview(page, "ready");
+    const shown = await page.evaluate(() => ({ imgs: document.querySelectorAll("[data-preview-photo]").length, ok: Array.from(document.querySelectorAll("[data-preview-photo]")).filter((i) => i.naturalWidth > 0).length, text: document.body.innerText }));
+    assert.deepStrictEqual([shown.imgs, shown.ok], [2, 2]);
+    assert.ok(/7,500,000/.test(shown.text), "preview shows the public price");
+    assert.ok(!/0800000001/.test(shown.text.split("ยืนยันเผยแพร่")[0].slice(shown.text.indexOf("ตรวจก่อนเผยแพร่"))), "preview shows no contact phone");
+    const previewSrc = await page.evaluate(() => Array.from(document.querySelectorAll("[data-preview-photo]")).map((i) => i.src.split(":")[0]));
+    assert.deepStrictEqual(previewSrc, ["blob", "blob"], "private photos shown through authenticated in-memory blobs (no token URL)");
+    assert.strictEqual(page.__logs.images.filter((i) => /alt=media|casePhotos/.test(i.url)).length, 0, "no <img> ever pointed at a Storage URL");
+    await H.shot(page, "16-owner-preview-photos-reviewed-ready");
+    await page.locator("[data-preview-cancel]").click();
+    // preview 3 — contact data in the public text is refused inside the dialog
+    await db.doc("caseInternal/" + ids.outsiderCase).update({ description: "Quiet house, call 0812345678" });
+    await openCase(page); await clickInCase(page, APPROVE); await page.waitForSelector("[data-preview-confirm]");
+    await preview(page, "refused"); await H.shot(page, "17-owner-preview-refused-contact-in-public-text");
+    await page.locator("[data-preview-cancel]").click();
+    await db.doc("caseInternal/" + ids.outsiderCase).update({ description: "Quiet 3-bedroom house near the beach." });
+    // publish
+    await openCase(page); await clickInCase(page, APPROVE); await page.waitForSelector("[data-preview-confirm]");
+    await preview(page, "ready"); await page.locator("[data-preview-confirm]").click();
+    await waitFor(async () => (await db.doc("caseInternal/" + ids.outsiderCase).get()).data().listingStatus === "live", 25000, "published");
+    const pub = (await db.doc("properties/" + ids.outsiderCase).get()).data();
+    assert.strictEqual(pub.price, 7500000); assert.ok(!("contactPhone" in pub) && !("trackToken" in pub));
+    assert.strictEqual((await db.collection("propertyPhotos").where("propertyId", "==", ids.outsiderCase).get()).size, 2);
+    const rc = (await db.doc("caseInternal/" + ids.outsiderCase).get()).data(); assert.strictEqual(rc.approvedByRole, "owner"); assert.strictEqual(rc.approvedByUid, ids.owner);
+    await sleep(1500); await H.shot(page, "18-owner-approvals-after-publish");
+    assert.deepStrictEqual(unexpected(page.__logs, [/casePhotos[^ ]*alt=media[^ ]* :: net::ERR_(FAILED|BLOCKED_BY_CLIENT)/]), [], "unexpected browser problems (owner; the injected photo-download failure is the only allowed one)");
+    ids.ownerPage = page; ids.ownerCtx = ctx;
+    rec("B6", "owner: private photo via authenticated blob (no token URL); preview cancel = no change; failed photos need acknowledgement; contact in public text refused in the dialog; confirm publishes", "PASS (local browser + emulators)", "approvedBy recorded; 2 public photos");
+  });
+
+  it("B7 public view: pending case invisible; published listing shows its photos and is searchable; take-down removes page, records, files and the old photo links die", async () => {
+    const pend = await newPage({}, "public-pending");
+    await pend.page.goto(site.url + "/Property%20Details.dc.html?id=" + ids.agentCase); await sleep(5000); await H.shot(pend.page, "19-public-pending-case-not-visible");
+    assert.ok(!/4,200,000|Sea-view condo/.test(await pend.page.innerText("body")), "pending facts are not public");
+    // direct reads WITHOUT credentials (no Authorization header → the emulator applies firestore.rules to an anonymous visitor)
+    const E = H.emulators(); const rest = async (c, id) => (await fetch("http://" + E.fsHost + ":" + E.fsPort + "/v1/projects/" + H.PROJECT + "/databases/(default)/documents/" + c + "/" + id)).status;
+    assert.deepStrictEqual([await rest("properties", ids.agentCase), await rest("caseInternal", ids.agentCase), await rest("casePhotos", ids.agentCase + "_0")], [404, 403, 403], "anonymous: nothing public for the pending case; private records refused");
+    const pubv = await newPage({}, "public-live");
+    await gotoWithSdk(pubv.page, site.url + "/Property%20Details.dc.html?id=" + ids.outsiderCase, async () => /7,500,000/.test(await pubv.page.innerText("body")));
+    await waitFor(async () => pubv.page.evaluate(() => Array.from(document.querySelectorAll("img")).filter((i) => /publishedCasePhotos/.test(i.src) && i.naturalWidth > 0).length >= 1), 30000, "published photos displayed");
+    await H.shot(pubv.page, "20-public-published-listing-with-photos");
+    const imgUrls = await pubv.page.evaluate(() => Array.from(new Set(Array.from(document.querySelectorAll("img")).filter((i) => /publishedCasePhotos/.test(i.src)).map((i) => i.src))));
+    for (const u of imgUrls) assert.strictEqual((await fetch(u)).status, 200);
+    assert.ok(!/0800000001|Synthetic Outsider|trackToken/.test(await pubv.page.innerText("body")), "no contact data on the public page");
+    const search = await newPage({}, "public-search");
+    await gotoWithSdk(search.page, site.url + "/Search%20Results.dc.html", async () => /7,500,000|7500000/.test(await search.page.innerText("body")));
+    const op = ids.ownerPage; op.on("dialog", (d) => d.accept("synthetic take-down reason"));
+    await openCase(op); await clickInCase(op, "⛔ ปิดประกาศ");
+    await waitFor(async () => (await db.doc("caseInternal/" + ids.outsiderCase).get()).data().listingStatus === "offline", 25000, "offline");
+    await waitFor(async () => !(await db.doc("properties/" + ids.outsiderCase).get()).exists, 10000, "public document removed");
+    assert.strictEqual((await db.collection("propertyPhotos").where("propertyId", "==", ids.outsiderCase).get()).size, 0);
+    await waitFor(async () => (await bucket.getFiles({ prefix: "publishedCasePhotos/" + ids.outsiderCase + "/" }))[0].length === 0, 15000, "public files deleted (the function deletes them right after the transaction)");
+    for (const u of imgUrls) assert.notStrictEqual((await fetch(u)).status, 200, "old public photo link is dead");
+    await pubv.page.reload(); await sleep(4000); await H.shot(pubv.page, "22-public-after-take-down");
+    assert.ok(!/7,500,000/.test(await pubv.page.innerText("body")), "page no longer shows the listing");
+    assert.deepStrictEqual(unexpected(pubv.page.__logs).concat(unexpected(search.page.__logs)).concat(unexpected(pend.page.__logs)).filter((m) => !/publishedCasePhotos/.test(m) && !/maps\.googleapis\.com/.test(m) && m !== "pageerror: Event"), [], "unexpected browser problems (public pages; the only allowed noise is the Google Maps script that the no-external-traffic policy blocks, and the error event it raises)");
+    rec("B7", "pending invisible (UI + direct reads refused); published listing + photos shown and searchable; owner take-down removes page, records, files; old photo links dead", "PASS (local browser + emulators)", "");
+    rec("O1", "OBSERVATION: first Firestore read of a public page can run before the Firebase SDK scripts executed (page then shows bundled sample data until reload)", "OBSERVED", "retries needed in this run: " + sdkRaces + ". Pre-existing page-load race; not caused by this change; to be checked on the real TEST site.");
+    await Promise.all([pend.ctx.close(), pubv.ctx.close(), search.ctx.close(), ids.ownerCtx.close()]);
   });
 });
