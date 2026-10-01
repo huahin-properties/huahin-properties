@@ -152,6 +152,15 @@ async function copyWithToken(bucket, src, dst) {
   await dstFile.setMetadata({ metadata: { firebaseStorageDownloadTokens: token } });
   return downloadUrl(bucket, dst, token);
 }
+// PRIVATE copy (pending review): NO download token. A tokenless object is governed only by storage.rules
+// (team read), so a link cannot be passed around. The copy from a client-uploaded staging file would otherwise
+// inherit the token the client SDK mints at upload time, so it is removed explicitly.
+async function copyPrivate(bucket, src, dst) {
+  const dstFile = bucket.file(dst);
+  await bucket.file(src).copy(dstFile);
+  await dstFile.setMetadata({ metadata: { firebaseStorageDownloadTokens: null } });
+  return downloadUrl(bucket, dst, "").replace(/[?&]token=$/, "").replace(/&token=$/, "");
+}
 async function deleteIfExists(bucket, path) { try { await bucket.file(path).delete(); } catch (e) { /* already gone */ } }
 
 const okResult = (id, c, extra) => Object.assign({ created: false, alreadyExisted: true, propertyId: id, trackToken: (c && c.trackToken) || "", photoCount: Number(c && c.photoCount) || 0 }, extra || {});
@@ -197,13 +206,13 @@ async function submitListingCase({ admin, HttpsError, request }) {
   for (let i = 0; i < v.photoPaths.length; i++) {
     await assertImageObject(bucket, v.photoPaths[i], HttpsError);
     const dst = "casePhotos/" + caseId + "/" + i + ".webp";
-    photoDocs.push({ index: i, storagePath: dst, dataUrl: await copyWithToken(bucket, v.photoPaths[i], dst) });
+    photoDocs.push({ index: i, storagePath: dst, dataUrl: await copyPrivate(bucket, v.photoPaths[i], dst) });
   }
   let ownershipDocStoragePath = "";
   if (v.ownershipDocPath) {
     await assertImageObject(bucket, v.ownershipDocPath, HttpsError);
     ownershipDocStoragePath = "caseAttachments/" + caseId + "/ownership-document.webp"; // existing team-only path
-    await bucket.file(v.ownershipDocPath).copy(bucket.file(ownershipDocStoragePath));
+    await copyPrivate(bucket, v.ownershipDocPath, ownershipDocStoragePath);
   }
 
   // 5) Create the Case (public-safe), its internal record and its private photo records atomically.
@@ -251,6 +260,9 @@ async function submitListingCase({ admin, HttpsError, request }) {
     console.error("submitListingCase failed", caseId, (e && e.message) || String(e));
     throw e instanceof HttpsError ? e : new HttpsError("internal", "ไม่สามารถบันทึกเคสได้ กรุณาลองอีกครั้ง");
   }
+  // The submitter's staging copies carry a token only they hold; once the Case exists the private copies are the
+  // record, so the staging files are removed (best-effort; a retry returns the existing Case before looking at them).
+  for (const sp of v.photoPaths.concat(v.ownershipDocPath ? [v.ownershipDocPath] : [])) await deleteIfExists(bucket, sp);
   try { // best-effort audit trail; never blocks a submission that already succeeded
     await db.collection("activityLog").add({ type: "case_submitted", propertyId: caseId, byUid: actor.uid, byRole: actor.role, byEmail: actor.email || "", at: now, summary: "ส่งเรื่อง " + caseId + " (" + actor.role + ")" });
   } catch (e) { console.warn("activityLog (case_submitted) not written", caseId); }

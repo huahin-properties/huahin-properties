@@ -396,11 +396,19 @@ function _mergePhotoLists(pub, priv) {
   (pub || []).forEach((p) => by.set(p.id, p));
   return Array.from(by.values());
 }
+// Private copies are stored WITHOUT a download token (storage.rules: team read only). The team's browser asks
+// Storage for a link with its own signed-in session; the link is not kept anywhere.
+async function _resolvePrivate(rows) {
+  return Promise.all((rows || []).map(async (p) => {
+    if (!p || !p.storagePath) return p;
+    try { return { ...p, dataUrl: await storageRef().ref().child(p.storagePath).getDownloadURL() }; } catch (e) { return p; }
+  }));
+}
 export async function fetchPhotosFor(propertyId) {
   const pub = await fetchWhere("propertyPhotos", "propertyId", propertyId);
   if (!(await _isTeamSession())) return pub;
   let priv = [];
-  try { priv = await fetchWhere("casePhotos", "propertyId", propertyId); } catch (e) { priv = []; }
+  try { priv = await _resolvePrivate(await fetchWhere("casePhotos", "propertyId", propertyId)); } catch (e) { priv = []; }
   return _mergePhotoLists(pub, priv);
 }
 
@@ -408,7 +416,7 @@ export async function fetchAllPhotos() {
   const pub = await fetchCollection("propertyPhotos");
   if (!(await _isTeamSession())) return pub;
   let priv = [];
-  try { priv = await fetchCollection("casePhotos"); } catch (e) { priv = []; }
+  try { priv = await _resolvePrivate(await fetchCollection("casePhotos")); } catch (e) { priv = []; }
   return _mergePhotoLists(pub, priv);
 }
 
