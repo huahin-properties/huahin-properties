@@ -1922,7 +1922,9 @@ ${context}${this._buildNotesContext() ? `\n\nADDITIONAL CURRENT NOTES FROM THE A
         const res = await fetch(CLOUD_FN.claudeComplete, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ system, messages }),
+          // CHAT-FIX-02: opt in to the server-side PD-16 (Thai female voice) guard. This is the only
+          // caller that sends it; the window.claude.complete preview path above is unchanged.
+          body: JSON.stringify({ system, messages, guard: "pd16" }),
         });
         if (!res.ok) {
           const errBody = await res.json().catch(() => ({}));

@@ -82,6 +82,44 @@ exports.notifyNewLead = onDocumentCreated(
   }
 );
 
+// CHAT-FIX-02 — PD-16 guard for the PLAIN-TEXT chat contract of claudeComplete.
+// Not callClaudeReception: that one is a tool-use call returning a structured
+// classification; here the model returns free text and the response is just { completion }.
+// Same pieces as receptionTurn: pd16Violation (detector, unchanged), ONE retry, pd16ReplyIsSafe
+// (numbers, property codes, [[CONTACT]]/[[LIST_PROPERTY]] tokens and quoted spans must be
+// identical; no male voice left) and the same fixed female fallback sentence.
+// Called only after the FIRST model call has already succeeded: a failure of the first call
+// keeps the original error behaviour (never turned into the fallback).
+// Returns the text to send. Never throws. Logs a fixed reason code only — never customer text,
+// model text, tokens or error details (the error of a failed retry is not inspected).
+async function pd16GuardChatText(chatBody, firstText) {
+  if (!pd16Violation(firstText)) return firstText;
+  const fallback = (reason) => {
+    try { console.log(JSON.stringify({ component: "claudeComplete", event: "pd16_fallback", reason })); } catch (e) { /* never break a reply */ }
+    return PD16_FALLBACK_REPLY;
+  };
+  let retriedText;
+  try {
+    const retryRes = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-api-key": ANTHROPIC_API_KEY.value(), "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({
+        ...chatBody,
+        messages: [...chatBody.messages, { role: "assistant", content: firstText }, { role: "user", content: PD16_RETRY_NOTE }],
+      }),
+    });
+    if (!retryRes.ok) return fallback("retry_failed");
+    const retryData = await retryRes.json();
+    retriedText = (retryData.content || []).map((b) => b.text || "").join("");
+  } catch (e) {
+    return fallback("retry_failed");
+  }
+  if (!retriedText || !retriedText.trim()) return fallback("retry_unsafe");
+  if (pd16Violation(retriedText)) return fallback("retry_still_male");
+  if (!pd16ReplyIsSafe(firstText, retriedText)) return fallback("retry_unsafe");
+  return retriedText;
+}
+
 exports.claudeComplete = onRequest(
   { secrets: [ANTHROPIC_API_KEY], cors: true, region: "asia-southeast1", timeoutSeconds: 300, memory: "512MiB" },
   async (req, res) => {
@@ -119,6 +157,16 @@ exports.claudeComplete = onRequest(
           return;
         }
         const chatText = (chatData.content || []).map((b) => b.text || "").join("");
+        // CHAT-FIX-02 — OPT-IN PD-16 guard. Runs ONLY when the caller sends exactly
+        // guard === "pd16" (string, strict equality) in chat mode. It is never inferred from
+        // the prompt, max_tokens, language or anything else; every other request (no guard,
+        // another value, translation tools, single-turn content/tool mode) is untouched.
+        // The response shape stays { completion } — no classification, no draft, no extra field.
+        if (req.body.guard === "pd16") {
+          const guarded = await pd16GuardChatText(chatBody, chatText);
+          res.json({ completion: guarded });
+          return;
+        }
         res.json({ completion: chatText });
         return;
       }
