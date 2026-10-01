@@ -8,6 +8,6 @@
   },
   "scripts": {
     "test:rules": "firebase emulators:exec --only firestore \"mocha tests/conversations.rules.test.js --timeout 20000\"",
-    "test:sec": "npx --yes firebase-tools@15.32.1 emulators:exec --config tests/firebase.sec-test.json --project demo-sec-test-01 --only firestore,storage \"mocha tests/sec-gaps.rules.test.js tests/sec-gaps.storage.test.js tests/functions/create-case.characterization.test.js tests/sec-callsite-guard.test.js --timeout 60000\""
+    "test:sec": "npx --yes firebase-tools@15.32.1 emulators:exec --config tests/firebase.sec-test.json --project demo-sec-test-01 --only firestore,storage \"mocha tests/sec-helpers.selftest.test.js tests/sec-gaps.rules.test.js tests/sec-gaps.storage.test.js tests/functions/create-case.characterization.test.js tests/sec-callsite-guard.test.js --timeout 60000\""
   }
 }

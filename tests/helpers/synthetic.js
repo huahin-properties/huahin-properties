@@ -93,15 +93,32 @@ function seedDocs() {
 //   NOT-TESTED         specified but not executed (reason recorded).
 const results = [];
 
-async function isAllowed(promise) {
+// Only these error codes are accepted as "the rules said no":
+//   Firestore client SDK  -> FirebaseError.code === "permission-denied"
+//   Storage client SDK    -> StorageError.code  === "storage/unauthorized"
+// Message text is NOT inspected: a message that merely mentions "403",
+// "unauthorized" or "permission" (proxy page, emulator crash, network error)
+// is not evidence that a rule denied anything.
+const DENIAL_CODES = new Set(["permission-denied", "storage/unauthorized"]);
+
+function isPermissionDenied(e) {
+  return !!e && typeof e.code === "string" && DENIAL_CODES.has(e.code);
+}
+
+// Runs the operation. Resolves { allowed: true, value } when it succeeds,
+// { allowed: false, error } on an expected rules denial, and RE-THROWS every
+// other error (network, emulator down, SDK/runtime, bad test code) so the test fails.
+async function attempt(promise) {
   try {
-    await promise;
-    return true;
+    return { allowed: true, value: await promise };
   } catch (e) {
-    const msg = String((e && (e.code || e.message)) || e);
-    if (/permission-denied|PERMISSION_DENIED|storage\/unauthorized|unauthorized|403/i.test(msg)) return false;
-    throw e; // anything else is a harness problem, not a rules answer
+    if (isPermissionDenied(e)) return { allowed: false, error: e };
+    throw e;
   }
+}
+
+async function isAllowed(promise) {
+  return (await attempt(promise)).allowed;
 }
 
 function record(entry) {
@@ -134,4 +151,4 @@ function printSummary() {
   }
 }
 
-module.exports = { PROJECT_ID, UID, INVITED_EMAIL, TOKEN_A, TOKEN_B, seedDocs, assertEmulatorOnly, isAllowed, record, printSummary, results };
+module.exports = { PROJECT_ID, UID, INVITED_EMAIL, TOKEN_A, TOKEN_B, seedDocs, assertEmulatorOnly, isAllowed, attempt, isPermissionDenied, record, printSummary, results };

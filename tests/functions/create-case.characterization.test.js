@@ -14,7 +14,7 @@ const fs = require("fs");
 const path = require("path");
 const assert = require("assert");
 const { initializeTestEnvironment } = require("@firebase/rules-unit-testing");
-const { PROJECT_ID, assertEmulatorOnly, record, printSummary } = require("../helpers/synthetic");
+const { PROJECT_ID, assertEmulatorOnly, attempt, record, printSummary } = require("../helpers/synthetic");
 
 assertEmulatorOnly();
 
@@ -57,29 +57,29 @@ describe("SEC-TEST-01 B: createCaseFromConversation characterization (synthetic,
   });
   after(async () => { printSummary(); await testEnv.cleanup(); });
 
-  function needFns(id, title) {
-    if (loadError) {
-      record_(id, title, "NOT-TESTED", "functions/index.js could not be loaded in-process: " + String(loadError.message).split("\n")[0] + " (run `npm ci` in functions/)");
-      return false;
-    }
+  // If functions/index.js could not be loaded in-process (e.g. `npm ci` was not run in functions/),
+  // that is a runtime/environment error, NOT "not tested": the test fails and says why.
+  function needFns() {
+    if (loadError) throw new Error("functions/index.js could not be loaded in-process: " + String(loadError.message).split("\n")[0] + " (run `npm ci` in functions/)");
     return true;
   }
 
   it("B1 the Case the Function creates is anonymously readable with contact + trackToken", async () => {
-    if (!needFns("B1", "chat Case readable by anonymous")) return;
+    needFns();
     const res = await callCreate(VISITOR, { confirmed: true });
     assert.strictEqual(res.created, true, "Function did not create a case: " + JSON.stringify(res));
     const stored = (await admin.firestore().doc("properties/" + res.propertyId).get()).data();
     const present = ["contactName", "ownerContact", "trackToken", "conversationId", "receptionVisitorId"].filter((f) => stored[f]);
-    const anonSnap = await testEnv.unauthenticatedContext().firestore().doc("properties/" + res.propertyId).get().then((s) => s, () => null);
-    const exposed = anonSnap && anonSnap.exists ? present.filter((f) => anonSnap.data()[f]) : [];
+    // Only a rules denial may be reported as "not reproduced"; any other error fails the test.
+    const anonRead = await attempt(testEnv.unauthenticatedContext().firestore().doc("properties/" + res.propertyId).get());
+    const exposed = anonRead.allowed && anonRead.value.exists ? present.filter((f) => anonRead.value.data()[f]) : [];
     record_("B1", "chat-created Case: contact/trackToken stored on the properties doc and readable by anonymous",
       exposed.length ? "GAP-CONFIRMED" : "GAP-NOT-REPRODUCED",
-      "stored fields: " + present.join(",") + "; anonymously readable: " + exposed.join(",") + "; listingStatus=" + stored.listingStatus + ", source=" + stored.source);
+      "stored fields: " + present.join(",") + "; anonymously readable: " + (anonRead.allowed ? exposed.join(",") : "denied with " + anonRead.error.code) + "; listingStatus=" + stored.listingStatus + ", source=" + stored.source);
   });
 
   it("B2 internal provenance message is NOT customer-visible and carries no token", async () => {
-    if (!needFns("B2", "provenance message internal")) return;
+    needFns();
     const res = await callCreate(VISITOR, { confirmed: true });
     const msgs = await admin.firestore().collection("properties/" + res.propertyId + "/caseMessages").get();
     const bad = msgs.docs.filter((d) => d.data().visibility !== "internal" || d.data().caseToken);
@@ -89,7 +89,7 @@ describe("SEC-TEST-01 B: createCaseFromConversation characterization (synthetic,
   });
 
   it("B3 repeat call returns the SAME case + token (link by server-side uid evidence, no duplicate)", async () => {
-    if (!needFns("B3", "repeat call no duplicate")) return;
+    needFns();
     const a = await callCreate(VISITOR, { confirmed: true });
     const b = await callCreate(VISITOR, { confirmed: true });
     const cases = await admin.firestore().collection("properties").where("conversationId", "==", CONV).get();
@@ -99,7 +99,7 @@ describe("SEC-TEST-01 B: createCaseFromConversation characterization (synthetic,
   });
 
   it("B4 another visitor cannot obtain this case (id is derived from caller uid, not from the request)", async () => {
-    if (!needFns("B4", "other visitor isolation")) return;
+    needFns();
     await callCreate(VISITOR, { confirmed: true });
     const res = await callCreate(OTHER, { confirmed: true, propertyId: "x", conversationId: CONV });
     const ok = res.created === false;
@@ -108,9 +108,13 @@ describe("SEC-TEST-01 B: createCaseFromConversation characterization (synthetic,
   });
 
   it("B5 unauthenticated call is rejected; unconfirmed call creates nothing", async () => {
-    if (!needFns("B5", "auth + consent")) return;
+    needFns();
     let rejected = false;
-    try { await callCreate(null, { confirmed: true }); } catch (e) { rejected = /unauthenticated/i.test(String(e.code || e.message)); }
+    try { await callCreate(null, { confirmed: true }); }
+    catch (e) {
+      // Only the Function's own HttpsError("unauthenticated") counts; anything else is a real error.
+      if (e && e.code === "unauthenticated") rejected = true; else throw e;
+    }
     const nc = await callCreate(VISITOR, {});
     const cases = await admin.firestore().collection("properties").get();
     const ok = rejected && nc.created === false && cases.size === 0;
@@ -119,7 +123,7 @@ describe("SEC-TEST-01 B: createCaseFromConversation characterization (synthetic,
   });
 
   it("B6 incomplete conversation (no usable contact) creates nothing", async () => {
-    if (!needFns("B6", "gate")) return;
+    needFns();
     await admin.firestore().doc("conversations/" + CONV).set({ ...qualifiedConversation(), contact: "later" });
     const res = await callCreate(VISITOR, { confirmed: true });
     const ok = res.created === false && res.reason === "missing_contact";

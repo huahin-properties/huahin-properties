@@ -15,10 +15,11 @@
 
 const fs = require("fs");
 const path = require("path");
+const assert = require("assert");
 const { initializeTestEnvironment } = require("@firebase/rules-unit-testing");
 const {
   PROJECT_ID, UID, INVITED_EMAIL, TOKEN_A, TOKEN_B,
-  seedDocs, assertEmulatorOnly, isAllowed, record, printSummary,
+  seedDocs, assertEmulatorOnly, isAllowed, attempt, record, printSummary,
 } = require("./helpers/synthetic");
 
 assertEmulatorOnly();
@@ -54,8 +55,10 @@ function control(id, title, expectAllowed, op, note) {
     if (!ok) throw new Error(id + ": control mismatch");
   });
 }
+// NOT-TESTED probes are recorded and then skipped, so mocha reports them as "pending",
+// never as "passing".
 function notTested(id, title, reason) {
-  it(id + " " + title + " [NOT-TESTED]", async () => { record({ id, title, label: "NOT-TESTED", note: reason }); });
+  it(id + " " + title + " [NOT-TESTED]", function () { record({ id, title, label: "NOT-TESTED", note: reason }); this.skip(); });
 }
 
 describe("SEC-TEST-01 A: Firestore rules probes (synthetic, emulator)", function () {
@@ -69,26 +72,23 @@ describe("SEC-TEST-01 A: Firestore rules probes (synthetic, emulator)", function
 
   // ── Public reading of private / unpublished data ──────────────────────
   it("G1 anonymous can read an unpublished case incl. contact + trackToken", async () => {
-    let allowed = false, leaked = [];
-    try {
-      const snap = await anon().doc("properties/CASE-SYN-1").get();
-      allowed = true;
-      const d = snap.data() || {};
+    // attempt(): only a rules denial counts as "not reproduced"; any other error fails the test.
+    const r = await attempt(anon().doc("properties/CASE-SYN-1").get());
+    let leaked = [];
+    if (r.allowed) {
+      const d = r.value.data() || {};
       for (const f of ["contactName", "ownerContact", "trackToken", "internalNotes"]) if (f in d) leaked.push(f);
-    } catch (e) { if (!/permission|PERMISSION/i.test(String(e.message || e.code))) throw e; }
-    record({ id: "G1", title: "anonymous reads unpublished case (pending) document", label: allowed ? "GAP-CONFIRMED" : "GAP-NOT-REPRODUCED",
-      note: allowed ? "fields visible: " + leaked.join(", ") : undefined });
+    }
+    record({ id: "G1", title: "anonymous reads unpublished case (pending) document", label: r.allowed ? "GAP-CONFIRMED" : "GAP-NOT-REPRODUCED",
+      note: r.allowed ? "fields visible: " + leaked.join(", ") : "denied with " + r.error.code });
   });
 
   it("G2 anonymous can list the whole properties collection (pending/offline included)", async () => {
-    let allowed = false, statuses = {};
-    try {
-      const snap = await anon().collection("properties").get();
-      allowed = true;
-      snap.forEach((d) => { const s = d.data().listingStatus || "none"; statuses[s] = (statuses[s] || 0) + 1; });
-    } catch (e) { if (!/permission|PERMISSION/i.test(String(e.message || e.code))) throw e; }
-    record({ id: "G2", title: "anonymous lists all properties", label: allowed ? "GAP-CONFIRMED" : "GAP-NOT-REPRODUCED",
-      note: allowed ? "statuses returned: " + JSON.stringify(statuses) : undefined });
+    const r = await attempt(anon().collection("properties").get());
+    const statuses = {};
+    if (r.allowed) r.value.forEach((d) => { const s = d.data().listingStatus || "none"; statuses[s] = (statuses[s] || 0) + 1; });
+    record({ id: "G2", title: "anonymous lists all properties", label: r.allowed ? "GAP-CONFIRMED" : "GAP-NOT-REPRODUCED",
+      note: r.allowed ? "statuses returned: " + JSON.stringify(statuses) : "denied with " + r.error.code });
   });
 
   gap("G3a", "anonymous reads owners", () => anon().doc("owners/OWN-SYN-1").get());
@@ -141,11 +141,11 @@ describe("SEC-TEST-01 A: Firestore rules probes (synthetic, emulator)", function
   gap("G9", "signed-up user with an INVITED e-mail but email_verified=false creates own adminUsers doc as staff",
     () => as(UID.ATTACKER, { email: INVITED_EMAIL, email_verified: false }).doc("adminUsers/" + UID.ATTACKER).set({ role: "staff" }),
     "rules do not check email_verified; invite doc is publicly readable (G3d)");
-  it("G9b chain: after G9, does the new staff reach internal data?", async () => {
+  it("G9b chain: after G9, does the new staff reach internal data?", async function () {
     const ctx = testEnv.authenticatedContext(UID.ATTACKER, { email: INVITED_EMAIL, email_verified: false });
     const db = ctx.firestore();
     const created = await isAllowed(db.doc("adminUsers/" + UID.ATTACKER).set({ role: "staff" }));
-    if (!created) { record({ id: "G9b", title: "chain after self-promotion to staff", label: "NOT-TESTED", note: "G9 was denied, so chain not reachable" }); return; }
+    if (!created) { record({ id: "G9b", title: "chain after self-promotion to staff", label: "NOT-TESTED", note: "G9 was denied, so chain not reachable" }); this.skip(); }
     const readsLeads = await isAllowed(db.doc("leads/LEAD-SYN-1").get());
     const readsCase = await isAllowed(db.doc("properties/CASE-SYN-1/caseMessages/M2").get());
     record({ id: "G9b", title: "after self-promotion to staff: reads leads / internal case messages", label: readsLeads && readsCase ? "GAP-CONFIRMED" : "GAP-NOT-REPRODUCED",
@@ -170,9 +170,15 @@ describe("SEC-TEST-01 A: Firestore rules probes (synthetic, emulator)", function
 
   // ── Tokens: the case-tracking design ──────────────────────────────────
   it("G11 chain: token read from the PUBLIC case doc opens customer messages and lets a stranger post as the customer", async () => {
-    const snap = await anon().doc("properties/CASE-SYN-1").get().catch(() => null);
-    const token = snap && snap.exists ? snap.data().trackToken : null;
-    if (!token) { record({ id: "G11", title: "token chain", label: "GAP-NOT-REPRODUCED", note: "token not readable anonymously" }); return; }
+    // Step 1: can the token be read anonymously? Only a rules denial may end the chain as
+    // "not reproduced"; any other error (network, emulator, runtime) propagates and fails the test.
+    const first = await attempt(anon().doc("properties/CASE-SYN-1").get());
+    if (!first.allowed) {
+      record({ id: "G11", title: "token chain", label: "GAP-NOT-REPRODUCED", note: "public read of the case was denied with " + first.error.code });
+      return;
+    }
+    const token = (first.value.data() || {}).trackToken;
+    assert.ok(typeof token === "string" && token.length > 20, "seeded case has no usable trackToken (test data problem)");
     const reads = await isAllowed(anon().collection("properties/CASE-SYN-1/caseMessages")
       .where("visibility", "==", "customer").where("caseToken", "==", token).get());
     const posts = await isAllowed(anon().collection("properties/CASE-SYN-1/caseMessages").add({

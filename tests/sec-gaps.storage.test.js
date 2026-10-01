@@ -111,11 +111,11 @@ describe("SEC-TEST-01 A2: Storage rules probes (synthetic, emulator)", function 
   // resolve: an adminUsers-doc Staff was denied while the hard-coded Owner uid path was allowed. So team
   // allow-paths are recorded as NOT-TESTED (inconclusive) rather than counted as a rules verdict.
   function teamProbe(id, title, op) {
-    it(id + " " + title, async () => {
+    it(id + " " + title, async function () {
       const allowed = await isAllowed(op());
-      record(allowed
-        ? { id, title, label: "CONTROL", note: "expected ALLOWED, got ALLOWED" }
-        : { id, title, label: "NOT-TESTED", note: "inconclusive: cross-service adminUsers lookup did not resolve in the Storage emulator here; NOT a verdict on storage.rules" });
+      if (allowed) { record({ id, title, label: "CONTROL", note: "expected ALLOWED, got ALLOWED" }); return; }
+      record({ id, title, label: "NOT-TESTED", note: "inconclusive: cross-service adminUsers lookup did not resolve in the Storage emulator here; NOT a verdict on storage.rules" });
+      this.skip(); // pending, not passing
     });
   }
   teamProbe("S5c", "team member (Staff via adminUsers doc) may write siteContent images", () => asSt(UID.STAFF).ref("siteContent/banner.webp").put(img(), WEBP));
