@@ -30,13 +30,13 @@ function deps(storage, actor, opts) {
         if (!exists) { o.counts.uploads++; await f.save(Buffer.from(String(data).slice(0, 40) + name), { contentType: "image/webp", resumable: false }); }
         return p; // "already there" is success (slots are create-only)
       },
-      submitListingCase: async (data) => { o.counts.submits++; const r = await call("submitListingCase", { uid: o.uid, token: actor.token }, data); if (o.loseResponse) { o.loseResponse = false; throw new Error("synthetic: the answer never arrived"); } return r; },
+      submitListingCase: async (data) => { o.counts.submits++; if (o.refuseOnce) { o.refuseOnce = false; throw Object.assign(new Error("synthetic server refusal"), { code: "invalid-argument" }); } const r = await call("submitListingCase", { uid: o.uid, token: actor.token }, data); if (o.loseResponse) { o.loseResponse = false; throw new Error("synthetic: the answer never arrived"); } return r; },
       getPropertyDraft: async () => (await draftCall("getPropertyDraft", {})),
       updatePropertyDraft: async (fields) => (await draftCall("updatePropertyDraft", { fields })),
     },
   } };
 }
-const fill = (flow, extra) => { const f = Object.assign({ name: "Synthetic Person", phone: "0800000000", txnType: "sale", type: "house", price: "7500000", description: "Synthetic description for a synthetic property." }, extra || {}); Object.keys(f).forEach((k) => flow.setField(k, f[k])); };
+const fill = (flow, extra) => { const f = Object.assign({ name: "Synthetic Person", phone: "0800000000", txnType: "sale", type: "house", price: "7500000", area: "hua-hin", description: "Synthetic description for a synthetic property." }, extra || {}); Object.keys(f).forEach((k) => flow.setField(k, f[k])); };
 
 describe("LISTING-E2E-01 recovery: refresh / partial upload / lost response / double click / chat-draft prefill (real handlers, emulators, synthetic)", function () {
   this.timeout(120000);
@@ -115,12 +115,26 @@ describe("LISTING-E2E-01 recovery: refresh / partial upload / lost response / do
     const store = mem(); const x = deps(store, A.extA);
     const a = new Flow(x.d); fill(a, { price: "0" }); await a.addPhoto("d0", "t0"); await a.addPhoto("d1", "t1");
     await assert.rejects(a.submit(), (e) => e.code === "form_incomplete"); assert.strictEqual(x.o.counts.submits, 0);
-    a.setField("price", "7500000"); a.setField("txnType", "buy"); // the server refuses an unknown transaction type
-    await assert.rejects(a.submit(), (e) => e.code === "invalid-argument" || /txn|bad_/.test(String(e.message)));
+    a.setField("price", "7500000"); x.o.refuseOnce = true; // the server refuses once (synthetic)
+    await assert.rejects(a.submit(), (e) => e.code === "invalid-argument");
     assert.strictEqual(a.photoCount(), 2); assert.strictEqual(a.state.fields.description.length > 0, true);
-    a.setField("txnType", "sale");
     assert.ok((await a.submit()).propertyId);
     assert.strictEqual((await db.collection("caseInternal").get()).size, 1);
+  });
+
+  it("R5b the form uses the ONE checklist: price OR a request for appraisal, the main location (area or pin), commercial subtype, contactability, photos — and the description is not required", async () => {
+    const store = mem(); const x = deps(store, A.extA);
+    const a = new Flow(x.d); await a.addPhoto("d0", "t0"); await a.addPhoto("d1", "t1");
+    assert.deepStrictEqual(a.missing().sort(), ["contact", "contactName", "intent", "location", "price"].sort());
+    fill(a, { description: "", area: "" }); assert.deepStrictEqual(a.missing(), ["location"]);
+    a.setField("coords", "12.558940,99.909039"); assert.deepStrictEqual(a.missing(), [], "a pin alone is the main location");
+    a.setField("coords", ""); a.setField("area", "cha-am"); assert.deepStrictEqual(a.missing(), []);
+    a.setField("priceMode", "appraisal"); a.setField("price", ""); assert.deepStrictEqual(a.missing(), [], "request for appraisal: no price needed to submit");
+    a.setField("type", "commercial"); assert.deepStrictEqual(a.missing(), ["commercialSubtype"]); a.setField("commercialSubtype", "office"); assert.deepStrictEqual(a.missing(), []);
+    const done = await a.submit();
+    const rec = (await db.doc("caseInternal/" + done.propertyId).get()).data();
+    assert.strictEqual(rec.priceMode, "appraisal"); assert.strictEqual(rec.price, null); assert.strictEqual(rec.commercialSubtype, "office"); assert.strictEqual(rec.area, "cha-am");
+    assert.strictEqual(rec.description, "", "no description required to submit");
   });
 
   it("R6 land needs 1 photo, a house 2 (Photo Standard v1): the form lets a land plot with 1 photo through, not a house", async () => {

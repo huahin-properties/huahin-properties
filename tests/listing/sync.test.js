@@ -46,4 +46,18 @@ describe("LISTING-E2E-01 sync + Staff photo gate", () => {
     const lister = { id: "L1", listerId: "u", contactPhone: "0800000000", listingStatus: "live" };
     assert.strictEqual(d.toPublicProperty(lister), lister, "lister listings keep their public contact (unchanged behavior)");
   });
+  it("Y5 the submission checklist is ONE definition: the browser mirror and the server module give the same answer on a matrix of cases, and the locked rules hold (appraisal, main location, commercial subtype, contactability, photo minimum, no description needed)", async () => {
+    const b = await esm("submission-checklist.js"), s = require("../../functions/submission-checklist.js");
+    assert.deepStrictEqual([b.TYPES, b.AREAS, b.COMMERCIAL_SUBTYPES], [s.TYPES, s.AREAS, s.COMMERCIAL_SUBTYPES]);
+    const base = { txnType: "sale", type: "house", price: 5000000, priceMode: "fixed", area: "hua-hin", coords: "", commercialSubtype: "", name: "Synthetic", phone: "0800000000", email: "" };
+    const variants = [{}, { txnType: "" }, { type: "castle" }, { price: 0 }, { price: "abc" }, { price: null, priceMode: "appraisal" }, { area: "", coords: "" }, { area: "", coords: "12.5,99.9" }, { area: "x", coords: "bad" },
+      { type: "commercial" }, { type: "commercial", commercialSubtype: "office" }, { type: "commercial", commercialSubtype: "castle" }, { name: "x" }, { phone: "1", email: "" }, { phone: "", email: "a@b.co" }, { phone: "line: abc123" }, { type: "land" }];
+    for (const v of variants) for (const photos of [0, 1, 2, 5]) assert.deepStrictEqual(b.missingForSubmit(Object.assign({}, base, v), photos), s.missingForSubmit(Object.assign({}, base, v), photos), JSON.stringify(v) + " photos=" + photos);
+    assert.deepStrictEqual(s.missingForSubmit(base, 2), []);
+    assert.deepStrictEqual(s.missingForSubmit(Object.assign({}, base, { price: null, priceMode: "appraisal" }), 2), [], "appraisal request: no price");
+    assert.deepStrictEqual(s.missingForSubmit(Object.assign({}, base, { area: "", coords: "" }), 2), ["location"]);
+    assert.deepStrictEqual(s.missingForSubmit(Object.assign({}, base, { type: "land" }), 1), [], "land: 1 photo");
+    assert.deepStrictEqual(s.missingForSubmit(base, 1), ["photos"], "house: 1 photo is not enough");
+    assert.deepStrictEqual(s.missingForSubmit(Object.assign({}, base, { type: "commercial" }), 2), ["commercialSubtype"]);
+  });
 });

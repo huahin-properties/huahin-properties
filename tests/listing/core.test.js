@@ -6,6 +6,7 @@ const assert = require("assert");
 const { install, snapshot, diffSnapshots } = require("../chat/stub-anthropic");
 const H = require("./helpers");
 const { ACTORS: A, call, errCode, errReason, newKey, putStaging, payload, PRIVATE_FIELDS } = H;
+const publish = async (actor, id, extra) => { const pv = await call("previewListingCase", actor, { propertyId: id }); return call("publishListingCase", actor, Object.assign({ propertyId: id, reviewedSig: pv.publishSig }, extra || {})); };
 const listing = () => require("../../functions/listing-case.js");
 
 let iso, snapBefore, db;
@@ -162,7 +163,7 @@ describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, 
     assert.strictEqual(await errReason(call("submitListingCase", A.extA, payload(k4, "house", big))), "photo_bad_size");
     const k5 = newKey();
     assert.strictEqual(await errReason(call("submitListingCase", A.extA, payload(k5, "house", Array.from({ length: 31 }, (_, i) => ({ path: "caseUploads/" + A.extA.uid + "/" + k5 + "/" + i + ".webp" }))))), "too_many_photos");
-    for (const bad of [{ price: 0 }, { price: "abc" }, { txnType: "buy" }, { type: "castle" }, { description: "  " }, { area: "paris" }, { submitter: { name: "x", phone: "1" } }, { submissionKey: "short" }]) {
+    for (const bad of [{ price: 0 }, { price: "abc" }, { txnType: "buy" }, { type: "castle" }, { area: "paris" }, { submitter: { name: "x", phone: "1" } }, { submissionKey: "short" }, { area: "", coordsRaw: "" }, { type: "commercial", commercialSubtype: "" }, { type: "commercial", commercialSubtype: "castle" }]) {
       const kk = newKey(); const ph = await putStaging(A.extA, kk, [0, 1]);
       assert.strictEqual(await errCode(call("submitListingCase", A.extA, payload(kk, "house", ph, bad))), "invalid-argument", JSON.stringify(bad));
     }
@@ -184,20 +185,20 @@ describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, 
   // ── S8 / S9 publish ─────────────────────────────────────────────────────
   it("S8 only the Owner can publish; a Case needs the Owner's intake decision first; the photo standard is re-checked", async () => {
     const { r } = await submit(A.extA, { n: 2 });
-    for (const who of ["extA", "agent", "staff", "google"]) assert.strictEqual(await errCode(call("publishListingCase", A[who], { propertyId: r.propertyId })), "permission-denied", who);
-    assert.strictEqual(await errCode(call("publishListingCase", null, { propertyId: r.propertyId })), "unauthenticated");
-    assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: r.propertyId })), "intake_not_approved");
+    for (const who of ["extA", "agent", "staff", "google"]) assert.strictEqual(await errCode(publish(A[who], r.propertyId)), "permission-denied", who);
+    assert.strictEqual(await errCode(publish(null, r.propertyId)), "unauthenticated");
+    assert.strictEqual(await errReason(publish(A.owner, r.propertyId)), "intake_not_approved");
     await approveIntake(r.propertyId);
     await db.doc("casePhotos/" + r.propertyId + "-1").delete();
-    assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: r.propertyId })), "photos_below_minimum");
-    assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: "own-nope" })), "case_not_found");
+    assert.strictEqual(await errReason(publish(A.owner, r.propertyId)), "photos_below_minimum");
+    assert.strictEqual(await errReason(publish(A.owner, "own-nope")), "case_not_found");
     assert.strictEqual(await count("properties"), 0); assert.deepStrictEqual(await H.listFiles("publishedCasePhotos/"), []);
   });
 
   it("S9 publish: the public page is the ALLOW-LIST projection only (unknown/internal fields never reach it); public photos are server-written copies; who approved is recorded privately; idempotent", async () => {
     const { r } = await ready(A.agent, { type: "villa", n: 3 });
     await db.doc("caseInternal/" + r.propertyId).update({ secretNote: "SYNTHETIC-SECRET", futureField: 123, internalNotes: "synthetic internal note", bedrooms: 4, features: ["pool"], description: "Synthetic villa near the beach." });
-    const out = await call("publishListingCase", A.owner, { propertyId: r.propertyId });
+    const out = await publish(A.owner, r.propertyId);
     assert.strictEqual(out.published, true); assert.strictEqual(out.photoCount, 3); assert.strictEqual(out.approvalPath, "intake_approved");
     const pub = await getDoc("properties/" + r.propertyId);
     assert.strictEqual(pub.listingStatus, "live"); assert.strictEqual(pub.bedrooms, 4); assert.deepStrictEqual(pub.features, ["pool"]); assert.strictEqual(pub.photos.length, 3); assert.ok(pub.title.th && pub.title.en); assert.ok(pub.expiresAt > pub.publishedAt);
@@ -211,7 +212,7 @@ describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, 
     const rec = await getDoc("caseInternal/" + r.propertyId);
     assert.strictEqual(rec.approvedByUid, A.owner.uid); assert.strictEqual(rec.approvedByRole, "owner"); assert.strictEqual(rec.approvalPath, "intake_approved"); assert.strictEqual(rec.publishOp.status, "done");
     assert.strictEqual((await db.collection("activityLog").where("type", "==", "listing_published").get()).size, 1);
-    const again = await call("publishListingCase", A.owner, { propertyId: r.propertyId });
+    const again = await publish(A.owner, r.propertyId);
     assert.strictEqual(again.alreadyLive, true); assert.strictEqual(await count("propertyPhotos"), 3);
     assert.strictEqual((await H.listFiles("publishedCasePhotos/" + r.propertyId + "/")).length, 3);
     assert.strictEqual((await H.listFiles("casePhotos/" + r.propertyId + "/")).length, 3, "private originals stay");
@@ -221,28 +222,28 @@ describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, 
     const { r } = await ready(A.extA, { n: 2 });
     for (const bad of ["โทร 081-234-5678 ได้เลย", "ติดต่อ line: synthetic123", "mail synthetic@example.test", "www.example-listing.com", "call 0812345678"]) {
       await db.doc("caseInternal/" + r.propertyId).update({ description: bad });
-      assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: r.propertyId })), "public_text_has_contact_info", bad);
+      assert.strictEqual(await errReason(publish(A.owner, r.propertyId)), "public_text_has_contact_info", bad);
     }
     assert.strictEqual(await count("properties"), 0); assert.deepStrictEqual(await H.listFiles("publishedCasePhotos/"), []); assert.strictEqual(await count("propertyPhotos"), 0);
     await db.doc("caseInternal/" + r.propertyId).update({ description: "Quiet 3-bedroom house, 150 sqm, price 12,000,000 THB." });
-    assert.strictEqual((await call("publishListingCase", A.owner, { propertyId: r.propertyId })).published, true);
+    assert.strictEqual((await publish(A.owner, r.propertyId)).published, true);
   });
 
   it("S9c stale approval: if the approval is withdrawn while photos are being copied, publishing fails at commit; no public document, no public file, the lease is released", async () => {
     const { r } = await ready(A.extA, { n: 2 });
     listing().hooks.afterPublishCopy = async () => { await db.doc("caseInternal/" + r.propertyId).update({ reviewStatus: "returned" }); };
-    assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: r.propertyId })), "intake_not_approved");
+    assert.strictEqual(await errReason(publish(A.owner, r.propertyId)), "intake_not_approved");
     assert.strictEqual(await getDoc("properties/" + r.propertyId), null); assert.strictEqual(await count("propertyPhotos"), 0); assert.deepStrictEqual(await H.listFiles("publishedCasePhotos/"), []);
     assert.strictEqual((await getDoc("caseInternal/" + r.propertyId)).publishOp.status, "failed");
     delete listing().hooks.afterPublishCopy;
     await approveIntake(r.propertyId);
-    assert.strictEqual((await call("publishListingCase", A.owner, { propertyId: r.propertyId })).published, true, "publishable again once re-approved");
+    assert.strictEqual((await publish(A.owner, r.propertyId)).published, true, "publishable again once re-approved");
   });
 
   it("S9d publish vs take-down: a take-down that arrives while the publish is copying cancels it — the listing does not appear and the copies are removed", async () => {
     const { r } = await ready(A.extA, { n: 2 });
     listing().hooks.afterPublishCopy = async () => { delete listing().hooks.afterPublishCopy; const o = await call("unpublishListingCase", A.owner, { propertyId: r.propertyId }); assert.strictEqual(o.cancelledPublish, true); };
-    assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: r.propertyId })), "publish_cancelled");
+    assert.strictEqual(await errReason(publish(A.owner, r.propertyId)), "publish_cancelled");
     assert.strictEqual(await getDoc("properties/" + r.propertyId), null); assert.strictEqual(await count("propertyPhotos"), 0); assert.deepStrictEqual(await H.listFiles("publishedCasePhotos/"), []);
     assert.notStrictEqual((await getDoc("caseInternal/" + r.propertyId)).listingStatus, "live");
   });
@@ -250,15 +251,15 @@ describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, 
   it("S9e photos changed while publishing (a Staff photo added in between): the commit refuses (the copy would be stale)", async () => {
     const { r } = await ready(A.extA, { n: 2 });
     listing().hooks.afterPublishCopy = async () => { delete listing().hooks.afterPublishCopy; const key = newKey(); const p = await putStaging(A.staff, key, [0]); await call("addCasePhotos", A.staff, { propertyId: r.propertyId, paths: p.map((x) => x.path) }); };
-    assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: r.propertyId })), "photos_changed");
+    assert.strictEqual(await errReason(publish(A.owner, r.propertyId)), "photos_changed");
     assert.strictEqual(await getDoc("properties/" + r.propertyId), null); assert.deepStrictEqual(await H.listFiles("publishedCasePhotos/"), []);
-    const ok = await call("publishListingCase", A.owner, { propertyId: r.propertyId });
+    const ok = await publish(A.owner, r.propertyId);
     assert.strictEqual(ok.photoCount, 3);
   });
 
   it("S9f two Owner clicks at once: one publishes, the other is told it is in progress or already live; the end state is consistent (one set of public photos)", async () => {
     const { r } = await ready(A.extA, { n: 3 });
-    const rs = await Promise.all([call("publishListingCase", A.owner, { propertyId: r.propertyId }).catch((e) => ({ err: e.details && e.details.reason })), call("publishListingCase", A.owner, { propertyId: r.propertyId }).catch((e) => ({ err: e.details && e.details.reason }))]);
+    const rs = await Promise.all([publish(A.owner, r.propertyId).catch((e) => ({ err: e.details && e.details.reason })), publish(A.owner, r.propertyId).catch((e) => ({ err: e.details && e.details.reason }))]);
     assert.strictEqual(rs.filter((x) => x.published === true).length, 1, JSON.stringify(rs));
     assert.ok(rs.every((x) => x.published === true || x.alreadyLive === true || ["publish_in_progress", "publish_cancelled"].includes(x.err)), JSON.stringify(rs));
     assert.strictEqual(await count("propertyPhotos"), 3);
@@ -270,16 +271,16 @@ describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, 
 
   it("S10 the Owner's own submission can be published without an intake round (approval path recorded as owner_direct); a Staff or agent Case never skips the decision", async () => {
     const { r } = await submit(A.owner, { type: "condo", n: 2, extra: { propertyOwner: { relation: "website", name: "", contact: "" } } });
-    const out = await call("publishListingCase", A.owner, { propertyId: r.propertyId });
+    const out = await publish(A.owner, r.propertyId);
     assert.strictEqual(out.approvalPath, "owner_direct"); assert.strictEqual((await getDoc("caseInternal/" + r.propertyId)).submittedByRole, "owner");
     const s = await submit(A.staff, { n: 2 }); const g = await submit(A.agent, { n: 2 });
-    assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: s.r.propertyId })), "intake_not_approved");
-    assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: g.r.propertyId })), "intake_not_approved");
+    assert.strictEqual(await errReason(publish(A.owner, s.r.propertyId)), "intake_not_approved");
+    assert.strictEqual(await errReason(publish(A.owner, g.r.propertyId)), "intake_not_approved");
   });
 
   it("S11 take-down: the public document, public photo records AND files are removed, the record goes offline, private originals stay; the old public link dies; re-publish makes new copies", async () => {
     const { r } = await ready(A.extA, { n: 2 });
-    await call("publishListingCase", A.owner, { propertyId: r.propertyId });
+    await publish(A.owner, r.propertyId);
     const firstUrl = (await db.collection("propertyPhotos").doc(r.propertyId + "-0").get()).data().dataUrl;
     assert.strictEqual((await fetch(firstUrl)).status, 200);
     for (const who of ["extA", "agent", "staff"]) assert.strictEqual(await errCode(call("unpublishListingCase", A[who], { propertyId: r.propertyId })), "permission-denied", who);
@@ -292,7 +293,7 @@ describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, 
     const rec = await getDoc("caseInternal/" + r.propertyId);
     assert.strictEqual(rec.listingStatus, "offline"); assert.strictEqual(rec.offlineReason, "synthetic reason");
     assert.strictEqual((await call("unpublishListingCase", A.owner, { propertyId: r.propertyId })).unpublished, false, "taking down twice is harmless");
-    const re = await call("publishListingCase", A.owner, { propertyId: r.propertyId });
+    const re = await publish(A.owner, r.propertyId);
     assert.strictEqual(re.published, true);
     const newUrl = (await db.collection("propertyPhotos").doc(r.propertyId + "-0").get()).data().dataUrl;
     assert.notStrictEqual(newUrl, firstUrl); assert.strictEqual((await fetch(newUrl)).status, 200); assert.notStrictEqual((await fetch(firstUrl)).status, 200);
@@ -300,7 +301,7 @@ describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, 
 
   it("S11b a legacy member-uploaded photo of an unrelated listing is not touched by a take-down", async () => {
     const { r } = await ready(A.extA, { n: 2 });
-    await call("publishListingCase", A.owner, { propertyId: r.propertyId });
+    await publish(A.owner, r.propertyId);
     await db.doc("propertyPhotos/LEGACY-1-0").set({ propertyId: "LEGACY-1", index: 0, dataUrl: "http://synthetic/legacy" });
     await call("unpublishListingCase", A.owner, { propertyId: r.propertyId });
     assert.ok((await db.doc("propertyPhotos/LEGACY-1-0").get()).exists);
@@ -361,7 +362,7 @@ describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, 
       process.env.GCLOUD_PROJECT = "huahin-properties-prod-like"; delete process.env.GOOGLE_CLOUD_PROJECT; process.env.FIREBASE_CONFIG = "{}"; delete process.env.LISTING_E2E_ENABLED;
       const key = newKey(); const photos = await putStaging(A.extA, key, [0, 1]);
       assert.strictEqual(await errReason(call("submitListingCase", A.extA, payload(key, "house", photos))), "not_enabled");
-      for (const fn of ["publishListingCase", "unpublishListingCase", "syncListingCase", "reconcileListingFiles"]) assert.strictEqual(await errReason(call(fn, A.owner, { propertyId: "x" })), "not_enabled", fn);
+      for (const fn of ["previewListingCase", "publishListingCase", "unpublishListingCase", "syncListingCase", "reconcileListingFiles"]) assert.strictEqual(await errReason(call(fn, A.owner, { propertyId: "x" })), "not_enabled", fn);
       assert.strictEqual(await errReason(call("addCasePhotos", A.staff, { propertyId: "x", paths: ["a"] })), "not_enabled");
       assert.strictEqual(await errReason(call("trackListingCase", null, { id: "x", token: "t".repeat(30) })), "not_enabled");
       assert.strictEqual(await count("caseInternal"), 0);
@@ -371,22 +372,35 @@ describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, 
   });
 
   // ── S14 sync, S15 staff photos, S16 reconcile ───────────────────────────
-  it("S14 edits to a published Case reach the public page only through the projection: allow-list again, contact details refused (public page keeps the previous text), never publishes anything new", async () => {
+  it("S14 edits to a published Case: Staff can only REQUEST an update (the public page does not change); the Owner applies exactly what they previewed; stale preview / contact details refused; never publishes anything new", async () => {
     const { r } = await ready(A.extA, { n: 2 });
     assert.deepStrictEqual(await call("syncListingCase", A.staff, { propertyId: r.propertyId }), { synced: false, propertyId: r.propertyId, reason: "not_live" });
-    await call("publishListingCase", A.owner, { propertyId: r.propertyId });
+    await publish(A.owner, r.propertyId);
+    const before = await getDoc("properties/" + r.propertyId);
     await db.doc("caseInternal/" + r.propertyId).update({ price: 9999999, bedrooms: 5, internalNotes: "synthetic internal", secretNote: "SYN" });
-    assert.strictEqual((await call("syncListingCase", A.staff, { propertyId: r.propertyId })).synced, true);
-    let pub = await getDoc("properties/" + r.propertyId);
-    assert.strictEqual(pub.price, 9999999); assert.strictEqual(pub.bedrooms, 5); assert.ok(!("internalNotes" in pub) && !("secretNote" in pub)); assert.strictEqual(pub.photos.length, 2); assert.strictEqual(pub.listingStatus, "live");
-    const before = pub.description;
-    await db.doc("caseInternal/" + r.propertyId).update({ description: "call me 0812345678" });
-    const bad = await call("syncListingCase", A.owner, { propertyId: r.propertyId });
-    assert.strictEqual(bad.synced, false); assert.strictEqual(bad.reason, "public_text_has_contact_info");
-    pub = await getDoc("properties/" + r.propertyId); assert.strictEqual(pub.description, before, "the public page keeps its previous text");
+    const req = await call("syncListingCase", A.staff, { propertyId: r.propertyId });
+    assert.deepStrictEqual([req.synced, req.reason, req.pendingOwnerApproval], [false, "owner_approval_required", true]);
+    assert.deepStrictEqual(await getDoc("properties/" + r.propertyId), before, "the public page is unchanged by a Staff edit");
+    assert.strictEqual((await getDoc("caseInternal/" + r.propertyId)).publicUpdatePending, true);
     for (const who of ["extA", "agent", "google"]) assert.strictEqual(await errCode(call("syncListingCase", A[who], { propertyId: r.propertyId })), "permission-denied", who);
-    await db.doc("caseInternal/" + r.propertyId).update({ listingStatus: "offline" }); // not live → nothing changes publicly even if asked
-    assert.strictEqual((await call("syncListingCase", A.owner, { propertyId: r.propertyId })).synced, false);
+    const pv = await call("previewListingCase", A.owner, { propertyId: r.propertyId });
+    assert.strictEqual(pv.publicDocument.price, 9999999); assert.strictEqual(pv.currentPublicDocument.price, 7500000); assert.strictEqual(pv.publicUpdatePending, true);
+    assert.ok(!("internalNotes" in pv.publicDocument) && !("secretNote" in pv.publicDocument));
+    assert.strictEqual(await errReason(call("syncListingCase", A.owner, { propertyId: r.propertyId })), "preview_required");
+    await db.doc("caseInternal/" + r.propertyId).update({ price: 8888888 }); // edited again after the Owner looked
+    assert.strictEqual(await errReason(call("syncListingCase", A.owner, { propertyId: r.propertyId, reviewedSig: pv.updateSig })), "reviewed_content_changed");
+    const pv2 = await call("previewListingCase", A.owner, { propertyId: r.propertyId });
+    assert.strictEqual((await call("syncListingCase", A.owner, { propertyId: r.propertyId, reviewedSig: pv2.updateSig })).synced, true);
+    let pub = await getDoc("properties/" + r.propertyId);
+    assert.strictEqual(pub.price, 8888888); assert.strictEqual(pub.bedrooms, 5); assert.ok(!("internalNotes" in pub) && !("secretNote" in pub)); assert.strictEqual(pub.photos.length, 2); assert.strictEqual(pub.listingStatus, "live");
+    assert.strictEqual((await getDoc("caseInternal/" + r.propertyId)).publicUpdatePending, false);
+    const keep = pub.description;
+    await db.doc("caseInternal/" + r.propertyId).update({ description: "call me 0812345678" });
+    const bad = await call("syncListingCase", A.owner, { propertyId: r.propertyId, reviewedSig: (await call("previewListingCase", A.owner, { propertyId: r.propertyId })).updateSig });
+    assert.deepStrictEqual([bad.synced, bad.reason], [false, "public_text_has_contact_info"]);
+    assert.strictEqual((await getDoc("properties/" + r.propertyId)).description, keep, "the public page keeps its previous text");
+    await db.doc("caseInternal/" + r.propertyId).update({ description: keep || "", listingStatus: "offline" });
+    assert.strictEqual((await call("syncListingCase", A.owner, { propertyId: r.propertyId })).reason, "not_live");
   });
 
   it("S15 Staff add photos to a private Case through the server (own staging → private copy, no token); others cannot; bad paths and overflow are refused; a later publish includes them", async () => {
@@ -403,12 +417,13 @@ describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, 
     assert.deepStrictEqual(docs.map((d) => d.index), [0, 1, 2, 3]);
     for (const d of docs) assert.ok(await H.fileExists(d.storagePath));
     assert.strictEqual((await H.listFiles("casePhotos/" + r.propertyId + "/")).length, 4);
-    assert.strictEqual((await call("publishListingCase", A.owner, { propertyId: r.propertyId })).photoCount, 4);
+    assert.strictEqual((await publish(A.owner, r.propertyId)).photoCount, 4);
   });
 
-  it("S16 reconcile (Owner): files that no record references (leftovers of lost attempts / old publishes) are removed; referenced ones are not", async () => {
+  it("S16 reconcile (Owner): files that no record references (leftovers of lost attempts / old publishes) are removed after the grace period; referenced, young and active ones are not", async () => {
+    process.env.LISTING_RECONCILE_GRACE_MS = "0";
     const { r } = await ready(A.extA, { n: 2 });
-    await call("publishListingCase", A.owner, { propertyId: r.propertyId });
+    await publish(A.owner, r.propertyId);
     const b = H.load().admin.storage().bucket(H.BUCKET_NAME);
     await b.file("casePhotos/" + r.propertyId + "/a-orphan/0.webp").save(Buffer.alloc(8), { resumable: false });
     await b.file("publishedCasePhotos/" + r.propertyId + "/p-old/0.webp").save(Buffer.alloc(8), { resumable: false });
@@ -417,5 +432,147 @@ describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, 
     assert.strictEqual(out.removed, 2);
     assert.strictEqual((await H.listFiles("casePhotos/" + r.propertyId + "/")).length, 2); assert.strictEqual((await H.listFiles("publishedCasePhotos/" + r.propertyId + "/")).length, 2);
     assert.strictEqual((await call("reconcileListingFiles", A.owner, { propertyId: r.propertyId })).removed, 0);
+    delete process.env.LISTING_RECONCILE_GRACE_MS;
+  });
+
+  // ── round-3 additions: one checklist, lifecycle cleanup races, stale type/content at commit, delete failures, ownership documents ──
+  it("S17 one submission checklist: a request for appraisal is accepted (price optional) but can not be PUBLISHED without a price; the main location (area or pin) is required; commercial needs its subtype; the description is optional", async () => {
+    const mk = async (extra, n = 2) => { const key = newKey(); const photos = await putStaging(A.extA, key, Array.from({ length: n }, (_, i) => i)); return call("submitListingCase", A.extA, payload(key, "house", photos, extra)); };
+    const refuse = async (extra) => { const key = newKey(); const photos = await putStaging(A.extA, key, [0, 1]); return errReason(call("submitListingCase", A.extA, payload(key, "house", photos, extra))); };
+    assert.strictEqual(await refuse({ area: "", coordsRaw: "" }), "missing_location");
+    assert.strictEqual(await refuse({ price: 0 }), "bad_price");
+    assert.strictEqual(await refuse({ type: "commercial", commercialSubtype: "" }), "missing_commercial_subtype");
+    const pinOnly = await mk({ area: "", coordsRaw: "12.558940,99.909039", description: "" });
+    assert.strictEqual((await getDoc("caseInternal/" + pinOnly.propertyId)).description, "");
+    const r = await mk({ priceMode: "appraisal", price: undefined });
+    const rec = await getDoc("caseInternal/" + r.propertyId);
+    assert.strictEqual(rec.priceMode, "appraisal"); assert.strictEqual(rec.price, null);
+    await approveIntake(r.propertyId);
+    assert.strictEqual(await errReason(publish(A.owner, r.propertyId)), "price_required_to_publish");
+    assert.strictEqual(await getDoc("properties/" + r.propertyId), null);
+    await db.doc("caseInternal/" + r.propertyId).update({ price: 6500000, priceMode: "fixed" });
+    assert.strictEqual((await publish(A.owner, r.propertyId)).published, true);
+    assert.strictEqual((await getDoc("properties/" + r.propertyId)).price, 6500000);
+  });
+
+  it("S18 take-down → republish → the OLD take-down clean-up runs: it deletes only the old operation's files and never the new live photos", async () => {
+    const { r } = await ready(A.extA, { n: 2 });
+    await publish(A.owner, r.propertyId);
+    const oldOp = (await getDoc("caseInternal/" + r.propertyId)).publishOp.opId;
+    let newUrls = [];
+    listing().hooks.afterUnpublishCommit = async () => { delete listing().hooks.afterUnpublishCommit; await publish(A.owner, r.propertyId); newUrls = (await db.collection("propertyPhotos").where("propertyId", "==", r.propertyId).get()).docs.map((d) => d.data().dataUrl); };
+    const out = await call("unpublishListingCase", A.owner, { propertyId: r.propertyId });
+    assert.strictEqual(out.unpublished, true); assert.strictEqual(out.publicFilesRemoved, true);
+    const newOp = (await getDoc("caseInternal/" + r.propertyId)).publishOp.opId;
+    assert.notStrictEqual(newOp, oldOp); assert.strictEqual((await getDoc("caseInternal/" + r.propertyId)).listingStatus, "live", "the republish is live");
+    assert.strictEqual(newUrls.length, 2);
+    for (const u of newUrls) assert.strictEqual((await fetch(u)).status, 200, "the NEW public photo still downloads");
+    const files = await H.listFiles("publishedCasePhotos/" + r.propertyId + "/");
+    assert.strictEqual(files.length, 2); assert.ok(files.every((f) => f.includes("/" + newOp + "/")), "only the new operation's files remain");
+    assert.strictEqual((await db.collection("propertyPhotos").where("propertyId", "==", r.propertyId).get()).size, 2);
+  });
+
+  it("S19 an old publish that finishes late (its lease expired and a newer publish went live) cleans only its OWN files and cannot take the listing live", async () => {
+    process.env.LISTING_LEASE_MS = "30";
+    try {
+      const { r } = await ready(A.extA, { n: 2 });
+      let release; const gate = new Promise((res) => { release = res; });
+      let n = 0;
+      listing().hooks.afterPublishCopy = async () => { n++; if (n === 1) await gate; };
+      const old = publish(A.owner, r.propertyId).catch((e) => ({ err: e.details && e.details.reason }));
+      await new Promise((res) => setTimeout(res, 500));
+      const fresh = await publish(A.owner, r.propertyId); // the first lease has expired
+      assert.strictEqual(fresh.published, true);
+      const liveOp = (await getDoc("caseInternal/" + r.propertyId)).publishOp.opId;
+      release();
+      const res = await old;
+      assert.strictEqual(res.err, "publish_cancelled");
+      const files = await H.listFiles("publishedCasePhotos/" + r.propertyId + "/");
+      assert.strictEqual(files.length, 2); assert.ok(files.every((f) => f.includes("/" + liveOp + "/")), "the newer operation's files were not touched");
+      const urls = (await db.collection("propertyPhotos").where("propertyId", "==", r.propertyId).get()).docs.map((d) => d.data().dataUrl);
+      for (const u of urls) assert.strictEqual((await fetch(u)).status, 200);
+      assert.strictEqual((await getDoc("caseInternal/" + r.propertyId)).publishOp.status, "done");
+    } finally { delete process.env.LISTING_LEASE_MS; }
+  });
+
+  it("S20 reconcile while a publish is copying: the active operation's files, young files and referenced files are NOT deleted; real orphans are", async () => {
+    process.env.LISTING_RECONCILE_GRACE_MS = "0";
+    try {
+      const { r } = await ready(A.extA, { n: 2 });
+      const b = H.load().admin.storage().bucket(H.BUCKET_NAME);
+      await b.file("publishedCasePhotos/" + r.propertyId + "/p-dead/0.webp").save(Buffer.alloc(8), { resumable: false });
+      let during;
+      listing().hooks.afterPublishCopy = async () => { delete listing().hooks.afterPublishCopy; during = await call("reconcileListingFiles", A.owner, { propertyId: r.propertyId }); };
+      assert.strictEqual((await publish(A.owner, r.propertyId)).published, true);
+      assert.strictEqual(during.removed, 1, "only the dead operation's file was removed during the copy");
+      assert.strictEqual((await H.listFiles("publishedCasePhotos/" + r.propertyId + "/")).length, 2, "the copying operation's files survived");
+      for (const d of (await db.collection("propertyPhotos").where("propertyId", "==", r.propertyId).get()).docs) assert.strictEqual((await fetch(d.data().dataUrl)).status, 200);
+    } finally { delete process.env.LISTING_RECONCILE_GRACE_MS; }
+    // with the default grace period nothing young is deleted
+    const b2 = H.load().admin.storage().bucket(H.BUCKET_NAME);
+    const x = await ready(A.extB, { n: 2 });
+    await b2.file("casePhotos/" + x.r.propertyId + "/a-fresh/0.webp").save(Buffer.alloc(8), { resumable: false });
+    const out = await call("reconcileListingFiles", A.owner, { propertyId: x.r.propertyId });
+    assert.strictEqual(out.removed, 0); assert.strictEqual(out.skippedYoung, 1);
+  });
+
+  it("S21 the type, photo minimum and content are recomputed from the record AT COMMIT: land(1 photo) turned into a house during the copy is refused; a content edit after the Owner's preview is refused; no preview → refused", async () => {
+    const land = await ready(A.extA, { type: "land", n: 1 });
+    listing().hooks.afterPublishCopy = async () => { delete listing().hooks.afterPublishCopy; await db.doc("caseInternal/" + land.r.propertyId).update({ type: "house" }); };
+    assert.strictEqual(await errReason(publish(A.owner, land.r.propertyId)), "photos_below_minimum");
+    assert.strictEqual(await getDoc("properties/" + land.r.propertyId), null); assert.deepStrictEqual(await H.listFiles("publishedCasePhotos/"), []);
+    const v = await ready(A.extB, { type: "villa", n: 2 });
+    listing().hooks.afterPublishCopy = async () => { delete listing().hooks.afterPublishCopy; await db.doc("caseInternal/" + v.r.propertyId).update({ bedrooms: 9 }); };
+    assert.strictEqual(await errReason(publish(A.owner, v.r.propertyId)), "reviewed_content_changed");
+    assert.strictEqual(await getDoc("properties/" + v.r.propertyId), null); assert.deepStrictEqual(await H.listFiles("publishedCasePhotos/"), []);
+    const pv = await call("previewListingCase", A.owner, { propertyId: v.r.propertyId });
+    assert.strictEqual(pv.publicDocument.bedrooms, 9); assert.strictEqual(pv.wouldRefuse, null); assert.strictEqual(pv.photoCount, 2); assert.strictEqual(pv.publicDocument.title.en.startsWith("Pool Villa"), true);
+    assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: v.r.propertyId })), "preview_required");
+    assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: v.r.propertyId, reviewedSig: "0".repeat(64) })), "reviewed_content_changed");
+    for (const who of ["extA", "agent", "staff"]) assert.strictEqual(await errCode(call("previewListingCase", A[who], { propertyId: v.r.propertyId })), "permission-denied", who);
+    const ok = await call("publishListingCase", A.owner, { propertyId: v.r.propertyId, reviewedSig: pv.publishSig });
+    assert.strictEqual(ok.published, true);
+    const pub = await getDoc("properties/" + v.r.propertyId); assert.strictEqual(pub.bedrooms, 9); assert.strictEqual(pub.title.en.startsWith("Pool Villa"), true);
+  });
+
+  it("S22 a failed file deletion is REPORTED, not hidden: take-down says the files were not removed, remembers them, and reconcile removes them later", async () => {
+    const { r } = await ready(A.extA, { n: 2 });
+    await publish(A.owner, r.propertyId);
+    const url = (await db.doc("propertyPhotos/" + r.propertyId + "-0").get()).data().dataUrl;
+    listing().hooks.beforeDelete = async ({ path }) => { if (path.startsWith("publishedCasePhotos/")) throw Object.assign(new Error("synthetic storage outage"), { code: 503 }); };
+    const out = await call("unpublishListingCase", A.owner, { propertyId: r.propertyId });
+    assert.strictEqual(out.unpublished, true); assert.strictEqual(out.publicFilesRemoved, false); assert.strictEqual(out.cleanupFailed.length, 2);
+    assert.strictEqual(await getDoc("properties/" + r.propertyId), null, "the listing is down even though the files could not be deleted");
+    assert.strictEqual((await db.collection("propertyPhotos").where("propertyId", "==", r.propertyId).get()).size, 0);
+    assert.strictEqual((await fetch(url)).status, 200, "…and the old link still works — which is exactly why the result must not claim otherwise");
+    assert.strictEqual((await getDoc("caseInternal/" + r.propertyId)).cleanupPending.length, 2);
+    delete listing().hooks.beforeDelete;
+    process.env.LISTING_RECONCILE_GRACE_MS = "0";
+    try { const rc = await call("reconcileListingFiles", A.owner, { propertyId: r.propertyId }); assert.strictEqual(rc.removed, 2); } finally { delete process.env.LISTING_RECONCILE_GRACE_MS; }
+    assert.notStrictEqual((await fetch(url)).status, 200); assert.deepStrictEqual((await getDoc("caseInternal/" + r.propertyId)).cleanupPending, []);
+    // a not-found file is not a failure
+    assert.strictEqual((await call("unpublishListingCase", A.owner, { propertyId: r.propertyId })).unpublished, false);
+  });
+
+  it("S23 ownership documents: the attempt-specific copy is deleted when an attempt fails or loses; the winner's document stays and is referenced", async () => {
+    const key = newKey(); const photos = await putStaging(A.extA, key, [0, 1]); const doc = await putStaging(A.extA, key, ["doc"]);
+    const body = payload(key, "house", photos, { ownershipDocPath: doc[0].path });
+    listing().hooks.afterSubmitCopy = async () => { throw new Error("synthetic crash after copy"); };
+    assert.strictEqual(await errCode(call("submitListingCase", A.extA, body)), "internal");
+    assert.deepStrictEqual(await H.listFiles("caseAttachments/"), [], "no ownership document left behind by the failed attempt");
+    assert.deepStrictEqual(await H.listFiles("casePhotos/"), []);
+    delete listing().hooks.afterSubmitCopy;
+    // two attempts at once, both with a document: exactly one document remains and the record points at it
+    let held = 0, release; const gate = new Promise((res) => { release = res; });
+    listing().hooks.afterSubmitCopy = async () => { held++; if (held === 1) await gate; };
+    const p1 = call("submitListingCase", A.extA, body);
+    await new Promise((res) => setTimeout(res, 400));
+    const r2 = await call("submitListingCase", A.extA, body);
+    release(); const r1 = await p1;
+    assert.strictEqual(r1.propertyId, r2.propertyId);
+    const rec = await getDoc("caseInternal/" + r1.propertyId);
+    const atts = await H.listFiles("caseAttachments/");
+    assert.deepStrictEqual(atts, [rec.ownershipDocPath], "only the winner's document exists, and the record references exactly it");
+    assert.strictEqual((await H.listFiles("casePhotos/" + r1.propertyId + "/")).length, 2);
   });
 });

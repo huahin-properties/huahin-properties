@@ -1839,6 +1839,10 @@ exports.unpublishListingCase = onCall(
   { region: "asia-southeast1", timeoutSeconds: 120, memory: "512MiB" },
   (request) => listingCase.unpublishListingCase({ admin, HttpsError, request })
 );
+exports.previewListingCase = onCall(
+  { region: "asia-southeast1", timeoutSeconds: 60 },
+  (request) => listingCase.previewListingCase({ admin, HttpsError, request })
+);
 exports.syncListingCase = onCall(
   { region: "asia-southeast1", timeoutSeconds: 60 },
   (request) => listingCase.syncListingCase({ admin, HttpsError, request })

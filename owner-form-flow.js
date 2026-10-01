@@ -9,10 +9,11 @@
 //   • a chat draft pre-fills the form (type, sale/rent, price, pin) but never over something the customer typed, and the
 //     customer's edits go back to the draft through the server (which decides provenance and protects Staff edits).
 import { photoStandardFor } from "./photo-standard.js";
+import { missingForSubmit } from "./submission-checklist.js";
 
 const STORE_KEY = "hhOwnerForm.v1";
 export const MAX_SLOTS = 30; // the server accepts at most 30 photos per Case; slots are numbered 0..29 and never reused
-const BLANK = () => ({ fields: { name: "", phone: "", email: "", txnType: "", type: "villa", condition: "resale", price: "", description: "", coords: "", ownerContact: "" },
+const BLANK = () => ({ fields: { name: "", phone: "", email: "", txnType: "", type: "villa", condition: "resale", price: "", priceMode: "fixed", area: "", commercialSubtype: "", description: "", coords: "", ownerContact: "" },
   touched: {}, key: "", uid: "", slots: [], nextSlot: 0, doc: null, done: null, prefilled: [] });
 const COORDS_RE = /^\s*-?\d{1,3}(\.\d+)?\s*,\s*-?\d{1,3}(\.\d+)?\s*$/;
 const TYPES = ["villa", "house", "townhouse", "condo", "land", "commercial"];
@@ -43,10 +44,9 @@ export class OwnerFormFlow {
   setField(k, v) { this.s.fields[k] = v; this.s.touched[k] = true; this.save(); }
   photoRule() { return photoStandardFor(this.s.fields.type); }
   photoCount() { return this.s.slots.length; }
-  canSubmit() {
-    const f = this.s.fields;
-    return !!(f.txnType && TYPES.includes(f.type) && Number(f.price) > 0 && String(f.description).trim() && String(f.name).trim().length >= 2 && String(f.phone).trim() && this.photoCount() >= this.photoRule().min);
-  }
+  // ONE checklist (submission-checklist.js = the server's own): what is still missing before the form may be sent. Completeness (a percentage) is not computed here.
+  missing() { const f = this.s.fields; return missingForSubmit({ txnType: f.txnType, type: f.type, price: f.price, priceMode: f.priceMode, area: f.area, coords: f.coords, commercialSubtype: f.commercialSubtype, name: f.name, phone: f.phone, email: f.email }, this.photoCount()); }
+  canSubmit() { return this.missing().length === 0; }
 
   // ── chat draft → form (never over what the customer typed) ─────────────
   async prefillFromDraft() {
@@ -110,7 +110,7 @@ export class OwnerFormFlow {
       const uid = await this._uid();
       const f = this.s.fields;
       const res = await this.d.fb.submitListingCase({
-        submissionKey: this.s.key, txnType: f.txnType, type: f.type, condition: f.condition, price: Number(f.price), description: f.description, coordsRaw: f.coords,
+        submissionKey: this.s.key, txnType: f.txnType, type: f.type, condition: f.condition, price: f.priceMode === "appraisal" ? null : Number(f.price), priceMode: f.priceMode, area: f.area, commercialSubtype: f.type === "commercial" ? f.commercialSubtype : "", description: f.description, coordsRaw: f.coords,
         submitter: { name: f.name, phone: f.phone, email: f.email },
         propertyOwner: { relation: this.d.relation || undefined, name: "", contact: f.ownerContact },
         language: this.d.language || "th",

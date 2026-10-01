@@ -55,7 +55,7 @@ async function putStaging(actor, key, names, opts) {
   return out;
 }
 const payload = (key, type, photos, extra) => Object.assign({
-  submissionKey: key, txnType: "sale", type: type || "house", condition: "resale", price: 7500000, area: "hua-hin",
+  submissionKey: key, txnType: "sale", type: type || "house", condition: "resale", price: 7500000, area: "hua-hin", commercialSubtype: "retail",
   description: "Synthetic description for a synthetic property.", coordsRaw: "12.558940,99.909039",
   submitter: { name: FIX.name, phone: FIX.phone, email: "" }, propertyOwner: { relation: "self", name: FIX.owner, contact: "0811111111" },
   language: "th", photos,

@@ -11,6 +11,7 @@ const { initializeTestEnvironment } = require("@firebase/rules-unit-testing");
 const { install, snapshot, diffSnapshots } = require("../chat/stub-anthropic");
 const { isAllowed } = require("../helpers/synthetic");
 const H = require("./helpers");
+const publish = async (actor, id, extra) => { const pv = await call("previewListingCase", actor, { propertyId: id }); return call("publishListingCase", actor, Object.assign({ propertyId: id, reviewedSig: pv.publishSig }, extra || {})); };
 const { ACTORS: A, call, errCode, errReason, newKey, putStaging, payload, PRIVATE_FIELDS } = H;
 
 const ctxOf = (env, a) => env.authenticatedContext(a.uid, a.token);
@@ -82,7 +83,7 @@ describe("LISTING-E2E-01 end-to-end per submitter group (real rules + real handl
       assert.strictEqual(await allowed(F(ac).doc("properties/" + id).set({ listingStatus: "live", price: 1, listerId: g.actor.uid })), false, "nobody can create a public page for it");
 
       // 5 submitters / agents cannot publish through the server either
-      if (g.actor !== A.owner) for (const who of [g.actor, A.staff]) assert.strictEqual(await errCode(call("publishListingCase", who, { propertyId: id })), "permission-denied", "publish refused for " + who.uid);
+      if (g.actor !== A.owner) for (const who of [g.actor, A.staff]) assert.strictEqual(await errCode(publish(who, id)), "permission-denied", "publish refused for " + who.uid);
 
       // 6 Staff prepares the case (through the rules): assign, verify, review, send to the Owner — but cannot publish or approve
       const st = ctxOf(env, A.staff), sf = F(st);
@@ -92,18 +93,18 @@ describe("LISTING-E2E-01 end-to-end per submitter group (real rules + real handl
       assert.strictEqual(await allowed(sf.doc("caseInternal/" + id).update({ reviewStatus: "approved" })), false, "Staff cannot approve");
       assert.strictEqual(await allowed(sf.doc("caseInternal/" + id).update({ approvedByUid: A.staff.uid })), false, "Staff cannot forge the approval record");
       assert.strictEqual(await allowed(sf.doc("casePhotos/" + id + "-0").get()), true, "Staff can see the private photos to review them");
-      assert.strictEqual(await errCode(call("publishListingCase", A.staff, { propertyId: id })), "permission-denied");
+      assert.strictEqual(await errCode(publish(A.staff, id)), "permission-denied");
       await call("trackListingCase", null, { id, token: r1.trackToken, action: "send", message: "synthetic customer question", lang: "en" });
       assert.strictEqual((await sf.collection("properties/" + id + "/caseMessages").get()).size, 1, "Staff see the customer's message");
 
       // 7 Owner decides, then publishes through the server
       const oc = F(ctxOf(env, A.owner));
       if (!g.ownerDirect) {
-        assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: id })), "intake_not_approved", "the Owner's publish step does not skip the intake decision");
+        assert.strictEqual(await errReason(publish(A.owner, id)), "intake_not_approved", "the Owner's publish step does not skip the intake decision");
         assert.strictEqual(await allowed(oc.doc("caseInternal/" + id).update({ reviewStatus: "approved", approvedSubmissionId: "syn-sub-1" })), true, "Owner records the intake decision");
       }
       assert.strictEqual(await allowed(oc.doc("caseInternal/" + id).update({ listingStatus: "live" })), false, "not even the Owner publishes from a browser");
-      const out = await call("publishListingCase", A.owner, { propertyId: id });
+      const out = await publish(A.owner, id);
       assert.strictEqual(out.published, true); assert.strictEqual(out.photoCount, g.n);
       assert.strictEqual(out.approvalPath, g.ownerDirect ? "owner_direct" : "intake_approved");
       const intAfter = (await db.doc("caseInternal/" + id).get()).data();
