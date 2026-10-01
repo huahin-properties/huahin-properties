@@ -143,4 +143,30 @@ describe("LISTING-E2E-01 end-to-end per submitter group (real rules + real handl
     assert.notStrictEqual(c.propertyId, a.propertyId);
     assert.strictEqual((await db.collection("properties").get()).size, 2);
   });
+
+  it("E2E-CHAT a lead the chat opened is COMPLETED by the form on the SAME case (photos + details attached, token kept, no second case); repeating it changes nothing", async () => {
+    const uid = A.extA.uid, chatId = "own-1800000000000-abcde", token = "C".repeat(48), draftId = "draft__" + uid;
+    // exactly the shape createCaseFromConversation writes (split): thin public part, internal part
+    await db.doc("properties/" + chatId).set({ source: "owner_submission", caseSource: "ai_assistant", listingStatus: "pending", reviewStatus: "submitted", workflowVersion: "intake_v1", internalSplit: true, status: "sale", description: "", submittedAt: 1 });
+    await db.doc("caseInternal/" + chatId).set({ propertyId: chatId, createdAt: 1, submittedByUid: uid, submittedByRole: "external", caseSource: "ai_assistant", trackToken: token, conversationId: "reception__" + uid, receptionVisitorId: uid, contactName: "Synthetic Chat Lead", ownerContact: "line:synthetic", assignedToEmail: "staff@example.test" });
+    await db.doc("properties/" + chatId).update({ caseSource: "ai_assistant" });
+    await db.doc("propertyDrafts/" + draftId).set({ ownerUid: uid, status: "draft", caseId: chatId, fields: {} });
+    const key = newKey(); const photos = await putStaging(A.extA, key, [0, 1, 2]);
+    const d = payload(key, "villa", photos, { price: 9900000, description: "Synthetic form description" });
+    const a = await call("submitListingCase", A.extA, d);
+    assert.strictEqual(a.propertyId, chatId, "same case"); assert.strictEqual(a.trackToken, token, "the customer's existing tracking link keeps working");
+    assert.strictEqual((await db.collection("properties").get()).size, 1, "no second case");
+    const pub = (await db.doc("properties/" + chatId).get()).data(), int = (await db.doc("caseInternal/" + chatId).get()).data();
+    assert.strictEqual(pub.type, "villa"); assert.strictEqual(pub.price, 9900000); assert.strictEqual(pub.photoCount, 3); assert.strictEqual(pub.listingStatus, "pending"); assert.strictEqual(pub.reviewStatus, "submitted");
+    assert.strictEqual(int.formCompletedKey, key); assert.strictEqual(int.trackToken, token); assert.strictEqual(int.assignedToEmail, "staff@example.test", "Staff's work on the case is not overwritten");
+    assert.strictEqual(int.conversationId, "reception__" + uid); assert.strictEqual(int.contactPhone, H.FIX.phone);
+    assert.deepStrictEqual(PRIVATE_FIELDS.filter((k) => k in pub), [], "still nothing private on the public document");
+    assert.strictEqual((await db.collection("casePhotos").where("propertyId", "==", chatId).get()).size, 3);
+    const again = await call("submitListingCase", A.extA, d);
+    assert.strictEqual(again.propertyId, chatId); assert.strictEqual((await db.collection("casePhotos").get()).size, 3);
+    const k2 = newKey(); const p2 = await putStaging(A.extA, k2, [0, 1]);
+    const third = await call("submitListingCase", A.extA, payload(k2, "villa", p2));
+    assert.strictEqual(third.propertyId, chatId, "a different key from the same draft is still the same, already-complete case");
+    assert.strictEqual((await db.collection("casePhotos").get()).size, 3, "…and does not add photos or reopen it");
+  });
 });

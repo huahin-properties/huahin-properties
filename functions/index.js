@@ -16,6 +16,7 @@ const Stripe = require("stripe");
 // C4.2b — trackToken generation. Node's CSPRNG, server-side only. The token
 // must never be predictable: it is the ONLY credential a customer holds for
 // their own Case (see the trackToken branches in firestore.rules).
+const caseSplit = require("./case-fields");
 const nodeCrypto = require("crypto");
 // CHAT-LIVE-01: access gate + AI-call cap for the chat TEST project. On production (and the
 // emulator namespace) state() is "off" and every call below is a no-op that reads nothing.
@@ -1605,7 +1606,10 @@ exports.createCaseFromConversation = onCall(
           // Unreachable while creation stays atomic (below); fails closed
           // anyway rather than returning a token for a Case we cannot see.
           if (!caseSnap.exists) return { created: false, reason: "case_missing" };
-          const c = caseSnap.data() || {};
+          // LISTING-E2E-01: a Case created from now on keeps its token / conversation link in caseInternal
+          // (the public document holds public-safe fields only); an older Case still has them on the document.
+          const intSnap = await t.get(db.collection("caseInternal").doc(existingId));
+          const c = Object.assign({}, caseSnap.data() || {}, intSnap.exists ? (intSnap.data() || {}) : {});
           // BOTH ends of the link must agree before any token is released. A
           // tampered or corrupted link returns no token at all.
           if (c.conversationId !== conversationId) return { created: false, reason: "link_mismatch" };
@@ -1625,8 +1629,13 @@ exports.createCaseFromConversation = onCall(
         if (reason) return { created: false, reason };
 
         const pb = d.propertyBasics || {};
+        // LISTING-E2E-01: ONE draft binding with the form. If this visitor has a form draft, the Case is linked to it
+        // (case.draftId in the internal record, draft.caseId) — never matched by name or phone.
+        const draftRef = db.collection("propertyDrafts").doc("draft__" + visitorId);
+        const draftSnap = await t.get(draftRef);
+        const draftLink = draftSnap.exists && !(draftSnap.data() || {}).caseId;
         // ── The canonical Property Case ───────────────────────────────────
-        t.create(db.collection("properties").doc(propertyId), {
+        const caseDoc = {
           // COMPATIBILITY, NOT LAZINESS. `source` is a capability key in
           // firestore.rules (isPublicOwnerSubmission, the trackToken reply
           // branches, the caseMessages tokenOk check) and gates ~15 behaviours
@@ -1676,7 +1685,20 @@ exports.createCaseFromConversation = onCall(
           // takes responsibility. An AI-created Case has never been touched by
           // a human, so writing it here would permanently disable AI on a Case
           // no human has seen - and would forge the human-handoff record.
-        });
+          // (LISTING-E2E-01) who submitted: the verified visitor uid, recorded in the internal record only.
+          submittedByUid: visitorId, submittedByRole: "external",
+          ...(draftLink ? { draftId: "draft__" + visitorId } : {}),
+        };
+        // LISTING-E2E-01: the SAME split the form path uses — contact, token and conversation link never go on the
+        // publicly readable document.
+        const split = caseSplit.splitCaseFields(caseDoc);
+        // The chat summary is free text written by a customer talking to an AI: it can contain names or phone numbers,
+        // so it is kept in the internal record (team pages show it as the description until Staff write their own).
+        const chatSummary = split.pub.description || "";
+        split.pub.description = "";
+        t.create(db.collection("properties").doc(propertyId), Object.assign({}, split.pub, { internalSplit: true }));
+        t.create(db.collection("caseInternal").doc(propertyId), Object.assign({ propertyId, createdAt: now, chatRequirementsSummary: chatSummary }, split.priv));
+        if (draftLink) t.set(draftRef, { caseId: propertyId, status: "submitted", submittedAt: now, updatedAt: now }, { merge: true });
         // Same commit as the Case. linkedCaseIds non-empty therefore IMPLIES
         // the Case exists: the dangling-pointer state cannot occur.
         t.update(convRef, {

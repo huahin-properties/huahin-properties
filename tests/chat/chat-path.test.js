@@ -326,7 +326,11 @@ describe("CHAT-TEST-01: chat + draft path (synthetic, emulator, stubbed model)",
     const all = await admin.firestore().collection("properties").get();
     const dupOk = c1.created === true && c2.created === true && c2.alreadyExisted === true && c1.propertyId === c2.propertyId && c1.trackToken === c2.trackToken && all.size === 1;
     rec("C5c", "confirmed twice => ONE case, same id + same track link (dedupe by server-side conversation link)", dupOk ? "CONTROL" : "CONTROL-FAILED", "cases=" + all.size + " sameId=" + (c1.propertyId === c2.propertyId));
-    const caseDoc = (await admin.firestore().doc("properties/" + c1.propertyId).get()).data();
+    // LISTING-E2E-01: a chat-created Case is split — public-safe fields on properties/{id}, the rest in caseInternal/{id}.
+    const pubDoc = (await admin.firestore().doc("properties/" + c1.propertyId).get()).data();
+    const intDoc = (await admin.firestore().doc("caseInternal/" + c1.propertyId).get()).data();
+    const caseDoc = Object.assign({}, pubDoc, intDoc);
+    assert.ok(pubDoc.internalSplit === true && !("trackToken" in pubDoc) && !("conversationId" in pubDoc) && !("contactName" in pubDoc) && !("ownerContact" in pubDoc), "the public document carries no contact / token / conversation link");
     const link = caseDoc.conversationId === convId(UID_A) && caseDoc.receptionVisitorId === UID_A && caseDoc.caseSource === "ai_assistant" && caseDoc.source === "owner_submission";
     const conv = (await admin.firestore().doc("conversations/" + convId(UID_A)).get()).data();
     rec("C5d", "case carries conversationId/receptionVisitorId; conversation links back (linkedCaseIds)", link && (conv.linkedCaseIds || [])[0] === c1.propertyId ? "CONTROL" : "CONTROL-FAILED", "caseSource=" + caseDoc.caseSource + " linked=" + JSON.stringify(conv.linkedCaseIds));
@@ -344,13 +348,16 @@ describe("CHAT-TEST-01: chat + draft path (synthetic, emulator, stubbed model)",
       missing.length ? "GAP-CONFIRMED" : "GAP-NOT-REPRODUCED",
       "draft fields not in case: [" + missing.join(", ") + "]; draft fields in case: [" + present.join(", ") + "]; case instead carries (from conversation, not draft): [" + carried.join(", ") + "]");
     const draftAfter = draft;
-    const noBackLink = draftAfter.caseId === undefined && caseDoc.draftId === undefined;
-    rec("C5f", "draft <-> case link (draft.caseId / case.draftId)", noBackLink ? "GAP-CONFIRMED" : "GAP-NOT-REPRODUCED", "draft.status=" + draftAfter.status + "; draft.caseId=" + draftAfter.caseId + "; case.draftId=" + caseDoc.draftId);
+    // LISTING-E2E-01: the link now exists (draft.caseId <-> case.draftId in the internal record) — one draft, one case.
+    const draftNow = (await admin.firestore().doc("propertyDrafts/" + draftId(UID_A)).get()).data();
+    const linkedBack = draftNow.caseId === c1.propertyId && caseDoc.draftId === draftId(UID_A);
+    rec("C5f", "draft <-> case link (draft.caseId / case.draftId) — fixed by LISTING-E2E-01", linkedBack ? "CONTROL" : "CONTROL-FAILED", "draft.status=" + draftNow.status + "; draft.caseId=" + draftNow.caseId + "; case.draftId=" + caseDoc.draftId);
+    assert.ok(linkedBack);
     results.chatCaseId = c1.propertyId;
   });
 
   // ── C6 ────────────────────────────────────────────────────────────────
-  it("C6 chat vs form: same person, two paths (policy: one draft + one submit path; NOT implemented, only recorded)", async () => {
+  it("C6 chat vs form: same person — one draft binding, one server submit path (LISTING-E2E-01)", async () => {
     needFns();
     await buildQualifiedChat(UID_A, { contact: true });
     const chat = await createCase(UID_A, { confirmed: true });
@@ -364,21 +371,20 @@ describe("CHAT-TEST-01: chat + draft path (synthetic, emulator, stubbed model)",
     // LISTING-E2E-01: the browser can no longer create a Case directly; the form submits through submitListingCase (server).
     rec("C6a", "form-style anonymous direct create is now REFUSED by rules (closed by LISTING-E2E-01; the form uses submitListingCase)", !f.allowed ? "CONTROL" : "CONTROL-FAILED", f.allowed ? "allowed" : "denied with " + f.error.code);
     assert.ok(!f.allowed);
-    // For the two-path comparison below, simulate the legacy form document with the Admin SDK.
-    await admin.firestore().doc("properties/" + formId).set(formDocData);
-    const same = await admin.firestore().collection("properties").where("ownerContact", "==", CONTACT).get();
-    const ids = same.docs.map((d) => d.id);
-    const formDoc = (await admin.firestore().doc("properties/" + formId).get()).data();
-    const linked = formDoc.conversationId || formDoc.draftId || (formDoc.linkedCaseIds || []).length;
-    rec("C6b", "same contact via chat and via form => TWO separate cases, no link between them (policy 'one draft/one path/no duplicate case' NOT implemented)",
-      same.size === 2 && !linked ? "GAP-CONFIRMED" : "GAP-NOT-REPRODUCED", "cases=" + same.size + " ids=" + ids.join(",") + " chatCase=" + chat.propertyId + " formCase.conversationId=" + formDoc.conversationId);
+    // LISTING-E2E-01: the chat Case and the form share ONE draft (draft__<uid>): the form's server path (submitListingCase)
+    // completes the Case the chat opened instead of opening a second one (tests/listing/e2e.test.js "E2E-CHAT").
+    const draftLinked = (await admin.firestore().doc("propertyDrafts/" + draftId(UID_A)).get()).data();
+    rec("C6b", "chat Case is bound to the visitor's draft (draft.caseId) so the form completes it instead of opening a second Case (fixed by LISTING-E2E-01; proof in tests/listing/e2e.test.js E2E-CHAT)",
+      draftLinked.caseId === chat.propertyId ? "CONTROL" : "CONTROL-FAILED", "draft.caseId=" + draftLinked.caseId + " chatCase=" + chat.propertyId);
+    assert.strictEqual(draftLinked.caseId, chat.propertyId);
     // No merge was attempted by this test or by the code under test.
     // source checks
     const osub = read("Owner Submission.dc.html");
     const rail = read("ContactRail.dc.html");
-    const formReadsDraft = /propertyDraft|getPropertyDraft|receptionTurn|conversationId/.test(osub);
+    const formReadsDraft = /submitListingCase/.test(osub); // the form submits through the server path, which binds the draft by uid
     const railPlainNav = /_navigate\(\s*"Owner Submission\.dc\.html"\s*\)/.test(rail) && !/Owner Submission\.dc\.html\?/.test(rail);
-    rec("C6c", "source: Owner Submission form does not read the chat draft or conversation id", !formReadsDraft ? "GAP-CONFIRMED" : "GAP-NOT-REPRODUCED", "form references draft/conversation: " + formReadsDraft);
+    rec("C6c", "source: Owner Submission form submits through submitListingCase (server binds the chat draft by uid) — fixed by LISTING-E2E-01", formReadsDraft ? "CONTROL" : "CONTROL-FAILED", "uses submitListingCase: " + formReadsDraft);
+    assert.ok(formReadsDraft);
     rec("C6d", "source: chat 'List property' button opens the form with NO draft/conversation parameter", railPlainNav ? "GAP-CONFIRMED" : "GAP-NOT-REPRODUCED", "plain navigate: " + railPlainNav);
   });
 

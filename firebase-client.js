@@ -123,7 +123,10 @@ export function mergeCaseInternal(rows, internalById) {
     const i = internalById && internalById[p.id];
     if (!i) return p;
     const { propertyId, createdAt, ...rest } = i; // eslint-disable-line no-unused-vars
-    return { ...p, ...rest };
+    const merged = { ...p, ...rest };
+    // a chat-created Case keeps the customer's free-text summary internally; Staff's own description (public) wins once written
+    if (!p.description && rest.chatRequirementsSummary) merged.description = rest.chatRequirementsSummary;
+    return merged;
   });
 }
 async function attachCaseInternal(rows) {

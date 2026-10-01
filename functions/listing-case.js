@@ -170,9 +170,10 @@ async function submitListingCase({ admin, HttpsError, request }) {
   const actor = await resolveActor(admin, request, HttpsError);
   const v = validateSubmission(request.data, actor, HttpsError);
   const db = admin.firestore();
-  const caseId = caseIdFor(actor.uid, v.key);
-  const caseRef = db.collection("properties").doc(caseId);
-  const intRef = db.collection("caseInternal").doc(caseId);
+  let caseId = caseIdFor(actor.uid, v.key);
+  let caseRef = db.collection("properties").doc(caseId);
+  let intRef = db.collection("caseInternal").doc(caseId);
+  let completing = false, existingToken = ""; // true: the form completes a Case the chat already opened (one draft → one Case)
   const draftId = "draft__" + actor.uid;
   const draftRef = db.collection("propertyDrafts").doc(draftId);
 
@@ -192,7 +193,14 @@ async function submitListingCase({ admin, HttpsError, request }) {
     const [o, oi] = await Promise.all([db.collection("properties").doc(String(draft.caseId)).get(), db.collection("caseInternal").doc(String(draft.caseId)).get()]);
     const od = Object.assign({}, o.exists ? o.data() : {}, oi.exists ? oi.data() : {});
     if (o.exists && (od.submittedByUid === actor.uid || od.receptionVisitorId === actor.uid)) {
-      return okResult(String(draft.caseId), od, { linkedFromDraft: true });
+      if (od.formCompletedKey === v.key) return okResult(String(draft.caseId), od, { linkedFromDraft: true });
+      // A lead the chat opened (no photos, no price yet) is COMPLETED by the form on the same Case — the form's data is
+      // not thrown away and no second Case is opened. A Case that is already complete / past "pending" is returned as is.
+      if (od.caseSource === "ai_assistant" && !od.formCompletedKey && od.listingStatus === "pending" && od.internalSplit === true && oi.exists) {
+        completing = true; existingToken = String(od.trackToken || ""); caseId = String(draft.caseId); caseRef = o.ref; intRef = oi.ref;
+      } else {
+        return okResult(String(draft.caseId), od, { linkedFromDraft: true });
+      }
     }
   }
 
@@ -244,9 +252,22 @@ async function submitListingCase({ admin, HttpsError, request }) {
   try {
     await db.runTransaction(async (t) => {
       const again = await t.get(caseRef);
-      if (again.exists) throw new HttpsError("aborted", "concurrent_duplicate", { reason: "concurrent_duplicate" });
-      t.create(caseRef, pub);
-      t.create(intRef, Object.assign({ propertyId: caseId, createdAt: now }, priv));
+      if (completing) {
+        const cur = await t.get(intRef);
+        if (!again.exists || !cur.exists || (cur.data() || {}).formCompletedKey) throw new HttpsError("aborted", "concurrent_duplicate", { reason: "concurrent_duplicate" });
+        // only what the form adds; the Case's identity, status, token, assignment and conversation link stay untouched
+        const keepPub = ["status", "type", "condition", "price", "description", "locationProvided", "locationFollowUpNeeded", "photoCount", "photoStandard", "area"];
+        const keepPriv = ["coordsRaw", "contactName", "contactPhone", "contactEmail", "propertyOwnerRelation", "ownerContact", "ownerName", "ownershipDocPath", "submissionKey", "customerLanguage"];
+        const pubUp = {}, privUp = { formCompletedKey: v.key, formCompletedAt: now };
+        keepPub.forEach((k) => { if (k in pub) pubUp[k] = pub[k]; });
+        keepPriv.forEach((k) => { if (k in priv) privUp[k] = priv[k]; });
+        t.update(caseRef, pubUp);
+        t.update(intRef, privUp);
+      } else {
+        if (again.exists) throw new HttpsError("aborted", "concurrent_duplicate", { reason: "concurrent_duplicate" });
+        t.create(caseRef, pub);
+        t.create(intRef, Object.assign({ propertyId: caseId, createdAt: now }, priv));
+      }
       photoDocs.forEach((p) => t.set(db.collection("casePhotos").doc(caseId + "-" + p.index), {
         propertyId: caseId, index: p.index, dataUrl: p.dataUrl, storagePath: p.storagePath,
         uploadedByUid: actor.uid, uploadedByRole: actor.role, uploadedAt: now,
@@ -266,7 +287,7 @@ async function submitListingCase({ admin, HttpsError, request }) {
   try { // best-effort audit trail; never blocks a submission that already succeeded
     await db.collection("activityLog").add({ type: "case_submitted", propertyId: caseId, byUid: actor.uid, byRole: actor.role, byEmail: actor.email || "", at: now, summary: "ส่งเรื่อง " + caseId + " (" + actor.role + ")" });
   } catch (e) { console.warn("activityLog (case_submitted) not written", caseId); }
-  return { created: true, alreadyExisted: false, propertyId: caseId, trackToken, photoCount: photoDocs.length };
+  return { created: !completing, completedChatCase: completing, alreadyExisted: false, propertyId: caseId, trackToken: completing ? existingToken : trackToken, photoCount: photoDocs.length };
 }
 
 // ── publish / take down (Owner only) ───────────────────────────────────────

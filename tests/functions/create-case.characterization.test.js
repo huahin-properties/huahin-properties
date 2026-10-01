@@ -64,18 +64,23 @@ describe("SEC-TEST-01 B: createCaseFromConversation characterization (synthetic,
     return true;
   }
 
-  it("B1 the Case the Function creates is anonymously readable with contact + trackToken", async () => {
+  it("B1 the Case the Function creates keeps contact + trackToken out of the public document (LISTING-E2E-01)", async () => {
     needFns();
     const res = await callCreate(VISITOR, { confirmed: true });
     assert.strictEqual(res.created, true, "Function did not create a case: " + JSON.stringify(res));
-    const stored = (await admin.firestore().doc("properties/" + res.propertyId).get()).data();
+    const pub = (await admin.firestore().doc("properties/" + res.propertyId).get()).data();
+    const internal = (await admin.firestore().doc("caseInternal/" + res.propertyId).get()).data();
+    const stored = Object.assign({}, pub, internal);
     const present = ["contactName", "ownerContact", "trackToken", "conversationId", "receptionVisitorId"].filter((f) => stored[f]);
     // Only a rules denial may be reported as "not reproduced"; any other error fails the test.
     const anonRead = await attempt(testEnv.unauthenticatedContext().firestore().doc("properties/" + res.propertyId).get());
     const exposed = anonRead.allowed && anonRead.value.exists ? present.filter((f) => anonRead.value.data()[f]) : [];
-    record_("B1", "chat-created Case: contact/trackToken stored on the properties doc and readable by anonymous",
-      exposed.length ? "GAP-CONFIRMED" : "GAP-NOT-REPRODUCED",
-      "stored fields: " + present.join(",") + "; anonymously readable: " + (anonRead.allowed ? exposed.join(",") : "denied with " + anonRead.error.code) + "; listingStatus=" + stored.listingStatus + ", source=" + stored.source);
+    const anonInternal = await attempt(testEnv.unauthenticatedContext().firestore().doc("caseInternal/" + res.propertyId).get());
+    // LISTING-E2E-01: the same fields are now stored in caseInternal and are NOT readable by an anonymous visitor.
+    record_("B1", "chat-created Case: contact/trackToken live in caseInternal (not on the public properties doc) — fixed by LISTING-E2E-01",
+      exposed.length === 0 && present.length === 5 && !anonInternal.allowed ? "CONTROL" : "CONTROL-FAILED",
+      "stored (internal): " + present.join(",") + "; anonymously readable on properties: " + (anonRead.allowed ? (exposed.join(",") || "none") : "denied with " + anonRead.error.code) + "; caseInternal anonymous read: " + (anonInternal.allowed ? "ALLOWED" : "denied") + "; listingStatus=" + pub.listingStatus + ", source=" + pub.source);
+    assert.ok(exposed.length === 0 && present.length === 5 && !anonInternal.allowed);
   });
 
   it("B2 internal provenance message is NOT customer-visible and carries no token", async () => {
@@ -92,7 +97,7 @@ describe("SEC-TEST-01 B: createCaseFromConversation characterization (synthetic,
     needFns();
     const a = await callCreate(VISITOR, { confirmed: true });
     const b = await callCreate(VISITOR, { confirmed: true });
-    const cases = await admin.firestore().collection("properties").where("conversationId", "==", CONV).get();
+    const cases = await admin.firestore().collection("caseInternal").where("conversationId", "==", CONV).get();
     const ok = a.created && b.created && b.alreadyExisted === true && a.propertyId === b.propertyId && cases.size === 1;
     record_("B3", "repeat confirm => same case id, no duplicate", ok ? "CONTROL" : "CONTROL-FAILED", "cases for conversation=" + cases.size);
     assert.ok(ok);
