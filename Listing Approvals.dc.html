@@ -231,7 +231,7 @@
                             </sc-for>
                           </select>
                           <div style="display:flex; gap:7px; flex-wrap:wrap;">
-                            <div onClick="{{ r.onApprove }}" style="background:oklch(40% 0.11 150); color:white; padding:7px 16px; border-radius:100px; font-size:11.5px; font-weight:700; cursor:pointer;">✓ อนุมัติ</div>
+                            <div onClick="{{ r.onIntakeApprove }}" style="background:oklch(40% 0.11 150); color:white; padding:7px 16px; border-radius:100px; font-size:11.5px; font-weight:700; cursor:pointer;">✓ อนุมัติ</div>
                             <div onClick="{{ r.onReturn }}" style="background:white; border:1px solid oklch(80% 0.09 27); color:oklch(45% 0.17 27); padding:7px 15px; border-radius:100px; font-size:11.5px; font-weight:600; cursor:pointer;">↩️ ส่งกลับให้แก้</div>
                             <div onClick="{{ r.onMoreInfo }}" style="background:white; border:1px solid oklch(84% 0.06 75); color:oklch(45% 0.12 70); padding:7px 15px; border-radius:100px; font-size:11.5px; font-weight:600; cursor:pointer;">＋ ขอข้อมูลเพิ่ม</div>
                           </div>
@@ -1078,7 +1078,8 @@ class Component extends DCLogic {
       onReviewNote: (e) => this.setState((s2) => ({ reviewNote: { ...s2.reviewNote, [p.id]: e.target.value } })),
       reviewStepKey: this.state.reviewStepKey[p.id] || (ev.steps[0] ? ev.steps[0].stepKey : ""),
       onReviewStepKey: (e) => this.setState((s2) => ({ reviewStepKey: { ...s2.reviewStepKey, [p.id]: e.target.value } })),
-      onApprove: () => this.decide(p, "approved"),
+      // (named onIntakeApprove: the card's own onApprove — the PUBLISH approval — is spread after these values and used to replace this one, so the panel button published instead of recording the intake decision)
+      onIntakeApprove: () => this.decide(p, "approved"),
       onReturn: () => this.decide(p, "returned"),
       onMoreInfo: () => this.decide(p, "more_info"),
       hasReviewErr: !!this.state.reviewErr[p.id],

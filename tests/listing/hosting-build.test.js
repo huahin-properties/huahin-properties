@@ -145,4 +145,13 @@ describe("LISTING-E2E-01 TEST-only hosting build (no network, nothing deployed)"
     fs.writeFileSync(path.join(out, "zz.html"), '<a href="Nowhere Page.dc.html">x</a>');
     const again = /["'`=(]\s*\.?\/?([A-Za-z][A-Za-z0-9 %_-]*\.dc\.html)/.exec(fs.readFileSync(path.join(out, "zz.html"), "utf8")); assert.ok(again && !have.has(again[1]), "negative control");
   });
+
+  it("H9 the TEST build never falls back to the bundled sample catalogue after a load failure; the production source keeps its fallback; data helpers wait (bounded) for the SDK part they need", () => {
+    const d = out(); made.push(d); build(CFG, d);
+    assert.ok(/const SAMPLE_FALLBACK_ON_ERROR = true;/.test(fs.readFileSync(path.join(ROOT, "data.js"), "utf8")), "production source unchanged");
+    assert.ok(/const SAMPLE_FALLBACK_ON_ERROR = false;/.test(fs.readFileSync(path.join(d, "data.js"), "utf8")), "TEST build: no sample fallback");
+    const fc = fs.readFileSync(path.join(ROOT, "firebase-client.js"), "utf8");
+    for (const part of ["firestore", "app", "auth"]) assert.ok(fc.includes('await whenSdkPart("' + part + '")'), "waits for the " + part + " part");
+    assert.ok(/sdk-timeout/.test(fc) && /budgetMs \|\| 8000/.test(fc), "bounded (8 s) with a distinct error code");
+  });
 });

@@ -87,12 +87,31 @@ export function whenFirebaseReady() {
   return p;
 }
 
+// LISTING-E2E-01 (O1): the SDK <script> tags in <helmet> are inserted by the runtime and nothing else waits for them, so the FIRST read of a public page
+// could run before window.firebase.<part> existed and fail ("Firebase SDK not loaded"). Data helpers wait for the one part they need — bounded
+// (50 ms steps, 8 s), rejecting with code "sdk-timeout" so the caller shows an error state instead of guessing. No automatic reload anywhere.
+export function whenSdkPart(part, budgetMs) {
+  const limit = budgetMs || 8000;
+  return new Promise((resolve, reject) => {
+    let waited = 0;
+    const poll = () => {
+      const f = window.firebase;
+      if (f && typeof f[part] === "function" && typeof f.initializeApp === "function") { resolve(f); return; }
+      waited += 50;
+      if (waited >= limit) { const err = new Error("Firebase SDK part '" + part + "' not ready after " + limit + " ms"); err.code = "sdk-timeout"; reject(err); return; }
+      setTimeout(poll, 50);
+    };
+    poll();
+  });
+}
+
 function db() { return getApp().firestore(); }
 function storageRef() { return getApp().storage(); }
 
 // ── Firestore helpers ───────────────────────────────────────────────────
 
 export async function fetchCollection(name) {
+  await whenSdkPart("firestore");
   const snap = await db().collection(name).get();
   const rows = snap.docs.map((d) => ({ ...d.data(), id: d.id }));
   return name === "properties" ? attachCaseRecords(rows) : rows;
@@ -2714,6 +2733,7 @@ export async function createNotificationEvent(evt) {
 // ── LISTING-E2E-01: the single submit path + Owner publish, called through Cloud Functions ─────────
 const FN_COMPAT_SRC = "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js";
 async function _functionsApp() {
+  await whenSdkPart("app");
   const app = getApp();
   if (typeof app.functions !== "function") {
     await new Promise((resolve, reject) => {
@@ -2736,6 +2756,7 @@ export async function callFn(name, data) {
 // Signs the visitor in anonymously when nobody is signed in, and returns the uid. A signed-in
 // member/team account is left untouched (their role is derived by the server from their account).
 export async function ensureSignedIn() {
+  await whenSdkPart("auth");
   const a = authApp();
   if (a.currentUser) return a.currentUser.uid;
   const cred = await a.signInAnonymously();

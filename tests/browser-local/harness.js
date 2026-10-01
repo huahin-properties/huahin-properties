@@ -93,6 +93,11 @@ async function newContext(browser, site, opts) {
     }
     if (PROD.test(url) || PROD.test(host)) log.prodHits.push(url);
     const v = vendorFor(url);
+    // fault injection for the first-load tests: ctx.__fault = { delayMs, failFirebase } applies to the Firebase SDK scripts only
+    if (v && /firebase-/.test(v.file) && ctx.__fault) {
+      if (ctx.__fault.failFirebase) { log.vendor.push({ url, note: "FAILED (injected)" }); return route.abort("failed"); }
+      if (ctx.__fault.delayMs) await new Promise((r) => setTimeout(r, ctx.__fault.delayMs));
+    }
     if (v && fs.existsSync(v.file)) { log.vendor.push({ url, note: v.note || "" }); return route.fulfill({ status: 200, contentType: "application/javascript", headers: { "access-control-allow-origin": "*" }, body: fs.readFileSync(v.file) }); }
     if (/fonts\.(googleapis|gstatic)\.com/.test(host)) { log.fonts.push(url); return route.fulfill({ status: 200, contentType: "text/css", body: "/* local test: fonts blocked */" }); }
     log.external.push(url); return route.abort("blockedbyclient");
@@ -101,12 +106,13 @@ async function newContext(browser, site, opts) {
 }
 // every page collects console errors, page errors, failed requests and HTTP >= 400 responses
 function watch(page, name) {
-  const L = { name, console: [], pageerrors: [], failed: [], bad: [], images: [] };
+  const L = { name, console: [], pageerrors: [], failed: [], bad: [], images: [], storage: [], navs: [] };
+  page.on("framenavigated", (f) => { if (f === page.mainFrame()) L.navs.push(f.url()); });
   page.__logs = L;
   page.on("console", (m) => { if (["error", "warning"].includes(m.type())) L.console.push(m.type() + ": " + m.text().slice(0, 300)); });
   page.on("pageerror", (e) => L.pageerrors.push(String(e && e.message || e).slice(0, 300)));
   page.on("requestfailed", (r) => L.failed.push(r.method() + " " + r.url().slice(0, 160) + " :: " + (r.failure() && r.failure().errorText)));
-  page.on("response", (r) => { const s = r.status(); const u = r.url(); if (s >= 400) L.bad.push(s + " " + r.request().method() + " " + u.slice(0, 160)); if (r.request().resourceType() === "image") L.images.push({ url: u.slice(0, 140), status: s }); });
+  page.on("response", (r) => { const s = r.status(); if (/firebasestorage\.googleapis\.com\/v0\/b\//.test(r.url())) L.storage.push({ status: s, url: r.url(), kind: r.request().resourceType() }); const u = r.url(); if (s >= 400) L.bad.push(s + " " + r.request().method() + " " + u.slice(0, 160)); if (r.request().resourceType() === "image") L.images.push({ url: u.slice(0, 140), status: s }); });
   return L;
 }
 

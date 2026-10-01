@@ -827,13 +827,31 @@ export function toPublicProperty(p) {
   return out;
 }
 
+// What a public page shows when the backend can not be read. true (production, unchanged): the bundled sample catalogue. The listing TEST build sets it to false
+// (tools/build-listing-test.js) so sample properties can never pass for real listings after an SDK delay or backend failure: the page gets an EMPTY list, an
+// explicit state in window.__hhDataLoad and a visible notice instead.
+const SAMPLE_FALLBACK_ON_ERROR = true;
+function reportLoadFailure(e) {
+  try {
+    window.__hhDataLoad = { state: "failed", code: (e && e.code) || "error", message: String((e && e.message) || e).slice(0, 200) };
+    if (typeof document !== "undefined" && document.body && !document.getElementById("hh-data-load-failed")) {
+      const n = document.createElement("div"); n.id = "hh-data-load-failed"; n.setAttribute("role", "alert");
+      n.style.cssText = "position:fixed;left:0;right:0;top:0;z-index:2147483000;background:#7a1f2b;color:#fff;padding:10px 16px;font:14px sans-serif;text-align:center;";
+      n.textContent = "โหลดข้อมูลประกาศไม่สำเร็จ — กรุณารีเฟรชหน้านี้ (Could not load listings — please refresh)";
+      document.body.appendChild(n);
+    }
+  } catch (x) { /* never let the notice break the page */ }
+}
+
 export async function getEffectiveProperties(mod) {
   try {
     const fb = await import("./firebase-client.js");
+    if (typeof window !== "undefined") window.__hhDataLoad = { state: "loading" };
     const [properties, allPhotos] = await Promise.all([
       fb.fetchCollection("properties"),
       fb.fetchAllPhotos(),
     ]);
+    if (typeof window !== "undefined") window.__hhDataLoad = { state: "ok" };
     if (!properties || !properties.length) return mod.PROPERTIES;
     // "live" is the only publicly-visible state under the trial/expiry/
     // approval model (pending/expired/rejected all hidden). Listings saved
@@ -878,8 +896,10 @@ export async function getEffectiveProperties(mod) {
     const staticOnly = (mod.PROPERTIES || []).filter((p) => !firestoreIds.has(p.id));
     return [...fromFirestore, ...staticOnly];
   } catch (e) {
-    console.warn("getEffectiveProperties: Firebase fetch failed, using bundled sample data:", e);
-    return mod.PROPERTIES;
+    if (SAMPLE_FALLBACK_ON_ERROR) { console.warn("getEffectiveProperties: Firebase fetch failed, using bundled sample data:", e); return mod.PROPERTIES; }
+    console.warn("getEffectiveProperties: Firebase fetch failed, showing an error state (no sample data):", e);
+    reportLoadFailure(e);
+    return [];
   }
 }
 

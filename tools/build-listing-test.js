@@ -124,6 +124,9 @@ function build(config, outDir, root, opts) {
   for (const f of files) out[f] = fs.readFileSync(path.join(root, f));
   const txt = (f) => out[f].toString("utf8");
 
+  // data.js — in the TEST build a backend failure / SDK delay shows an error state, never the bundled sample catalogue as if it were real listings
+  out["data.js"] = Buffer.from(replaceExact(txt("data.js"), "const SAMPLE_FALLBACK_ON_ERROR = true;", "const SAMPLE_FALLBACK_ON_ERROR = false;", "data.js", "sample fallback switch"));
+
   // firebase-client.js — config block + every Function host + production-only defaults
   let fc = txt("firebase-client.js");
   const cfgRe = /const firebaseConfig = \{[\s\S]*?\n\};/;
