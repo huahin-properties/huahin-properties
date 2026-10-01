@@ -2725,6 +2725,8 @@ async function _stagingPhotoExists(path) {
   try { await storageRef().ref().child(path).getMetadata(); return true; } catch (e) { return false; }
 }
 export const submitListingCase = (data) => callFn("submitListingCase", data);
+export const getPropertyDraft = () => callFn("getPropertyDraft", {});
+export const updatePropertyDraft = (fields) => callFn("updatePropertyDraft", { fields });
 export const publishListingCase = (propertyId) => callFn("publishListingCase", { propertyId: String(propertyId) });
 export const unpublishListingCase = (propertyId, reason) => callFn("unpublishListingCase", { propertyId: String(propertyId), reason: reason || "" });
 export const trackListingCase = (id, token, extra) => callFn("trackListingCase", Object.assign({ id, token }, extra || {}));
