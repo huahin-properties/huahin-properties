@@ -18,3 +18,15 @@ export function splitCaseFields(obj) {
   Object.keys(obj || {}).forEach((k) => { (PRIVATE_SET.has(k) ? priv : pub)[k] = obj[k]; });
   return { pub, priv };
 }
+
+// Mirror of functions/case-fields.js PUBLIC_FIELDS (the allow-list the SERVER projects to the public page). The browser only uses it to decide
+// whether an edit to a published Case needs to be re-projected. tests/listing/sync.test.js compares the two.
+export const PUBLIC_FIELDS = [
+  "type", "status", "condition", "price", "currency", "area", "subdistrict", "zone",
+  "bedrooms", "bathrooms", "poolSize", "parking", "titleDeed", "kitchenTypes", "purchaseOptions",
+  "projectStatus", "projectName", "poolStatus", "furnishing", "commercialSubtype", "yearBuilt", "floor", "floors",
+  "commonFee", "foreignQuota", "landShape", "roadWidth", "landCondition", "utilities", "zoningColor", "electricalPhase",
+  "landRai", "landNgan", "landWah", "livingArea", "landSize",
+  "title", "shortDesc", "fullDesc", "description", "features", "collections", "seoTags", "seo",
+  "mapLink", "mapDisplayMode", "distanceBeach", "distanceTown", "publicPropertyCode", "vipTier",
+];

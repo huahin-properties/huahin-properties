@@ -11,7 +11,7 @@
 // data), and Storage holds uploaded photos served from a fast CDN URL —
 // replacing the browser-only localStorage + local-file demo used earlier.
 
-import { PRIVATE_FIELDS } from "./case-fields.js";
+import { PRIVATE_FIELDS, PUBLIC_FIELDS } from "./case-fields.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCTfx0ucOxEvfcP15Gf-SJEXRS-_-F1oWQ",
@@ -242,7 +242,7 @@ export async function setDoc(collectionName, id, data) {
   if (collectionName === "properties" && (await _isSplitCase(id))) {
     await db().collection("caseInternal").doc(String(id)).set(data, { merge: true });
     // keys that can change what the public sees → ask the server to re-project (no-op when the Case is not live)
-    if (data && typeof data === "object" && !Object.keys(data).every((k) => ["updatedAt", "lastStaffMessageAt", "staffLastReadAt"].includes(k))) await _syncIfLive(id);
+    if (data && typeof data === "object" && Object.keys(data).some((k) => PUBLIC_FIELDS.includes(k))) await _syncIfLive(id);
     return;
   }
   await db().collection(collectionName).doc(String(id)).set(data, { merge: true });

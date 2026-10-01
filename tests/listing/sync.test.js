@@ -12,6 +12,8 @@ describe("LISTING-E2E-01 sync + Staff photo gate", () => {
     assert.deepStrictEqual(b.PRIVATE_FIELDS, s.PRIVATE_FIELDS);
     const sample = { type: "house", price: 1, contactPhone: "x", trackToken: "t", approvedByUid: "u", title: "t" };
     assert.deepStrictEqual(b.splitCaseFields(sample), s.splitCaseFields(sample));
+    assert.deepStrictEqual(b.PUBLIC_FIELDS, s.PUBLIC_FIELDS, "the public allow-list differs between browser and server");
+    assert.ok(!b.PUBLIC_FIELDS.some((k) => b.PRIVATE_FIELDS.includes(k)), "a field is both public and private");
   });
   it("Y2 photo-standard.js (browser) == functions/photo-standard.js (server) == BLUEPRINT §32 numbers", async () => {
     const b = await esm("photo-standard.js"), s = require("../../functions/photo-standard.js");
