@@ -22,7 +22,7 @@
 
 const nodeCrypto = require("crypto");
 const { PHOTO_STANDARD, photoStandardFor } = require("./photo-standard");
-const { splitCaseFields } = require("./case-fields");
+const { projectPublic, publicTextProblems } = require("./case-fields");
 
 // The original hard-coded Owner uid (same value as firestore.rules / storage.rules).
 const OWNER_UID = "n7TZKSBscPXE1kRU8WzYpsqJh2g2";
@@ -179,7 +179,20 @@ async function copyPrivate(bucket, src, dst) {
 }
 async function deleteIfExists(bucket, path) { try { await bucket.file(path).delete(); } catch (e) { /* already gone */ } }
 
+// ── the Case record ────────────────────────────────────────────────────────
+// A Case lives in caseInternal/{id} (team-only). properties/{id} is NOT the Case any more: it is the public
+// projection, created by publishListingCase from an explicit allow-list and deleted again on take-down. A pending,
+// draft or offline Case therefore has no public document at all.
+const casePhotoDocs = async (db, id) => (await db.collection("casePhotos").where("propertyId", "==", id).get()).docs.map((d) => d.data()).sort((a, b) => a.index - b.index);
+const sigOf = (photos) => nodeCrypto.createHash("sha256").update(photos.map((p) => p.index + ":" + p.storagePath).join("|")).digest("hex");
 const okResult = (id, c, extra) => Object.assign({ created: false, alreadyExisted: true, propertyId: id, trackToken: (c && c.trackToken) || "", photoCount: Number(c && c.photoCount) || 0 }, extra || {});
+// test seam: lets the fault/concurrency tests run code at a precise point (never set in production)
+const hooks = {};
+async function hook(name, ctx) { if (typeof hooks[name] === "function") await hooks[name](ctx); }
+
+async function deletePrefix(bucket, prefix) {
+  try { const [files] = await bucket.getFiles({ prefix }); await Promise.all(files.map((f) => f.delete().catch(() => {}))); } catch (e) { /* nothing to remove */ }
+}
 
 // ── submitListingCase ──────────────────────────────────────────────────────
 async function submitListingCase({ admin, HttpsError, request }) {
@@ -188,36 +201,31 @@ async function submitListingCase({ admin, HttpsError, request }) {
   const v = validateSubmission(request.data, actor, HttpsError);
   const db = admin.firestore();
   let caseId = caseIdFor(actor.uid, v.key);
-  let caseRef = db.collection("properties").doc(caseId);
   let intRef = db.collection("caseInternal").doc(caseId);
-  let completing = false, existingToken = ""; // true: the form completes a Case the chat already opened (one draft → one Case)
+  let completing = false, existingToken = ""; // true: the form completes a Case the chat already opened
   const draftId = "draft__" + actor.uid;
   const draftRef = db.collection("propertyDrafts").doc(draftId);
 
-  // 1) The same submission again (double click / refresh / retry) → the existing Case.
-  const [exSnap, exInt] = await Promise.all([caseRef.get(), intRef.get()]);
-  if (exSnap.exists) {
-    const ci = exInt.exists ? (exInt.data() || {}) : {};
+  // 1) The same submission again (double click / refresh / retry / lost response) → the existing Case. Nothing is touched.
+  const exInt = await intRef.get();
+  if (exInt.exists) {
+    const ci = exInt.data() || {};
     if (ci.submittedByUid !== actor.uid) throw new HttpsError("already-exists", "case_id_taken", { reason: "case_id_taken" });
-    return okResult(caseId, Object.assign({}, exSnap.data(), ci));
+    return okResult(caseId, ci);
   }
 
   // 2) One draft, one Case — bound by the draft's own id (draft__<uid>), never by a name or a phone.
-  //    If the chat already turned this visitor's draft into a Case, no second Case is opened.
   const draftSnap = await draftRef.get();
   const draft = draftSnap.exists ? (draftSnap.data() || {}) : null;
   if (draft && draft.caseId && String(draft.caseId) !== caseId) {
-    const [o, oi] = await Promise.all([db.collection("properties").doc(String(draft.caseId)).get(), db.collection("caseInternal").doc(String(draft.caseId)).get()]);
-    const od = Object.assign({}, o.exists ? o.data() : {}, oi.exists ? oi.data() : {});
-    if (o.exists && (od.submittedByUid === actor.uid || od.receptionVisitorId === actor.uid)) {
+    const oi = await db.collection("caseInternal").doc(String(draft.caseId)).get();
+    const od = oi.exists ? (oi.data() || {}) : {};
+    if (oi.exists && (od.submittedByUid === actor.uid || od.receptionVisitorId === actor.uid)) {
       if (od.formCompletedKey === v.key) return okResult(String(draft.caseId), od, { linkedFromDraft: true });
-      // A lead the chat opened (no photos, no price yet) is COMPLETED by the form on the same Case — the form's data is
-      // not thrown away and no second Case is opened. A Case that is already complete / past "pending" is returned as is.
-      if (od.caseSource === "ai_assistant" && !od.formCompletedKey && od.listingStatus === "pending" && od.internalSplit === true && oi.exists) {
-        completing = true; existingToken = String(od.trackToken || ""); caseId = String(draft.caseId); caseRef = o.ref; intRef = oi.ref;
-      } else {
-        return okResult(String(draft.caseId), od, { linkedFromDraft: true });
-      }
+      // A lead the chat opened (no photos, no price yet) is COMPLETED by the form on the same Case.
+      if (od.caseSource === "ai_assistant" && !od.formCompletedKey && od.listingStatus === "pending") {
+        completing = true; existingToken = String(od.trackToken || ""); caseId = String(draft.caseId); intRef = oi.ref;
+      } else return okResult(String(draft.caseId), od, { linkedFromDraft: true });
     }
   }
 
@@ -225,86 +233,96 @@ async function submitListingCase({ admin, HttpsError, request }) {
   const std = photoStandardFor(v.type);
   if (v.photoPaths.length < std.min) throw new HttpsError("failed-precondition", "photos_below_minimum", { reason: "photos_below_minimum", min: std.min, have: v.photoPaths.length });
 
-  // 4) Verify every photo is a stored image in the caller's own staging folder; copy to the private per-case folder.
+  // 4) Verify every photo is a stored image in the caller's own staging folder and copy it to a PRIVATE folder that belongs
+  //    to THIS attempt only (casePhotos/<case>/a-<attempt>/<n>.webp). An attempt never writes to a path another attempt
+  //    uses, so a competing or failed request can not alter the photos of the Case that won (see reconcile below).
   const bucket = bucketFor(admin);
+  const attempt = "a-" + nodeCrypto.randomBytes(6).toString("hex");
+  const attemptPrefix = "casePhotos/" + caseId + "/" + attempt + "/";
   const photoDocs = [];
-  for (let i = 0; i < v.photoPaths.length; i++) {
-    await assertImageObject(bucket, v.photoPaths[i], HttpsError);
-    const dst = "casePhotos/" + caseId + "/" + i + ".webp";
-    photoDocs.push({ index: i, storagePath: dst, dataUrl: await copyPrivate(bucket, v.photoPaths[i], dst) });
-  }
   let ownershipDocStoragePath = "";
-  if (v.ownershipDocPath) {
-    await assertImageObject(bucket, v.ownershipDocPath, HttpsError);
-    ownershipDocStoragePath = "caseAttachments/" + caseId + "/ownership-document.webp"; // existing team-only path
-    await copyPrivate(bucket, v.ownershipDocPath, ownershipDocStoragePath);
-  }
-
-  // 5) Create the Case (public-safe), its internal record and its private photo records atomically.
-  const now = Date.now();
-  const trackToken = nodeCrypto.randomBytes(24).toString("hex");
-  const caseSourceByRole = { external: "owner_form", agent: "agent_form", staff: "staff_form", owner: "owner_form" };
-  const coordsOk = /^\s*-?\d{1,3}(\.\d+)?\s*,\s*-?\d{1,3}(\.\d+)?\s*$/.test(v.coordsRaw);
-  const flat = {
-    source: "owner_submission", // capability key in firestore.rules and ~15 behaviours of Listing Approvals
-    caseSource: caseSourceByRole[actor.role] || "owner_form",
-    listingStatus: "pending", reviewStatus: "submitted", workflowVersion: "intake_v1", internalSplit: true,
-    status: v.txnType, type: v.type, condition: v.condition, price: v.price, description: v.description,
-    locationProvided: coordsOk, locationFollowUpNeeded: !coordsOk,
-    photoCount: photoDocs.length, photoStandard: { min: std.min, target: std.target },
-    submittedAt: now, isDraft: false,
-    ...(v.area ? { area: v.area } : {}),
-    ...(actor.role === "agent" ? { listerId: actor.uid } : {}),
-    // ── internal (split out below) ──
-    coordsRaw: v.coordsRaw,
-    contactName: v.submitter.name, contactPhone: v.submitter.phone, contactEmail: v.submitter.email,
-    submittedByRole: actor.role, submittedByUid: actor.uid, submittedByLabel: actor.label || v.submitter.name,
-    propertyOwnerRelation: v.propertyOwner.relation, ownerContact: v.propertyOwner.contact,
-    ...(v.propertyOwner.name ? { ownerName: v.propertyOwner.name } : {}),
-    ...(ownershipDocStoragePath ? { ownershipDocPath: ownershipDocStoragePath } : {}),
-    submissionKey: v.key, customerLanguage: v.language, trackToken,
-    ...(draft ? { draftId } : {}),
-  };
-  const { pub, priv } = splitCaseFields(flat);
+  const abandon = async () => { await deletePrefix(bucket, attemptPrefix); if (ownershipDocStoragePath) await deleteIfExists(bucket, ownershipDocStoragePath + "." + attempt); };
   try {
+    for (let i = 0; i < v.photoPaths.length; i++) {
+      await assertImageObject(bucket, v.photoPaths[i], HttpsError);
+      const dst = attemptPrefix + i + ".webp";
+      photoDocs.push({ index: i, storagePath: dst, dataUrl: await copyPrivate(bucket, v.photoPaths[i], dst) });
+    }
+    if (v.ownershipDocPath) {
+      await assertImageObject(bucket, v.ownershipDocPath, HttpsError);
+      ownershipDocStoragePath = "caseAttachments/" + caseId + "/ownership-" + attempt + ".webp"; // existing team-only area
+      await copyPrivate(bucket, v.ownershipDocPath, ownershipDocStoragePath);
+    }
+    await hook("afterSubmitCopy", { caseId, attempt, actor });
+
+    // 5) One transaction creates (or completes) the record. The first committed attempt wins.
+    const now = Date.now();
+    const trackToken = nodeCrypto.randomBytes(24).toString("hex");
+    const caseSourceByRole = { external: "owner_form", agent: "agent_form", staff: "staff_form", owner: "owner_form" };
+    const coordsOk = /^\s*-?\d{1,3}(\.\d+)?\s*,\s*-?\d{1,3}(\.\d+)?\s*$/.test(v.coordsRaw);
+    const record = {
+      propertyId: caseId, createdAt: now,
+      source: "owner_submission", // capability key used by ~15 behaviours of Listing Approvals / Staff Workspace
+      caseSource: caseSourceByRole[actor.role] || "owner_form",
+      listingStatus: "pending", reviewStatus: "submitted", workflowVersion: "intake_v1", internalSplit: true,
+      status: v.txnType, type: v.type, condition: v.condition, price: v.price, description: v.description,
+      locationProvided: coordsOk, locationFollowUpNeeded: !coordsOk,
+      photoCount: photoDocs.length, photoStandard: { min: std.min, target: std.target },
+      submittedAt: now, isDraft: false,
+      ...(v.area ? { area: v.area } : {}),
+      ...(actor.role === "agent" ? { listerId: actor.uid } : {}),
+      coordsRaw: v.coordsRaw,
+      contactName: v.submitter.name, contactPhone: v.submitter.phone, contactEmail: v.submitter.email,
+      submittedByRole: actor.role, submittedByUid: actor.uid, submittedByLabel: actor.label || v.submitter.name,
+      propertyOwnerRelation: v.propertyOwner.relation, ownerContact: v.propertyOwner.contact,
+      ...(v.propertyOwner.name ? { ownerName: v.propertyOwner.name } : {}),
+      ...(ownershipDocStoragePath ? { ownershipDocPath: ownershipDocStoragePath } : {}),
+      submissionKey: v.key, customerLanguage: v.language, trackToken,
+      ...(draft ? { draftId } : {}),
+    };
+    let lost = false;
     await db.runTransaction(async (t) => {
-      const again = await t.get(caseRef);
+      lost = false;
+      const cur = await t.get(intRef);
       if (completing) {
-        const cur = await t.get(intRef);
-        if (!again.exists || !cur.exists || (cur.data() || {}).formCompletedKey) throw new HttpsError("aborted", "concurrent_duplicate", { reason: "concurrent_duplicate" });
+        if (!cur.exists || (cur.data() || {}).formCompletedKey) { lost = true; return; }
         // only what the form adds; the Case's identity, status, token, assignment and conversation link stay untouched
-        const keepPub = ["status", "type", "condition", "price", "description", "locationProvided", "locationFollowUpNeeded", "photoCount", "photoStandard", "area"];
-        const keepPriv = ["coordsRaw", "contactName", "contactPhone", "contactEmail", "propertyOwnerRelation", "ownerContact", "ownerName", "ownershipDocPath", "submissionKey", "customerLanguage"];
-        const pubUp = {}, privUp = { formCompletedKey: v.key, formCompletedAt: now };
-        keepPub.forEach((k) => { if (k in pub) pubUp[k] = pub[k]; });
-        keepPriv.forEach((k) => { if (k in priv) privUp[k] = priv[k]; });
-        t.update(caseRef, pubUp);
-        t.update(intRef, privUp);
+        const keep = ["status", "type", "condition", "price", "description", "locationProvided", "locationFollowUpNeeded", "photoCount", "photoStandard", "area",
+          "coordsRaw", "contactName", "contactPhone", "contactEmail", "propertyOwnerRelation", "ownerContact", "ownerName", "ownershipDocPath", "submissionKey", "customerLanguage"];
+        const up = { formCompletedKey: v.key, formCompletedAt: now };
+        keep.forEach((k) => { if (k in record) up[k] = record[k]; });
+        t.update(intRef, up);
       } else {
-        if (again.exists) throw new HttpsError("aborted", "concurrent_duplicate", { reason: "concurrent_duplicate" });
-        t.create(caseRef, pub);
-        t.create(intRef, Object.assign({ propertyId: caseId, createdAt: now }, priv));
+        if (cur.exists) { lost = true; return; }
+        t.create(intRef, record);
       }
       photoDocs.forEach((p) => t.set(db.collection("casePhotos").doc(caseId + "-" + p.index), {
         propertyId: caseId, index: p.index, dataUrl: p.dataUrl, storagePath: p.storagePath,
-        uploadedByUid: actor.uid, uploadedByRole: actor.role, uploadedAt: now,
+        uploadedByUid: actor.uid, uploadedByRole: actor.role, uploadedAt: now, attempt,
       }));
       if (draft) t.set(draftRef, { caseId, status: "submitted", submittedAt: now, updatedAt: now }, { merge: true });
     });
+    if (lost) {
+      // another attempt committed first: this attempt's files are removed, the winner's are untouched
+      await abandon();
+      const w = (await intRef.get()).data() || {};
+      if (w.submittedByUid === actor.uid || w.receptionVisitorId === actor.uid) return okResult(caseId, w);
+      throw new HttpsError("already-exists", "case_id_taken", { reason: "case_id_taken" });
+    }
+    // The submitter's staging area is no longer needed (client-minted tokens die with it); a retry returns the Case before looking at it.
+    await deletePrefix(bucket, "caseUploads/" + actor.uid + "/" + v.key + "/");
+    try { // best-effort audit trail; never blocks a submission that already succeeded
+      await db.collection("activityLog").add({ type: "case_submitted", propertyId: caseId, byUid: actor.uid, byRole: actor.role, byEmail: actor.email || "", at: now, summary: "ส่งเรื่อง " + caseId + " (" + actor.role + ")" });
+    } catch (e) { console.warn("activityLog (case_submitted) not written", caseId); }
+    return { created: !completing, completedChatCase: completing, alreadyExisted: false, propertyId: caseId, trackToken: completing ? existingToken : trackToken, photoCount: photoDocs.length };
   } catch (e) {
-    // A parallel identical request may have won the race: same uid + key → same id → return its Case.
-    const [won, wonInt] = await Promise.all([caseRef.get(), intRef.get()]);
-    if (won.exists && wonInt.exists && (wonInt.data() || {}).submittedByUid === actor.uid) return okResult(caseId, Object.assign({}, won.data(), wonInt.data()));
+    // anything that failed BEFORE the commit leaves no file behind; after a commit nothing here runs
+    const stillMine = await intRef.get().then((s) => s.exists && (s.data() || {}).submissionKey === v.key && (s.data() || {}).submittedByUid === actor.uid).catch(() => false);
+    if (!stillMine) await abandon();
+    if (e instanceof HttpsError) throw e;
     console.error("submitListingCase failed", caseId, (e && e.message) || String(e));
-    throw e instanceof HttpsError ? e : new HttpsError("internal", "ไม่สามารถบันทึกเคสได้ กรุณาลองอีกครั้ง");
+    throw new HttpsError("internal", "ไม่สามารถบันทึกเคสได้ กรุณาลองอีกครั้ง");
   }
-  // The submitter's staging copies carry a token only they hold; once the Case exists the private copies are the
-  // record, so the staging files are removed (best-effort; a retry returns the existing Case before looking at them).
-  for (const sp of v.photoPaths.concat(v.ownershipDocPath ? [v.ownershipDocPath] : [])) await deleteIfExists(bucket, sp);
-  try { // best-effort audit trail; never blocks a submission that already succeeded
-    await db.collection("activityLog").add({ type: "case_submitted", propertyId: caseId, byUid: actor.uid, byRole: actor.role, byEmail: actor.email || "", at: now, summary: "ส่งเรื่อง " + caseId + " (" + actor.role + ")" });
-  } catch (e) { console.warn("activityLog (case_submitted) not written", caseId); }
-  return { created: !completing, completedChatCase: completing, alreadyExisted: false, propertyId: caseId, trackToken: completing ? existingToken : trackToken, photoCount: photoDocs.length };
 }
 
 // ── publish / take down (Owner only) ───────────────────────────────────────
@@ -312,10 +330,17 @@ const TYPE_TH = { villa: "พูลวิลล่า", house: "บ้านเ�
 const TYPE_EN = { villa: "Pool Villa", house: "House", townhouse: "Townhouse", condo: "Condo", land: "Land", commercial: "Commercial" };
 const AREA_TH = { "hua-hin": "หัวหิน", pranburi: "ปราณบุรี", "cha-am": "ชะอำ" };
 const AREA_EN = { "hua-hin": "Hua Hin", pranburi: "Pranburi", "cha-am": "Cha-am" };
+const PUBLISHABLE = ["pending", "pending_owner", "offline"];
+const LEASE_MS = 5 * 60 * 1000;
 
 async function requireOwner(admin, HttpsError, request) {
   const actor = await resolveActor(admin, request, HttpsError);
   if (actor.role !== "owner") throw new HttpsError("permission-denied", "Only the Owner can do this.");
+  return actor;
+}
+async function requireTeam(admin, HttpsError, request) {
+  const actor = await resolveActor(admin, request, HttpsError);
+  if (actor.role !== "owner" && actor.role !== "staff") throw new HttpsError("permission-denied", "Team members only.");
   return actor;
 }
 function requireId(HttpsError, request) {
@@ -323,135 +348,311 @@ function requireId(HttpsError, request) {
   if (!isStr(id) || !id || id.length > 200 || id.includes("/")) throw bad(HttpsError, "bad_property_id");
   return id;
 }
+// Why a Case may (not) be published right now. Used before AND inside the final transaction.
+function publishVerdict(rec, HttpsError) {
+  if (!PUBLISHABLE.includes(rec.listingStatus)) return new HttpsError("failed-precondition", "not_publishable_status", { reason: "not_publishable_status", status: rec.listingStatus || null });
+  if (rec.source === "owner_submission") {
+    if (rec.reviewStatus === "approved") return { approvalPath: "intake_approved" };
+    if (rec.submittedByRole === "owner") return { approvalPath: "owner_direct" };
+    return new HttpsError("failed-precondition", "intake_not_approved", { reason: "intake_not_approved", reviewStatus: rec.reviewStatus || null });
+  }
+  return { approvalPath: "owner_listing_approval" };
+}
+function publicTitle(rec, type, area) {
+  if (rec.title && typeof rec.title === "object") return rec.title;
+  return {
+    th: (TYPE_TH[type] || "") + (area ? AREA_TH[area] : "") + (rec.status === "rent" ? " ให้เช่า" : " ขาย"),
+    en: (TYPE_EN[type] || "") + (area ? " " + AREA_EN[area] : "") + (rec.status === "rent" ? " for rent" : " for sale"),
+  };
+}
 
 async function publishListingCase({ admin, HttpsError, request }) {
   assertEnabled(HttpsError);
   const actor = await requireOwner(admin, HttpsError, request);
   const id = requireId(HttpsError, request);
   const db = admin.firestore();
-  const ref = db.collection("properties").doc(id), intRef = db.collection("caseInternal").doc(id);
-  const [snap, intSnap] = await Promise.all([ref.get(), intRef.get()]);
-  if (!snap.exists) throw new HttpsError("not-found", "case_not_found", { reason: "case_not_found" });
-  const c = snap.data() || {}, ci = intSnap.exists ? (intSnap.data() || {}) : {};
-  if (c.listingStatus === "live") return { published: false, alreadyLive: true, propertyId: id };
-  if (!["pending", "pending_owner", "offline"].includes(c.listingStatus)) throw new HttpsError("failed-precondition", "not_publishable_status", { reason: "not_publishable_status", status: c.listingStatus || null });
-  // A Case that came through intake must have been decided by the Owner first, unless the Owner is
-  // publishing their OWN submission (the approval path is then recorded as such).
-  let approvalPath;
-  if (c.source === "owner_submission") {
-    if (c.reviewStatus === "approved") approvalPath = "intake_approved";
-    else if (ci.submittedByRole === "owner") approvalPath = "owner_direct";
-    else throw new HttpsError("failed-precondition", "intake_not_approved", { reason: "intake_not_approved", reviewStatus: c.reviewStatus || null });
-  } else approvalPath = "owner_listing_approval";
-
-  const type = TYPES.includes(c.type) ? c.type : "house";
+  const intRef = db.collection("caseInternal").doc(id), pubRef = db.collection("properties").doc(id);
+  const first = await intRef.get();
+  if (!first.exists) throw new HttpsError("not-found", "case_not_found", { reason: "case_not_found" });
+  const rec0 = first.data() || {};
+  if (rec0.listingStatus === "live") return { published: false, alreadyLive: true, propertyId: id };
+  const verdict0 = publishVerdict(rec0, HttpsError);
+  if (verdict0 instanceof HttpsError) throw verdict0;
+  // Public text is checked for contact details BEFORE anything is copied; the Owner edits it and publishes again.
+  const problems = publicTextProblems(rec0);
+  if (problems.length) throw new HttpsError("failed-precondition", "public_text_has_contact_info", { reason: "public_text_has_contact_info", fields: problems });
+  const type = TYPES.includes(rec0.type) ? rec0.type : "house";
   const std = photoStandardFor(type);
-  const bucket = bucketFor(admin);
-  const priv = (await db.collection("casePhotos").where("propertyId", "==", id).get()).docs.map((d) => d.data()).sort((a, b) => a.index - b.index);
-  const legacyPub = (await db.collection("propertyPhotos").where("propertyId", "==", id).get()).docs.map((d) => d.data()).sort((a, b) => (a.index || 0) - (b.index || 0));
-  const have = Math.max(priv.length, legacyPub.length);
-  if (have < std.min) throw new HttpsError("failed-precondition", "photos_below_minimum", { reason: "photos_below_minimum", min: std.min, have });
+  const photos0 = await casePhotoDocs(db, id);
+  if (photos0.length < std.min) throw new HttpsError("failed-precondition", "photos_below_minimum", { reason: "photos_below_minimum", min: std.min, have: photos0.length });
+  const sig0 = sigOf(photos0);
 
-  const published = [];
-  for (const p of priv) published.push({ index: p.index, dataUrl: await copyWithToken(bucket, p.storagePath, "propertyPhotos/" + id + "-" + p.index + ".webp") });
-  const finalPhotos = published.length ? published : legacyPub.map((p) => ({ index: p.index || 0, dataUrl: p.dataUrl }));
-  const now = Date.now();
-  const area = c.area && AREA_TH[c.area] ? c.area : "";
-  const title = c.title && typeof c.title === "object" ? c.title : {
-    th: (TYPE_TH[type] || "") + (area ? AREA_TH[area] : "") + (c.status === "rent" ? " ให้เช่า" : " ขาย"),
-    en: (TYPE_EN[type] || "") + (area ? " " + AREA_EN[area] : "") + (c.status === "rent" ? " for rent" : " for sale"),
-  };
-  await db.runTransaction(async (t) => {
-    const cur = await t.get(ref);
-    const cd = cur.data() || {};
-    if (cd.listingStatus === "live") return; // a parallel publish already did it
-    if (!["pending", "pending_owner", "offline"].includes(cd.listingStatus)) throw new HttpsError("failed-precondition", "not_publishable_status", { reason: "not_publishable_status" });
-    if (published.length) finalPhotos.forEach((p) => t.set(db.collection("propertyPhotos").doc(id + "-" + p.index), { propertyId: id, index: p.index, dataUrl: p.dataUrl, publishedAt: now, publishedByUid: actor.uid }));
-    t.update(ref, {
-      listingStatus: "live", publishedAt: now, expiresAt: now + LISTING_DURATION_DAYS * 86400000, approvedAt: now,
-      expiredAt: null, photosDeletedAt: null, offlineAt: null, isDraft: false, title,
-      photos: finalPhotos.map((p) => ({ label: "Photo " + (p.index + 1) })), publishedPhotoCount: finalPhotos.length,
-    });
-    const attribution = { approvedByUid: actor.uid, approvedByEmail: actor.email || "", approvedByRole: "owner", approvalPath, offlineReason: null };
-    if (intSnap.exists) t.update(intRef, attribution); else t.set(intRef, Object.assign({ propertyId: id, createdAt: now }, attribution), { merge: true });
-  });
+  // (1) reserve: only one publish at a time; a take-down in between cancels the reservation
+  const opId = "p-" + nodeCrypto.randomBytes(6).toString("hex");
   try {
-    await db.collection("activityLog").add({ type: "listing_published", propertyId: id, byUid: actor.uid, byRole: "owner", byEmail: actor.email || "", approvalPath, at: now, summary: "เผยแพร่ประกาศ " + id });
-  } catch (e) { console.warn("activityLog (listing_published) not written", id); }
-  return { published: true, alreadyLive: false, propertyId: id, photoCount: finalPhotos.length, approvalPath };
+    await db.runTransaction(async (t) => {
+      const cur = await t.get(intRef);
+      const rec = cur.data() || {};
+      if (rec.listingStatus === "live") throw new HttpsError("already-exists", "already_live", { reason: "already_live" });
+      const verdict = publishVerdict(rec, HttpsError);
+      if (verdict instanceof HttpsError) throw verdict;
+      const op = rec.publishOp;
+      if (op && op.status === "publishing" && Date.now() - (op.startedAt || 0) < LEASE_MS) throw new HttpsError("aborted", "publish_in_progress", { reason: "publish_in_progress" });
+      t.update(intRef, { publishOp: { opId, status: "publishing", startedAt: Date.now(), byUid: actor.uid, sig: sig0 } });
+    });
+  } catch (e) {
+    if (e && e.details && e.details.reason === "already_live") return { published: false, alreadyLive: true, propertyId: id };
+    throw e;
+  }
+
+  // (2) copy the private photos to a path that belongs to THIS operation only (public, tokened)
+  const bucket = bucketFor(admin);
+  const opPrefix = "publishedCasePhotos/" + id + "/" + opId + "/";
+  const released = async () => { await deletePrefix(bucket, opPrefix); await intRef.get().then((s) => { const o = (s.data() || {}).publishOp; if (o && o.opId === opId && o.status === "publishing") return intRef.update({ publishOp: Object.assign({}, o, { status: "failed" }) }); }).catch(() => {}); };
+  try {
+    const published = [];
+    for (const p of photos0) published.push({ index: p.index, dataUrl: await copyWithToken(bucket, p.storagePath, opPrefix + p.index + ".webp") });
+    await hook("afterPublishCopy", { id, opId });
+
+    // (3) commit: re-read EVERYTHING that the decision depends on, inside the transaction
+    const now = Date.now();
+    let approvalPath = "";
+    await db.runTransaction(async (t) => {
+      const cur = await t.get(intRef);
+      const rec = cur.data() || {};
+      const op = rec.publishOp;
+      if (!op || op.opId !== opId || op.status !== "publishing") throw new HttpsError("aborted", "publish_cancelled", { reason: "publish_cancelled" });
+      const verdict = publishVerdict(rec, HttpsError); // the approval is checked AGAIN at commit time (it may have been withdrawn)
+      if (verdict instanceof HttpsError) throw verdict;
+      approvalPath = verdict.approvalPath;
+      const pbad = publicTextProblems(rec); // …and so is the public text
+      if (pbad.length) throw new HttpsError("failed-precondition", "public_text_has_contact_info", { reason: "public_text_has_contact_info", fields: pbad });
+      const photosNow = (await t.get(db.collection("casePhotos").where("propertyId", "==", id))).docs.map((d) => d.data()).sort((a, b) => a.index - b.index);
+      if (sigOf(photosNow) !== sig0) throw new HttpsError("aborted", "photos_changed", { reason: "photos_changed" });
+      const area = rec.area && AREA_TH[rec.area] ? rec.area : "";
+      const proj = projectPublic(rec);
+      const pub = Object.assign({}, proj, {
+        source: "owner_submission", internalSplit: true, listingStatus: "live", isDraft: false,
+        publishedAt: now, expiresAt: now + LISTING_DURATION_DAYS * 86400000, approvedAt: now,
+        title: publicTitle(rec, type, area), photos: published.map((p) => ({ label: "Photo " + (p.index + 1) })), publishedPhotoCount: published.length,
+        ...(rec.listerId ? { listerId: rec.listerId } : {}), viewCount: 0,
+      });
+      t.set(pubRef, pub); // full replace: nothing from an earlier projection survives
+      published.forEach((p) => t.set(db.collection("propertyPhotos").doc(id + "-" + p.index), { propertyId: id, index: p.index, dataUrl: p.dataUrl, publishedAt: now, publishedByUid: actor.uid, publishOpId: opId }));
+      t.update(intRef, {
+        listingStatus: "live", publishedAt: now, expiresAt: now + LISTING_DURATION_DAYS * 86400000, approvedAt: now, isDraft: false,
+        expiredAt: null, photosDeletedAt: null, offlineAt: null, offlineReason: null, publishedPhotoCount: published.length,
+        approvedByUid: actor.uid, approvedByEmail: actor.email || "", approvedByRole: "owner", approvalPath,
+        publishOp: { opId, status: "done", startedAt: op.startedAt, finishedAt: now, byUid: actor.uid },
+      });
+    });
+    // older operations' files (a failed earlier attempt) are no longer needed
+    try { const [files] = await bucket.getFiles({ prefix: "publishedCasePhotos/" + id + "/" }); await Promise.all(files.filter((f) => !f.name.startsWith(opPrefix)).map((f) => f.delete().catch(() => {}))); } catch (e) { /* best effort */ }
+    try {
+      await db.collection("activityLog").add({ type: "listing_published", propertyId: id, byUid: actor.uid, byRole: "owner", byEmail: actor.email || "", approvalPath, at: now, summary: "เผยแพร่ประกาศ " + id });
+    } catch (e) { console.warn("activityLog (listing_published) not written", id); }
+    return { published: true, alreadyLive: false, propertyId: id, photoCount: published.length, approvalPath };
+  } catch (e) {
+    const live = await intRef.get().then((s) => (s.data() || {}).publishOp && (s.data() || {}).publishOp.opId === opId && (s.data() || {}).publishOp.status === "done").catch(() => false);
+    if (!live) await released();
+    if (e instanceof HttpsError) throw e;
+    console.error("publishListingCase failed", id, (e && e.message) || String(e));
+    throw new HttpsError("internal", "เผยแพร่ไม่สำเร็จ กรุณาลองอีกครั้ง");
+  }
 }
 
-// Take a published Case down. The PUBLIC copies are physically removed (files and records) — hiding the
-// listing is not enough, because a photo URL keeps working after the page stops linking to it. The
-// private originals stay, so the Owner can publish again (new copies, new tokens).
+// Take a published Case down. The public document AND the public photo records disappear in ONE transaction (nothing public
+// links to the listing afterwards), then every public file is physically deleted (a photo URL keeps working after a page stops
+// linking to it). The private originals stay, so the Owner can publish again (new copies, new tokens). A take-down that arrives
+// while a publish is still copying cancels that publish.
 async function unpublishListingCase({ admin, HttpsError, request }) {
   assertEnabled(HttpsError);
   const actor = await requireOwner(admin, HttpsError, request);
   const id = requireId(HttpsError, request);
   const reason = clean(request.data && request.data.reason, 500);
   const db = admin.firestore();
-  const ref = db.collection("properties").doc(id), intRef = db.collection("caseInternal").doc(id);
-  const [snap, intSnap] = await Promise.all([ref.get(), intRef.get()]);
-  if (!snap.exists) throw new HttpsError("not-found", "case_not_found", { reason: "case_not_found" });
-  const c = snap.data() || {};
-  if (c.listingStatus !== "live") return { unpublished: false, propertyId: id, status: c.listingStatus || null };
+  const intRef = db.collection("caseInternal").doc(id), pubRef = db.collection("properties").doc(id);
   const now = Date.now();
-  // status first: from this write on, nothing public links to the listing
-  await ref.update({ listingStatus: "offline", offlineAt: now });
-  if (intSnap.exists) await intRef.update({ offlineReason: reason || null, offlineByUid: actor.uid }); else await intRef.set({ propertyId: id, offlineReason: reason || null, offlineByUid: actor.uid }, { merge: true });
-  const bucket = bucketFor(admin);
-  const pubDocs = (await db.collection("propertyPhotos").where("propertyId", "==", id).get()).docs;
-  let removed = 0;
-  for (const d of pubDocs) {
-    const data = d.data() || {};
-    if (!data.publishedByUid) continue; // only copies THIS flow published; legacy member-uploaded photos are not touched
-    await deleteIfExists(bucket, "propertyPhotos/" + d.id + ".webp");
-    await d.ref.delete();
-    removed++;
+  const out = await db.runTransaction(async (t) => {
+    const cur = await t.get(intRef);
+    if (!cur.exists) throw new HttpsError("not-found", "case_not_found", { reason: "case_not_found" });
+    const rec = cur.data() || {};
+    const photoDocs = (await t.get(db.collection("propertyPhotos").where("propertyId", "==", id))).docs;
+    if (rec.listingStatus !== "live") {
+      if (rec.publishOp && rec.publishOp.status === "publishing") { t.update(intRef, { publishOp: Object.assign({}, rec.publishOp, { status: "cancelled" }) }); return { unpublished: false, cancelledPublish: true, propertyId: id, status: rec.listingStatus || null, removed: 0 }; }
+      return { unpublished: false, propertyId: id, status: rec.listingStatus || null, removed: 0 };
+    }
+    let removed = 0;
+    photoDocs.forEach((d) => { if ((d.data() || {}).publishedByUid) { t.delete(d.ref); removed++; } });
+    t.delete(pubRef);
+    t.update(intRef, { listingStatus: "offline", offlineAt: now, offlineReason: reason || null, offlineByUid: actor.uid, publishOp: null });
+    return { unpublished: true, propertyId: id, removedPublicPhotos: removed };
+  });
+  if (out.unpublished) {
+    await deletePrefix(bucketFor(admin), "publishedCasePhotos/" + id + "/");
+    try {
+      await db.collection("activityLog").add({ type: "listing_unpublished", propertyId: id, byUid: actor.uid, byRole: "owner", byEmail: actor.email || "", at: now, summary: "ถอนประกาศ " + id });
+    } catch (e) { console.warn("activityLog (listing_unpublished) not written", id); }
   }
-  try {
-    await db.collection("activityLog").add({ type: "listing_unpublished", propertyId: id, byUid: actor.uid, byRole: "owner", byEmail: actor.email || "", at: now, summary: "ถอนประกาศ " + id });
-  } catch (e) { console.warn("activityLog (listing_unpublished) not written", id); }
-  return { unpublished: true, propertyId: id, removedPublicPhotos: removed };
+  return out;
 }
 
-// ── trackListingCase — the customer's token-checked view (no account, no public read) ─────────
-// The token is the whole authorisation. Not found and wrong token look identical.
-async function trackListingCase({ admin, HttpsError, request }) {
+// Edits to an ALREADY published Case (price, text, …) reach the public page only through this projection. It never changes the
+// status, never publishes anything new, and refuses text that contains contact details (the public page keeps its previous text).
+async function syncListingCase({ admin, HttpsError, request }) {
   assertEnabled(HttpsError);
-  const d = request.data || {};
-  const id = d.id, token = d.token;
+  await requireTeam(admin, HttpsError, request);
+  const id = requireId(HttpsError, request);
+  const db = admin.firestore();
+  const intRef = db.collection("caseInternal").doc(id), pubRef = db.collection("properties").doc(id);
+  return db.runTransaction(async (t) => {
+    const [cur, pub] = await Promise.all([t.get(intRef), t.get(pubRef)]);
+    if (!cur.exists) throw new HttpsError("not-found", "case_not_found", { reason: "case_not_found" });
+    const rec = cur.data() || {};
+    if (rec.listingStatus !== "live" || !pub.exists) return { synced: false, propertyId: id, reason: "not_live" };
+    const problems = publicTextProblems(rec);
+    if (problems.length) return { synced: false, propertyId: id, reason: "public_text_has_contact_info", fields: problems };
+    const keep = pub.data() || {};
+    const proj = projectPublic(rec);
+    const type = TYPES.includes(rec.type) ? rec.type : "house";
+    const area = rec.area && AREA_TH[rec.area] ? rec.area : "";
+    t.set(pubRef, Object.assign({}, proj, {
+      source: "owner_submission", internalSplit: true, listingStatus: "live", isDraft: false,
+      publishedAt: keep.publishedAt || rec.publishedAt || null, expiresAt: rec.expiresAt || keep.expiresAt || null, approvedAt: rec.approvedAt || keep.approvedAt || null,
+      title: publicTitle(rec, type, area), photos: keep.photos || [], publishedPhotoCount: keep.publishedPhotoCount || 0,
+      ...(rec.listerId ? { listerId: rec.listerId } : {}), viewCount: keep.viewCount || 0,
+    }));
+    return { synced: true, propertyId: id };
+  });
+}
+
+// Staff add photos to a Case that is still private: the browser uploads to ITS OWN staging folder, this copies the files into the
+// Case's private area and registers them. (A published Case picks the photos up the next time the Owner publishes it.)
+async function addCasePhotos({ admin, HttpsError, request }) {
+  assertEnabled(HttpsError);
+  const actor = await requireTeam(admin, HttpsError, request);
+  const id = requireId(HttpsError, request);
+  const paths = Array.isArray(request.data && request.data.paths) ? request.data.paths : [];
+  if (!paths.length || paths.length > 10) throw bad(HttpsError, "bad_paths");
+  const prefix = "caseUploads/" + actor.uid + "/";
+  const re = new RegExp("^" + prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "[A-Za-z0-9_-]{16,64}/[0-9]{1,2}\\.webp$");
+  paths.forEach((p) => { if (!isStr(p) || !re.test(p)) throw bad(HttpsError, "bad_photo_path"); });
+  const db = admin.firestore(), bucket = bucketFor(admin);
+  const intRef = db.collection("caseInternal").doc(id);
+  const snap = await intRef.get();
+  if (!snap.exists) throw new HttpsError("not-found", "case_not_found", { reason: "case_not_found" });
+  const attempt = "a-" + nodeCrypto.randomBytes(6).toString("hex");
+  const copies = [];
+  try {
+    for (let i = 0; i < paths.length; i++) { await assertImageObject(bucket, paths[i], HttpsError); const dst = "casePhotos/" + id + "/" + attempt + "/" + i + ".webp"; copies.push({ i, storagePath: dst, dataUrl: await copyPrivate(bucket, paths[i], dst) }); }
+    const now = Date.now();
+    const added = await db.runTransaction(async (t) => {
+      const existing = (await t.get(db.collection("casePhotos").where("propertyId", "==", id))).docs.map((d) => d.data());
+      let next = existing.reduce((m, p) => Math.max(m, p.index + 1), 0);
+      if (existing.length + copies.length > MAX_PHOTOS) throw new HttpsError("failed-precondition", "too_many_photos", { reason: "too_many_photos" });
+      copies.forEach((c) => { t.set(db.collection("casePhotos").doc(id + "-" + next), { propertyId: id, index: next, dataUrl: c.dataUrl, storagePath: c.storagePath, uploadedByUid: actor.uid, uploadedByRole: actor.role, uploadedAt: now, attempt }); next++; });
+      t.update(intRef, { photoCount: existing.length + copies.length });
+      return copies.length;
+    });
+    for (const p of paths) await deleteIfExists(bucket, p);
+    return { added, propertyId: id };
+  } catch (e) {
+    await deletePrefix(bucket, "casePhotos/" + id + "/" + attempt + "/");
+    if (e instanceof HttpsError) throw e;
+    throw new HttpsError("internal", "เพิ่มรูปไม่สำเร็จ");
+  }
+}
+
+// Reconciliation (Owner): removes private/public files that no record references any more (leftovers of failed or lost attempts).
+async function reconcileListingFiles({ admin, HttpsError, request }) {
+  assertEnabled(HttpsError);
+  await requireOwner(admin, HttpsError, request);
+  const id = requireId(HttpsError, request);
+  const db = admin.firestore(), bucket = bucketFor(admin);
+  const keepPrivate = new Set((await casePhotoDocs(db, id)).map((p) => p.storagePath));
+  const [pFiles] = await bucket.getFiles({ prefix: "casePhotos/" + id + "/" });
+  let removed = 0;
+  for (const f of pFiles) if (!keepPrivate.has(f.name)) { await f.delete().catch(() => {}); removed++; }
+  const rec = (await db.collection("caseInternal").doc(id).get()).data() || {};
+  const livePrefix = rec.listingStatus === "live" && rec.publishOp && rec.publishOp.status === "done" ? "publishedCasePhotos/" + id + "/" + rec.publishOp.opId + "/" : null;
+  const [uFiles] = await bucket.getFiles({ prefix: "publishedCasePhotos/" + id + "/" });
+  for (const f of uFiles) if (!livePrefix || !f.name.startsWith(livePrefix)) { await f.delete().catch(() => {}); removed++; }
+  return { removed, propertyId: id };
+}
+
+// ── trackListingCase — the customer's token-checked view and conversation (no account, no public read) ─────────
+// The token is the whole authorisation, and it is checked HERE: customers can not read caseMessages (or anything else) from the
+// browser. Not found and wrong token look identical. Works for a Case record (caseInternal) and for an older Case whose token is
+// still on its properties document.
+async function loadForTrack(admin, id, token, HttpsError) {
   const denied = () => new HttpsError("permission-denied", "not_available");
   if (!isStr(id) || !id || id.length > 200 || id.includes("/") || !isStr(token) || token.length < 20 || token.length > 200) throw denied();
   const db = admin.firestore();
-  const intRef = db.collection("caseInternal").doc(id);
-  const [snap, intSnap] = await Promise.all([db.collection("properties").doc(id).get(), intRef.get()]);
-  if (!snap.exists || !intSnap.exists) throw denied();
-  const ci = intSnap.data() || {};
-  if (!safeEqual(ci.trackToken, token)) throw denied();
-  const c = snap.data() || {};
+  const intRef = db.collection("caseInternal").doc(id), pubRef = db.collection("properties").doc(id);
+  const [intSnap, pubSnap] = await Promise.all([intRef.get(), pubRef.get()]);
+  if (intSnap.exists) {
+    const rec = intSnap.data() || {};
+    if (!safeEqual(rec.trackToken, token)) throw denied();
+    return { rec, ref: intRef, legacy: false };
+  }
+  if (pubSnap.exists) {
+    const rec = pubSnap.data() || {};
+    if (rec.source !== "owner_submission" || !safeEqual(rec.trackToken, token)) throw denied();
+    return { rec, ref: pubRef, legacy: true };
+  }
+  throw denied();
+}
+const safeMessage = (m) => {
+  const own = m.senderType === "customer" || m.direction === "inbound";
+  return { id: m.id, senderType: m.senderType || (m.direction === "inbound" ? "customer" : "staff"), direction: m.direction || "", createdAt: m.createdAt || null, messageType: m.messageType || "",
+    originalText: own ? (m.originalText || "") : (m.originalText || ""), customerText: m.customerText || "" };
+};
+
+async function trackListingCase({ admin, HttpsError, request }) {
+  assertEnabled(HttpsError);
+  const d = request.data || {};
+  const db = admin.firestore();
+  const { rec, ref, legacy } = await loadForTrack(admin, d.id, d.token, HttpsError);
+  const id = d.id;
+  const msgs = db.collection("properties").doc(id).collection("caseMessages");
   const action = d.action || "view";
   const now = Date.now();
-  if (action === "responded") {
-    const message = clean(d.message, 4000);
-    if (!message) throw bad(HttpsError, "missing_message");
-    await intRef.update({ infoResponseMessage: message, infoResponseAt: now, infoResponseStatus: "responded", lastCustomerMessageAt: now });
-  } else if (action === "language") {
+  if (action === "messages") {
+    const snap = await msgs.where("visibility", "==", "customer").get();
+    const rows = snap.docs.map((x) => safeMessage(Object.assign({ id: x.id }, x.data()))).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)).slice(-200);
+    return { messages: rows };
+  }
+  if (action === "send") {
+    const text = clean(d.message, 4000);
+    if (!text) throw bad(HttpsError, "missing_message");
+    const lang = LANGS.includes(d.lang) ? d.lang : (LANGS.includes(rec.customerLanguage) ? rec.customerLanguage : "th");
+    const mine = await msgs.where("direction", "==", "inbound").get();
+    if (mine.size >= 500) throw new HttpsError("resource-exhausted", "too_many_messages", { reason: "too_many_messages" });
+    const row = { senderType: "customer", direction: "inbound", messageType: "response", channel: "track_submission", visibility: "customer",
+      originalLanguage: lang, originalText: text, thaiText: clean(d.thaiText, 4000) || text, customerLanguage: lang, customerText: text, caseId: id, createdAt: now };
+    const added = await msgs.add(row);
+    await ref.update({ infoResponseMessage: row.thaiText, infoResponseAt: now, infoResponseStatus: "responded", lastCustomerMessageAt: now });
+    return { sent: true, id: added.id };
+  }
+  if (action === "language") {
     if (!LANGS.includes(d.lang)) throw bad(HttpsError, "bad_language");
-    if (ci.customerLanguageConfirmed !== true) await intRef.update({ customerLanguage: d.lang, customerLanguageConfirmed: true, customerLanguageSource: "message_detected" });
+    if (rec.customerLanguageConfirmed !== true) await ref.update({ customerLanguage: d.lang, customerLanguageConfirmed: true, customerLanguageSource: "message_detected" });
   } else if (action === "read") {
-    await intRef.update({ customerLastReadAt: now });
+    await ref.update({ customerLastReadAt: now });
   } else if (action !== "view") throw bad(HttpsError, "bad_action");
-  const fresh = action === "view" ? ci : (await intRef.get()).data() || {};
+  const fresh = action === "view" ? rec : (await ref.get()).data() || {};
   const reviewReturn = fresh.reviewReturn && typeof fresh.reviewReturn === "object" ? { reason: String(fresh.reviewReturn.reason || "").slice(0, 1000) } : null;
+  let photoCount = Number(rec.photoCount) || 0;
+  if (legacy) { try { photoCount = (await db.collection("propertyPhotos").where("propertyId", "==", id).get()).size; } catch (e) { /* keep */ } }
   // exactly what the customer's page needs — no internal ids, emails, staff names or secrets
   return {
-    id, type: c.type || "", status: c.status || "", listingStatus: c.listingStatus || "", reviewStatus: c.reviewStatus || "submitted",
-    submittedAt: c.submittedAt || null, publicPropertyCode: c.publicPropertyCode || "", photoCount: Number(c.photoCount) || 0,
+    id, legacy, type: rec.type || "", status: rec.status || "", listingStatus: rec.listingStatus || "", reviewStatus: rec.reviewStatus || "submitted",
+    submittedAt: rec.submittedAt || null, publicPropertyCode: rec.publicPropertyCode || "", photoCount, price: Number(rec.price) || 0,
     contactName: fresh.contactName || "", customerLanguage: fresh.customerLanguage || "th", customerLanguageConfirmed: fresh.customerLanguageConfirmed === true,
     infoRequestMessage: fresh.infoRequestMessage || "", infoRequestAt: fresh.infoRequestAt || null,
     infoResponseMessage: fresh.infoResponseMessage || "", infoResponseAt: fresh.infoResponseAt || null, reviewReturn,
+    lastStaffMessageAt: fresh.lastStaffMessageAt || null, customerLastReadAt: fresh.customerLastReadAt || null,
   };
 }
 
-module.exports = { isEnabled, submitListingCase, publishListingCase, unpublishListingCase, trackListingCase, resolveActor, caseIdFor, validateSubmission, PHOTO_STANDARD, OWNER_UID, TYPES, MAX_PHOTOS };
+module.exports = { isEnabled, hooks, submitListingCase, publishListingCase, unpublishListingCase, syncListingCase, addCasePhotos, reconcileListingFiles, trackListingCase, resolveActor, caseIdFor, validateSubmission, PHOTO_STANDARD, OWNER_UID, TYPES, MAX_PHOTOS };

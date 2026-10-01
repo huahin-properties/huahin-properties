@@ -77,6 +77,8 @@ async function wipe(testEnv) {
   if (testEnv) { await testEnv.clearFirestore(); }
 }
 async function fileExists(p) { const { admin: a } = load(); const [x] = await a.storage().bucket(BUCKET_NAME).file(p).exists(); return x; }
+async function listFiles(prefix) { const { admin: a } = load(); const [fs_] = await a.storage().bucket(BUCKET_NAME).getFiles({ prefix }); return fs_.map((f) => f.name).sort(); }
+async function fileMeta(p) { const { admin: a } = load(); const [m] = await a.storage().bucket(BUCKET_NAME).file(p).getMetadata(); return m; }
 const { PRIVATE_FIELDS } = require(path.join(FUNCTIONS_DIR, "case-fields.js"));
 
-module.exports = { ROOT, FUNCTIONS_DIR, PROJECT_ID, BUCKET_NAME, OWNER_UID, ACTORS, FIX, load, call, errCode, errReason, newKey, putStaging, payload, seedRoles, wipe, fileExists, PRIVATE_FIELDS, IMG };
+module.exports = { ROOT, FUNCTIONS_DIR, PROJECT_ID, BUCKET_NAME, OWNER_UID, ACTORS, FIX, load, call, errCode, errReason, newKey, putStaging, payload, seedRoles, wipe, fileExists, listFiles, fileMeta, PRIVATE_FIELDS, IMG };

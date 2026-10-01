@@ -45,87 +45,92 @@ describe("LISTING-E2E-01 end-to-end per submitter group (real rules + real handl
       const photos = await putStaging(g.actor, key, Array.from({ length: g.n }, (_, i) => i));
       const d = payload(key, g.type, photos, { propertyOwner: { relation: g.relation, name: "Synthetic Real Owner", contact: "0822222222" } });
       const [r1, r2] = await Promise.all([call("submitListingCase", g.actor, d), call("submitListingCase", g.actor, d)]);
-      assert.strictEqual(r1.propertyId, r2.propertyId); assert.strictEqual((await db.collection("properties").get()).size, 1, "one case");
+      assert.strictEqual(r1.propertyId, r2.propertyId); assert.strictEqual((await db.collection("caseInternal").get()).size, 1, "one case");
       const id = r1.propertyId;
-      const int0 = (await db.doc("caseInternal/" + id).get()).data();
-      assert.strictEqual(int0.submittedByUid, g.actor.uid, "submitter recorded from the verified identity");
-      assert.strictEqual(int0.propertyOwnerRelation, g.relation, "submitter, property owner and approver are separate facts");
-      assert.strictEqual(int0.ownerName, "Synthetic Real Owner");
-      assert.ok(!int0.approvedByUid, "nobody has approved yet");
+      const rec0 = (await db.doc("caseInternal/" + id).get()).data();
+      assert.strictEqual(rec0.submittedByUid, g.actor.uid, "submitter recorded from the verified identity");
+      assert.strictEqual(rec0.propertyOwnerRelation, g.relation, "submitter, property owner and approver are separate facts");
+      assert.strictEqual(rec0.ownerName, "Synthetic Real Owner");
+      assert.ok(!rec0.approvedByUid, "nobody has approved yet");
 
-      // 3 the pending listing is NOT public: no live status, no public photo copies; private photos unreadable by the public
+      // 3 a pending case is NOT public in any way
       const pubView = F(env.unauthenticatedContext());
-      assert.strictEqual((await pubView.doc("properties/" + id).get()).data().listingStatus, "pending");
-      assert.strictEqual(await allowed(pubView.collection("propertyPhotos").where("propertyId", "==", id).get().then((s) => { if (s.size) throw new Error("public photo exists"); })), true);
+      assert.strictEqual((await pubView.doc("properties/" + id).get()).exists, false, "no public document for a pending case");
+      assert.strictEqual((await pubView.collection("propertyPhotos").where("propertyId", "==", id).get()).size, 0, "no public photo record");
       assert.strictEqual(await allowed(pubView.doc("caseInternal/" + id).get()), false);
       assert.strictEqual(await allowed(pubView.doc("casePhotos/" + id + "-0").get()), false);
-      const privUrl = (await db.doc("casePhotos/" + id + "-0").get()).data().dataUrl;
-      assert.ok(!/token=/.test(privUrl), "the private copy has no download token in its record");
-      assert.notStrictEqual(await dl(privUrl), 200, "a pending photo cannot be downloaded without a session");
-      const privMeta = (await H.load().admin.storage().bucket(H.BUCKET_NAME).file("casePhotos/" + id + "/0.webp").getMetadata())[0];
+      assert.strictEqual(await allowed(pubView.collection("properties/" + id + "/caseMessages").get()), false);
+      const privDoc = (await db.doc("casePhotos/" + id + "-0").get()).data();
+      assert.ok(!/token=/.test(privDoc.dataUrl), "the private copy has no download token in its record");
+      assert.notStrictEqual(await dl(privDoc.dataUrl), 200, "a pending photo cannot be downloaded without a session");
+      const privMeta = (await H.load().admin.storage().bucket(H.BUCKET_NAME).file(privDoc.storagePath).getMetadata())[0];
       assert.ok(!(privMeta.metadata && privMeta.metadata.firebaseStorageDownloadTokens), "private file carries no download token");
-      assert.ok(!(await H.fileExists("caseUploads/" + g.actor.uid + "/" + key + "/0.webp")), "staging copy (client-minted token) is removed after submit");
+      assert.deepStrictEqual(await H.listFiles("caseUploads/"), [], "staging copies (client-minted token) are removed after submit");
 
-      // 4 cross-user denial
+      // 4 cross-user denial — and the submitter's own access is the server's token-checked view, not the record
       const stranger = g.other || A.google;
       const sc = ctxOf(env, stranger);
-      assert.strictEqual(await allowed(F(sc).doc("caseInternal/" + id).get()), false, "another user cannot read the internal record");
+      assert.strictEqual(await allowed(F(sc).doc("caseInternal/" + id).get()), false, "another user cannot read the case record");
       assert.strictEqual(await allowed(F(sc).doc("casePhotos/" + id + "-0").get()), false, "…or the private photo records");
-      assert.strictEqual(await allowed(F(sc).doc("properties/" + id).update({ price: 1 })), false, "…or edit the case");
-      assert.strictEqual(await allowed(F(sc).doc("caseInternal/" + id).update({ contactPhone: "x" })), false);
-      assert.strictEqual(await allowed(ctxOf(env, stranger).storage().ref("casePhotos/" + id + "/0.webp").getMetadata()), false, "…or the private photo files");
-      assert.strictEqual(await allowed(ctxOf(env, g.actor).firestore().doc("caseInternal/" + id).get()), true, "the submitter can read their own record");
-      if (g.actor !== A.owner) assert.strictEqual(await allowed(ctxOf(env, g.actor).firestore().doc("properties/" + id).update({ listingStatus: "live" })), false, "a submitter cannot flip their own case live from a browser");
+      assert.strictEqual(await allowed(sc.storage().ref(privDoc.storagePath).getMetadata()), false, "…or the private photo files");
+      assert.strictEqual(await allowed(F(sc).doc("caseInternal/" + id).update({ price: 1 })), false, "…or edit the case");
+      assert.strictEqual(await allowed(F(sc).collection("properties/" + id + "/caseMessages").get()), false, "…or its conversation");
+      assert.strictEqual(await errCode(call("trackListingCase", stranger, { id, action: "view" })), "permission-denied", "…or its tracking view without the token");
+      const ac = ctxOf(env, g.actor);
+      if (g.actor !== A.owner) assert.strictEqual(await allowed(F(ac).doc("caseInternal/" + id).get()), false, "even the submitter does not read the internal record (the site Owner reads it as team)");
+      assert.strictEqual((await call("trackListingCase", null, { id, token: r1.trackToken })).id, id, "the submitter's view is the server's token-checked one");
+      assert.strictEqual(await allowed(F(ac).doc("properties/" + id).set({ listingStatus: "live", price: 1, listerId: g.actor.uid })), false, "nobody can create a public page for it");
 
       // 5 submitters / agents cannot publish through the server either
       if (g.actor !== A.owner) for (const who of [g.actor, A.staff]) assert.strictEqual(await errCode(call("publishListingCase", who, { propertyId: id })), "permission-denied", "publish refused for " + who.uid);
 
       // 6 Staff prepares the case (through the rules): assign, verify, review, send to the Owner — but cannot publish or approve
       const st = ctxOf(env, A.staff), sf = F(st);
-      assert.strictEqual(await allowed(sf.doc("caseInternal/" + id).update({ assignedToUid: A.staff.uid, assignedToEmail: "staff@example.test", verifications: { owner_identity: { by: "staff@example.test", at: 1 } } })), true, "Staff writes assignment + verification to the internal record");
-      assert.strictEqual(await allowed(sf.doc("properties/" + id).update({ reviewStatus: "reviewing" })), true);
-      assert.strictEqual(await allowed(sf.doc("properties/" + id).update({ listingStatus: "pending_owner" })), true, "Staff sends it to the Owner");
-      assert.strictEqual(await allowed(sf.doc("properties/" + id).update({ listingStatus: "live" })), false, "Staff cannot make it live");
-      assert.strictEqual(await allowed(sf.doc("properties/" + id).update({ reviewStatus: "approved" })), false, "Staff cannot approve");
+      assert.strictEqual(await allowed(sf.doc("caseInternal/" + id).update({ assignedToUid: A.staff.uid, assignedToEmail: "staff@example.test", verifications: { owner_identity: { by: "staff@example.test", at: 1 } }, reviewStatus: "reviewing" })), true, "Staff writes assignment + verification");
+      assert.strictEqual(await allowed(sf.doc("caseInternal/" + id).update({ listingStatus: "pending_owner" })), true, "Staff sends it to the Owner");
+      assert.strictEqual(await allowed(sf.doc("caseInternal/" + id).update({ listingStatus: "live" })), false, "Staff cannot make it live");
+      assert.strictEqual(await allowed(sf.doc("caseInternal/" + id).update({ reviewStatus: "approved" })), false, "Staff cannot approve");
       assert.strictEqual(await allowed(sf.doc("caseInternal/" + id).update({ approvedByUid: A.staff.uid })), false, "Staff cannot forge the approval record");
       assert.strictEqual(await allowed(sf.doc("casePhotos/" + id + "-0").get()), true, "Staff can see the private photos to review them");
-      if (g.actor !== A.owner) assert.strictEqual(await errCode(call("publishListingCase", A.staff, { propertyId: id })), "permission-denied");
+      assert.strictEqual(await errCode(call("publishListingCase", A.staff, { propertyId: id })), "permission-denied");
+      await call("trackListingCase", null, { id, token: r1.trackToken, action: "send", message: "synthetic customer question", lang: "en" });
+      assert.strictEqual((await sf.collection("properties/" + id + "/caseMessages").get()).size, 1, "Staff see the customer's message");
 
       // 7 Owner decides, then publishes through the server
       const oc = F(ctxOf(env, A.owner));
       if (!g.ownerDirect) {
         assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: id })), "intake_not_approved", "the Owner's publish step does not skip the intake decision");
-        assert.strictEqual(await allowed(oc.doc("properties/" + id).update({ reviewStatus: "approved", approvedSubmissionId: "syn-sub-1" })), true, "Owner records the intake decision");
+        assert.strictEqual(await allowed(oc.doc("caseInternal/" + id).update({ reviewStatus: "approved", approvedSubmissionId: "syn-sub-1" })), true, "Owner records the intake decision");
       }
+      assert.strictEqual(await allowed(oc.doc("caseInternal/" + id).update({ listingStatus: "live" })), false, "not even the Owner publishes from a browser");
       const out = await call("publishListingCase", A.owner, { propertyId: id });
       assert.strictEqual(out.published, true); assert.strictEqual(out.photoCount, g.n);
       assert.strictEqual(out.approvalPath, g.ownerDirect ? "owner_direct" : "intake_approved");
       const intAfter = (await db.doc("caseInternal/" + id).get()).data();
       assert.strictEqual(intAfter.approvedByUid, A.owner.uid, "action record: who approved"); assert.strictEqual(intAfter.approvedByRole, "owner");
-      assert.ok(intAfter.assignedToEmail === "staff@example.test" || g.ownerDirect === true || true);
 
-      // 8 the public page: allowed data only + photos of THIS property that actually download
+      // 8 the public page: allow-list data only + photos of THIS property that actually download
       const pub = (await pubView.doc("properties/" + id).get()).data();
       assert.strictEqual(pub.listingStatus, "live");
       const leaked = PRIVATE_FIELDS.filter((k) => k in pub); assert.deepStrictEqual(leaked, [], "public document has no private field: " + leaked);
       const txt = JSON.stringify(pub);
-      // An agent's id is on the public document on purpose (listerId: it drives the agent's public mini-site and "my listings");
-      // for everyone else the submitter's uid must not appear anywhere.
       if (g.actor === A.agent) assert.strictEqual(pub.listerId, g.actor.uid); else assert.ok(!("listerId" in pub));
-      for (const secret of [r1.trackToken, ...(g.actor === A.agent ? [] : [g.actor.uid]), H.FIX.phone, "0822222222", "Synthetic Real Owner", key]) assert.ok(!txt.includes(secret), "public document leaks " + secret);
+      for (const secret of [r1.trackToken, ...(g.actor === A.agent ? [] : [g.actor.uid]), H.FIX.phone, "0822222222", "Synthetic Real Owner", key, "staff@example.test"]) assert.ok(!txt.includes(secret), "public document leaks " + secret);
       const pphotos = (await pubView.collection("propertyPhotos").where("propertyId", "==", id).get()).docs.map((x) => x.data());
       assert.strictEqual(pphotos.length, g.n, "all photos are bound to this property and public");
-      for (const p of pphotos) { assert.strictEqual(p.propertyId, id); assert.strictEqual(await dl(p.dataUrl), 200, "public photo downloads"); assert.ok(!p.dataUrl.includes("casePhotos")); }
-      assert.strictEqual(pub.photoCount, g.n);
-      // the old private URL does not turn public by publishing
-      assert.notStrictEqual(await dl(privUrl), 200, "publishing does not turn the private copy public");
+      for (const p of pphotos) { assert.strictEqual(p.propertyId, id); assert.strictEqual(await dl(p.dataUrl), 200, "public photo downloads"); assert.ok(p.dataUrl.includes("publishedCasePhotos")); }
+      assert.strictEqual(pub.photoCount, undefined); assert.strictEqual(pub.publishedPhotoCount, g.n);
+      assert.notStrictEqual(await dl(privDoc.dataUrl), 200, "publishing does not turn the private copy public");
+      // the owner/agent/other users still cannot edit the public page or its photos from a browser
+      for (const who of [A.owner, g.actor, stranger]) { const c = F(ctxOf(env, who)); assert.strictEqual(await allowed(c.doc("properties/" + id).update({ price: 1 })), false); assert.strictEqual(await allowed(c.doc("propertyPhotos/" + id + "-0").delete()), false); }
 
-      // 9 take-down: public copies die, old public links stop working
+      // 9 take-down: public page and copies die, old public links stop working
       const oldUrl = pphotos[0].dataUrl;
       assert.strictEqual((await call("unpublishListingCase", A.owner, { propertyId: id, reason: "synthetic" })).unpublished, true);
-      assert.strictEqual((await pubView.doc("properties/" + id).get()).data().listingStatus, "offline");
+      assert.strictEqual((await pubView.doc("properties/" + id).get()).exists, false);
       assert.strictEqual((await pubView.collection("propertyPhotos").where("propertyId", "==", id).get()).size, 0);
       assert.notStrictEqual(await dl(oldUrl), 200, "old public photo link is dead after take-down");
+      assert.strictEqual((await call("trackListingCase", null, { id, token: r1.trackToken })).listingStatus, "offline");
     });
   }
 
@@ -137,30 +142,27 @@ describe("LISTING-E2E-01 end-to-end per submitter group (real rules + real handl
     const a = await call("submitListingCase", A.extA, payload(k1, "house", p1, { draftId }));
     const b = await call("submitListingCase", A.extA, payload(k2, "house", p2, { draftId }));
     assert.strictEqual(a.propertyId, b.propertyId, "same draft → same case");
-    // same name + phone but a DIFFERENT draft/key from another visitor is a different case (never merged by contact)
     const k3 = newKey(); const p3 = await putStaging(A.extB, k3, [0, 1]);
     const c = await call("submitListingCase", A.extB, payload(k3, "house", p3));
     assert.notStrictEqual(c.propertyId, a.propertyId);
-    assert.strictEqual((await db.collection("properties").get()).size, 2);
+    assert.strictEqual((await db.collection("caseInternal").get()).size, 2);
   });
 
   it("E2E-CHAT a lead the chat opened is COMPLETED by the form on the SAME case (photos + details attached, token kept, no second case); repeating it changes nothing", async () => {
     const uid = A.extA.uid, chatId = "own-1800000000000-abcde", token = "C".repeat(48), draftId = "draft__" + uid;
-    // exactly the shape createCaseFromConversation writes (split): thin public part, internal part
-    await db.doc("properties/" + chatId).set({ source: "owner_submission", caseSource: "ai_assistant", listingStatus: "pending", reviewStatus: "submitted", workflowVersion: "intake_v1", internalSplit: true, status: "sale", description: "", submittedAt: 1 });
-    await db.doc("caseInternal/" + chatId).set({ propertyId: chatId, createdAt: 1, submittedByUid: uid, submittedByRole: "external", caseSource: "ai_assistant", trackToken: token, conversationId: "reception__" + uid, receptionVisitorId: uid, contactName: "Synthetic Chat Lead", ownerContact: "line:synthetic", assignedToEmail: "staff@example.test" });
-    await db.doc("properties/" + chatId).update({ caseSource: "ai_assistant" });
+    // exactly the shape createCaseFromConversation writes: ONE team-only record
+    await db.doc("caseInternal/" + chatId).set({ propertyId: chatId, createdAt: 1, internalSplit: true, source: "owner_submission", caseSource: "ai_assistant", listingStatus: "pending", reviewStatus: "submitted", workflowVersion: "intake_v1", status: "sale", description: "customer summary from chat", submittedAt: 1,
+      submittedByUid: uid, submittedByRole: "external", trackToken: token, conversationId: "reception__" + uid, receptionVisitorId: uid, contactName: "Synthetic Chat Lead", ownerContact: "line:synthetic", assignedToEmail: "staff@example.test" });
     await db.doc("propertyDrafts/" + draftId).set({ ownerUid: uid, status: "draft", caseId: chatId, fields: {} });
     const key = newKey(); const photos = await putStaging(A.extA, key, [0, 1, 2]);
     const d = payload(key, "villa", photos, { price: 9900000, description: "Synthetic form description" });
     const a = await call("submitListingCase", A.extA, d);
     assert.strictEqual(a.propertyId, chatId, "same case"); assert.strictEqual(a.trackToken, token, "the customer's existing tracking link keeps working");
-    assert.strictEqual((await db.collection("properties").get()).size, 1, "no second case");
-    const pub = (await db.doc("properties/" + chatId).get()).data(), int = (await db.doc("caseInternal/" + chatId).get()).data();
-    assert.strictEqual(pub.type, "villa"); assert.strictEqual(pub.price, 9900000); assert.strictEqual(pub.photoCount, 3); assert.strictEqual(pub.listingStatus, "pending"); assert.strictEqual(pub.reviewStatus, "submitted");
-    assert.strictEqual(int.formCompletedKey, key); assert.strictEqual(int.trackToken, token); assert.strictEqual(int.assignedToEmail, "staff@example.test", "Staff's work on the case is not overwritten");
-    assert.strictEqual(int.conversationId, "reception__" + uid); assert.strictEqual(int.contactPhone, H.FIX.phone);
-    assert.deepStrictEqual(PRIVATE_FIELDS.filter((k) => k in pub), [], "still nothing private on the public document");
+    assert.strictEqual((await db.collection("caseInternal").get()).size, 1, "no second case"); assert.strictEqual((await db.collection("properties").get()).size, 0, "nothing public");
+    const rec = (await db.doc("caseInternal/" + chatId).get()).data();
+    assert.strictEqual(rec.type, "villa"); assert.strictEqual(rec.price, 9900000); assert.strictEqual(rec.photoCount, 3); assert.strictEqual(rec.listingStatus, "pending"); assert.strictEqual(rec.reviewStatus, "submitted"); assert.strictEqual(rec.description, "Synthetic form description");
+    assert.strictEqual(rec.formCompletedKey, key); assert.strictEqual(rec.trackToken, token); assert.strictEqual(rec.assignedToEmail, "staff@example.test", "Staff's work on the case is not overwritten");
+    assert.strictEqual(rec.conversationId, "reception__" + uid); assert.strictEqual(rec.contactPhone, H.FIX.phone);
     assert.strictEqual((await db.collection("casePhotos").where("propertyId", "==", chatId).get()).size, 3);
     const again = await call("submitListingCase", A.extA, d);
     assert.strictEqual(again.propertyId, chatId); assert.strictEqual((await db.collection("casePhotos").get()).size, 3);
@@ -168,5 +170,6 @@ describe("LISTING-E2E-01 end-to-end per submitter group (real rules + real handl
     const third = await call("submitListingCase", A.extA, payload(k2, "villa", p2));
     assert.strictEqual(third.propertyId, chatId, "a different key from the same draft is still the same, already-complete case");
     assert.strictEqual((await db.collection("casePhotos").get()).size, 3, "…and does not add photos or reopen it");
+    assert.strictEqual((await H.listFiles("casePhotos/" + chatId + "/")).length, 3, "…and leaves no file behind");
   });
 });

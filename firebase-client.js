@@ -11,7 +11,7 @@
 // data), and Storage holds uploaded photos served from a fast CDN URL —
 // replacing the browser-only localStorage + local-file demo used earlier.
 
-import { PRIVATE_FIELDS, splitCaseFields } from "./case-fields.js";
+import { PRIVATE_FIELDS } from "./case-fields.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCTfx0ucOxEvfcP15Gf-SJEXRS-_-F1oWQ",
@@ -95,17 +95,17 @@ function storageRef() { return getApp().storage(); }
 export async function fetchCollection(name) {
   const snap = await db().collection(name).get();
   const rows = snap.docs.map((d) => ({ ...d.data(), id: d.id }));
-  return name === "properties" ? attachCaseInternal(rows) : rows;
+  return name === "properties" ? attachCaseRecords(rows) : rows;
 }
 
-// ── LISTING-E2E-01: internal Case data lives in caseInternal/{id} ───────────────
-// A Case created by submitListingCase keeps only public-safe fields in the publicly readable
-// properties/{id}; contact, owner, trackToken, assignment, verifications, approval attribution… live in
-// caseInternal/{id} (readable by the team and the submitter). To keep every existing team page working
-// unchanged, THIS layer (a) merges the internal record back into the Case for team members, and (b)
-// routes writes of internal fields to the right document. Legacy Cases (no internalSplit flag) behave
-// exactly as before. Visitors, anonymous users and non-team members never get the merge.
-const _splitCache = new Map(); // caseId -> boolean (is this Case split?)
+// ── LISTING-E2E-01: a Case is the team-only record caseInternal/{id} ────────────────────────────────
+// Cases that came through submitListingCase / the chat live ONLY in caseInternal/{id} (team read/write). properties/{id} is just the
+// public projection of a PUBLISHED listing, written by the server. To keep every existing team page working unchanged, THIS layer
+// (a) adds the Case records to what a team member reads from "properties" (public projection + record, record wins), and
+// (b) sends a team member's writes for such a Case to caseInternal (and asks the server to re-project it if it is live).
+// Older Cases (a properties document with no caseInternal record) behave exactly as before. Visitors, anonymous users and
+// non-team members never read caseInternal (rules) and never get this merge.
+const _splitCache = new Map(); // caseId -> boolean (is this Case a record?)
 let _teamCache = { uid: null, isTeam: false };
 async function _isTeamSession() {
   const a = authApp();
@@ -117,40 +117,41 @@ async function _isTeamSession() {
   _teamCache = { uid: u.uid, isTeam: role === "owner" || role === "staff" };
   return _teamCache.isTeam;
 }
-export function mergeCaseInternal(rows, internalById) {
-  return (rows || []).map((p) => {
-    if (!p || p.internalSplit !== true) return p;
-    const i = internalById && internalById[p.id];
-    if (!i) return p;
-    const { propertyId, createdAt, ...rest } = i; // eslint-disable-line no-unused-vars
-    const merged = { ...p, ...rest };
-    // a chat-created Case keeps the customer's free-text summary internally; Staff's own description (public) wins once written
-    if (!p.description && rest.chatRequirementsSummary) merged.description = rest.chatRequirementsSummary;
-    return merged;
+export function mergeCaseRecords(publicRows, records) {
+  const by = new Map();
+  (publicRows || []).forEach((p) => { if (p && p.id) by.set(p.id, p); });
+  (records || []).forEach((r) => {
+    if (!r || !r.id) return;
+    const { propertyId, createdAt, ...rest } = r; // eslint-disable-line no-unused-vars
+    by.set(r.id, { ...(by.get(r.id) || {}), ...rest, id: r.id });
   });
+  return Array.from(by.values());
 }
-async function attachCaseInternal(rows) {
-  rows.forEach((p) => { if (p && p.id) _splitCache.set(p.id, p.internalSplit === true); });
-  if (!rows.some((p) => p.internalSplit === true)) return rows;
-  if (!(await _isTeamSession())) return rows;
+async function attachCaseRecords(rows) {
+  if (!(await _isTeamSession())) { rows.forEach((p) => { if (p && p.id) _splitCache.set(p.id, false); }); return rows; }
   try {
     const snap = await db().collection("caseInternal").get();
-    const by = {};
-    snap.docs.forEach((d) => { by[d.id] = d.data(); });
-    return mergeCaseInternal(rows, by);
-  } catch (e) { console.warn("caseInternal merge skipped:", e && e.code); return rows; }
+    const recs = snap.docs.map((d) => ({ ...d.data(), id: d.id }));
+    recs.forEach((r) => _splitCache.set(r.id, true));
+    return mergeCaseRecords(rows, recs);
+  } catch (e) { console.warn("case records not merged:", e && e.code); return rows; }
 }
 async function _isSplitCase(propertyId) {
   const id = String(propertyId);
-  if (_splitCache.has(id)) return _splitCache.get(id);
+  if (_splitCache.get(id) === true) return true;
+  if (!(await _isTeamSession())) return false;
   let split = false;
-  try { const s = await db().collection("properties").doc(id).get(); split = s.exists && (s.data() || {}).internalSplit === true; } catch (e) { split = false; }
+  try { split = (await db().collection("caseInternal").doc(id).get()).exists; } catch (e) { split = false; }
   _splitCache.set(id, split);
   return split;
 }
-// Ref to write an INTERNAL field to: caseInternal/{id} for a split Case, properties/{id} otherwise.
+// Ref to write a Case's data to: the record for a new-style Case, the properties document otherwise.
 async function _refForPrivateWrite(propertyId) {
   return (await _isSplitCase(propertyId)) ? db().collection("caseInternal").doc(String(propertyId)) : db().collection("properties").doc(String(propertyId));
+}
+// After a team member edits a Case that is LIVE, the server re-projects the public page from the record (allow-list + public-text check).
+async function _syncIfLive(propertyId) {
+  try { await callFn("syncListingCase", { propertyId: String(propertyId) }); } catch (e) { console.warn("public page not re-projected:", e && (e.code || e.message)); }
 }
 export { PRIVATE_FIELDS };
 
@@ -238,12 +239,11 @@ export async function fetchStorageFolderInventory(folderPath) {
 // operation under clearer names for NEW call sites, so intent is explicit
 // at the call site instead of only in this comment.
 export async function setDoc(collectionName, id, data) {
-  if (collectionName === "properties" && data && typeof data === "object" && PRIVATE_FIELDS.some((k) => k in data) && (await _isSplitCase(id))) {
-    // internal fields of a split Case go to caseInternal; the public document never receives them
-    const { pub, priv } = splitCaseFields(data);
-    if (Object.keys(priv).length) await db().collection("caseInternal").doc(String(id)).set(priv, { merge: true });
-    if (!Object.keys(pub).length) return;
-    data = pub;
+  if (collectionName === "properties" && (await _isSplitCase(id))) {
+    await db().collection("caseInternal").doc(String(id)).set(data, { merge: true });
+    // keys that can change what the public sees → ask the server to re-project (no-op when the Case is not live)
+    if (data && typeof data === "object" && !Object.keys(data).every((k) => ["updatedAt", "lastStaffMessageAt", "staffLastReadAt"].includes(k))) await _syncIfLive(id);
+    return;
   }
   await db().collection(collectionName).doc(String(id)).set(data, { merge: true });
 }
@@ -271,19 +271,19 @@ export async function replaceDoc(collectionName, id, data) {
 // change made elsewhere (e.g. an admin approval) in between page load and
 // save isn't silently clobbered by a stale client-side copy.
 export async function fetchDocById(collectionName, id) {
+  if (collectionName === "properties" && (await _isTeamSession())) {
+    try {
+      const i = await db().collection("caseInternal").doc(String(id)).get();
+      if (i.exists) {
+        _splitCache.set(String(id), true);
+        const pub = await db().collection("properties").doc(String(id)).get();
+        return mergeCaseRecords(pub.exists ? [{ ...pub.data(), id: pub.id }] : [], [{ ...i.data(), id: i.id }])[0];
+      }
+    } catch (e) { console.warn("case record not merged:", e && e.code); }
+  }
   const snap = await db().collection(collectionName).doc(String(id)).get();
   if (!snap.exists) return null;
-  const doc = { ...snap.data(), id: snap.id };
-  if (collectionName === "properties") {
-    _splitCache.set(doc.id, doc.internalSplit === true);
-    if (doc.internalSplit === true && (await _isTeamSession())) {
-      try {
-        const i = await db().collection("caseInternal").doc(doc.id).get();
-        if (i.exists) return mergeCaseInternal([doc], { [doc.id]: i.data() })[0];
-      } catch (e) { console.warn("caseInternal merge skipped:", e && e.code); }
-    }
-  }
-  return doc;
+  return { ...snap.data(), id: snap.id };
 }
 
 export async function deleteDocById(collectionName, id) {
@@ -328,7 +328,17 @@ export async function uploadImage(file, path) {
 
 export async function fetchWhere(collectionName, field, value) {
   const snap = await db().collection(collectionName).where(field, "==", value).get();
-  return snap.docs.map((d) => ({ ...d.data(), id: d.id }));
+  const rows = snap.docs.map((d) => ({ ...d.data(), id: d.id }));
+  if (collectionName === "properties" && (await _isTeamSession())) {
+    // team: also the new-style Case records that match (they have no public document until published)
+    try {
+      const rs = await db().collection("caseInternal").where(field, "==", value).get();
+      const recs = rs.docs.map((d) => ({ ...d.data(), id: d.id }));
+      recs.forEach((r) => _splitCache.set(r.id, true));
+      return mergeCaseRecords(rows.filter((r) => !recs.some((x) => x.id === r.id)), recs);
+    } catch (e) { console.warn("case records not merged:", e && e.code); }
+  }
+  return rows;
 }
 
 // Resizes an image File/Blob to a data: URL capped at ~1000px longest
@@ -380,6 +390,17 @@ async function dataUrlToBlob(dataUrl) {
 // URL for some other reason, they can still call uploadImage directly.
 export async function savePhoto(propertyId, index, photoUrl) {
   const id = `${propertyId}-${index}`;
+  // LISTING-E2E-01: photos of a new-style Case are never written to the public collection from a browser. An existing photo
+  // (an https link read back from the Case) is already stored; a NEW one is staged and registered by the server (private).
+  if (await _isSplitCase(propertyId)) {
+    if (typeof photoUrl === "string" && /^https?:\/\//i.test(photoUrl)) return id;
+    const uid = await ensureSignedIn();
+    const rnd = new Uint8Array(18); (window.crypto || window.msCrypto).getRandomValues(rnd);
+    const key = "s" + Array.from(rnd).map((b) => b.toString(36).padStart(2, "0")).join("").slice(0, 30);
+    const path = await uploadCaseStagingPhoto(uid, key, "0", photoUrl);
+    await callFn("addCasePhotos", { propertyId: String(propertyId), paths: [path] });
+    return id;
+  }
   if (typeof photoUrl === "string" && /^https?:\/\//i.test(photoUrl)) {
     await setDoc("propertyPhotos", id, { propertyId, index, dataUrl: photoUrl });
     return id;
@@ -2298,7 +2319,7 @@ export async function addCaseMessage(propertyId, msg) {
   try {
     const field = msg && msg.direction === "inbound" ? "lastCustomerMessageAt" : "lastStaffMessageAt";
     // lastCustomerMessageAt is an internal field (caseInternal for a split Case); lastStaffMessageAt stays public-safe
-    const target = field === "lastCustomerMessageAt" ? await _refForPrivateWrite(propertyId) : db().collection("properties").doc(String(propertyId));
+    const target = await _refForPrivateWrite(propertyId);
     await target.set({ [field]: now }, { merge: true });
   } catch (e) { console.warn("lastMessageAt stamp failed:", e); }
   return ref.id;
@@ -2531,8 +2552,9 @@ export async function clearVerification(propertyId, key) {
 // Stores references, not copies of photos.
 export async function createSubmission(propertyId, snapshot) {
   const admin = currentAdminUser();
-  const propRef = db().collection("properties").doc(String(propertyId));
-  const propSnap = await propRef.get();
+  const propRef = db().collection("properties").doc(String(propertyId)); // subcollection parent
+  const caseRef = await _refForPrivateWrite(propertyId); // where the Case's own fields live
+  const propSnap = await caseRef.get();
   const prev = Number((propSnap.data() || {}).submissionCount) || 0;
   const number = prev + 1;
   const doc = {
@@ -2549,7 +2571,7 @@ export async function createSubmission(propertyId, snapshot) {
     reviewResult: null, reviewedBy: null, reviewedAt: null, returnReason: null,
   };
   const ref = await propRef.collection("submissions").add(doc);
-  await propRef.set({
+  await caseRef.set({
     submissionCount: number,
     reviewStatus: "waiting_review",
     lastSubmittedAt: doc.submittedAt,
@@ -2573,6 +2595,7 @@ export async function decideSubmission(propertyId, submissionId, decision, opts)
   const admin = currentAdminUser();
   const now = Date.now();
   const propRef = db().collection("properties").doc(String(propertyId));
+  const caseRef = await _refForPrivateWrite(propertyId);
   await propRef.collection("submissions").doc(String(submissionId)).update({
     reviewResult: decision,
     reviewedBy: (admin && admin.email) || "",
@@ -2581,13 +2604,14 @@ export async function decideSubmission(propertyId, submissionId, decision, opts)
     returnStepKey: (opts && opts.stepKey) || null,
   });
   if (decision === "approved") {
-    await propRef.set({
+    await caseRef.set({
       reviewStatus: "approved", intakeCompletedAt: now,
-      approvedBy: (admin && admin.email) || "", approvedSubmissionId: String(submissionId),
+      // (approvedBy is an approval-attribution key: only the server writes it on a new-style Case, at publish time)
+      ...((await _isSplitCase(propertyId)) ? {} : { approvedBy: (admin && admin.email) || "" }), approvedSubmissionId: String(submissionId),
       reviewReturn: null,
     }, { merge: true });
   } else {
-    await propRef.set({
+    await caseRef.set({
       reviewStatus: decision === "more_info" ? "more_info_required" : "returned",
       reviewReturn: {
         stepKey: (opts && opts.stepKey) || null,
@@ -2610,7 +2634,7 @@ export async function decideSubmission(propertyId, submissionId, decision, opts)
 export async function assignPublicCode(internalCaseId, publicCode) {
   const code = String(publicCode || "").trim();
   if (!code) throw new Error("publicCode required");
-  await db().collection("properties").doc(String(internalCaseId)).set({
+  await (await _refForPrivateWrite(internalCaseId)).set({
     publicPropertyCode: code,
     publicCodeAssignedAt: Date.now(),
   }, { merge: true });

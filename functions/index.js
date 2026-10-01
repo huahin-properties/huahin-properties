@@ -16,7 +16,6 @@ const Stripe = require("stripe");
 // C4.2b — trackToken generation. Node's CSPRNG, server-side only. The token
 // must never be predictable: it is the ONLY credential a customer holds for
 // their own Case (see the trackToken branches in firestore.rules).
-const caseSplit = require("./case-fields");
 const nodeCrypto = require("crypto");
 // CHAT-LIVE-01: access gate + AI-call cap for the chat TEST project. On production (and the
 // emulator namespace) state() is "off" and every call below is a no-op that reads nothing.
@@ -1602,14 +1601,13 @@ exports.createCaseFromConversation = onCall(
           // caller's uid - never from the request - so this cannot be steered
           // toward another customer's Case.
           const existingId = String(linked[0]);
-          const caseSnap = await t.get(db.collection("properties").doc(existingId));
+          // LISTING-E2E-01: a Case created from now on is the team-only record caseInternal/{id}; an older Case is a properties document.
+          const intSnap = await t.get(db.collection("caseInternal").doc(existingId));
+          const caseSnap = intSnap.exists ? intSnap : await t.get(db.collection("properties").doc(existingId));
           // Unreachable while creation stays atomic (below); fails closed
           // anyway rather than returning a token for a Case we cannot see.
           if (!caseSnap.exists) return { created: false, reason: "case_missing" };
-          // LISTING-E2E-01: a Case created from now on keeps its token / conversation link in caseInternal
-          // (the public document holds public-safe fields only); an older Case still has them on the document.
-          const intSnap = await t.get(db.collection("caseInternal").doc(existingId));
-          const c = Object.assign({}, caseSnap.data() || {}, intSnap.exists ? (intSnap.data() || {}) : {});
+          const c = caseSnap.data() || {};
           // BOTH ends of the link must agree before any token is released. A
           // tampered or corrupted link returns no token at all.
           if (c.conversationId !== conversationId) return { created: false, reason: "link_mismatch" };
@@ -1692,13 +1690,8 @@ exports.createCaseFromConversation = onCall(
         // LISTING-E2E-01: the SAME split the form path uses — contact, token and conversation link never go on the
         // publicly readable document.
         if (listingCase.isEnabled()) {
-          const split = caseSplit.splitCaseFields(caseDoc);
-          // The chat summary is free text written by a customer talking to an AI: it can contain names or phone numbers,
-          // so it is kept in the internal record (team pages show it as the description until Staff write their own).
-          const chatSummary = split.pub.description || "";
-          split.pub.description = "";
-          t.create(db.collection("properties").doc(propertyId), Object.assign({}, split.pub, { internalSplit: true }));
-          t.create(db.collection("caseInternal").doc(propertyId), Object.assign({ propertyId, createdAt: now, chatRequirementsSummary: chatSummary }, split.priv));
+          // LISTING-E2E-01: the Case is ONE team-only record (caseInternal). There is no public document until the Owner publishes.
+          t.create(db.collection("caseInternal").doc(propertyId), Object.assign({ propertyId, createdAt: now, internalSplit: true }, caseDoc));
           if (draftLink) t.set(draftRef, { caseId: propertyId, status: "submitted", submittedAt: now, updatedAt: now }, { merge: true });
         } else {
           // Not a LISTING-E2E-01 project: exactly the previous shape (single document), nothing new written.
@@ -1845,6 +1838,18 @@ exports.publishListingCase = onCall(
 exports.unpublishListingCase = onCall(
   { region: "asia-southeast1", timeoutSeconds: 120, memory: "512MiB" },
   (request) => listingCase.unpublishListingCase({ admin, HttpsError, request })
+);
+exports.syncListingCase = onCall(
+  { region: "asia-southeast1", timeoutSeconds: 60 },
+  (request) => listingCase.syncListingCase({ admin, HttpsError, request })
+);
+exports.addCasePhotos = onCall(
+  { region: "asia-southeast1", timeoutSeconds: 120, memory: "512MiB" },
+  (request) => listingCase.addCasePhotos({ admin, HttpsError, request })
+);
+exports.reconcileListingFiles = onCall(
+  { region: "asia-southeast1", timeoutSeconds: 120 },
+  (request) => listingCase.reconcileListingFiles({ admin, HttpsError, request })
 );
 exports.trackListingCase = onCall(
   { region: "asia-southeast1", timeoutSeconds: 60 },

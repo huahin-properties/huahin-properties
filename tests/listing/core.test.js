@@ -1,68 +1,106 @@
-// LISTING-E2E-01 — submitListingCase / publishListingCase / unpublishListingCase / trackListingCase.
-// The real handlers run in-process against the Firestore + Storage emulators (synthetic data, no credentials,
-// every non-loopback call blocked). NOT a production PASS.
+// LISTING-E2E-01 — submitListingCase / publishListingCase / unpublishListingCase / syncListingCase / addCasePhotos /
+// reconcileListingFiles / trackListingCase. The real handlers run in-process against the Firestore + Storage emulators
+// (synthetic data, no credentials, every non-loopback call blocked). NOT a production PASS.
 "use strict";
 const assert = require("assert");
 const { install, snapshot, diffSnapshots } = require("../chat/stub-anthropic");
 const H = require("./helpers");
 const { ACTORS: A, call, errCode, errReason, newKey, putStaging, payload, PRIVATE_FIELDS } = H;
+const listing = () => require("../../functions/listing-case.js");
 
-let iso, snapBefore, db, bucket;
+let iso, snapBefore, db;
 const getDoc = async (p) => { const s = await db.doc(p).get(); return s.exists ? s.data() : null; };
 const count = async (c) => (await db.collection(c).get()).size;
-const privKeysIn = (obj) => PRIVATE_FIELDS.filter((k) => obj && k in obj);
+const approveIntake = (id) => db.doc("caseInternal/" + id).update({ reviewStatus: "approved", approvedSubmissionId: "syn-sub-1" });
+const PUB_ALLOWED = new Set(require("../../functions/case-fields.js").PUBLIC_FIELDS.concat(["source", "internalSplit", "listingStatus", "isDraft", "publishedAt", "expiresAt", "approvedAt", "photos", "publishedPhotoCount", "listerId", "viewCount"]));
 
-// submit a synthetic case as `actor`
 async function submit(actor, { type = "house", n = 2, key = newKey(), extra } = {}) {
   const photos = await putStaging(actor, key, Array.from({ length: n }, (_, i) => i));
   const r = await call("submitListingCase", actor, payload(key, type, photos, extra));
   return { r, key, photos };
 }
-// what Staff + the Owner's intake decision leave on the record (the callable under test is the publish step)
-const approveIntake = (id) => db.doc("properties/" + id).update({ reviewStatus: "approved", approvedSubmissionId: "syn-sub-1" });
+const ready = async (actor, opts) => { const x = await submit(actor, opts); await approveIntake(x.r.propertyId); return x; };
 
 describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, synthetic)", function () {
   this.timeout(120000);
   before(async () => {
     snapBefore = snapshot(); iso = install();
-    const { admin } = H.load(); db = admin.firestore(); bucket = admin.storage().bucket(H.BUCKET_NAME);
+    const { admin } = H.load(); db = admin.firestore();
   });
-  beforeEach(async () => { await H.wipe(); await H.seedRoles(); });
+  beforeEach(async () => { await H.wipe(); await H.seedRoles(); const hk = listing().hooks; Object.keys(hk).forEach((k) => delete hk[k]); });
   after(() => { iso.restore(); assert.strictEqual(diffSnapshots(snapBefore, snapshot()).length, 0); assert.strictEqual(iso.blocked.length, 0, JSON.stringify(iso.blocked)); });
 
   // ── S1 submit ───────────────────────────────────────────────────────────
-  it("S1 an external (anonymous) visitor's submission creates ONE Case: public document without any internal field, internal record, private photo records", async () => {
+  it("S1 a submission creates ONE team-only record + private photos; NOTHING public exists (no properties document, no public photo)", async () => {
     const { r, key } = await submit(A.extA, { type: "house", n: 3 });
     assert.strictEqual(r.created, true); assert.strictEqual(r.photoCount, 3); assert.ok(r.trackToken.length >= 40);
-    const pub = await getDoc("properties/" + r.propertyId), int = await getDoc("caseInternal/" + r.propertyId);
-    assert.deepStrictEqual(privKeysIn(pub), [], "the publicly readable document carries NO internal field: " + privKeysIn(pub));
-    assert.ok(!JSON.stringify(pub).includes(A.extA.uid) && !JSON.stringify(pub).includes(r.trackToken) && !JSON.stringify(pub).includes(H.FIX.phone) && !JSON.stringify(pub).includes(key), "no uid / token / phone / key anywhere in it");
-    assert.strictEqual(pub.source, "owner_submission"); assert.strictEqual(pub.listingStatus, "pending"); assert.strictEqual(pub.reviewStatus, "submitted");
-    assert.strictEqual(pub.internalSplit, true); assert.strictEqual(pub.photoCount, 3); assert.deepStrictEqual(pub.photoStandard, { min: 2, target: 6 });
-    assert.strictEqual(int.trackToken, r.trackToken); assert.strictEqual(int.contactPhone, H.FIX.phone); assert.strictEqual(int.submittedByUid, A.extA.uid); assert.strictEqual(int.submittedByRole, "external");
-    assert.strictEqual(int.ownerName, H.FIX.owner); assert.strictEqual(int.propertyOwnerRelation, "self");
+    assert.strictEqual(await getDoc("properties/" + r.propertyId), null, "no public document for a pending Case");
+    assert.strictEqual(await count("propertyPhotos"), 0, "no public photo record");
+    const rec = await getDoc("caseInternal/" + r.propertyId);
+    assert.strictEqual(rec.source, "owner_submission"); assert.strictEqual(rec.listingStatus, "pending"); assert.strictEqual(rec.reviewStatus, "submitted"); assert.strictEqual(rec.internalSplit, true);
+    assert.strictEqual(rec.photoCount, 3); assert.deepStrictEqual(rec.photoStandard, { min: 2, target: 6 });
+    assert.strictEqual(rec.trackToken, r.trackToken); assert.strictEqual(rec.contactPhone, H.FIX.phone); assert.strictEqual(rec.submittedByUid, A.extA.uid); assert.strictEqual(rec.submittedByRole, "external"); assert.strictEqual(rec.submissionKey, key);
+    assert.strictEqual(rec.ownerName, H.FIX.owner); assert.strictEqual(rec.propertyOwnerRelation, "self"); assert.strictEqual(rec.price, 7500000);
     const ph = (await db.collection("casePhotos").where("propertyId", "==", r.propertyId).get()).docs.map((d) => d.data()).sort((a, b) => a.index - b.index);
-    assert.strictEqual(ph.length, 3); ph.forEach((p, i) => { assert.strictEqual(p.index, i); assert.strictEqual(p.uploadedByUid, A.extA.uid); assert.ok(p.dataUrl.includes("casePhotos%2F" + r.propertyId + "%2F" + i + ".webp")); assert.ok(await_ok(p)); });
-    for (let i = 0; i < 3; i++) assert.ok(await H.fileExists("casePhotos/" + r.propertyId + "/" + i + ".webp"));
-    assert.strictEqual(await count("propertyPhotos"), 0, "nothing public is created for a pending Case");
+    assert.strictEqual(ph.length, 3);
+    for (const [i, p] of ph.entries()) {
+      assert.strictEqual(p.index, i); assert.strictEqual(p.uploadedByUid, A.extA.uid);
+      assert.ok(p.storagePath.startsWith("casePhotos/" + r.propertyId + "/a-")); assert.ok(!/token=/.test(p.dataUrl), "no download token in the record");
+      assert.ok(await H.fileExists(p.storagePath)); assert.ok(!((await H.fileMeta(p.storagePath)).metadata || {}).firebaseStorageDownloadTokens, "no token on the private file");
+    }
+    assert.deepStrictEqual(await H.listFiles("caseUploads/"), [], "the submitter's staging files are removed");
+    assert.strictEqual((await H.listFiles("casePhotos/" + r.propertyId + "/")).length, 3, "exactly the 3 files, no leftovers");
   });
-  function await_ok() { return true; }
 
-  // ── S2 duplicates ───────────────────────────────────────────────────────
-  it("S2 the same submission twice, and 8 identical submissions at the same instant, give exactly ONE Case with one set of photo records", async () => {
+  // ── S2 duplicates + competing attempts ──────────────────────────────────
+  it("S2 the same submission twice, and 8 identical submissions at the same instant, give exactly ONE record, one set of photo records and no orphan file", async () => {
     const key = newKey(); const photos = await putStaging(A.extA, key, [0, 1]);
     const d = payload(key, "house", photos);
     const first = await call("submitListingCase", A.extA, d);
-    const again = await call("submitListingCase", A.extA, d);
+    const again = await call("submitListingCase", A.extA, d); // staging is gone by now: a retry after a lost response must not need it
     assert.strictEqual(first.created, true); assert.strictEqual(again.created, false); assert.strictEqual(again.alreadyExisted, true);
     assert.strictEqual(again.propertyId, first.propertyId); assert.strictEqual(again.trackToken, first.trackToken);
-    // concurrent, fresh key
     const key2 = newKey(); const photos2 = await putStaging(A.extB, key2, [0, 1]);
     const rs = await Promise.all(Array.from({ length: 8 }, () => call("submitListingCase", A.extB, payload(key2, "condo", photos2))));
-    assert.strictEqual(new Set(rs.map((x) => x.propertyId)).size, 1, "all 8 resolve to one Case");
-    assert.strictEqual(new Set(rs.map((x) => x.trackToken)).size, 1, "and one token");
-    assert.strictEqual(rs.filter((x) => x.created).length, 1, "exactly one of them created it");
-    assert.strictEqual(await count("properties"), 2); assert.strictEqual(await count("caseInternal"), 2); assert.strictEqual(await count("casePhotos"), 4);
+    assert.strictEqual(new Set(rs.map((x) => x.propertyId)).size, 1); assert.strictEqual(new Set(rs.map((x) => x.trackToken)).size, 1); assert.strictEqual(rs.filter((x) => x.created).length, 1);
+    assert.strictEqual(await count("caseInternal"), 2); assert.strictEqual(await count("casePhotos"), 4);
+    assert.strictEqual((await H.listFiles("casePhotos/")).length, 4, "losing attempts removed their own files; the winner's are untouched");
+    assert.strictEqual(await count("properties"), 0);
+  });
+
+  it("S2b competing submissions with the SAME key but DIFFERENT photos/payload: the first committed one wins whole; the other changes nothing and leaves nothing", async () => {
+    const key = newKey();
+    const photosX = await putStaging(A.extA, key, [0, 1], { buf: Buffer.alloc(100, 1) });
+    const dX = payload(key, "house", photosX, { price: 1111111 });
+    let release; const gate = new Promise((res) => { release = res; });
+    let held = 0;
+    listing().hooks.afterSubmitCopy = async () => { held++; if (held === 1) await gate; }; // the first attempt waits after copying; the second runs to completion first
+    const p1 = call("submitListingCase", A.extA, dX);
+    await new Promise((r) => setTimeout(r, 400));
+    // second attempt: same key, same uid; different price. (staging slots are create-only: same photos)
+    const r2 = await call("submitListingCase", A.extA, payload(key, "house", photosX, { price: 2222222 }));
+    release();
+    const r1 = await p1;
+    assert.strictEqual(r1.propertyId, r2.propertyId);
+    const rec = await getDoc("caseInternal/" + r1.propertyId);
+    assert.strictEqual(rec.price, 2222222, "the attempt that committed first defines the Case");
+    assert.strictEqual(rec.photoCount, 2);
+    const files = await H.listFiles("casePhotos/" + r1.propertyId + "/");
+    const docs = (await db.collection("casePhotos").get()).docs.map((d) => d.data().storagePath).sort();
+    assert.deepStrictEqual(files, docs, "every stored file belongs to a record and every record has its file — no mixture of two attempts");
+    assert.strictEqual(files.length, 2);
+  });
+
+  it("S2c fault: a failure after the copy but before the commit leaves NO record and NO file; the retry then succeeds", async () => {
+    const key = newKey(); const photos = await putStaging(A.extA, key, [0, 1]);
+    listing().hooks.afterSubmitCopy = async () => { throw new Error("synthetic crash after copy"); };
+    assert.strictEqual(await errCode(call("submitListingCase", A.extA, payload(key, "house", photos))), "internal");
+    assert.strictEqual(await count("caseInternal"), 0); assert.strictEqual(await count("casePhotos"), 0);
+    assert.deepStrictEqual(await H.listFiles("casePhotos/"), [], "the failed attempt removed its own copies");
+    assert.strictEqual((await H.listFiles("caseUploads/")).length, 2, "the staged originals are still there for the retry");
+    delete listing().hooks.afterSubmitCopy;
+    const r = await call("submitListingCase", A.extA, payload(key, "house", photos));
+    assert.strictEqual(r.created, true); assert.strictEqual((await H.listFiles("casePhotos/" + r.propertyId + "/")).length, 2);
   });
 
   it("S3 a different key is a different Case; the same key from another user is a different Case; another user's staging path is refused", async () => {
@@ -71,36 +109,36 @@ describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, 
     const shared = newKey("shared");
     const x = await submit(A.extA, { key: shared }); const y = await submit(A.extB, { key: shared });
     assert.notStrictEqual(x.r.propertyId, y.r.propertyId);
-    // B tries to attach A's staged photos
     const stolen = await putStaging(A.extA, newKey("mine"), [0, 1]);
     assert.strictEqual(await errReason(call("submitListingCase", A.extB, payload(newKey("b"), "house", stolen))), "bad_photo_path");
-    assert.strictEqual(await count("properties"), 4);
+    assert.strictEqual(await count("caseInternal"), 4);
   });
 
-  // ── S4 roles ────────────────────────────────────────────────────────────
+  // ── S4 / S5 roles ───────────────────────────────────────────────────────
   it("S4 the role comes from the verified account, never from the request: claims of role/approval/live in the body are ignored", async () => {
     const key = newKey(); const photos = await putStaging(A.extA, key, [0, 1]);
     const evil = payload(key, "house", photos, { role: "owner", submittedByRole: "owner", listingStatus: "live", reviewStatus: "approved", approvedBy: "x@y.z", approvedByUid: A.owner.uid, approvedAt: 1, publishedAt: 1, listerId: A.agent.uid, source: "x", internalSplit: false, assignedToEmail: "staff@example.test" });
     evil.propertyOwner = { relation: "website", name: "x", contact: "y" };
     const r = await call("submitListingCase", A.extA, evil);
-    const pub = await getDoc("properties/" + r.propertyId), int = await getDoc("caseInternal/" + r.propertyId);
-    assert.strictEqual(int.submittedByRole, "external"); assert.strictEqual(int.propertyOwnerRelation, "self", "an outsider cannot file 'in the website's name'");
-    assert.strictEqual(pub.listingStatus, "pending"); assert.strictEqual(pub.reviewStatus, "submitted"); assert.ok(!("approvedAt" in pub) && !("publishedAt" in pub) && !("listerId" in pub));
-    assert.ok(!("approvedBy" in int) && !("approvedByUid" in int) && !("assignedToEmail" in int)); assert.strictEqual(pub.source, "owner_submission"); assert.strictEqual(pub.internalSplit, true);
+    const rec = await getDoc("caseInternal/" + r.propertyId);
+    assert.strictEqual(rec.submittedByRole, "external"); assert.strictEqual(rec.propertyOwnerRelation, "self", "an outsider cannot file 'in the website's name'");
+    assert.strictEqual(rec.listingStatus, "pending"); assert.strictEqual(rec.reviewStatus, "submitted");
+    for (const k of ["approvedAt", "publishedAt", "listerId", "approvedBy", "approvedByUid", "assignedToEmail"]) assert.ok(!(k in rec), k + " was taken from the request");
+    assert.strictEqual(rec.source, "owner_submission"); assert.strictEqual(rec.internalSplit, true); assert.strictEqual(await getDoc("properties/" + r.propertyId), null);
   });
 
   it("S5 the four kinds of submitter get their role from their account: external, agent (listers record), staff, owner — via the same function", async () => {
     const out = {};
     for (const [k, actor] of [["external", A.extA], ["google-no-record", A.google], ["agent", A.agent], ["staff", A.staff], ["owner", A.owner]]) {
       const { r } = await submit(actor, { type: "land", n: 1, extra: k === "owner" ? { propertyOwner: { relation: "website", name: "", contact: "" } } : k === "staff" ? { propertyOwner: { relation: "representative", name: "Synthetic Seller", contact: "0822222222" } } : k === "agent" ? { propertyOwner: { relation: "representative", name: "Synthetic Client", contact: "0833333333" } } : {} });
-      out[k] = { pub: await getDoc("properties/" + r.propertyId), int: await getDoc("caseInternal/" + r.propertyId) };
+      out[k] = await getDoc("caseInternal/" + r.propertyId);
     }
-    assert.strictEqual(out.external.int.submittedByRole, "external"); assert.strictEqual(out["google-no-record"].int.submittedByRole, "external");
-    assert.strictEqual(out.agent.int.submittedByRole, "agent"); assert.strictEqual(out.agent.pub.listerId, A.agent.uid); assert.strictEqual(out.agent.int.propertyOwnerRelation, "representative");
-    assert.strictEqual(out.staff.int.submittedByRole, "staff"); assert.strictEqual(out.staff.int.propertyOwnerRelation, "representative"); assert.strictEqual(out.staff.int.ownerName, "Synthetic Seller");
-    assert.strictEqual(out.owner.int.submittedByRole, "owner"); assert.strictEqual(out.owner.int.propertyOwnerRelation, "website");
-    assert.ok(!("listerId" in out.external.pub) && !("listerId" in out.staff.pub) && !("listerId" in out.owner.pub));
-    for (const k of Object.keys(out)) { assert.strictEqual(out[k].pub.listingStatus, "pending", k + " starts pending: nobody submits straight to live"); assert.deepStrictEqual(privKeysIn(out[k].pub), [], k); }
+    assert.strictEqual(out.external.submittedByRole, "external"); assert.strictEqual(out["google-no-record"].submittedByRole, "external");
+    assert.strictEqual(out.agent.submittedByRole, "agent"); assert.strictEqual(out.agent.listerId, A.agent.uid); assert.strictEqual(out.agent.propertyOwnerRelation, "representative");
+    assert.strictEqual(out.staff.submittedByRole, "staff"); assert.strictEqual(out.staff.propertyOwnerRelation, "representative"); assert.strictEqual(out.staff.ownerName, "Synthetic Seller");
+    assert.strictEqual(out.owner.submittedByRole, "owner"); assert.strictEqual(out.owner.propertyOwnerRelation, "website");
+    assert.ok(!("listerId" in out.external) && !("listerId" in out.staff) && !("listerId" in out.owner));
+    for (const k of Object.keys(out)) assert.strictEqual(out[k].listingStatus, "pending", k + " starts pending: nobody submits straight to live");
   });
 
   it("S5b when the form says nothing about the relation, the default depends on the verified role (and 'website' is never given to an outsider or an agent)", async () => {
@@ -109,152 +147,275 @@ describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, 
     assert.strictEqual(await rel(A.agent, { propertyOwner: { relation: "website" } }), "representative"); assert.strictEqual(await rel(A.extA, { propertyOwner: { relation: "website" } }), "self");
   });
 
-  // ── S6 validation / photo standard ────────────────────────────────────────
   it("S6 photo standard v1: land needs 1, every other type 2 — enforced by the server; missing/foreign/non-image/oversize/too many photos are refused", async () => {
-    assert.strictEqual((await submit(A.extA, { type: "land", n: 1 })).r.created, true);
-    for (const t of ["house", "villa", "condo", "townhouse", "commercial"]) {
-      const key = newKey(); const photos = await putStaging(A.extA, key, [0]);
-      assert.strictEqual(await errReason(call("submitListingCase", A.extA, payload(key, t, photos))), "photos_below_minimum", t);
-      const k2 = newKey(); const p2 = await putStaging(A.extA, k2, [0, 1]);
-      assert.strictEqual((await call("submitListingCase", A.extA, payload(k2, t, p2))).created, true, t + " with 2");
+    for (const [type, min] of [["land", 1], ["house", 2], ["villa", 2], ["condo", 2], ["townhouse", 2], ["commercial", 2]]) {
+      const k1 = newKey(); const few = await putStaging(A.extA, k1, Array.from({ length: min - 1 }, (_, i) => i));
+      assert.strictEqual(await errReason(call("submitListingCase", A.extA, payload(k1, type, few))), "photos_below_minimum", type + " below minimum");
+      const k2 = newKey(); const ok = await putStaging(A.extA, k2, Array.from({ length: min }, (_, i) => i));
+      assert.strictEqual((await call("submitListingCase", A.extA, payload(k2, type, ok))).created, true, type + " at minimum");
     }
-    const k = newKey(); const ok2 = await putStaging(A.extA, k, [0, 1]);
-    const base = (ph, ex) => payload(k, "house", ph, ex);
-    assert.strictEqual(await errReason(call("submitListingCase", A.extA, base([...ok2, { path: "caseUploads/" + A.extA.uid + "/" + k + "/9.webp" }]))), "photo_missing");
-    assert.strictEqual(await errReason(call("submitListingCase", A.extA, base([{ path: "caseUploads/" + A.extA.uid + "/" + k + "/../0.webp" }, ok2[1]]))), "bad_photo_path");
-    assert.strictEqual(await errReason(call("submitListingCase", A.extA, base([{ path: "propertyPhotos/x-0.webp" }, ok2[1]]))), "bad_photo_path");
-    assert.strictEqual(await errReason(call("submitListingCase", A.extA, base([ok2[0], ok2[0]]))), "bad_photo_path", "the same file twice");
-    const kp = newKey(); const pdf = await putStaging(A.extA, kp, [0, 1], { contentType: "application/pdf" });
-    assert.strictEqual(await errReason(call("submitListingCase", A.extA, payload(kp, "house", pdf))), "photo_not_image");
-    const kb = newKey(); const big = await putStaging(A.extA, kb, [0, 1], { buf: Buffer.alloc(8 * 1024 * 1024 + 1, 1) });
-    assert.strictEqual(await errReason(call("submitListingCase", A.extA, payload(kb, "house", big))), "photo_bad_size");
-    const many = Array.from({ length: 31 }, (_, i) => ({ path: "caseUploads/" + A.extA.uid + "/" + k + "/" + i + ".webp" }));
-    assert.strictEqual(await errReason(call("submitListingCase", A.extA, base(many))), "too_many_photos");
-    // field validation
-    const kk = newKey(); const ph = await putStaging(A.extA, kk, [0, 1]);
-    for (const [ex, reason] of [[{ price: 0 }, "bad_price"], [{ price: "x" }, "bad_price"], [{ type: "boat" }, "bad_type"], [{ txnType: "swap" }, "bad_txn_type"], [{ description: "  " }, "missing_description"], [{ area: "mars" }, "bad_area"], [{ submitter: { name: "A", phone: "0800000000" } }, "missing_submitter_name"], [{ submitter: { name: "Syn Name", phone: "12" } }, "missing_submitter_contact"], [{ submissionKey: "short" }, "bad_submission_key"]]) {
-      assert.strictEqual(await errReason(call("submitListingCase", A.extA, Object.assign(payload(kk, "house", ph), ex))), reason, JSON.stringify(ex));
+    const k = newKey(); const photos = await putStaging(A.extA, k, [0, 1]);
+    assert.strictEqual(await errReason(call("submitListingCase", A.extA, payload(k, "house", [photos[0], { path: photos[1].path.replace("/1.webp", "/7.webp") }]))), "photo_missing");
+    const k3 = newKey(); const nonImage = await putStaging(A.extA, k3, [0, 1], { contentType: "application/pdf" });
+    assert.strictEqual(await errReason(call("submitListingCase", A.extA, payload(k3, "house", nonImage))), "photo_not_image");
+    const k4 = newKey(); const big = await putStaging(A.extA, k4, [0, 1], { buf: Buffer.alloc(8 * 1024 * 1024 + 1) });
+    assert.strictEqual(await errReason(call("submitListingCase", A.extA, payload(k4, "house", big))), "photo_bad_size");
+    const k5 = newKey();
+    assert.strictEqual(await errReason(call("submitListingCase", A.extA, payload(k5, "house", Array.from({ length: 31 }, (_, i) => ({ path: "caseUploads/" + A.extA.uid + "/" + k5 + "/" + i + ".webp" }))))), "too_many_photos");
+    for (const bad of [{ price: 0 }, { price: "abc" }, { txnType: "buy" }, { type: "castle" }, { description: "  " }, { area: "paris" }, { submitter: { name: "x", phone: "1" } }, { submissionKey: "short" }]) {
+      const kk = newKey(); const ph = await putStaging(A.extA, kk, [0, 1]);
+      assert.strictEqual(await errCode(call("submitListingCase", A.extA, payload(kk, "house", ph, bad))), "invalid-argument", JSON.stringify(bad));
     }
-    assert.strictEqual(await errCode(call("submitListingCase", null, payload(kk, "house", ph))), "unauthenticated");
+    assert.strictEqual((await H.listFiles("casePhotos/")).length, 11, "refused submissions left no private file behind");
   });
 
-  // ── S7 one draft, one Case ──────────────────────────────────────────────
   it("S7 one draft, one Case: the draft's own id links it; a second form after a chat Case returns that Case; name/phone are never used to merge", async () => {
-    await db.doc("propertyDrafts/draft__" + A.extA.uid).set({ ownerUid: A.extA.uid, status: "draft", fields: { price: { value: 7500000 } } });
-    const { r } = await submit(A.extA, { n: 2 });
-    const int = await getDoc("caseInternal/" + r.propertyId), draft = await getDoc("propertyDrafts/draft__" + A.extA.uid);
-    assert.strictEqual(int.draftId, "draft__" + A.extA.uid); assert.strictEqual(draft.caseId, r.propertyId); assert.strictEqual(draft.status, "submitted");
-    const key2 = newKey(); const p2 = await putStaging(A.extA, key2, [0, 1]);
-    const second = await call("submitListingCase", A.extA, payload(key2, "condo", p2));
-    assert.strictEqual(second.propertyId, r.propertyId); assert.strictEqual(second.linkedFromDraft, true); assert.strictEqual(second.created, false);
-    assert.strictEqual(await count("properties"), 1);
-    // same name + phone but a different visitor (no draft link) = a separate Case, not a merge
-    const other = await submit(A.extB, { n: 2 });
-    assert.notStrictEqual(other.r.propertyId, r.propertyId); assert.strictEqual(await count("properties"), 2);
-    // a draft that belongs to someone else is never touched
-    assert.strictEqual((await getDoc("propertyDrafts/draft__" + A.extB.uid)), null);
+    const draftId = "draft__" + A.extA.uid;
+    await db.doc("propertyDrafts/" + draftId).set({ ownerUid: A.extA.uid, status: "draft", fields: {} });
+    const a = await submit(A.extA, { key: newKey() });
+    assert.strictEqual((await getDoc("propertyDrafts/" + draftId)).caseId, a.r.propertyId); assert.strictEqual((await getDoc("caseInternal/" + a.r.propertyId)).draftId, draftId);
+    const b = await submit(A.extA, { key: newKey() });
+    assert.strictEqual(b.r.propertyId, a.r.propertyId); assert.strictEqual(b.r.linkedFromDraft, true);
+    const c = await submit(A.extB, { key: newKey() });
+    assert.notStrictEqual(c.r.propertyId, a.r.propertyId, "same name + phone, different visitor/draft → different Case");
+    assert.strictEqual(await count("caseInternal"), 2);
   });
 
-  // ── S8 publish ──────────────────────────────────────────────────────────
+  // ── S8 / S9 publish ─────────────────────────────────────────────────────
   it("S8 only the Owner can publish; a Case needs the Owner's intake decision first; the photo standard is re-checked", async () => {
     const { r } = await submit(A.extA, { n: 2 });
-    for (const who of ["extA", "extB", "agent", "staff", "google"]) assert.strictEqual(await errCode(call("publishListingCase", A[who], { propertyId: r.propertyId })), "permission-denied", who);
+    for (const who of ["extA", "agent", "staff", "google"]) assert.strictEqual(await errCode(call("publishListingCase", A[who], { propertyId: r.propertyId })), "permission-denied", who);
     assert.strictEqual(await errCode(call("publishListingCase", null, { propertyId: r.propertyId })), "unauthenticated");
     assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: r.propertyId })), "intake_not_approved");
-    assert.strictEqual((await getDoc("properties/" + r.propertyId)).listingStatus, "pending");
     await approveIntake(r.propertyId);
-    // photo standard re-checked: drop the private photo records below the minimum
-    const snap = await db.collection("casePhotos").where("propertyId", "==", r.propertyId).get();
-    await snap.docs[1].ref.delete();
+    await db.doc("casePhotos/" + r.propertyId + "-1").delete();
     assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: r.propertyId })), "photos_below_minimum");
-    assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: "x/y" })), "bad_property_id");
-    assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: "own-does-not-exist" })), "case_not_found");
+    assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: "own-nope" })), "case_not_found");
+    assert.strictEqual(await count("properties"), 0); assert.deepStrictEqual(await H.listFiles("publishedCasePhotos/"), []);
   });
 
-  it("S9 publish: live document with title + photos, public photo copies, who approved recorded privately, audit trail; idempotent; private data still private", async () => {
-    const { r } = await submit(A.extA, { type: "villa", n: 3 });
-    await approveIntake(r.propertyId);
+  it("S9 publish: the public page is the ALLOW-LIST projection only (unknown/internal fields never reach it); public photos are server-written copies; who approved is recorded privately; idempotent", async () => {
+    const { r } = await ready(A.agent, { type: "villa", n: 3 });
+    await db.doc("caseInternal/" + r.propertyId).update({ secretNote: "SYNTHETIC-SECRET", futureField: 123, internalNotes: "synthetic internal note", bedrooms: 4, features: ["pool"], description: "Synthetic villa near the beach." });
     const out = await call("publishListingCase", A.owner, { propertyId: r.propertyId });
     assert.strictEqual(out.published, true); assert.strictEqual(out.photoCount, 3); assert.strictEqual(out.approvalPath, "intake_approved");
-    const pub = await getDoc("properties/" + r.propertyId), int = await getDoc("caseInternal/" + r.propertyId);
-    assert.strictEqual(pub.listingStatus, "live"); assert.ok(pub.publishedAt && pub.expiresAt > pub.publishedAt && pub.approvedAt);
-    assert.strictEqual(pub.photos.length, 3); assert.ok(pub.title.th && pub.title.en); assert.strictEqual(pub.publishedPhotoCount, 3);
-    assert.deepStrictEqual(privKeysIn(pub), [], "the live document still has no internal field (approver identity included)");
-    assert.strictEqual(int.approvedByUid, A.owner.uid); assert.strictEqual(int.approvedByRole, "owner"); assert.strictEqual(int.approvedByEmail, "owner@example.test"); assert.strictEqual(int.approvalPath, "intake_approved");
-    const pubPhotos = (await db.collection("propertyPhotos").where("propertyId", "==", r.propertyId).get()).docs.map((d) => d.data()).sort((a, b) => a.index - b.index);
-    assert.strictEqual(pubPhotos.length, 3);
-    pubPhotos.forEach((p, i) => { assert.ok(p.dataUrl.includes("propertyPhotos%2F" + r.propertyId + "-" + i + ".webp")); assert.strictEqual(p.publishedByUid, A.owner.uid); });
-    for (let i = 0; i < 3; i++) { assert.ok(await H.fileExists("propertyPhotos/" + r.propertyId + "-" + i + ".webp")); assert.ok(await H.fileExists("casePhotos/" + r.propertyId + "/" + i + ".webp"), "private originals stay"); }
-    const log = (await db.collection("activityLog").where("propertyId", "==", r.propertyId).get()).docs.map((d) => d.data().type).sort();
-    assert.deepStrictEqual(log, ["case_submitted", "listing_published"]);
+    const pub = await getDoc("properties/" + r.propertyId);
+    assert.strictEqual(pub.listingStatus, "live"); assert.strictEqual(pub.bedrooms, 4); assert.deepStrictEqual(pub.features, ["pool"]); assert.strictEqual(pub.photos.length, 3); assert.ok(pub.title.th && pub.title.en); assert.ok(pub.expiresAt > pub.publishedAt);
+    const extra = Object.keys(pub).filter((k) => !PUB_ALLOWED.has(k));
+    assert.deepStrictEqual(extra, [], "fields outside the allow-list reached the public document: " + extra);
+    assert.ok(!JSON.stringify(pub).includes("SYNTHETIC-SECRET") && !JSON.stringify(pub).includes(H.FIX.phone) && !JSON.stringify(pub).includes(H.FIX.name));
+    assert.strictEqual(pub.listerId, A.agent.uid, "an agent's own mini-site id is the one deliberate public link");
+    const pp = (await db.collection("propertyPhotos").where("propertyId", "==", r.propertyId).get()).docs.map((d) => d.data());
+    assert.strictEqual(pp.length, 3);
+    for (const p of pp) { assert.ok(/token=/.test(p.dataUrl)); assert.ok(p.dataUrl.includes("publishedCasePhotos%2F" + r.propertyId + "%2F")); assert.ok(!p.dataUrl.includes("casePhotos%2F")); assert.strictEqual(p.publishedByUid, A.owner.uid); assert.strictEqual((await fetch(p.dataUrl)).status, 200); }
+    const rec = await getDoc("caseInternal/" + r.propertyId);
+    assert.strictEqual(rec.approvedByUid, A.owner.uid); assert.strictEqual(rec.approvedByRole, "owner"); assert.strictEqual(rec.approvalPath, "intake_approved"); assert.strictEqual(rec.publishOp.status, "done");
+    assert.strictEqual((await db.collection("activityLog").where("type", "==", "listing_published").get()).size, 1);
     const again = await call("publishListingCase", A.owner, { propertyId: r.propertyId });
-    assert.strictEqual(again.alreadyLive, true); assert.strictEqual((await db.collection("propertyPhotos").where("propertyId", "==", r.propertyId).get()).size, 3);
+    assert.strictEqual(again.alreadyLive, true); assert.strictEqual(await count("propertyPhotos"), 3);
+    assert.strictEqual((await H.listFiles("publishedCasePhotos/" + r.propertyId + "/")).length, 3);
+    assert.strictEqual((await H.listFiles("casePhotos/" + r.propertyId + "/")).length, 3, "private originals stay");
   });
 
-  it("S10 the Owner's own submission can be published without an intake round (approval path recorded as owner_direct)", async () => {
+  it("S9b public text with contact details is refused (nothing copied, nothing public); after the Owner edits it, publishing works", async () => {
+    const { r } = await ready(A.extA, { n: 2 });
+    for (const bad of ["โทร 081-234-5678 ได้เลย", "ติดต่อ line: synthetic123", "mail synthetic@example.test", "www.example-listing.com", "call 0812345678"]) {
+      await db.doc("caseInternal/" + r.propertyId).update({ description: bad });
+      assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: r.propertyId })), "public_text_has_contact_info", bad);
+    }
+    assert.strictEqual(await count("properties"), 0); assert.deepStrictEqual(await H.listFiles("publishedCasePhotos/"), []); assert.strictEqual(await count("propertyPhotos"), 0);
+    await db.doc("caseInternal/" + r.propertyId).update({ description: "Quiet 3-bedroom house, 150 sqm, price 12,000,000 THB." });
+    assert.strictEqual((await call("publishListingCase", A.owner, { propertyId: r.propertyId })).published, true);
+  });
+
+  it("S9c stale approval: if the approval is withdrawn while photos are being copied, publishing fails at commit; no public document, no public file, the lease is released", async () => {
+    const { r } = await ready(A.extA, { n: 2 });
+    listing().hooks.afterPublishCopy = async () => { await db.doc("caseInternal/" + r.propertyId).update({ reviewStatus: "returned" }); };
+    assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: r.propertyId })), "intake_not_approved");
+    assert.strictEqual(await getDoc("properties/" + r.propertyId), null); assert.strictEqual(await count("propertyPhotos"), 0); assert.deepStrictEqual(await H.listFiles("publishedCasePhotos/"), []);
+    assert.strictEqual((await getDoc("caseInternal/" + r.propertyId)).publishOp.status, "failed");
+    delete listing().hooks.afterPublishCopy;
+    await approveIntake(r.propertyId);
+    assert.strictEqual((await call("publishListingCase", A.owner, { propertyId: r.propertyId })).published, true, "publishable again once re-approved");
+  });
+
+  it("S9d publish vs take-down: a take-down that arrives while the publish is copying cancels it — the listing does not appear and the copies are removed", async () => {
+    const { r } = await ready(A.extA, { n: 2 });
+    listing().hooks.afterPublishCopy = async () => { delete listing().hooks.afterPublishCopy; const o = await call("unpublishListingCase", A.owner, { propertyId: r.propertyId }); assert.strictEqual(o.cancelledPublish, true); };
+    assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: r.propertyId })), "publish_cancelled");
+    assert.strictEqual(await getDoc("properties/" + r.propertyId), null); assert.strictEqual(await count("propertyPhotos"), 0); assert.deepStrictEqual(await H.listFiles("publishedCasePhotos/"), []);
+    assert.notStrictEqual((await getDoc("caseInternal/" + r.propertyId)).listingStatus, "live");
+  });
+
+  it("S9e photos changed while publishing (a Staff photo added in between): the commit refuses (the copy would be stale)", async () => {
+    const { r } = await ready(A.extA, { n: 2 });
+    listing().hooks.afterPublishCopy = async () => { delete listing().hooks.afterPublishCopy; const key = newKey(); const p = await putStaging(A.staff, key, [0]); await call("addCasePhotos", A.staff, { propertyId: r.propertyId, paths: p.map((x) => x.path) }); };
+    assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: r.propertyId })), "photos_changed");
+    assert.strictEqual(await getDoc("properties/" + r.propertyId), null); assert.deepStrictEqual(await H.listFiles("publishedCasePhotos/"), []);
+    const ok = await call("publishListingCase", A.owner, { propertyId: r.propertyId });
+    assert.strictEqual(ok.photoCount, 3);
+  });
+
+  it("S9f two Owner clicks at once: one publishes, the other is told it is in progress or already live; the end state is consistent (one set of public photos)", async () => {
+    const { r } = await ready(A.extA, { n: 3 });
+    const rs = await Promise.all([call("publishListingCase", A.owner, { propertyId: r.propertyId }).catch((e) => ({ err: e.details && e.details.reason })), call("publishListingCase", A.owner, { propertyId: r.propertyId }).catch((e) => ({ err: e.details && e.details.reason }))]);
+    assert.strictEqual(rs.filter((x) => x.published === true).length, 1, JSON.stringify(rs));
+    assert.ok(rs.every((x) => x.published === true || x.alreadyLive === true || ["publish_in_progress", "publish_cancelled"].includes(x.err)), JSON.stringify(rs));
+    assert.strictEqual(await count("propertyPhotos"), 3);
+    const op = (await getDoc("caseInternal/" + r.propertyId)).publishOp;
+    assert.strictEqual(op.status, "done");
+    const files = await H.listFiles("publishedCasePhotos/" + r.propertyId + "/");
+    assert.strictEqual(files.length, 3); assert.ok(files.every((f) => f.includes("/" + op.opId + "/")), "only the winning operation's files remain");
+  });
+
+  it("S10 the Owner's own submission can be published without an intake round (approval path recorded as owner_direct); a Staff or agent Case never skips the decision", async () => {
     const { r } = await submit(A.owner, { type: "condo", n: 2, extra: { propertyOwner: { relation: "website", name: "", contact: "" } } });
     const out = await call("publishListingCase", A.owner, { propertyId: r.propertyId });
     assert.strictEqual(out.approvalPath, "owner_direct"); assert.strictEqual((await getDoc("caseInternal/" + r.propertyId)).submittedByRole, "owner");
-    // but a Staff-filed Case never skips the decision, and an agent's Case never does
     const s = await submit(A.staff, { n: 2 }); const g = await submit(A.agent, { n: 2 });
     assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: s.r.propertyId })), "intake_not_approved");
     assert.strictEqual(await errReason(call("publishListingCase", A.owner, { propertyId: g.r.propertyId })), "intake_not_approved");
   });
 
-  it("S11 take-down: public files AND records are physically removed, the listing goes offline, private originals stay, re-publish makes new copies", async () => {
-    const { r } = await submit(A.extA, { n: 2 }); await approveIntake(r.propertyId);
+  it("S11 take-down: the public document, public photo records AND files are removed, the record goes offline, private originals stay; the old public link dies; re-publish makes new copies", async () => {
+    const { r } = await ready(A.extA, { n: 2 });
     await call("publishListingCase", A.owner, { propertyId: r.propertyId });
     const firstUrl = (await db.collection("propertyPhotos").doc(r.propertyId + "-0").get()).data().dataUrl;
+    assert.strictEqual((await fetch(firstUrl)).status, 200);
     for (const who of ["extA", "agent", "staff"]) assert.strictEqual(await errCode(call("unpublishListingCase", A[who], { propertyId: r.propertyId })), "permission-denied", who);
-    assert.ok(await H.fileExists("propertyPhotos/" + r.propertyId + "-0.webp"));
     const out = await call("unpublishListingCase", A.owner, { propertyId: r.propertyId, reason: "synthetic reason" });
     assert.strictEqual(out.unpublished, true); assert.strictEqual(out.removedPublicPhotos, 2);
-    const pub = await getDoc("properties/" + r.propertyId);
-    assert.strictEqual(pub.listingStatus, "offline"); assert.strictEqual(await count("propertyPhotos"), 0);
-    for (let i = 0; i < 2; i++) { assert.ok(!(await H.fileExists("propertyPhotos/" + r.propertyId + "-" + i + ".webp")), "public file " + i + " is gone"); assert.ok(await H.fileExists("casePhotos/" + r.propertyId + "/" + i + ".webp")); }
-    assert.strictEqual((await getDoc("caseInternal/" + r.propertyId)).offlineReason, "synthetic reason"); assert.deepStrictEqual(privKeysIn(pub), []);
+    assert.strictEqual(await getDoc("properties/" + r.propertyId), null, "offline = no public document"); assert.strictEqual(await count("propertyPhotos"), 0);
+    assert.deepStrictEqual(await H.listFiles("publishedCasePhotos/"), []);
+    assert.notStrictEqual((await fetch(firstUrl)).status, 200, "the old public photo link is dead");
+    assert.strictEqual((await H.listFiles("casePhotos/" + r.propertyId + "/")).length, 2, "private originals stay");
+    const rec = await getDoc("caseInternal/" + r.propertyId);
+    assert.strictEqual(rec.listingStatus, "offline"); assert.strictEqual(rec.offlineReason, "synthetic reason");
     assert.strictEqual((await call("unpublishListingCase", A.owner, { propertyId: r.propertyId })).unpublished, false, "taking down twice is harmless");
     const re = await call("publishListingCase", A.owner, { propertyId: r.propertyId });
     assert.strictEqual(re.published, true);
     const newUrl = (await db.collection("propertyPhotos").doc(r.propertyId + "-0").get()).data().dataUrl;
-    assert.notStrictEqual(newUrl, firstUrl, "new public copy = new token: the old link stays dead");
+    assert.notStrictEqual(newUrl, firstUrl); assert.strictEqual((await fetch(newUrl)).status, 200); assert.notStrictEqual((await fetch(firstUrl)).status, 200);
   });
 
-  // ── S12 tracking ────────────────────────────────────────────────────────
-  it("S12 the customer's tracking view needs the token, shows no internal data, and not-found = wrong token", async () => {
+  it("S11b a legacy member-uploaded photo of an unrelated listing is not touched by a take-down", async () => {
+    const { r } = await ready(A.extA, { n: 2 });
+    await call("publishListingCase", A.owner, { propertyId: r.propertyId });
+    await db.doc("propertyPhotos/LEGACY-1-0").set({ propertyId: "LEGACY-1", index: 0, dataUrl: "http://synthetic/legacy" });
+    await call("unpublishListingCase", A.owner, { propertyId: r.propertyId });
+    assert.ok((await db.doc("propertyPhotos/LEGACY-1-0").get()).exists);
+  });
+
+  // ── S12 tracking + conversation ─────────────────────────────────────────
+  it("S12 the customer's tracking view needs the token, shows no internal data, and not-found = wrong token = no token", async () => {
     const { r } = await submit(A.extA, { n: 2 });
     await db.doc("caseInternal/" + r.propertyId).update({ assignedToEmail: "staff@example.test", reviewReturn: { reason: "synthetic: please send the title deed", by: "staff@example.test", at: 1 }, internalNotes: "synthetic secret note" });
     const view = await call("trackListingCase", null, { id: r.propertyId, token: r.trackToken });
-    assert.strictEqual(view.id, r.propertyId); assert.strictEqual(view.reviewStatus, "submitted"); assert.strictEqual(view.photoCount, 2); assert.strictEqual(view.contactName, H.FIX.name);
+    assert.strictEqual(view.id, r.propertyId); assert.strictEqual(view.reviewStatus, "submitted"); assert.strictEqual(view.photoCount, 2); assert.strictEqual(view.contactName, H.FIX.name); assert.strictEqual(view.legacy, false);
     assert.deepStrictEqual(view.reviewReturn, { reason: "synthetic: please send the title deed" });
     const text = JSON.stringify(view);
-    for (const secret of [r.trackToken, A.extA.uid, "staff@example.test", "synthetic secret note", H.FIX.phone, "caseUploads"]) assert.ok(!text.includes(secret), "view must not contain: " + secret);
+    for (const secret of [r.trackToken, A.extA.uid, "staff@example.test", "synthetic secret note", H.FIX.phone, "caseUploads", "casePhotos"]) assert.ok(!text.includes(secret), "view must not contain: " + secret);
     for (const bad of [{ id: r.propertyId, token: "x".repeat(40) }, { id: "own-nope", token: r.trackToken }, { id: r.propertyId, token: "" }, { id: "a/b", token: r.trackToken }, { id: r.propertyId }, { token: r.trackToken }]) {
-      assert.strictEqual(await errCode(call("trackListingCase", null, bad)), "permission-denied", JSON.stringify(bad).slice(0, 40));
+      for (const action of ["view", "messages", "send", "read", "language"]) assert.strictEqual(await errCode(call("trackListingCase", null, Object.assign({ action, message: "hello", lang: "en" }, bad))), "permission-denied", action + " " + JSON.stringify(bad).slice(0, 40));
     }
-    await call("trackListingCase", null, { id: r.propertyId, token: r.trackToken, action: "language", lang: "en" });
-    await call("trackListingCase", null, { id: r.propertyId, token: r.trackToken, action: "responded", message: "synthetic reply" });
-    await call("trackListingCase", null, { id: r.propertyId, token: r.trackToken, action: "read" });
-    const int = await getDoc("caseInternal/" + r.propertyId);
-    assert.strictEqual(int.customerLanguage, "en"); assert.strictEqual(int.customerLanguageConfirmed, true); assert.strictEqual(int.infoResponseMessage, "synthetic reply"); assert.ok(int.customerLastReadAt);
-    assert.deepStrictEqual(privKeysIn(await getDoc("properties/" + r.propertyId)), [], "bookkeeping never touches the public document");
-    await call("trackListingCase", null, { id: r.propertyId, token: r.trackToken, action: "language", lang: "fr" });
-    assert.strictEqual((await getDoc("caseInternal/" + r.propertyId)).customerLanguage, "en", "language is locked once confirmed");
-    assert.strictEqual(await errReason(call("trackListingCase", null, { id: r.propertyId, token: r.trackToken, action: "delete" })), "bad_action");
+    assert.strictEqual(await errCode(call("trackListingCase", null, { id: r.propertyId, token: r.trackToken, action: "delete-everything" })), "invalid-argument");
   });
 
-  // ── S13 test-project-only guard ─────────────────────────────────────────
-  it("S13 outside a test project the four functions refuse every call (so an accidental production deploy changes nothing); LISTING_E2E_ENABLED=1 is the deliberate switch", async () => {
+  it("S12b the customer's conversation goes through the server: customer-visible messages only, no caseToken / Thai note / staff identity in the response; a message sent lands on the Case; unrelated uid or wrong token can neither read nor send", async () => {
+    const { r } = await submit(A.extA, { n: 2 });
+    const col = db.collection("properties/" + r.propertyId + "/caseMessages");
+    await col.add({ senderType: "staff", direction: "outbound", visibility: "customer", customerText: "Please send the title deed", thaiText: "THAI-NOTE", senderEmail: "staff@example.test", caseToken: r.trackToken, createdAt: 10 });
+    await col.add({ senderType: "staff", direction: "internal", visibility: "internal", text: "INTERNAL-ONLY-NOTE", createdAt: 11 });
+    const read = await call("trackListingCase", null, { id: r.propertyId, token: r.trackToken, action: "messages" });
+    assert.strictEqual(read.messages.length, 1); assert.strictEqual(read.messages[0].customerText, "Please send the title deed");
+    const txt = JSON.stringify(read);
+    for (const secret of ["THAI-NOTE", "staff@example.test", "INTERNAL-ONLY-NOTE", r.trackToken, "caseToken", "thaiText"]) assert.ok(!txt.includes(secret), secret);
+    // another signed-in uid with the case id but no token
+    assert.strictEqual(await errCode(call("trackListingCase", A.extB, { id: r.propertyId, action: "messages" })), "permission-denied");
+    assert.strictEqual(await errCode(call("trackListingCase", A.extB, { id: r.propertyId, token: "z".repeat(48), action: "messages" })), "permission-denied");
+    const sent = await call("trackListingCase", null, { id: r.propertyId, token: r.trackToken, action: "send", message: "Here is the deed", thaiText: "นี่คือโฉนด", lang: "en" });
+    assert.strictEqual(sent.sent, true);
+    const msgs = (await col.get()).docs.map((d) => d.data()).filter((m) => m.senderType === "customer");
+    assert.strictEqual(msgs.length, 1); assert.strictEqual(msgs[0].visibility, "customer"); assert.strictEqual(msgs[0].originalText, "Here is the deed"); assert.strictEqual(msgs[0].thaiText, "นี่คือโฉนด"); assert.ok(!("caseToken" in msgs[0]));
+    const rec = await getDoc("caseInternal/" + r.propertyId); assert.strictEqual(rec.infoResponseStatus, "responded"); assert.ok(rec.lastCustomerMessageAt);
+    assert.strictEqual(await errCode(call("trackListingCase", null, { id: r.propertyId, token: r.trackToken, action: "send", message: "   " })), "invalid-argument");
+    assert.strictEqual(await getDoc("properties/" + r.propertyId), null, "still no public document");
+  });
+
+  it("S12c an older Case (token on its properties document) works through the same function — and an unrelated token is refused", async () => {
+    await db.doc("properties/own-legacy-1").set({ source: "owner_submission", listingStatus: "pending", reviewStatus: "submitted", trackToken: "L".repeat(48), contactName: "Legacy Person", type: "house", status: "sale", price: 1, submittedAt: 5 });
+    await db.collection("properties/own-legacy-1/caseMessages").add({ senderType: "staff", direction: "outbound", visibility: "customer", customerText: "legacy hello", createdAt: 2 });
+    const v = await call("trackListingCase", null, { id: "own-legacy-1", token: "L".repeat(48) });
+    assert.strictEqual(v.legacy, true); assert.strictEqual(v.contactName, "Legacy Person");
+    assert.strictEqual((await call("trackListingCase", null, { id: "own-legacy-1", token: "L".repeat(48), action: "messages" })).messages.length, 1);
+    assert.strictEqual((await call("trackListingCase", null, { id: "own-legacy-1", token: "L".repeat(48), action: "send", message: "hi" })).sent, true);
+    assert.strictEqual(await errCode(call("trackListingCase", null, { id: "own-legacy-1", token: "M".repeat(48) })), "permission-denied");
+    assert.strictEqual(await errCode(call("trackListingCase", null, { id: "own-legacy-1", token: "L".repeat(48) + "x" })), "permission-denied");
+    await db.doc("properties/live-1").set({ source: "x", listingStatus: "live", trackToken: "Q".repeat(48) });
+    assert.strictEqual(await errCode(call("trackListingCase", null, { id: "live-1", token: "Q".repeat(48) })), "permission-denied", "only owner_submission documents are trackable");
+  });
+
+  it("S13 outside a test project the listing functions refuse every call (so an accidental production deploy changes nothing); LISTING_E2E_ENABLED=1 is the deliberate switch", async () => {
     const saved = { g: process.env.GCLOUD_PROJECT, c: process.env.GOOGLE_CLOUD_PROJECT, f: process.env.FIREBASE_CONFIG, e: process.env.LISTING_E2E_ENABLED };
     try {
       process.env.GCLOUD_PROJECT = "huahin-properties-prod-like"; delete process.env.GOOGLE_CLOUD_PROJECT; process.env.FIREBASE_CONFIG = "{}"; delete process.env.LISTING_E2E_ENABLED;
       const key = newKey(); const photos = await putStaging(A.extA, key, [0, 1]);
       assert.strictEqual(await errReason(call("submitListingCase", A.extA, payload(key, "house", photos))), "not_enabled");
-      for (const fn of ["publishListingCase", "unpublishListingCase"]) assert.strictEqual(await errReason(call(fn, A.owner, { propertyId: "x" })), "not_enabled", fn);
+      for (const fn of ["publishListingCase", "unpublishListingCase", "syncListingCase", "reconcileListingFiles"]) assert.strictEqual(await errReason(call(fn, A.owner, { propertyId: "x" })), "not_enabled", fn);
+      assert.strictEqual(await errReason(call("addCasePhotos", A.staff, { propertyId: "x", paths: ["a"] })), "not_enabled");
       assert.strictEqual(await errReason(call("trackListingCase", null, { id: "x", token: "t".repeat(30) })), "not_enabled");
-      assert.strictEqual(await count("properties"), 0, "nothing was written");
+      assert.strictEqual(await count("caseInternal"), 0);
       process.env.LISTING_E2E_ENABLED = "1";
       assert.strictEqual((await call("submitListingCase", A.extA, payload(key, "house", photos))).created, true, "the deliberate switch enables it");
     } finally { for (const [k, v] of [["GCLOUD_PROJECT", saved.g], ["GOOGLE_CLOUD_PROJECT", saved.c], ["FIREBASE_CONFIG", saved.f], ["LISTING_E2E_ENABLED", saved.e]]) { if (v === undefined) delete process.env[k]; else process.env[k] = v; } }
+  });
+
+  // ── S14 sync, S15 staff photos, S16 reconcile ───────────────────────────
+  it("S14 edits to a published Case reach the public page only through the projection: allow-list again, contact details refused (public page keeps the previous text), never publishes anything new", async () => {
+    const { r } = await ready(A.extA, { n: 2 });
+    assert.deepStrictEqual(await call("syncListingCase", A.staff, { propertyId: r.propertyId }), { synced: false, propertyId: r.propertyId, reason: "not_live" });
+    await call("publishListingCase", A.owner, { propertyId: r.propertyId });
+    await db.doc("caseInternal/" + r.propertyId).update({ price: 9999999, bedrooms: 5, internalNotes: "synthetic internal", secretNote: "SYN" });
+    assert.strictEqual((await call("syncListingCase", A.staff, { propertyId: r.propertyId })).synced, true);
+    let pub = await getDoc("properties/" + r.propertyId);
+    assert.strictEqual(pub.price, 9999999); assert.strictEqual(pub.bedrooms, 5); assert.ok(!("internalNotes" in pub) && !("secretNote" in pub)); assert.strictEqual(pub.photos.length, 2); assert.strictEqual(pub.listingStatus, "live");
+    const before = pub.description;
+    await db.doc("caseInternal/" + r.propertyId).update({ description: "call me 0812345678" });
+    const bad = await call("syncListingCase", A.owner, { propertyId: r.propertyId });
+    assert.strictEqual(bad.synced, false); assert.strictEqual(bad.reason, "public_text_has_contact_info");
+    pub = await getDoc("properties/" + r.propertyId); assert.strictEqual(pub.description, before, "the public page keeps its previous text");
+    for (const who of ["extA", "agent", "google"]) assert.strictEqual(await errCode(call("syncListingCase", A[who], { propertyId: r.propertyId })), "permission-denied", who);
+    await db.doc("caseInternal/" + r.propertyId).update({ listingStatus: "offline" }); // not live → nothing changes publicly even if asked
+    assert.strictEqual((await call("syncListingCase", A.owner, { propertyId: r.propertyId })).synced, false);
+  });
+
+  it("S15 Staff add photos to a private Case through the server (own staging → private copy, no token); others cannot; bad paths and overflow are refused; a later publish includes them", async () => {
+    const { r } = await ready(A.extA, { n: 2 });
+    const k = newKey(); const p = await putStaging(A.staff, k, [0, 1]);
+    for (const who of ["extA", "agent", "google"]) assert.strictEqual(await errCode(call("addCasePhotos", A[who], { propertyId: r.propertyId, paths: p.map((x) => x.path) })), "permission-denied", who);
+    assert.strictEqual(await errReason(call("addCasePhotos", A.staff, { propertyId: r.propertyId, paths: ["caseUploads/" + A.extA.uid + "/" + newKey() + "/0.webp"] })), "bad_photo_path");
+    assert.strictEqual(await errReason(call("addCasePhotos", A.staff, { propertyId: r.propertyId, paths: [] })), "bad_paths");
+    assert.strictEqual(await errReason(call("addCasePhotos", A.staff, { propertyId: "own-nope", paths: p.map((x) => x.path) })), "case_not_found");
+    const out = await call("addCasePhotos", A.staff, { propertyId: r.propertyId, paths: p.map((x) => x.path) });
+    assert.strictEqual(out.added, 2);
+    const rec = await getDoc("caseInternal/" + r.propertyId); assert.strictEqual(rec.photoCount, 4);
+    const docs = (await db.collection("casePhotos").where("propertyId", "==", r.propertyId).get()).docs.map((d) => d.data()).sort((a, b) => a.index - b.index);
+    assert.deepStrictEqual(docs.map((d) => d.index), [0, 1, 2, 3]);
+    for (const d of docs) assert.ok(await H.fileExists(d.storagePath));
+    assert.strictEqual((await H.listFiles("casePhotos/" + r.propertyId + "/")).length, 4);
+    assert.strictEqual((await call("publishListingCase", A.owner, { propertyId: r.propertyId })).photoCount, 4);
+  });
+
+  it("S16 reconcile (Owner): files that no record references (leftovers of lost attempts / old publishes) are removed; referenced ones are not", async () => {
+    const { r } = await ready(A.extA, { n: 2 });
+    await call("publishListingCase", A.owner, { propertyId: r.propertyId });
+    const b = H.load().admin.storage().bucket(H.BUCKET_NAME);
+    await b.file("casePhotos/" + r.propertyId + "/a-orphan/0.webp").save(Buffer.alloc(8), { resumable: false });
+    await b.file("publishedCasePhotos/" + r.propertyId + "/p-old/0.webp").save(Buffer.alloc(8), { resumable: false });
+    for (const who of ["staff", "agent", "extA"]) assert.strictEqual(await errCode(call("reconcileListingFiles", A[who], { propertyId: r.propertyId })), "permission-denied", who);
+    const out = await call("reconcileListingFiles", A.owner, { propertyId: r.propertyId });
+    assert.strictEqual(out.removed, 2);
+    assert.strictEqual((await H.listFiles("casePhotos/" + r.propertyId + "/")).length, 2); assert.strictEqual((await H.listFiles("publishedCasePhotos/" + r.propertyId + "/")).length, 2);
+    assert.strictEqual((await call("reconcileListingFiles", A.owner, { propertyId: r.propertyId })).removed, 0);
   });
 });

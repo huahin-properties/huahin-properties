@@ -120,9 +120,16 @@ service firebase.storage {
       allow read: if request.auth != null && (request.auth.uid == uid || isTeamMember());
       allow update, delete: if false;
     }
-    // Private per-case photo copies (pending review). Team-only, written only by the server.
-    match /casePhotos/{caseId}/{fileName} {
+    // Private per-case photo copies (pending review). Team read only, written by the server only. These files have NO download
+    // token (the server removes the one the browser upload minted), so Storage rules are the only way in.
+    match /casePhotos/{caseId}/{allPaths=**} {
       allow read: if isTeamMember();
+      allow write: if false;
+    }
+    // PUBLISHED copies of a Case's photos: public read, written and deleted by the server only (Admin SDK). A member's browser
+    // can not create, overwrite or delete them, so one member can not tamper with another's published photos in this flow.
+    match /publishedCasePhotos/{caseId}/{allPaths=**} {
+      allow read: if true;
       allow write: if false;
     }
 
@@ -167,8 +174,10 @@ service firebase.storage {
     // Anything not named above is private. This replaces the old
     // `allow read: if true` catch-all: a new folder created in future is now
     // secret by default instead of public by default.
+    // LISTING-E2E-01: this used to grant team members read/write on EVERY path (Storage ORs matching rules, so it overrode the
+    // narrower rules above, e.g. casePhotos "write: false"). Team access is now granted only on the explicit paths above.
     match /{allPaths=**} {
-      allow read, write: if isTeamMember();
+      allow read, write: if false;
     }
   }
 }
