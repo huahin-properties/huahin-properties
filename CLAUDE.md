@@ -256,9 +256,17 @@ the package, opens the PR, and reports with evidence.
    test results as TEST / EXPECTED / ACTUAL / EVIDENCE with the commit tested.
    No secrets (names of secrets only) and no customer data in docs, PRs or
    comments.
+   **Testing follows impact:** a docs-only package is checked for correctness
+   and consistency of the documents (against source/git and against each
+   other) and needs no GREEN switch or production test; a package that
+   changes the system states its tests (what, where, pass criteria, whether
+   GREEN is needed) up front.
 6. The old Viewer flow (`Copy Code to GitHub.dc.html`, copy-paste file by
    file, `export-for-github/`, zip downloads) is retired and kept as history
    only. The Viewer is not a website file — never commit it to the repo root.
+   **Still in force:** guide the owner **one step at a time** — wait for the
+   result, then give the next step — and always name the window. Retiring
+   the Viewer did not retire this way of helping the owner.
 7. Cloud Function / rules changes additionally need the owner to deploy from
    a GitHub Codespace (see the Data/backend section for scope and `git pull`).
    Explain every terminal step and say which window it applies to — owner
