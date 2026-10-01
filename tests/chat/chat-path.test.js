@@ -157,7 +157,7 @@ describe("CHAT-TEST-01: chat + draft path (synthetic, emulator, stubbed model)",
     const r = await turn(UID_A, "สวัสดี");
     const conv = await admin.firestore().doc("conversations/" + convId(UID_A)).get();
     const draft = await admin.firestore().doc("propertyDrafts/" + draftId(UID_A)).get();
-    const cases = await admin.firestore().collection("properties").get();
+    const cases = await admin.firestore().collection("caseInternal").get();
     const ok = r.persisted === false && !conv.exists && !draft.exists && cases.empty;
     rec("C1", "casual first turn: no conversation, no draft, no case", ok ? "CONTROL" : "CONTROL-FAILED", "persisted=" + r.persisted + " conv=" + conv.exists + " draft=" + draft.exists + " cases=" + cases.size);
     assert.ok(ok);
@@ -312,25 +312,25 @@ describe("CHAT-TEST-01: chat + draft path (synthetic, emulator, stubbed model)",
     // 5a: gate not met (no name/contact) -> no case even with confirmed:true
     await buildQualifiedChat(UID_A, { contact: false });
     const gate = await createCase(UID_A, { confirmed: true });
-    const none = await admin.firestore().collection("properties").get();
+    const none = await admin.firestore().collection("caseInternal").get();
     rec("C5a", "name/contact missing => no case (confirmed:true still refused)", gate.created === false && none.empty ? "CONTROL" : "CONTROL-FAILED", "reason=" + gate.reason + " cases=" + none.size);
     assert.ok(gate.created === false && none.empty);
     // 5b: complete the chat
     iso.setScript([withContact]);
     await turn(UID_A, "ชื่อ Synthetic Seller เบอร์ " + CONTACT);
     const unconfirmed = await createCase(UID_A, {});
-    const noneYet = await admin.firestore().collection("properties").get();
+    const noneYet = await admin.firestore().collection("caseInternal").get();
     rec("C5b", "no user confirmation (confirmed !== true) => no case", unconfirmed.created === false && noneYet.empty ? "CONTROL" : "CONTROL-FAILED", "reason=" + unconfirmed.reason);
     const c1 = await createCase(UID_A, { confirmed: true });
     const c2 = await createCase(UID_A, { confirmed: true });
-    const all = await admin.firestore().collection("properties").get();
+    const all = await admin.firestore().collection("caseInternal").get();
     const dupOk = c1.created === true && c2.created === true && c2.alreadyExisted === true && c1.propertyId === c2.propertyId && c1.trackToken === c2.trackToken && all.size === 1;
     rec("C5c", "confirmed twice => ONE case, same id + same track link (dedupe by server-side conversation link)", dupOk ? "CONTROL" : "CONTROL-FAILED", "cases=" + all.size + " sameId=" + (c1.propertyId === c2.propertyId));
-    // LISTING-E2E-01: a chat-created Case is split — public-safe fields on properties/{id}, the rest in caseInternal/{id}.
-    const pubDoc = (await admin.firestore().doc("properties/" + c1.propertyId).get()).data();
+    // LISTING-E2E-01: a chat-created Case is ONE team-only record (caseInternal); there is no public properties document until the Owner publishes.
     const intDoc = (await admin.firestore().doc("caseInternal/" + c1.propertyId).get()).data();
-    const caseDoc = Object.assign({}, pubDoc, intDoc);
-    assert.ok(pubDoc.internalSplit === true && !("trackToken" in pubDoc) && !("conversationId" in pubDoc) && !("contactName" in pubDoc) && !("ownerContact" in pubDoc), "the public document carries no contact / token / conversation link");
+    const pubSnap = await admin.firestore().doc("properties/" + c1.propertyId).get();
+    const caseDoc = Object.assign({}, intDoc);
+    assert.ok(pubSnap.exists === false && intDoc.internalSplit === true, "no public document: contact / token / conversation link live only in the team-only record");
     const link = caseDoc.conversationId === convId(UID_A) && caseDoc.receptionVisitorId === UID_A && caseDoc.caseSource === "ai_assistant" && caseDoc.source === "owner_submission";
     const conv = (await admin.firestore().doc("conversations/" + convId(UID_A)).get()).data();
     rec("C5d", "case carries conversationId/receptionVisitorId; conversation links back (linkedCaseIds)", link && (conv.linkedCaseIds || [])[0] === c1.propertyId ? "CONTROL" : "CONTROL-FAILED", "caseSource=" + caseDoc.caseSource + " linked=" + JSON.stringify(conv.linkedCaseIds));
@@ -418,7 +418,7 @@ describe("CHAT-TEST-01: chat + draft path (synthetic, emulator, stubbed model)",
       const conv = (await db.doc("conversations/" + convId(uid)).get()).data() || {};
       const draft = (await db.doc("propertyDrafts/" + draftId(uid)).get()).data() || {};
       const f = draft.fields || {};
-      const cases = await db.collection("properties").get();
+      const cases = await db.collection("caseInternal").get();
       const lastMsg = (await db.collection("conversations/" + convId(uid) + "/messages").where("role", "==", "ai").get()).docs.map((d) => d.data().text);
       return { r, conv, f, cases, lastMsg, calls: iso.anthropicCalls.length };
     }

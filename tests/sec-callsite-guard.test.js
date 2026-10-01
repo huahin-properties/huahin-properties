@@ -80,6 +80,6 @@ describe("SEC-TEST-01 C: call-site inventory (source only)", function () {
   it("Track Submission no longer downloads the whole properties collection (LISTING-E2E-01): server-checked token for new Cases, read-by-id for legacy Cases", () => {
     const src = read("Track Submission.dc.html");
     assert.ok(!/fetchCollection\(\s*["']properties["']\s*\)/.test(src), "whole-collection fetch is back");
-    assert.ok(/trackListingCase\(/.test(src) && /fetchDocById\(\s*["']properties["']/.test(src));
+    assert.ok(/trackListingCase\(/.test(src) && !/fetchDocById\(/.test(src) && !/fetchCaseMessages\(|watchCaseMessages\(|addCaseMessage\(/.test(src), "the customer page must use only the server-checked function");
   });
 });
