@@ -169,15 +169,26 @@ class Component extends DCLogic {
     this._id = id;
     this._token = token;
     try {
-      const all = await fb.fetchCollection("properties");
-      const p = (all || []).find((x) => x.id === id);
-      // The token — not the id — is what authorises this page.
-      if (!p || !p.trackToken || p.trackToken !== token) { this.setState({ phase: "denied" }); return; }
-      let photoCount = 0;
+      // LISTING-E2E-01: the token is checked by the server (trackListingCase) for every new Case — the
+      // browser never reads the Case's private record and never lists the collection. A Case created before
+      // this change (token still on its own document) is read by id only, and the token is compared here.
+      let p = null, photoCount = 0;
       try {
-        const photos = await fb.fetchAllPhotos();
-        photoCount = (photos || []).filter((ph) => ph.propertyId === id).length;
-      } catch (e) {}
+        const v = await fb.trackListingCase(id, token, { action: "view" });
+        p = Object.assign({}, v, { trackToken: token });
+        photoCount = Number(v.photoCount) || 0;
+        this._split = true;
+      } catch (e) {
+        if (!(e && (e.code === "functions/permission-denied" || e.code === "permission-denied"))) throw e;
+        this._split = false;
+        const legacy = await fb.fetchDocById("properties", id);
+        if (!legacy || !legacy.trackToken || legacy.trackToken !== token) { this.setState({ phase: "denied" }); return; }
+        p = legacy;
+        try {
+          const photos = await fb.fetchPhotosFor(id);
+          photoCount = (photos || []).length;
+        } catch (e2) {}
+      }
       let msgs = [];
       let msgsFailed = false;
       try { msgs = await fb.fetchCaseMessages(id, true, token); }
@@ -194,7 +205,7 @@ class Component extends DCLogic {
           });
         });
       } catch (e) { console.warn("watch failed:", e); }
-      try { await fb.markCaseRead(id, "customer"); } catch (e) {}
+      try { if (this._split) await fb.trackListingCase(id, token, { action: "read" }); else await fb.markCaseRead(id, "customer"); } catch (e) {}
       // Legacy compatibility: a case created before caseMessages existed still
       // has its request/response in the old fields. Show them as the first two
       // entries WITHOUT writing anything (idempotent — nothing is duplicated
@@ -228,7 +239,8 @@ class Component extends DCLogic {
         // Only written once, and only when detection actually succeeded — the
         // Firestore rule for this path accepts nothing else.
         try {
-          await this._fb.setDoc("properties", this._id, {
+          if (this._split) await this._fb.trackListingCase(this._id, this._token, { action: "language", lang });
+          else await this._fb.setDoc("properties", this._id, {
             customerLanguage: lang,
             customerLanguageConfirmed: true,
             customerLanguageSource: "message_detected",
@@ -264,11 +276,12 @@ class Component extends DCLogic {
       // Bookkeeping is best-effort: it keeps the legacy Staff card fields in
       // step, but a rejection here must never look like a failed send.
       try {
-        await this._fb.updateDocFields("properties", this._id, {
+        if (this._split) await this._fb.trackListingCase(this._id, this._token, { action: "responded", message: thai });
+        else await this._fb.updateDocFields("properties", this._id, {
           infoResponseMessage: thai, infoResponseAt: Date.now(), infoResponseStatus: "responded",
         });
       } catch (e) { console.error("[CaseMessenger][bookkeeping] failed (message WAS sent):", e && e.code, e && e.message); }
-      try { await this._fb.markCaseRead(this._id, "customer"); } catch (e) {}
+      try { if (this._split) await this._fb.trackListingCase(this._id, this._token, { action: "read" }); else await this._fb.markCaseRead(this._id, "customer"); } catch (e) {}
     } catch (e) {
       console.error("[CaseMessenger][customer-send] failed:", e && e.code, e && e.message, e);
       // Keep the text so the customer never loses what they wrote.
@@ -287,7 +300,7 @@ class Component extends DCLogic {
       data_complete: "ข้อมูลครบ — กำลังเตรียมประกาศ",
       ready: "กำลังเตรียมประกาศ",
     };
-    const typeLabels = { villa: "พูลวิลล่า", house: "บ้านเดี่ยว", condo: "คอนโด", land: "ที่ดิน", commercial: "อาคารพาณิชย์" };
+    const typeLabels = { villa: "พูลวิลล่า", house: "บ้านเดี่ยว", townhouse: "ทาวน์เฮ้าส์", condo: "คอนโด", land: "ที่ดิน", commercial: "อาคารพาณิชย์" };
     const rs = p.reviewStatus || "submitted";
     return {
       isLoading: this.state.phase === "loading",

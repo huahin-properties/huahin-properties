@@ -107,7 +107,8 @@ describe("CHAT-LIVE-01 build script (no credentials)", function () {
 
   it("B6 production source files are byte-identical to the commit this work started from (build never edits them)", () => {
     build(OK, path.join(tmp(), "o"));
-    for (const base of ["8c549c6", "HEAD"]) {
+    // beec235 = head of the CHAT-LIVE-01 PR; LISTING-E2E-01 intentionally changed some of these files after it (data.js, firebase-client.js, case-fields.js).
+    for (const base of ["beec235", "HEAD"]) {
       const r = spawnSync("git", ["diff", "--quiet", base, "--", ...FILES], { cwd: ROOT });
       assert.strictEqual(r.status, 0, "production file differs from " + base);
     }

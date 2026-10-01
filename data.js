@@ -1,6 +1,8 @@
 // huahin.properties — shared data & i18n
 // Plain ES module: PROPERTIES (sample listings), I18N (UI strings), AREAS/TYPES/FEATURES/STATUS labels.
 
+import { PRIVATE_FIELDS } from "./case-fields.js";
+
 export const LANGS = ["en", "th", "ru", "zh", "de", "no", "fr", "it"];
 
 export const LANG_LABELS = { en: "English", th: "ไทย", ru: "Русский", zh: "中文", de: "Deutsch", no: "Norsk", fr: "Français", it: "Italiano" };
@@ -814,6 +816,17 @@ export function getEffectivePropertiesSync(mod) {
 // falling back to the static bundled sample data if Firebase is
 // unreachable. This replaces the old localStorage-based merge above, which
 // only ever reflected edits made in that one browser.
+// LISTING-E2E-01 — defence in depth for the public site. A Case created through the intake path
+// (source "owner_submission") must never expose its private fields on a public page, even if one ever
+// reached the public document (a Case created before the split still carries them — see the legacy plan).
+// This is NOT the protection (the protection is where the data is stored + the rules); it is the last filter.
+export function toPublicProperty(p) {
+  if (!p || p.source !== "owner_submission") return p;
+  const out = { ...p };
+  PRIVATE_FIELDS.forEach((k) => { delete out[k]; });
+  return out;
+}
+
 export async function getEffectiveProperties(mod) {
   try {
     const fb = await import("./firebase-client.js");
@@ -830,8 +843,12 @@ export async function getEffectiveProperties(mod) {
     const visible = properties.filter((p) => p.listingStatus === "live" || (p.listingStatus === undefined && !p.isDraft));
     const photosById = {};
     allPhotos.forEach((ph) => { photosById[ph.id] = ph.dataUrl; });
-    const fromFirestore = visible.map((p) => {
-      const photos = (p.photos || []).map((ph, i) => {
+    const fromFirestore = visible.map(toPublicProperty).map((p) => {
+      // A listing published through the intake path carries its photos in propertyPhotos/{id}-{n};
+      // use them when the document has no photos[] list of its own.
+      const own = (p.photos && p.photos.length) ? p.photos
+        : allPhotos.filter((ph) => ph.propertyId === p.id).sort((a, b) => (a.index || 0) - (b.index || 0)).map((ph) => ({ label: "", url: ph.dataUrl }));
+      const photos = own.map((ph, i) => {
         const label = typeof ph === "string" ? ph : ph.label;
         const url = photosById[`${p.id}-${i}`] || (typeof ph === "object" && ph.url) || "";
         return { label, url };

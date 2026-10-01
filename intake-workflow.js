@@ -19,6 +19,8 @@
 //     required step tomorrow cannot retroactively invalidate today's cases.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { photoStandardFor } from "./photo-standard.js";
+
 export const WORKFLOW_VERSION = "intake_v1";
 
 // Requirement levels. CRITICAL and REQUIRED block submission; OPTIONAL never
@@ -113,14 +115,21 @@ export const WORKFLOW_DEFS = {
         purpose: "ให้แน่ใจว่าข้อมูลทรัพย์และรูปภาพพร้อมพอที่จะทำประกาศได้",
         todo: [
           "ตรวจจำนวนห้อง ขนาดที่ดิน พื้นที่ใช้สอย ตามประเภททรัพย์",
-          "ตรวจจำนวนรูป — ต้องมีอย่างน้อย 5 รูปที่ใช้งานได้",
+          "ตรวจจำนวนรูป — ต้องถึงขั้นต่ำตามประเภททรัพย์ (Photo Standard v1: ที่ดิน 1 รูป, อื่นๆ 2 รูป) และควรครบตามเป้าหมายของประเภทนั้น",
           "ถ้าข้อมูลไม่ครบ ให้สอบถามเจ้าของผ่านช่องแชทของเคสนี้",
         ],
         requirements: [
-          { key: "photos_5", level: LEVEL.CRITICAL, label: "รูปภาพอย่างน้อย 5 รูป",
-            get: (c) => (photoCount(c) >= 5 ? photoCount(c) : null),
-            progressLabel: (c) => "รูปภาพ " + photoCount(c) + "/5",
+          // LISTING-E2E-01: the gate follows PHOTO MINIMUM STANDARD v1 (BLUEPRINT §32, LOCKED) per property type —
+          // it used to be a flat "5 photos" for every type, which blocked a land plot that has the 1-3 photos
+          // the standard accepts. The standard's "ครบ" target is a non-blocking recommendation.
+          { key: "photos_min", level: LEVEL.CRITICAL, label: "รูปภาพถึงขั้นต่ำตามประเภททรัพย์",
+            get: (c) => (photoCount(c) >= photoStandardFor(c.prop && c.prop.type).min ? photoCount(c) : null),
+            progressLabel: (c) => "รูปภาพ " + photoCount(c) + "/" + photoStandardFor(c.prop && c.prop.type).min + " (ขั้นต่ำ)",
             hint: "จำนวนนับจากรูปที่อยู่ในระบบจริง ไม่สามารถกดผ่านเองได้" },
+          { key: "photos_target", level: LEVEL.OPTIONAL, label: "รูปภาพครบตามเป้าหมายของประเภททรัพย์",
+            get: (c) => (photoCount(c) >= photoStandardFor(c.prop && c.prop.type).target ? photoCount(c) : null),
+            progressLabel: (c) => "รูปภาพ " + photoCount(c) + "/" + photoStandardFor(c.prop && c.prop.type).target + " (ครบ)",
+            hint: "ไม่บล็อกการส่งเรื่อง — แนะนำให้ขอรูปเพิ่มจากผู้ฝาก" },
           { key: "bedrooms", level: LEVEL.CRITICAL, label: "จำนวนห้องนอน",
             applies: (c) => !isLand(c), get: (c) => num(c.prop.bedrooms) },
           { key: "bathrooms", level: LEVEL.REQUIRED, label: "จำนวนห้องน้ำ",

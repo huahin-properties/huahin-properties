@@ -100,6 +100,7 @@
             <select value="{{ f_type }}" onChange="{{ onFType }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px; background:white;">
               <option value="villa">พูลวิลล่า</option>
               <option value="house">บ้านเดี่ยว</option>
+              <option value="townhouse">ทาวน์เฮ้าส์</option>
               <option value="condo">คอนโด</option>
               <option value="land">ที่ดิน</option>
               <option value="commercial">อาคารพาณิชย์</option>
@@ -121,7 +122,7 @@
             <textarea rows="4" value="{{ f_details }}" onChange="{{ onFDetails }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px; resize:vertical;"></textarea>
           </div>
           <div>
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รูปทรัพย์ (ขั้นต่ำ 5 รูป) — อัปโหลดแล้ว {{ photoCount }} รูป</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รูปทรัพย์ ({{ photoRule }}) — อัปโหลดแล้ว {{ photoCount }} รูป</div>
             <input type="file" accept="image/*" multiple="{{ true }}" onChange="{{ onPhotosChange }}" style="width:100%; font-size:13px;" />
             <sc-if value="{{ hasPhotos }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
@@ -232,6 +233,7 @@ class Component extends DCLogic {
     this.setState({ showDevBar: isPreviewEnv || (() => { try { return localStorage.getItem("hhDevBar") === "1"; } catch (e) { return false; } })() });
     const fb0 = await import("./firebase-client.js");
     this._fb = fb0;
+    try { this._ps = await import("./photo-standard.js"); } catch (e) { this._ps = null; }
     try {
       const saved = JSON.parse(localStorage.getItem("hhOwnerContact") || "null");
       if (saved && saved.phone) {
@@ -290,94 +292,60 @@ class Component extends DCLogic {
     this.setState({ step: 2 });
   }
 
+  // LISTING-E2E-01 — ONE submit path. Photos go to the submitter's private staging folder, then
+  // submitListingCase (server) verifies them, creates ONE Case and returns the private tracking link.
+  // The submission key is created once and kept (localStorage) until the server confirms, so a double
+  // click, a refresh or a retry after a network drop re-uses the same key and gets the SAME case back.
+  _submissionKey() {
+    let k = "";
+    try { k = localStorage.getItem("hhSubmissionKey") || ""; } catch (e) {}
+    if (!/^[A-Za-z0-9_-]{16,64}$/.test(k)) {
+      const rnd = new Uint8Array(18);
+      (window.crypto || window.msCrypto).getRandomValues(rnd);
+      k = "k" + Array.from(rnd).map((b) => b.toString(36).padStart(2, "0")).join("").slice(0, 30);
+      try { localStorage.setItem("hhSubmissionKey", k); } catch (e) {}
+    }
+    return k;
+  }
+
   async submit() {
+    if (this._submitting) return;
+    this._submitting = true;
     this.setState({ submitting: true, step3Error: "" });
     try {
-      const id = "own-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
-      // Unguessable private tracking token (~32 chars). The property id alone
-      // is NEVER the key to the tracking page — this token is.
-      const rnd = new Uint8Array(24);
-      (window.crypto || window.msCrypto).getRandomValues(rnd);
-      const token = Array.from(rnd).map((b) => b.toString(36).padStart(2, "0")).join("").slice(0, 32);
-      await this._fb.setDoc("properties", id, {
-        // DO NOT rename/overload `source` — application logic AND
-        // firestore.rules (isPublicOwnerSubmission, the trackToken reply
-        // branches, the caseMessages tokenOk check) all key off the exact
-        // string "owner_submission".
-        source: "owner_submission",
-        // C1 additive Case provenance: WHICH CHANNEL created this Case.
-        // `source` says "this is an owner submission" (a security/logic
-        // marker); caseSource says how the Case actually arrived, so future
-        // channels (ai_assistant, contact_conversion, line, facebook) are
-        // distinguishable without touching `source`. Nothing reads caseSource
-        // yet — it is written now so historical data exists when C4/C7 need it.
-        caseSource: "owner_form",
-        listingStatus: "pending",
-        reviewStatus: "submitted",
-        status: this.state.txnType,
-        type: this.state.f_type,
-        condition: this.state.f_condition,
-        price: Number(this.state.f_price) || 0,
-        description: this.state.f_details,
-        coordsRaw: this.state.f_coords,
-        // Location is optional for the CUSTOMER but still required internally.
-        // These two flags are the handover: the Staff intake workflow reads
-        // them so a submission with no pin shows up as an outstanding
-        // follow-up item instead of quietly looking complete.
-        locationProvided: /^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$/.test(this.state.f_coords),
-        locationFollowUpNeeded: !/^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$/.test(this.state.f_coords),
-        ownerContact: this.state.f_ownerContact,
-        ownershipDocUrl: this.state.ownershipDocUrl || null,
-        contactName: this.state.f_name,
-        contactPhone: this.state.f_phone,
-        contactEmail: this.state.f_email,
-        submittedAt: Date.now(),
-        trackToken: token,
-        // Which language the customer used, so every later reply reaches them
-        // in that language. Reuses the site's existing language preference.
-        customerLanguage: (() => {
-          try { const l = localStorage.getItem("hh_lang"); if (l) return l; } catch (e) {}
-          const n = (navigator.language || "th").slice(0, 2).toLowerCase();
-          return ["th", "en", "zh", "ru", "de", "no", "fr", "it"].includes(n) ? n : "th";
-        })(),
-      });
-      // PHASE 1A.2 — photo upload must never destroy a captured lead.
-      // Previously all photos went up in one Promise.all: a single rejected
-      // upload (one oversized file, one flaky connection, one rule mismatch)
-      // rejected the whole thing, the catch below fired, and the customer saw
-      // "ส่งข้อมูลไม่สำเร็จ" even though their property document had already
-      // been written successfully. They then either gave up or submitted
-      // again, creating a duplicate case. Uploads are now sequential and
-      // individually guarded; whatever fails is recorded on the case for Staff
-      // to chase, and the submission itself still completes.
-      const photoErrors = [];
+      const fb = this._fb;
+      const key = this._submissionKey();
+      const uid = await fb.ensureSignedIn();
+      const photos = [];
       for (let i = 0; i < this.state.photos.length; i++) {
-        try {
-          await this._fb.savePhoto(id, i, this.state.photos[i].url);
-        } catch (pe) {
-          photoErrors.push((pe && (pe.code || pe.message)) || String(pe));
-          console.warn("Owner submission photo " + i + " failed:", pe);
-        }
+        photos.push({ path: await fb.uploadCaseStagingPhoto(uid, key, String(i), this.state.photos[i].url) });
       }
-      if (photoErrors.length) {
-        // Best-effort note on the case. If even this write is refused we still
-        // do not fail the submission — the lead is already saved.
-        try {
-          await this._fb.setDoc("properties", id, {
-            photoUploadFailedCount: photoErrors.length,
-            photoUploadFollowUpNeeded: true,
-            photoUploadLastError: photoErrors[0],
-          });
-        } catch (e2) { console.warn("could not record photo upload issue:", e2); }
-      }
-      this.setState({ submitted: true, submitting: false, submittedId: id, trackUrl: location.origin + location.pathname.replace(/[^/]*$/, "") + "Track%20Submission.dc.html?id=" + encodeURIComponent(id) + "&t=" + token });
+      let ownershipDocPath = "";
+      if (this.state.ownershipDocUrl) ownershipDocPath = await fb.uploadCaseStagingPhoto(uid, key, "doc", this.state.ownershipDocUrl);
+      const lang = (() => {
+        try { const l = localStorage.getItem("hh_lang"); if (l) return l; } catch (e) {}
+        const n = (navigator.language || "th").slice(0, 2).toLowerCase();
+        return ["th", "en", "zh", "ru", "de", "no", "fr", "it"].includes(n) ? n : "th";
+      })();
+      const res = await fb.submitListingCase({
+        submissionKey: key,
+        txnType: this.state.txnType, type: this.state.f_type, condition: this.state.f_condition,
+        price: Number(this.state.f_price) || 0, description: this.state.f_details,
+        coordsRaw: this.state.f_coords,
+        submitter: { name: this.state.f_name, phone: this.state.f_phone, email: this.state.f_email },
+        propertyOwner: { relation: "self", name: "", contact: this.state.f_ownerContact },
+        language: lang, photos, ownershipDocPath,
+      });
+      const r = (res && res.data) ? res.data : res;
+      try { localStorage.removeItem("hhSubmissionKey"); } catch (e) {}
+      this.setState({ submitted: true, submitting: false, submittedId: r.propertyId, trackUrl: location.origin + location.pathname.replace(/[^/]*$/, "") + "Track%20Submission.dc.html?id=" + encodeURIComponent(r.propertyId) + "&t=" + encodeURIComponent(r.trackToken) });
     } catch (e) {
       console.warn("Owner submission failed:", e);
-      // Show the machine code too. "Missing or insufficient permissions" alone
-      // never said WHICH layer refused; permission-denied (Firestore) and
-      // storage/unauthorized (Storage) are different bugs with different fixes.
       const code = (e && e.code) ? " [" + e.code + "]" : "";
-      this.setState({ submitting: false, step3Error: "ส่งข้อมูลไม่สำเร็จ: " + (e.message || e) + code });
+      const reason = e && e.details && e.details.reason ? " (" + e.details.reason + ")" : "";
+      this.setState({ submitting: false, step3Error: "ส่งข้อมูลไม่สำเร็จ: " + (e.message || e) + reason + code + " — กดส่งอีกครั้งได้ ระบบจะไม่สร้างรายการซ้ำ" });
+    } finally {
+      this._submitting = false;
     }
   }
 
@@ -413,7 +381,8 @@ class Component extends DCLogic {
     // Staff side (intake-workflow.js "coords" requirement + the
     // locationFollowUpNeeded flag written below), so nothing is silently lost
     // — it moves from "customer must supply now" to "staff must obtain".
-    const canStep3Next = s.f_price && s.f_details.trim() && s.photos.length >= 5;
+    const std = this._ps ? this._ps.photoStandardFor(s.f_type) : { min: 2, target: 5 };
+    const canStep3Next = s.f_price && s.f_details.trim() && s.photos.length >= std.min;
     return {
       isStep1: s.step === 1, isStep2: s.step === 2, isStep3: s.step === 3, isStep4: s.step === 4,
       stepDots: stepColors.map((c) => ({ color: c })),
@@ -439,6 +408,7 @@ class Component extends DCLogic {
       onClearPrior: () => this.clearPrior(),
       mapEmbedUrl: `https://www.google.com/maps?q=${encodeURIComponent(s.f_coords.trim())}&hl=th&z=16&output=embed`,
       f_ownerContact: s.f_ownerContact, onFOwnerContact: (e) => this.setState({ f_ownerContact: e.target.value }),
+      photoRule: "ขั้นต่ำ " + std.min + " รูป · แนะนำ " + std.target + " รูปขึ้นไป",
       photoCount: s.photos.length, hasPhotos: s.photos.length > 0,
       photoThumbs: s.photos.map((p, i) => ({ url: p.url, onRemove: () => this.removePhoto(i) })),
       onPhotosChange: (e) => this.onPhotosChange(e),

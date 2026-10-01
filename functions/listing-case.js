@@ -382,7 +382,7 @@ async function trackListingCase({ admin, HttpsError, request }) {
   if (action === "responded") {
     const message = clean(d.message, 4000);
     if (!message) throw bad(HttpsError, "missing_message");
-    await intRef.update({ infoResponseMessage: message, infoResponseAt: now, infoResponseStatus: "responded" });
+    await intRef.update({ infoResponseMessage: message, infoResponseAt: now, infoResponseStatus: "responded", lastCustomerMessageAt: now });
   } else if (action === "language") {
     if (!LANGS.includes(d.lang)) throw bad(HttpsError, "bad_language");
     if (ci.customerLanguageConfirmed !== true) await intRef.update({ customerLanguage: d.lang, customerLanguageConfirmed: true, customerLanguageSource: "message_detected" });
