@@ -12,8 +12,13 @@ const crypto = require("crypto");
 const ROOT = path.resolve(__dirname, "..");
 const PRODUCTION_PROJECT = "huahin-properties-5f1b5";
 // The pages that make up the test (entry points). Everything they import is added automatically (closure below).
-const ENTRIES = ["index.html", "Owner Submission.dc.html", "Track Submission.dc.html", "Admin Login.dc.html", "Listing Approvals.dc.html",
-  "Staff Workspace.dc.html", "Lister Dashboard.dc.html", "Property Details.dc.html", "Search Results.dc.html", "Home.dc.html"];
+const ENTRIES = ["index.html", "Owner Submission.dc.html", "Track Submission.dc.html", "Admin Login.dc.html", "Admin Dashboard.dc.html", "Listing Approvals.dc.html",
+  "Staff Workspace.dc.html", "Lister Dashboard.dc.html", "Agent Signup.dc.html", "Agent Profile.dc.html", "Leads.dc.html", "Staff Handbook.dc.html",
+  "Property Details.dc.html", "Search Results.dc.html", "Home.dc.html", "About.dc.html", "Contact.dc.html"];
+// Pages the built site links to but deliberately does NOT ship (a link to one of them is a 404 on the test site — by design, listed so nobody mistakes it for a bug):
+//   Lister Billing (Stripe checkout/portal), Performance, Collection View, and the static SEO landing pages (baan-*.html, condo-*.html, pool-villa-*.html, thidin-*.html, ...).
+const EXCLUDED_NAV = ["Lister Billing.dc.html", "Performance.dc.html", "Collection View.dc.html"];
+const EXCLUDED_NAV_RE = /^(baan-|condo-|pool-villa-|thidin-|hua-hin-|pranburi-|cha-am-)[a-z0-9-]*\.html$/;
 // The Cloud Functions the listing TEST site needs — by name. NEVER `firebase deploy --only functions` (that deploys every export, including Stripe / LINE /
 // e-mail / triggers and their unrelated secrets). The chat functions are optional: they need the Anthropic secret and are deployed only when the chat widget is tested.
 const REQUIRED_FUNCTIONS = ["submitListingCase", "previewListingCase", "publishListingCase", "unpublishListingCase", "syncListingCase", "addCasePhotos", "reconcileListingFiles", "listMyCases", "trackListingCase"];
@@ -70,7 +75,7 @@ function replaceExact(text, from, to, file, label) {
 function scrub(t) {
   return t
     .replace(/https?:\/\/(?:www\.)?huahin\.properties/gi, "https://listing-test.invalid")
-    .replace(/(^|[^a-z0-9.\/-])(?:www\.)?huahin\.properties/gi, "$1listing-test.invalid")
+    .replace(/(^|[^a-z0-9.\/-])(?:www\.)?huahin\.properties/gi, "$1huahin properties [TEST]")
     .replace(/0851785480|0805820777/g, "0000000000")
     .replace(/doothailand@gmail\.com/gi, "test@invalid.example")
     .replace(/facebook\.com\/groups\/\d+/gi, "facebook.com/groups/0")
@@ -159,7 +164,9 @@ function build(config, outDir, root, opts) {
   }
   // production contact channels / hosts in text → neutral (the scan below proves nothing is left)
   // any remaining mention of the production chat endpoint (e.g. Home's welcome assistant) points at the TEST project, which answers 401 unless allow-listed
-  for (const f of Object.keys(out)) { if (/\.(html|js)$/.test(f)) out[f] = Buffer.from(scrub(out[f].toString("utf8")).replace(/https:\/\/claudecomplete-3j4ldf4pja-as\.a\.run\.app/g, ccUrl)); }
+  for (const f of Object.keys(out)) { if (/\.(html|js)$/.test(f)) out[f] = Buffer.from(scrub(out[f].toString("utf8")).replace(/https:\/\/claudecomplete-3j4ldf4pja-as\.a\.run\.app/g, ccUrl)
+    .replace(/asia-southeast1-huahin-properties-5f1b5\.cloudfunctions\.net/g, fnHost) // other pages' production Function hosts (LINE login, share cards…) point at the TEST project, where they do not exist
+    .replace(/https:\/\/huahin-properties-5f1b5\.(web\.app|firebaseapp\.com)/g, "https://" + pid + ".$1")); }
 
   out["listing-test-config.js"] = Buffer.from("window.__CHAT_LIVE__ = " + JSON.stringify({ projectId: pid, apiKey: config.apiKey, appId: config.appId, messagingSenderId: config.messagingSenderId,
     authDomain: config.authDomain, storageBucket: config.storageBucket, region: config.region, claudeCompleteUrl: ccUrl, allowedHosts: [pid + ".web.app", pid + ".firebaseapp.com"] }, null, 2) + ";\n");
@@ -184,7 +191,7 @@ function build(config, outDir, root, opts) {
   return manifest;
 }
 
-module.exports = { build, validate, closure, ENTRIES, REQUIRED_FUNCTIONS, OPTIONAL_CHAT_FUNCTIONS, deployFunctionsCommand, FORBIDDEN, PRODUCTION_PROJECT, MARKER };
+module.exports = { build, validate, closure, ENTRIES, EXCLUDED_NAV, EXCLUDED_NAV_RE, REQUIRED_FUNCTIONS, OPTIONAL_CHAT_FUNCTIONS, deployFunctionsCommand, FORBIDDEN, PRODUCTION_PROJECT, MARKER };
 
 if (require.main === module) {
   const a = process.argv.slice(2);

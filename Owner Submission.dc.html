@@ -271,10 +271,11 @@ class Component extends DCLogic {
       return ["th", "en", "zh", "ru", "de", "no", "fr", "it"].includes(n) ? n : "th";
     })();
     this.flow = new OwnerFormFlow({ storage: window.localStorage, fb: { ensureSignedIn: fb0.ensureSignedIn, uploadCaseStagingPhoto: fb0.uploadCaseStagingPhoto, submitListingCase: fb0.submitListingCase, getPropertyDraft: fb0.getPropertyDraft, updatePropertyDraft: fb0.updatePropertyDraft }, relation, language: lang, crypto: window.crypto });
+    Object.keys(this._pending || {}).forEach((k) => this.flow.setField(k, this._pending[k])); this._pending = {};
     this._sync();
     // a submit that already succeeded (the answer arrived, the page was refreshed): show the confirmation + link again
     const done = this.flow.state.done;
-    if (done) this.setState({ submitted: true, submittedId: done.propertyId, trackUrl: location.origin + location.pathname.replace(/[^/]*$/, "") + "Track%20Submission.dc.html?id=" + encodeURIComponent(done.propertyId) + "&t=" + encodeURIComponent(done.trackToken) });
+    if (done) this.setState({ step: 4, submitted: true, submittedId: done.propertyId, trackUrl: location.origin + location.pathname.replace(/[^/]*$/, "") + "Track%20Submission.dc.html?id=" + encodeURIComponent(done.propertyId) + "&t=" + encodeURIComponent(done.trackToken) });
     // chat draft → form (never over what was typed)
     this.flow.prefillFromDraft().then((applied) => { if (applied.length) { this._sync(); this.setState({ prefilledNote: "เติมข้อมูลจากที่คุยกับผู้ช่วยให้แล้ว (" + applied.length + " ช่อง) ตรวจแก้ได้เลย" }); } }).catch(() => {});
     try {
@@ -302,13 +303,17 @@ class Component extends DCLogic {
     let tries = 0;
     const check = () => {
       if (!this._fb || !this._fb.currentAdminUser) return;
-      let staff = null;
-      try { staff = this._fb.currentAdminUser(); } catch (e) {}
-      if (staff) {
-        if (this.state.hasPriorSubmission) {
-          if (this.flow) { this.flow.setField("name", ""); this.flow.setField("phone", ""); this.flow.setField("email", ""); this._sync(); }
-          this.setState({ f_name: "", f_phone: "", f_email: "", hasPriorSubmission: false });
-        }
+      let user = null;
+      try { user = this._fb.currentAdminUser(); } catch (e) {}
+      if (user) {
+        // Any signed-in user is NOT a team member: a visitor who already uploaded a photo is signed in anonymously and must keep their own saved form after a refresh
+        // (found by BROWSER-LOCAL-01: the old "signed in = staff" test blanked the restored form). Only a verified team role starts blank.
+        this._fb.fetchAdminRole().then((role) => {
+          if ((role === "owner" || role === "staff") && (this.state.hasPriorSubmission || (this.flow && this.flow.state.fields.name))) {
+            if (this.flow) { this.flow.setField("name", ""); this.flow.setField("phone", ""); this.flow.setField("email", ""); this._sync(); }
+            this.setState({ f_name: "", f_phone: "", f_email: "", hasPriorSubmission: false });
+          }
+        }).catch(() => {});
         return;
       }
       if (++tries < 8) this._staffCheckT = setTimeout(check, 400);
@@ -350,7 +355,13 @@ class Component extends DCLogic {
       step3Error: st.lostPhotos ? "รูปที่อัปโหลดไว้ก่อนหน้าใช้ไม่ได้แล้ว (เปลี่ยนอุปกรณ์/ล้างข้อมูลเบราว์เซอร์) กรุณาเลือกรูปใหม่อีกครั้ง" : this.state.step3Error,
     });
   }
-  _setField(k, v) { this.flow.setField(k, v); this._sync(); }
+  // A field can be typed before the form logic has finished loading (it is imported asynchronously): remember it and hand it over as soon as the flow exists, so
+  // nothing typed in the first moments is lost (found by BROWSER-LOCAL-01: typing right after the page appeared left the name empty).
+  _setField(k, v) {
+    const STATE = { name: "f_name", phone: "f_phone", email: "f_email", txnType: "txnType", type: "f_type", condition: "f_condition", price: "f_price", description: "f_details", coords: "f_coords", ownerContact: "f_ownerContact", area: "f_area", commercialSubtype: "f_subtype" };
+    if (!this.flow) { this._pending = Object.assign(this._pending || {}, { [k]: v }); if (STATE[k]) this.setState({ [STATE[k]]: v }); return; }
+    this.flow.setField(k, v); this._sync();
+  }
 
   async submit() {
     if (this._submitting) return;
