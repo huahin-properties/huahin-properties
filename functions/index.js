@@ -510,8 +510,35 @@ function pd16ReplyIsSafe(first, retried) {
   return true;
 }
 
+// CHAT-FIX-01 — FIXED FEMALE-VOICE FALLBACK.
+// When the retry cannot produce a reply that is both female-voiced AND safe, the
+// first (male-voiced) reply is NOT released any more. The WHOLE reply string is
+// replaced by this fixed sentence. It has no digits, no property code, no
+// [[CONTACT]] / [[LIST_PROPERTY]] token, no quotation, and it claims nothing
+// (not submitted, not saved, not "the team is handling it").
+//
+// LIMITS, stated on purpose:
+//   * The first reply's CONTENT is withheld for that turn. This does not preserve
+//     what the model wanted to say (answer, question, price, code).
+//   * A CONTACT / LIST_PROPERTY button that the first reply would have produced
+//     does NOT appear on a fallback turn (no token in the fallback).
+//   * Only the reply string is replaced. stage, intents, customer name/contact,
+//     propertyBasics, draft fields etc. still come from the FIRST call; nothing
+//     from the retry (classification included) is ever used on this path.
+//   * Applies only to replies that contain Thai script (pd16Violation is Thai-only),
+//     so other languages never reach it.
+//   * pd16Violation itself is unchanged, so its known limits remain (for example a
+//     Thai word that merely contains "ผม", such as "ผมสีดำ", is still counted as a
+//     male voice).
+const PD16_FALLBACK_REPLY = "ขออภัยค่ะ ตอนนี้ยังเรียบเรียงคำตอบได้ไม่สมบูรณ์ รบกวนส่งข้อความล่าสุดอีกครั้งนะคะ";
+
 // ONE retry maximum, and only when the first reply actually violates PD-16.
-// No loop, no second retry, no change to what this function returns.
+// No loop, no second retry. The returned object carries `pd16Fallback` (a FIXED
+// reason code, never text) only when the fallback sentence was used:
+//   retry_failed       the retry call threw
+//   retry_still_male   the retry still has a male voice
+//   retry_unsafe       the retry is empty or failed another safeguard (token,
+//                      code, number or quotation changed)
 async function callClaudeReception(system, messages, apiKey) {
   const first = await callClaudeReceptionOnce(system, messages, apiKey);
   if (!pd16Violation(first.reply)) return first;
@@ -523,11 +550,16 @@ async function callClaudeReception(system, messages, apiKey) {
       apiKey
     );
   } catch (e) {
-    return first; // a failed retry must never break the turn
+    // The error object is deliberately NOT inspected or logged: it may carry
+    // model output, tokens or request details.
+    return { ...first, reply: PD16_FALLBACK_REPLY, pd16Fallback: "retry_failed" };
   }
-  if (!pd16ReplyIsSafe(first.reply, retried.reply)) return first;
+  const retriedReply = retried && retried.reply;
+  if (!retriedReply || !String(retriedReply).trim()) return { ...first, reply: PD16_FALLBACK_REPLY, pd16Fallback: "retry_unsafe" };
+  if (pd16Violation(retriedReply)) return { ...first, reply: PD16_FALLBACK_REPLY, pd16Fallback: "retry_still_male" };
+  if (!pd16ReplyIsSafe(first.reply, retriedReply)) return { ...first, reply: PD16_FALLBACK_REPLY, pd16Fallback: "retry_unsafe" };
   // Reply string only; everything else stays from the first call.
-  return { ...first, reply: retried.reply };
+  return { ...first, reply: retriedReply };
 }
 
 async function callClaudeReceptionOnce(system, messages, apiKey) {
@@ -965,6 +997,9 @@ exports.receptionTurn = onCall(
         code: (e && e.code) || null, msgLen: e && e.message ? String(e.message).length : 0 });
       throw e;
     }
+    // CHAT-FIX-01: a fixed reason code only (retry_failed | retry_still_male | retry_unsafe).
+    // Never customer text, model text, tokens or error details.
+    if (out.pd16Fallback) rxLog({ rid, event: "pd16_fallback", uidTail, reason: out.pd16Fallback });
 
     // Classification outcome BEFORE the gate runs - this is the datum the
     // platform logs could not show. Property-basics fields are reported as
