@@ -1,8 +1,8 @@
 # SEC-TEST-01 — Security probes with synthetic data (emulator only)
 
-Branch `claude/sec-test-01`, base `origin/main` = `4e358a5`. Tested on that base plus the test files in this change (no rules, Function or client file was modified).
+Branch `claude/sec-test-01`, base `origin/main` = `4e358a5`. **Tested commit: `9cd456e`** (run on a clean working tree on 1 Oct 2026; the first version of this PR, `90926c7`, was run earlier with the same label counts). No rules, Function or client file was modified.
 
-> **A passing run is NOT a security certification.** Mocha "passing" only means each probe ran and produced an answer. A `GAP-CONFIRMED` row is an open weakness. `GAP-NOT-REPRODUCED` covers only the single case tested. Nothing here was run against production; no real customer data was read or written.
+> **A passing run is NOT a security certification.** Mocha "passing" only means a probe or inventory check ran and produced an answer (for GAP probes the answer *is* the finding). NOT-TESTED items are reported by mocha as **pending**, never as passing. A `GAP-CONFIRMED` row is an open weakness. `GAP-NOT-REPRODUCED` covers only the single case tested. Nothing here was run against production; no real customer data was read or written.
 
 ## 1. What was run
 
@@ -12,10 +12,12 @@ Branch `claude/sec-test-01`, base `origin/main` = `4e358a5`. Tested on that base
 | Emulators | Firestore + Storage, project `demo-sec-test-01`, ports 8181 / 9299, config `tests/firebase.sec-test.json` (the real `firebase.json` is untouched) |
 | Tool versions | `firebase-tools@15.32.1` via `npx` (pinned in the npm script, not added as a dependency), `@firebase/rules-unit-testing` and `mocha` already in `package.json`, Node 22 locally (`functions/` declares Node 20) |
 | Safety | `tests/helpers/synthetic.js: assertEmulatorOnly()` aborts unless the project id starts with `demo-` and the Firestore/Storage hosts are loopback |
-| Result | **89 mocha tests passing, 0 failing** · probe labels: 25 GAP-CONFIRMED, 0 GAP-NOT-REPRODUCED, 49 CONTROL, 5 NOT-TESTED (79 probes; 10 mocha tests are the source-inventory checks) |
+| Result (run on `9cd456e`, `npm run test:sec`, exit 0) | **95 passing, 5 pending, 0 failing** · the 95 passing = 74 probes that ran + 10 source-inventory checks + 11 helper self-tests · the 5 pending = the 5 **NOT-TESTED** items (F1, F2, F3, S5c, S6c), listed separately below · probe labels (79 probes): **25 GAP-CONFIRMED · 0 GAP-NOT-REPRODUCED · 49 CONTROL · 5 NOT-TESTED** |
+| Denial detection | `isAllowed()` / `attempt()` accept only Firestore `permission-denied` and Storage `storage/unauthorized` as "the rules said no". Message text (403, "unauthorized", "PERMISSION_DENIED" in a message) is never used. Any other error (network, emulator down, SDK/runtime, failed Function load) is re-thrown and fails the test. Proven by `tests/sec-helpers.selftest.test.js` (no emulator) |
+| Review fixes (PR #2 review, 1 Oct 2026) | G1, G2, G11 (rules) and B1 (Function) no longer swallow errors: only a rules denial can become GAP-NOT-REPRODUCED. B-tests now fail (not NOT-TESTED) if `functions/index.js` cannot be loaded. NOT-TESTED probes are skipped so they count as pending |
 | Noted side effect | The Admin SDK attempted a cloud metadata lookup for credentials (`MetadataLookupWarning ... 403`) while loading `functions/index.js`; data calls went to the emulator (loopback host asserted). The existing `npm run test:rules` (conversations only) was **not** re-run. |
 
-Files: `tests/sec-gaps.rules.test.js` (A: Firestore rules), `tests/sec-gaps.storage.test.js` (A2: Storage rules), `tests/functions/create-case.characterization.test.js` (B: current Function, Admin SDK bypasses rules), `tests/sec-callsite-guard.test.js` (C: source inventory), `tests/helpers/synthetic.js`, `tests/firebase.sec-test.json`.
+Files: `tests/sec-gaps.rules.test.js` (A: Firestore rules), `tests/sec-gaps.storage.test.js` (A2: Storage rules), `tests/functions/create-case.characterization.test.js` (B: current Function, Admin SDK bypasses rules), `tests/sec-callsite-guard.test.js` (C: source inventory), `tests/sec-helpers.selftest.test.js` (helper self-test), `tests/helpers/synthetic.js`, `tests/firebase.sec-test.json`.
 
 ## 2. Labels
 
