@@ -420,12 +420,22 @@ function _mergePhotoLists(pub, priv) {
   (pub || []).forEach((p) => by.set(p.id, p));
   return Array.from(by.values());
 }
-// Private copies are stored WITHOUT a download token (storage.rules: team read only). The team's browser asks
-// Storage for a link with its own signed-in session; the link is not kept anywhere.
-async function _resolvePrivate(rows) {
+// Private copies are stored WITHOUT a download token (storage.rules: team read only). The team's browser fetches the bytes with its own ID token and
+// shows an in-memory object URL (private-photo.js); nothing is minted, stored or shareable. `onlyFirst`: lists need just the cover of each Case.
+let _privateLoader = null;
+async function _privatePhotoLoader() {
+  if (!_privateLoader) {
+    const { createPrivatePhotoLoader } = await import("./private-photo.js");
+    _privateLoader = createPrivatePhotoLoader({ bucket: firebaseConfig.storageBucket, getIdToken: async () => { const u = authApp() && authApp().currentUser; return u ? u.getIdToken() : null; } });
+  }
+  return _privateLoader;
+}
+async function _resolvePrivate(rows, onlyFirst) {
+  const loader = await _privatePhotoLoader();
   return Promise.all((rows || []).map(async (p) => {
     if (!p || !p.storagePath) return p;
-    try { return { ...p, dataUrl: await storageRef().ref().child(p.storagePath).getDownloadURL() }; } catch (e) { return p; }
+    if (onlyFirst && p.index !== 0) return { ...p, dataUrl: "" }; // not needed in a list; fetchPhotosFor(id) loads them all
+    try { return { ...p, dataUrl: await loader.load(p.storagePath) }; } catch (e) { return { ...p, dataUrl: "", privatePhotoError: (e && e.status) || "error" }; }
   }));
 }
 export async function fetchPhotosFor(propertyId) {
@@ -440,7 +450,7 @@ export async function fetchAllPhotos() {
   const pub = await fetchCollection("propertyPhotos");
   if (!(await _isTeamSession())) return pub;
   let priv = [];
-  try { priv = await _resolvePrivate(await fetchCollection("casePhotos")); } catch (e) { priv = []; }
+  try { priv = await _resolvePrivate(await fetchCollection("casePhotos"), true); } catch (e) { priv = []; }
   return _mergePhotoLists(pub, priv);
 }
 
