@@ -356,12 +356,16 @@ describe("CHAT-TEST-01: chat + draft path (synthetic, emulator, stubbed model)",
     const chat = await createCase(UID_A, { confirmed: true });
     // The form (Owner Submission.dc.html) creates a case straight from the browser (anonymous, rules isPublicOwnerSubmission).
     const formId = "own-SYN-FORM-1";
-    const f = await attempt(anon().doc("properties/" + formId).set({
+    const formDocData = {
       source: "owner_submission", caseSource: "owner_form", listingStatus: "pending",
       contactName: NAME, ownerContact: CONTACT, trackToken: "SYNTHETIC-FORM-TOKEN-0123456789", submittedAt: Date.now(),
-    }));
-    rec("C6a", "form-style anonymous create is accepted by rules (current intended path)", f.allowed ? "CONTROL" : "CONTROL-FAILED", f.allowed ? "allowed" : "denied with " + f.error.code);
-    assert.ok(f.allowed);
+    };
+    const f = await attempt(anon().doc("properties/" + formId).set(formDocData));
+    // LISTING-E2E-01: the browser can no longer create a Case directly; the form submits through submitListingCase (server).
+    rec("C6a", "form-style anonymous direct create is now REFUSED by rules (closed by LISTING-E2E-01; the form uses submitListingCase)", !f.allowed ? "CONTROL" : "CONTROL-FAILED", f.allowed ? "allowed" : "denied with " + f.error.code);
+    assert.ok(!f.allowed);
+    // For the two-path comparison below, simulate the legacy form document with the Admin SDK.
+    await admin.firestore().doc("properties/" + formId).set(formDocData);
     const same = await admin.firestore().collection("properties").where("ownerContact", "==", CONTACT).get();
     const ids = same.docs.map((d) => d.id);
     const formDoc = (await admin.firestore().doc("properties/" + formId).get()).data();

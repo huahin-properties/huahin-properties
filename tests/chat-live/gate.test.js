@@ -352,7 +352,14 @@ describe("CHAT-LIVE-01 gate: allow-list, ID token, atomic AI-call cap (emulators
 
   it("GT17 production diff is additive only: every chatGate line in functions/index.js is a call guarded by the gate's own state; the existing tests (test:chat) are run separately unchanged", () => {
     const { execFileSync } = require("child_process");
-    const d = execFileSync("git", ["diff", "--unified=0", "8c549c6", "--", "functions/index.js"], { cwd: ROOT, encoding: "utf8" });
+    // LISTING-E2E-01 appends its own self-contained block (4 exports); it is cut out here so this guard keeps checking only the CHAT-LIVE-01 changes.
+    const os = require("os"), fsx = require("fs"), pathx = require("path");
+    let cur = fsx.readFileSync(pathx.join(ROOT, "functions/index.js"), "utf8");
+    const a = cur.indexOf("// LISTING-E2E-01"), b = cur.indexOf("// startConversation (Callable)");
+    if (a !== -1 && b > a) cur = cur.slice(0, a) + cur.slice(b);
+    const tmp = pathx.join(os.tmpdir(), "gt17-index-" + process.pid + ".js"); fsx.writeFileSync(tmp, cur);
+    fsx.writeFileSync(tmp + ".base", execFileSync("git", ["show", "8c549c6:functions/index.js"], { cwd: ROOT, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 }));
+    let d; try { d = execFileSync("git", ["diff", "--no-index", "--unified=0", tmp + ".base", tmp], { cwd: ROOT, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 }); } catch (e) { d = e.stdout; }
     const removed = d.split("\n").filter((l) => /^-[^-]/.test(l)), added = d.split("\n").filter((l) => /^\+[^+]/.test(l));
     // The only removed lines are the 4 signatures/calls that gain an argument.
     assert.strictEqual(removed.length, 4, removed.join("\n"));
