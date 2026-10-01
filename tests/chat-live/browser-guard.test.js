@@ -11,7 +11,8 @@ const fs = require("fs");
 const http = require("http");
 const os = require("os");
 const path = require("path");
-const { build } = require("../../tools/build-chat-live");
+const { build: rawBuild } = require("../../tools/build-chat-live");
+const build = (cfg, out) => rawBuild(cfg, out, undefined, { outputBases: [os.tmpdir()] });
 
 const ROOT = path.resolve(__dirname, "..", "..");
 const VENDOR = process.env.CHAT_LIVE_VENDOR || "";
@@ -21,7 +22,7 @@ const OK = {
   projectId: "huahin-chat-test-fake1", apiKey: "FAKE-WEB-KEY-NOT-REAL", appId: "1:111111111111:web:fakefakefake",
   messagingSenderId: "111111111111", authDomain: "huahin-chat-test-fake1.firebaseapp.com",
   storageBucket: "huahin-chat-test-fake1.firebasestorage.app", region: "asia-southeast1",
-  claudeCompleteUrl: "https://claudecomplete-fakefake-as.a.run.app",
+  claudeCompleteUrl: "https://asia-southeast1-huahin-chat-test-fake1.cloudfunctions.net/claudeComplete",
 };
 const PROD = /5f1b5|auth\.huahin\.properties|claudecomplete-3j4ldf4pja|(^|\.)huahin\.properties$/;
 const MIME = { ".html": "text/html", ".js": "application/javascript", ".png": "image/png", ".json": "application/json" };
@@ -115,6 +116,8 @@ describe("CHAT-LIVE-01 test-site guard (real Chromium, all external hosts interc
   it("P2c stop: one field missing (claudeCompleteUrl)", async () => { assert.strictEqual(await expectStopped(variant((d) => setCfg(d, (c) => { delete c.claudeCompleteUrl; })), "missing-field"), "missing:claudeCompleteUrl"); });
   it("P2d stop: production project id in config", async () => { assert.strictEqual(await expectStopped(variant((d) => setCfg(d, (c) => { c.projectId = "huahin-properties-5f1b5"; })), "prod-id"), "production-value-in-config"); });
   it("P2e stop: production claudeComplete URL in config", async () => { assert.strictEqual(await expectStopped(variant((d) => setCfg(d, (c) => { c.claudeCompleteUrl = "https://claudecomplete-3j4ldf4pja-as.a.run.app"; })), "prod-url"), "production-value-in-config"); });
+  it("P2g stop: claudeComplete URL of another project (right domain shape)", async () => { assert.strictEqual(await expectStopped(variant((d) => setCfg(d, (c) => { c.claudeCompleteUrl = "https://asia-southeast1-another-project-test.cloudfunctions.net/claudeComplete"; })), "other-project-url"), "claudeComplete-url-not-bound-to-project"); });
+  it("P2h stop: run.app URL", async () => { assert.strictEqual(await expectStopped(variant((d) => setCfg(d, (c) => { c.claudeCompleteUrl = "https://claudecomplete-fakefake-as.a.run.app"; })), "run-app"), "claudeComplete-url-not-bound-to-project"); });
   it("P2f stop: opened from a host that is not on the allow-list", async () => { assert.strictEqual(await expectStopped(outOk, "wrong-host", "not-allowed.test"), "host-not-allowed"); });
 
   it("P3 allowed hostname (<project>.web.app) passes the guard", async () => {
@@ -142,7 +145,7 @@ describe("CHAT-LIVE-01 test-site guard (real Chromium, all external hosts interc
     } finally { await t.ctx.close(); t.s.close(); }
   });
 
-  it("P5 NEGATIVE CONTROL: the unmodified production index.html (no guard) starts Firebase on the PRODUCTION project", async () => {
+  it("P5 NEGATIVE CONTROL: the unmodified production index.html (no guard) initialises Firebase with the PRODUCTION CONFIG (all external requests are intercepted; nothing real is contacted)", async () => {
     const d = fs.mkdtempSync(path.join(os.tmpdir(), "chatlive-n-"));
     for (const f of require("../../tools/build-chat-live").FILES) fs.copyFileSync(path.join(ROOT, f), path.join(d, f));
     const t = await open(browser, d);

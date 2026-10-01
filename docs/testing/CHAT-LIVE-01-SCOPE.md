@@ -1,8 +1,8 @@
-# CHAT-LIVE-01 — ขอบเขตหน้าทดสอบแชทจริง (แยกจาก production) — v2
+# CHAT-LIVE-01 — ขอบเขตหน้าทดสอบแชทจริง (แยกจาก production) — v3
 
-สถานะ: **เอกสารขอบเขต + สคริปต์ build/guard + ชุดทดสอบที่ไม่ใช้ credentials** ยังไม่สร้างบริการ ไม่ตั้ง credentials ไม่ deploy ไม่ merge
+
 ฐาน: `8c549c6` (PR #5 ผ่านการตรวจโค้ดของ Work; ผลรันที่ `afa0d8b` เป็นผลของ Code ไม่ใช่ production PASS)
-v2 = ปรับตามคำตัดสิน 5 ข้อของ Work ที่ `916fe01` + ข้อสังเกตเพิ่มเติม
+v2 = ปรับตามคำตัดสิน 5 ข้อของ Work ที่ `916fe01` · v3 = ปรับตามรีวิว `8f51b5c` (ความปลอดภัยของโฟลเดอร์ผลลัพธ์, URL claudeComplete ผูกกับโปรเจกต์ทดสอบ, ลงมือทำ gate ตามขอบเขตหัวข้อ 4, แผนทดสอบ production-ไม่เปลี่ยนแบบ DI)
 
 เป้าหมายแรก: ContactRail + `receptionTurn` (+ `createCaseFromConversation`, `getPropertyDraft`, `updatePropertyDraft`, `claudeComplete` ที่ ContactRail เรียก)
 
@@ -18,12 +18,13 @@ v2 = ปรับตามคำตัดสิน 5 ข้อของ Work ท
 
 | รายการ | สถานะ |
 |---|---|
-| `tools/build-chat-live.js` + `tools/chat-live/guard.js` + `tools/chat-live.config.example.json` | **ทำแล้ว** (ไม่แตะไฟล์ production แม้แต่ไบต์เดียว) |
-| `tests/chat-live/build.test.js` (15) + `tests/chat-live/browser-guard.test.js` (10) | **ทำแล้ว** ผลในหัวข้อ 7 |
-| `npm run test:chat-live` | **ทำแล้ว** (เพิ่ม script 1 บรรทัดใน `package.json`, lockfile ไม่เปลี่ยน) |
-| แก้ Function: allow-list, token ของ `claudeComplete`, เพดานแบบ atomic | **ยังไม่ทำ — เป็นข้อเสนอให้ Work ตรวจ (หัวข้อ 4)** |
+| `tools/build-chat-live.js` + `tools/chat-live/guard.js` + `tools/chat-live.config.example.json` | ทำแล้ว; v3: จำกัดโฟลเดอร์ผลลัพธ์, URL `claudeComplete` derive จาก project id |
+| `functions/chat-test-gate.js` (ใหม่) + 21 บรรทัดเพิ่มใน `functions/index.js` | **ทำแล้ว (v3)** — ทำงานเฉพาะ project id `huahin-chat-test-*`; production และ emulator `demo-*` = ปิด (พฤติกรรมเดิม); id ที่ไม่ทราบ = ปฏิเสธ |
+| `tests/chat-live/build.test.js` (21) + `browser-guard.test.js` (12) + `gate.test.js` (18) | ทำแล้ว ผลหัวข้อ 7 |
+| `npm run test:chat-live`, `npm run test:chat-live-gate` | ทำแล้ว (เพิ่ม 2 script; ไม่เพิ่ม dependency; lockfile ไม่เปลี่ยน) |
 | สร้างโปรเจกต์/บริการ/credentials/deploy | **ไม่ทำ** |
-| คู่มือเจ้าของทีละขั้น | ร่างหัวข้อ 8 — เขียนละเอียดหลัง Work อนุมัติหัวข้อ 4 |
+| คู่มือเจ้าของทีละขั้น | ร่างหัวข้อ 9 — เขียนละเอียดหลัง Work ตรวจ PR นี้ |
+| ค่าเริ่มต้นแอดมินในไฟล์สาธารณะ | **บันทึกเป็นงานแยก** `docs/security/SEC-URGENT-01-admin-default-credentials.md` (ไม่แสดงค่า ไม่ล็อกอิน production) |
 
 ## 2. Entry page และไฟล์ที่จำเป็นจริง
 
@@ -46,7 +47,7 @@ v2 = ปรับตามคำตัดสิน 5 ข้อของ Work ท
 | `canonical`, `og:url/og:image`, JSON-LD, google-site-verification ที่ชี้ `huahin.properties` | ลบออก + ใส่ `noindex,nofollow` |
 | สแกนสุดท้ายก่อนเขียนไฟล์ | ล้มทันทีถ้ายังเหลือ `5f1b5`, `auth.huahin.properties`, `claudecomplete-3j4ldf4pja`, URL `huahin.properties`, LINE/mailto/tel/wa.me จริง, เบอร์/อีเมลจริง, หรือค่า `password:` ที่ไม่ใช่สังเคราะห์ |
 
-> **ข้อสังเกตด้านความปลอดภัยของ production (รายงาน ไม่แก้ในแพ็กเกจนี้):** `firebase-client.js` ซึ่งถูกส่งให้ทุกเบราว์เซอร์มีค่าเริ่มต้นบัญชีแอดมินแบบข้อความล้วน และ `index.html` ฝังอีเมลแอดมินของประตูปรับปรุงเว็บ ผมไม่ได้ยืนยันว่าค่าเหล่านั้นยังใช้เข้าระบบจริงอยู่หรือไม่ — ขอให้ Work/เจ้าของพิจารณาเป็นแพ็กเกจแยก (ผมไม่ใส่ค่าลับซ้ำลงในเอกสาร/ชุดทดสอบ)
+> **ข้อสังเกตด้านความปลอดภัยของ production (บันทึกเป็นงานเร่งด่วนแยก `docs/security/SEC-URGENT-01-admin-default-credentials.md` ไม่แก้ในแพ็กเกจนี้ ไม่แสดงค่า ไม่ล็อกอิน production; การลบจากโค้ดอย่างเดียวไม่ทำให้รหัสที่เคยเผยแพร่ใช้ไม่ได้ ต้องให้เจ้าของเปลี่ยน/เพิกถอนภายหลัง):** `firebase-client.js` ซึ่งถูกส่งให้ทุกเบราว์เซอร์มีค่าเริ่มต้นบัญชีแอดมินแบบข้อความล้วน และ `index.html` ฝังอีเมลแอดมินของประตูปรับปรุงเว็บ ไม่ได้ยืนยันว่าค่าเหล่านั้นยังใช้เข้าระบบจริงอยู่หรือไม่ (ไม่มีการลองล็อกอิน) ไม่ใส่ค่าลับซ้ำลงในเอกสาร/ชุดทดสอบ
 
 ## 3. Guard คอนฟิก — ทำงานก่อน Firebase/แชท (ทำแล้ว + ทดสอบในเบราว์เซอร์จริง)
 
@@ -58,49 +59,48 @@ v2 = ปรับตามคำตัดสิน 5 ข้อของ Work ท
 
 ข้อค้นพบระหว่างทดสอบ: ครั้งแรก guard ที่หยุดแล้ว SDK/ฟอนต์/รูปยังถูกโหลดเพราะ `<helmet>` ถูกเบราว์เซอร์อ่านเอง จึงเปลี่ยนเป็นแนว template; ครั้งที่สองการโหลด SDK ซ้ำทำให้ Firebase app หาย จึงให้ `support.js` เป็นผู้โหลด SDK เหมือนเดิม และเพิ่มเทสต์ "SDK โหลดครั้งเดียว" (ในการทดสอบหน้า production ที่ไม่มี guard ก็เคยเห็นแอปหายชั่วคราวเป็นบางรอบ — สังเกตจากชุดทดสอบ Chromium ที่สกัดเครือข่าย ยังไม่ได้ยืนยันบนเบราว์เซอร์จริง)
 
-## 4. ข้อเสนอแก้ Function (ให้ Work ตรวจ — ยังไม่ลงมือ)
+### 3.1 ความปลอดภัยของโฟลเดอร์ผลลัพธ์ (v3 — ตามรีวิว 8f51b5c ข้อ 1)
 
-หลักการ: **ทุกอย่างทำงานเฉพาะเมื่อ project id ไม่ใช่ `huahin-properties-5f1b5`** (เปิดโดยปริยายในทุกโปรเจกต์ที่ไม่ใช่ production; ถ้าเอกสารตั้งค่าขาด → ปฏิเสธทั้งหมด = fail closed) บน production โค้ดเส้นทางเดิมต้องไม่เปลี่ยน
+ก่อนอ่าน/สร้าง/ลบอะไร `build()` ตรวจโฟลเดอร์ผลลัพธ์ และตรวจซ้ำก่อนลบจริง:
+- ต้องอยู่ **ใต้** `<repo>/build/` เท่านั้น (CLI) — ไม่ใช่ตัว `build/` เอง ไม่ใช่ root `/`, home, repo root, โฟลเดอร์ที่มีไฟล์ต้นฉบับ หรือโฟลเดอร์ที่เป็นแม่ของ source
+- ไม่มี symlink ในเส้นทาง (ตรวจเส้นทางตามที่เขียน ไม่ใช่เส้นทางที่ resolve แล้ว) และไม่ resolve ออกนอกพื้นที่ที่กำหนด
+- ถ้าโฟลเดอร์มีอยู่แล้ว: ต้องว่าง หรือมีไฟล์ marker `.chat-live-output` ที่ build เคยสร้าง — มิฉะนั้นปฏิเสธและ **ไม่ลบ** ไม่ว่าในนั้นจะมีอะไร
+- `/build/` ใส่ใน `.gitignore` (ผลลัพธ์ไม่ถูก commit)
+- negative tests B9–B15 ใช้ "repo จำลอง" ที่มีไฟล์ sentinel แล้วเทียบเนื้อหาทั้งต้นไม้ก่อน/หลังที่ build ถูกปฏิเสธ: ไฟล์ไม่เสียหาย
 
-### 4.1 ไฟล์ที่จะแก้/เพิ่ม
+### 3.2 URL ของ claudeComplete ผูกกับโปรเจกต์ทดสอบ (v3 — ข้อ 2)
 
+- `projectId` ต้องเป็น `huahin-chat-test-<ส่วนต่อท้าย>` (≤ 30 ตัวอักษร) — ชุดเดียวกับที่ gate ใน Function ใช้
+- URL **ไม่รับจากคอนฟิกอีกต่อไป** build คำนวณเป็น `https://asia-southeast1-<projectId>.cloudfunctions.net/claudeComplete`; ถ้าคอนฟิกใส่ `claudeCompleteUrl` มา ต้องตรงตัวกับค่านี้ มิฉะนั้นปฏิเสธ (URL ของโปรเจกต์อื่นที่รูปแบบโดเมนถูกต้อง, `run.app`, http, ต่อท้าย path/query = ปฏิเสธ — B3/B4)
+- guard ในเบราว์เซอร์ตรวจซ้ำ: URL, authDomain และ storageBucket ต้องผูกกับ `projectId` (P2g/P2h)
+- **ยังไม่ได้ยืนยัน:** ว่า Function รุ่น 2 ที่ deploy ใน `asia-southeast1` ตอบที่ URL รูปแบบ `cloudfunctions.net` นี้จริง (Code เปิดเอกสาร/โดเมนไม่ได้) — ขั้นตรวจหลัง deploy: เปิดหน้าทดสอบแล้วทดสอบ L8; ถ้าไม่ตอบ จะไม่ถอยไปรับ `run.app` เฉย ๆ แต่ต้องมีหลักฐานเชื่อม URL กับโปรเจกต์ (เช่น รายการ URL จาก `firebase functions:list --project <test-id>` หรือหน้า Cloud Run ของโปรเจกต์นั้น) และ Work อนุมัติก่อน
+
+## 4. gate ใน Function (v3 — ลงมือแล้วตามขอบเขตที่ Work อนุญาต)
+
+### 4.1 ไฟล์ที่เปลี่ยน
 | ไฟล์ | การเปลี่ยนแปลง |
 |---|---|
-| `functions/chat-test-gate.js` (ใหม่) | `gateActive()`, `requireAllowedUid(uid)`, `verifyHttpUid(req)`, `reserveAiCalls(uid, n)` |
-| `functions/index.js` | เรียก gate ที่ต้นของ 5 handler และก่อนทุกจุดเรียกโมเดลที่เส้นทางแชท (บรรทัดที่ `fetch("https://api.anthropic.com…")`: `claudeComplete` 3 จุด [โหมดแชท, retry ของ guard PD-16, โหมด content/tool] และ `callClaudeReceptionOnce` 1 จุด) — แก้เป็นบรรทัดเพิ่ม ไม่ย้ายตรรกะเดิม |
-| `ContactRail.dc.html` | **ไม่แก้** — header `Authorization` ถูกใส่ใน test build เท่านั้น (build patch + ทดสอบแล้ว B5/B7) |
-| `tests/chat-live/gate.test.js` (ใหม่, ใช้ Auth+Firestore emulator, Anthropic stub เดิม) | ดูหัวข้อ 4.5 |
-| `package.json` | script `test:chat-live-gate` (ไม่เพิ่ม dependency) |
+| `functions/chat-test-gate.js` (ใหม่) | `runtimeProjectId`, `stateFor`, `createGate`/`sharedGate`: `enforceCallable`, `enforceHttp`, `reserve`, `reserveHook`, `reserveHttp` |
+| `functions/index.js` | เพิ่ม **21 บรรทัด ลบ/แก้ 4 บรรทัด** (เทียบ `8c549c6`): สร้าง gate, เรียก `enforceCallable` ใน 4 callable, `enforceHttp` + `reserveHttp` ใน `claudeComplete` (โหมดแชท, โหมด content/tool), และพารามิเตอร์ `beforeCall`/`beforeRetry` ให้ `callClaudeReception`/`pd16GuardChatText` (4 บรรทัดที่แก้คือ signature/การเรียกที่เพิ่มอาร์กิวเมนต์) — GT17 ตรวจ diff นี้ในเทสต์ |
+| `ContactRail.dc.html` | ไม่แก้ (header `Authorization` ใส่ใน test build เท่านั้น) |
+| `tests/chat-live/gate.test.js`, `tests/firebase.chat-live.json`, `package.json` | ทดสอบ (Firestore + Auth emulator `demo-sec-test-01`, stub) |
 
-### 4.2 allow-list ที่ตรวจฝั่งเซิร์ฟเวอร์ (ข้อกำหนดของ Work)
+### 4.2 การตัดสินว่าอยู่ในโหมดไหน (ตามข้อกำหนดของ Work)
+- ตัดสินจาก **runtime ฝั่งเซิร์ฟเวอร์เท่านั้น** (`FIREBASE_CONFIG`, `GCLOUD_PROJECT`, `GOOGLE_CLOUD_PROJECT` — ทุกแหล่งที่มีต้องตรงกัน) ไม่รับ project id จาก request/header/claims (GT2)
+- `huahin-properties-5f1b5` → **ปิด** = พฤติกรรมเดิม ไม่อ่าน/เขียน `chatTest*` และไม่ต้องมี `Authorization` (GT16, spy)
+- `huahin-chat-test-<suffix>` → **บังคับ** · อื่นทั้งหมด (ไม่ทราบ ไม่ตรงกัน ไม่มี ไม่ถูกต้อง) → **ปฏิเสธ ไม่ตีความเป็น production** (GT1, GT3)
+- **จุดตัดสินใจให้ Work ดู:** id ขึ้นต้น `demo-` (เนมสเปซของ Firebase emulator ซึ่งไม่มีอยู่จริงบน Google Cloud) ถูกจัดเป็น "ปิด" เพื่อให้ชุดทดสอบเดิม (`test:chat` 55, `test:sec`) รันโดยไม่แก้สักไฟล์ ถ้า Work ไม่ต้องการ ให้เปลี่ยนเป็น "ปฏิเสธ" แล้วชุดเดิมต้องฉีด provider ทีละไฟล์
 
-- เอกสาร `chatTestAllow/{uid}` ใน Firestore ของโปรเจกต์ทดสอบ; handler อ่านด้วย Admin SDK; ไม่มี/`enabled !== true` → ปฏิเสธ **ก่อนเรียก AI และก่อนอ่าน/เขียนข้อมูลอื่น**
-- ครอบคลุม **receptionTurn, claudeComplete, getPropertyDraft, updatePropertyDraft, createCaseFromConversation** (3 callable ที่ใช้ข้อมูลทดสอบ + 2 ตัวที่เรียก AI)
-- **เขียนได้เฉพาะฝั่งที่มีสิทธิ์:** `firestore.rules` ปัจจุบันเป็น deny-by-default สำหรับคอลเลกชันที่ไม่ได้ระบุ → client เพิ่มสิทธิ์ตัวเองไม่ได้ (จะมีเทสต์ยืนยันกับ rules จริงใน repo; ถ้าพบว่ากฎ catch-all ไม่เป็นอย่างที่คาด จะแจ้งก่อนแก้)
-- **ขั้นตอนอนุญาต UID แบบสั้นที่สุด:** (1) ผู้ทดสอบเปิดหน้าทดสอบ → แถบเหลืองบนสุดแสดง "รหัสผู้ทดสอบ (UID)" (guard ทำแล้ว) แล้วส่งให้เจ้าของ (2) เจ้าของเปิด Firebase Console ของโปรเจกต์ **ทดสอบ** → Firestore → `chatTestAllow` → Add document → Document ID = UID → ฟิลด์ `enabled` (boolean) = `true` → Save (ไม่ต้องใช้เทอร์มินัล)
+### 4.3 allow-list / token / เพดาน
+- 5 handler ใช้กฎเดียวกัน: `receptionTurn`, `getPropertyDraft`, `updatePropertyDraft`, `createCaseFromConversation` (callable) และ `claudeComplete` (HTTP: `Authorization: Bearer <ID token>` → `verifyIdToken` → uid → allow-list) ตรวจ **ก่อน** อ่านข้อมูลหรือเรียกโมเดล (GT4–GT6)
+- allow-list = `chatTestAllow/<uid>` ต้องมี `enabled === true` (boolean) ขาด/ชนิดอื่น = ปฏิเสธ; client เขียน/อ่าน `chatTestAllow`, `chatTestQuota`, `chatTestConfig` ไม่ได้ด้วย `firestore.rules` จริงใน repo (catch-all deny) ทั้งแบบ anonymous sign-in และไม่ล็อกอิน (GT8)
+- **fallback ข้ามไม่ได้ (GT7):** `permission-denied`/`unauthenticated` อยู่ในรายการที่ ContactRail ยอมให้ตกไปใช้ `claudeComplete` (อ่านจาก source จริง) แต่ `claudeComplete` ปฏิเสธ uid เดียวกันทั้งแบบมี token (403) และไม่มี token (401); `resource-exhausted`/`failed-precondition` ไม่อยู่ในรายการ fallback
+- เพดาน: `chatTestConfig/limits` = `globalCap`, `perUidCap` ต้องเป็น **จำนวนเต็มบวก 1–10000** (ปฏิเสธ NaN, ±Infinity, ลบ, 0, ทศนิยม, string, boolean, null, ขาด, เกิน) และตัวนับที่เสียหายก็ปฏิเสธ — fail closed ก่อนเรียกโมเดล (GT9)
+- จองด้วย **Firestore transaction** ก่อนเรียกโมเดล **ทุกครั้ง รวม retry** (PD-16 retry ของทั้ง `receptionTurn` และ `claudeComplete` จองอีก 1 ช่อง; เต็ม → ข้อความสำรองหญิงเดิม, การเรียกแรกเต็ม → error `resource-exhausted`/429 ไม่ใช่ข้อความสำรอง) นับแม้การเรียกล้มเหลว (GT10–GT15)
+- `maxInstances` ไม่ถูกเรียกว่าเพดานค่าใช้จ่าย; เพดานจำนวนเป็นตัวนับข้างบน ส่วนวงเงินจริงตั้งที่ Workspace ของคีย์ AI และ billing ของ Firebase (เจ้าของตั้ง ตามหน้าทางการที่ Work ตรวจ)
 
-### 4.3 `claudeComplete` แบบ HTTP ตรวจ Firebase ID token และ UID
-
-- ต้องมี `Authorization: Bearer <ID token>`; `admin.auth().verifyIdToken` → uid → ตรวจ allow-list เหมือนข้างบน; ขาด/หมดอายุ/ไม่ถูกต้อง = 401, ไม่อยู่ใน allow-list = 403; ตรวจ **ก่อน** อ่าน body และก่อนเรียก AI (หลัง method check เดิม)
-- **ห้าม fallback ข้ามข้อจำกัด:** ตามโค้ด ContactRail รหัสผิดพลาดบางตัวของ receptionTurn (รวม `permission-denied` และ `unauthenticated` — ดู CHAT-FIX-02 S2) อนุญาตให้ตกไปใช้ `claudeComplete` จึงต้องให้ `claudeComplete` ปฏิเสธ UID เดียวกันด้วยกฎเดียวกัน และมีเทสต์ "UID ที่ไม่อนุญาต → ทั้งสองเส้นทางถูกปฏิเสธ จำนวนการเรียก Anthropic = 0"
-- ฝั่งเบราว์เซอร์: test build ส่ง header ด้วย `getIdToken()` (ไม่แก้ไฟล์ production)
-
-### 4.4 เพดานการเรียก AI — จอง atomic ก่อนเรียกโมเดล นับ retry
-
-- `reserveAiCalls(uid, n)` ใช้ Firestore transaction บน `chatTestQuota/global` และ `chatTestQuota/uid__<uid>`; เพดานอยู่ใน `chatTestConfig/limits` (`globalCap` = เพดานรวมของรอบทดสอบ, `perUidCap`) — **เอกสาร config ขาด/ค่าไม่ใช่ตัวเลข → ปฏิเสธ (fail closed)**; ตัวเลขเพดานเจ้าของเป็นผู้เลือก (ยังไม่กำหนด)
-- จองก่อนเรียกโมเดล **ทุกครั้ง**: การเรียกแรก 1 ช่อง; **PD-16 retry จองอีก 1 ช่อง** (ทั้ง `receptionTurn` และ `claudeComplete`) ถ้าเต็มตอน retry → ถือเป็น `retry_failed` → ข้อความสำรองเพศหญิงเดิม (ไม่เรียกโมเดลเกินเพดาน)
-- ช่องที่จองไม่คืนแม้การเรียกล้มเหลว (นับแบบระมัดระวัง); เต็ม → `resource-exhausted` (callable) / 429 (HTTP) ซึ่ง **ไม่อยู่ในรายการรหัสที่ ContactRail ยอมให้ fallback** (ตรวจจาก source ใน S2 — จะยืนยันซ้ำในเทสต์)
-- **ไม่เรียก `maxInstances` ว่าเพดานค่าใช้จ่าย**: เป็นเพดานการทำงานพร้อมกัน เท่านั้น; เพดานค่าใช้จ่ายจริงต้องมี (ก) ตัวนับข้างบน และ (ข) การจำกัดงบ/spend ที่ Workspace ของคีย์ Anthropic และ billing ของ Firebase ตามหน้าทางการที่ Work ตรวจ — เจ้าของตั้งค่าเอง
-
-### 4.5 หลักฐานที่จะส่ง (ทั้งหมดไม่ใช้ credentials; Anthropic = stub, Firebase = emulator)
-
-1. UID ไม่อยู่ใน allow-list → ปฏิเสธทั้ง 5 ฟังก์ชัน, **Anthropic stub ถูกเรียก 0 ครั้ง**, ไม่มีเอกสาร conversation/draft/case ถูกเขียน
-2. HTTP `claudeComplete`: ไม่มี token / token ปลอม / token หมดอายุ → 401; token ถูกแต่ไม่อยู่ใน allow-list → 403; AI = 0
-3. ลำดับ fallback จริง: receptionTurn ปฏิเสธ → ส่งต่อ claudeComplete → ปฏิเสธ (ไม่มีทางอ้อม)
-4. client เขียน `chatTestAllow/*`, `chatTestQuota/*`, `chatTestConfig/*` ด้วยกฎจริง → ถูกปฏิเสธ
-5. เพดาน: ยิงพร้อมกัน 20 คำขอเมื่อเพดาน 5 → สำเร็จ **5** พอดี, Anthropic stub = 5 ครั้งพอดี, ที่เหลือถูกปฏิเสธก่อนเรียกโมเดล; เพดานรวมข้าม 2 UID; retry นับ (เหลือ 1 ช่อง → คำตอบแรกผ่าน retry ถูกปฏิเสธ → ข้อความสำรอง AI = 1 ครั้ง)
-6. config ขาด → ปฏิเสธทั้งหมด
-7. **production ไม่เปลี่ยนพฤติกรรม:** (ก) รันชุดเดิม 55 (`test:chat`) + SEC-TEST-01 ซ้ำโดยตั้ง project id เป็นของ production → ผลต้องเท่าเดิม (ข) เทสต์ใหม่ที่ตั้ง project id เป็น production: gate ปิด ไม่มีการอ่าน `chatTestAllow`/`chatTestQuota` เลย (นับการเข้าถึงด้วย Admin SDK spy) และไม่ต้องมี Authorization header (ค) negative control: ถอด gate ออก → เทสต์ข้อ 1–5 ต้องล้ม (ง) diff ของ `functions/index.js` แสดงเฉพาะบรรทัดเพิ่มที่ครอบด้วยเงื่อนไข gate
+### 4.4 ขั้นตอนอนุญาต UID แบบสั้นที่สุด (ไม่เปลี่ยน)
+(1) ผู้ทดสอบเปิดหน้าทดสอบ → แถบเหลืองแสดง UID แล้วส่งให้เจ้าของ (2) เจ้าของเปิด Firebase Console ของโปรเจกต์ **ทดสอบ** → Firestore → `chatTestAllow` → Add document → Document ID = UID, ฟิลด์ `enabled` (boolean) = `true` → Save · และตั้ง `chatTestConfig/limits` (`globalCap`, `perUidCap` เป็นตัวเลขจำนวนเต็ม) หนึ่งครั้ง — ไม่ต้องใช้เทอร์มินัล
 
 ## 5. บริการ Firebase ที่จำเป็น (ไม่เพิ่มอัตโนมัติ — ไม่เปลี่ยนจาก v1 ยกเว้นระบุ)
 
@@ -128,13 +128,23 @@ v2 = ปรับตามคำตัดสิน 5 ข้อของ Work ท
 
 สรุป: **ตอนนี้ Code ยังเปิดหน้าทดสอบที่ deploy แล้วบน `*.web.app` ด้วยเบราว์เซอร์ไม่ได้** (ชุดทดสอบในข้อ 7 ทำงานได้เพราะสกัดคำขอและใช้สำเนาไฟล์ในเครื่อง ไม่ใช่การเปิดโดเมนจริง) ก่อนเริ่มทดสอบเบราว์เซอร์กับระบบจริง เจ้าของต้องแก้ **Network access** ของสภาพแวดล้อม Code (เมนูสภาพแวดล้อมคลาวด์ที่แถบหัวเซสชัน → Edit) เพิ่มโดเมนอนุญาตเหล่านี้: `www.gstatic.com`, `unpkg.com`, `<test-id>.web.app`, `<test-id>.firebaseapp.com`, `asia-southeast1-<test-id>.cloudfunctions.net`, โดเมน `*.run.app` ของ `claudeComplete` (และ `firestore.googleapis.com`, `identitytoolkit.googleapis.com`, `securetoken.googleapis.com` ถ้ายังไม่เปิด) — เป็นการตั้งค่าของเจ้าของ (Code ทำเองไม่ได้) และต้องรู้ `<test-id>` ก่อน จึงเป็นขั้นหลังสร้างโปรเจกต์ ผมจะบอกรายการโดเมนตามจริงอีกครั้งตอนนั้น
 
-## 7. ผลทดสอบ (รอบนี้ — ไม่ใช้ credentials; ไม่ใช่ production PASS)
+## 7. ผลทดสอบ (ไม่ใช้ credentials; ไม่ใช่ production PASS) — รายละเอียดตัวเลขอยู่ในรายงานของ PR
 
-ดูตารางผลจริงในรายงานของ PR (commit ที่รัน, จำนวน passing/pending/failing, negative control) — ชุด `test:chat-live`:
+| ชุด | ขอบเขต | ผล (รัน ณ commit ที่ระบุในรายงาน PR) |
+|---|---|---|
+| `npm run test:chat-live` | build (21: B1–B15 รวมแบบวนตามฟิลด์) + Chromium จริง (12: P1, P2a–h, P3, P4, P5) | ผ่าน 33 (ต้องมี `CHAT_LIVE_VENDOR`; ไม่มี = เบราว์เซอร์ pending) |
+| `npm run test:chat-live-gate` | Firestore + Auth emulator, stub Anthropic: GT1–GT18 | ผ่าน 18 |
+| `npm run test:chat` (เดิม ไม่แก้) | CHAT-TEST-01/FIX-01/FIX-02 | ผ่าน 55 / pending 8 — เท่าเดิม |
+| `npm run test:sec` (เดิม ไม่แก้) | SEC-TEST-01 | ผ่าน 95 / pending 5 — เท่าเดิม |
 
-- B1–B8 (15 เคส): config ขาด/placeholder/production/รูปแบบผิด → ปฏิเสธและไม่เขียนไฟล์; build ที่ถูกต้องไม่มีสตริง production/ช่องทางติดต่อจริง/ค่าลับ; ไฟล์ production ไม่เปลี่ยน (`git diff` เทียบ `8c549c6` และ `HEAD`); negative control: จุด patch หายไป หรือมีสตริง production ถูกปลูกไว้ → build ล้ม
-- P1–P5 (10 เคส, Chromium จริง, ทุก host ภายนอกถูกสกัดและบันทึก): guard ผ่าน → Firebase เริ่มบน **โปรเจกต์ทดสอบ**, ไม่มีคำขอไป host production, SDK แต่ละไฟล์โหลดครั้งเดียว; guard ไม่ผ่าน 6 แบบ → **ไม่มีคำขอภายนอกเลย**; host ที่อนุญาตผ่าน; ตัวกรองรันไทม์บล็อก fetch/XHR ไป URL production; negative control: หน้า production เดิมที่ไม่มี guard เริ่ม Firebase บน production (พิสูจน์ว่า guard คือสิ่งที่กัน)
-- ข้อจำกัด: ใช้ Firebase SDK 10.14.1 จาก `node_modules` แทน 10.12.2 ที่หน้าจริงใช้; Firestore/Functions/Anthropic จริงไม่ถูกเรียก; ไม่ใช่การทดสอบกับโมเดลจริงหรือโดเมนจริง; ต้องมี `CHAT_LIVE_VENDOR` (สำเนา React/Babel) ชุดเบราว์เซอร์จึงรัน ไม่เช่นนั้น pending
+**หลักฐาน "production ไม่เปลี่ยนพฤติกรรม" (ตามแผนที่ Work แก้):**
+1. Firestore/Auth ของชุดทดสอบ **ยังเป็น `demo-*` + loopback ตลอด**; `assertEmulatorOnly` ไม่ถูกแก้; ไม่ใช้ credentials จริง
+2. สาขา production ของ gate ทดสอบด้วย **dependency injection** (GT16: provider = project id ของ production → ไม่มีการอ่าน/เขียน `chatTest*` ผ่าน spy บน Firestore, ไม่ต้องมี `Authorization`, ทุก handler ตอบเหมือนเดิม; และ gate แยกที่ฉีด `admin` เป็น spy ที่ throw เมื่อถูกแตะ → นับการแตะ = 0 ทั้ง production และ `demo-*`)
+3. ชุดเดิมรันซ้ำ **โดยไม่แก้ไฟล์ทดสอบเดิม** กับโค้ดใหม่: 55/8 และ 95/5 เท่ากับก่อนแก้
+4. GT17: diff ของ `functions/index.js` เทียบ `8c549c6` = เพิ่มเฉพาะบรรทัดที่เกี่ยวกับ gate และแก้ 4 บรรทัดที่เพิ่มอาร์กิวเมนต์
+5. negative control: GT4 (ปิด gate = uid ที่ไม่อนุญาตไปถึงโมเดล) · GT18 (จองแบบไม่ atomic = ปล่อยเกินเพดาน ทำให้ GT10 ล้มได้จริง) · B7/B8 (build ล้มเมื่อต้นฉบับเปลี่ยน/มีสตริง production ถูกปลูก) · P5 (หน้า production เดิมที่ไม่มี guard **เริ่ม Firebase ด้วยคอนฟิก production โดยที่คำขอภายนอกทุกอันถูกสกัด — ไม่ได้เชื่อมต่อ production จริง** ใช้พิสูจน์ว่า guard คือสิ่งที่กัน)
+
+**ข้อจำกัด:** ชุดเบราว์เซอร์ใช้ Firebase SDK **10.14.1 จาก `node_modules` แต่หน้าจริงใช้ 10.12.2 จาก gstatic (คนละเวอร์ชัน)**; React/Babel เป็นสำเนา 18.3.1/7.29.0 ตรงเวอร์ชัน; Firestore/Functions/Anthropic จริง ไม่ถูกเรียก; ไม่ใช่การทดสอบโดเมนจริงหรือโมเดลจริง; gate ทดสอบกับ Auth emulator (token จริงของ emulator) ส่วน token หมดอายุทดสอบด้วยการฉีดตัวตรวจ; ไม่ได้ทดสอบ Cloud Functions runtime จริง (ตัวแปร `FIREBASE_CONFIG`/`GCLOUD_PROJECT` ที่ runtime จริงตั้งให้ทดสอบเป็นการจำลองด้วยพารามิเตอร์ของฟังก์ชัน — ต้องยืนยันตอน deploy ขั้นแรก ด้วย L-gate smoke: UID ไม่อนุญาตต้องถูกปฏิเสธ)
 
 ## 8. แผนทดสอบเบราว์เซอร์ L1–L9 (ร่างปรับแล้ว — ยังไม่รัน)
 
@@ -156,7 +166,7 @@ v2 = ปรับตามคำตัดสิน 5 ข้อของ Work ท
 
 ## 9. ใครทำอะไร
 
-**Code ทำเองได้ (ไม่ต้องสิทธิ์เพิ่ม):** build/guard/ทดสอบ (ทำแล้ว) · หลัง Work อนุมัติหัวข้อ 4: แก้ Function + เทสต์ emulator + หลักฐาน production-ไม่เปลี่ยน · ร่างคู่มือ
+**Code ทำเองได้ (ไม่ต้องสิทธิ์เพิ่ม):** build/guard/gate/ทดสอบ (ทำแล้ว) · ร่างคู่มือ
 
 **ต้องให้เจ้าของทำ (ตามลำดับ — จะส่งทีละขั้น):**
 1. สร้างโปรเจกต์ Firebase ทดสอบ (ชื่อต้องมีคำว่า `test`) แล้วแจ้ง project id ← **ขั้นแรกและขั้นเดียวที่เจ้าของต้องทำเมื่อ Work อนุมัติให้เริ่ม**
@@ -169,4 +179,4 @@ v2 = ปรับตามคำตัดสิน 5 ข้อของ Work ท
 
 ## 10. ไม่อยู่ในแพ็กเกจนี้
 
-ไม่ merge · ไม่ deploy · ไม่เปิด GREEN · ไม่แตะฟีเจอร์ที่พักไว้ · ไม่ขยายไป staging ทั้งระบบ · ไม่แก้ช่องว่างร่าง→เคส/แชท↔ฟอร์ม/"ผมสีดำ" · ไม่แก้ค่าเริ่มต้นแอดมิน/อีเมลใน production (รายงานเท่านั้น) · ไม่มี credentials ในไฟล์ใด ๆ
+ไม่ merge · ไม่ deploy · ไม่เปิด GREEN · ไม่แตะฟีเจอร์ที่พักไว้ · ไม่ขยายไป staging ทั้งระบบ · ไม่แก้ช่องว่างร่าง→เคส/แชท↔ฟอร์ม/"ผมสีดำ" · ไม่แก้ค่าเริ่มต้นแอดมิน/อีเมลใน production (บันทึกเป็น SEC-URGENT-01 แยก; ไม่ล็อกอิน production) · ไม่มี credentials ในไฟล์ใด ๆ

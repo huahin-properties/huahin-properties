@@ -35,6 +35,8 @@
   }
   var blob = JSON.stringify(C);
   for (var j = 0; j < PROD_MARKERS.length; j++) if (blob.indexOf(PROD_MARKERS[j]) !== -1) return stop("production-value-in-config");
+  if (C.claudeCompleteUrl !== "https://asia-southeast1-" + C.projectId + ".cloudfunctions.net/claudeComplete") return stop("claudeComplete-url-not-bound-to-project");
+  if (C.authDomain !== C.projectId + ".firebaseapp.com" || String(C.storageBucket).indexOf(C.projectId + ".") !== 0) return stop("config-not-bound-to-project");
   var host = location.hostname;
   var loopback = (host === "localhost" || host === "127.0.0.1");
   if (!(loopback || C.allowedHosts.indexOf(host) !== -1)) return stop("host-not-allowed");
