@@ -1803,6 +1803,26 @@ async function resolveSenderIdentity(senderId) {
   );
 }
 
+// LISTING-E2E-01 — the single server-side submit path and the Owner-only publish step.
+// Logic lives in listing-case.js (identity is derived from the verified token there).
+const listingCase = require("./listing-case");
+exports.submitListingCase = onCall(
+  { region: "asia-southeast1", timeoutSeconds: 120, memory: "512MiB" },
+  (request) => listingCase.submitListingCase({ admin, HttpsError, request })
+);
+exports.publishListingCase = onCall(
+  { region: "asia-southeast1", timeoutSeconds: 120, memory: "512MiB" },
+  (request) => listingCase.publishListingCase({ admin, HttpsError, request })
+);
+exports.unpublishListingCase = onCall(
+  { region: "asia-southeast1", timeoutSeconds: 120, memory: "512MiB" },
+  (request) => listingCase.unpublishListingCase({ admin, HttpsError, request })
+);
+exports.trackListingCase = onCall(
+  { region: "asia-southeast1", timeoutSeconds: 60 },
+  (request) => listingCase.trackListingCase({ admin, HttpsError, request })
+);
+
 // startConversation (Callable): creates the conversation doc (if it
 // doesn't already exist) and writes the FIRST message as an AI-role
 // greeting. A separate entry point from sendConversationTurn because the

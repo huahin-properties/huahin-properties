@@ -86,37 +86,44 @@ service firebase.storage {
     match /propertyPhotos/{fileName} {
       allow read: if true;
 
-      // Signed-in listers manage listing photos. Ownership cannot be checked
-      // from the filename: the pattern is "<propertyId>-<index>.webp" and a
-      // propertyId itself contains hyphens, so the two cannot be separated
-      // without capture groups, which Storage Rules do not support. Splitting
-      // by hand would be fragile string surgery on live data. The safe fix is
-      // a future path shape (propertyPhotos/{propertyId}/{photoId}) — NOT a
-      // guess-parse today. Documented as a deferred item, not overlooked.
-      allow create, update, delete: if isSignedIn();
+      // LISTING-E2E-01 — who may write PUBLIC listing photos from a browser:
+      //   * team members, and
+      //   * a signed-in, NON-anonymous member who has a listers/{uid} record.
+      // Anonymous sign-in (every chat visitor has one) can no longer create, replace or delete a
+      // listing's photos, and the anonymous "own-*.webp" create path is gone: photos of a submitted
+      // Case go to caseUploads/{uid}/... (private) and are copied here by the server at publish time
+      // (Admin SDK) and removed again when the listing is taken down.
+      // Still open (documented): a member can overwrite ANOTHER member's photo, because ownership
+      // cannot be derived from the "<propertyId>-<index>.webp" file name (see the note below).
+      //
+      // Ownership cannot be checked from the filename: the pattern is "<propertyId>-<index>.webp" and a
+      // propertyId itself contains hyphens, so the two cannot be separated without capture groups,
+      // which Storage Rules do not support. The safe fix is a future path shape
+      // (propertyPhotos/{propertyId}/{photoId}) — NOT a guess-parse today.
+      function isMemberWriter() {
+        return isTeamMember() || (request.auth != null && request.auth.token.firebase.sign_in_provider != "anonymous"
+          && firestore.exists(/databases/(default)/documents/listers/$(request.auth.uid)));
+      }
+      allow create, update, delete: if isMemberWriter();
+    }
 
-      // Public owner-submission channel: a property owner with NO account
-      // must be able to attach photos when consigning a property.
-      //
-      // CREATE ONLY + IMAGE ONLY + SIZE CAP. Previously this was a blanket
-      // write of any file type or size, so it could be used both to overwrite
-      // another customer's photos and to store arbitrary files at our cost.
-      //
-      // PHASE 1A.2 FIX: the previous three-segment regex
-      //   own-[A-Za-z0-9]+-[A-Za-z0-9]+-[0-9]+\.webp
-      // was too tight for the real filenames savePhoto() produces
-      // ("own-<timestamp>-<random>-<index>.webp", where the random suffix can
-      // be shorter than expected and the id itself contains hyphens). One
-      // photo failing the regex failed the whole Promise.all and therefore the
-      // whole submission. The prefix + extension check below still confines
-      // anonymous writes to the owner-submission namespace, which is the
-      // property that actually matters here; create-only + size cap are
-      // unchanged, so the abuse cases this rule was written to stop
-      // (overwriting someone else's photo, parking PDFs or huge binaries in
-      // the bucket) are still blocked.
-      allow create: if isCreate()
-        && fileName.matches('own-.*\\.webp')
+    // ── CASE UPLOADS (private) — LISTING-E2E-01 ──────────────────────────────
+    // A submitter (any signed-in user, anonymous sign-in included) may CREATE images in THEIR OWN
+    // folder only: caseUploads/<their uid>/<submission key>/<n>.webp (or doc.webp). Create-only, image
+    // only, size-capped, no replace, no delete. Readable by that uid and the team — nobody else.
+    // The submitListingCase function verifies and copies them to casePhotos/ (team-only).
+    match /caseUploads/{uid}/{key}/{fileName} {
+      allow create: if request.auth != null && request.auth.uid == uid && isCreate()
+        && key.matches('[A-Za-z0-9_-]{16,64}')
+        && fileName.matches('([0-9]{1,2}|doc)\\.webp')
         && isSafeImage(8 * 1024 * 1024);
+      allow read: if request.auth != null && (request.auth.uid == uid || isTeamMember());
+      allow update, delete: if false;
+    }
+    // Private per-case photo copies (pending review). Team-only, written only by the server.
+    match /casePhotos/{caseId}/{fileName} {
+      allow read: if isTeamMember();
+      allow write: if false;
     }
 
     match /profilePhotos/{fileName} {
