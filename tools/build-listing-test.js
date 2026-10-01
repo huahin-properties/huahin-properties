@@ -14,6 +14,11 @@ const PRODUCTION_PROJECT = "huahin-properties-5f1b5";
 // The pages that make up the test (entry points). Everything they import is added automatically (closure below).
 const ENTRIES = ["index.html", "Owner Submission.dc.html", "Track Submission.dc.html", "Admin Login.dc.html", "Listing Approvals.dc.html",
   "Staff Workspace.dc.html", "Lister Dashboard.dc.html", "Property Details.dc.html", "Search Results.dc.html", "Home.dc.html"];
+// The Cloud Functions the listing TEST site needs — by name. NEVER `firebase deploy --only functions` (that deploys every export, including Stripe / LINE /
+// e-mail / triggers and their unrelated secrets). The chat functions are optional: they need the Anthropic secret and are deployed only when the chat widget is tested.
+const REQUIRED_FUNCTIONS = ["submitListingCase", "previewListingCase", "publishListingCase", "unpublishListingCase", "syncListingCase", "addCasePhotos", "reconcileListingFiles", "listMyCases", "trackListingCase"];
+const OPTIONAL_CHAT_FUNCTIONS = ["receptionTurn", "getPropertyDraft", "updatePropertyDraft", "createCaseFromConversation", "claudeComplete"];
+const deployFunctionsCommand = (pid, names) => "firebase deploy --only " + (names || REQUIRED_FUNCTIONS).map((n) => "functions:" + n).join(",") + " --project " + pid;
 const REQUIRED = ["projectId", "apiKey", "appId", "messagingSenderId", "authDomain", "storageBucket", "region"];
 const PROJECT_ID_RE = /^huahin-listing-test-[a-z0-9]+(-[a-z0-9]+)*$/;
 const claudeCompleteUrlFor = (pid) => "https://asia-southeast1-" + pid + ".cloudfunctions.net/claudeComplete";
@@ -179,7 +184,7 @@ function build(config, outDir, root, opts) {
   return manifest;
 }
 
-module.exports = { build, validate, closure, ENTRIES, FORBIDDEN, PRODUCTION_PROJECT, MARKER };
+module.exports = { build, validate, closure, ENTRIES, REQUIRED_FUNCTIONS, OPTIONAL_CHAT_FUNCTIONS, deployFunctionsCommand, FORBIDDEN, PRODUCTION_PROJECT, MARKER };
 
 if (require.main === module) {
   const a = process.argv.slice(2);

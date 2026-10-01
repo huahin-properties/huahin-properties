@@ -590,4 +590,19 @@ describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, 
     assert.deepStrictEqual((await call("listMyCases", A.extB, {})).cases, []);
     assert.strictEqual(await errCode(call("listMyCases", null, {})), "unauthenticated");
   });
+
+  it("S25 the preview of a LIVE listing shows the photo set that actually stays public (published photos), says how many newer private photos are not included, and an update does not publish them", async () => {
+    const { r } = await ready(A.extA, { n: 2 });
+    const first = await call("previewListingCase", A.owner, { propertyId: r.propertyId });
+    assert.deepStrictEqual([first.photoSource, first.photoCount, first.unpublishedPhotoCount, first.photoPaths.length, first.photoUrls.length], ["private", 2, 0, 2, 0]);
+    await publish(A.owner, r.propertyId);
+    const k = newKey(); const p = await putStaging(A.staff, k, [0]); await call("addCasePhotos", A.staff, { propertyId: r.propertyId, paths: p.map((x) => x.path) });
+    await db.doc("caseInternal/" + r.propertyId).update({ bedrooms: 3 });
+    const pv = await call("previewListingCase", A.owner, { propertyId: r.propertyId });
+    assert.deepStrictEqual([pv.photoSource, pv.photoCount, pv.privatePhotoCount, pv.unpublishedPhotoCount, pv.photoPaths.length, pv.photoUrls.length], ["published", 2, 3, 1, 0, 2]);
+    for (const u of pv.photoUrls) assert.strictEqual((await fetch(u)).status, 200);
+    assert.strictEqual((await call("syncListingCase", A.owner, { propertyId: r.propertyId, reviewedSig: pv.updateSig })).synced, true);
+    assert.strictEqual((await db.collection("propertyPhotos").where("propertyId", "==", r.propertyId).get()).size, 2, "the update did not publish the new private photo");
+    assert.strictEqual((await getDoc("properties/" + r.propertyId)).photos.length, 2);
+  });
 });

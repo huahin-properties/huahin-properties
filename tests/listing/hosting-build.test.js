@@ -6,7 +6,7 @@ const os = require("os");
 const path = require("path");
 const crypto = require("crypto");
 const { spawnSync } = require("child_process");
-const { build, closure, FORBIDDEN, MARKER } = require("../../tools/build-listing-test");
+const { build, closure, FORBIDDEN, MARKER, REQUIRED_FUNCTIONS, OPTIONAL_CHAT_FUNCTIONS, deployFunctionsCommand } = require("../../tools/build-listing-test");
 
 const ROOT = path.join(__dirname, "..", "..");
 const CFG = { projectId: "huahin-listing-test-abc", apiKey: "SYNTHETIC-KEY", appId: "1:123:web:synthetic", messagingSenderId: "123", authDomain: "huahin-listing-test-abc.firebaseapp.com", storageBucket: "huahin-listing-test-abc.appspot.com", region: "asia-southeast1" };
@@ -102,5 +102,32 @@ describe("LISTING-E2E-01 TEST-only hosting build (no network, nothing deployed)"
     for (const f of closure(ROOT)) { fs.mkdirSync(path.dirname(path.join(tmp, f)), { recursive: true }); fs.copyFileSync(path.join(ROOT, f), path.join(tmp, f)); }
     fs.writeFileSync(path.join(tmp, "firebase-client.js"), fs.readFileSync(path.join(tmp, "firebase-client.js"), "utf8").replace("const DEFAULT_ADMIN_CREDENTIALS", "const RENAMED_CREDENTIALS"));
     assert.throws(() => build(CFG, path.join(tmp, "build", "o"), tmp, { outputBases: [path.join(tmp, "build")] }), /DEFAULT_ADMIN_CREDENTIALS not found/);
+  });
+
+  it("H7 deploy set: only NAMED functions (never all of them); every function the built pages call is in the set; the guide shows exactly that command; no new composite index is needed; the built hosting config is the TEST one, not the root production hosting", () => {
+    const src = (f) => fs.readFileSync(path.join(ROOT, f), "utf8");
+    const called = new Set();
+    for (const f of closure(ROOT).filter((x) => /\.(js|html)$/.test(x))) for (const m of src(f).matchAll(/(?:callFn|httpsCallable)\(\s*["']([A-Za-z]+)["']/g)) called.add(m[1]);
+    const known = new Set(REQUIRED_FUNCTIONS.concat(OPTIONAL_CHAT_FUNCTIONS, ["startConversation", "sendConversationTurn"])); // the last two belong to the old conversation widget (not used by the listing test)
+    for (const n of called) assert.ok(known.has(n), "a built page calls a function that the deploy guide does not account for: " + n);
+    for (const n of REQUIRED_FUNCTIONS) assert.ok(called.has(n) || n === "reconcileListingFiles", "required function never called by any page: " + n);
+    const exportsNow = new Set(Array.from(src("functions/index.js").matchAll(/^exports\.([A-Za-z0-9_]+)/gm)).map((m) => m[1]));
+    for (const n of REQUIRED_FUNCTIONS.concat(OPTIONAL_CHAT_FUNCTIONS)) assert.ok(exportsNow.has(n), "not exported: " + n);
+    for (const bad of ["stripeWebhook", "createCheckoutSession", "lineAuthStart", "notifyNewLead", "notifyOwnerApproval", "agentProfileMeta", "shareCard"]) assert.ok(!REQUIRED_FUNCTIONS.includes(bad), bad);
+    const cmd = deployFunctionsCommand("huahin-listing-test-abc");
+    assert.ok(/^firebase deploy --only functions:[A-Za-z]+(,functions:[A-Za-z]+)* --project huahin-listing-test-abc$/.test(cmd) && !/--only functions\b(?!:)/.test(cmd));
+    const guide = src("docs/listing-e2e/DEPLOY-TEST-PROJECT.md");
+    assert.ok(guide.includes(cmd.replace("huahin-listing-test-abc", "<huahin-listing-test-…>")), "the guide must show exactly the generated command");
+    assert.ok(!/firebase deploy --only functions( |$|`)/m.test(guide.replace(/ห้ามรัน `firebase deploy --only functions`[^\n]*/, "")), "the guide must not tell anyone to deploy all functions");
+    // indexes: every query of the listing flow is single-field equality (no orderBy, no chained where)
+    const lc = src("functions/listing-case.js");
+    assert.ok(!/\.orderBy\(/.test(lc) && !/\.where\([^)]*\)\s*\.where\(/.test(lc), "a composite index would be needed");
+    // hosting: the built folder carries its own TEST config; the root one (production rewrites) is never what gets deployed
+    const d = out(); made.push(d); build(CFG, d);
+    const built = JSON.parse(fs.readFileSync(path.join(d, "firebase.json"), "utf8")).hosting;
+    const root = JSON.parse(src("firebase.json")).hosting;
+    assert.ok(root.rewrites && root.rewrites.length, "sanity: the root hosting config has production rewrites");
+    assert.deepStrictEqual([built.public, built.rewrites], [".", undefined]);
+    assert.ok(!JSON.stringify(built).includes("agentProfileMeta") && !fs.readFileSync(path.join(d, "listing-test-config.js"), "utf8").includes("5f1b5"));
   });
 });

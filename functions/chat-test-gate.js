@@ -6,12 +6,15 @@
 //   demo-*  AND runtime evidence of a local emulator -> "off" : FIRESTORE_EMULATOR_HOST is set and loopback, and every other emulator
 //            endpoint variable that is set is loopback too. The name alone never switches the gate off: demo-* without that evidence,
 //            or with any external endpoint, is "deny".
-//   huahin-chat-test-<suffix>        -> "enforce" : allow-listed anonymous UID + (HTTP) verified ID token + atomic AI-call cap
+//   huahin-chat-test-<suffix> | huahin-listing-test-<suffix> -> "enforce" : allow-listed anonymous UID + (HTTP) verified ID token + atomic AI-call cap
 //   anything else, or ids that disagree, or none -> "deny": every gated handler refuses (an unknown project is NEVER treated as production)
 "use strict";
 
 const PRODUCTION_PROJECT = "huahin-properties-5f1b5";
-const TEST_RE = /^huahin-chat-test-[a-z0-9]+(-[a-z0-9]+)*$/;
+// The chat TEST project and the LISTING TEST project (LISTING-E2E-01: the hosted form/Staff/Approvals site also carries the chat widget and
+// calls receptionTurn / getPropertyDraft / updatePropertyDraft / createCaseFromConversation / claudeComplete) are BOTH strict test projects with the SAME
+// allow-list, ID token and atomic cap. Nothing else is recognised.
+const TEST_RE = /^huahin-(chat|listing)-test-[a-z0-9]+(-[a-z0-9]+)*$/;
 const EMULATOR_RE = /^demo-[a-z0-9]+(-[a-z0-9]+)*$/;
 const UID_RE = /^[A-Za-z0-9_.:-]{1,128}$/;
 const MAX_CAP = 10000; // upper bound for any configured cap

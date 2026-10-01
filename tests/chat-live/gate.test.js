@@ -91,8 +91,8 @@ describe("CHAT-LIVE-01 gate: allow-list, ID token, atomic AI-call cap (emulators
   it("GT1 project-id -> state table: production/demo = off; huahin-chat-test-* = enforce; everything else (incl. look-alikes, null) = deny", () => {
     const { stateFor, runtimeProjectId } = require(GATE_SRC);
     const EMU = { FIRESTORE_EMULATOR_HOST: "127.0.0.1:8381", FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9199" };
-    const off = [PROD_PID], on = [TEST_PID, "huahin-chat-test-a1", "huahin-chat-test-a-b-c"];
-    const deny = [null, undefined, "", "other-project", PROD_PID + "x", "x" + PROD_PID, "HUAHIN-PROPERTIES-5F1B5", "huahin-chat-test-", "huahin-chat-test", "huahin-chat-test-UPPER", "huahin-chat-test--a", "huahin-chat-test-" + "x".repeat(20), "demo-", "demo_x", "my-test-project", 42, {}];
+    const off = [PROD_PID], on = [TEST_PID, "huahin-chat-test-a1", "huahin-chat-test-a-b-c", "huahin-listing-test-x1", "huahin-listing-test-a-b-c"];
+    const deny = [null, undefined, "", "other-project", PROD_PID + "x", "x" + PROD_PID, "HUAHIN-PROPERTIES-5F1B5", "huahin-chat-test-", "huahin-chat-test", "huahin-chat-test-UPPER", "huahin-chat-test--a", "huahin-chat-test-" + "x".repeat(20), "huahin-listing-test-", "huahin-listing-test", "huahin-listing-test-UPPER", "huahin-listing-test--a", "huahin-listing-test-" + "x".repeat(20), "huahin-other-test-abc", "huahin-listing-tests-abc", "xhuahin-listing-test-abc", "huahin-listing-test-abc.evil", "demo-", "demo_x", "my-test-project", 42, {}];
     off.forEach((p) => { assert.strictEqual(stateFor(p, {}), "off", "production, exact match, no emulator needed"); assert.strictEqual(stateFor(p, EMU), "off"); assert.strictEqual(stateFor(p, { FIRESTORE_EMULATOR_HOST: "firestore.googleapis.com:443" }), "off", "production id keeps the existing behaviour whatever the env says"); });
     on.forEach((p) => { assert.strictEqual(stateFor(p, {}), "enforce"); assert.strictEqual(stateFor(p, EMU), "enforce", "emulator variables never switch a test-project id off"); }); deny.forEach((p) => { assert.strictEqual(stateFor(p, {}), "deny", JSON.stringify(p)); assert.strictEqual(stateFor(p, EMU), "deny", "unknown id stays deny even with emulator evidence: " + JSON.stringify(p)); });
     assert.strictEqual(runtimeProjectId({ GCLOUD_PROJECT: TEST_PID }), TEST_PID);
@@ -314,6 +314,33 @@ describe("CHAT-LIVE-01 gate: allow-list, ID token, atomic AI-call cap (emulators
   });
 
   // ── production behaviour unchanged ──────────────────────────────────────
+  it("GT20 the LISTING test project is gated exactly like the chat test project (same allow-list, ID token, atomic cap): enforce; no allow-list / no token / no config => refused; cap enforced; production and unrelated ids unchanged", async () => {
+    const LISTING_PID = "huahin-listing-test-sim";
+    setPid(LISTING_PID);
+    assert.strictEqual(gate.state(), "enforce");
+    const u = await mkToken(); iso.setScript([rx(FEM), T(FEM), T(FEM), T(FEM)]);
+    // absent allow-list entry => every gated callable refuses, no model call, nothing written
+    assert.deepStrictEqual([await code(turn(u.uid)), await code(callable("getPropertyDraft", u.uid)), await code(callable("updatePropertyDraft", u.uid, { fields: { area: "x" } })), await code(callable("createCaseFromConversation", u.uid, { confirmed: true }))], Array(4).fill("permission-denied"));
+    assert.strictEqual(await code(turn(null)), "unauthenticated");
+    assert.strictEqual((await chat(u.idToken)).status, 403, "HTTP: valid token but not allow-listed");
+    assert.strictEqual((await chat(null)).status, 401, "HTTP: no Authorization header");
+    assert.strictEqual((await chat("garbled.token.value")).status, 401);
+    assert.strictEqual(iso.anthropicCalls.length, 0); assert.strictEqual(await dataDocs(), 0);
+    // allow-listed but NO cap configured => refused (absent configuration never means "unlimited")
+    await allow(u.uid);
+    assert.notStrictEqual(await code(turn(u.uid)), "OK", "no chatTestConfig/limits document");
+    assert.strictEqual(iso.anthropicCalls.length, 0);
+    // allow-listed + cap 2 => exactly 2 model calls are answered, the third is refused before the model; the HTTP route shares the counters
+    await limits(2, 2);
+    assert.strictEqual(await code(turn(u.uid)), "OK"); assert.strictEqual((await chat(u.idToken)).status, 200);
+    assert.strictEqual(await code(turn(u.uid)), "resource-exhausted"); assert.strictEqual((await chat(u.idToken)).status, 429);
+    assert.strictEqual(iso.anthropicCalls.length, 2, "the cap is enforced on the listing project as well");
+    assert.strictEqual(await used("chatTestQuota/global"), 2);
+    // a DIFFERENT, unrelated test-looking id is still refused, and production keeps its existing behaviour
+    for (const pid of ["huahin-listing-tests-abc", "huahin-other-test-abc"]) { setPid(pid); assert.strictEqual(gate.state(), "deny", pid); assert.strictEqual(await code(turn(u.uid)), "permission-denied", pid); }
+    setPid(PROD_PID); assert.strictEqual(gate.state(), "off");
+  });
+
   it("GT16 production branch (DI): no allow-list/quota/config read or write at all, no Authorization header needed, behaviour as before", async () => {
     setPid(PROD_PID); const names = []; const f = db(); const orig = f.collection.bind(f);
     f.collection = (n) => { names.push(n); return orig(n); };

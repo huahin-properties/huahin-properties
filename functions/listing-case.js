@@ -314,8 +314,12 @@ async function submitListingCase({ admin, HttpsError, request }) {
     return { created: !completing, completedChatCase: completing, alreadyExisted: false, propertyId: caseId, trackToken: completing ? existingToken : trackToken, photoCount: photoDocs.length };
   } catch (e) {
     // anything that failed BEFORE the commit leaves no file behind; after a commit nothing here runs
-    const stillMine = await intRef.get().then((s) => s.exists && (s.data() || {}).submissionKey === v.key && (s.data() || {}).submittedByUid === actor.uid).catch(() => false);
-    if (!stillMine) await abandon();
+    const won = await intRef.get().then((s) => (s.exists ? s.data() || {} : null)).catch(() => null);
+    const sameSubmission = !!won && won.submissionKey === v.key && won.submittedByUid === actor.uid;
+    // A sibling attempt of the SAME submission may have committed while this one failed (e.g. transaction contention): its record is the answer, this attempt's files go.
+    const mineCommitted = await db.collection("casePhotos").where("propertyId", "==", caseId).get().then((q) => q.docs.some((d) => (d.data() || {}).attempt === attempt)).catch(() => false);
+    if (!mineCommitted) await abandon(); // only when this attempt's own files are not the ones the record points at
+    if (sameSubmission && !(e instanceof HttpsError && e.code === "invalid-argument")) return okResult(caseId, won);
     if (e instanceof HttpsError) throw e;
     console.error("submitListingCase failed", caseId, (e && e.message) || String(e));
     throw new HttpsError("internal", "ไม่สามารถบันทึกเคสได้ กรุณาลองอีกครั้ง");
@@ -414,8 +418,17 @@ async function previewListingCase({ admin, HttpsError, request }) {
   if (!wouldRefuse && problems.length) wouldRefuse = "public_text_has_contact_info";
   if (!wouldRefuse && rec.listingStatus !== "live" && photos.length < std.min) wouldRefuse = "photos_below_minimum";
   const live = rec.listingStatus === "live" ? ((await db.collection("properties").doc(id).get()).data() || null) : null;
+  // The photo set shown must be the set that ACTUALLY is / becomes public. Before the first publish that is every private photo. For a listing that is already
+  // live, a later update keeps the PUBLISHED photos (new private photos reach the public page only when the Owner takes it down and publishes it again), so the
+  // preview shows the published ones and says how many newer private photos are NOT included.
+  let photoSource = "private", photoPaths = photos.map((p) => p.storagePath), photoUrls = [], unpublishedPhotoCount = 0, shownCount = photos.length;
+  if (live) {
+    const pub = (await db.collection("propertyPhotos").where("propertyId", "==", id).get()).docs.map((d) => d.data()).sort((a, b) => (a.index || 0) - (b.index || 0));
+    photoSource = "published"; photoPaths = []; photoUrls = pub.map((p) => p.dataUrl); shownCount = pub.length; unpublishedPhotoCount = Math.max(0, photos.length - pub.length);
+  }
   return {
-    propertyId: id, listingStatus: rec.listingStatus || null, publicDocument: doc, photoCount: photos.length, photoIndexes: photos.map((p) => p.index), photoPaths: photos.map((p) => p.storagePath), photoStandard: std,
+    propertyId: id, listingStatus: rec.listingStatus || null, publicDocument: doc, photoSource, photoCount: shownCount, privatePhotoCount: photos.length, unpublishedPhotoCount,
+    photoIndexes: photos.map((p) => p.index), photoPaths, photoUrls, photoStandard: std,
     problems, wouldRefuse, publishSig: publishSig(rec, photos), updateSig: projectionSig(rec), currentPublicDocument: live ? projectPublic(live) : null, publicUpdatePending: !!rec.publicUpdatePending,
   };
 }
