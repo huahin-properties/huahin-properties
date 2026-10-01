@@ -1,0 +1,106 @@
+// LISTING-E2E-01 — the TEST-only hosting build (tools/build-listing-test.js). No credentials, no network, no deploy.
+"use strict";
+const assert = require("assert");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+const crypto = require("crypto");
+const { spawnSync } = require("child_process");
+const { build, closure, FORBIDDEN, MARKER } = require("../../tools/build-listing-test");
+
+const ROOT = path.join(__dirname, "..", "..");
+const CFG = { projectId: "huahin-listing-test-abc", apiKey: "SYNTHETIC-KEY", appId: "1:123:web:synthetic", messagingSenderId: "123", authDomain: "huahin-listing-test-abc.firebaseapp.com", storageBucket: "huahin-listing-test-abc.appspot.com", region: "asia-southeast1" };
+const sha = (f) => crypto.createHash("sha256").update(fs.readFileSync(path.join(ROOT, f))).digest("hex");
+let n = 0;
+const out = () => path.join(ROOT, "build", "hosting-test-" + process.pid + "-" + (++n));
+const refuses = (cfg, re, dir) => assert.throws(() => build(cfg, dir || out()), re);
+
+describe("LISTING-E2E-01 TEST-only hosting build (no network, nothing deployed)", function () {
+  this.timeout(60000);
+  const made = [];
+  after(() => { for (const d of made) fs.rmSync(d, { recursive: true, force: true }); });
+
+  it("H1 builds the form, tracking, admin login, Staff, Approvals and public pages with every import they need, for the TEST project only", () => {
+    const files = closure(ROOT);
+    for (const must of ["Owner Submission.dc.html", "Track Submission.dc.html", "Admin Login.dc.html", "Listing Approvals.dc.html", "Staff Workspace.dc.html", "Property Details.dc.html", "Search Results.dc.html", "Lister Dashboard.dc.html", "index.html",
+      "owner-form-flow.js", "photo-standard.js", "case-fields.js", "intake-workflow.js", "firebase-client.js", "data.js", "support.js", "ContactRail.dc.html", "PropertyCard.dc.html", "LanguageSwitcher.dc.html"]) assert.ok(files.includes(must), "closure lacks " + must);
+    const before = Object.fromEntries(files.map((f) => [f, sha(f)]));
+    const d = out(); made.push(d);
+    const m = build(CFG, d);
+    for (const f of files) assert.ok(fs.existsSync(path.join(d, f)), "missing in output: " + f);
+    for (const f of ["listing-test-config.js", "listing-test-guard.js", "firebase.json", "MANIFEST.json", MARKER]) assert.ok(fs.existsSync(path.join(d, f)), f);
+    assert.strictEqual(Object.keys(m).length, files.length + 3);
+    for (const f of files) assert.strictEqual(sha(f), before[f], "the build edited a production source file: " + f);
+    // every local file a built page or script refers to exists in the output (no 404 on a test site)
+    for (const f of fs.readdirSync(d).filter((x) => /\.(html|js)$/.test(x))) {
+      const t = fs.readFileSync(path.join(d, f), "utf8");
+      for (const r of t.matchAll(/(?:from\s+|import\s*\(\s*|src=)["']\.\/([A-Za-z0-9_.\- %]+\.(?:js|png))["']/g)) assert.ok(fs.existsSync(path.join(d, decodeURIComponent(r[1]))), f + " refers to missing " + r[1]);
+      for (const r of t.matchAll(/<dc-import\s+name="([^"]+)"/g)) assert.ok(fs.existsSync(path.join(d, r[1] + ".dc.html")), f + " imports missing " + r[1]);
+    }
+  });
+
+  it("H2 no production project, host, contact channel or default credential is left in ANY output file; no page loads support.js before the guard; every page is noindex", () => {
+    const d = out(); made.push(d); build(CFG, d);
+    for (const f of fs.readdirSync(d)) {
+      if (/\.(png|jpg|webp)$/.test(f) || f === "listing-test-guard.js") continue;
+      const t = fs.readFileSync(path.join(d, f), "utf8");
+      for (const re of FORBIDDEN) assert.ok(!re.test(t), f + " matches " + re);
+      assert.ok(!/huahin-properties-5f1b5|5f1b5|claudecomplete-3j4ldf4pja/i.test(t), f);
+      if (f.endsWith(".html")) {
+        assert.ok(/name="robots" content="noindex,nofollow"/.test(t), f + " noindex");
+        assert.ok(t.indexOf("listing-test-guard.js") < t.indexOf("firebase-app-compat") || t.indexOf("firebase-app-compat") === -1, f + ": guard first");
+        assert.ok(!/<script src="\.\/support\.js">/.test(t), f + ": support.js loaded directly");
+        assert.ok(t.includes('<template id="chat-live-app">') && t.includes("__chatLiveStart"), f + ": inert until the guard passes");
+        assert.ok(!/<link rel="canonical"|<script type="application\/ld\+json">|<meta name="google-site-verification"/.test(t), f + ": static SEO tags removed (pages that add them at run time only point at the .invalid host and stay noindex)");
+      }
+    }
+    const fc = fs.readFileSync(path.join(d, "firebase-client.js"), "utf8");
+    assert.ok(fc.includes('"projectId": "huahin-listing-test-abc"') && fc.includes("asia-southeast1-huahin-listing-test-abc.cloudfunctions.net"));
+    assert.ok(/DEFAULT_ADMIN_CREDENTIALS = \{ username: "SYNTHETIC", password: "SYNTHETIC-DISABLED"/.test(fc), "default admin credentials replaced");
+    assert.ok(/DEFAULT_FB_FOOTER = `TEST SITE/.test(fc));
+    const hosting = JSON.parse(fs.readFileSync(path.join(d, "firebase.json"), "utf8")).hosting;
+    assert.strictEqual(hosting.public, "."); assert.ok(JSON.stringify(hosting.headers).includes("noindex"));
+    assert.ok(!hosting.rewrites, "no rewrites to production functions");
+    const cfg = fs.readFileSync(path.join(d, "listing-test-config.js"), "utf8"); assert.ok(cfg.includes("huahin-listing-test-abc.web.app"));
+  });
+
+  it("H3 every built script parses (a scrub or patch cannot leave a syntax error behind)", () => {
+    const d = out(); made.push(d); build(CFG, d);
+    for (const f of fs.readdirSync(d).filter((x) => x.endsWith(".js"))) {
+      const tmp = path.join(os.tmpdir(), "h3-" + process.pid + "-" + f.replace(/[^a-z0-9.]/gi, "_") + ".mjs"); fs.copyFileSync(path.join(d, f), tmp);
+      const r = spawnSync(process.execPath, ["--check", tmp], { encoding: "utf8" }); fs.rmSync(tmp, { force: true });
+      assert.strictEqual(r.status, 0, f + ": " + r.stderr.slice(0, 200));
+    }
+    for (const f of fs.readdirSync(d).filter((x) => x.endsWith(".dc.html"))) {
+      const t = fs.readFileSync(path.join(d, f), "utf8"); const m = t.match(/<script type="text\/x-dc" data-dc-script>([\s\S]*?)<\/script>/);
+      if (!m) continue;
+      const tmp = path.join(os.tmpdir(), "h3-" + process.pid + "-" + f.replace(/[^a-z0-9.]/gi, "_") + ".mjs"); fs.writeFileSync(tmp, "class DCLogic{}\n" + m[1]);
+      const r = spawnSync(process.execPath, ["--check", tmp], { encoding: "utf8" }); fs.rmSync(tmp, { force: true });
+      assert.strictEqual(r.status, 0, f + ": " + r.stderr.slice(0, 200));
+    }
+  });
+
+  it("H4 refuses (and writes nothing) for a production project id, a wrong prefix, placeholders, mismatched domain/bucket/region and production values hidden in the config", () => {
+    const bad = [[{ projectId: "huahin-properties-5f1b5" }, /production/], [{ projectId: "my-real-project" }, /huahin-listing-test-/], [{ projectId: "huahin-chat-test-abc" }, /huahin-listing-test-/],
+      [{ apiKey: "REPLACE_ME" }, /placeholder/], [{ appId: "" }, /missing/], [{ authDomain: "auth.huahin.properties" }, /production/], [{ authDomain: "other.firebaseapp.com" }, /authDomain/],
+      [{ storageBucket: "other.appspot.com" }, /storageBucket/], [{ region: "us-central1" }, /region/], [{ messagingSenderId: "claudecomplete-3j4ldf4pja" }, /production/], [{ projectId: "huahin-listing-test-" + "x".repeat(20) }, /max 30/]];
+    for (const [patch, re] of bad) { const d = out(); refuses(Object.assign({}, CFG, patch), re, d); assert.ok(!fs.existsSync(d), "wrote something for " + JSON.stringify(patch)); }
+    assert.throws(() => build(null, out()), /not an object/);
+  });
+
+  it("H5 output-folder safety: only inside ./build, never the repo or a source folder, never a non-empty folder this build did not create", () => {
+    refuses(CFG, /designated output area/, path.join(os.tmpdir(), "listing-x"));
+    refuses(CFG, /root|designated|source/, ROOT);
+    refuses(CFG, /designated output area/, path.join(ROOT, "tools", "x"));
+    const d = out(); made.push(d); fs.mkdirSync(d, { recursive: true }); fs.writeFileSync(path.join(d, "keep-me.txt"), "x");
+    refuses(CFG, /not empty and was not created by this build/, d);
+    assert.ok(fs.existsSync(path.join(d, "keep-me.txt")), "an unrelated folder is never deleted");
+  });
+
+  it("H6 negative control: if a patch target disappears from the source, the build refuses instead of half-patching", () => {
+    const tmp = fs.mkdtempSync(path.join(ROOT, "build", "src-copy-")); made.push(tmp);
+    for (const f of closure(ROOT)) { fs.mkdirSync(path.dirname(path.join(tmp, f)), { recursive: true }); fs.copyFileSync(path.join(ROOT, f), path.join(tmp, f)); }
+    fs.writeFileSync(path.join(tmp, "firebase-client.js"), fs.readFileSync(path.join(tmp, "firebase-client.js"), "utf8").replace("const DEFAULT_ADMIN_CREDENTIALS", "const RENAMED_CREDENTIALS"));
+    assert.throws(() => build(CFG, path.join(tmp, "build", "o"), tmp, { outputBases: [path.join(tmp, "build")] }), /DEFAULT_ADMIN_CREDENTIALS not found/);
+  });
+});
