@@ -17,7 +17,7 @@ const path = require("path");
 const assert = require("assert");
 const { initializeTestEnvironment } = require("@firebase/rules-unit-testing");
 const { PROJECT_ID, assertEmulatorOnly, attempt, record, printSummary } = require("../helpers/synthetic");
-const { install, FAKE_KEY } = require("./stub-anthropic");
+const { install, FAKE_KEY, snapshot, diffSnapshots, TOUCHED_ENV } = require("./stub-anthropic");
 
 assertEmulatorOnly();
 
@@ -34,7 +34,7 @@ const NAME = "Synthetic Seller";
 const draftId = (uid) => "draft__" + uid;
 const convId = (uid) => "reception__" + uid;
 
-let iso, origFetch, admin, fns, testEnv, loadError = null;
+let iso, snapBefore, admin, fns, testEnv, loadError = null;
 const results = {}; // small scratch for cross-test notes
 
 // ── scripted "model" outputs (tool input of reception_reply) ────────────────
@@ -74,12 +74,53 @@ function needFns() {
 }
 const rec = (id, title, label, note) => record({ id, title, label, note });
 
+
+// ── isolation self-test: install()/restore() put EVERYTHING back, including env vars that did not exist ──
+describe("CHAT-TEST-01 isolation self-test (install/restore round trip)", function () {
+  const probe = {
+    ANTHROPIC_API_KEY: "ORIGINAL-SYNTHETIC-KEY",        // present before -> must come back with this value
+    GCE_METADATA_HOST: "original-synthetic-host:1",     // present before -> must come back
+    GOOGLE_APPLICATION_CREDENTIALS: "/synthetic/original.json", // present before -> must come back
+    // METADATA_SERVER_DETECTION is deliberately ABSENT before -> must be absent again afterwards
+  };
+  const saved = {};
+  before(() => {
+    for (const k of TOUCHED_ENV) saved[k] = Object.prototype.hasOwnProperty.call(process.env, k) ? { v: process.env[k] } : null;
+    for (const k of TOUCHED_ENV) delete process.env[k];
+    for (const [k, v] of Object.entries(probe)) process.env[k] = v;
+  });
+  after(() => {
+    for (const k of TOUCHED_ENV) { delete process.env[k]; if (saved[k]) process.env[k] = saved[k].v; }
+  });
+  it("restores fetch, http/https request+get and env (present value, changed value, and previously-absent variable)", () => {
+    const before = snapshot();
+    assert.strictEqual(before.env.METADATA_SERVER_DETECTION.present, false, "precondition: variable absent before");
+    const stub = install();
+    const during = snapshot();
+    assert.notStrictEqual(during.fetch, before.fetch);
+    assert.notStrictEqual(during.httpRequest, before.httpRequest);
+    assert.notStrictEqual(during.httpsGet, before.httpsGet);
+    assert.strictEqual(process.env.ANTHROPIC_API_KEY, FAKE_KEY);
+    assert.strictEqual(during.env.METADATA_SERVER_DETECTION.present, true);
+    assert.strictEqual(during.env.GOOGLE_APPLICATION_CREDENTIALS.present, false);
+    stub.restore();
+    assert.deepStrictEqual(diffSnapshots(before, snapshot()), []);
+    assert.strictEqual(process.env.ANTHROPIC_API_KEY, probe.ANTHROPIC_API_KEY);
+    assert.strictEqual(process.env.GCE_METADATA_HOST, probe.GCE_METADATA_HOST);
+    assert.strictEqual(process.env.GOOGLE_APPLICATION_CREDENTIALS, probe.GOOGLE_APPLICATION_CREDENTIALS);
+    assert.strictEqual(Object.prototype.hasOwnProperty.call(process.env, "METADATA_SERVER_DETECTION"), false, "a variable that did not exist before must not exist after");
+    rec("C8e", "isolation self-test: install→restore returns fetch, http/https and env (incl. a variable that did not exist) to the pre-install state", "CONTROL", "round trip identical");
+  });
+});
+
 describe("CHAT-TEST-01: chat + draft path (synthetic, emulator, stubbed model)", function () {
   this.timeout(60000);
 
   before(async () => {
-    origFetch = global.fetch;
-    iso = install(); // closes external services BEFORE anything else loads
+    snapBefore = snapshot();          // state BEFORE the stub is installed (fetch, http/https, every env var + presence)
+    iso = install();                  // closes external services BEFORE anything else loads
+    const during = diffSnapshots(snapBefore, snapshot());
+    assert.ok(during.length >= 5, "sanity: installing the stub must change the process (checker would be vacuous otherwise): " + JSON.stringify(during));
     testEnv = await initializeTestEnvironment({ projectId: PROJECT_ID, firestore: { rules: RULES } });
     try {
       admin = require(require.resolve("firebase-admin", { paths: [FUNCTIONS_DIR] }));
@@ -97,11 +138,14 @@ describe("CHAT-TEST-01: chat + draft path (synthetic, emulator, stubbed model)",
   after(async () => {
     const blockedAtEnd = iso.blocked.slice();
     iso.restore();
-    const restored = iso.isRestoredTo(origFetch);
-    rec("C8c", "after the run global.fetch / http(s) / env are restored", restored ? "CONTROL" : "CONTROL-FAILED", restored ? "restored" : "NOT restored");
+    // Compare EVERYTHING install() touched against the state captured before it: fetch, http.request/get,
+    // https.request/get and each environment variable (present/absent AND value).
+    const diffs = diffSnapshots(snapBefore, snapshot());
+    const restored = iso.isRestored() && diffs.length === 0;
+    rec("C8c", "after the run fetch, http/https request+get and every touched env var equal their pre-install state", restored ? "CONTROL" : "CONTROL-FAILED", restored ? "identical to pre-install snapshot (" + TOUCHED_ENV.join(", ") + ")" : "differences: " + JSON.stringify(diffs));
     printSummary();
     await testEnv.cleanup();
-    assert.ok(restored, "isolation was not restored");
+    assert.ok(restored, "isolation was not restored: " + JSON.stringify(diffs));
     assert.strictEqual(blockedAtEnd.length, 0, "outbound calls were attempted: " + JSON.stringify(blockedAtEnd));
   });
 
@@ -175,6 +219,65 @@ describe("CHAT-TEST-01: chat + draft path (synthetic, emulator, stubbed model)",
     };
     const bad = Object.entries(checks).filter(([, v]) => !v).map(([k]) => k);
     rec("C3", "same-uid continuity on the SERVER: accumulate, never erase, never downgrade (not a browser-refresh test)", bad.length ? "CONTROL-FAILED" : "CONTROL", bad.length ? "failed: " + bad.join("; ") : "all " + Object.keys(checks).length + " checks");
+    assert.deepStrictEqual(bad, []);
+  });
+
+  it("C3b name/contact already stored, then the model returns EMPTY values => stored data stays (empty never overwrites)", async () => {
+    needFns();
+    const db = admin.firestore();
+    // turn 3 = qualified + name + contact (stored). turn 4 = qualified again but the "model" returns empty name/contact/basics/fields.
+    iso.setScript([casual, sellAdvisory, withContact,
+      { reply: "รับทราบค่ะ", stage: "qualified", primaryIntent: "SELL", customerName: "", contact: "", requirementsSummary: "", propertyBasics: { kind: "", area: "", scale: "" }, propertyFields: {}, statedFields: [], mentionedFields: [] }]);
+    await turn(UID_A, "สวัสดี");
+    await turn(UID_A, "อยากขายบ้านที่หัวหิน 3 ห้องนอน");
+    await turn(UID_A, "ชื่อ Synthetic Seller เบอร์ " + CONTACT);
+    const stored = (await db.doc("conversations/" + convId(UID_A)).get()).data();
+    assert.strictEqual(stored.customerName, NAME, "precondition: name was stored");
+    assert.strictEqual(stored.contact, CONTACT, "precondition: contact was stored");
+    const draftBefore = (await db.doc("propertyDrafts/" + draftId(UID_A)).get()).data().fields;
+    await turn(UID_A, "ครับ/ค่ะ ขอบคุณ");
+    const after = (await db.doc("conversations/" + convId(UID_A)).get()).data();
+    const draftAfter = (await db.doc("propertyDrafts/" + draftId(UID_A)).get()).data().fields;
+    const checks = {
+      "customerName kept": after.customerName === NAME,
+      "contact kept": after.contact === CONTACT,
+      "requirementsSummary kept (not blanked)": after.requirementsSummary === stored.requirementsSummary && after.requirementsSummary !== "",
+      "propertyBasics kept": JSON.stringify(after.propertyBasics) === JSON.stringify(stored.propertyBasics),
+      "draft fields kept": JSON.stringify(Object.keys(draftAfter).sort()) === JSON.stringify(Object.keys(draftBefore).sort()) && draftAfter.bedrooms.value === 3 && draftAfter.area.value === "หัวหิน",
+      "intent kept (SELL)": after.primaryIntent === "SELL",
+    };
+    const bad = Object.entries(checks).filter(([, v]) => !v).map(([k]) => k);
+    rec("C3b", "name+contact stored, then empty model values => stored data NOT overwritten (name, contact, summary, basics, draft)", bad.length ? "CONTROL-FAILED" : "CONTROL", bad.length ? "failed: " + bad.join("; ") : "before: name=" + stored.customerName + " contact=" + stored.contact + " · after the empty turn: unchanged");
+    assert.deepStrictEqual(bad, []);
+  });
+
+  it("C3c stage never regresses: qualified then 'general' stays qualified; advisory then 'general' stays advisory", async () => {
+    needFns();
+    const db = admin.firestore();
+    // qualified -> general
+    iso.setScript([casual, sellAdvisory, qualifiedOtherEmpty, { reply: "ได้ค่ะ", stage: "general", primaryIntent: "OTHER" }]);
+    await turn(UID_A, "สวัสดี");
+    await turn(UID_A, "อยากขายบ้านที่หัวหิน 3 ห้องนอน");
+    await turn(UID_A, "ราคาประมาณ 5 ล้าน");
+    const q1 = (await db.doc("conversations/" + convId(UID_A)).get()).data();
+    await turn(UID_A, "ถามเรื่องทั่วไปค่ะ");
+    const q2 = (await db.doc("conversations/" + convId(UID_A)).get()).data();
+    // advisory -> general (other uid)
+    iso.setScript([casual, sellAdvisory, { reply: "ได้ค่ะ", stage: "general", primaryIntent: "OTHER" }]);
+    await turn(UID_B, "สวัสดี");
+    await turn(UID_B, "อยากขายบ้านที่หัวหิน 3 ห้องนอน");
+    const a1 = (await db.doc("conversations/" + convId(UID_B)).get()).data();
+    await turn(UID_B, "ถามเรื่องทั่วไปค่ะ");
+    const a2 = (await db.doc("conversations/" + convId(UID_B)).get()).data();
+    const checks = {
+      "precondition: stage was qualified": q1.conversationStage === "qualified",
+      "qualified -> general: stays qualified": q2.conversationStage === "qualified",
+      "qualified -> general: intent SELL kept": q2.primaryIntent === "SELL",
+      "precondition: stage was advisory": a1.conversationStage === "advisory",
+      "advisory -> general: stays advisory": a2.conversationStage === "advisory",
+    };
+    const bad = Object.entries(checks).filter(([, v]) => !v).map(([k]) => k);
+    rec("C3c", "stage does not go backwards when the next model reply proposes 'general' (qualified stays qualified; advisory stays advisory)", bad.length ? "CONTROL-FAILED" : "CONTROL", bad.length ? "failed: " + bad.join("; ") : "qualified→general: " + q1.conversationStage + "→" + q2.conversationStage + " · advisory→general: " + a1.conversationStage + "→" + a2.conversationStage);
     assert.deepStrictEqual(bad, []);
   });
 

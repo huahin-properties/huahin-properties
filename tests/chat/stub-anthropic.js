@@ -30,7 +30,7 @@ function hostOfRequestArgs(args) {
 }
 
 function install() {
-  const ENV_KEYS = ["ANTHROPIC_API_KEY", "METADATA_SERVER_DETECTION", "GCE_METADATA_HOST", "GOOGLE_APPLICATION_CREDENTIALS"];
+  const ENV_KEYS = TOUCHED_ENV;
   const savedEnv = {};
   for (const k of ENV_KEYS) savedEnv[k] = Object.prototype.hasOwnProperty.call(process.env, k) ? process.env[k] : undefined;
   const saved = {
@@ -99,11 +99,37 @@ function install() {
     setScript(entries) { state.script.length = 0; state.script.push(...entries); },
     scriptRemaining() { return state.script.length; },
     resetCalls() { state.anthropicCalls.length = 0; },
-    // Verification helper used by the test's `after`: proves the process is back to its original state.
-    isRestoredTo(origFetch) { return state.restored && global.fetch === origFetch; },
+    isRestored() { return state.restored; },
     restore,
     originals: saved,
   };
+}
+
+// ── restore verification ──────────────────────────────────────────────────────
+// Everything install() touches: global.fetch, http.request/get, https.request/get and EVERY environment
+// variable it sets or deletes — including whether a variable existed at all (absent !== empty string).
+const TOUCHED_ENV = ["ANTHROPIC_API_KEY", "METADATA_SERVER_DETECTION", "GCE_METADATA_HOST", "GOOGLE_APPLICATION_CREDENTIALS"];
+
+function snapshot() {
+  const env = {};
+  for (const k of TOUCHED_ENV) env[k] = { present: Object.prototype.hasOwnProperty.call(process.env, k), value: process.env[k] };
+  return {
+    fetch: global.fetch,
+    httpRequest: http.request, httpGet: http.get, httpsRequest: https.request, httpsGet: https.get,
+    env,
+  };
+}
+
+// Returns a list of human-readable differences (empty list = identical).
+function diffSnapshots(a, b) {
+  const d = [];
+  for (const k of ["fetch", "httpRequest", "httpGet", "httpsRequest", "httpsGet"]) if (a[k] !== b[k]) d.push(k + " differs");
+  for (const k of TOUCHED_ENV) {
+    const x = a.env[k], y = b.env[k];
+    if (x.present !== y.present) d.push("env " + k + ": present " + x.present + " -> " + y.present);
+    else if (x.present && x.value !== y.value) d.push("env " + k + ": value changed");
+  }
+  return d;
 }
 
 function lastUserText(messages) {
@@ -112,4 +138,4 @@ function lastUserText(messages) {
   return typeof c === "string" ? c.slice(0, 80) : "";
 }
 
-module.exports = { install, FAKE_KEY };
+module.exports = { install, FAKE_KEY, snapshot, diffSnapshots, TOUCHED_ENV };
