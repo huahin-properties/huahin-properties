@@ -3,7 +3,9 @@
 // Which behaviour applies is decided from the project id the platform gives the
 // running Function (environment set by the runtime, never from a request):
 //   huahin-properties-5f1b5          -> "off"     : production keeps its existing behaviour; this module reads nothing
-//   demo-*  (Firebase emulator only) -> "off"     : the emulator namespace cannot exist in Google Cloud; keeps the existing test suites unchanged
+//   demo-*  AND runtime evidence of a local emulator -> "off" : FIRESTORE_EMULATOR_HOST is set and loopback, and every other emulator
+//            endpoint variable that is set is loopback too. The name alone never switches the gate off: demo-* without that evidence,
+//            or with any external endpoint, is "deny".
 //   huahin-chat-test-<suffix>        -> "enforce" : allow-listed anonymous UID + (HTTP) verified ID token + atomic AI-call cap
 //   anything else, or ids that disagree, or none -> "deny": every gated handler refuses (an unknown project is NEVER treated as production)
 "use strict";
@@ -23,10 +25,20 @@ function runtimeProjectId(env) {
   return found[0];
 }
 
-function stateFor(projectId) {
+const LOOPBACK_RE = /^(127(\.\d{1,3}){3}|localhost|\[::1\])(:\d{1,5})?$/;
+const EMULATOR_HOST_VARS = ["FIRESTORE_EMULATOR_HOST", "FIREBASE_AUTH_EMULATOR_HOST", "FIREBASE_STORAGE_EMULATOR_HOST", "FIREBASE_DATABASE_EMULATOR_HOST", "PUBSUB_EMULATOR_HOST"];
+// Runtime proof that this process talks to a LOCAL emulator: the Firestore emulator flag must be present, and every emulator endpoint that is set must be loopback.
+function emulatorEvidence(env) {
+  env = env || process.env;
+  const fs = env.FIRESTORE_EMULATOR_HOST;
+  if (typeof fs !== "string" || !LOOPBACK_RE.test(fs)) return false;
+  return EMULATOR_HOST_VARS.every((k) => env[k] === undefined || (typeof env[k] === "string" && LOOPBACK_RE.test(env[k])));
+}
+
+function stateFor(projectId, env) {
   if (typeof projectId !== "string") return "deny";
   if (projectId === PRODUCTION_PROJECT) return "off";
-  if (EMULATOR_RE.test(projectId)) return "off";
+  if (EMULATOR_RE.test(projectId)) return emulatorEvidence(env) ? "off" : "deny";
   if (projectId.length <= 30 && TEST_RE.test(projectId)) return "enforce";
   return "deny";
 }
@@ -35,7 +47,8 @@ const isCap = (v) => typeof v === "number" && Number.isSafeInteger(v) && v >= 1 
 const isUsed = (v) => typeof v === "number" && Number.isSafeInteger(v) && v >= 0;
 
 function createGate({ admin, HttpsError, getProjectId }) {
-  let provider = getProjectId || (() => runtimeProjectId());
+  const initialProvider = getProjectId || (() => runtimeProjectId());
+  let provider = initialProvider;
   const db = () => admin.firestore();
   const authApi = () => admin.auth();
   const state = () => stateFor(provider());
@@ -106,7 +119,9 @@ function createGate({ admin, HttpsError, getProjectId }) {
   }
 
   return { state, enforceCallable, enforceHttp, reserve, reserveHook, reserveHttp,
-    __testOnly: { setProjectIdProvider(fn) { provider = fn || (() => runtimeProjectId()); } } };
+    // Test-only (not a Cloud Function export): swap the project-id provider, and put the ORIGINAL runtime provider back.
+    __testOnly: { setProjectIdProvider(fn) { if (typeof fn !== "function") throw new Error("provider must be a function; use reset() to restore the runtime provider"); provider = fn; },
+      reset() { provider = initialProvider; }, isRuntimeProvider() { return provider === initialProvider; } } };
 }
 
 // One shared instance per process: functions/index.js creates it at load; the gate tests fetch the SAME
@@ -114,4 +129,4 @@ function createGate({ admin, HttpsError, getProjectId }) {
 let shared = null;
 function sharedGate(deps) { if (!shared) shared = createGate(deps || {}); return shared; }
 
-module.exports = { createGate, sharedGate, runtimeProjectId, stateFor, PRODUCTION_PROJECT, MAX_CAP };
+module.exports = { createGate, sharedGate, runtimeProjectId, stateFor, emulatorEvidence, PRODUCTION_PROJECT, MAX_CAP };

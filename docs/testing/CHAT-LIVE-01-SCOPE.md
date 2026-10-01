@@ -1,8 +1,8 @@
-# CHAT-LIVE-01 — ขอบเขตหน้าทดสอบแชทจริง (แยกจาก production) — v3
+# CHAT-LIVE-01 — ขอบเขตหน้าทดสอบแชทจริง (แยกจาก production) — v4
 
 
 ฐาน: `8c549c6` (PR #5 ผ่านการตรวจโค้ดของ Work; ผลรันที่ `afa0d8b` เป็นผลของ Code ไม่ใช่ production PASS)
-v2 = ปรับตามคำตัดสิน 5 ข้อของ Work ที่ `916fe01` · v3 = ปรับตามรีวิว `8f51b5c` (ความปลอดภัยของโฟลเดอร์ผลลัพธ์, URL claudeComplete ผูกกับโปรเจกต์ทดสอบ, ลงมือทำ gate ตามขอบเขตหัวข้อ 4, แผนทดสอบ production-ไม่เปลี่ยนแบบ DI)
+v2 = ปรับตามคำตัดสิน 5 ข้อของ Work ที่ `916fe01` · v4 = ปิดข้อปรับสุดท้ายตามรีวิว `3d0f85e` (demo-* ปิด gate ได้เฉพาะเมื่อมีหลักฐาน emulator loopback; คืนค่า provider จริงหลังทดสอบ + ทดสอบร่วมในโปรเซสเดียว) · v3 = ปรับตามรีวิว `8f51b5c` (ความปลอดภัยของโฟลเดอร์ผลลัพธ์, URL claudeComplete ผูกกับโปรเจกต์ทดสอบ, ลงมือทำ gate ตามขอบเขตหัวข้อ 4, แผนทดสอบ production-ไม่เปลี่ยนแบบ DI)
 
 เป้าหมายแรก: ContactRail + `receptionTurn` (+ `createCaseFromConversation`, `getPropertyDraft`, `updatePropertyDraft`, `claudeComplete` ที่ ContactRail เรียก)
 
@@ -20,7 +20,7 @@ v2 = ปรับตามคำตัดสิน 5 ข้อของ Work ท
 |---|---|
 | `tools/build-chat-live.js` + `tools/chat-live/guard.js` + `tools/chat-live.config.example.json` | ทำแล้ว; v3: จำกัดโฟลเดอร์ผลลัพธ์, URL `claudeComplete` derive จาก project id |
 | `functions/chat-test-gate.js` (ใหม่) + 21 บรรทัดเพิ่มใน `functions/index.js` | **ทำแล้ว (v3)** — ทำงานเฉพาะ project id `huahin-chat-test-*`; production และ emulator `demo-*` = ปิด (พฤติกรรมเดิม); id ที่ไม่ทราบ = ปฏิเสธ |
-| `tests/chat-live/build.test.js` (21) + `browser-guard.test.js` (12) + `gate.test.js` (18) | ทำแล้ว ผลหัวข้อ 7 |
+| `tests/chat-live/build.test.js` (21) + `browser-guard.test.js` (12) + `gate.test.js` (21) | ทำแล้ว ผลหัวข้อ 7 |
 | `npm run test:chat-live`, `npm run test:chat-live-gate` | ทำแล้ว (เพิ่ม 2 script; ไม่เพิ่ม dependency; lockfile ไม่เปลี่ยน) |
 | สร้างโปรเจกต์/บริการ/credentials/deploy | **ไม่ทำ** |
 | คู่มือเจ้าของทีละขั้น | ร่างหัวข้อ 9 — เขียนละเอียดหลัง Work ตรวจ PR นี้ |
@@ -89,7 +89,9 @@ v2 = ปรับตามคำตัดสิน 5 ข้อของ Work ท
 - ตัดสินจาก **runtime ฝั่งเซิร์ฟเวอร์เท่านั้น** (`FIREBASE_CONFIG`, `GCLOUD_PROJECT`, `GOOGLE_CLOUD_PROJECT` — ทุกแหล่งที่มีต้องตรงกัน) ไม่รับ project id จาก request/header/claims (GT2)
 - `huahin-properties-5f1b5` → **ปิด** = พฤติกรรมเดิม ไม่อ่าน/เขียน `chatTest*` และไม่ต้องมี `Authorization` (GT16, spy)
 - `huahin-chat-test-<suffix>` → **บังคับ** · อื่นทั้งหมด (ไม่ทราบ ไม่ตรงกัน ไม่มี ไม่ถูกต้อง) → **ปฏิเสธ ไม่ตีความเป็น production** (GT1, GT3)
-- **จุดตัดสินใจให้ Work ดู:** id ขึ้นต้น `demo-` (เนมสเปซของ Firebase emulator ซึ่งไม่มีอยู่จริงบน Google Cloud) ถูกจัดเป็น "ปิด" เพื่อให้ชุดทดสอบเดิม (`test:chat` 55, `test:sec`) รันโดยไม่แก้สักไฟล์ ถ้า Work ไม่ต้องการ ให้เปลี่ยนเป็น "ปฏิเสธ" แล้วชุดเดิมต้องฉีด provider ทีละไฟล์
+- **demo-* (v4):** ชื่อ `demo-*` อย่างเดียว **ไม่ปิด gate** gate เป็น "ปิด" ก็ต่อเมื่อมีหลักฐานจาก runtime ว่าอยู่กับ emulator ในเครื่อง: `FIRESTORE_EMULATOR_HOST` ต้องมีและเป็น loopback (`127.x.x.x`, `localhost`, `[::1]`) และตัวแปร endpoint ของ emulator อื่นที่ตั้งไว้ (Auth, Storage, Database, Pub/Sub) ต้องเป็น loopback ทั้งหมด — ไม่มี flag, ค่าว่าง, host ภายนอก, host ที่ขึ้นต้นเหมือน loopback (`127.0.0.1.evil…`, `localhost.evil…`), `0.0.0.0` หรือ flag ของ Auth อย่างเดียว = **ปฏิเสธ** (GT1b, GT1c) ส่วนชุดทดสอบเดิม (`test:chat`, `test:sec`) ที่รันใต้ emulator จริงยังรันได้โดยไม่แก้ไฟล์
+- production ตรงตัว: ปิด (พฤติกรรมเดิม) โดยไม่ขึ้นกับตัวแปร emulator; id ที่ไม่ทราบ: ปฏิเสธเสมอ แม้มีหลักฐาน emulator (GT1)
+- **การคืนค่าหลังทดสอบ (v4):** `reset()` คืน provider ของ runtime เดิมจริง (ไม่ใช่ฟังก์ชันจำลองที่คืนค่า `undefined`); `setProjectIdProvider(undefined)` ถูกปฏิเสธ; `after` ของชุดยืนยันว่า provider เป็นของ runtime และ `state()` เท่ากับที่ runtime คำนวณเอง (GT19 เป็น negative control: ตัวคืนค่าแบบเก่าทำให้ state เป็น deny และ `isRuntimeProvider()` เป็น false); รันร่วมในโปรเซสเดียวด้วย `npm run test:chat-live-combined` (gate → chat → sec → `zz-gate-restored`) เพื่อพิสูจน์ว่าชุดอื่นไม่โดนสถานะค้าง
 
 ### 4.3 allow-list / token / เพดาน
 - 5 handler ใช้กฎเดียวกัน: `receptionTurn`, `getPropertyDraft`, `updatePropertyDraft`, `createCaseFromConversation` (callable) และ `claudeComplete` (HTTP: `Authorization: Bearer <ID token>` → `verifyIdToken` → uid → allow-list) ตรวจ **ก่อน** อ่านข้อมูลหรือเรียกโมเดล (GT4–GT6)
@@ -133,7 +135,8 @@ v2 = ปรับตามคำตัดสิน 5 ข้อของ Work ท
 | ชุด | ขอบเขต | ผล (รัน ณ commit ที่ระบุในรายงาน PR) |
 |---|---|---|
 | `npm run test:chat-live` | build (21: B1–B15 รวมแบบวนตามฟิลด์) + Chromium จริง (12: P1, P2a–h, P3, P4, P5) | ผ่าน 33 (ต้องมี `CHAT_LIVE_VENDOR`; ไม่มี = เบราว์เซอร์ pending) |
-| `npm run test:chat-live-gate` | Firestore + Auth emulator, stub Anthropic: GT1–GT18 | ผ่าน 18 |
+| `npm run test:chat-live-gate` | Firestore + Auth emulator, stub Anthropic: GT1–GT19 (รวม GT1b/GT1c, GT19) | ผ่าน 21 |
+| `npm run test:chat-live-combined` (โปรเซสเดียว: gate → chat → sec → zz-gate-restored) | ตรวจการคืนค่าและผลกระทบต่อชุดอื่น | ผ่าน 173 / pending 13 (= 21 + 55 + 95 + 2 ; 8 + 5) |
 | `npm run test:chat` (เดิม ไม่แก้) | CHAT-TEST-01/FIX-01/FIX-02 | ผ่าน 55 / pending 8 — เท่าเดิม |
 | `npm run test:sec` (เดิม ไม่แก้) | SEC-TEST-01 | ผ่าน 95 / pending 5 — เท่าเดิม |
 

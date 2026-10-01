@@ -75,10 +75,14 @@ describe("CHAT-LIVE-01 gate: allow-list, ID token, atomic AI-call cap (emulators
   beforeEach(async () => { await testEnv.clearFirestore(); iso.resetCalls(); iso.setScript([]); setPid(TEST_PID); });
   after(async () => {
     if (server) await new Promise((r) => server.close(r));
-    gate && setPid(undefined);
+    if (gate) gate.__testOnly.reset(); // put the ORIGINAL runtime provider back (not a stand-in that returns undefined)
     const blocked = iso.blocked.slice(); iso.restore();
     const diffs = diffSnapshots(snapBefore, snapshot());
     await testEnv.cleanup();
+    const gm = require(GATE_SRC);
+    assert.strictEqual(gate.__testOnly.isRuntimeProvider(), true, "the original runtime provider must be back");
+    assert.strictEqual(gate.state(), gm.stateFor(gm.runtimeProjectId(process.env), process.env), "gate state must equal what the runtime itself yields, not a simulated state left behind");
+    assert.strictEqual(gate.state(), "off", "under the local emulator + demo-* the runtime state is off");
     assert.strictEqual(diffs.length, 0, "isolation not restored: " + JSON.stringify(diffs));
     assert.strictEqual(blocked.length, 0, "outbound calls attempted: " + JSON.stringify(blocked));
   });
@@ -86,15 +90,53 @@ describe("CHAT-LIVE-01 gate: allow-list, ID token, atomic AI-call cap (emulators
   // ── state decision ──────────────────────────────────────────────────────
   it("GT1 project-id -> state table: production/demo = off; huahin-chat-test-* = enforce; everything else (incl. look-alikes, null) = deny", () => {
     const { stateFor, runtimeProjectId } = require(GATE_SRC);
-    const off = [PROD_PID, "demo-sec-test-01", "demo-x"], on = [TEST_PID, "huahin-chat-test-a1", "huahin-chat-test-a-b-c"];
+    const EMU = { FIRESTORE_EMULATOR_HOST: "127.0.0.1:8381", FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9199" };
+    const off = [PROD_PID], on = [TEST_PID, "huahin-chat-test-a1", "huahin-chat-test-a-b-c"];
     const deny = [null, undefined, "", "other-project", PROD_PID + "x", "x" + PROD_PID, "HUAHIN-PROPERTIES-5F1B5", "huahin-chat-test-", "huahin-chat-test", "huahin-chat-test-UPPER", "huahin-chat-test--a", "huahin-chat-test-" + "x".repeat(20), "demo-", "demo_x", "my-test-project", 42, {}];
-    off.forEach((p) => assert.strictEqual(stateFor(p), "off", String(p))); on.forEach((p) => assert.strictEqual(stateFor(p), "enforce", p)); deny.forEach((p) => assert.strictEqual(stateFor(p), "deny", JSON.stringify(p)));
+    off.forEach((p) => { assert.strictEqual(stateFor(p, {}), "off", "production, exact match, no emulator needed"); assert.strictEqual(stateFor(p, EMU), "off"); assert.strictEqual(stateFor(p, { FIRESTORE_EMULATOR_HOST: "firestore.googleapis.com:443" }), "off", "production id keeps the existing behaviour whatever the env says"); });
+    on.forEach((p) => { assert.strictEqual(stateFor(p, {}), "enforce"); assert.strictEqual(stateFor(p, EMU), "enforce", "emulator variables never switch a test-project id off"); }); deny.forEach((p) => { assert.strictEqual(stateFor(p, {}), "deny", JSON.stringify(p)); assert.strictEqual(stateFor(p, EMU), "deny", "unknown id stays deny even with emulator evidence: " + JSON.stringify(p)); });
     assert.strictEqual(runtimeProjectId({ GCLOUD_PROJECT: TEST_PID }), TEST_PID);
     assert.strictEqual(runtimeProjectId({ GCLOUD_PROJECT: TEST_PID, GOOGLE_CLOUD_PROJECT: PROD_PID }), null, "disagreeing sources -> unknown");
     assert.strictEqual(runtimeProjectId({ FIREBASE_CONFIG: "{not json", GCLOUD_PROJECT: PROD_PID }), null, "unparseable config -> unknown, never production");
     assert.strictEqual(runtimeProjectId({ FIREBASE_CONFIG: JSON.stringify({ projectId: TEST_PID }), GCLOUD_PROJECT: TEST_PID }), TEST_PID);
     assert.strictEqual(runtimeProjectId({}), null);
     assert.strictEqual(stateFor(runtimeProjectId({})), "deny");
+  });
+
+  it("GT1b demo-* switches the gate off ONLY with runtime evidence of a local emulator; the name alone, or any external endpoint, is deny", () => {
+    const { stateFor, emulatorEvidence } = require(GATE_SRC);
+    const L = "127.0.0.1:8381";
+    // evidence present -> off (existing suites keep running)
+    for (const env of [{ FIRESTORE_EMULATOR_HOST: L }, { FIRESTORE_EMULATOR_HOST: "localhost:8080" }, { FIRESTORE_EMULATOR_HOST: "[::1]:8080" }, { FIRESTORE_EMULATOR_HOST: L, FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9199", FIREBASE_STORAGE_EMULATOR_HOST: "127.0.0.1:9299" }])
+      assert.strictEqual(stateFor("demo-sec-test-01", env), "off", JSON.stringify(env));
+    // no emulator flag, or an endpoint that is not loopback -> deny
+    const bad = [{}, { GCLOUD_PROJECT: "demo-sec-test-01" }, { FIRESTORE_EMULATOR_HOST: "" }, { FIRESTORE_EMULATOR_HOST: "firestore.googleapis.com:443" }, { FIRESTORE_EMULATOR_HOST: "10.0.0.5:8080" },
+      { FIRESTORE_EMULATOR_HOST: "127.0.0.1.evil.example:8080" }, { FIRESTORE_EMULATOR_HOST: "localhost.evil.example:8080" }, { FIRESTORE_EMULATOR_HOST: "evil.example/127.0.0.1" }, { FIRESTORE_EMULATOR_HOST: "0.0.0.0:8080" },
+      { FIRESTORE_EMULATOR_HOST: L, FIREBASE_AUTH_EMULATOR_HOST: "identitytoolkit.googleapis.com" }, { FIRESTORE_EMULATOR_HOST: L, FIREBASE_STORAGE_EMULATOR_HOST: "storage.googleapis.com" },
+      { FIRESTORE_EMULATOR_HOST: L, FIREBASE_DATABASE_EMULATOR_HOST: "db.example.com:9000" }, { FIRESTORE_EMULATOR_HOST: L, PUBSUB_EMULATOR_HOST: "pubsub.googleapis.com" }, { FIRESTORE_EMULATOR_HOST: L, FIREBASE_AUTH_EMULATOR_HOST: "" },
+      { FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9199" } /* auth flag alone is not Firestore evidence */, { FIRESTORE_EMULATOR_HOST: 8381 }];
+    for (const env of bad) { assert.strictEqual(stateFor("demo-sec-test-01", env), "deny", JSON.stringify(env)); assert.strictEqual(emulatorEvidence(env), false); }
+    // the live process: really running under the local emulator -> off; remove the flag (synchronously, restored in finally) -> deny; external endpoint -> deny
+    const saved = process.env.FIRESTORE_EMULATOR_HOST, savedAuth = process.env.FIREBASE_AUTH_EMULATOR_HOST;
+    const g = require(GATE_SRC).createGate({ admin: {}, HttpsError: Error, getProjectId: () => "demo-sec-test-01" });
+    try {
+      assert.strictEqual(g.state(), "off", "sanity: this run is under the local emulator");
+      delete process.env.FIRESTORE_EMULATOR_HOST; assert.strictEqual(g.state(), "deny", "demo-* without the emulator flag");
+      process.env.FIRESTORE_EMULATOR_HOST = "firestore.googleapis.com:443"; assert.strictEqual(g.state(), "deny", "demo-* with an external endpoint");
+      process.env.FIRESTORE_EMULATOR_HOST = saved; process.env.FIREBASE_AUTH_EMULATOR_HOST = "identitytoolkit.googleapis.com"; assert.strictEqual(g.state(), "deny", "external auth endpoint");
+    } finally { process.env.FIRESTORE_EMULATOR_HOST = saved; if (savedAuth === undefined) delete process.env.FIREBASE_AUTH_EMULATOR_HOST; else process.env.FIREBASE_AUTH_EMULATOR_HOST = savedAuth; }
+    assert.strictEqual(g.state(), "off", "environment restored");
+  });
+
+  it("GT1c demo-* without evidence refuses every gated handler (no model call, nothing written); the same ids with evidence behave as before", async () => {
+    const u = await mkToken(); await allow(u.uid); await limits(100, 100); iso.setScript([rx(FEM), T(FEM)]);
+    setPid("demo-sec-test-01"); const saved = process.env.FIRESTORE_EMULATOR_HOST;
+    let codes, h;
+    delete process.env.FIRESTORE_EMULATOR_HOST;
+    try { codes = [await code(turn(u.uid)), await code(callable("getPropertyDraft", u.uid))]; h = await chat(u.idToken); } finally { process.env.FIRESTORE_EMULATOR_HOST = saved; }
+    assert.deepStrictEqual(codes, ["permission-denied", "permission-denied"]); assert.strictEqual(h.status, 403);
+    assert.strictEqual(iso.anthropicCalls.length, 0); assert.strictEqual(await dataDocs(), 0);
+    assert.strictEqual(await code(turn("syn-demo-uid")), "OK", "with the emulator evidence back, demo-* is off and the unchanged behaviour returns");
   });
 
   it("GT2 the project id comes only from the runtime: nothing in the request (body, header, auth token claims) can change the state", async () => {
@@ -289,13 +331,23 @@ describe("CHAT-LIVE-01 gate: allow-list, ID token, atomic AI-call cap (emulators
     assert.strictEqual((await db().collection("chatTestQuota").get()).size + (await db().collection("chatTestAllow").get()).size, 0);
     // DI at the module level too: spy admin proves "off" never touches Firestore or Auth
     let touched = 0; const spyAdmin = { firestore() { touched++; throw new Error("touched"); }, auth() { touched++; throw new Error("touched"); } };
-    for (const pid of [PROD_PID, "demo-spy"]) {
+    for (const pid of [PROD_PID, "demo-spy"]) { // demo-spy is "off" here because this process runs under the local emulator (evidence present)
       const g = require(GATE_SRC).createGate({ admin: spyAdmin, HttpsError: Error, getProjectId: () => pid });
       assert.strictEqual(g.state(), "off"); assert.strictEqual(await g.enforceCallable({ auth: { uid: "u" } }), null);
       assert.strictEqual(await g.enforceHttp({ headers: {} }, { status() { throw new Error("must not answer"); } }), null);
       assert.strictEqual(g.reserveHook("u"), undefined); assert.strictEqual(await g.reserveHttp(null, {}), true);
     }
     assert.strictEqual(touched, 0);
+  });
+
+  it("GT19 the restore path itself: setProjectIdProvider rejects a non-function; reset() puts the ORIGINAL runtime provider back; a stand-in that returns undefined would be caught", () => {
+    const gm = require(GATE_SRC);
+    assert.throws(() => gate.__testOnly.setProjectIdProvider(undefined), /use reset/);
+    setPid(TEST_PID); assert.strictEqual(gate.state(), "enforce"); assert.strictEqual(gate.__testOnly.isRuntimeProvider(), false);
+    gate.__testOnly.reset(); assert.strictEqual(gate.__testOnly.isRuntimeProvider(), true); assert.strictEqual(gate.state(), gm.stateFor(gm.runtimeProjectId(process.env), process.env));
+    // negative control: the old cleanup (provider returning undefined) leaves the gate in "deny" and isRuntimeProvider() false
+    gate.__testOnly.setProjectIdProvider(() => undefined); assert.strictEqual(gate.state(), "deny"); assert.strictEqual(gate.__testOnly.isRuntimeProvider(), false);
+    gate.__testOnly.reset(); assert.strictEqual(gate.__testOnly.isRuntimeProvider(), true);
   });
 
   it("GT17 production diff is additive only: every chatGate line in functions/index.js is a call guarded by the gate's own state; the existing tests (test:chat) are run separately unchanged", () => {
