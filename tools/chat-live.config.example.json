@@ -1,0 +1,11 @@
+{
+  "_note": "Template only. Every REPLACE_ME value makes tools/build-chat-live.js refuse to build. Fill in the TEST Firebase project's web-app values (never production). No secret belongs in this file.",
+  "projectId": "REPLACE_ME",
+  "apiKey": "REPLACE_ME",
+  "appId": "REPLACE_ME",
+  "messagingSenderId": "REPLACE_ME",
+  "authDomain": "REPLACE_ME",
+  "storageBucket": "REPLACE_ME",
+  "region": "asia-southeast1",
+  "claudeCompleteUrl": "REPLACE_ME"
+}

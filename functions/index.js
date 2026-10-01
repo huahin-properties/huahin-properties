@@ -17,6 +17,9 @@ const Stripe = require("stripe");
 // must never be predictable: it is the ONLY credential a customer holds for
 // their own Case (see the trackToken branches in firestore.rules).
 const nodeCrypto = require("crypto");
+// CHAT-LIVE-01: access gate + AI-call cap for the chat TEST project. On production (and the
+// emulator namespace) state() is "off" and every call below is a no-op that reads nothing.
+const chatGate = require("./chat-test-gate").sharedGate({ admin, HttpsError });
 // C4.3 Phase 2A-1 - the SINGLE customer-facing draft completeness evaluator.
 // Lives in functions/ so it is deployed with this file and the server stays
 // the only place the percentage is computed. It does NOT import, copy or
@@ -92,7 +95,7 @@ exports.notifyNewLead = onDocumentCreated(
 // keeps the original error behaviour (never turned into the fallback).
 // Returns the text to send. Never throws. Logs a fixed reason code only — never customer text,
 // model text, tokens or error details (the error of a failed retry is not inspected).
-async function pd16GuardChatText(chatBody, firstText) {
+async function pd16GuardChatText(chatBody, firstText, beforeRetry) {
   if (!pd16Violation(firstText)) return firstText;
   const fallback = (reason) => {
     try { console.log(JSON.stringify({ component: "claudeComplete", event: "pd16_fallback", reason })); } catch (e) { /* never break a reply */ }
@@ -100,6 +103,7 @@ async function pd16GuardChatText(chatBody, firstText) {
   };
   let retriedText;
   try {
+    if (beforeRetry) await beforeRetry(); // CHAT-LIVE-01: the retry is a counted call; refused -> retry_failed
     const retryRes = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: { "content-type": "application/json", "x-api-key": ANTHROPIC_API_KEY.value(), "anthropic-version": "2023-06-01" },
@@ -129,6 +133,10 @@ exports.claudeComplete = onRequest(
     }
 
     try {
+      // CHAT-LIVE-01: null on production/emulator (nothing happens); a verified, allow-listed uid on the
+      // test project; false when this call has already been answered 401/403. Runs before the body is read.
+      const gateUid = await chatGate.enforceHttp(req, res);
+      if (gateUid === false) return;
       const { content, tool, system, messages, max_tokens } = req.body;
 
       // Multi-turn chat mode (used by the ContactRail AI chat widget):
@@ -141,6 +149,7 @@ exports.claudeComplete = onRequest(
       if (messages) {
         const chatBody = { model: "claude-haiku-4-5", max_tokens: max_tokens || 600, messages };
         if (system) chatBody.system = system;
+        if (!(await chatGate.reserveHttp(gateUid, res))) return;
         const chatRes = await fetch("https://api.anthropic.com/v1/messages", {
           method: "POST",
           headers: {
@@ -163,7 +172,7 @@ exports.claudeComplete = onRequest(
         // another value, translation tools, single-turn content/tool mode) is untouched.
         // The response shape stays { completion } — no classification, no draft, no extra field.
         if (req.body.guard === "pd16") {
-          const guarded = await pd16GuardChatText(chatBody, chatText);
+          const guarded = await pd16GuardChatText(chatBody, chatText, gateUid === null ? undefined : () => chatGate.reserve(gateUid, 1));
           res.json({ completion: guarded });
           return;
         }
@@ -177,6 +186,7 @@ exports.claudeComplete = onRequest(
         return;
       }
 
+      if (!(await chatGate.reserveHttp(gateUid, res))) return;
       const body = {
         model: "claude-sonnet-4-5",
         max_tokens: 4096,
@@ -587,11 +597,14 @@ const PD16_FALLBACK_REPLY = "ขออภัยค่ะ ตอนนี้ย�
 //   retry_still_male   the retry still has a male voice
 //   retry_unsafe       the retry is empty or failed another safeguard (token,
 //                      code, number or quotation changed)
-async function callClaudeReception(system, messages, apiKey) {
+async function callClaudeReception(system, messages, apiKey, beforeCall) {
+  // CHAT-LIVE-01: beforeCall (undefined on production) reserves one counted model call BEFORE each call.
+  if (beforeCall) await beforeCall();
   const first = await callClaudeReceptionOnce(system, messages, apiKey);
   if (!pd16Violation(first.reply)) return first;
   let retried;
   try {
+    if (beforeCall) await beforeCall(); // a retry is a counted call too; a refused reservation ends in the fixed female fallback (retry_failed)
     retried = await callClaudeReceptionOnce(
       system,
       [...messages, { role: "assistant", content: first.reply }, { role: "user", content: PD16_RETRY_NOTE }],
@@ -1016,6 +1029,7 @@ exports.receptionTurn = onCall(
       rxLog({ rid, event: "reject", reason: "unauthenticated" });
       throw new HttpsError("unauthenticated", "Sign-in required.");
     }
+    await chatGate.enforceCallable(request);
     const visitorId = auth.uid;
     const uidTail = String(visitorId).slice(-4);
     const { system, messages, customerText, seedMessages, propertyRefs, collectionIds } = request.data || {};
@@ -1039,7 +1053,7 @@ exports.receptionTurn = onCall(
     // ONE model call: reply + classification together.
     let out;
     try {
-      out = await callClaudeReception(system, messages, ANTHROPIC_API_KEY.value());
+      out = await callClaudeReception(system, messages, ANTHROPIC_API_KEY.value(), chatGate.reserveHook(visitorId));
     } catch (e) {
       rxLog({ rid, event: "model_error", uidTail, name: (e && e.name) || null,
         code: (e && e.code) || null, msgLen: e && e.message ? String(e.message).length : 0 });
@@ -1429,6 +1443,7 @@ exports.updatePropertyDraft = onCall(
   async (request) => {
     const uid = request.auth && request.auth.uid;
     if (!uid) throw new HttpsError("unauthenticated", "Sign-in required.");
+    await chatGate.enforceCallable(request);
     const fields = (request.data && request.data.fields) || {};
     // PROVENANCE IS NEVER TAKEN FROM THE CLIENT. request.data.source (and any
     // other provenance-shaped key) is ignored entirely: this callable IS the
@@ -1503,6 +1518,7 @@ exports.getPropertyDraft = onCall(
   async (request) => {
     const uid = request.auth && request.auth.uid;
     if (!uid) throw new HttpsError("unauthenticated", "Sign-in required.");
+    await chatGate.enforceCallable(request);
 
     const db = admin.firestore();
     try {
@@ -1537,6 +1553,7 @@ exports.createCaseFromConversation = onCall(
   async (request) => {
     const visitorId = request.auth && request.auth.uid;
     if (!visitorId) throw new HttpsError("unauthenticated", "ต้องเข้าสู่ระบบก่อน");
+    await chatGate.enforceCallable(request);
     // Consent is a USER ACTION, never an AI judgement. If this were inferred
     // from the model's output, the AI would be able to create Staff work items
     // on its own initiative - the one design error in this phase that would be
