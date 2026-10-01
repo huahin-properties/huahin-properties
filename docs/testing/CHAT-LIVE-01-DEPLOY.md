@@ -17,9 +17,9 @@
 
 รัน: `bash tools/chat-live/deploy-test.sh` (ค่าเริ่มต้นโปรเจกต์ `huahin-chat-test-01`)
 
-ทำเองทั้งหมด (เจ้าของแค่ตอบคำถามในหน้าดำ): ตรวจล็อกอิน → ตรวจว่ามองเห็นโปรเจกต์ → ตรวจ Firestore → อ่านค่า web app ที่มีอยู่แล้ว (ค่าสาธารณะ ไม่ใช่ความลับ) → build หน้าทดสอบ (ปฏิเสธถ้ามีอะไรชี้ production) → แสดงแผน → **ให้พิมพ์ `DEPLOY-TEST` ยืนยัน** → ตั้งคีย์ AI (พิมพ์ในหน้าดำเอง) → `npm ci` ใน `functions/` → deploy กฎ+index Firestore → deploy **เฉพาะ 5 ฟังก์ชัน** → deploy หน้าเว็บทดสอบ
+ทำเองทั้งหมด (เจ้าของแค่ตอบคำถามในหน้าดำ): ตรวจล็อกอิน → ตรวจว่ามองเห็นโปรเจกต์ (เทียบ project id แบบตรงตัวจาก JSON ไม่ใช่แค่ข้อความที่ประกอบอยู่) → ตรวจ Firestore → อ่านค่า web app ที่มีอยู่แล้ว (ค่าสาธารณะ ไม่ใช่ความลับ) → build หน้าทดสอบ (ปฏิเสธถ้ามีอะไรชี้ production) → แสดงแผน → **ให้พิมพ์ `DEPLOY-TEST` ยืนยัน** → ตั้งคีย์ AI (พิมพ์ในหน้าดำเอง) → `npm ci` ใน `functions/` → deploy กฎ+index Firestore → deploy **เฉพาะ 5 ฟังก์ชัน** → deploy หน้าเว็บทดสอบ
 
-ความปลอดภัยของสคริปต์ (ทดสอบแล้วด้วย firebase ปลอม — `tests/chat-live/deploy-script.test.js` D1–D9):
+ความปลอดภัยของสคริปต์ (ทดสอบแล้วด้วย firebase ปลอม — `tests/chat-live/deploy-script.test.js` D1–D13):
 - ปฏิเสธ project id ที่ไม่ใช่ `huahin-chat-test-*` (รวม production, ตัวพิมพ์ใหญ่, ยาวเกิน, มีอักขระแปลก) ก่อนเรียก firebase แม้แต่ครั้งเดียว
 - **ทุกคำสั่ง firebase ใส่ `--project huahin-chat-test-01`** ไม่พึ่งค่า default ของ `.firebaserc` (ซึ่งเป็น production); ไม่มี deploy ที่ไม่มี `--only`; id production ไม่ปรากฏในคำสั่งใด ๆ
 - ไม่อ่าน/พิมพ์/ส่งต่อคีย์: ขั้นตอนคีย์คือการรัน `firebase functions:secrets:set ANTHROPIC_API_KEY` ซึ่งขอค่าในหน้าดำของ Codespace เอง
@@ -32,6 +32,11 @@
 - ว่า Function รุ่น 2 ตอบที่ `https://asia-southeast1-huahin-chat-test-01.cloudfunctions.net/claudeComplete` จริง (ดู CHAT-LIVE-01-SCOPE §3.2) — ตรวจโดยทดสอบ L8 หลัง deploy
 - ตัวแปร runtime ของ Cloud Functions (`FIREBASE_CONFIG`/`GCLOUD_PROJECT`) ที่ gate ใช้ตัดสินโหมด — **smoke test แรกหลัง deploy: UID ที่ยังไม่อยู่ใน `chatTestAllow` ต้องถูกปฏิเสธ** (ถ้าได้คำตอบ = หยุดทันที)
 - เมื่อ spend cap 25 บาทเต็ม บริการอาจหยุดทำงาน — เป็นผลของวงเงินที่เจ้าของตั้งใจ ไม่ใช่ความผิดปกติ
+
+## 3b. ข้อควรรู้หลัง PR #7 (Code ตรวจแล้ว)
+- ต้องมี **Web app อย่างน้อย 1 ตัวในโปรเจกต์ทดสอบ** ก่อนรันสคริปต์ (Firebase Console → Project settings → Your apps → ถ้าไม่มีให้ Add app → Web) ไม่เช่นนั้นสคริปต์หยุดโดยไม่สร้างอะไร — จะแจ้งเป็นขั้นของเจ้าของเมื่อถึงเวลา
+- ถ้ามี Web app หลายตัว สคริปต์ใช้ตัวแรกที่ CLI ส่งมา (ตรวจแล้วว่า config ที่อ่านเป็นของโปรเจกต์ที่ระบุตรงตัว)
+- รูปแบบ `--json` จริงของ `projects:list` / `apps:list` ยังไม่ได้ยืนยันกับ Firebase จริง (ทดสอบกับ firebase ปลอมเท่านั้น) — ถ้าอ่านไม่ได้สคริปต์หยุดก่อนสร้าง/deploy อะไร
 
 ## 4. ลำดับต่อจากนี้ (เจ้าของทำทีละขั้น — Code จะบอกขั้นต่อไปเมื่อขั้นก่อนเสร็จ)
 1. **ขั้นแรก (หน้าขาว GitHub):** เปิด Codespace บนกิ่ง `claude/chat-live-01`
