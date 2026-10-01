@@ -28,7 +28,8 @@ const REQUIRED_FUNCTIONS = ["submitListingCase", "previewListingCase", "publishL
 const OPTIONAL_CHAT_FUNCTIONS = ["receptionTurn", "getPropertyDraft", "updatePropertyDraft", "createCaseFromConversation", "claudeComplete"];
 const deployFunctionsCommand = (pid, names) => "firebase deploy --only " + (names || REQUIRED_FUNCTIONS).map((n) => "functions:" + n).join(",") + " --project " + pid;
 const REQUIRED = ["projectId", "apiKey", "appId", "messagingSenderId", "authDomain", "storageBucket", "region"];
-const PROJECT_ID_RE = /^huahin-listing-test-[a-z0-9]+(-[a-z0-9]+)*$/;
+// The same two test prefixes the Functions (listing-case.js) and the chat gate (chat-test-gate.js) already accept. Reusing huahin-chat-test-01 therefore needs no server change.
+const PROJECT_ID_RE = /^huahin-(listing|chat)-test-[a-z0-9]+(-[a-z0-9]+)*$/;
 const claudeCompleteUrlFor = (pid) => "https://asia-southeast1-" + pid + ".cloudfunctions.net/claudeComplete";
 const MARKER = ".listing-test-output";
 const FORBIDDEN = [/huahin-properties-5f1b5/i, /5f1b5/i, /auth\.huahin\.properties/i, /claudecomplete-3j4ldf4pja/i,
@@ -44,7 +45,7 @@ function validate(c) {
   for (const k of REQUIRED) { const v = c[k]; if (typeof v !== "string" || !v.trim() || /REPLACE_ME/i.test(v)) fail("config missing or placeholder: " + k); }
   if (/5f1b5|huahin-properties-5f1b5|auth\.huahin\.properties|claudecomplete-3j4ldf4pja/i.test(JSON.stringify(c))) fail("config contains a production value");
   if (c.projectId === PRODUCTION_PROJECT) fail("projectId is production");
-  if (c.projectId.length > 30 || !PROJECT_ID_RE.test(c.projectId)) fail("projectId must look like huahin-listing-test-<suffix> (max 30 chars) so a real project is never used by mistake");
+  if (c.projectId.length > 30 || !PROJECT_ID_RE.test(c.projectId)) fail("projectId must look like huahin-listing-test-<suffix> or huahin-chat-test-<suffix> (max 30 chars) so a real project is never used by mistake");
   if (c.authDomain !== c.projectId + ".firebaseapp.com") fail("authDomain must be <projectId>.firebaseapp.com");
   if (!c.storageBucket.startsWith(c.projectId + ".")) fail("storageBucket must belong to the test project");
   if (c.region !== "asia-southeast1") fail("region must stay asia-southeast1 (matches the Functions region)");

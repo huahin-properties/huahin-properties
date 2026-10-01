@@ -81,7 +81,7 @@ describe("LISTING-E2E-01 TEST-only hosting build (no network, nothing deployed)"
   });
 
   it("H4 refuses (and writes nothing) for a production project id, a wrong prefix, placeholders, mismatched domain/bucket/region and production values hidden in the config", () => {
-    const bad = [[{ projectId: "huahin-properties-5f1b5" }, /production/], [{ projectId: "my-real-project" }, /huahin-listing-test-/], [{ projectId: "huahin-chat-test-abc" }, /huahin-listing-test-/],
+    const bad = [[{ projectId: "huahin-properties-5f1b5" }, /production/], [{ projectId: "my-real-project" }, /huahin-listing-test-/], [{ projectId: "huahin-chat-testing-abc" }, /huahin-listing-test-/], [{ projectId: "huahin-chat-test-" }, /huahin-listing-test-/],
       [{ apiKey: "REPLACE_ME" }, /placeholder/], [{ appId: "" }, /missing/], [{ authDomain: "auth.huahin.properties" }, /production/], [{ authDomain: "other.firebaseapp.com" }, /authDomain/],
       [{ storageBucket: "other.appspot.com" }, /storageBucket/], [{ region: "us-central1" }, /region/], [{ messagingSenderId: "claudecomplete-3j4ldf4pja" }, /production/], [{ projectId: "huahin-listing-test-" + "x".repeat(20) }, /max 30/]];
     for (const [patch, re] of bad) { const d = out(); refuses(Object.assign({}, CFG, patch), re, d); assert.ok(!fs.existsSync(d), "wrote something for " + JSON.stringify(patch)); }
@@ -153,5 +153,14 @@ describe("LISTING-E2E-01 TEST-only hosting build (no network, nothing deployed)"
     const fc = fs.readFileSync(path.join(ROOT, "firebase-client.js"), "utf8");
     for (const part of ["firestore", "app", "auth"]) assert.ok(fc.includes('await whenSdkPart("' + part + '")'), "waits for the " + part + " part");
     assert.ok(/sdk-timeout/.test(fc) && /budgetMs \|\| 8000/.test(fc), "bounded (8 s) with a distinct error code");
+  });
+
+  it("H10 the existing TEST project prefix huahin-chat-test-* is accepted (reuse needs no server change); the config and every built file belong to that project", () => {
+    const cfg = Object.assign({}, CFG, { projectId: "huahin-chat-test-01", authDomain: "huahin-chat-test-01.firebaseapp.com", storageBucket: "huahin-chat-test-01.firebasestorage.app" });
+    const d = out(); made.push(d); build(cfg, d);
+    const fc = fs.readFileSync(path.join(d, "firebase-client.js"), "utf8");
+    assert.ok(fc.includes("asia-southeast1-huahin-chat-test-01.cloudfunctions.net") && !fc.includes("5f1b5"));
+    assert.ok(/TEST_PROJECT_RE = \/\^\(huahin-chat-test-\|huahin-listing-test-/.test(fs.readFileSync(path.join(ROOT, "functions", "listing-case.js"), "utf8")), "the Functions already accept this prefix");
+    assert.ok(/huahin-\(chat\|listing\)-test-/.test(fs.readFileSync(path.join(ROOT, "functions", "chat-test-gate.js"), "utf8")) || /\(chat\|listing\)/.test(fs.readFileSync(path.join(ROOT, "functions", "chat-test-gate.js"), "utf8")), "the chat gate already enforces on this prefix");
   });
 });

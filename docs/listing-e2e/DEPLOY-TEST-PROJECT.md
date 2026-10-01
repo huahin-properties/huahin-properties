@@ -1,5 +1,7 @@
 # LISTING-E2E-01 — ชุด deploy สำหรับโปรเจกต์ **TEST เท่านั้น** (ยังไม่ deploy — รอ Work ตรวจ + ผล BROWSER-LOCAL-01)
 
+> **เส้นทางที่เจ้าของใช้จริง:** `OWNER-TEST-GUIDE.md` (สคริปต์เดียว `tools/listing-test/deploy-test.sh`, ใช้ `huahin-chat-test-01` ได้ — รับ prefix `huahin-chat-test-*` และ `huahin-listing-test-*`). เอกสารนี้คือรายละเอียดคำสั่งทีละตัว (เหมือนสิ่งที่สคริปต์รัน) — คำสั่ง build ที่เขียนว่า `huahin-listing-test-*` ใช้กับ `huahin-chat-test-*` ได้เช่นกัน
+
 **ห้ามนำไฟล์เหล่านี้ขึ้น GitHub/Hosting/Functions ของ production** (`huahin-properties-5f1b5`) จนกว่า Owner จะสั่งเป็นรอบแยก และต้องทำ migration ข้อมูลเดิมก่อน (LEGACY-DATA-PLAN.md).
 **ห้ามรัน `firebase deploy --only functions` (ทั้งหมด)** — จะ deploy ฟังก์ชันทุกตัวรวมถึง Stripe / LINE / อีเมล / triggers พร้อม secret ที่ไม่เกี่ยวข้อง. ใช้ชื่อฟังก์ชันทีละตัวตามด้านล่างเท่านั้น และ **ไม่ต้องให้คีย์ใดๆ ที่ไม่เกี่ยวข้อง**
 
