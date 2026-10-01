@@ -327,13 +327,18 @@ class Component extends DCLogic {
         const n = (navigator.language || "th").slice(0, 2).toLowerCase();
         return ["th", "en", "zh", "ru", "de", "no", "fr", "it"].includes(n) ? n : "th";
       })();
+      // Who is the submitter relative to the property? Stated here, VERIFIED by Staff — the server never trusts it for
+      // authority (role comes from the signed-in account). The site Owner posts in the website's name; Staff file on
+      // behalf of a walk-in owner; everyone else says they are the owner themselves.
+      let relation; // left empty unless team: the server then defaults by role (agent → representative, visitor → self)
+      try { const role = await fb.fetchAdminRole(); relation = role === "owner" ? "website" : role === "staff" ? "representative" : undefined; } catch (e) {}
       const res = await fb.submitListingCase({
         submissionKey: key,
         txnType: this.state.txnType, type: this.state.f_type, condition: this.state.f_condition,
         price: Number(this.state.f_price) || 0, description: this.state.f_details,
         coordsRaw: this.state.f_coords,
         submitter: { name: this.state.f_name, phone: this.state.f_phone, email: this.state.f_email },
-        propertyOwner: { relation: "self", name: "", contact: this.state.f_ownerContact },
+        propertyOwner: { relation, name: "", contact: this.state.f_ownerContact },
         language: lang, photos, ownershipDocPath,
       });
       const r = (res && res.data) ? res.data : res;
