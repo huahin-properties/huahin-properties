@@ -35,7 +35,7 @@
 **ยังไม่ได้ทดสอบ:** หน้าที่ build ออกมาทำงานใน browser จริงหรือไม่ (ทดสอบแค่: ไฟล์ครบตาม import, parse ผ่าน, ไม่มีสตริง production).
 
 ## 6) หลักฐานการทดสอบ
-`npm run test:listing` = **65 passing / 1 pending** (core 29 · rules 14+ST · e2e 5 · recovery 10 · sync 4 · hosting-build 6 ฯลฯ) · test:sec 96 (5 pending) · test:chat 55 (8 pending) · test:chat-live 34 (12 pending = ชุด browser ที่ไม่ได้รัน) · test:chat-live-gate 21 · test:chat-live-combined 174 (13 pending). expectation เดิมที่ช่องโหว่ถูกปิด (S2a, C5/C6, B1, callsite, GT17, B6) ถูกอัปเดตและระบุในคอมมิต.
+`npm run test:listing` = **65 passing / 1 pending** (core 27 · rules 14 รวม ST3 ที่ pending · e2e 5 · recovery 10 · sync 4 · hosting-build 6) · test:sec 96 (5 pending) · test:chat 55 (8 pending) · test:chat-live 34 (12 pending = ชุด browser ที่ไม่ได้รัน) · test:chat-live-gate 21 · test:chat-live-combined 174 (13 pending). expectation เดิมที่ช่องโหว่ถูกปิด (S2a, C5/C6, B1, callsite, GT17, B6) ถูกอัปเดตและระบุในคอมมิต.
 **Pending ที่ตั้งใจ:** ST3 — Storage rules ที่ใช้ lookup ข้าม service (ทีมงาน/lister เขียน `propertyPhotos` เดิม) emulator แก้ค่าไม่ได้ ต้องยืนยันบน TEST จริง.
 
 ## 7) สิ่งที่ยังไม่ครบ / BLOCKED (ห้ามอ้างว่าเสร็จ)
