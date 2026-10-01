@@ -195,19 +195,7 @@ service cloud.firestore {
             && resource.data.trackToken.size() > 20
             && request.resource.data.trackToken == resource.data.trackToken
             && request.resource.data.diff(resource.data).affectedKeys()
-                 .hasOnly(['customerLastReadAt', 'lastCustomerMessageAt']))
-
-        // PHASE 1A.2 (ก.ย. 2569) — photo-upload follow-up markers.
-        // Owner Submission no longer aborts the whole submission when one
-        // photo upload fails; it records the failure on the case so Staff can
-        // chase the missing photos. That note is written by a signed-out
-        // visitor immediately after their own create, so it needs its own
-        // narrow branch. Three harmless boolean/count/string fields only —
-        // no price, status, contact or workflow field is reachable here.
-        || (resource.data.source == "owner_submission"
-            && request.resource.data.diff(resource.data).affectedKeys()
-                 .hasOnly(['photoUploadFailedCount', 'photoUploadFollowUpNeeded', 'photoUploadLastError'])
-            && request.resource.data.photoUploadFollowUpNeeded == true);
+                 .hasOnly(['customerLastReadAt', 'lastCustomerMessageAt']));
       allow delete: if isOwner() || (request.auth != null && resource.data.listerId == request.auth.uid);
 
       // STEP 2B.2 — Case conversation for owner-submission cases.
@@ -326,7 +314,7 @@ service cloud.firestore {
     match /caseInternal/{id} {
       allow read: if isAdmin() || (request.auth != null && resource.data.get("submittedByUid", "") == request.auth.uid);
       allow create, update: if isOwner()
-        || (isStaffOnly() && !request.resource.data.diff(resource.data).affectedKeys().hasAny(["approvedBy", "approvedByUid", "approvedByEmail", "approvedByRole", "approvalPath"]));
+        || ((isAdmin() && !isOwner()) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(["approvedBy", "approvedByUid", "approvedByEmail", "approvedByRole", "approvalPath"]));
       allow delete: if false;
     }
     // Private photo records of a Case (pending review). Never public; written only by the server.
