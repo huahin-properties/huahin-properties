@@ -24,28 +24,21 @@ if ! $FB projects:list >/dev/null 2>&1; then
   echo "Not logged in. Follow the link it prints, sign in with the Google account that owns $PROJECT, then paste the code back HERE (the black terminal)."
   $FB login --no-localhost
 fi
-$FB projects:list 2>/dev/null | grep -q "$PROJECT" || die "this Google account cannot see project $PROJECT. Log in with the account that created it."
+PROJECTS="$( $FB projects:list --json )" || die "could not list projects"
+printf '%s' "$PROJECTS" | node -e 'const fs=require("fs"); const j=JSON.parse(fs.readFileSync(0,"utf8")); const a=Array.isArray(j.result)?j.result:j.result?.projects; if(!Array.isArray(a)||!a.some(x=>x.projectId===process.argv[1])) process.exit(1)' "$PROJECT" || die "this Google account cannot see project $PROJECT."
 
 say "2/8 Firestore database exists?"
 fb firestore:databases:list >/dev/null 2>&1 || echo "WARNING: could not list Firestore databases (checking is optional). Make sure Firestore was created in the Firebase console."
 
 say "3/8 Web app config (public identifiers, not secrets)"
-APPS="$(fb apps:list WEB 2>&1 || true)"
-APPID="$(printf '%s' "$APPS" | grep -o '1:[0-9]*:web:[a-f0-9]*' | head -1 || true)"
-if [[ -z "$APPID" ]]; then
-  echo "No web app yet — creating one named chat-live-web."
-  fb apps:create WEB chat-live-web >/dev/null
-  APPS="$(fb apps:list WEB 2>&1 || true)"
-  APPID="$(printf '%s' "$APPS" | grep -o '1:[0-9]*:web:[a-f0-9]*' | head -1 || true)"
-fi
-[[ -n "$APPID" ]] || die "could not find the web app id."
-mkdir -p build
-TMP="$(mktemp)"; trap 'rm -f "$TMP"' EXIT
-fb apps:sdkconfig WEB "$APPID" >"$TMP"
-node tools/chat-live/make-config.js "$PROJECT" build/chat-live.config.json <"$TMP" || die "could not read the web app config."
+APPS="$(fb apps:list WEB --json)" || die "could not list web apps; no app was created"
+APPID="$(printf '%s' "$APPS" | node -e 'const fs=require("fs");const j=JSON.parse(fs.readFileSync(0,"utf8"));const a=Array.isArray(j.result)?j.result:j.result?.apps;if(!Array.isArray(a)||!a.length||!a[0].appId)process.exit(1);process.stdout.write(a[0].appId)')" || die "an existing web app is required; no app was created"
+TMPDIR_CHAT="$(mktemp -d)"; trap 'rm -rf "$TMPDIR_CHAT"' EXIT
+fb apps:sdkconfig WEB "$APPID" >"$TMPDIR_CHAT/sdk.txt"
+node tools/chat-live/make-config.js "$PROJECT" "$TMPDIR_CHAT/config.json" <"$TMPDIR_CHAT/sdk.txt" || die "could not read the web app config."
 
 say "4/8 Build the test site (refuses anything that could reach production)"
-node tools/build-chat-live.js --config build/chat-live.config.json --out build/chat-live || die "build refused — nothing was deployed."
+node tools/build-chat-live.js --config "$TMPDIR_CHAT/config.json" --out build/chat-live || die "build refused — nothing was deployed."
 
 say "5/8 Plan"
 cat <<PLAN

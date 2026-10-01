@@ -17,7 +17,7 @@
 
 รัน: `bash tools/chat-live/deploy-test.sh` (ค่าเริ่มต้นโปรเจกต์ `huahin-chat-test-01`)
 
-ทำเองทั้งหมด (เจ้าของแค่ตอบคำถามในหน้าดำ): ตรวจล็อกอิน → ตรวจว่ามองเห็นโปรเจกต์ → ตรวจ Firestore → สร้าง/อ่านค่า web app (ค่าสาธารณะ ไม่ใช่ความลับ) → build หน้าทดสอบ (ปฏิเสธถ้ามีอะไรชี้ production) → แสดงแผน → **ให้พิมพ์ `DEPLOY-TEST` ยืนยัน** → ตั้งคีย์ AI (พิมพ์ในหน้าดำเอง) → `npm ci` ใน `functions/` → deploy กฎ+index Firestore → deploy **เฉพาะ 5 ฟังก์ชัน** → deploy หน้าเว็บทดสอบ
+ทำเองทั้งหมด (เจ้าของแค่ตอบคำถามในหน้าดำ): ตรวจล็อกอิน → ตรวจว่ามองเห็นโปรเจกต์ → ตรวจ Firestore → อ่านค่า web app ที่มีอยู่แล้ว (ค่าสาธารณะ ไม่ใช่ความลับ) → build หน้าทดสอบ (ปฏิเสธถ้ามีอะไรชี้ production) → แสดงแผน → **ให้พิมพ์ `DEPLOY-TEST` ยืนยัน** → ตั้งคีย์ AI (พิมพ์ในหน้าดำเอง) → `npm ci` ใน `functions/` → deploy กฎ+index Firestore → deploy **เฉพาะ 5 ฟังก์ชัน** → deploy หน้าเว็บทดสอบ
 
 ความปลอดภัยของสคริปต์ (ทดสอบแล้วด้วย firebase ปลอม — `tests/chat-live/deploy-script.test.js` D1–D9):
 - ปฏิเสธ project id ที่ไม่ใช่ `huahin-chat-test-*` (รวม production, ตัวพิมพ์ใหญ่, ยาวเกิน, มีอักขระแปลก) ก่อนเรียก firebase แม้แต่ครั้งเดียว
@@ -41,3 +41,9 @@
 5. Code/Work ทดสอบก่อน → เจ้าของลองรอบสุดท้าย (O-1/O-2/O-3) → Work สอนใช้งานและทำคู่มือ
 
 ไม่มีขั้นใดขอให้ส่งคีย์หรือรหัสผ่านในแชท
+
+## Work correction of deploy script (2026-10-01)
+
+The script requires successful JSON discovery and an existing web app; it never creates one. Project matching is exact, and SDK configuration must contain the matching projectId. Configuration is written exclusively into a private temporary directory, removed on exit. Existing files cannot be overwritten by make-config. Tests run in a disposable repository fixture and do not delete the working repository build directory.
+
+Validation: deploy-script tests use fake Firebase and npm only. No services or credentials are used; this is not production PASS. The build/browser suite is reported separately. This correction does not authorize an unattended deployment. Work/Code must re-review the resulting commit and update the Viewer before guiding the owner through deployment.

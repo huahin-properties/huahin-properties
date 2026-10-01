@@ -9,7 +9,7 @@ const pick = (t, k) => { const m = new RegExp("[\"']?" + k + "[\"']?\\s*:\\s*[\"
 function makeConfig(projectId, text) {
   const cfg = { projectId, apiKey: pick(text, "apiKey"), appId: pick(text, "appId"), messagingSenderId: pick(text, "messagingSenderId"),
     authDomain: projectId + ".firebaseapp.com", storageBucket: projectId + ".firebasestorage.app", region: "asia-southeast1" };
-  const inProject = pick(text, "projectId"); if (inProject && inProject !== projectId) throw new Error("sdkconfig belongs to a different project");
+  const inProject = pick(text, "projectId"); if (!inProject) throw new Error("sdkconfig output has no projectId"); if (inProject !== projectId) throw new Error("sdkconfig belongs to a different project");
   for (const k of ["apiKey", "appId", "messagingSenderId"]) if (!cfg[k]) throw new Error("sdkconfig output has no " + k);
   const bucket = pick(text, "storageBucket"); if (bucket && bucket.startsWith(projectId + ".")) cfg.storageBucket = bucket;
   return cfg;
@@ -18,7 +18,7 @@ module.exports = { makeConfig };
 if (require.main === module) {
   try {
     const [pid, out] = process.argv.slice(2); if (!pid || !out) throw new Error("usage: make-config.js <projectId> <out.json>");
-    fs.writeFileSync(out, JSON.stringify(makeConfig(pid, fs.readFileSync(0, "utf8")), null, 2) + "\n");
+    fs.writeFileSync(out, JSON.stringify(makeConfig(pid, fs.readFileSync(0, "utf8")), null, 2) + "\n", { flag: "wx" });
     console.log("config written (values not shown)");
   } catch (e) { console.error("CONFIG REFUSED: " + e.message); process.exit(1); }
 }
