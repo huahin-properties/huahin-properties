@@ -424,4 +424,57 @@ const preview = async (page, state, ms) => waitFor(async () => (await page.getAt
     rec("B9", "owner take-down from the UI removes page, records and files; old photo links dead", "PASS (local browser + emulators)", "");
     await after.ctx.close(); await ids.ownerCtx.close();
   });
+
+  it("B10 Staff sees ALL 7 different private photos in the strip and each click opens the matching big image (regression: only the cover loaded; clicking a grey tile opened a broken image)", async function () {
+    // 1. a new outsider case with 7 DIFFERENT photos through the real form
+    const o = await newPage({}, "outsider-7");
+    await o.page.goto(site.url + "/Owner%20Submission.dc.html");
+    await ownerFormFill(o.page, { name: "Synthetic Seven", phone: "0800000007", type: "house", price: 6100000, description: "Seven different photos." });
+    await uploadPhotos(o.page, 7, 40);
+    await goReview(o.page); await o.page.getByText("ส่งข้อมูล", { exact: true }).click(); await o.page.waitForSelector("text=ส่งข้อมูลสำเร็จ", { timeout: 40000 });
+    const mine = (await cases()).find((c) => c.contactPhone === "0800000007"); assert.ok(mine && mine.photoCount === 7, "7 photos in the case record"); ids.sevenCase = mine.id; await o.ctx.close();
+    // what is stored, in index order: the sha-256 of each private file
+    const crypto = require("crypto");
+    const recs = (await db.collection("casePhotos").where("propertyId", "==", mine.id).get()).docs.map((d) => d.data()).sort((a, b) => a.index - b.index);
+    assert.strictEqual(recs.length, 7);
+    const want = []; for (const r of recs) { const [buf] = await bucket.file(r.storagePath).download(); want.push(crypto.createHash("sha256").update(buf).digest("hex")); }
+    assert.strictEqual(new Set(want).size, 7, "the 7 stored files are all different");
+    // 2. Staff opens the page
+    const { ctx, page } = await newPage({}, "staff-7");
+    await loginAdmin(page, "staff@example.test");
+    await page.goto(site.url + "/Listing%20Approvals.dc.html"); await page.waitForSelector("text=" + mine.id, { timeout: 30000 });
+    const strip = () => page.evaluate((id) => {
+      const lab = Array.from(document.querySelectorAll("div")).find((e) => /^รูปที่ส่งมา/.test(Array.from(e.childNodes).filter((n) => n.nodeType === 3).map((n) => n.textContent).join("").trim()) && (() => { let a = e; for (let i = 0; i < 14 && a; i++, a = a.parentElement) if ((a.innerText || "").includes(id)) return true; return false; })());
+      if (!lab || !lab.nextElementSibling) return null;
+      return { label: lab.textContent.trim(), tiles: Array.from(lab.nextElementSibling.children).map((t) => { const m = /url\("?([^")]+)"?\)/.exec(getComputedStyle(t).backgroundImage || ""); return m ? m[1] : ""; }) };
+    }, mine.id);
+    await waitFor(async () => { const s = await strip(); return s && s.tiles.length === 7 && s.tiles.every((u) => u.startsWith("blob:")); }, 30000, "all 7 thumbnails loaded");
+    const st = await strip(); assert.ok(/7 รูป/.test(st.label), "the page says 7 photos: " + st.label);
+    await sleep(500); await page.evaluate(() => window.scrollTo(0, 0)); await page.evaluate((id) => { const l = Array.from(document.querySelectorAll("*")).find((e) => e.children.length === 0 && (e.textContent || "").trim() === id); if (l) l.scrollIntoView(); }, mine.id); await sleep(300);
+    await H.shot(page, "33-staff-seven-private-photos-all-shown");
+    const hash = (url) => page.evaluate(async (u) => { const b = await (await fetch(u)).arrayBuffer(); const h = await crypto.subtle.digest("SHA-256", b); return Array.from(new Uint8Array(h)).map((x) => x.toString(16).padStart(2, "0")).join(""); }, url);
+    const thumbs = []; for (const u of st.tiles) thumbs.push(await hash(u));
+    assert.deepStrictEqual(thumbs, want, "thumbnail i shows exactly stored photo i (7 different images, in order)");
+    const calls = page.__logs.photoCalls.length; assert.ok(calls >= 7, "7 photos were requested through getCasePhoto: " + calls);
+    // 3. every click opens the big image of THAT photo
+    for (let i = 0; i < 7; i++) {
+      await page.evaluate(([id, i]) => {
+        const lab = Array.from(document.querySelectorAll("div")).find((e) => /^รูปที่ส่งมา/.test(Array.from(e.childNodes).filter((n) => n.nodeType === 3).map((n) => n.textContent).join("").trim()) && (() => { let a = e; for (let k = 0; k < 14 && a; k++, a = a.parentElement) if ((a.innerText || "").includes(id)) return true; return false; })());
+        lab.nextElementSibling.children[i].click();
+      }, [mine.id, i]);
+      await page.waitForSelector('img[alt="รูปทรัพย์"]', { timeout: 10000 });
+      await waitFor(async () => page.evaluate(() => { const im = document.querySelector('img[alt="รูปทรัพย์"]'); return im && im.src.startsWith("blob:") && im.complete && im.naturalWidth > 0; }), 10000, "big image " + i);
+      const src = await page.evaluate(() => document.querySelector('img[alt="รูปทรัพย์"]').src);
+      assert.strictEqual(await hash(src), want[i], "big image " + i + " is photo " + i);
+      assert.ok(new RegExp("^" + (i + 1) + " / 7").test(await page.evaluate(() => document.body.innerText.match(/\d+ \/ \d+/)[0])), "counter " + (i + 1) + " / 7");
+      if (i === 2) await H.shot(page, "34-staff-lightbox-photo-3-of-7");
+      await page.keyboard.press("Escape").catch(() => {}); await page.evaluate(() => { const im = document.querySelector('img[alt="รูปทรัพย์"]'); if (im) im.parentElement.click(); }); await sleep(250);
+    }
+    // 4. nothing public, nothing direct
+    assert.strictEqual((await db.doc("properties/" + mine.id).get()).exists, false); assert.strictEqual((await db.collection("propertyPhotos").where("propertyId", "==", mine.id).get()).size, 0);
+    assert.strictEqual(ctx.__log.external.filter((u) => /firebasestorage\.googleapis\.com/.test(u)).length, 0, "no direct Storage request");
+    assert.strictEqual(page.__logs.images.filter((x) => /firebasestorage|casePhotos/.test(x.url)).length, 0);
+    rec("B10", "Staff sees all 7 DIFFERENT private photos (thumbnail i = stored photo i, by sha-256) and each lightbox opens the matching big image 1/7…7/7; getCasePhoto calls: " + calls, "PASS (local browser + emulators)", "regression for: only the cover loaded (1 call), 6 grey tiles, clicking one opened a broken image");
+    await ctx.close();
+  });
 });

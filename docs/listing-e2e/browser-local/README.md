@@ -23,7 +23,7 @@ B1 outsider form · B2 retry + refresh · B3 double click · B4 agent own-case n
 **B6 Owner, real UI actions:** intake decision from the review panel, then the publish preview (cancel, photo-failure acknowledgement, contact data refused) and publish ·
 **B7 first navigation** of the published listing page and search, 3 runs each, exactly one navigation (no reload) ·
 **B8 slow SDK (3 s) and failed SDK:** server data on first load / explicit error state, no sample listings, no reload ·
-B9 take-down. Plus **H8** (navigation/import closure) and **H9** (TEST build has no sample fallback; data helpers wait for the SDK) in `tests/listing/hosting-build.test.js`.
+B9 take-down · **B10 Staff sees all 7 different private photos** (thumbnail i = stored photo i by sha-256; every lightbox click opens the matching big image 1/7…7/7). Plus **H8** (navigation/import closure) and **H9** (TEST build has no sample fallback; data helpers wait for the SDK) in `tests/listing/hosting-build.test.js`.
 
 **9 Mocha tests pass; scenario status is per row in `RESULTS.md`.** Fields the intake form does not collect (bedrooms, bathrooms, living area, land size, coordinates, area) are SEEDED through the Admin SDK before Staff's actions — Staff data entry in the edit form is not driven. `reviewStatus` is NOT seeded any more: Staff submits and the Owner approves through the UI.
 

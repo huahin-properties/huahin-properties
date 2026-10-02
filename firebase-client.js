@@ -467,6 +467,25 @@ async function _resolvePrivate(rows, onlyFirst) {
     try { return { ...p, dataUrl: await loader.load(p.storagePath) }; } catch (e) { return { ...p, dataUrl: "", privatePhotoError: (e && e.status) || "error" }; }
   }));
 }
+// fetchAllPhotos(...) loads only the COVER of each private Case (a list does not need 70 photos). A page that shows every photo of a Case (thumbnail strip, lightbox) calls
+// this for the rows that still have no image: it loads them through the same loader/cache with a small concurrency and reports each row as it settles
+// (patch = { dataUrl } or { dataUrl: "", privatePhotoError }), so one failed photo never hides the others.
+export async function loadRemainingPrivatePhotos(rows, concurrency, onEach) {
+  const todo = (rows || []).filter((p) => p && p.privateCopy && p.storagePath && !p.dataUrl);
+  if (!todo.length) return [];
+  const loader = await _privatePhotoLoader();
+  let next = 0; const out = [];
+  const worker = async () => {
+    for (;;) {
+      const i = next++; if (i >= todo.length) return;
+      const row = todo[i]; let patch;
+      try { patch = { dataUrl: await loader.load(row.storagePath), privatePhotoError: "" }; } catch (e) { patch = { dataUrl: "", privatePhotoError: (e && e.status) || "error" }; }
+      out.push({ id: row.id, ...patch }); if (onEach) onEach(row, patch);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.max(1, concurrency || 4) }, worker));
+  return out;
+}
 export async function fetchPhotosFor(propertyId) {
   const pub = await fetchWhere("propertyPhotos", "propertyId", propertyId);
   if (!(await _isTeamSession())) return pub;

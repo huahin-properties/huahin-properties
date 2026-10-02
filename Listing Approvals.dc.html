@@ -524,6 +524,8 @@ class Component extends DCLogic {
       });
       Object.values(actByProp).forEach((arr) => arr.sort((a, b) => (b.at || 0) - (a.at || 0)));
       this.setState({ properties: properties.filter((p) => p.listerId || p.source === "owner_submission"), listersById, suspects, reports, photosByProp, actByProp, loaded: true });
+      // fetchAllPhotos() loads only the cover of each private Case. The thumbnail strip shows EVERY photo, so load the rest here (4 at a time, each as it arrives).
+      this._loadRestPhotos(Object.keys(photosByProp));
       // C3.1 FIX: this MUST run on the success path. It was previously only
       // called from the catch block below, so a normal (successful) load never
       // restored the deep-linked case at all — ?open=conversation resolved the
@@ -801,6 +803,23 @@ class Component extends DCLogic {
       console.error("[CaseMessenger][preview] failed:", e && e.message);
       this.setState((st) => ({ previewBusy: "", previewErr: { ...(st.previewErr || {}), [p.id]: "แปลไม่สำเร็จ ลองอีกครั้ง" } }));
     }
+  }
+
+  // Loads the photos of these Cases that are still missing (private Cases: only the cover came with the list) and puts each into state as it arrives.
+  async _loadRestPhotos(ids) {
+    const rows = [];
+    (ids || []).forEach((id) => (this.state.photosByProp[id] || []).forEach((ph) => rows.push(ph)));
+    try {
+      await this._fb.loadRemainingPrivatePhotos(rows, 4, (row, patch) => this.setState((st) => {
+        const by = { ...st.photosByProp }; const list = (by[row.propertyId] || []).map((x) => (x.id === row.id ? { ...x, ...patch } : x)); by[row.propertyId] = list; return { photosByProp: by };
+      }));
+    } catch (e) { console.warn("[Approvals] loading the remaining photos failed:", e && e.message); }
+  }
+  async openPhotoLightbox(p, i) {
+    await this._loadRestPhotos([p.id]); // anything the strip has not loaded yet (a no-op when all are there)
+    const list = (this.state.photosByProp[p.id] || []);
+    // aligned with the strip: index i is ALWAYS the photo that was clicked (a photo that failed to load shows as an empty frame, it does not shift the others)
+    this.setState({ lightboxUrls: list.map((x) => x.dataUrl || x.url || ""), lightboxIndex: i });
   }
 
   // Verification is the ONE place a staff action alone completes a
@@ -1588,8 +1607,8 @@ class Component extends DCLogic {
           photoCountLabel: ((this.state.photosByProp[p.id] || []).length) + " รูป",
           submissionPhotos: (this.state.photosByProp[p.id] || []).map((ph, i) => ({
             key: ph.id || String(i),
-            style: { width: "88px", height: "66px", borderRadius: "6px", flexShrink: 0, backgroundImage: (ph.dataUrl || ph.url) ? `url('${ph.dataUrl || ph.url}')` : "none", backgroundColor: "oklch(92% 0.01 70)", backgroundSize: "cover", backgroundPosition: "center", cursor: "pointer" },
-            onClick: () => this.setState({ lightboxUrls: (this.state.photosByProp[p.id] || []).map((x) => x.dataUrl || x.url).filter(Boolean), lightboxIndex: i }),
+            style: { outline: ph.privatePhotoError ? "2px solid #c0392b" : "none", width: "88px", height: "66px", borderRadius: "6px", flexShrink: 0, backgroundImage: (ph.dataUrl || ph.url) ? `url('${ph.dataUrl || ph.url}')` : "none", backgroundColor: "oklch(92% 0.01 70)", backgroundSize: "cover", backgroundPosition: "center", cursor: "pointer" },
+            onClick: () => this.openPhotoLightbox(p, i),
           })),
           phoneHref: p.contactPhone ? "tel:" + String(p.contactPhone).replace(/[^0-9+]/g, "") : "",
           hasPhone: !!p.contactPhone,
