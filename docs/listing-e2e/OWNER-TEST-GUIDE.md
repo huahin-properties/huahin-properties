@@ -22,7 +22,7 @@
 
 **หน้าดำ = Codespace** (เปิดบนกิ่ง `claude/listing-e2e-01`)
 6. พิมพ์ `bash tools/listing-test/deploy-test.sh` → ถ้าถูกขอให้ login ทำตามที่หน้าดำบอก (วางโค้ดกลับที่หน้าดำ) → ดูแผนที่แสดง (ต้องเห็น `huahin-chat-test-01 (NOT production)`) → พิมพ์ `DEPLOY-TEST` → รอจนขึ้น `DONE. Test site: https://huahin-chat-test-01.web.app`
-   สคริปต์ deploy เฉพาะ: ฟังก์ชัน 9 ตัวตามชื่อ, Firestore rules, Storage rules, หน้าเว็บ — **ไม่มีขั้นขอคีย์ AI** ส่งภาพหน้าดำให้ Work/Code ดูได้ (ไม่มีความลับในนั้น)
+   สคริปต์ deploy เฉพาะ: ฟังก์ชัน 9 ตัวตามชื่อ **จากโฟลเดอร์แยก `build/listing-functions` ที่ไม่มี secret** (ถ้า deploy จาก `functions/` ตรงๆ Firebase CLI จะตรวจ secret ทุกตัวของระบบ — AI/Stripe/อีเมล/LINE — ใน Secret Manager ก่อนกรอง `--only` แล้ว 403 เมื่อโปรเจกต์ไม่มี; พิสูจน์ด้วยเทสต์ F1), Firestore rules, Storage rules, หน้าเว็บ — **ไม่มีขั้นขอคีย์ AI** ส่งภาพหน้าดำให้ Work/Code ดูได้ (ไม่มีความลับในนั้น)
 
 **หน้าขาว = Firebase Console อีกครั้ง (สร้างบัญชีทดสอบ 2 คน)**
 7. Authentication → Users → Add user: `owner` (อีเมลอะไรก็ได้ที่เจ้าของจำได้, รหัสผ่านตั้งเอง) และ `staff` — คัดลอก **User UID** ของแต่ละคน
@@ -53,7 +53,8 @@
 ## 4) แชท AI จริง — แยกต่างหาก (ไม่ต้องทำเพื่อทดลองฟอร์ม)
 สถานะ: **ยังไม่มีผลทดสอบ AI จริงเลย** (เทสต์ทั้งหมดใช้ AI จำลอง) และ **ห้ามกลับไปรันสคริปต์ CHAT-LIVE ที่ค้างขั้น 6/8** ถ้าจะทำ ให้ทำหลังข้อ 2 ผ่านและ Work อนุญาตเท่านั้น สิ่งที่ต้องมี:
 1. **คีย์ Anthropic ใหม่ที่ใช้เฉพาะ TEST** + วงเงินที่เจ้าของตั้งเอง — เจ้าของเป็นคนเก็บ (ผมไม่ขอ ไม่เห็น ไม่รับในแชท)
-2. หน้าดำ Codespace (ทีละคำสั่ง ตอบกลับผลก่อนไปต่อ): 
+2. **ข้อควรระวัง:** ฟังก์ชันแชทอยู่ใน `functions/index.js` ที่ประกาศ secret ทั้งระบบ — การ deploy 5 ตัวนี้ด้วย `--only` จะเจอปัญหา Secret Manager แบบเดียวกัน (ต้องมีทั้ง Secret Manager API และขั้นตอนแยกโฟลเดอร์สำหรับแชทด้วย — **ยังไม่ได้ทำ/ทดสอบ** เป็นงานแยกก่อนเริ่มข้อนี้)
+   หน้าดำ Codespace (ทีละคำสั่ง ตอบกลับผลก่อนไปต่อ): 
    `npx --yes firebase-tools@15.32.1 functions:secrets:set ANTHROPIC_API_KEY --project huahin-chat-test-01` (วางคีย์ที่ช่องซ่อนในหน้าดำนั้น)
    `npx --yes firebase-tools@15.32.1 deploy --only functions:receptionTurn,functions:getPropertyDraft,functions:updatePropertyDraft,functions:createCaseFromConversation,functions:claudeComplete --project huahin-chat-test-01`
 3. **Allow-list + เพดาน** (ไม่มี = ปฏิเสธ ไม่ใช่ไม่จำกัด): เปิดเว็บ → คัดลอก UID จากแถบเหลือง → Firestore เพิ่ม `chatTestAllow/<UID>` = `{ enabled: true }` และ `chatTestConfig/limits` = `{ globalCap: <เช่น 50>, perUidCap: <เช่น 10> }` (ตัวเลข)

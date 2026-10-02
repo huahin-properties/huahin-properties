@@ -49,6 +49,8 @@ describe("LISTING-E2E-01 deploy script (stub firebase; nothing is deployed)", fu
     const { r, log } = run([]);
     assert.strictEqual(r.status, 0, r.stdout + r.stderr);
     const d = deploys(log); assert.strictEqual(d.length, 4, d.join("\n"));
+    assert.ok(/build\/listing-functions\|deploy /.test(d[0]), "functions are deployed from the listing-only folder, never from functions/: " + d[0]);
+    assert.ok(log.some((l) => /build\/listing-functions\|npm install/.test(l)) && !log.some((l) => /functions\|npm ci/.test(l)), "libraries installed inside the listing-only folder");
     const fn = /--only (\S+) --project/.exec(d[0]); assert.ok(fn, d[0]);
     assert.deepStrictEqual(fn[1].split(",").sort(), FUNCS.map((x) => "functions:" + x).sort());
     assert.ok(/--only firestore:rules (?:--json )?--project huahin-chat-test-01$/.test(d[1]), d[1]);

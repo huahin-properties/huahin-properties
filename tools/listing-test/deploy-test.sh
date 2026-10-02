@@ -49,9 +49,12 @@ ANS="${LISTING_TEST_CONFIRM:-}"
 if [[ -z "$ANS" ]]; then read -r -p "Type DEPLOY-TEST and press Enter to continue (anything else stops): " ANS; fi
 [[ "$ANS" == "DEPLOY-TEST" ]] || die "not confirmed — nothing was deployed."
 
-say "5/7 Install the functions' libraries (the Firebase CLI needs them to read the function list), then deploy the 9 functions"
-( cd functions && $NPM ci --no-audit --no-fund ) || die "npm ci in functions/ failed — nothing was deployed."
-fb deploy --only "$(printf 'functions:%s,' ${FUNCS//,/ } | sed 's/,$//')"
+say "5/7 Build the listing-only functions folder (no secrets), install its libraries, deploy the 9 functions from it"
+# WHY a separate folder: the Firebase CLI loads ALL of functions/index.js and asks Secret Manager about EVERY secret declared there (AI, Stripe, e-mail, LINE)
+# before it applies --only — so deploying from functions/ fails on a project with no such secrets. The listing functions need none.
+node tools/listing-test/build-functions.js --out build/listing-functions || die "listing functions build refused — nothing was deployed."
+( cd build/listing-functions && $NPM install --no-audit --no-fund ) || die "npm install in build/listing-functions failed — nothing was deployed."
+( cd build/listing-functions && $FB deploy --only "$(printf 'functions:%s,' ${FUNCS//,/ } | sed 's/,$//')" --project "$PROJECT" )
 
 say "6/7 Deploy Firestore + Storage rules"
 fb deploy --only firestore:rules

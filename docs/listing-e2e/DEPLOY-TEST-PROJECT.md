@@ -12,6 +12,7 @@
 ```
 firebase deploy --only functions:submitListingCase,functions:previewListingCase,functions:publishListingCase,functions:unpublishListingCase,functions:syncListingCase,functions:addCasePhotos,functions:reconcileListingFiles,functions:listMyCases,functions:trackListingCase --project <huahin-listing-test-…>
 ```
+**รันจาก `build/listing-functions` (สร้างด้วย `node tools/listing-test/build-functions.js`) ไม่ใช่จาก `functions/`** — เพราะ Firebase CLI โหลด `functions/index.js` ทั้งไฟล์และเช็ก secret ที่ประกาศไว้ทุกตัวใน Secret Manager ก่อนกรอง `--only` (เจอจริงบน `huahin-chat-test-01`: 403 Secret Manager ANTHROPIC_API_KEY) · สคริปต์ `tools/listing-test/deploy-test.sh` ทำให้อัตโนมัติ
 (คำสั่งนี้สร้างจาก `REQUIRED_FUNCTIONS` ใน `tools/build-listing-test.js` และมีเทสต์เทียบกับเอกสารนี้)
 **ไม่ใช้/ไม่ deploy:** createCheckoutSession, createPortalSession, createFeaturedCheckoutSession, createBannerCheckoutSession, createVipCheckoutSession, stripeWebhook (Stripe) · lineAuthStart/Exchange/Callback (LINE) · notifyNewLead, notifyOwnerApproval (อีเมล/trigger) · agentProfileMeta, shareCard · startConversation, sendConversationTurn.
 **ฟังก์ชันแชท (ไม่บังคับ — ใช้เมื่อจะทดสอบแชทเท่านั้น):** `receptionTurn, getPropertyDraft, updatePropertyDraft, createCaseFromConversation, claudeComplete` — ต้องใช้ secret Anthropic ของโปรเจกต์ TEST และ allow-list; เป็นเรื่องของ CHAT-LIVE-01 (พักไว้ที่ขั้น 6/8). การทดสอบ listing ไม่ต้องใช้ AI.
