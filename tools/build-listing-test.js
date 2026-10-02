@@ -26,7 +26,9 @@ const EXCLUDED_NAV_RE = /^(baan-|condo-|pool-villa-|thidin-|hua-hin-|pranburi-|c
 // e-mail / triggers and their unrelated secrets). The chat functions are optional: they need the Anthropic secret and are deployed only when the chat widget is tested.
 const REQUIRED_FUNCTIONS = ["submitListingCase", "previewListingCase", "publishListingCase", "unpublishListingCase", "syncListingCase", "addCasePhotos", "reconcileListingFiles", "listMyCases", "trackListingCase"];
 const OPTIONAL_CHAT_FUNCTIONS = ["receptionTurn", "getPropertyDraft", "updatePropertyDraft", "createCaseFromConversation", "claudeComplete"];
-const deployFunctionsCommand = (pid, names) => "firebase deploy --only " + (names || REQUIRED_FUNCTIONS).map((n) => "functions:" + n).join(",") + " --project " + pid;
+// The selector MUST carry the codebase ("listing", set in build/listing-functions/firebase.json): Firebase CLI 15.32.1 reads a bare `functions:<name>` as the DEFAULT codebase and
+// answers "No function matches given --only filters". Run it from inside build/listing-functions.
+const deployFunctionsCommand = (pid, names) => "firebase deploy --only " + (names || REQUIRED_FUNCTIONS).map((n) => "functions:listing:" + n).join(",") + " --project " + pid;
 const REQUIRED = ["projectId", "apiKey", "appId", "messagingSenderId", "authDomain", "storageBucket", "region"];
 // The same two test prefixes the Functions (listing-case.js) and the chat gate (chat-test-gate.js) already accept. Reusing huahin-chat-test-01 therefore needs no server change.
 const PROJECT_ID_RE = /^huahin-(listing|chat)-test-[a-z0-9]+(-[a-z0-9]+)*$/;

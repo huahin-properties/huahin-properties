@@ -54,7 +54,7 @@ say "5/7 Build the listing-only functions folder (no secrets), install its libra
 # before it applies --only — so deploying from functions/ fails on a project with no such secrets. The listing functions need none.
 node tools/listing-test/build-functions.js --out build/listing-functions || die "listing functions build refused — nothing was deployed."
 ( cd build/listing-functions && $NPM install --no-audit --no-fund ) || die "npm install in build/listing-functions failed — nothing was deployed."
-( cd build/listing-functions && $FB deploy --only "$(printf 'functions:%s,' ${FUNCS//,/ } | sed 's/,$//')" --project "$PROJECT" )
+( cd build/listing-functions && $FB deploy --only "$(printf 'functions:listing:%s,' ${FUNCS//,/ } | sed 's/,$//')" --project "$PROJECT" )
 
 say "6/7 Deploy Firestore + Storage rules"
 fb deploy --only firestore:rules

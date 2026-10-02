@@ -115,7 +115,7 @@ describe("LISTING-E2E-01 TEST-only hosting build (no network, nothing deployed)"
     for (const n of REQUIRED_FUNCTIONS.concat(OPTIONAL_CHAT_FUNCTIONS)) assert.ok(exportsNow.has(n), "not exported: " + n);
     for (const bad of ["stripeWebhook", "createCheckoutSession", "lineAuthStart", "notifyNewLead", "notifyOwnerApproval", "agentProfileMeta", "shareCard"]) assert.ok(!REQUIRED_FUNCTIONS.includes(bad), bad);
     const cmd = deployFunctionsCommand("huahin-listing-test-abc");
-    assert.ok(/^firebase deploy --only functions:[A-Za-z]+(,functions:[A-Za-z]+)* --project huahin-listing-test-abc$/.test(cmd) && !/--only functions\b(?!:)/.test(cmd));
+    assert.ok(/^firebase deploy --only functions:listing:[A-Za-z]+(,functions:listing:[A-Za-z]+)* --project huahin-listing-test-abc$/.test(cmd) && !/--only functions\b(?!:)/.test(cmd));
     const guide = src("docs/listing-e2e/DEPLOY-TEST-PROJECT.md");
     assert.ok(guide.includes(cmd.replace("huahin-listing-test-abc", "<huahin-listing-test-…>")), "the guide must show exactly the generated command");
     assert.ok(!/firebase deploy --only functions( |$|`)/m.test(guide.replace(/ห้ามรัน `firebase deploy --only functions`[^\n]*/, "")), "the guide must not tell anyone to deploy all functions");
