@@ -25,7 +25,7 @@ B1 outsider form · B2 retry + refresh · B3 double click · B4 agent own-case n
 **B8 slow SDK (3 s) and failed SDK:** server data on first load / explicit error state, no sample listings, no reload ·
 B9 take-down · **B10 Staff sees all 7 different private photos** (thumbnail i = stored photo i by sha-256; every lightbox click opens the matching big image 1/7…7/7). Plus **H8** (navigation/import closure) and **H9** (TEST build has no sample fallback; data helpers wait for the SDK) in `tests/listing/hosting-build.test.js`.
 
-**9 Mocha tests pass; scenario status is per row in `RESULTS.md`.** Fields the intake form does not collect (bedrooms, bathrooms, living area, land size, coordinates, area) are SEEDED through the Admin SDK before Staff's actions — Staff data entry in the edit form is not driven. `reviewStatus` is NOT seeded any more: Staff submits and the Owner approves through the UI.
+**9 Mocha tests pass; scenario status is per row in `RESULTS.md`.** Fields the intake form does not collect are SEEDED through the Admin SDK in B5 only; **B11 enters them through the real Staff page with no seeding.** `reviewStatus` is NOT seeded any more: Staff submits and the Owner approves through the UI.
 
 ## Known limits (stay open until the real TEST project)
 * **Staff/agent private images on the real TEST project — still PENDING.** In the local run the Storage emulator DID resolve the Firestore membership lookup (Staff, a synthetic Owner and the hard-coded Owner were allowed; an unrelated uid and anonymous were refused). That is emulator evidence; the real project must confirm it.

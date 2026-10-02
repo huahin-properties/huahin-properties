@@ -105,7 +105,10 @@ class Component extends DCLogic {
     try { await fb.onAdminAuthReady(); } catch (e) {}
     const user = fb.currentAdminUser && fb.currentAdminUser();
     if (!user) { block("ต้องเข้าสู่ระบบ", "หน้านี้สำหรับทีมงานเท่านั้น"); return; }
-    let role = null; try { role = await fb.fetchAdminRole(); } catch (e) {}
+    // (observed intermittently on a fresh page load: the very first read of adminUsers/<uid> can run before the Firestore connection carries the sign-in and answers "no role";
+    // ask again a couple of times before concluding the account is not team)
+    let role = null;
+    for (let i = 0; i < 4 && role !== "staff" && role !== "owner"; i++) { if (i) await new Promise((r) => setTimeout(r, 700)); try { role = await fb.fetchAdminRole(); } catch (e) { role = null; } }
     if (role !== "staff" && role !== "owner") { block("ไม่มีสิทธิ์", "หน้านี้สำหรับทีมงานเท่านั้น — บัญชีนี้ไม่ใช่ทีมงาน"); return; }
     // (the team session cache can answer "not a team member yet" for a moment right after sign-in, which reads as "no such case" — ask again a couple of times before saying so)
     let rec = null;

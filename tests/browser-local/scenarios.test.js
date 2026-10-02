@@ -493,7 +493,8 @@ const preview = async (page, state, ms) => waitFor(async () => (await page.getAt
     assert.ok(await inCard("รับงาน"), "claim button"); await waitFor(async () => (await db.doc("caseInternal/" + id).get()).data().assignedToEmail === "staff@example.test", 15000, "claimed");
     await page.reload(); await page.waitForSelector("text=" + id, { timeout: 30000 });
     assert.ok(await inCard("แก้ไขข้อมูลทรัพย์")); await page.waitForURL(/Case%20Data/, { timeout: 15000 });
-    await page.waitForSelector('[data-f="price"]', { timeout: 20000 }); await H.shot(page, "36-staff-case-data-form-opened");
+    await page.waitForSelector('[data-f="price"]', { timeout: 20000 });
+    await H.shot(page, "36-staff-case-data-form-opened");
     assert.strictEqual(await page.locator('[data-f="price"]').inputValue(), "6100000", "the form shows the case's own price");
     // invalid first: coordinates as a share link
     await page.locator('[data-f="coordsRaw"]').fill("https://maps.app.goo.gl/abc"); await page.locator('[data-case-data-save]').click();
