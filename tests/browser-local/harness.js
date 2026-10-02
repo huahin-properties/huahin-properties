@@ -85,12 +85,8 @@ async function newContext(browser, site, opts) {
     const url = route.request().url();
     let host = ""; try { host = new URL(url).hostname; } catch (e) { /* data:, blob: */ }
     if (/^(data|blob|about):/.test(url) || !host || host === "127.0.0.1" || host === "localhost") { log.local.push(url); return route.continue(); }
-    // The page fetches PRIVATE photos with the member's ID token from the Storage REST host (private-photo.js). Locally that host is mapped onto the Storage EMULATOR
-    // (same path, same Authorization header, storage.rules still decide); nothing leaves the machine. Recorded in log.mapped.
-    if (host === "firebasestorage.googleapis.com" && /^\/v0\/b\//.test(new URL(url).pathname)) {
-      const u = new URL(url); const target = "http://" + E.stHost + ":" + E.stPort + u.pathname + u.search; log.mapped.push(url);
-      try { const res = await route.fetch({ url: target }); return route.fulfill({ response: res, headers: Object.assign({}, res.headers(), { "access-control-allow-origin": "*" }) }); } catch (e) { return route.abort("failed"); }
-    }
+    // NO mapping for firebasestorage.googleapis.com any more: a page that requests a private photo from the Storage REST host directly is blocked here (it is a
+    // cross-origin request that real browsers refuse without a bucket CORS policy — seen on the TEST project). Private photos must come through getCasePhoto.
     if (PROD.test(url) || PROD.test(host)) log.prodHits.push(url);
     const v = vendorFor(url);
     // fault injection for the first-load tests: ctx.__fault = { delayMs, failFirebase } applies to the Firebase SDK scripts only
@@ -106,13 +102,14 @@ async function newContext(browser, site, opts) {
 }
 // every page collects console errors, page errors, failed requests and HTTP >= 400 responses
 function watch(page, name) {
-  const L = { name, console: [], pageerrors: [], failed: [], bad: [], images: [], storage: [], navs: [] };
+  const L = { name, console: [], pageerrors: [], failed: [], bad: [], images: [], storage: [], photoCalls: [], navs: [] };
   page.on("framenavigated", (f) => { if (f === page.mainFrame()) L.navs.push(f.url()); });
   page.__logs = L;
   page.on("console", (m) => { if (["error", "warning"].includes(m.type())) L.console.push(m.type() + ": " + m.text().slice(0, 300)); });
   page.on("pageerror", (e) => L.pageerrors.push(String(e && e.message || e).slice(0, 300)));
   page.on("requestfailed", (r) => L.failed.push(r.method() + " " + r.url().slice(0, 160) + " :: " + (r.failure() && r.failure().errorText)));
-  page.on("response", (r) => { const s = r.status(); if (/firebasestorage\.googleapis\.com\/v0\/b\//.test(r.url())) L.storage.push({ status: s, url: r.url(), kind: r.request().resourceType() }); const u = r.url(); if (s >= 400) L.bad.push(s + " " + r.request().method() + " " + u.slice(0, 160)); if (r.request().resourceType() === "image") L.images.push({ url: u.slice(0, 140), status: s }); });
+  page.on("response", (r) => { const s = r.status(); if (/\/getCasePhoto$/.test(r.url().split("?")[0]) && r.request().method() === "POST") L.photoCalls.push({ status: s });
+    if (/firebasestorage\.googleapis\.com\/v0\/b\//.test(r.url())) L.storage.push({ status: s, url: r.url(), kind: r.request().resourceType() }); const u = r.url(); if (s >= 400) L.bad.push(s + " " + r.request().method() + " " + u.slice(0, 160)); if (r.request().resourceType() === "image") L.images.push({ url: u.slice(0, 140), status: s }); });
   return L;
 }
 

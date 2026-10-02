@@ -7,10 +7,10 @@
 
 กันพลาด: ฟังก์ชัน listing ปฏิเสธทุกคำขอ (`not_enabled`) ในโปรเจกต์ที่ id ไม่ขึ้นต้นด้วย `huahin-chat-test-` / `huahin-listing-test-` / `demo-`; ตัว build ปฏิเสธ projectId ที่ไม่ใช่ `huahin-listing-test-*`; **ฟังก์ชันแชทที่มี gate (`receptionTurn`, `getPropertyDraft`, `updatePropertyDraft`, `createCaseFromConversation`, `claudeComplete`) รู้จักโปรเจกต์ `huahin-listing-test-*` เป็นโปรเจกต์ทดสอบ "enforce" ด้วย allow-list + ID token + เพดานจำนวนครั้งชุดเดียวกับ `huahin-chat-test-*` (ไม่ได้ปิด gate)** — ทดสอบ GT1/GT20.
 
-## 1) Functions — เฉพาะที่ต้องใช้ (9 ตัว, ไม่ใช้ secret ใดๆ)
-`submitListingCase, previewListingCase, publishListingCase, unpublishListingCase, syncListingCase, addCasePhotos, reconcileListingFiles, listMyCases, trackListingCase`
+## 1) Functions — เฉพาะที่ต้องใช้ (10 ตัว, ไม่ใช้ secret ใดๆ)
+`submitListingCase, previewListingCase, publishListingCase, unpublishListingCase, syncListingCase, addCasePhotos, reconcileListingFiles, listMyCases, getCasePhoto, trackListingCase`
 ```
-firebase deploy --only functions:listing:submitListingCase,functions:listing:previewListingCase,functions:listing:publishListingCase,functions:listing:unpublishListingCase,functions:listing:syncListingCase,functions:listing:addCasePhotos,functions:listing:reconcileListingFiles,functions:listing:listMyCases,functions:listing:trackListingCase --project <huahin-listing-test-…>
+firebase deploy --only functions:listing:submitListingCase,functions:listing:previewListingCase,functions:listing:publishListingCase,functions:listing:unpublishListingCase,functions:listing:syncListingCase,functions:listing:addCasePhotos,functions:listing:reconcileListingFiles,functions:listing:listMyCases,functions:listing:getCasePhoto,functions:listing:trackListingCase --project <huahin-listing-test-…>
 ```
 **ตัวเลือก `--only` ต้องมีชื่อ codebase `listing` (`functions:listing:<ชื่อ>`) — Firebase CLI 15.32.1 อ่าน `functions:<ชื่อ>` เฉยๆ เป็น codebase `default` แล้วตอบ "No function matches given --only filters"; รันจาก `build/listing-functions` (สร้างด้วย `node tools/listing-test/build-functions.js`) ไม่ใช่จาก `functions/`** — เพราะ Firebase CLI โหลด `functions/index.js` ทั้งไฟล์และเช็ก secret ที่ประกาศไว้ทุกตัวใน Secret Manager ก่อนกรอง `--only` (เจอจริงบน `huahin-chat-test-01`: 403 Secret Manager ANTHROPIC_API_KEY) · สคริปต์ `tools/listing-test/deploy-test.sh` ทำให้อัตโนมัติ
 (คำสั่งนี้สร้างจาก `REQUIRED_FUNCTIONS` ใน `tools/build-listing-test.js` และมีเทสต์เทียบกับเอกสารนี้)
@@ -47,4 +47,4 @@ Guard ของหน้า TEST แสดง UID ของผู้ทดสอ
 บัญชี (ข้อมูลสังเคราะห์เท่านั้น): Owner = ผู้ใช้อีเมล/รหัสผ่านที่มีเอกสาร `adminUsers/{uid}` role `owner` · Staff = `adminUsers/{uid}` role `staff` · เอเจนต์ = `listers/{uid}`.
 
 ## 7) ขั้นตอนของ Owner (ทีละขั้น — ยังไม่ต้องทำ)
-1. [Work ตรวจ PR + ผล BROWSER-LOCAL-01] → 2. [Owner สร้างโปรเจกต์ TEST + เว็บแอป ส่ง config ที่ไม่ใช่ความลับ] → 3. [Claude Code รัน build + ตรวจ MANIFEST/สแกน] → 4. [หน้าดำ Codespace: deploy ทีละคำสั่ง: functions (9 ตัว) → firestore:rules → storage → hosting (จากในโฟลเดอร์ build); ยืนยันผลทีละคำสั่ง] → 5. [สร้างบัญชีทดสอบ 3 บทบาท] → 6. [ทดสอบ browser 3 กลุ่มด้วยข้อมูลสังเคราะห์] → 7. [Owner ตัดสิน GREEN/ไม่ผ่าน]
+1. [Work ตรวจ PR + ผล BROWSER-LOCAL-01] → 2. [Owner สร้างโปรเจกต์ TEST + เว็บแอป ส่ง config ที่ไม่ใช่ความลับ] → 3. [Claude Code รัน build + ตรวจ MANIFEST/สแกน] → 4. [หน้าดำ Codespace: deploy ทีละคำสั่ง: functions (10 ตัว) → firestore:rules → storage → hosting (จากในโฟลเดอร์ build); ยืนยันผลทีละคำสั่ง] → 5. [สร้างบัญชีทดสอบ 3 บทบาท] → 6. [ทดสอบ browser 3 กลุ่มด้วยข้อมูลสังเคราะห์] → 7. [Owner ตัดสิน GREEN/ไม่ผ่าน]

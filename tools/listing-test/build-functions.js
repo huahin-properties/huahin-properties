@@ -10,7 +10,7 @@
 const fs = require("fs");
 const path = require("path");
 const ROOT = path.resolve(__dirname, "..", "..");
-const NAMES = ["submitListingCase", "previewListingCase", "publishListingCase", "unpublishListingCase", "syncListingCase", "addCasePhotos", "reconcileListingFiles", "listMyCases", "trackListingCase"];
+const NAMES = ["submitListingCase", "previewListingCase", "publishListingCase", "unpublishListingCase", "syncListingCase", "addCasePhotos", "reconcileListingFiles", "listMyCases", "trackListingCase", "getCasePhoto"];
 const FILES = ["listing-case.js", "photo-standard.js", "case-fields.js", "submission-checklist.js"];
 function fail(m) { const e = new Error(m); e.listingFunctions = true; throw e; }
 

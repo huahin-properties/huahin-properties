@@ -22,7 +22,7 @@
 
 **หน้าดำ = Codespace** (เปิดบนกิ่ง `claude/listing-e2e-01`)
 6. พิมพ์ `bash tools/listing-test/deploy-test.sh` → ถ้าถูกขอให้ login ทำตามที่หน้าดำบอก (วางโค้ดกลับที่หน้าดำ) → ดูแผนที่แสดง (ต้องเห็น `huahin-chat-test-01 (NOT production)`) → พิมพ์ `DEPLOY-TEST` → รอจนขึ้น `DONE. Test site: https://huahin-chat-test-01.web.app`
-   สคริปต์ deploy เฉพาะ: ฟังก์ชัน 9 ตัวตามชื่อ **จากโฟลเดอร์แยก `build/listing-functions` ที่ไม่มี secret (ตัวเลือก `functions:listing:<ชื่อ>` — ต้องมีชื่อ codebase)** (ถ้า deploy จาก `functions/` ตรงๆ Firebase CLI จะตรวจ secret ทุกตัวของระบบ — AI/Stripe/อีเมล/LINE — ใน Secret Manager ก่อนกรอง `--only` แล้ว 403 เมื่อโปรเจกต์ไม่มี; พิสูจน์ด้วยเทสต์ F1), Firestore rules, Storage rules, หน้าเว็บ — **ไม่มีขั้นขอคีย์ AI** ส่งภาพหน้าดำให้ Work/Code ดูได้ (ไม่มีความลับในนั้น)
+   สคริปต์ deploy เฉพาะ: ฟังก์ชัน 10 ตัวตามชื่อ **จากโฟลเดอร์แยก `build/listing-functions` ที่ไม่มี secret (ตัวเลือก `functions:listing:<ชื่อ>` — ต้องมีชื่อ codebase)** (ถ้า deploy จาก `functions/` ตรงๆ Firebase CLI จะตรวจ secret ทุกตัวของระบบ — AI/Stripe/อีเมล/LINE — ใน Secret Manager ก่อนกรอง `--only` แล้ว 403 เมื่อโปรเจกต์ไม่มี; พิสูจน์ด้วยเทสต์ F1), Firestore rules, Storage rules, หน้าเว็บ — **ไม่มีขั้นขอคีย์ AI** ส่งภาพหน้าดำให้ Work/Code ดูได้ (ไม่มีความลับในนั้น)
 
 **หน้าขาว = Firebase Console อีกครั้ง (สร้างบัญชีทดสอบ 2 คน)**
 7. Authentication → Users → Add user: `owner` (อีเมลอะไรก็ได้ที่เจ้าของจำได้, รหัสผ่านตั้งเอง) และ `staff` — คัดลอก **User UID** ของแต่ละคน
@@ -41,6 +41,12 @@
 | 6 | ใครก็ได้ (incognito) | `/Search%20Results.dc.html` แล้วเปิดประกาศ | เปิดหน้าครั้งแรก **ไม่รีโหลด** | ประกาศพร้อมรูปแสดงทันที; เคสที่ยังไม่อนุมัติไม่ปรากฏ |
 | 7 | Owner | การ์ดเคสเดิม | **⛔ ปิดประกาศ** (ใส่เหตุผล) | ประกาศหายจากหน้าสาธารณะ ลิงก์รูปเดิมใช้ไม่ได้ |
 ผ่านหรือไม่ผ่านทุกข้อ ส่งภาพหน้าจอให้ Work/Code; ถ้าเจออะไรผิดปกติ ให้ส่งภาพหน้าจอพร้อมบอกว่าเป็นข้อไหน
+
+## 2b) อัปเดตเว็บ TEST ที่ deploy ไปแล้ว (รักษาเคสและรูปเดิม — เจ้าของไม่ต้องส่งใหม่)
+เหตุ: Staff เห็นช่องรูปสีเทาบน TEST จริง — หน้าเว็บขอรูปส่วนตัวจาก Storage ตรงๆ พร้อม header `Authorization` ซึ่งเบราว์เซอร์ **บล็อกด้วย CORS** (`No 'Access-Control-Allow-Origin'`) เพราะ bucket ยังไม่มีนโยบาย CORS. แก้โดยให้หน้าขอรูปผ่านฟังก์ชัน `getCasePhoto` (เฉพาะ Owner/Staff, เฉพาะรูปส่วนตัวที่บันทึกไว้ของเคสนั้น, ไม่มี token, ไม่เปิดเป็นสาธารณะ) → **ไม่ต้องตั้งค่า bucket CORS เลย**
+หน้าดำ Codespace: `git pull origin claude/listing-e2e-01` แล้ว `bash tools/listing-test/deploy-test.sh huahin-chat-test-01` → พิมพ์ `DEPLOY-TEST` (รันซ้ำได้: ฟังก์ชัน 10 ตัวถูกเขียนทับ, rules เดิม, หน้าเว็บถูกแทนที่; **ข้อมูลใน Firestore และไฟล์ใน Storage ไม่ถูกแตะ** เคส/รูปเดิมยังอยู่)
+จากนั้นหน้าเบราว์เซอร์: เปิด `/Listing%20Approvals.dc.html` ด้วย Staff แล้วกด **Ctrl+Shift+R** (ล้างแคช) → รูปควรขึ้น; ถ้ายังเทา: F12 → Network → ดูรายการ `getCasePhoto` (สถานะ 200 = ผ่าน, 403 = บัญชีนี้ไม่มีเอกสาร `adminUsers`, 404 `photo_not_recorded` = เคสไม่มีรูปที่บันทึกไว้) แล้วส่งภาพมา
+หมายเหตุ: รายการ `GET /%7B%7B lightboxSrc %7D%7D → 404` ในแท็บ Network เป็นเสียงรบกวนเดิมของตัวรันหน้า (ขอรูปจากเทมเพลตก่อน bind) ไม่ใช่สาเหตุของช่องเทา
 
 ## 3) ขั้นนี้ยังไม่เคยพิสูจน์ (บอกตรงๆ)
 - **ข้อ 4 (Staff กรอกขนาดที่ดิน/พิกัดในฟอร์มแก้ไข)**: ปุ่ม ✏️ พาไป `Lister Dashboard.dc.html?edit=…&from=case` — **ไม่เคยทดสอบใน browser** (เทสต์เดิมใส่ค่าเหล่านี้ผ่านฐานข้อมูล) ถ้าบันทึกไม่ได้ ให้ส่งภาพ; Code แก้เฉพาะจุดนี้

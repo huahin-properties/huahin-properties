@@ -12,7 +12,7 @@ fs.cpSync(SOURCE, ROOT, { recursive: true, filter: (src) => ![".git", "node_modu
 const SCRIPT = path.join(ROOT, "tools", "listing-test", "deploy-test.sh");
 const P = "huahin-chat-test-01";
 const FUNCS_Q = (n) => "functions:listing:" + n;
-const FUNCS = ["submitListingCase", "previewListingCase", "publishListingCase", "unpublishListingCase", "syncListingCase", "addCasePhotos", "reconcileListingFiles", "listMyCases", "trackListingCase"];
+const FUNCS = ["submitListingCase", "previewListingCase", "publishListingCase", "unpublishListingCase", "syncListingCase", "addCasePhotos", "reconcileListingFiles", "listMyCases", "getCasePhoto", "trackListingCase"];
 const sdk = (p) => `const firebaseConfig = {\n  apiKey: "FAKE-WEB-KEY-NOT-REAL",\n  authDomain: "${p}.firebaseapp.com",\n  projectId: "${p}",\n  storageBucket: "${p}.firebasestorage.app",\n  messagingSenderId: "111111111111",\n  appId: "1:111111111111:web:abcdef0123456789"\n};`;
 
 function stub(dir, o) {
@@ -52,7 +52,7 @@ describe("LISTING-E2E-01 deploy script (stub firebase; nothing is deployed)", fu
   this.timeout(60000);
   before(clean); after(() => fs.rmSync(ROOT, { recursive: true, force: true }));
 
-  it("L1 happy path on huahin-chat-test-01: 9 NAMED functions, firestore rules, storage, hosting from build/listing-test; --project on every call; no secret step; never production", () => {
+  it("L1 happy path on huahin-chat-test-01: 10 NAMED functions, firestore rules, storage, hosting from build/listing-test; --project on every call; no secret step; never production", () => {
     const { r, log } = run([]);
     assert.strictEqual(r.status, 0, r.stdout + r.stderr);
     const d = deploys(log); assert.strictEqual(d.length, 4, d.join("\n"));
@@ -84,7 +84,7 @@ describe("LISTING-E2E-01 deploy script (stub firebase; nothing is deployed)", fu
   });
 
   // The stub cannot tell a wrong selector from a right one — the REAL Firebase CLI (15.32.1) selector code can.
-  it("L4 the --only value the script sends is accepted by the REAL Firebase CLI 15.32.1 selector parsing for the generated listing codebase: all 9 endpoints match, the chat/Stripe functions do not, and the old bare selector is refused", function () {
+  it("L4 the --only value the script sends is accepted by the REAL Firebase CLI 15.32.1 selector parsing for the generated listing codebase: all 10 endpoints match, the chat/Stripe functions do not, and the old bare selector is refused", function () {
     const cli = findCli(); if (!cli) return this.skip();
     const helper = require(path.join(cli, "lib/deploy/functions/functionsDeployHelper.js"));
     const { normalizeAndValidate } = require(path.join(cli, "lib/functions/projectConfig.js"));
@@ -93,7 +93,7 @@ describe("LISTING-E2E-01 deploy script (stub firebase; nothing is deployed)", fu
     const outDir = path.join(ROOT, "build", "listing-functions");
     const config = normalizeAndValidate(JSON.parse(fs.readFileSync(path.join(outDir, "firebase.json"), "utf8")).functions);
     const filters = helper.getEndpointFilters({ only }, config);
-    assert.strictEqual(filters.length, 9);
+    assert.strictEqual(filters.length, 10);
     assert.deepStrictEqual(helper.targetCodebases(config, filters), ["listing"], "the filters select the listing codebase");
     const ep = (id) => ({ id, codebase: "listing" });
     for (const n of FUNCS) assert.ok(helper.endpointMatchesAnyFilter(ep(n), filters), n + " matches");

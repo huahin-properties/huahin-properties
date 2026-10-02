@@ -449,13 +449,13 @@ function _mergePhotoLists(pub, priv) {
   (pub || []).forEach((p) => by.set(p.id, p));
   return Array.from(by.values());
 }
-// Private copies are stored WITHOUT a download token (storage.rules: team read only). The team's browser fetches the bytes with its own ID token and
-// shows an in-memory object URL (private-photo.js); nothing is minted, stored or shareable. `onlyFirst`: lists need just the cover of each Case.
+// Private copies are stored WITHOUT a download token (storage.rules: team read only). The team's browser asks the getCasePhoto function (team members only; a direct
+// Storage request from the page is blocked by CORS unless the bucket has a policy) and shows an in-memory object URL (private-photo.js); nothing is minted, stored or shareable. `onlyFirst`: lists need just the cover of each Case.
 let _privateLoader = null;
 async function _privatePhotoLoader() {
   if (!_privateLoader) {
     const { createPrivatePhotoLoader } = await import("./private-photo.js");
-    _privateLoader = createPrivatePhotoLoader({ bucket: firebaseConfig.storageBucket, getIdToken: async () => { const u = authApp() && authApp().currentUser; return u ? u.getIdToken() : null; } });
+    _privateLoader = createPrivatePhotoLoader({ callFn });
   }
   return _privateLoader;
 }

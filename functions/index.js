@@ -1843,6 +1843,10 @@ exports.listMyCases = onCall(
   { region: "asia-southeast1", timeoutSeconds: 60 },
   (request) => listingCase.listMyCases({ admin, HttpsError, request })
 );
+exports.getCasePhoto = onCall(
+  { region: "asia-southeast1", timeoutSeconds: 60, memory: "512MiB" },
+  (request) => listingCase.getCasePhoto({ admin, HttpsError, request })
+);
 exports.previewListingCase = onCall(
   { region: "asia-southeast1", timeoutSeconds: 60 },
   (request) => listingCase.previewListingCase({ admin, HttpsError, request })

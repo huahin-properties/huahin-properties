@@ -2,12 +2,12 @@
 # LISTING-E2E-01 — puts the LISTING TEST site on a TEST Firebase project. Run it in the owner's Codespace terminal (the black screen).
 #   bash tools/listing-test/deploy-test.sh [project-id]        default: huahin-chat-test-01
 # Refuses anything that is not huahin-chat-test-* / huahin-listing-test-*; puts --project on EVERY Firebase call (never relies on .firebaserc, which is
-# production); asks you to type DEPLOY-TEST before the first deploy; deploys ONLY: Firestore rules, Storage rules, 9 NAMED functions, the test web page.
+# production); asks you to type DEPLOY-TEST before the first deploy; deploys ONLY: Firestore rules, Storage rules, 10 NAMED functions, the test web page.
 # No AI key, no secret, no Stripe/LINE/e-mail functions. This is NOT the old CHAT-LIVE script (tools/chat-live/deploy-test.sh) and does not touch it.
 set -euo pipefail
 PROJECT="${1:-huahin-chat-test-01}"
 PROD="huahin-properties-5f1b5"
-FUNCS="submitListingCase,previewListingCase,publishListingCase,unpublishListingCase,syncListingCase,addCasePhotos,reconcileListingFiles,listMyCases,trackListingCase"
+FUNCS="submitListingCase,previewListingCase,publishListingCase,unpublishListingCase,syncListingCase,addCasePhotos,reconcileListingFiles,listMyCases,getCasePhoto,trackListingCase"
 say() { printf '\n== %s\n' "$*"; }
 die() { printf '\nSTOP: %s\n' "$*" >&2; exit 1; }
 [[ "$PROJECT" != "$PROD" ]] || die "that is the PRODUCTION project. This script only works on a TEST project."
@@ -40,7 +40,7 @@ say "4/7 Plan"
 cat <<PLAN
 Project : $PROJECT   (NOT production)
 Deploys : Firestore rules, Storage rules,
-          9 functions: ${FUNCS//,/, }
+          10 functions: ${FUNCS//,/, }
           test web page (build/listing-test) -> https://$PROJECT.web.app
 Never   : other functions, Stripe, e-mail, LINE, any AI key, production.
 NOTE    : this replaces the test web page and the Firestore/Storage rules of $PROJECT.
@@ -49,7 +49,7 @@ ANS="${LISTING_TEST_CONFIRM:-}"
 if [[ -z "$ANS" ]]; then read -r -p "Type DEPLOY-TEST and press Enter to continue (anything else stops): " ANS; fi
 [[ "$ANS" == "DEPLOY-TEST" ]] || die "not confirmed — nothing was deployed."
 
-say "5/7 Build the listing-only functions folder (no secrets), install its libraries, deploy the 9 functions from it"
+say "5/7 Build the listing-only functions folder (no secrets), install its libraries, deploy the 10 functions from it"
 # WHY a separate folder: the Firebase CLI loads ALL of functions/index.js and asks Secret Manager about EVERY secret declared there (AI, Stripe, e-mail, LINE)
 # before it applies --only — so deploying from functions/ fails on a project with no such secrets. The listing functions need none.
 node tools/listing-test/build-functions.js --out build/listing-functions || die "listing functions build refused — nothing was deployed."

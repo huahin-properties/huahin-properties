@@ -24,7 +24,7 @@ const ADMIN_TOOLS_NOT_IN_TEST = ["Property Map.dc.html", "Owners.dc.html", "Site
 const EXCLUDED_NAV_RE = /^(baan-|condo-|pool-villa-|thidin-|hua-hin-|pranburi-|cha-am-)[a-z0-9-]*\.html$/;
 // The Cloud Functions the listing TEST site needs — by name. NEVER `firebase deploy --only functions` (that deploys every export, including Stripe / LINE /
 // e-mail / triggers and their unrelated secrets). The chat functions are optional: they need the Anthropic secret and are deployed only when the chat widget is tested.
-const REQUIRED_FUNCTIONS = ["submitListingCase", "previewListingCase", "publishListingCase", "unpublishListingCase", "syncListingCase", "addCasePhotos", "reconcileListingFiles", "listMyCases", "trackListingCase"];
+const REQUIRED_FUNCTIONS = ["submitListingCase", "previewListingCase", "publishListingCase", "unpublishListingCase", "syncListingCase", "addCasePhotos", "reconcileListingFiles", "listMyCases", "getCasePhoto", "trackListingCase"];
 const OPTIONAL_CHAT_FUNCTIONS = ["receptionTurn", "getPropertyDraft", "updatePropertyDraft", "createCaseFromConversation", "claudeComplete"];
 // The selector MUST carry the codebase ("listing", set in build/listing-functions/firebase.json): Firebase CLI 15.32.1 reads a bare `functions:<name>` as the DEFAULT codebase and
 // answers "No function matches given --only filters". Run it from inside build/listing-functions.

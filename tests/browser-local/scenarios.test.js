@@ -267,12 +267,14 @@ const preview = async (page, state, ms) => waitFor(async () => (await page.getAt
     // the real viewing action: click the first thumbnail under "รูปที่ส่งมา" (it opens the lightbox, which loads the private photo with the member's ID token)
     const clicked = await page.evaluate((id) => { const ls = Array.from(document.querySelectorAll("div")).filter((e) => /^รูปที่ส่งมา/.test(Array.from(e.childNodes).filter((n) => n.nodeType === 3).map((n) => n.textContent).join("").trim())); for (const l of ls) { let a = l; for (let i = 0; i < 14 && a; i++, a = a.parentElement) { if ((a.innerText || "").includes(id) && l.nextElementSibling && l.nextElementSibling.firstElementChild) { l.nextElementSibling.firstElementChild.click(); return true; } } } return false; }, ids.outsiderCase);
     assert.ok(clicked, "found the submitted-photo thumbnail in the card"); await sleep(4000);
-    const attempts = page.__logs.storage.filter((x) => /alt=media/.test(x.url)); // (the page fetches the card thumbnail when it loads; the lightbox reuses the cached in-memory blob)
+    const attempts = page.__logs.photoCalls; // (the page asks getCasePhoto for the card thumbnail when it loads; the lightbox reuses the cached in-memory blob)
     const lightbox = await page.evaluate(() => Array.from(document.querySelectorAll("img")).filter((i) => i.alt === "รูปทรัพย์").map((i) => ({ src: i.src.split(":")[0], w: i.naturalWidth })));
     await H.shot(page, "19-staff-opens-private-photo");
-    assert.ok(attempts.length >= 1, "the page attempted Storage requests for the private photo (otherwise nothing is proven)");
+    assert.ok(attempts.length >= 1, "the page asked getCasePhoto for the private photo (otherwise nothing is proven)");
     assert.ok(lightbox.length >= 1, "the lightbox element is open");
-    const outcome = attempts.every((a) => a.status === 200) && lightbox.some((l) => l.src === "blob" && l.w > 0) ? "ALLOWED: request 200 and the image rendered" : "DENIED/FAILED: statuses " + JSON.stringify(attempts.map((a) => a.status)) + ", lightbox " + JSON.stringify(lightbox);
+    assert.strictEqual(page.context().__log.external.filter((u) => /firebasestorage\.googleapis\.com/.test(u)).length, 0, "the page never requests Storage REST directly (that is what real-browser CORS blocks)");
+    assert.strictEqual(page.__logs.images.filter((i) => /alt=media|casePhotos|firebasestorage/.test(i.url)).length, 0, "no <img> points at Storage");
+    const outcome = attempts.every((a) => a.status === 200) && lightbox.some((l) => l.src === "blob" && l.w > 0) ? "ALLOWED: getCasePhoto 200 and the image rendered" : "DENIED/FAILED: statuses " + JSON.stringify(attempts.map((a) => a.status)) + ", lightbox " + JSON.stringify(lightbox);
     // identities, exercised with the same transport (ID token → Storage REST); synthetic Owner uid comes from adminUsers, not the hard-coded one
     const [pc] = (await db.collection("casePhotos").where("propertyId", "==", ids.outsiderCase).get()).docs; const path = pc.data().storagePath;
     ids.owner2 = await mkUser("owner2@example.test"); await db.doc("adminUsers/" + ids.owner2).set({ role: "owner", email: "owner2@example.test", displayName: "Synthetic Owner 2" });
@@ -284,8 +286,12 @@ const preview = async (page, state, ms) => waitFor(async () => (await page.getAt
       "no credentials": await mediaStatus(null, path),
     };
     rec("B5a", "Staff from the UI: claim → 4 verifications → submit for review (DB: assignedTo, verifications, lastSubmissionId); no approve button for Staff", "PASS (local browser + emulators)", "SEEDED through the Admin SDK (not Staff data entry): " + Object.keys(seeded).join(", "));
-    rec("B5b", "Staff opens a private photo from the UI (the page loads the thumbnail with Staff's ID token; clicking it opens the lightbox)", "UI invoked + " + attempts.length + " Storage request(s) — " + outcome, "UI invocation + rendering = evidence of the page; the permission result is EMULATOR evidence (the Storage emulator resolved the Firestore membership lookup in this run) — the real TEST project must still confirm it");
-    rec("B5c", "private-image transport by identity (ID token → Storage emulator)", Object.entries(st).map(([k, v]) => k + " → " + v).join("; "), "emulator evidence only; real cross-service Storage on the TEST project stays PENDING");
+    rec("B5b", "Staff opens a private photo from the UI (the page loads the thumbnail through getCasePhoto; clicking it opens the lightbox)", "UI invoked + " + attempts.length + " getCasePhoto call(s) — " + outcome, "UI invocation + rendering = evidence of the page; the permission result is EMULATOR evidence (the Storage emulator resolved the Firestore membership lookup in this run) — the real TEST project must still confirm it");
+    rec("B5c", "storage.rules by identity (ID token → Storage emulator REST, NOT used by the page any more)", Object.entries(st).map(([k, v]) => k + " → " + v).join("; "), "emulator evidence only; real cross-service Storage on the TEST project stays PENDING");
+    const callable = async (token) => { const E = H.emulators(); const r = await fetch("http://" + E.fnHost + ":" + E.fnPort + "/" + H.PROJECT + "/asia-southeast1/getCasePhoto", { method: "POST", headers: Object.assign({ "content-type": "application/json" }, token ? { Authorization: "Bearer " + token } : {}), body: JSON.stringify({ data: { propertyId: ids.outsiderCase, path } }) }); const j = await r.json().catch(() => ({})); return r.status + (j.result && j.result.base64 ? " bytes" : j.error ? " " + j.error.status : ""); };
+    const fnm = { "hard-coded Owner uid": await callable(await idToken("owner@example.test")), "synthetic Owner (adminUsers role owner)": await callable(await idToken("owner2@example.test")), "ordinary Staff": await callable(await idToken("staff@example.test")), "unrelated signed-in uid (agent2)": await callable(await idToken("agent2@example.test")), "no credentials": await callable(null) };
+    assert.deepStrictEqual(Object.values(fnm), ["200 bytes", "200 bytes", "200 bytes", "403 PERMISSION_DENIED", "401 UNAUTHENTICATED"], JSON.stringify(fnm));
+    rec("B5d", "private-image access through getCasePhoto (the transport the page uses), by identity", Object.entries(fnm).map(([k, v]) => k + " → " + v).join("; "), "local Functions emulator + real function code; the real TEST project must repeat it");
     assert.strictEqual(st["unrelated signed-in uid (agent2)"] === 200, false, "an unrelated signed-in uid must not read the private photo");
     assert.strictEqual(st["no credentials"] === 200, false, "no credentials must not read the private photo");
     await ctx.close();
@@ -307,7 +313,7 @@ const preview = async (page, state, ms) => waitFor(async () => (await page.getAt
     rec("B6a", "Owner intake decision from the UI (no Admin SDK seeding of reviewStatus)", "PASS (local browser + emulators)", "reviewStatus approved by the click; approver recorded");
     // ── preview 1: photo downloads fail → needs acknowledgement; cancel
     let blockMedia = true;
-    await ctx.route(/casePhotos[^?]*\?[^ ]*alt=media/, (route) => (blockMedia ? route.abort("failed") : route.fallback()));
+    await ctx.route(/\/getCasePhoto$/, (route) => (blockMedia ? route.abort("failed") : route.fallback()));
     await openCase(page); await clickInCase(page, APPROVE); await page.waitForSelector("[data-preview-confirm]");
     await preview(page, "needs-ack");
     assert.strictEqual(await page.locator("[data-preview-confirm]").isDisabled(), true, "confirm disabled while photos failed and unacknowledged");
@@ -338,7 +344,7 @@ const preview = async (page, state, ms) => waitFor(async () => (await page.getAt
     assert.strictEqual((await db.collection("propertyPhotos").where("propertyId", "==", ids.outsiderCase).get()).size, 2);
     const rc = (await db.doc("caseInternal/" + ids.outsiderCase).get()).data(); assert.strictEqual(rc.approvedByRole, "owner"); assert.strictEqual(rc.approvedByUid, ids.owner);
     await sleep(1500); await H.shot(page, "26-owner-approvals-after-publish");
-    assert.deepStrictEqual(unexpected(page.__logs, [/casePhotos[^ ]*alt=media[^ ]* :: net::ERR_(FAILED|BLOCKED_BY_CLIENT)/]), [], "unexpected browser problems (owner; the injected photo-download failure is the only allowed one)");
+    assert.deepStrictEqual(unexpected(page.__logs, [/getCasePhoto :: net::ERR_(FAILED|BLOCKED_BY_CLIENT)/, /getCasePhoto :: net::ERR_FAILED/]), [], "unexpected browser problems (owner; the injected photo-download failure is the only allowed one)");
     ids.ownerPage = page; ids.ownerCtx = ctx;
     rec("B6", "owner: preview cancel = no change; failed photos need acknowledgement; ready shows the 2 photos that will be public; contact in public text refused in the dialog; confirm publishes", "PASS (local browser + emulators)", "approvedBy recorded; 2 public photos");
   });

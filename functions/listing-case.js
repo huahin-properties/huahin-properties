@@ -782,4 +782,27 @@ async function trackListingCase({ admin, HttpsError, request }) {
   };
 }
 
-module.exports = { isEnabled, hooks, listMyCases, submitListingCase, previewListingCase, publishListingCase, unpublishListingCase, syncListingCase, addCasePhotos, reconcileListingFiles, trackListingCase, resolveActor, caseIdFor, validateSubmission, PHOTO_STANDARD, OWNER_UID, TYPES, MAX_PHOTOS };
+// LISTING-E2E-01 — a team member's view of a PRIVATE (pending-review) photo. Why a function and not a direct Storage request from the page: a browser page on
+// <project>.web.app fetching firebasestorage.googleapis.com with an Authorization header is a cross-origin request; unless the BUCKET has a CORS policy the browser
+// blocks it ("No 'Access-Control-Allow-Origin' header", seen on the real TEST project). Callable functions answer CORS themselves, so no bucket setting is needed.
+// Nothing is made public and no download token exists: the caller must be Owner/Staff (adminUsers), the path must be a RECORDED private photo of that Case
+// (casePhotos/<case>/…, listed in a casePhotos document), and the bytes are returned in the response only.
+const MAX_PRIVATE_PHOTO_BYTES = 6 * 1024 * 1024; // base64 grows by a third; a callable response is capped at 10 MB
+async function getCasePhoto({ admin, HttpsError, request }) {
+  assertEnabled(HttpsError);
+  await requireTeam(admin, HttpsError, request);
+  const d = request.data || {};
+  const id = d.propertyId, p = d.path;
+  if (!isStr(id) || !id || id.length > 200 || id.includes("/") || !isStr(p) || p.length > 500) throw new HttpsError("invalid-argument", "bad_request");
+  if (!p.startsWith("casePhotos/" + id + "/") || p.includes("..") || p.includes("//")) throw new HttpsError("invalid-argument", "bad_photo_path");
+  const rec = await admin.firestore().collection("casePhotos").where("propertyId", "==", id).get();
+  if (!rec.docs.some((x) => (x.data() || {}).storagePath === p)) throw new HttpsError("not-found", "photo_not_recorded");
+  const file = bucketFor(admin).file(p);
+  let meta;
+  try { [meta] = await file.getMetadata(); } catch (e) { throw new HttpsError("not-found", "photo_missing"); }
+  if (Number(meta.size) > MAX_PRIVATE_PHOTO_BYTES) throw new HttpsError("failed-precondition", "photo_too_large");
+  const [buf] = await file.download();
+  return { contentType: /^image\//.test(meta.contentType || "") ? meta.contentType : "application/octet-stream", base64: buf.toString("base64") };
+}
+
+module.exports = { getCasePhoto, isEnabled, hooks, listMyCases, submitListingCase, previewListingCase, publishListingCase, unpublishListingCase, syncListingCase, addCasePhotos, reconcileListingFiles, trackListingCase, resolveActor, caseIdFor, validateSubmission, PHOTO_STANDARD, OWNER_UID, TYPES, MAX_PHOTOS };
