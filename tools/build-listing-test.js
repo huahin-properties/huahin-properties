@@ -13,7 +13,7 @@ const ROOT = path.resolve(__dirname, "..");
 const PRODUCTION_PROJECT = "huahin-properties-5f1b5";
 // The pages that make up the test (entry points). Everything they import is added automatically (closure below).
 const ENTRIES = ["index.html", "Owner Submission.dc.html", "Track Submission.dc.html", "Admin Login.dc.html", "Admin Dashboard.dc.html", "Listing Approvals.dc.html",
-  "Staff Workspace.dc.html", "Lister Dashboard.dc.html", "Agent Signup.dc.html", "Agent Profile.dc.html", "Leads.dc.html", "Staff Handbook.dc.html",
+  "Staff Workspace.dc.html", "Case Data.dc.html", "Lister Dashboard.dc.html", "Agent Signup.dc.html", "Agent Profile.dc.html", "Leads.dc.html", "Staff Handbook.dc.html",
   "Property Details.dc.html", "Search Results.dc.html", "Home.dc.html", "About.dc.html", "Contact.dc.html"];
 // Pages the built site links to but deliberately does NOT ship (a link to one of them is a 404 on the test site — by design, listed so nobody mistakes it for a bug):
 //   Lister Billing (Stripe checkout/portal), Performance, Collection View, and the static SEO landing pages (baan-*.html, condo-*.html, pool-villa-*.html, thidin-*.html, ...).

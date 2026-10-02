@@ -1564,7 +1564,8 @@ class Component extends DCLogic {
           // Opens THIS property in the existing editor and carries only the
           // case id back — no trackToken, no arbitrary return URL.
           onEditProperty: () => {
-            window.location.href = "Lister Dashboard.dc.html?edit=" + encodeURIComponent(p.id) + "&from=case";
+            // Staff are (rightly) kept out of Lister Dashboard; the case data has its own team-only page that edits only the Case record.
+            window.location.href = "Case Data.dc.html?id=" + encodeURIComponent(p.id);
           },
           onSendReply: () => this.sendCaseReply(p),
           onPreviewReply: () => this.previewReply(p),

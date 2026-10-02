@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <title>ข้อมูลทรัพย์ของเคส — huahin.properties</title>
+  <style>
+    body { margin: 0; background: oklch(97% 0.008 85); font-family: 'IBM Plex Sans Thai', system-ui, sans-serif; }
+    a { color: oklch(40% 0.13 25); }
+  </style>
+</helmet>
+
+<div style="min-height:100vh;">
+  <div style="background:oklch(22% 0.02 60); padding:14px clamp(16px,4vw,32px); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <img src="logo.png" alt="huahin.properties" style="height:34px; width:34px; border-radius:50%; object-fit:contain;" />
+      <div style="font-family:'Playfair Display',serif; font-size:19px; color:oklch(97% 0.01 80);">huahin . properties</div>
+      <div style="font-size:12px; color:oklch(78% 0.02 70);">| ข้อมูลทรัพย์ของเคส</div>
+    </div>
+    <a href="Listing Approvals.dc.html" style="color:oklch(85% 0.02 70); font-size:12.5px; text-decoration:none;">← กลับหน้าตรวจสอบ</a>
+  </div>
+
+  <div style="max-width:760px; margin:0 auto; padding:clamp(18px,4vw,32px);">
+
+    <sc-if value="{{ blocked }}" hint-placeholder-val="{{ false }}">
+      <div data-case-data-blocked="1" style="background:white; border:1px solid oklch(88% 0.06 30); border-radius:10px; padding:30px 24px; text-align:center;">
+        <div style="font-size:15px; font-weight:700; color:oklch(40% 0.12 25); margin-bottom:6px;">{{ blockedTitle }}</div>
+        <div style="font-size:13px; color:oklch(45% 0.02 60);">{{ blockedText }}</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+      <div style="font-family:'Playfair Display',serif; font-size:24px; color:oklch(20% 0.02 60); margin-bottom:3px;">ข้อมูลทรัพย์ของเคส</div>
+      <div data-case-data-id="1" style="font-size:13px; font-weight:700; color:oklch(40% 0.13 25);">{{ caseId }}</div>
+      <div style="font-size:12.5px; color:oklch(52% 0.02 60); margin:4px 0 16px;">{{ subtitle }}</div>
+      <div style="background:oklch(96% 0.03 85); border:1px solid oklch(88% 0.05 85); border-radius:8px; padding:10px 13px; font-size:12px; line-height:1.6; color:oklch(38% 0.04 60); margin-bottom:16px;">
+        หน้านี้แก้เฉพาะข้อมูลทรัพย์ภายในเคส (เก็บในระบบทีมงานเท่านั้น) — <strong>ไม่เผยแพร่</strong> และไม่แตะรูป เจ้าของเว็บเป็นผู้ตรวจและกดเผยแพร่เท่านั้น
+      </div>
+
+      <div style="background:white; border:1px solid oklch(90% 0.01 70); border-radius:10px; padding:18px 20px; display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px;">
+        <div><div style="font-size:12px; color:oklch(45% 0.02 60); margin-bottom:4px;">ราคา (บาท)</div>
+          <input data-f="price" type="number" value="{{ f_price }}" onChange="{{ onPrice }}" style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid oklch(85% 0.01 70); border-radius:6px; font-size:14px;" /></div>
+        <div><div style="font-size:12px; color:oklch(45% 0.02 60); margin-bottom:4px;">อำเภอ / พื้นที่</div>
+          <select data-f="area" value="{{ f_area }}" onChange="{{ onArea }}" style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid oklch(85% 0.01 70); border-radius:6px; font-size:14px; background:white;">
+            <option value="">— เลือก —</option><option value="hua-hin">หัวหิน</option><option value="pranburi">ปราณบุรี</option><option value="cha-am">ชะอำ</option>
+          </select></div>
+        <div><div style="font-size:12px; color:oklch(45% 0.02 60); margin-bottom:4px;">ห้องนอน</div>
+          <input data-f="bedrooms" type="number" value="{{ f_bedrooms }}" onChange="{{ onBedrooms }}" style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid oklch(85% 0.01 70); border-radius:6px; font-size:14px;" /></div>
+        <div><div style="font-size:12px; color:oklch(45% 0.02 60); margin-bottom:4px;">ห้องน้ำ</div>
+          <input data-f="bathrooms" type="number" value="{{ f_bathrooms }}" onChange="{{ onBathrooms }}" style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid oklch(85% 0.01 70); border-radius:6px; font-size:14px;" /></div>
+        <div><div style="font-size:12px; color:oklch(45% 0.02 60); margin-bottom:4px;">พื้นที่ใช้สอย (ตร.ม.)</div>
+          <input data-f="livingArea" type="number" value="{{ f_livingArea }}" onChange="{{ onLivingArea }}" style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid oklch(85% 0.01 70); border-radius:6px; font-size:14px;" /></div>
+        <div><div style="font-size:12px; color:oklch(45% 0.02 60); margin-bottom:4px;">ขนาดที่ดิน (ตร.ว.)</div>
+          <input data-f="landSize" type="number" value="{{ f_landSize }}" onChange="{{ onLandSize }}" style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid oklch(85% 0.01 70); border-radius:6px; font-size:14px;" /></div>
+        <div><div style="font-size:12px; color:oklch(45% 0.02 60); margin-bottom:4px;">ชั้นที่ (คอนโด)</div>
+          <input data-f="floor" value="{{ f_floor }}" onChange="{{ onFloor }}" style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid oklch(85% 0.01 70); border-radius:6px; font-size:14px;" /></div>
+        <div><div style="font-size:12px; color:oklch(45% 0.02 60); margin-bottom:4px;">พิกัด (ทศนิยม เช่น 12.558940,99.909039)</div>
+          <input data-f="coordsRaw" value="{{ f_coordsRaw }}" onChange="{{ onCoords }}" style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid oklch(85% 0.01 70); border-radius:6px; font-size:14px;" /></div>
+        <div style="grid-column:1/-1;"><div style="font-size:12px; color:oklch(45% 0.02 60); margin-bottom:4px;">รายละเอียดทรัพย์ (ข้อความนี้อาจขึ้นเว็บเมื่อเจ้าของเผยแพร่ — ห้ามใส่เบอร์/อีเมล/ลิงก์)</div>
+          <textarea data-f="description" rows="5" value="{{ f_description }}" onChange="{{ onDescription }}" style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid oklch(85% 0.01 70); border-radius:6px; font-size:14px; font-family:inherit;"></textarea></div>
+      </div>
+
+      <sc-if value="{{ hasError }}" hint-placeholder-val="{{ false }}">
+        <div data-case-data-error="1" style="margin-top:12px; background:oklch(96% 0.04 25); border:1px solid oklch(85% 0.1 25); color:oklch(40% 0.15 25); border-radius:8px; padding:10px 13px; font-size:13px;">{{ errorText }}</div>
+      </sc-if>
+      <sc-if value="{{ hasSaved }}" hint-placeholder-val="{{ false }}">
+        <div data-case-data-saved="1" style="margin-top:12px; background:oklch(96% 0.05 150); border:1px solid oklch(85% 0.1 150); color:oklch(35% 0.12 150); border-radius:8px; padding:10px 13px; font-size:13px;">✓ บันทึกแล้ว</div>
+      </sc-if>
+      <div style="margin-top:14px; display:flex; gap:10px; align-items:center;">
+        <div data-case-data-save="1" onClick="{{ onSave }}" style="background:oklch(40% 0.13 25); color:white; padding:11px 24px; border-radius:100px; font-size:13.5px; font-weight:700; cursor:pointer;">{{ saveLabel }}</div>
+        <a href="Listing Approvals.dc.html" style="font-size:13px;">กลับไปหน้าตรวจสอบ</a>
+      </div>
+    </sc-if>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:900,&quot;height&quot;:760}}">
+// A Staff member's way to enter the property data of ONE Case that is assigned to them (and the Owner's way to correct it). It writes only the data fields below to the team-only
+// Case record (caseInternal) through the same firebase-client path every team page uses; it never touches photos, the public document, the listing status or any approval/publish
+// field, and the Firestore rules still refuse every stamp key and "live" from a browser. (The member/agent editor in Lister Dashboard keeps its Staff guard untouched.)
+class Component extends DCLogic {
+  state = {
+    loaded: false, blocked: false, blockedTitle: "", blockedText: "", caseId: "", saving: false, saved: false, error: "", subtitle: "",
+    f_price: "", f_area: "", f_bedrooms: "", f_bathrooms: "", f_livingArea: "", f_landSize: "", f_floor: "", f_coordsRaw: "", f_description: "",
+  };
+
+  async componentDidMount() {
+    const id = (new URLSearchParams(window.location.search).get("id") || "").trim();
+    const block = (t, x) => this.setState({ loaded: true, blocked: true, blockedTitle: t, blockedText: x });
+    if (!id) { block("ไม่พบเคส", "เปิดหน้านี้จากปุ่ม “แก้ไขข้อมูลทรัพย์” ในหน้าตรวจสอบ"); return; }
+    const fb = await import("./firebase-client.js");
+    this._fb = fb; this._id = id;
+    try { await fb.onAdminAuthReady(); } catch (e) {}
+    const user = fb.currentAdminUser && fb.currentAdminUser();
+    if (!user) { block("ต้องเข้าสู่ระบบ", "หน้านี้สำหรับทีมงานเท่านั้น"); return; }
+    let role = null; try { role = await fb.fetchAdminRole(); } catch (e) {}
+    if (role !== "staff" && role !== "owner") { block("ไม่มีสิทธิ์", "หน้านี้สำหรับทีมงานเท่านั้น — บัญชีนี้ไม่ใช่ทีมงาน"); return; }
+    // (the team session cache can answer "not a team member yet" for a moment right after sign-in, which reads as "no such case" — ask again a couple of times before saying so)
+    let rec = null;
+    for (let i = 0; i < 3 && !(rec && rec.source === "owner_submission"); i++) { if (i) await new Promise((r) => setTimeout(r, 800)); try { rec = await fb.fetchDocById("properties", id); } catch (e) { rec = null; } }
+    if (!rec || rec.source !== "owner_submission") { block("ไม่พบเคส", "ไม่พบเคสรหัส " + id + " ในระบบทีมงาน"); return; }
+    // A Staff member edits the Cases that are theirs; the Owner may correct any Case.
+    if (role === "staff" && rec.assignedToEmail !== user.email) { block("เคสนี้ยังไม่ใช่งานของคุณ", "กด “✋ รับงาน” ที่เคสในหน้าตรวจสอบก่อน จึงจะแก้ข้อมูลได้" + (rec.assignedToEmail ? " (ตอนนี้ผู้รับผิดชอบคือ " + rec.assignedToEmail + ")" : "")); return; }
+    const s = (v) => (v === null || v === undefined ? "" : String(v));
+    this._role = role; this._email = user.email || "";
+    this.setState({
+      loaded: true, caseId: id, subtitle: "ประเภท: " + (rec.type || "-") + " · ผู้รับผิดชอบ: " + (rec.assignedToEmail || "-"),
+      f_price: s(rec.price), f_area: s(rec.area), f_bedrooms: s(rec.bedrooms), f_bathrooms: s(rec.bathrooms), f_livingArea: s(rec.livingArea), f_landSize: s(rec.landSize),
+      f_floor: s(rec.floor), f_coordsRaw: s(rec.coordsRaw), f_description: typeof rec.description === "string" ? rec.description : "",
+    });
+  }
+
+  num(v, label, min) {
+    if (v === "" || v === null || v === undefined) return { ok: true, value: null };
+    const n = Number(v);
+    if (!isFinite(n) || n < (min === undefined ? 0 : min)) return { ok: false, error: label + " ต้องเป็นตัวเลข" + ((min || 0) > 0 ? "มากกว่า 0" : "ตั้งแต่ 0 ขึ้นไป") };
+    return { ok: true, value: n };
+  }
+
+  async save() {
+    if (this.state.saving) return;
+    const st = this.state; const patch = {};
+    const checks = [["price", "ราคา", st.f_price, 1], ["bedrooms", "ห้องนอน", st.f_bedrooms, 0], ["bathrooms", "ห้องน้ำ", st.f_bathrooms, 0], ["livingArea", "พื้นที่ใช้สอย", st.f_livingArea, 0], ["landSize", "ขนาดที่ดิน", st.f_landSize, 0]];
+    for (const [k, label, v, min] of checks) { const r = this.num(v, label, min); if (!r.ok) { this.setState({ error: r.error, saved: false }); return; } patch[k] = r.value; }
+    if (patch.price === null) { this.setState({ error: "กรุณากรอกราคา", saved: false }); return; }
+    const coords = String(st.f_coordsRaw || "").trim();
+    if (coords) {
+      const m = /^(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)$/.exec(coords);
+      if (!m || Math.abs(Number(m[1])) > 90 || Math.abs(Number(m[2])) > 180) { this.setState({ error: "พิกัดต้องเป็นทศนิยม “ละติจูด,ลองจิจูด” เช่น 12.558940,99.909039 (ไม่ใช่ลิงก์แชร์)", saved: false }); return; }
+    }
+    patch.coordsRaw = coords || null;
+    patch.area = st.f_area || null; patch.floor = String(st.f_floor || "").trim() || null; patch.description = String(st.f_description || "").trim();
+    patch.updatedAt = Date.now();
+    this.setState({ saving: true, error: "", saved: false });
+    try {
+      await this._fb.updateDocFields("properties", this._id, patch);
+      try { await this._fb.logActivity({ type: "case_data_edited", propertyId: this._id, fields: Object.keys(patch).filter((k) => k !== "updatedAt"), summary: "แก้ข้อมูลทรัพย์ของเคส " + this._id }); } catch (e) {}
+      this.setState({ saving: false, saved: true });
+    } catch (e) {
+      this.setState({ saving: false, error: "บันทึกไม่สำเร็จ" + (e && e.code === "permission-denied" ? " — ไม่มีสิทธิ์แก้เคสนี้" : " — ลองอีกครั้ง") });
+    }
+  }
+
+  renderVals() {
+    const s = this.state; const set = (k) => (e) => this.setState({ [k]: e.target.value, saved: false });
+    return {
+      blocked: s.blocked, blockedTitle: s.blockedTitle, blockedText: s.blockedText, ready: s.loaded && !s.blocked,
+      caseId: s.caseId, subtitle: s.subtitle,
+      f_price: s.f_price, onPrice: set("f_price"), f_area: s.f_area, onArea: set("f_area"), f_bedrooms: s.f_bedrooms, onBedrooms: set("f_bedrooms"), f_bathrooms: s.f_bathrooms, onBathrooms: set("f_bathrooms"),
+      f_livingArea: s.f_livingArea, onLivingArea: set("f_livingArea"), f_landSize: s.f_landSize, onLandSize: set("f_landSize"), f_floor: s.f_floor, onFloor: set("f_floor"),
+      f_coordsRaw: s.f_coordsRaw, onCoords: set("f_coordsRaw"), f_description: s.f_description, onDescription: set("f_description"),
+      hasError: !!s.error, errorText: s.error, hasSaved: s.saved && !s.error, saveLabel: s.saving ? "กำลังบันทึก…" : "บันทึก", onSave: () => this.save(),
+    };
+  }
+}
+</script>
+</body>
+</html>

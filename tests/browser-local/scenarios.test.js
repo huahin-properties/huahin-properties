@@ -477,4 +477,63 @@ const preview = async (page, state, ms) => waitFor(async () => (await page.getAt
     rec("B10", "Staff sees all 7 DIFFERENT private photos (thumbnail i = stored photo i, by sha-256) and each lightbox opens the matching big image 1/7…7/7; getCasePhoto calls: " + calls, "PASS (local browser + emulators)", "regression for: only the cover loaded (1 call), 6 grey tiles, clicking one opened a broken image");
     await ctx.close();
   });
+
+  it("B11 Staff enters the property data of THEIR case from Listing Approvals (real buttons, nothing seeded), it persists after reopening; invalid input is refused; others are refused; Staff still can not publish; the Lister Dashboard Staff guard is intact", async () => {
+    const id = ids.sevenCase; assert.ok(id, "needs the case from B10");
+    const before = (await db.doc("caseInternal/" + id).get()).data(); assert.ok(!before.bedrooms && !before.landSize && !before.coordsRaw, "the case has none of the data yet (not seeded)");
+    const { ctx, page } = await newPage({}, "staff-edit");
+    await loginAdmin(page, "staff@example.test");
+    await page.goto(site.url + "/Listing%20Approvals.dc.html"); await page.waitForSelector("text=" + id, { timeout: 30000 });
+    // not assigned yet → the page refuses (assignment first), through the REAL button
+    const inCard = async (label) => page.evaluate(([cid, label]) => { const all = Array.from(document.querySelectorAll("*")).filter((e) => e.children.length === 0 && (e.textContent || "").trim() === cid); for (const n of all) { let a = n; for (let i = 0; i < 14 && a; i++, a = a.parentElement) { const b = Array.from(a.querySelectorAll("div,button,span")).find((e) => e.children.length === 0 && (e.textContent || "").trim().replace(/^[^\p{L}]+/u, "") === label); if (b) { b.click(); return true; } } } return false; }, [id, label]);
+    assert.ok(await inCard("แก้ไขข้อมูลทรัพย์"), "edit button found"); await page.waitForURL(/Case%20Data/, { timeout: 15000 });
+    await page.waitForSelector("[data-case-data-blocked]", { timeout: 15000 }); { const bt = await page.innerText("body"); assert.ok(/ยังไม่ใช่งานของคุณ/.test(bt), "blocked text: " + bt.slice(0, 400)); } await H.shot(page, "35-staff-case-data-needs-claim-first");
+    // claim, then edit
+    await page.goBack(); await page.waitForSelector("text=" + id, { timeout: 30000 });
+    assert.ok(await inCard("รับงาน"), "claim button"); await waitFor(async () => (await db.doc("caseInternal/" + id).get()).data().assignedToEmail === "staff@example.test", 15000, "claimed");
+    await page.reload(); await page.waitForSelector("text=" + id, { timeout: 30000 });
+    assert.ok(await inCard("แก้ไขข้อมูลทรัพย์")); await page.waitForURL(/Case%20Data/, { timeout: 15000 });
+    await page.waitForSelector('[data-f="price"]', { timeout: 20000 }); await H.shot(page, "36-staff-case-data-form-opened");
+    assert.strictEqual(await page.locator('[data-f="price"]').inputValue(), "6100000", "the form shows the case's own price");
+    // invalid first: coordinates as a share link
+    await page.locator('[data-f="coordsRaw"]').fill("https://maps.app.goo.gl/abc"); await page.locator('[data-case-data-save]').click();
+    await page.waitForSelector("[data-case-data-error]"); assert.ok(!(await db.doc("caseInternal/" + id).get()).data().coordsRaw, "invalid input wrote nothing"); await H.shot(page, "37-staff-case-data-invalid-coordinates-refused");
+    const fill = { bedrooms: "3", bathrooms: "2", livingArea: "140", landSize: "400", coordsRaw: "12.558940,99.909039" };
+    for (const [k, v] of Object.entries(fill)) await page.locator('[data-f="' + k + '"]').fill(v);
+    await page.locator('[data-f="area"]').selectOption("hua-hin");
+    await page.locator('[data-f="description"]').fill("Seven-photo house, quiet street, near the beach.");
+    await page.locator("[data-case-data-save]").click(); await page.waitForSelector("[data-case-data-saved]", { timeout: 20000 }); await H.shot(page, "38-staff-case-data-saved");
+    const after = (await db.doc("caseInternal/" + id).get()).data();
+    assert.deepStrictEqual([after.bedrooms, after.bathrooms, after.livingArea, after.landSize, after.coordsRaw, after.area], [3, 2, 140, 400, "12.558940,99.909039", "hua-hin"]);
+    assert.strictEqual(after.listingStatus, "pending"); assert.strictEqual((await db.doc("properties/" + id).get()).exists, false, "still not public"); assert.ok(!("approvedBy" in after), "no approval stamp");
+    assert.strictEqual((await db.collection("casePhotos").where("propertyId", "==", id).get()).size, 7, "photos untouched");
+    // reopen from scratch: values persist
+    await page.goto(site.url + "/Case%20Data.dc.html?id=" + encodeURIComponent(id)); await page.waitForSelector('[data-f="price"]', { timeout: 20000 });
+    const reopened = {}; for (const k of ["bedrooms", "bathrooms", "livingArea", "landSize", "coordsRaw", "description"]) reopened[k] = await page.locator('[data-f="' + k + '"]').inputValue();
+    assert.deepStrictEqual(reopened, Object.assign({}, fill, { description: "Seven-photo house, quiet street, near the beach." })); await H.shot(page, "39-staff-case-data-reopened-values-kept");
+    // the approvals page now counts the data (the workflow reads the same record)
+    await page.goto(site.url + "/Listing%20Approvals.dc.html"); await page.waitForSelector("text=" + id, { timeout: 30000 }); await sleep(2500); await H.shot(page, "40-staff-approvals-after-data-entry");
+    // Staff can NOT publish / approve / fake a stamp from the browser (rules), and the Lister Dashboard guard still sends Staff away
+    const tryWrite = (fields) => page.evaluate(async ([cid, fields]) => { try { await window.firebase.firestore().doc("caseInternal/" + cid).set(fields, { merge: true }); return "written"; } catch (e) { return e.code || String(e); } }, [id, fields]);
+    assert.strictEqual(await tryWrite({ listingStatus: "live" }), "permission-denied", "Staff can not set live");
+    assert.strictEqual(await tryWrite({ approvedByRole: "owner", approvedByUid: "x" }), "permission-denied", "Staff can not forge an approval stamp");
+    assert.strictEqual((await db.doc("caseInternal/" + id).get()).data().listingStatus, "pending");
+    await page.goto(site.url + "/Lister%20Dashboard.dc.html?edit=" + encodeURIComponent(id) + "&from=case"); await page.waitForURL(/Staff%20Workspace/, { timeout: 20000 });
+    rec("B11a", "Staff from the real buttons: refused before claiming → claim → open data page → invalid coordinates refused → enter data → save → reopen shows the values; photos/status/public untouched; no Admin SDK seeding of these values", "PASS (local browser + emulators)", "values read back from the Case record; Staff can not write listingStatus=live or approval stamps (rules); Lister Dashboard still redirects Staff");
+    await ctx.close();
+    // not allowed: a second Staff who has not claimed it, an agent, an outsider (anonymous), signed-out
+    ids.staff2 = await mkUser("staff2@example.test"); await db.doc("adminUsers/" + ids.staff2).set({ role: "staff", email: "staff2@example.test", displayName: "Synthetic Staff 2" });
+    const s2 = await newPage({}, "staff2"); await loginAdmin(s2.page, "staff2@example.test");
+    await s2.page.goto(site.url + "/Case%20Data.dc.html?id=" + encodeURIComponent(id)); await s2.page.waitForSelector("[data-case-data-blocked]", { timeout: 20000 });
+    assert.ok(/ยังไม่ใช่งานของคุณ/.test(await s2.page.innerText("body")) && (await s2.page.locator('[data-f="price"]').count()) === 0, "another Staff who has not claimed the case gets no form"); await H.shot(s2.page, "41-other-staff-refused"); await s2.ctx.close();
+    const ag = await newPage({}, "agent-edit"); await loginAgent(ag.page, "agent@example.test");
+    await ag.page.goto(site.url + "/Case%20Data.dc.html?id=" + encodeURIComponent(id)); await ag.page.waitForSelector("[data-case-data-blocked]", { timeout: 20000 });
+    assert.ok(/ไม่มีสิทธิ์/.test(await ag.page.innerText("body")) && (await ag.page.locator('[data-f="price"]').count()) === 0, "an agent gets no form"); await H.shot(ag.page, "42-agent-refused");
+    const agWrite = await ag.page.evaluate(async (cid) => { const out = {}; try { await window.firebase.firestore().doc("caseInternal/" + cid).set({ price: 1 }, { merge: true }); out.write = "written"; } catch (e) { out.write = e.code; } try { await window.firebase.firestore().doc("caseInternal/" + cid).get(); out.read = "read"; } catch (e) { out.read = e.code; } return out; }, id);
+    assert.deepStrictEqual(agWrite, { write: "permission-denied", read: "permission-denied" }); await ag.ctx.close();
+    const an = await newPage({}, "anon-edit"); await an.page.goto(site.url + "/Case%20Data.dc.html?id=" + encodeURIComponent(id)); await an.page.waitForSelector("[data-case-data-blocked]", { timeout: 20000 });
+    assert.ok(/ต้องเข้าสู่ระบบ/.test(await an.page.innerText("body"))); await an.ctx.close();
+    assert.strictEqual((await db.doc("caseInternal/" + id).get()).data().price, 6100000, "nobody else changed the case");
+    rec("B11b", "refused: another Staff who has not claimed the case (page), an agent (page + direct read/write denied by rules), signed-out visitor", "PASS (local browser + emulators)", "assignment is enforced by the page, not by Firestore rules (rules let any Staff write non-stamp fields — unchanged, documented)");
+  });
 });
