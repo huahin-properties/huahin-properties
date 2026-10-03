@@ -166,9 +166,14 @@ function build(config, outDir, root, opts) {
     h = h.replace(/<meta name="google-site-verification"[^>]*>\s*/g, "").replace(/<link rel="canonical"[^>]*>\s*/g, "").replace(/<meta property="og:(?:url|image)"[^>]*>\s*/g, "").replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>\s*/g, "");
     h = h.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<meta name="robots" content="noindex,nofollow">');
     if (!/<body>/.test(h) || h.lastIndexOf("</body>") < 0) fail("<body> markers not found in " + f);
-    h = h.replace("<body>", '<body>\n<template id="chat-live-app">');
-    const bi = h.lastIndexOf("</body>");
-    h = h.slice(0, bi) + '</template>\n<script>window.__chatLiveStart && window.__chatLiveStart();</script>\n' + h.slice(bi);
+    // ONLY the pages a browser opens are made inert. A COMPONENT file (PropertyCard, SearchFilters, LanguageSwitcher, ContactRail …) is never rendered as a page: the runtime FETCHES it as
+    // text and looks for its <script data-dc-script> (the component's logic and prop list). Wrapped in a <template> that script is invisible to the parser, the component then runs with NO
+    // logic and every derived value is missing (DOC-OBS-01: the Search card had no cover photo on TEST). Components therefore keep the guard + noindex but are not wrapped.
+    if (ENTRIES.includes(f)) {
+      h = h.replace("<body>", '<body>\n<template id="chat-live-app">');
+      const bi = h.lastIndexOf("</body>");
+      h = h.slice(0, bi) + '</template>\n<script>window.__chatLiveStart && window.__chatLiveStart();</script>\n' + h.slice(bi);
+    }
     out[f] = Buffer.from(h);
   }
   // production contact channels / hosts in text → neutral (the scan below proves nothing is left)

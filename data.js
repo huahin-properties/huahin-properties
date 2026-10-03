@@ -854,7 +854,8 @@ function reportLoadFailure(e) {
 export async function getEffectiveProperties(mod) {
   try {
     const fb = await import("./firebase-client.js");
-    if (typeof window !== "undefined") window.__hhDataLoad = { state: "loading" };
+    // (several components of one page call this: a later call must not turn an already-"ok" state back into "loading" while it is in flight)
+    if (typeof window !== "undefined" && !(window.__hhDataLoad && window.__hhDataLoad.state === "ok")) window.__hhDataLoad = { state: "loading" };
     const [properties, allPhotos] = await Promise.all([
       fb.fetchCollection("properties"),
       fb.fetchAllPhotos(),
@@ -888,7 +889,7 @@ export async function getEffectiveProperties(mod) {
         // Self-serve listings (Lister Dashboard) don't collect these fields
         // yet — default them so pages that assume they're always arrays/
         // numbers (feature filters, distance display) don't crash.
-        features: p.features || [], distanceBeach: p.distanceBeach || 0, distanceTown: p.distanceTown || 0,
+        features: p.features || [], distanceBeach: p.distanceBeach, distanceTown: p.distanceTown, // (never default an unknown distance to 0: 0 is a real distance)
       };
     });
     // CRITICAL: the bundled sample catalog (mod.PROPERTIES — HH-101, CA-301,

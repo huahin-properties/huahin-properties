@@ -218,6 +218,13 @@
                       </div>
                     </sc-if>
 
+                    <sc-if value="{{ r.wfHasPublishStamp }}" hint-placeholder-val="{{ false }}">
+                      <div data-publish-approval style="margin-top:11px; background:white; border:1px solid oklch(88% 0.02 70); border-radius:8px; padding:12px 14px;">
+                        <div style="font-size:12.5px; font-weight:700; color:oklch(35% 0.13 25); margin-bottom:3px;">{{ r.wfPublishTitle }}</div>
+                        <div style="font-size:11.5px; color:oklch(50% 0.02 60);">{{ r.wfPublishSub }}</div>
+                      </div>
+                    </sc-if>
+
                     <sc-if value="{{ r.wfHasReview }}" hint-placeholder-val="{{ false }}">
                       <div style="margin-top:11px; background:white; border:1px solid oklch(88% 0.02 70); border-radius:8px; padding:12px 14px;">
                         <div style="font-size:12.5px; font-weight:700; color:oklch(35% 0.13 25); margin-bottom:3px;">{{ r.wfReviewTitle }}</div>
@@ -1018,6 +1025,7 @@ class Component extends DCLogic {
     const subs = this.state.submissions[p.id] || [];
     const levelLabels = { critical: "จำเป็น", required: "ต้องมี", optional: "ถ้ามี" };
     const st = (k) => this._wf.stateStyle(k);
+    const stamps = this._approvalStamps(p);
     return {
       wfProgressLabel: ev.overallDone + "/" + ev.overallTotal + " ครบ · " + ev.overallPercent + "%",
       // Rendered from the definition: a step added later appears here with no
@@ -1087,9 +1095,13 @@ class Component extends DCLogic {
         : ev.reviewStatus === "waiting_review" ? "🔔 รอผู้บริหารตรวจสอบ"
         : ev.reviewStatus === "returned" ? "↩️ ส่งกลับให้แก้ไข"
         : ev.reviewStatus === "more_info_required" ? "＋ ขอข้อมูลเพิ่มเติม" : "การตรวจสอบ",
+      // FX-1 (DOC-OBS-04): TWO different events, each shown with the person who did THAT event — never one field standing in for the other.
+      //   intake approval  = the review decision on the submission (who: the submission's reviewedBy; older cases: the approvedBy stamp written at that moment)
+      //   publish approval = the stamp the server writes when the Owner publishes (approvedByEmail; the ROLE is only ever labelled as a role, never shown as a name)
       wfReviewSub: ev.reviewStatus === "approved"
-        ? ("อนุมัติโดย " + (p.approvedBy || "-") + (p.intakeCompletedAt ? " · " + new Date(p.intakeCompletedAt).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + " น." : ""))
+        ? ("อนุมัติรับเรื่องโดย " + stamps.intakeWho + (p.intakeCompletedAt ? " · " + stamps.fmt(p.intakeCompletedAt) : ""))
         : ("ส่งงานแล้ว " + ev.submissionCount + " ครั้ง"),
+      wfHasPublishStamp: stamps.hasPublish, wfPublishTitle: "✓ อนุมัติเผยแพร่", wfPublishSub: stamps.publishText,
       wfCanDecide: this._canDecideOn(p) && ev.reviewStatus !== "approved",
       wfStepOptions: ev.steps.filter((x) => !x.isSubmit)
         .map((x) => ({ key: x.stepKey, value: x.stepKey, label: x.number + ". " + x.title })),
@@ -1111,6 +1123,29 @@ class Component extends DCLogic {
           + (v.reviewResult === "approved" ? "อนุมัติ" : v.reviewResult === "returned" ? "ส่งกลับ" : v.reviewResult === "more_info" ? "ขอข้อมูลเพิ่ม" : "รอตรวจ"),
       })),
     };
+  }
+
+  // The people behind the two approval events of a Case (see FX-1). Reads only what the team page already holds (the merged record);
+  // nothing here is public: approvedBy* / reviewedBy are internal fields (case-fields.js PRIVATE_FIELDS) and the public projection is an allow-list.
+  _approvalStamps(p) {
+    const fmt = (t) => new Date(t).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + " น.";
+    let intakeWho = "";
+    if (p.approvedBy) intakeWho = p.approvedBy; // cases that pre-date the server stamp: written at the moment of the intake approval
+    else {
+      const rows = this.state.submissions[p.id];
+      if (Array.isArray(rows)) {
+        const hit = rows.find((x) => String(x.id) === String(p.approvedSubmissionId)) || rows.filter((x) => x.reviewResult === "approved").sort((a, b) => (b.reviewedAt || 0) - (a.reviewedAt || 0))[0];
+        intakeWho = (hit && hit.reviewedBy) || "ไม่มีบันทึกผู้ดำเนินการ";
+      } else {
+        intakeWho = "กำลังโหลด…";
+        this._subsAsked = this._subsAsked || {};
+        if (!this._subsAsked[p.id]) { this._subsAsked[p.id] = true; Promise.resolve().then(() => this._loadSubs(p)); }
+      }
+    }
+    const hasPublish = !!(p.approvedByEmail || p.approvedByUid || p.approvedByRole || (p.listingStatus === "live" && (p.approvedAt || p.publishedAt) && p.source === "owner_submission"));
+    const when = p.approvedAt || p.publishedAt;
+    const who = p.approvedByEmail ? p.approvedByEmail : (p.approvedByRole ? "ไม่มีอีเมลบันทึก (บทบาทที่บันทึก: " + p.approvedByRole + ")" : "ไม่มีบันทึกผู้อนุมัติเผยแพร่");
+    return { fmt, intakeWho, hasPublish, publishText: "อนุมัติเผยแพร่โดย " + who + (when ? " · " + fmt(when) : "") };
   }
 
   async _loadSubs(p) {

@@ -230,8 +230,8 @@
             <div style="position:absolute; top:12px; left:12px; background:oklch(99% 0.005 80 / 0.92); border-radius:4px; padding:6px 12px; font-size:12px; color:oklch(30% 0.02 60);">{{ p.locationBadgeLabel }}</div>
           </div>
           <div style="display:flex; gap:24px; margin-top:12px; font-size:13px; color:oklch(45% 0.02 60);">
-            <div>{{ p.distanceBeachLabel }}</div>
-            <div>{{ p.distanceTownLabel }}</div>
+            <sc-if value="{{ p.hasDistanceBeach }}"><div>{{ p.distanceBeachLabel }}</div></sc-if>
+            <sc-if value="{{ p.hasDistanceTown }}"><div>{{ p.distanceTownLabel }}</div></sc-if>
           </div>
         </div>
       </div>
@@ -442,6 +442,16 @@ function parseLatLngHH(input) {
 // calculations from the owner's actual pinned coordinates (2026-08 fix —
 // previously these read a static distanceBeach/distanceTown field that
 // self-serve listings never set, always showing "0 km").
+// Distance line for the public page (FX-2). "" = no evidence → the line is not shown.
+function distanceLabel(raw, which, placeLabel, t) {
+  const exact = parseLatLngHH(raw.mapLink);
+  const ref = AREA_REF_POINTS[raw.area];
+  let km = null;
+  if (exact && ref) km = haversineKm(exact.lat, exact.lng, ref[which].lat, ref[which].lng).toFixed(1);
+  else { const v = raw[which === "beach" ? "distanceBeach" : "distanceTown"]; if (typeof v === "number" && isFinite(v) && v >= 0) km = String(v); }
+  if (km === null) return "";
+  return `${km} ${t.km_to} ${placeLabel ? placeLabel : ""}`.trim();
+}
 const AREA_REF_POINTS = {
   "hua-hin": { beach: { lat: 12.5683, lng: 99.9577 }, town: { lat: 12.5683, lng: 99.9577 } },
   pranburi: { beach: { lat: 12.3853, lng: 99.9847 }, town: { lat: 12.3831, lng: 99.9425 } },
@@ -876,24 +886,19 @@ class Component extends DCLogic {
         || (raw.description && (typeof raw.description === "object" ? raw.description[lang] : raw.description))
         || t.no_description,
       features: raw.features.map((f) => mod.FEATURES[f][lang]),
-      distanceBeachLabel: (() => {
-        const exact = parseLatLngHH(raw.mapLink);
-        const ref = AREA_REF_POINTS[raw.area];
-        const km = (exact && ref) ? haversineKm(exact.lat, exact.lng, ref.beach.lat, ref.beach.lng).toFixed(1) : raw.distanceBeach;
-        return `${km} ${t.km_to} ${t.beach ? t.beach : ""}`;
-      })(),
-      distanceTownLabel: (() => {
-        const exact = parseLatLngHH(raw.mapLink);
-        const ref = AREA_REF_POINTS[raw.area];
-        const km = (exact && ref) ? haversineKm(exact.lat, exact.lng, ref.town.lat, ref.town.lng).toFixed(1) : raw.distanceTown;
-        return `${km} ${t.km_to} ${t.town}`;
-      })(),
+      // FX-2 (DOC-OBS-03): a distance is shown ONLY when there is evidence for it — either the coordinates on the public record (straight-line figure to the area's reference point, as before)
+      // or a stored NUMBER. Unknown is never written as 0 or "undefined"; a stored 0 (a real number) is kept. The two sources are never mixed or converted into each other.
+      distanceBeachLabel: distanceLabel(raw, "beach", t.beach, t),
+      distanceTownLabel: distanceLabel(raw, "town", t.town, t),
+      hasDistanceBeach: distanceLabel(raw, "beach", t.beach, t) !== "",
+      hasDistanceTown: distanceLabel(raw, "town", t.town, t) !== "",
       locationBadgeLabel: (() => {
-        const zoneText = (raw.zone && typeof raw.zone === "object") ? (raw.zone[lang] || raw.zone.th) : raw.zone;
+        const zoneRaw = (raw.zone && typeof raw.zone === "object") ? (raw.zone[lang] || raw.zone.th) : raw.zone;
+        const zoneText = (typeof zoneRaw === "string" && zoneRaw.trim() && zoneRaw.trim() !== "undefined") ? zoneRaw.trim() : ""; // no zone on the record → no zone name (never the word "undefined")
         const exact = parseLatLngHH(raw.mapLink);
-        if (raw.mapDisplayMode === "exact" && exact) return `${areaLabelOf(raw.area)} · ${zoneText}`;
+        if (raw.mapDisplayMode === "exact" && exact) return zoneText ? `${areaLabelOf(raw.area)} · ${zoneText}` : areaLabelOf(raw.area);
         const tambon = (exact && this._tambonMod) ? this._tambonMod.findTambonFor(exact.lat, exact.lng) : null;
-        return tambon ? `${t.property_general_area} · ตำบล${tambon.nameTh}` : `${t.property_general_area} · ${zoneText}`;
+        return tambon ? `${t.property_general_area} · ตำบล${tambon.nameTh}` : (zoneText ? `${t.property_general_area} · ${zoneText}` : t.property_general_area);
       })(),
     };
 

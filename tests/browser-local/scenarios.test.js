@@ -44,6 +44,17 @@ const trackUrlOf = async (page) => page.evaluate(() => {
   for (const c of cands) { const m = String(c).match(/https?:\/\/[^\s"']*Track%20Submission[^\s"']*/); if (m) return m[0]; }
   return null; });
 
+// FX-4 (DOC-OBS-01): the cover photo of a published listing must really LOAD on the Search page (decoded image, not only a URL in the markup).
+const searchCover = (page) => page.evaluate(() => { const imgs = Array.from(document.querySelectorAll("img")); const pub = imgs.filter((i) => /publishedCasePhotos/.test(i.src));
+  return { loaded: pub.filter((i) => i.complete && i.naturalWidth > 0).length, withUrl: pub.length, allImgs: imgs.map((i) => i.src.slice(0, 90) + " " + i.naturalWidth), bg: Array.from(document.querySelectorAll("[style*='url(']")).map((e) => e.getAttribute("style").slice(0, 90)).slice(0, 4), noPhotoLabel: /no photo|ไม่มีรูป|รูปภาพ/i.test(document.body.innerText) }; });
+async function expectSearchCover(page, who) {
+  try { await waitFor(async () => (await searchCover(page)).loaded >= 1, 20000, "cover photo decoded in Search (" + who + ")"); }
+  catch (e) {
+    const diag = await page.evaluate(async () => { try { const m = await import("./data.js"); const fb = await import("./firebase-client.js"); const props = await m.getEffectiveProperties(m); const ph = await fb.fetchAllPhotos();
+      const card = Array.from(document.querySelectorAll("a")).find((a) => /Property.{0,3}Details/.test(a.getAttribute("href") || "")); return { cardHtml: card ? card.outerHTML.slice(0, 200) : "no card link", owner: props.filter((p) => p.source === "owner_submission").map((p) => ({ id: p.id, photos: (p.photos || []).slice(0, 2), photoKeys: Object.keys(p).filter((k) => /photo/i.test(k)) })), allPhotos: ph.map((x) => ({ id: x.id, pid: x.propertyId, url: (x.dataUrl || "").slice(0, 70) })).slice(0, 6) }; } catch (x) { return "diag failed: " + x; } });
+    throw new Error("DOC-OBS-01 reproduced for " + who + ": no decoded cover photo in Search. state=" + JSON.stringify(await searchCover(page)) + " data=" + JSON.stringify(diag));
+  }
+}
 async function newPage(ctxOpts, name) {
   const ctx = await H.newContext(browser, site, ctxOpts); const page = await ctx.newPage(); H.watch(page, name || "page"); return { ctx, page };
 }
@@ -343,6 +354,11 @@ const preview = async (page, state, ms) => waitFor(async () => (await page.getAt
     assert.strictEqual(pub.price, 7500000); assert.ok(!("contactPhone" in pub) && !("trackToken" in pub));
     assert.strictEqual((await db.collection("propertyPhotos").where("propertyId", "==", ids.outsiderCase).get()).size, 2);
     const rc = (await db.doc("caseInternal/" + ids.outsiderCase).get()).data(); assert.strictEqual(rc.approvedByRole, "owner"); assert.strictEqual(rc.approvedByUid, ids.owner);
+    // FX-1 (DOC-OBS-04): the two approval events are shown separately, each with the person who did THAT event; the public record carries neither person
+    assert.ok(!Object.keys(pub).some((k) => /^approvedBy|reviewedBy|intakeApprovedBy|approvedByEmail/.test(k)), "no approver data in the public document: " + Object.keys(pub).filter((k) => /approv|review/i.test(k)));
+    await waitFor(async () => /อนุมัติรับเรื่องโดย owner@example\.test/.test(await page.innerText("body")), 20000, "intake approval line names the person who approved the intake (not '-')");
+    await waitFor(async () => (await page.locator("[data-publish-approval]").count()) >= 1 && /อนุมัติเผยแพร่โดย owner@example\.test/.test(await page.locator("[data-publish-approval]").first().innerText()), 20000, "publish approval stamp names the Owner who published");
+    const bodyApprovals = await page.innerText("body"); assert.ok(!/อนุมัติ(รับเรื่อง|เผยแพร่)?โดย -/.test(bodyApprovals) && !/โดย undefined|โดย owner(\s|$)/.test(bodyApprovals), "no '-' / undefined / bare role used as a person's name");
     await sleep(1500); await H.shot(page, "26-owner-approvals-after-publish");
     assert.deepStrictEqual(unexpected(page.__logs, [/getCasePhoto :: net::ERR_(FAILED|BLOCKED_BY_CLIENT)/, /getCasePhoto :: net::ERR_FAILED/]), [], "unexpected browser problems (owner; the injected photo-download failure is the only allowed one)");
     ids.ownerPage = page; ids.ownerCtx = ctx;
@@ -373,10 +389,14 @@ const preview = async (page, state, ms) => waitFor(async () => (await page.getAt
       await search.page.goto(site.url + "/Search%20Results.dc.html");
       await waitFor(async () => /7,500,000|7500000/.test(await search.page.innerText("body")), 20000, "listing in search on first navigation (run " + run + ")");
       assert.strictEqual(search.page.__logs.navs.length, 1, "search: exactly one navigation");
+      await expectSearchCover(search.page, "visitor run " + run);
       if (run === 1) await H.shot(search.page, "29-public-search-first-load-lists-published");
       await pubv.ctx.close(); await search.ctx.close();
     }
     await pend.ctx.close();
+    // FX-4: the same Search page as the signed-in OWNER (team session: the page merges the private records and loads private covers through getCasePhoto)
+    const osPage = await ids.ownerCtx.newPage(); H.watch(osPage, "owner-search"); await osPage.goto(site.url + "/Search%20Results.dc.html");
+    await waitFor(async () => /7,500,000|7500000/.test(await osPage.innerText("body")), 20000, "listing in search (owner)"); await expectSearchCover(osPage, "owner"); await H.shot(osPage, "29b-owner-search-cover"); await osPage.close();
     rec("B7", "published listing (details + photos) and search show server data on the FIRST navigation, 3 runs each, 1 navigation per page (no reload); pending case invisible (UI + direct reads refused)", "PASS (local browser + emulators)", "");
   });
 
@@ -572,6 +592,56 @@ const preview = async (page, state, ms) => waitFor(async () => (await page.getAt
       assert.ok(txt.length > 20 && !/undefined|detail_state/.test(txt), lang + ": real text, no raw key"); await lp.ctx.close();
     }
     assert.strictEqual(new Set(Object.values(titles)).size, 8, "8 different languages: " + JSON.stringify(titles));
+    // 5. (Work review) the retry button: ONE user-caused navigation, nothing automatic before or after
+    const rt = await newPage({}, "public-retry"); rt.ctx.__fault = { failFirebase: true };
+    await rt.page.goto(site.url + "/Property%20Details.dc.html?id=" + ids.outsiderCase); await rt.page.waitForSelector("[data-view-state=failed]", { timeout: 40000 });
+    assert.strictEqual(rt.page.__logs.navs.length, 1, "before the click: exactly the first load"); await sleep(3000); assert.strictEqual(rt.page.__logs.navs.length, 1, "nothing reloads by itself while the failed state is shown");
+    await Promise.all([rt.page.waitForNavigation({ timeout: 30000 }), rt.page.locator("[data-view-state-retry]").click()]);
+    await rt.page.waitForSelector("[data-view-state=failed]", { timeout: 40000 }); await sleep(3000);
+    assert.strictEqual(rt.page.__logs.navs.length, 2, "the click caused exactly ONE navigation (and nothing after it): " + JSON.stringify(rt.page.__logs.navs)); await rt.ctx.close();
+    // 6. direct fetch fails while the collection loads fine → "could not load", NOT "not found"
+    const df = await newPage({}, "public-direct-fetch-fails");
+    await df.ctx.route("**/firebase-client.js", async (route) => { const r = await route.fetch(); let body = await r.text(); const k = "export async function fetchDocById(collectionName, id) {"; if (!body.includes(k)) throw new Error("patch target missing"); route.fulfill({ response: r, body: body.replace(k, k + " if (window.__failDirect) throw new Error('injected direct read failure');") }); });
+    await df.ctx.addInitScript(() => { window.__failDirect = true; });
+    await df.page.goto(site.url + "/Property%20Details.dc.html?id=NO-SUCH-LISTING");
+    await df.page.waitForSelector("[data-view-state=failed], [data-view-state=notfound]", { timeout: 40000 });
+    assert.strictEqual(await df.page.getAttribute("[data-view-state]", "data-view-state"), "failed", "direct read failed while the collection loaded → failed, never not-found");
+    assert.strictEqual(await df.page.evaluate(() => window.__hhDataLoad.state), "ok", "(the collection itself loaded fine)"); await H.shot(df.page, "55-details-direct-read-failed-state"); await df.ctx.close();
+    // 7. ALL texts of ALL states in ALL 8 languages (loading / not found / failed / retry / back) — what is on the screen is exactly the language's dictionary entry, distinct per language
+    const LANGS = ["th", "en", "ru", "no", "de", "zh", "fr", "it"], KEYS = ["detail_state_loading", "detail_state_notfound_title", "detail_state_notfound_text", "detail_state_failed_title", "detail_state_failed_text", "detail_state_back", "detail_state_retry"];
+    const probe = await newPage({}, "i18n-dict"); await probe.page.goto(site.url + "/Property%20Details.dc.html?id=NO-SUCH-LISTING"); await probe.page.waitForSelector("[data-view-state]", { timeout: 30000 });
+    const dict = await probe.page.evaluate(async (ls) => { const m = await import("./data.js"); return Object.fromEntries(ls.map((l) => [l, m.I18N[l]])); }, LANGS); await probe.ctx.close();
+    for (const k of KEYS) { const vals = LANGS.map((l) => dict[l][k]); assert.ok(vals.every((v) => typeof v === "string" && v.trim().length > 1 && !/undefined/.test(v)), k + " exists in all 8 languages"); if (k !== "detail_state_back" || true) assert.strictEqual(new Set(vals).size, 8, k + " is different in every language (no copied English): " + JSON.stringify(vals)); }
+    const shown = async (lang, url, fault, selector, want) => { const lp = await newPage({}, "i18n-" + want + "-" + lang); if (fault) lp.ctx.__fault = fault; await lp.ctx.addInitScript((l) => { try { localStorage.setItem("hh_lang", l); } catch (e) { /* none */ } }, lang);
+      await lp.page.goto(site.url + url); await lp.page.waitForSelector(selector, { timeout: 45000 }); const txt = await lp.page.innerText("[data-view-state]"); await lp.ctx.close(); return txt; };
+    const results = await Promise.all(LANGS.map(async (lang) => ({ lang,
+      notfound: await shown(lang, "/Property%20Details.dc.html?id=NO-SUCH-LISTING", null, "[data-view-state=notfound]", "nf"),
+      failed: await shown(lang, "/Property%20Details.dc.html?id=NO-SUCH-LISTING", { failFirebase: true }, "[data-view-state=failed]", "fail"),
+      loading: await shown(lang, "/Property%20Details.dc.html?id=NO-SUCH-LISTING", { delayMs: 3000 }, "[data-view-state=loading]", "load") })));
+    for (const r of results) { const d = dict[r.lang];
+      for (const need of [d.detail_state_notfound_title, d.detail_state_notfound_text, d.detail_state_back]) assert.ok(r.notfound.includes(need), r.lang + " not-found shows: " + need);
+      for (const need of [d.detail_state_failed_title, d.detail_state_failed_text, d.detail_state_retry, d.detail_state_back]) assert.ok(r.failed.includes(need), r.lang + " failed shows: " + need);
+      assert.ok(r.loading.includes(d.detail_state_loading), r.lang + " loading shows: " + d.detail_state_loading); }
     rec("B12", "Details page states (FX-3): loading is never 'not found'; closed and never-existed listings show the same not-found message with a way back to search and nothing private; a failed load shows a different message with manual retry; the not-found text exists in all 8 languages", "PASS (local browser + emulators)", "no automatic reload in any state");
+  });
+  it("B13 (FX-2 / DOC-OBS-03) public Details page: an unknown distance or zone is HIDDEN (never '0 กม.' / 'undefined'); a stored 0 and real coordinates still show", async () => {
+    const base = { status: "sale", type: "house", area: "hua-hin", price: 5000000, bedrooms: 3, bathrooms: 2, livingArea: 120, listingStatus: "live", isDraft: false, features: [], source: "owner_submission", internalSplit: true, publishedAt: Date.now(), expiresAt: Date.now() + 86400000 };
+    await db.doc("properties/fx2-unknown").set({ ...base, title: { th: "ทดสอบไม่ทราบระยะ", en: "Unknown distance" } });                                       // what a Case projection looks like: no coordinates, no zone, no distances
+    await db.doc("properties/fx2-zero").set({ ...base, title: { th: "ทดสอบศูนย์จริง", en: "Real zero" }, distanceBeach: 0, distanceTown: 3.5, zone: { th: "ทดสอบโซน", en: "Test zone" } });
+    await db.doc("properties/fx2-coords").set({ ...base, title: { th: "ทดสอบพิกัด", en: "Coordinates" }, mapLink: "12.5683,99.9577", mapDisplayMode: "area" });
+    const body = async (id) => { const pg = await newPage({}, "fx2-" + id); await pg.page.goto(site.url + "/Property%20Details.dc.html?id=" + id); await waitFor(async () => /5,000,000/.test(await pg.page.innerText("body")), 30000, "details of " + id); await sleep(1500); const t = await pg.page.innerText("body"); await H.shot(pg.page, "56-details-" + id); await pg.ctx.close(); return t; };
+    const unknown = await body("fx2-unknown");
+    assert.ok(!/undefined/.test(unknown), "no 'undefined' anywhere"); assert.ok(!/(^|[^\d.])0(\.0)?\s*กม/.test(unknown) && !/(^|[^\d.])0(\.0)?\s*km/i.test(unknown), "no '0 km' written for an unknown distance");
+    assert.ok(!/กม\.?\s*ถึง/.test(unknown), "no distance line at all when there is no evidence"); assert.ok(/บริเวณโดยประมาณ/.test(unknown) || /General area/i.test(unknown), "the general-area badge is still there (without a zone name)");
+    const zero = await body("fx2-zero");
+    assert.ok(/(^|[^\d.])0\s*กม\.?\s*ถึง/.test(zero), "a stored 0 is a real distance and is kept: " + (zero.match(/.{0,20}กม.{0,30}/g) || []).join(" | ")); assert.ok(/3\.5\s*กม/.test(zero), "a stored 3.5 is shown"); assert.ok(/ทดสอบโซน/.test(zero), "a real zone name is shown"); assert.ok(!/undefined/.test(zero));
+    const coords = await body("fx2-coords");
+    assert.ok(/\d+(\.\d)?\s*กม\.?\s*ถึง/.test(coords), "coordinates on the record → the figure is still shown"); assert.ok(!/undefined/.test(coords));
+    // the Search card: no empty " · " prefix when there is no zone
+    const sp = await newPage({}, "fx2-search"); await sp.page.goto(site.url + "/Search%20Results.dc.html"); await waitFor(async () => /ทดสอบไม่ทราบระยะ|Unknown distance/.test(await sp.page.innerText("body")), 30000, "unknown-distance listing in search");
+    const cardText = await sp.page.evaluate(() => { const a = Array.from(document.querySelectorAll("a")).find((x) => /id=fx2-unknown/.test(x.getAttribute("href") || "")); return a ? a.innerText : ""; });
+    assert.ok(cardText && !/^\s*·/m.test(cardText) && !/undefined/.test(cardText), "search card has no empty zone prefix: " + JSON.stringify(cardText.slice(0, 120))); await H.shot(sp.page, "57-search-card-no-zone"); await sp.ctx.close();
+    for (const id of ["fx2-unknown", "fx2-zero", "fx2-coords"]) await db.doc("properties/" + id).delete();
+    rec("B13", "FX-2: unknown distance/zone hidden (no 0 km / undefined); stored 0 and real coordinates kept; search card has no empty zone prefix", "PASS (local browser + emulators)", "synthetic documents written straight to the emulator; deleted afterwards");
   });
 });

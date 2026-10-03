@@ -6,7 +6,7 @@ const os = require("os");
 const path = require("path");
 const crypto = require("crypto");
 const { spawnSync } = require("child_process");
-const { build, closure, FORBIDDEN, MARKER, REQUIRED_FUNCTIONS, OPTIONAL_CHAT_FUNCTIONS, deployFunctionsCommand, EXCLUDED_NAV, ADMIN_TOOLS_NOT_IN_TEST } = require("../../tools/build-listing-test");
+const { build, closure, ENTRIES, FORBIDDEN, MARKER, REQUIRED_FUNCTIONS, OPTIONAL_CHAT_FUNCTIONS, deployFunctionsCommand, EXCLUDED_NAV, ADMIN_TOOLS_NOT_IN_TEST } = require("../../tools/build-listing-test");
 
 const ROOT = path.join(__dirname, "..", "..");
 const CFG = { projectId: "huahin-listing-test-abc", apiKey: "SYNTHETIC-KEY", appId: "1:123:web:synthetic", messagingSenderId: "123", authDomain: "huahin-listing-test-abc.firebaseapp.com", storageBucket: "huahin-listing-test-abc.appspot.com", region: "asia-southeast1" };
@@ -50,7 +50,11 @@ describe("LISTING-E2E-01 TEST-only hosting build (no network, nothing deployed)"
         assert.ok(/name="robots" content="noindex,nofollow"/.test(t), f + " noindex");
         assert.ok(t.indexOf("listing-test-guard.js") < t.indexOf("firebase-app-compat") || t.indexOf("firebase-app-compat") === -1, f + ": guard first");
         assert.ok(!/<script src="\.\/support\.js">/.test(t), f + ": support.js loaded directly");
-        assert.ok(t.includes('<template id="chat-live-app">') && t.includes("__chatLiveStart"), f + ": inert until the guard passes");
+        if (ENTRIES.includes(f)) assert.ok(t.includes('<template id="chat-live-app">') && t.includes("__chatLiveStart"), f + ": inert until the guard passes");
+        else { // DOC-OBS-01: a COMPONENT is fetched as text by the runtime; its logic script must NOT be hidden inside a <template>
+          assert.ok(!t.includes('<template id="chat-live-app">'), f + ": a component file is not wrapped in the inert template");
+          if (/data-dc-script/.test(t)) assert.ok(/<script[^>]*data-dc-script/.test(t.replace(/<template[\s\S]*?<\/template>/g, "")), f + ": its data-dc-script is visible to the component parser");
+        }
         assert.ok(!/<link rel="canonical"|<script type="application\/ld\+json">|<meta name="google-site-verification"/.test(t), f + ": static SEO tags removed (pages that add them at run time only point at the .invalid host and stay noindex)");
       }
     }
