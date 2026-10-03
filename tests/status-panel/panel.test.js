@@ -42,17 +42,19 @@ describe("status panel (docs-only, built from PROJECT-STATUS.md)", function () {
     rows.forEach((l, i) => { const cell = l.split("|")[3].trim(); assert.strictEqual(d.roadmap[i].status.key, emo[[...cell][0]], "row " + i); });
   });
 
-  it("P4 percentages: every scope is UNLOCKED, so the panel says 'ยังคำนวณไม่ได้', and the draft numbers match the checklist (pass/applicable)", () => {
-    const html = out.document;
+  it("P4 percentages: ONLY the scopes Work locked (S-TEST-FLOW 9/9, S-TEST-PUBLIC 2/7) show a percentage; every other scope says 'ยังคำนวณไม่ได้' with a draft marked 'ไม่ใช่ความคืบหน้า'", () => {
+    const html = out.document; const LOCKED = ["S-TEST-FLOW", "S-TEST-PUBLIC"];
+    assert.deepStrictEqual(d.reg.scopes.filter((s) => s.locked).map((s) => s.id).sort(), LOCKED.slice().sort());
     d.reg.scopes.forEach((s) => {
-      const p = pct(s); assert.strictEqual(p.computable, false, s.id + " must not show a percentage while unlocked");
-      const card = html.slice(html.indexOf('id="scope-' + s.id + '"'), html.indexOf("</article>", html.indexOf('id="scope-' + s.id + '"')));
-      assert.ok(card.includes("ยังคำนวณไม่ได้") && card.includes("ไม่ใช่ความคืบหน้า") && card.includes(p.pass + "/" + p.n), s.id);
+      const p = pct(s); const card = html.slice(html.indexOf('id="scope-' + s.id + '"'), html.indexOf("</article>", html.indexOf('id="scope-' + s.id + '"')));
+      if (LOCKED.includes(s.id)) { assert.strictEqual(p.computable, true, s.id); assert.ok(card.includes(p.pass + "/" + p.n + " ") && card.includes("= " + p.percent + "%") && !card.includes("ยังคำนวณไม่ได้"), s.id); }
+      else { assert.strictEqual(p.computable, false, s.id + " must not show a percentage while unlocked"); assert.ok(card.includes("ยังคำนวณไม่ได้") && card.includes("ไม่ใช่ความคืบหน้า") && card.includes(p.pass + "/" + p.n), s.id); }
       assert.strictEqual(s.items.filter((i) => i.status === "pass").length, p.pass);
       assert.strictEqual(p.count.pass + p.count.fail + p.count.blocked + p.count.unverified + p.count.na, s.items.length);
     });
+    const f = pct(d.reg.scopes.find((x) => x.id === "S-TEST-FLOW")), u = pct(d.reg.scopes.find((x) => x.id === "S-TEST-PUBLIC"));
+    assert.deepStrictEqual([f.pass, f.n, f.percent, u.pass, u.n, u.percent], [9, 9, 100, 2, 7, 29], "Work's locked figures");
   });
-
   it("P5 percentage rules: a LOCKED scope shows pass/applicable = percent; N/A is removed from the divisor, BLOCKED/FAIL/UNVERIFIED stay; empty scope is not computable", () => {
     const mk = (items, locked) => ({ locked, items: items.map((st, i) => ({ id: "x" + i, status: st })) });
     let p = pct(mk(["pass", "pass", "fail", "blocked", "unverified"], true)); assert.deepStrictEqual([p.pass, p.n, p.percent, p.computable], [2, 5, 40, true]);
@@ -81,11 +83,11 @@ describe("status panel (docs-only, built from PROJECT-STATUS.md)", function () {
     }
   });
 
-  it("P8 docs-only round: the panel work touches no website/Functions/rules file (git, against the code SHA of the package)", function () {
+  it("P8 scope guard: against the code SHA of the package, the ONLY non-document files that differ are the FX-3 draft change (Property Details page, data.js texts, its browser test) — nothing else (no Functions, rules, other pages)", function () {
     let names; try { names = execSync("git diff --name-only " + d.reg.package.codeSha + " -- . ':!docs' ':!tools/status-panel' ':!tests/status-panel' ':!*.md' ':!package.json'", { cwd: ROOT, encoding: "utf8" }).trim(); } catch (e) { return this.skip(); }
-    assert.strictEqual(names, "", "non-doc files differ from the package code SHA:\n" + names);
+    const ALLOWED = ["Property Details.dc.html", "data.js", "tests/browser-local/scenarios.test.js"];
+    const extra = names.split("\n").filter(Boolean).filter((f) => !ALLOWED.includes(f)); assert.deepStrictEqual(extra, [], "unexpected non-doc files differ from the package code SHA:\n" + extra.join("\n"));
   });
-
   it("P9 real browser: loads with no script error, no sideways scroll at desktop and phone width, filters and search change the rows, section 2 'YOU DO NOW' is visible at rest", async function () {
     let chromium; for (const m of ["playwright", "/opt/node22/lib/node_modules/playwright"]) { try { chromium = require(m).chromium; break; } catch (e) { /* next */ } }
     if (!chromium) return this.skip();
@@ -109,19 +111,20 @@ describe("status panel (docs-only, built from PROJECT-STATUS.md)", function () {
     } finally { await b.close(); fs.rmSync(tmp, { force: true }); }
   });
 
-  it("P10 decisions D1-D5 are listed with options, the Code proposal marked 'ไม่ใช่มติ', a decider; only an owner-confirmed decision may be 'decided' or 'parked' and it must carry an outcome naming that source", () => {
-    const html = out.document; assert.strictEqual(d.reg.decisions.length, 5);
+  it("P10 decisions are listed with options, the Code proposal marked 'ไม่ใช่มติ', a decider; only an owner-confirmed decision may be 'decided' or 'parked' and it must carry an outcome naming that source", () => {
+    const html = out.document; assert.strictEqual(d.reg.decisions.length, 6);
     d.reg.decisions.forEach((x) => { assert.ok(html.includes('id="decisions"') && html.includes(">" + x.id + " · ผู้ตัดสิน")); assert.ok(/ไม่ใช่มติ/.test(x.codeView)); if (x.status !== "open") assert.ok(x.outcome && /เจ้าของ/.test(x.outcome), x.id + " non-open needs an owner-sourced outcome"); });
     const by = (st) => d.reg.decisions.filter((x) => x.status === st).map((x) => x.id);
-    assert.deepStrictEqual([by("open"), by("decided"), by("parked")], [["D1", "D2", "D5"], ["D4"], ["D3"]]);
-    assert.strictEqual(count(html, /รอตัดสิน<\/div><h3>/g), 3); assert.strictEqual(count(html, /พักไว้<\/div><h3>/g), 1); assert.strictEqual(count(html, /ตัดสินแล้ว<\/div><h3>/g), 1);
+    assert.deepStrictEqual([by("open"), by("decided"), by("parked")], [["D1", "D2", "D5", "D6"], ["D4"], ["D3"]]);
+    assert.ok(!/วัน|เดือน|ปี/.test(d.reg.decisions.find((x) => x.id === "D6").codeView.replace(/ไม่เสนอจำนวนวัน/, "")), "D6: Code must not propose a retention period");
+    assert.strictEqual(count(html, /รอตัดสิน<\/div><h3>/g), 4); assert.strictEqual(count(html, /พักไว้<\/div><h3>/g), 1); assert.strictEqual(count(html, /ตัดสินแล้ว<\/div><h3>/g), 1);
     const bad = parse(MD); bad.reg.decisions[0].codeView = "ควร lock เลย"; assert.ok(validate(bad).some((e) => /not a decision/.test(e)));
   });
   it("P12 round r3: AI chat is a separate checklist from Listing, Node.js 20 is UNVERIFIED not FAIL, and the owner-screenshot check R12 is separate from R11", () => {
     const sc = (id) => d.reg.scopes.find((x) => x.id === id), it = (id) => d.reg.scopes.flatMap((x) => x.items).find((x) => x.id === id);
     assert.ok(sc("S-TEST-CHAT") && sc("S-TEST-CHAT").items.map((x) => x.id).join() === "T22" && sc("S-PROD-CHAT"));
     ["S-DEV-CORE", "S-TEST-FLOW", "S-TEST-PUBLIC", "S-TEST-NEG"].forEach((id) => assert.ok(!sc(id).items.some((x) => x.id === "T22" || x.id === "P07"), id + " must not hold chat items"));
-    assert.strictEqual(it("P06").status, "unverified"); assert.strictEqual(it("R11").status, "unverified"); assert.strictEqual(it("R12").status, "unverified"); assert.ok(d.reg.scopes.every((x) => x.locked === false));
+    assert.strictEqual(it("P06").status, "unverified"); assert.strictEqual(it("R11").status, "unverified"); assert.strictEqual(it("R12").status, "pass"); assert.strictEqual(d.reg.scopes.filter((x) => x.locked).length, 2);
   });
   it("P13 round r4: owner ideas are kept in three separate tiers, the proposals are only 'proposed' (nothing fixed), every DOC-OBS has a proposal, and the proposals show a requirement check", () => {
     const html = out.document; const tier = (t) => d.reg.ideas.filter((x) => x.tier === t).length;
@@ -129,10 +132,22 @@ describe("status panel (docs-only, built from PROJECT-STATUS.md)", function () {
     assert.strictEqual(count(html, /<section id="ideas">/g), 1); assert.strictEqual(count(html, /<section id="props">/g), 1);
     d.reg.ideas.forEach((x) => assert.ok(html.includes(">" + x.id + "</div>")));
     ["DOC-OBS-01", "DOC-OBS-02", "DOC-OBS-03", "DOC-OBS-04", "DOC-OBS-05"].forEach((o) => assert.ok(d.reg.proposals.some((x) => x.obs === o), o + " has a proposal"));
-    d.reg.proposals.forEach((x) => { assert.ok(["proposed", "blocked-decision"].includes(x.status)); assert.ok(x.reqCheck.length >= 2 && x.test.length > 10, x.id); assert.ok(html.includes(">" + x.id + " · " + x.obs)); });
+    d.reg.proposals.forEach((x) => { assert.ok(["proposed", "blocked-decision", "in-draft"].includes(x.status)); assert.ok(x.reqCheck.length >= 2 && x.test.length > 10, x.id); assert.ok(html.includes(">" + x.id + " · " + x.obs)); });
     assert.ok(d.reg.proposals.find((x) => x.obs === "DOC-OBS-02").status === "blocked-decision" && d.reg.proposals.find((x) => x.obs === "DOC-OBS-02").decider === "owner", "the land-unit proposal waits for the owner decision D2");
     const bad = parse(MD); bad.reg.proposals[0].status = "done"; assert.ok(validate(bad).some((e) => /bad status/.test(e)));
     const bad2 = parse(MD); bad2.reg.ideas[0].tier = "later"; assert.ok(validate(bad2).some((e) => /bad tier/.test(e)));
+  });
+  it("P14 round r5: the 10 owner requirements are registered in three tiers; splitting criteria adds NO pass; R12 passes with the owner's screenshots while R11 stays UNVERIFIED; no stale document head is shown as current", () => {
+    const html = out.document; const tier = (t) => d.reg.reqs.filter((x) => x.tier === t).length;
+    assert.ok(tier("current") >= 4 && tier("when") >= 4 && tier("future") >= 2); ["A1", "A2a", "A2b", "A3", "A4", "A5", "A6", "A7", "A8", "A9a", "A9b", "A9c", "A10a", "A10b"].forEach((id) => assert.ok(d.reg.reqs.some((x) => x.id === id), id));
+    assert.strictEqual(count(html, /<section id="reqs">/g), 1); d.reg.reqs.forEach((x) => assert.ok(html.includes(">" + x.id + "</div>")));
+    const all = d.reg.scopes.flatMap((x) => x.items), it = (id) => all.find((x) => x.id === id);
+    assert.strictEqual(it("R12").status, "pass"); assert.ok(/11:08/.test(it("R12").ref) && /6 ภาพ/.test(it("R12").ref)); assert.strictEqual(it("R11").status, "unverified");
+    ["T17", "T19", "T20", "T21", "P04", "D12"].forEach((id) => { assert.ok(!all.some((x) => x.id === id), id + " was split"); const kids = all.filter((x) => new RegExp("^" + id + "[a-z]$").test(x.id)); assert.ok(kids.length >= 2 && kids.every((x) => x.status !== "pass"), id + " sub-items add no pass"); });
+    assert.ok(all.every((x) => !/^(T17|T19|T20|T21|P04|D12)[a-z]$/.test(x.id) || x.status === "unverified" || x.status === "blocked" || x.status === "fail"));
+    assert.strictEqual(d.reg.scopes.length, 12);
+    const P = d.reg.package; assert.ok(/^[0-9a-f]{40}$/.test(P.docBaseSha) && P.docBaseSha !== "34a0eb0ee27bddfa72003958dd7e0546a9b490b2", "the document head shown is not the old v1.1 commit"); assert.ok(html.includes(P.docBaseSha.slice(0, 7)) && !/เอกสารล่าสุดใน GitHub \(v1\.1\)/.test(html));
+    ["BLUEPRINT.md", "HANDOFF-NEXT-CHAT.md", "PROJECT-STATUS.md"].forEach((f) => { const t = fs.readFileSync(path.join(ROOT, f), "utf8"); const head = t.slice(0, 2500); assert.ok(head.includes(P.docBaseSha) && head.includes("สถานะปัจจุบัน (r5)"), f + " names the current head at the top"); assert.ok(/\[ประวัติ ณ v2\] Code baseline/.test(head), f + " marks the old PR-head line as history"); });
   });
   it("P11 the package set shown in the panel is the one in the handoff files (same id and revision in the registry, the three files' CODE-V2-01 block and the page header)", () => {
     assert.ok(out.document.includes(d.reg.package.set));

@@ -95,6 +95,20 @@
     </div>
   </sc-if>
 
+  <!-- FX-3 (DOC-OBS-05): while the page has no listing to show it says WHY, instead of staying blank. Three separate states:
+       loading (never "not found" while the data is still on its way) / not found or closed (one message for both — it does not reveal whether a private case ever existed) / load failed.
+       Nothing from any case is shown here: only fixed text. -->
+  <sc-if value="{{ showViewState }}">
+    <div role="status" aria-live="polite" data-view-state="{{ viewState }}" style="max-width:640px; margin:0 auto; padding:clamp(48px,12vh,120px) clamp(20px,6vw,56px); text-align:center; display:flex; flex-direction:column; gap:14px; align-items:center;">
+      <h1 style="font-family:'Playfair Display',serif; font-size:clamp(22px,4vw,30px); font-weight:500; margin:0; color:oklch(22% 0.02 60);">{{ viewStateTitle }}</h1>
+      <p style="margin:0; font-size:15px; line-height:1.7; color:oklch(40% 0.02 60);">{{ viewStateText }}</p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+        <sc-if value="{{ viewStateCanRetry }}"><a href="" onClick="{{ onViewStateRetry }}" data-view-state-retry style="padding:11px 20px; background:oklch(40% 0.13 25); color:white; text-decoration:none; font-size:14px; border-radius:2px;">{{ viewStateRetry }}</a></sc-if>
+        <sc-if value="{{ viewStateCanBack }}"><a href="Search Results.dc.html" data-view-state-back style="padding:11px 20px; border:1px solid oklch(40% 0.13 25); color:oklch(40% 0.13 25); text-decoration:none; font-size:14px; border-radius:2px;">{{ viewStateBack }}</a></sc-if>
+      </div>
+    </div>
+  </sc-if>
+
   <sc-if value="{{ hasProperty }}" hint-placeholder-val="{{ true }}">
 
     <!-- ============ BANNER SLOT (top) ============ -->
@@ -527,7 +541,7 @@ class Component extends DCLogic {
           if (!Array.isArray(safe.features)) safe.features = [];
           effProps = [...effProps, safe];
         }
-      } catch (e) { console.warn("direct property fetch failed:", e); }
+      } catch (e) { this._directFetchFailed = true; console.warn("direct property fetch failed:", e); }
     }
     this.setState({ effProps }, () => this._maybeFetchMedia());
     // Self-serve listings (Lister Dashboard) track a per-listing view count
@@ -779,7 +793,7 @@ class Component extends DCLogic {
       gateError: this.state.gateError,
     };
     const mod = this.state.data;
-    if (!mod) return { t: {}, isDesktopNav: true, isMobileNav: false, hasProperty: false, langOptions: [], currentPropertyId: this._id, ...gateVals };
+    if (!mod) return { t: {}, isDesktopNav: true, isMobileNav: false, hasProperty: false, showViewState: false, langOptions: [], currentPropertyId: this._id, ...gateVals };
 
     const lang = this.state.lang;
     const t = mod.I18N[lang];
@@ -800,7 +814,16 @@ class Component extends DCLogic {
     // avoid regressing tested behavior) — see property-adapter.js header.
     const normalized = (this._adapter && raw) ? this._adapter.normalizeProperty(raw, mod, lang) : null;
     if (!raw) {
+      // loading (the data has not arrived yet) / failed (the load failed, or the direct read failed) / notfound (loaded fine, nothing under this id — closed or never public).
+      const loadedOk = !!this.state.effProps;
+      const failed = loadedOk && (!!this._directFetchFailed || !!(typeof window !== "undefined" && window.__hhDataLoad && window.__hhDataLoad.state === "failed"));
+      const viewState = !loadedOk ? "loading" : (failed ? "failed" : "notfound");
       return { t, lang, isDesktopNav: !this.state.isMobile, isMobileNav: this.state.isMobile, hasProperty: false, langValue, onLangChange, langOptions,
+        showViewState: true, viewState,
+        viewStateTitle: { loading: t.detail_state_loading, notfound: t.detail_state_notfound_title, failed: t.detail_state_failed_title }[viewState],
+        viewStateText: { loading: "", notfound: t.detail_state_notfound_text, failed: t.detail_state_failed_text }[viewState],
+        viewStateCanRetry: viewState === "failed", viewStateCanBack: viewState !== "loading", viewStateRetry: t.detail_state_retry, viewStateBack: t.detail_state_back,
+        onViewStateRetry: (e) => { if (e && e.preventDefault) e.preventDefault(); try { window.location.reload(); } catch (x) { /* nothing */ } },
         currentPropertyId: this._id,
         toggleMenu: () => this.setState((s) => ({ mobileMenuOpen: !s.mobileMenuOpen })), mobileMenuOpen: false };
     }
@@ -962,7 +985,7 @@ class Component extends DCLogic {
       mobileMenuOpen: this.state.isMobile && this.state.mobileMenuOpen,
       toggleMenu: () => this.setState((s) => ({ mobileMenuOpen: !s.mobileMenuOpen })),
       langValue, onLangChange, langOptions,
-      hasProperty: true,
+      hasProperty: true, showViewState: false,
       currentPropertyId: raw.id,
       favIcon: this.state.isFav ? "⭐" : "☆",
       favTitle: this.state.isFav ? t.fav_remove : t.fav_add,

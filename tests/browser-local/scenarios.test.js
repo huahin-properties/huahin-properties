@@ -537,4 +537,41 @@ const preview = async (page, state, ms) => waitFor(async () => (await page.getAt
     assert.strictEqual((await db.doc("caseInternal/" + id).get()).data().price, 6100000, "nobody else changed the case");
     rec("B11b", "refused: another Staff who has not claimed the case (page), an agent (page + direct read/write denied by rules), signed-out visitor", "PASS (local browser + emulators)", "assignment is enforced by the page, not by Firestore rules (rules let any Staff write non-stamp fields — unchanged, documented)");
   });
+  it("B12 (FX-3 / DOC-OBS-05) Details page states: LOADING is never shown as 'not found'; a closed/unknown listing says so (one message, 8 languages, way back to search, nothing private); a failed load says 'could not load' with a retry — never a blank page", async () => {
+    // 1. the listing taken down in B9 (public record + photos gone) and an id that never existed: the SAME not-found view
+    const closed = await newPage({}, "public-closed-detail");
+    await closed.page.goto(site.url + "/Property%20Details.dc.html?id=" + ids.outsiderCase);
+    await closed.page.waitForSelector("[data-view-state=notfound]", { timeout: 30000 }); await H.shot(closed.page, "52-details-closed-listing-not-found-state");
+    const body = await closed.page.innerText("body");
+    assert.ok(/ไม่พบประกาศนี้/.test(body), "visible not-found message (Thai)"); assert.ok(!/7,500,000|Synthetic|0800000001|trackToken/.test(body), "nothing from the case is shown");
+    assert.strictEqual(await closed.page.locator("[data-view-state-back]").getAttribute("href"), "Search Results.dc.html"); assert.strictEqual(await closed.page.locator("[data-view-state-retry]").count(), 0, "no retry on a plain not-found");
+    const never = await newPage({}, "public-never-existed"); await never.page.goto(site.url + "/Property%20Details.dc.html?id=NO-SUCH-LISTING");
+    await never.page.waitForSelector("[data-view-state=notfound]", { timeout: 30000 });
+    assert.strictEqual((await never.page.innerText("[data-view-state]")).trim(), (await closed.page.innerText("[data-view-state]")).trim(), "closed and never-existed look identical (no hint that a private case exists)");
+    assert.strictEqual(closed.page.__logs.navs.length, 1, "no automatic reload"); await never.ctx.close(); await closed.ctx.close();
+    // 2. slow data: while the data is on its way the page says LOADING and never "not found"
+    const slow = await newPage({}, "public-slow-detail"); slow.ctx.__fault = { delayMs: 3000 };
+    await slow.page.goto(site.url + "/Property%20Details.dc.html?id=NO-SUCH-LISTING");
+    await slow.page.waitForSelector("[data-view-state=loading]", { timeout: 30000 });
+    assert.ok(!/ไม่พบประกาศนี้/.test(await slow.page.innerText("body")), "while loading, the page must not say not found"); assert.ok(/กำลังโหลดประกาศ/.test(await slow.page.innerText("[data-view-state]")));
+    await H.shot(slow.page, "53-details-loading-state");
+    await slow.page.waitForSelector("[data-view-state=notfound]", { timeout: 40000 }); await slow.ctx.close();
+    // 3. failed load: a different message, with a manual retry; never "not found"
+    const bad = await newPage({}, "public-failed-detail-state"); bad.ctx.__fault = { failFirebase: true };
+    await bad.page.goto(site.url + "/Property%20Details.dc.html?id=" + ids.outsiderCase);
+    await bad.page.waitForSelector("[data-view-state=failed]", { timeout: 40000 });
+    assert.ok(/โหลดประกาศไม่สำเร็จ/.test(await bad.page.innerText("body")) && !/ไม่พบประกาศนี้/.test(await bad.page.innerText("[data-view-state]")), "failed is not 'not found'");
+    assert.strictEqual(await bad.page.locator("[data-view-state-retry]").count(), 1, "manual retry offered"); assert.strictEqual(bad.page.__logs.navs.length, 1, "still no AUTOMATIC reload");
+    await H.shot(bad.page, "54-details-failed-load-state"); await bad.ctx.close();
+    // 4. all 8 languages: each shows its own, distinct, non-empty not-found title (no raw key, no 'undefined')
+    const titles = {};
+    for (const lang of ["th", "en", "ru", "no", "de", "zh", "fr", "it"]) {
+      const lp = await newPage({}, "public-notfound-" + lang); await lp.ctx.addInitScript((l) => { try { localStorage.setItem("hh_lang", l); } catch (e) { /* none */ } }, lang);
+      await lp.page.goto(site.url + "/Property%20Details.dc.html?id=NO-SUCH-LISTING"); await lp.page.waitForSelector("[data-view-state=notfound]", { timeout: 30000 });
+      const txt = (await lp.page.innerText("[data-view-state]")).trim(); titles[lang] = txt.split("\n")[0].trim();
+      assert.ok(txt.length > 20 && !/undefined|detail_state/.test(txt), lang + ": real text, no raw key"); await lp.ctx.close();
+    }
+    assert.strictEqual(new Set(Object.values(titles)).size, 8, "8 different languages: " + JSON.stringify(titles));
+    rec("B12", "Details page states (FX-3): loading is never 'not found'; closed and never-existed listings show the same not-found message with a way back to search and nothing private; a failed load shows a different message with manual retry; the not-found text exists in all 8 languages", "PASS (local browser + emulators)", "no automatic reload in any state");
+  });
 });
