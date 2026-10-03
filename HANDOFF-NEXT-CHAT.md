@@ -2,7 +2,8 @@
 
 **รุ่นหลัก: HP-HANDOFF-2026-10-03-v2 · 3 ตุลาคม 2569 · Asia/Bangkok**
 
-- **สถานะปัจจุบัน (r9):** source/code head `d7ee37e9323115168e8d0179372e9c2015ec42c4` (โค้ดเว็บ+Functions เปลี่ยน: หน่วยที่ดิน D2) · เอกสาร/build base ที่ Work ตรวจ `d0ffd49b56c5303e69c8c82ddb9b8db374442915` · **Cloud TEST deployed ยังเป็น `2c897593321713783d0ba81c7167962e1793be9a`** (ยังไม่ deploy r9) · production deployed ไม่ทราบ (RED) · T12 คง FAIL จนกว่า Work ตรวจและเจ้าของลอง Cloud TEST · S-TEST-FLOW 9/9 · S-TEST-PUBLIC 6/7 ≈ 86% (ผล Cloud ที่ 2c89759 ไม่เปลี่ยน) · ดูบล็อก "ผลปรับรอบ r9" ท้ายเอกสาร; บรรทัด r8 ด้านล่างเป็น **ประวัติ**
+- **สถานะปัจจุบัน (r9b):** source/code head `958c8770fed6bdd0265239cf030c3a43a2505dc3` (แก้ข้อพบ Work review r9: Case Data ล้างที่ดิน + Lister validation) · เอกสาร/build base ที่ Work ตรวจ `7f596631ef11587d0532c5931d37cff69b4eded0` · **Cloud TEST deployed ยังเป็น `2c897593321713783d0ba81c7167962e1793be9a`** (ยังไม่ deploy r9/r9b) · production deployed ไม่ทราบ (RED) · T12 คง FAIL จนกว่า Work ตรวจและเจ้าของลอง Cloud TEST · S-TEST-FLOW 9/9 · S-TEST-PUBLIC 6/7 ≈ 86% (ผล Cloud ที่ 2c89759 ไม่เปลี่ยน) · ดูบล็อก "ผลปรับรอบ r9b" ท้ายเอกสาร; บรรทัด r9 ด้านล่างเป็น **ประวัติ**
+- [ประวัติ r9] **สถานะ ณ r9:** source/code head `d7ee37e9323115168e8d0179372e9c2015ec42c4` (โค้ดเว็บ+Functions เปลี่ยน: หน่วยที่ดิน D2) · เอกสาร/build base ที่ Work ตรวจ `d0ffd49b56c5303e69c8c82ddb9b8db374442915` · **Cloud TEST deployed ยังเป็น `2c897593321713783d0ba81c7167962e1793be9a`** (ยังไม่ deploy r9) · production deployed ไม่ทราบ (RED) · T12 คง FAIL จนกว่า Work ตรวจและเจ้าของลอง Cloud TEST · S-TEST-FLOW 9/9 · S-TEST-PUBLIC 6/7 ≈ 86% (ผล Cloud ที่ 2c89759 ไม่เปลี่ยน) · ดูบล็อก "ผลปรับรอบ r9" ท้ายเอกสาร; บรรทัด r8 ด้านล่างเป็น **ประวัติ**
 - [ประวัติ r8] **สถานะ ณ r8:** source/code head `678a04211879352d05e14fbe6166a9186a65507e` (โค้ดเว็บ ไม่เปลี่ยน) · เอกสาร/build base ที่ Work ตรวจ `2c897593321713783d0ba81c7167962e1793be9a` · **Cloud TEST deployed `2c897593321713783d0ba81c7167962e1793be9a`** (เจ้าของลองเคสสังเคราะห์เดิมแล้ว) · production deployed ไม่ทราบ (RED) · Cloud TEST: T10/T13/T14/T16 PASS, T12 FAIL → S-TEST-PUBLIC 6/7 ≈ 86% (เฉพาะขอบเขตนี้) · S-TEST-FLOW 9/9 · ดูบล็อก "ผลปรับรอบ r8" ท้ายเอกสาร; บรรทัดสถานะรุ่นก่อนหน้าด้านล่างเป็น **ประวัติ**
 - [ประวัติ r7] **สถานะ ณ r7:** source/code head `678a04211879352d05e14fbe6166a9186a65507e` (draft ยังไม่ deploy; โค้ดเว็บเท่ากับ `7c1ec6b`) · เอกสาร/build base head ที่ Work ตรวจ `59d3ecb76ba179ce661e74c90040353e404f7604` · Cloud TEST deployed `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5` (ไม่ใช่ source ปัจจุบัน) · production deployed ไม่ทราบ · ขอบเขต checklist 12 ชุด (lock 2: S-TEST-FLOW 9/9, S-TEST-PUBLIC 2/7) · FX-1/2/3/4 ใน draft (ผลในเครื่อง) + ตรวจผลกระทบ component แล้ว รอ Work — ดูบล็อก "ผลปรับรอบ r7" ท้ายเอกสาร; บรรทัดสถานะรุ่นก่อนหน้าด้านล่างเป็น **ประวัติ**
 - [ประวัติ r6] **สถานะ ณ r6:** source/code head `7c1ec6b40bc5c5008d3bd20eb4ed8274bc3a3b99` (draft, ยังไม่ deploy) · เอกสาร/build base head ที่ Work ตรวจ `4a49ea68377f1a8f881891b020a12e1bf70964df` · Cloud TEST deployed `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5` (ไม่ใช่ source ปัจจุบัน) · production deployed ไม่ทราบ · ขอบเขต checklist 12 ชุด (lock 2: S-TEST-FLOW 9/9, S-TEST-PUBLIC 2/7) · FX-1/2/3/4 อยู่ใน draft (ผลในเครื่อง) รอ Work ตรวจ — ดูบล็อก "ผลปรับรอบ r6" ท้ายเอกสาร; บรรทัดที่ระบุ SHA/สถานะรุ่นก่อนหน้าด้านล่างเป็น **ประวัติ**
@@ -986,3 +987,35 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
 **ผลทดสอบ (LOCAL ที่ source `d7ee37e` — ไม่ใช่ Cloud):** test:listing **99 ผ่าน** (LA1–LA5: 100 ตร.ว.=400 ตร.ม., 400 ตร.ม.=100 ตร.ว., แปลงครั้งเดียว/ซ้ำไม่เปลี่ยน, ไม่เดาข้อมูลเก่า, browser/server ตรงกัน; L1–L4: server คำนวณใหม่, legacy ผ่านตามเดิม, หน่วยผิดไม่ขึ้นสาธารณะ, แก้ซ้ำไม่แปลงซ้ำ) · test:browser-local **21/21 ผ่าน** (B11 บันทึก→รีเฟรช→แก้→บันทึกซ้ำ 3 ครั้งไม่แปลงซ้ำ; B19 Staff→Owner preview→เผยแพร่ ครบ 8 ภาษา; B20 ข้อมูลเก่าไม่เดา; B21 ฟอร์มเอเจนต์) · test:chat-live 34 ผ่าน (12 pending) · negative control: ใช้หน้าเดิม → B11/B19/B20/B21 ล้ม (17 ผ่าน/4 ล้ม); ปิดการคำนวณใหม่ของ server → L1/L3 ล้ม · combined suite: ไม่ได้รัน (คง UNVERIFIED) · D08 (B2 flake) คง FAIL ตามบันทึกเดิม.
 
 **ข้อจำกัด:** ยังไม่ทดสอบบน Cloud TEST (T12 คง FAIL); เส้นทาง Lister ครอบคลุมเฉพาะ edit/save ที่ B21 ทดสอบ; ไม่ได้เปลี่ยนข้อมูลเก่าใด ๆ; ผล PASS ทั้งหมดของรอบนี้เป็นหลักฐาน LOCAL เท่านั้น. Production RED.
+
+
+## ผลปรับรอบ r9b — CODE-V2-01 r9b (3 ต.ค. 2569 · แก้เฉพาะข้อพบจาก Work review r9 · ก่อนเสนอ deploy TEST)
+
+**หัวสี่แบบ (แยกกัน):** source head `958c8770fed6bdd0265239cf030c3a43a2505dc3` (r9 เดิม `d7ee37e…`) · doc base ที่ Work ตรวจ `7f596631ef11587d0532c5931d37cff69b4eded0` · documentation head = commit เอกสารของรอบนี้ (ดู PR) · **Cloud TEST deployed `2c897593321713783d0ba81c7167962e1793be9a`** (ไม่เปลี่ยน) · production deployed: ไม่ทราบ (RED). ไม่ merge ไม่ deploy ไม่แก้/migrate/ลบข้อมูล Cloud ไม่รันสคริปต์ CHAT-LIVE เดิม.
+
+**ข้อ 1 — Case Data ล้างพื้นที่แล้วค่าเก่ากลับมา (แก้แล้ว):** แยกชัด — (ก) แก้ข้อมูลอื่นของเคสเก่าที่ไม่ทราบหน่วยและไม่แตะช่องที่ดิน → เก็บ `landSize` เดิมไว้ตามเดิม; (ข) คนที่เคยบันทึกพื้นที่แบบมีหน่วยแล้วตั้งใจล้างช่อง → ล้าง `landAreaValue/Unit/Sqm` และ `landSize` เดิมด้วย เพื่อไม่ให้ preview/public fallback กลับไปแสดงค่าเก่าโดยเงียบ. เปลี่ยนเฉพาะการบันทึกจากการกระทำของผู้ใช้ (ไม่มี backfill/migrate ข้อมูล Cloud).
+
+**ข้อ 2 — Lister Dashboard ห้าม fallback (แก้แล้ว):** ตรวจด้วยกติกาเดียวกับตัวสร้างฟิลด์ (`landAreaFields`) ก่อนเขียน: ค่าที่ถูกปฏิเสธ (เช่นเกินขอบเขต) หรือการล้างหน่วยจากรายการที่มีหน่วยแล้ว → แจ้งข้อผิดพลาดและไม่เขียนข้อมูล ไม่คืนค่าเดิมพร้อมข้อความสำเร็จ; ข้อยกเว้นเดียว = ค่า legacy ที่ไม่ได้แก้จริง (ยังบันทึกฟิลด์อื่นได้); ตัวสร้าง patch โยนข้อผิดพลาดแทน fallback เงียบ.
+
+**ข้อ 3 — ช่องทางที่ D2 รองรับ (ห้ามสรุปว่าครบทั้งระบบ):**
+
+| ช่องทาง | สถานะ D2 |
+|---|---|
+| Case Data (Staff/Owner) | รองรับ (กรอกค่า+หน่วย, ล้าง, ข้อมูลเก่าไม่เดา) |
+| Lister Dashboard (เอเจนต์) | รองรับเส้นทางแก้/บันทึก (B21, B23) |
+| Owner preview | รองรับ (แถวเดียว "ที่ดิน" ค่า+หน่วย หรือ "N (ไม่ระบุหน่วย)") |
+| Property Details สาธารณะ | รองรับ 8 ภาษา |
+| Projection ฝั่ง server + allow-list | รองรับ (คำนวณใหม่ตอนฉาย) |
+| Owner Submission | ไม่มีช่องที่ดิน — ไม่รองรับ |
+| Admin Dashboard | ยังเขียน landSize ไม่มีหน่วย — ไม่รองรับ |
+| AI Quick Add | ยังเขียน landSize ไม่มีหน่วย — ไม่รองรับ |
+| AI draft (Functions) | prompt ใช้ "ตารางวา" — ไม่รองรับ |
+| บริบท AI ใน Home / ContactRail | ข้อความ sqwah / sqm ไม่ตรงกัน — ไม่รองรับ |
+
+**ไฟล์ที่แก้รอบนี้:** `Case Data.dc.html`, `Lister Dashboard.dc.html`, `tests/browser-local/scenarios.test.js` (B22, B23 ใหม่), `tests/listing/core.test.js` (L5 ใหม่) + เอกสาร/แผงสถานะ. ไม่แก้ source ช่องทางอื่น.
+
+**ผลทดสอบ (LOCAL ที่ source `958c877` — ไม่ใช่ Cloud):** test:listing **100 ผ่าน** (L5: การล้างโดยตั้งใจถึงเอกสารสาธารณะ — ไม่มี landSize/ฟิลด์ที่ดิน) · test:browser-local **23/23 ผ่าน** (B22: legacy → ค่า+หน่วย → บันทึก → ล้าง → บันทึก → เปิดใหม่ ไม่มีค่าเก่ากลับ; B23: ค่าเกินขอบเขต/ล้างหน่วย = ไม่เขียน + ล้างช่อง = ล้างทุกฟิลด์) · test:chat-live 34 ผ่าน · test:status-panel ผ่าน · negative control: Case Data+Lister เดิม → B22/B23 ล้ม (21 ผ่าน/2 ล้ม) แล้วคืนโค้ดที่แก้ · ระหว่างทาง B22 ล้ม 2 รอบจากตัวทดสอบเอง (description สั้นเกิน; เคสที่คัดลอกมามีรูปไม่ครบจึงเผยแพร่ไม่ได้ → เปลี่ยนเป็นตรวจแถว preview จาก `public-preview.js` + L5 ฝั่ง server) · combined: ไม่ได้รัน (UNVERIFIED) · D08 (B2 flake) คง FAIL.
+
+**ขั้นตอนทดสอบบน Cloud TEST แบบสั้น (หลัง Work ตรวจและเจ้าของ deploy TEST ตาม head ที่ Work ระบุ — deploy ทั้ง listing functions และ hosting):** (1) ส่งเคสสังเคราะห์ใหม่ → ใน Case Data กรอกที่ดิน 100 + หน่วย ตร.ว. → บันทึก → รีเฟรช → ดูว่ายังเป็น 100 ตร.ว. (ไม่เป็น 400) → (2) Owner ตรวจก่อนเผยแพร่ ต้องเห็น "100 ตร.ว. (400 ตร.ม.)" → เผยแพร่ → หน้าสาธารณะแสดงเท่ากันและเปลี่ยนภาษาได้ → (3) ลองล้างช่องที่ดินแล้วบันทึกอีกเคสสังเคราะห์: preview/สาธารณะต้องไม่มีที่ดิน. ห้ามแก้เคส TEST เดิมด้วยมือ; T12 เปลี่ยนเป็น PASS ได้เมื่อเจ้าของยืนยันเท่านั้น.
+
+**ข้อจำกัด:** ผล PASS ทั้งหมดเป็นหลักฐาน LOCAL; ยังไม่ทดสอบบน Cloud TEST (T12 คง FAIL); รายการเก่าจะแสดง "X (ไม่ระบุหน่วย)" หลัง merge (ISS-LAND-LEGACY-DISPLAY); ต้อง deploy listing functions คู่ hosting (ISS-LAND-DEPLOY). Production RED.
