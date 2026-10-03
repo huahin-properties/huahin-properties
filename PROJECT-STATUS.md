@@ -2,7 +2,8 @@
 
 **รุ่นหลัก: HP-HANDOFF-2026-10-03-v2 · 3 ตุลาคม 2569 · Asia/Bangkok**
 
-- **สถานะปัจจุบัน (r7):** source/code head `678a04211879352d05e14fbe6166a9186a65507e` (draft ยังไม่ deploy; โค้ดเว็บเท่ากับ `7c1ec6b`) · เอกสาร/build base head ที่ Work ตรวจ `59d3ecb76ba179ce661e74c90040353e404f7604` · Cloud TEST deployed `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5` (ไม่ใช่ source ปัจจุบัน) · production deployed ไม่ทราบ · ขอบเขต checklist 12 ชุด (lock 2: S-TEST-FLOW 9/9, S-TEST-PUBLIC 2/7) · FX-1/2/3/4 ใน draft (ผลในเครื่อง) + ตรวจผลกระทบ component แล้ว รอ Work — ดูบล็อก "ผลปรับรอบ r7" ท้ายเอกสาร; บรรทัดสถานะรุ่นก่อนหน้าด้านล่างเป็น **ประวัติ**
+- **สถานะปัจจุบัน (r8):** source/code head `678a04211879352d05e14fbe6166a9186a65507e` (โค้ดเว็บ ไม่เปลี่ยน) · เอกสาร/build base ที่ Work ตรวจ `2c897593321713783d0ba81c7167962e1793be9a` · **Cloud TEST deployed `2c897593321713783d0ba81c7167962e1793be9a`** (เจ้าของลองเคสสังเคราะห์เดิมแล้ว) · production deployed ไม่ทราบ (RED) · Cloud TEST: T10/T13/T14/T16 PASS, T12 FAIL → S-TEST-PUBLIC 6/7 ≈ 86% (เฉพาะขอบเขตนี้) · S-TEST-FLOW 9/9 · ดูบล็อก "ผลปรับรอบ r8" ท้ายเอกสาร; บรรทัดสถานะรุ่นก่อนหน้าด้านล่างเป็น **ประวัติ**
+- [ประวัติ r7] **สถานะ ณ r7:** source/code head `678a04211879352d05e14fbe6166a9186a65507e` (draft ยังไม่ deploy; โค้ดเว็บเท่ากับ `7c1ec6b`) · เอกสาร/build base head ที่ Work ตรวจ `59d3ecb76ba179ce661e74c90040353e404f7604` · Cloud TEST deployed `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5` (ไม่ใช่ source ปัจจุบัน) · production deployed ไม่ทราบ · ขอบเขต checklist 12 ชุด (lock 2: S-TEST-FLOW 9/9, S-TEST-PUBLIC 2/7) · FX-1/2/3/4 ใน draft (ผลในเครื่อง) + ตรวจผลกระทบ component แล้ว รอ Work — ดูบล็อก "ผลปรับรอบ r7" ท้ายเอกสาร; บรรทัดสถานะรุ่นก่อนหน้าด้านล่างเป็น **ประวัติ**
 - [ประวัติ r6] **สถานะ ณ r6:** source/code head `7c1ec6b40bc5c5008d3bd20eb4ed8274bc3a3b99` (draft, ยังไม่ deploy) · เอกสาร/build base head ที่ Work ตรวจ `4a49ea68377f1a8f881891b020a12e1bf70964df` · Cloud TEST deployed `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5` (ไม่ใช่ source ปัจจุบัน) · production deployed ไม่ทราบ · ขอบเขต checklist 12 ชุด (lock 2: S-TEST-FLOW 9/9, S-TEST-PUBLIC 2/7) · FX-1/2/3/4 อยู่ใน draft (ผลในเครื่อง) รอ Work ตรวจ — ดูบล็อก "ผลปรับรอบ r6" ท้ายเอกสาร; บรรทัดที่ระบุ SHA/สถานะรุ่นก่อนหน้าด้านล่างเป็น **ประวัติ**
 - [ประวัติ r5] **สถานะ ณ r5:** Work ตรวจ head เอกสาร `f4d8090e631ad990de43d27570c05fa12b724722`; code/TEST SHA `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5`; ขอบเขต checklist 12 ชุด (lock แล้ว 2: S-TEST-FLOW 9/9, S-TEST-PUBLIC 2/7); R12=PASS; ข้อกำหนดเจ้าของ A1–A10 บันทึกแล้ว; FX-3 อยู่ใน draft branch (ยังไม่ deploy). ดูบล็อก "ผลปรับรอบ r5" ท้ายเอกสาร. บรรทัดถัดไปที่ระบุ `34a0eb0` / "v2 ยังไม่ commit" เป็น **ประวัติ**
 - รวม Work v1 + Claude Code v1.1 ที่ document commit `34a0eb0ee27bddfa72003958dd7e0546a9b490b2` + Claude AI ADDENDUM-CLAUDE-AI-01 + มติแผง PROJECT-STATUS ที่เจ้าของยืนยัน 3 ต.ค. 10:19
@@ -91,10 +92,10 @@ Evidence tags: HISTORY=บันทึกเดิม; OWNER-OLD-CHAT=ข้อ�
 | Staff 7 photos/lightbox | 🟢 REAL-TEST | user ยืนยันครบ | คง negative permission เป็นงานค้าง |
 | Staff data save/refresh | 🟢 REAL-TEST | 011249 + user | unit defect แยกไว้ |
 | Staff submit review | 🟢 REAL-TEST | 012206 | ส่งแล้ว 1 ครั้ง |
-| Owner intake/preview/publish | 🟢 REAL-TEST | 014754/014857/015012 | approval display mapping ค้าง |
+| Owner intake/preview/publish | 🟢 REAL-TEST (T14 PASS บัญชี Owner เดียวกัน ที่ 2c89759) | 014754/014857/015012 + 144101/144107 | ผู้อนุมัติคนละบัญชีบน Cloud ยังไม่ทดสอบ |
 | Public details 7 photos | 🟢 REAL-TEST photos | user + 015323 | ไม่ถือว่า fields ทั้งหมดถูก |
-| Public search cover/data labels/map | 🔴 observed defects | 015210/015323/015328 | Code audit → เสนอ targeted fix หลัง scope อนุมัติ |
-| Take-down search/details | 🟢 REAL-TEST UI หลัง refresh | 020034/020932 | ลิงก์รูปเก่ายัง UNVERIFIED |
+| Public search cover/data labels/map | 🟡 REAL-TEST Cloud 2c89759: T10/T13 PASS (เคสสังเคราะห์เดียว); T12 FAIL | ภาพ 145029–145325 | T12 รอมติหน่วยที่ดิน D2; แผนที่ยังไม่ยืนยันตำแหน่งจริง (ISS-MAP-LIMITS) |
+| Take-down search/details | 🟢 REAL-TEST Cloud 2c89759: T16 PASS; ปิด→เปิดใหม่→ปิดอีกครั้ง; Search = 0; รูปเดิม 1 ไฟล์ 404 | ภาพ 143124/150108/150315/145508/145934 | ตรวจรูปอีก 6 ไฟล์และการลบ backend ยัง UNVERIFIED |
 | Full 3 submitter groups | 🟡 LOCAL reported; REAL-TEST ไม่ครบ | CODE-REPORT | agent flow และ negative Cloud ต้องเติม |
 | Privacy legacy migration | 🔴 BLOCKED production | CODE-REPORT plan | ห้าม migrate/delete จนอนุมัติแยก |
 | Production release | 🔴 NOT READY | draft/unmerged + blockers | ห้าม merge/deploy/GREEN |
@@ -102,6 +103,7 @@ Evidence tags: HISTORY=บันทึกเดิม; OWNER-OLD-CHAT=ข้อ�
 | ข้อกำหนดเจ้าของ A1–A10 + FX-3 (DOC-OBS-05) r5 | 🟡 บันทึกแล้ว; FX-3 อยู่ใน draft branch (LOCAL) รอ Work ตรวจ | SOURCE/LOCAL | Work ตรวจ diff → เจ้าของ deploy TEST ตาม head ที่ตรวจ |
 | FX-1/2/4 ใน draft + ทดสอบ FX-3 เพิ่ม + ทะเบียนรุ่น/ผลทดสอบ r6 | 🟡 พร้อมส่ง Work ตรวจ; LOCAL ผ่าน; ยังไม่ deploy | LOCAL/SOURCE | Work ตรวจ diff → เจ้าของ deploy TEST ตาม head ที่ตรวจ |
 | ตรวจผลกระทบ component + FX-1 สองบัญชี r7 | 🟡 พร้อมส่ง Work ตรวจ; LOCAL ผ่าน; ยังไม่ deploy | LOCAL/SOURCE | Work ระบุ head → เจ้าของ deploy TEST → ทดสอบเฉพาะจุด |
+| ซิงก์ผล Cloud TEST ที่ head 2c89759 (r8) | 🟢 REAL-TEST Cloud: T10/T13/T14/T16 PASS, T12 FAIL; S-TEST-PUBLIC 6/7 ≈ 86% (เฉพาะขอบเขตนี้) | ภาพเจ้าของ (Work ตรวจแล้ว) | Work ตรวจชุดส่งต่อ r8; ยังไม่ต้องทดสอบเพิ่ม |
 
 ## 4. งานค้างและลำดับถัดไป
 
@@ -587,6 +589,32 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
 
 **ไม่เปลี่ยน/ไม่ทำ:** ไม่ merge · ไม่ deploy (รวม TEST) · ไม่แตะ production · ไม่ migrate/ลบข้อมูล Cloud · ไม่เปิด GREEN · ไม่รัน `tools/chat-live/deploy-test.sh` · ไม่สร้างข้อมูล Cloud · เจ้าของยังไม่ต้องส่งเคสใหม่.
 
+## ผลปรับรอบ r8 — CODE-V2-01 r8 (3 ต.ค. 2569 · ซิงก์ผล Cloud TEST ที่ head 2c89759 · เอกสารและแผงเท่านั้น)
+
+**หัวสามแบบ (แยกกัน):** source/code head `678a04211879352d05e14fbe6166a9186a65507e` (โค้ดเว็บ — ไม่เปลี่ยนในรอบนี้) · documentation head = commit ของรอบ r8 นี้ (ดู PR; มีแต่เอกสาร/แผง) · **Cloud TEST deployed head `2c897593321713783d0ba81c7167962e1793be9a`** (หัวของ r7 ที่เจ้าของ deploy; โค้ดเว็บเท่ากับ source head) · production deployed: ไม่ทราบ (คง RED).
+
+**ผล Cloud TEST (REAL-TEST)** — `huahin-chat-test-01` ที่ head `2c89759` เคสสังเคราะห์เดิม `own-14a754ca222d54e405fe` / `HH-67680` · เจ้าของลองและส่งภาพ, Work ตรวจภาพแล้ว · **แยกจากผล emulator** (B6/B7/B12/B13/B16/B17 เป็นผลในเครื่อง ไม่ถูกรวมกับตารางนี้):
+| ข้อ | ผล | หลักฐาน (รหัสภาพของเจ้าของ) | ข้อจำกัดที่ต้องคงไว้ |
+|---|---|---|---|
+| T10 Search รูปปก | **PASS** | 145029, 145035, 145207, 145211 — รูปปกตรงกับเคส; ไทย → English ได้ เมนู ตัวกรอง ชื่อประกาศเปลี่ยนตาม | เคสสังเคราะห์เดียว |
+| T13 undefined / ระยะ 0 | **PASS เฉพาะเคสนี้** | 145317, 145322, 145325 — Details ไม่แสดง undefined หรือระยะ 0 ที่ไม่มีข้อมูลรองรับ | ไม่รับรองตำแหน่งแผนที่จริง (ISS-MAP-LIMITS) |
+| T14 ผู้อนุมัติ | **PASS** | 144101, 144107 — ผู้อนุมัติรับเรื่องและผู้เผยแพร่แสดงแยกกัน | **บัญชี Owner เดียวกันเท่านั้น** (คนละบัญชีบน Cloud ยังไม่ทดสอบ) |
+| T16 หลังปิด Details | **PASS** | 143124 (ไทย), 150108 (อังกฤษ) — แสดงไม่พบประกาศ ไม่แสดงรูป/ข้อมูลเดิม | ภาพ **150059 = ก่อน** Ctrl+Shift+R, **150108 = หลัง**; **ไม่มีหลักฐานว่ารูปเดิมแสดงระหว่างโหลด** |
+| T12 หน่วยที่ดิน | **คง FAIL** | กรอก 100 ตร.ว. แต่ Details แสดง 100 sqm | รอข้อมูลตัวอย่าง `landSize` + มติ D2 |
+| T23 ปิด → เปิดใหม่ → ปิดอีกครั้ง (รายการใหม่) | **PASS** | เปิดใหม่ 144321, 144507 · ปิด 145635, 145755 | ผ่าน UI บน TEST; ไม่ได้ตรวจการลบ backend ทั้งหมด |
+| T15 (เดิม PASS) ปิดแล้ว Search = 0 | ยืนยันซ้ำ | 150315 — Search เหลือ 0 listings | — |
+| T18a รูปสาธารณะเดิม **1 ไฟล์** | **PASS เฉพาะไฟล์นี้** | 145508 (ก่อนปิด โหลดได้) → 145934 (หลังปิด + hard refresh ตอบ 404 Not Found) | **ห้ามสรุปว่าตรวจครบ 7 ไฟล์หรือผ่านเกณฑ์ลบทั้งหมด** — T18b (ไฟล์อื่น) และ T17a–c (ลบ backend) ยัง **UNVERIFIED** |
+
+**เปอร์เซ็นต์ (เฉพาะขอบเขตที่ Work lock):** `S-TEST-PUBLIC` = T09/T10/T11/T13/T14/T16 PASS + T12 FAIL = **6/7 ≈ 86%** (checklist เดิม 7 ข้อ ไม่เพิ่ม/ลด; ก่อนหน้า 2/7 ≈ 29%) · `S-TEST-FLOW` ยัง **9/9** · **เป็นตัวเลขของขอบเขตนั้นเท่านั้น ไม่ใช่เปอร์เซ็นต์ทั้งโครงการ** · ขอบเขตอื่นยังไม่ lock.
+
+**ทะเบียนข้อสังเกต:** DOC-OBS-01, -03, -04, -05 ปิด (ยืนยันบน Cloud TEST เฉพาะเคสสังเคราะห์เดียว; -03 ติดตามข้อจำกัดต่อที่ ISS-MAP-LIMITS) · **DOC-OBS-02 เปิด** (T12) · FX-1…FX-4 สถานะ "ยืนยันบน Cloud TEST" (ยังไม่ merge) · ISS-TESTBUILD ยังเปิด: Cloud ยืนยันเฉพาะ component ที่ใช้ใน Search ทำงาน — ContactRail/การเริ่ม conversation บน Cloud **UNVERIFIED** · ISS-RAIL-ANON ยังเปิด.
+
+**ผล Cloud TEST เดิมก่อนหน้า** (head `d0fe617`) เก็บเป็นประวัติที่มีข้อจำกัดของ build (component ไม่มีตรรกะ) — ไม่ลบ.
+
+**ข้อจำกัดการทดสอบที่คงเดิม:** ไม่ได้ทดสอบบัญชีอื่น/สิทธิ์ (Cloud negative matrix), ข้อมูลเก่า (LEGACY-DATA-PLAN ยัง BLOCKED), AI จริง; D08 (flake ในเครื่อง) คง FAIL; combined คง UNVERIFIED.
+
+**ไม่เปลี่ยน/ไม่ทำ:** รอบนี้เอกสารและแผงเท่านั้น — ไม่แก้ source เว็บไซต์/Functions/rules · ไม่ merge · ไม่ deploy · ไม่ migrate หรือลบข้อมูลเพิ่มเติม · ไม่เปิด GREEN · ไม่รัน `tools/chat-live/deploy-test.sh` · production คง RED · เจ้าของยังไม่ต้องส่งเคสใหม่.
+
 ## 6. STATUS-REGISTRY — ข้อมูลเครื่องอ่านของแผงภายใน (แก้ที่นี่ที่เดียว แล้วรัน `npm run status-panel`)
 
 ตาราง §1–§3 ด้านบนเป็นต้นทางของ Roadmap/ฐานระบบ/งานปัจจุบัน (แผงอ่านตรงจากตาราง). บล็อกนี้เก็บเฉพาะสิ่งที่ตารางไม่มี: ผู้รับผิดชอบ/ขอบเขต/วัน-commit ของแต่ละงาน (`taskMeta`), checklist ร่างสำหรับเปอร์เซ็นต์ (`scopes`, ทุกชุด `locked:false` จนกว่า Work lock), ทะเบียนค้าง (`issues`) และประวัติ. สถานะรายการใน checklist: `pass` / `fail` / `blocked` / `unverified` / `na` (N/A ต้องมีเหตุผลใน `ref`). ห้ามใส่รหัสผ่าน คีย์ อีเมล เบอร์ หรือ token.
@@ -599,34 +627,33 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   "id": "HP-HANDOFF-2026-10-03-v2",
   "date": "2026-10-03",
   "tz": "Asia/Bangkok",
-  "docBaseSha": "59d3ecb76ba179ce661e74c90040353e404f7604",
-  "deployedTestSha": "d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5",
+  "docBaseSha": "2c897593321713783d0ba81c7167962e1793be9a",
+  "deployedTestSha": "2c897593321713783d0ba81c7167962e1793be9a",
   "deployedProdSha": "ไม่ทราบ",
   "prState": "PR #8 OPEN / DRAFT / NOT MERGED · base claude/chat-live-01",
   "website": "RED / Public Hidden (ตามรายงาน ไม่ได้ตรวจสดรอบนี้)",
-  "revision": "r7 (Code · ตรวจผลกระทบการเลิกห่อ template + FX-1 สองบัญชี)",
-  "set": "HP-HANDOFF-2026-10-03-v2 + CODE-V2-01 r7",
+  "revision": "r8 (Code · ซิงก์ผล Cloud TEST ที่ head 2c89759 — เอกสารและแผงเท่านั้น)",
+  "set": "HP-HANDOFF-2026-10-03-v2 + CODE-V2-01 r8",
   "sourceHeadSha": "678a04211879352d05e14fbe6166a9186a65507e"
  },
  "goal": "ให้เจ้าของและทีมลงประกาศพร้อมรูปจนเผยแพร่ได้จริงอย่างปลอดภัย (ส่งฟอร์ม → Staff เตรียม → Owner อนุมัติ/เผยแพร่ → หน้าสาธารณะ) บนเว็บ huahin.properties โดยยังไม่เปิดเว็บสาธารณะจนกว่าเจ้าของอนุมัติ",
  "current": {
-  "task": "ตอบ Work review r6: ตรวจผลกระทบการเลิกห่อ template (component 4 ตัว), การเริ่มทำงานอัตโนมัติของ ContactRail, TEST guard, FX-1 สองบัญชี — เสนอ head + แผนทดสอบเฉพาะจุด",
+  "task": "ซิงก์ผล Cloud TEST ที่ head 2c89759 (เอกสารและแผงเท่านั้น) — T10/T13/T14/T16 PASS, T12 FAIL, S-TEST-PUBLIC 6/7",
   "phases": [
    "LISTING-E2E-01",
    "ชุดส่งต่อ"
   ],
   "environments": [
    "เอกสาร",
-   "พัฒนา (โค้ด/ในเครื่อง)",
-   "TEST (ผลเดิม)"
+   "TEST (Cloud ผลใหม่)"
   ],
-  "actor": "Claude Code → ส่ง ChatGPT Work ตรวจ ก่อนเจ้าของ deploy TEST"
+  "actor": "Claude Code → ส่ง ChatGPT Work ตรวจ"
  },
  "youDoNow": {
-  "text": "ยังไม่ต้องทำอะไร — ไม่ต้องส่งเคสใหม่; รอ ChatGPT Work ตรวจผลกระทบ component + แผนทดสอบ แล้วจึงมีคำสั่ง deploy TEST",
+  "text": "ยังไม่ต้องทำอะไร — เจ้าของยังไม่ต้องส่งเคสใหม่หรือทดสอบเพิ่ม; รอ ChatGPT Work ตรวจชุดส่งต่อรุ่นนี้",
   "where": "ไม่มีหน้าจอที่ต้องเปิด",
-  "passWhen": "Work ระบุ head ที่ให้ deploy TEST (เจ้าของ deploy เองเท่านั้น)",
-  "next": "ยังไม่มีคำสั่ง deploy/merge/ทดสอบ"
+  "passWhen": "Work แจ้งผลตรวจ",
+  "next": "ยังไม่มีคำสั่ง deploy/merge/ทดสอบเพิ่ม; ค้างต่อ: T12 (หน่วยที่ดิน D2), ISS-MAP-LIMITS, T17a–c/T18b, บัญชีอื่น/สิทธิ์/ข้อมูลเก่า/AI จริง"
  },
  "actors": {
   "owner": "เจ้าของ (Product Owner)",
@@ -675,28 +702,28 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
      "text": "หน้า Details แยกสถานะ กำลังโหลด / ไม่พบหรือปิดแล้ว / โหลดไม่สำเร็จ ครบ 8 ภาษา ไม่เผยข้อมูลเคสส่วนตัว (FX-3, draft)",
      "status": "pass",
      "level": "LOCAL",
-     "ref": "browser-local B12: retry = 1 navigation, direct read ล้ม = โหลดล้ม (ไม่ใช่ไม่พบ), ข้อความ 7 รายการ × 8 ภาษา + negative control ล้มเมื่อตัดการตรวจ direct read; ยังไม่ deploy / ยังไม่ลอง Cloud"
+     "ref": "browser-local B12: retry = 1 navigation, direct read ล้ม = โหลดล้ม (ไม่ใช่ไม่พบ), ข้อความ 7 รายการ × 8 ภาษา + negative control ล้มเมื่อตัดการตรวจ direct read; ยังไม่ deploy / ยังไม่ลอง Cloud · Cloud TEST 2c89759: T16 PASS"
     },
     {
      "id": "D14",
      "text": "หน้าอนุมัติแสดงตราอนุมัติรับเรื่องกับตราอนุมัติเผยแพร่แยกกัน ตรงกับผู้ดำเนินการของเหตุการณ์นั้น ไม่ใช้บทบาทเป็นชื่อบุคคล ไม่เพิ่มข้อมูลผู้อนุมัติในข้อมูลสาธารณะ (FX-1, draft)",
      "status": "pass",
      "level": "LOCAL",
-     "ref": "browser-local B6 + negative control ล้มเมื่อไม่มี FX-1; ยังไม่ deploy / ยังไม่ลอง Cloud"
+     "ref": "browser-local B6 + negative control ล้มเมื่อไม่มี FX-1; ยังไม่ deploy / ยังไม่ลอง Cloud · Cloud TEST 2c89759: T14 (บัญชีเดียว) PASS"
     },
     {
      "id": "D15",
      "text": "หน้า Details/การ์ดค้นหา ซ่อนระยะและชื่อโซนที่ไม่มีหลักฐาน ไม่แสดง 0 กม. หรือ undefined แทน \"ไม่ทราบ\" และคงค่า 0 ที่เก็บไว้จริง (FX-2, draft)",
      "status": "pass",
      "level": "LOCAL",
-     "ref": "browser-local B13 + negative control ล้มเมื่อไม่มี FX-2; ยังไม่ deploy / ยังไม่ลอง Cloud"
+     "ref": "browser-local B13 + negative control ล้มเมื่อไม่มี FX-2; ยังไม่ deploy / ยังไม่ลอง Cloud · Cloud TEST 2c89759: T13 (เคสนี้) PASS"
     },
     {
      "id": "D16",
      "text": "บิลด์ TEST ไม่ห่อไฟล์ component ในเทมเพลต จึงรูปปกการ์ดค้นหาโหลดจริงทั้ง visitor และ Owner (FX-4, draft)",
      "status": "pass",
      "level": "LOCAL",
-     "ref": "browser-local B7 (ล้มก่อนแก้ ทำซ้ำได้) + B17 + hosting-build; ยังไม่ deploy — T10 ยังเป็น FAIL จนลองบน TEST"
+     "ref": "browser-local B7 (ล้มก่อนแก้ ทำซ้ำได้) + B17 + hosting-build; ยังไม่ deploy — T10 ยังเป็น FAIL จนลองบน TEST · Cloud TEST 2c89759: T10 PASS"
     },
     {
      "id": "D17",
@@ -893,7 +920,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
      "text": "ปิดประกาศแล้ว Search = 0 รายการ",
      "status": "pass",
      "level": "REAL-TEST",
-     "ref": "020034"
+     "ref": "020034 · ยืนยันซ้ำที่ head 2c89759: หลังปิด Search เหลือ 0 listings (ภาพ 150315)"
     }
    ]
   },
@@ -902,7 +929,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "env": "test",
    "name": "Cloud TEST — หน้าสาธารณะแสดงถูกต้อง (DOC-OBS)",
    "locked": true,
-   "lockNote": "Work lock 3 ต.ค. 2569 — คงข้อบกพร่องทั้งห้า (DOC-OBS-01…05) ไว้ในตัวหาร; ตัวเลขนี้ไม่ได้หมายถึงแก้แล้ว",
+   "lockNote": "Work lock 3 ต.ค. 2569; อัปเดตผล Cloud TEST ที่ head 2c89759: T09/T10/T11/T13/T14/T16 PASS, T12 FAIL = 6/7 ≈ 86% — เฉพาะขอบเขตนี้ ไม่ใช่เปอร์เซ็นต์ทั้งโครงการ; T13 PASS เฉพาะเคสสังเคราะห์นี้; ไม่รับรองตำแหน่งแผนที่จริง",
    "items": [
     {
      "id": "T09",
@@ -914,9 +941,9 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
     {
      "id": "T10",
      "text": "หน้า Search แสดงรูปปก",
-     "status": "fail",
+     "status": "pass",
      "level": "REAL-TEST",
-     "ref": "DOC-OBS-01"
+     "ref": "ภาพเจ้าของ 145029, 145035, 145207, 145211: Search แสดงรูปปกตรงกับเคส; เปลี่ยนไทย → English ได้ เมนู ตัวกรอง และชื่อประกาศเปลี่ยนตาม (Work ตรวจภาพแล้ว) · เคสสังเคราะห์เดิม own-14a754ca222d54e405fe / HH-67680 · Cloud TEST huahin-chat-test-01 ที่ head 2c89759 · 3 ต.ค. 2569"
     },
     {
      "id": "T11",
@@ -934,24 +961,24 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
     },
     {
      "id": "T13",
-     "text": "แผนที่/ระยะทางไม่แสดง undefined หรือ 0 กม. ที่ไม่จริง",
-     "status": "fail",
+     "text": "แผนที่/ระยะทางไม่แสดง undefined หรือ 0 กม. ที่ไม่จริง (เฉพาะเคสนี้)",
+     "status": "pass",
      "level": "REAL-TEST",
-     "ref": "DOC-OBS-03"
+     "ref": "ภาพ 145317, 145322, 145325: Details ไม่แสดง undefined หรือระยะ 0 ที่ไม่มีข้อมูลรองรับ — PASS เฉพาะเคสนี้; แผนที่พื้นที่ทั่วไปยังไม่ยืนยันตำแหน่งจริง (ISS-MAP-LIMITS) · เคสสังเคราะห์เดิม own-14a754ca222d54e405fe / HH-67680 · Cloud TEST huahin-chat-test-01 ที่ head 2c89759 · 3 ต.ค. 2569"
     },
     {
      "id": "T14",
      "text": "หน้าอนุมัติแสดงผู้อนุมัติ",
-     "status": "fail",
+     "status": "pass",
      "level": "REAL-TEST",
-     "ref": "DOC-OBS-04"
+     "ref": "ภาพ 144101, 144107: แสดงผู้อนุมัติรับเรื่องและผู้เผยแพร่แยกกัน — กรณีบัญชี Owner เดียวกันเท่านั้น (กรณีคนละบัญชียังไม่ทดสอบบน Cloud; มีเฉพาะ B16 ในเครื่อง) · เคสสังเคราะห์เดิม own-14a754ca222d54e405fe / HH-67680 · Cloud TEST huahin-chat-test-01 ที่ head 2c89759 · 3 ต.ค. 2569"
     },
     {
      "id": "T16",
      "text": "หลังปิด หน้า Details แจ้งสถานะ 'ปิดแล้ว/ไม่พบ' ชัดเจน",
-     "status": "fail",
+     "status": "pass",
      "level": "REAL-TEST",
-     "ref": "DOC-OBS-05 (ว่างเปล่า)"
+     "ref": "ภาพ 143124 (ไทย), 150108 (อังกฤษ): หลังปิดประกาศแล้วรีเฟรช Details แสดงไม่พบประกาศ ไม่แสดงรูปหรือข้อมูลเดิม. คำชี้แจงเจ้าของ: ภาพ 150059 = ก่อน Ctrl+Shift+R, ภาพ 150108 = หลัง Ctrl+Shift+R; ไม่มีหลักฐานว่ารูปเดิมแสดงระหว่างโหลด · เคสสังเคราะห์เดิม own-14a754ca222d54e405fe / HH-67680 · Cloud TEST huahin-chat-test-01 ที่ head 2c89759 · 3 ต.ค. 2569"
     }
    ]
   },
@@ -984,11 +1011,18 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
      "ref": "ยังไม่ได้ตรวจ Cloud"
     },
     {
-     "id": "T18",
-     "text": "ลิงก์รูปสาธารณะเดิมใช้ไม่ได้หลังปิด",
+     "id": "T18a",
+     "text": "ลิงก์รูปสาธารณะเดิม \"ไฟล์ที่ตรวจ 1 ไฟล์\" ใช้ไม่ได้หลังปิด",
+     "status": "pass",
+     "level": "REAL-TEST",
+     "ref": "ภาพ 145508 (ก่อนปิด โหลดได้), 145934 (หลังปิดและ hard refresh ตอบ 404 Not Found) · หลักฐานเฉพาะไฟล์นี้ — ห้ามสรุปว่าตรวจครบ 7 ไฟล์หรือผ่านเกณฑ์ลบทั้งหมด · เคสสังเคราะห์เดิม own-14a754ca222d54e405fe / HH-67680 · Cloud TEST huahin-chat-test-01 ที่ head 2c89759 · 3 ต.ค. 2569"
+    },
+    {
+     "id": "T18b",
+     "text": "ลิงก์รูปสาธารณะเดิม \"ไฟล์อื่นของเคสเดียวกัน (ที่เหลือ)\" ใช้ไม่ได้หลังปิด",
      "status": "unverified",
      "level": "REAL-TEST",
-     "ref": "ต้องเก็บ URL ก่อนปิดรอบหน้า"
+     "ref": "ยังไม่ได้ตรวจ (เก็บ URL ไว้เพียง 1 ไฟล์)"
     },
     {
      "id": "T19a",
@@ -1045,6 +1079,13 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
      "status": "unverified",
      "level": "REAL-TEST",
      "ref": "ทดสอบเฉพาะ local"
+    },
+    {
+     "id": "T23",
+     "text": "ปิดประกาศ → เปิดใหม่ → ปิดอีกครั้ง ผ่าน UI ได้บน TEST (เคสสังเคราะห์เดิม)",
+     "status": "pass",
+     "level": "REAL-TEST",
+     "ref": "ภาพ เปิดใหม่ 144321, 144507 · ปิด 145635, 145755 · เคสสังเคราะห์เดิม own-14a754ca222d54e405fe / HH-67680 · Cloud TEST huahin-chat-test-01 ที่ head 2c89759 · 3 ต.ค. 2569 · ไม่ได้ตรวจการลบไฟล์ backend ทั้งหมด (T17a–c ยัง UNVERIFIED)"
     }
    ]
   },
@@ -1272,6 +1313,13 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
      "status": "pass",
      "level": "DOCS",
      "ref": "tests/status-panel P14"
+    },
+    {
+     "id": "R17",
+     "text": "ซิงก์ผล Cloud TEST ที่ head 2c89759 ลงชุดส่งต่อ/แผง แยกจากผล emulator (T10/T13/T14/T16 PASS, T12 FAIL, S-TEST-PUBLIC 6/7)",
+     "status": "pass",
+     "level": "DOCS",
+     "ref": "tests/status-panel P16"
     }
    ]
   }
@@ -1404,7 +1452,9 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
     "T17a",
     "T17b",
     "T17c",
-    "T18"
+    "T18a",
+    "T18b",
+    "T23"
    ]
   },
   "Full 3 submitter groups": {
@@ -1499,18 +1549,32 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
     "D18",
     "D19"
    ]
+  },
+  "ซิงก์ผล Cloud TEST ที่ head 2c89759 (r8)": {
+   "id": "W18",
+   "env": "test",
+   "scope": "S-TEST-PUBLIC",
+   "actor": "work",
+   "date": "2026-10-03",
+   "commit": "Cloud TEST 2c89759",
+   "items": [
+    "T10",
+    "T13",
+    "T14",
+    "T16"
+   ]
   }
  },
  "issues": [
   {
    "id": "DOC-OBS-01",
-   "title": "Search ไม่แสดงรูปปก — พบต้นเหตุ (บิลด์ TEST ซ่อนสคริปต์ component) แก้ใน draft รอ Work ตรวจ",
+   "title": "Search ไม่แสดงรูปปก — ยืนยันบน Cloud TEST ว่าแก้แล้ว (เคสสังเคราะห์เดียว)",
    "sev": "high",
-   "status": "open",
+   "status": "closed",
    "env": "test",
    "actor": "code",
-   "next": "Work ตรวจ diff FX-4 → เจ้าของ deploy TEST ตาม head ที่ตรวจ แล้วเปิด Search; T10 ยังเป็น FAIL จนกว่าจะลองบน TEST",
-   "source": "LOCAL (r6): ทำซ้ำได้แล้วแก้แล้ว (B7); SOURCE: ต้นเหตุ tools/build-listing-test.js; ยังไม่มีหลักฐาน Cloud"
+   "next": "ปิดข้อสังเกต; ติดตามต่อเฉพาะ ISS-TESTBUILD",
+   "source": "REAL-TEST (T10) ภาพ 145029–145211 ที่ head 2c89759; ต้นเหตุ = บิลด์ TEST ห่อ component (แก้แล้ว)"
   },
   {
    "id": "DOC-OBS-02",
@@ -1520,37 +1584,37 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "env": "test",
    "actor": "owner",
    "next": "เจ้าของตัดสิน D2 + Code ต้องการตัวอย่างข้อมูลจริงแบบอ่านอย่างเดียว (หน่วยของ landSize ที่มีอยู่) ก่อนเสนอแก้",
-   "source": "SOURCE (r6): ที่มาแต่ละ flow = ตร.ว./ตร.ม./sqwah/sqm ปนกัน (ดู FX-5); ไม่มีโค้ดแปลง"
+   "source": "SOURCE (r6): ที่มาแต่ละ flow = ตร.ว./ตร.ม./sqwah/sqm ปนกัน (ดู FX-5); ไม่มีโค้ดแปลง · Cloud TEST 3 ต.ค.: T12 ยัง FAIL — กรอก 100 ตร.ว. แต่ Details แสดง 100 sqm"
   },
   {
    "id": "DOC-OBS-03",
-   "title": "แผนที่แสดง undefined และระยะทาง 0 กม. — แก้ใน draft (FX-2) รอ Work ตรวจ",
+   "title": "undefined / ระยะ 0 กม. ในหน้า Details — ยืนยันบน Cloud TEST ว่าไม่ปรากฏ (เฉพาะเคสสังเคราะห์นี้); ข้อจำกัดแผนที่ติดตามที่ ISS-MAP-LIMITS",
    "sev": "med",
-   "status": "open",
+   "status": "closed",
    "env": "test",
    "actor": "code",
-   "next": "Work ตรวจ diff FX-2 → เจ้าของ deploy TEST ตาม head ที่ตรวจ; T13 ยังเป็น FAIL จนลองบน TEST",
-   "source": "LOCAL (r6): B13 + negative control; SOURCE: coordsRaw เป็นฟิลด์ภายในไม่ถูกฉายสาธารณะ จึงไม่มีระยะ/โซนให้แสดงสำหรับ Case"
+   "next": "ปิดข้อสังเกตนี้; ห้ามอ้างว่าแผนที่/ตำแหน่งถูกต้อง",
+   "source": "REAL-TEST (T13) ภาพ 145317, 145322, 145325"
   },
   {
    "id": "DOC-OBS-04",
-   "title": "หน้าอนุมัติแสดง \"อนุมัติโดย -\" — แก้ใน draft (FX-1) รอ Work ตรวจ",
+   "title": "อนุมัติโดย \"-\" — ยืนยันบน Cloud TEST ว่าแสดงผู้อนุมัติรับเรื่อง/เผยแพร่แยกกัน (บัญชี Owner เดียวกัน)",
    "sev": "low",
-   "status": "open",
+   "status": "closed",
    "env": "test",
    "actor": "code",
-   "next": "Work ตรวจ diff FX-1 → เจ้าของ deploy TEST ตาม head ที่ตรวจ; T14 ยังเป็น FAIL จนลองบน TEST",
-   "source": "LOCAL (r6): B6 + negative control; SOURCE: ตราอนุมัติรับเรื่อง ≠ ตราอนุมัติเผยแพร่"
+   "next": "ปิดข้อสังเกต; กรณีคนละบัญชียังไม่ทดสอบบน Cloud (มี B16 ในเครื่อง)",
+   "source": "REAL-TEST (T14) ภาพ 144101, 144107"
   },
   {
    "id": "DOC-OBS-05",
-   "title": "หลังปิดประกาศ หน้า Details ว่างเปล่า — แก้ใน draft branch (FX-3) รอ Work ตรวจ + เจ้าของลอง TEST",
+   "title": "หน้า Details ว่างหลังปิดประกาศ — ยืนยันบน Cloud TEST ว่าแสดงไม่พบประกาศ (ไทย/อังกฤษ)",
    "sev": "med",
-   "status": "open",
+   "status": "closed",
    "env": "test",
    "actor": "code",
-   "next": "Work ตรวจ diff FX-3 → เจ้าของ deploy TEST ตาม head ที่ตรวจ แล้วลองเปิดลิงก์ของเคสที่ปิด; ถึงจะปิดข้อสังเกตได้",
-   "source": "LOCAL (r5): B12 — ยังไม่ deploy, ยังไม่มีหลักฐาน Cloud; T16 ยังเป็น FAIL จนกว่าจะลองบน TEST"
+   "next": "ปิดข้อสังเกต",
+   "source": "REAL-TEST (T16) ภาพ 143124, 150108 (150059 = ก่อน Ctrl+Shift+R)"
   },
   {
    "id": "SEC-URGENT-01",
@@ -1790,7 +1854,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "env": "test",
    "actor": "work",
    "next": "Work ตรวจ + รับทราบ; เจ้าของ deploy TEST ตาม head ที่ Work ระบุ แล้วทดสอบเฉพาะจุดที่เปลี่ยน (ดูแผน r7)",
-   "source": "SOURCE/LOCAL (r7): ผลกระทบจำกัดเฉพาะหน้าที่มี component — Home, Search, Details, About, Contact, index (ContactRail) · +Agent Profile, Lister Dashboard (LanguageSwitcher) · Search/Lister Dashboard (SearchFilters) · Home/Search/Details/index (PropertyCard). หน้าฟอร์ม/ทีมงาน (Owner Submission, Track, Case Data, Staff Workspace, Listing Approvals, Admin) ไม่มี component จึงไม่ได้รับผล. PASS เดิมของ Cloud TEST (T01–T08, T09, T11, T15) ไม่ถูกลบ แต่ถือเป็นหลักฐานที่มีข้อจำกัดของ build; ไม่อ้างว่า component ทุกตัวบน Cloud ทดสอบแล้ว"
+   "source": "SOURCE/LOCAL (r7): ผลกระทบจำกัดเฉพาะหน้าที่มี component — Home, Search, Details, About, Contact, index (ContactRail) · +Agent Profile, Lister Dashboard (LanguageSwitcher) · Search/Lister Dashboard (SearchFilters) · Home/Search/Details/index (PropertyCard). หน้าฟอร์ม/ทีมงาน (Owner Submission, Track, Case Data, Staff Workspace, Listing Approvals, Admin) ไม่มี component จึงไม่ได้รับผล. PASS เดิมของ Cloud TEST (T01–T08, T09, T11, T15) ไม่ถูกลบ แต่ถือเป็นหลักฐานที่มีข้อจำกัดของ build; ไม่อ้างว่า component ทุกตัวบน Cloud ทดสอบแล้ว · r8: ที่ head 2c89759 บน Cloud TEST ยืนยัน component ที่เกี่ยวกับ Search (รูปปก เมนู ตัวกรอง ชื่อตามภาษา) ทำงาน (T10); ContactRail/การเริ่ม conversation บน Cloud ยัง UNVERIFIED"
   },
   {
    "id": "ISS-RAIL-ANON",
@@ -1810,7 +1874,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "env": "test",
    "actor": "work",
    "next": "ห้ามประกาศว่าแผนที่/ตำแหน่งถูกต้องครบ; ต้องมีมติว่า \"พื้นที่ระดับใดเปิดสาธารณะได้\" ก่อนออกแบบ (ขึ้นกับ D2/ข้อกำหนดความเป็นส่วนตัว)",
-   "source": "SOURCE (r7): coordsRaw เป็นฟิลด์ภายใน; Property Details ใช้ ZONE_COORDS หรือจุดกลาง 12.55,99.96"
+   "source": "SOURCE (r7): coordsRaw เป็นฟิลด์ภายใน; Property Details ใช้ ZONE_COORDS หรือจุดกลาง 12.55,99.96 · Cloud TEST 3 ต.ค.: แผนที่พื้นที่ทั่วไปยังไม่ยืนยันตำแหน่งจริง (คงข้อจำกัด)"
   }
  ],
  "history": [
@@ -1872,6 +1936,16 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   {
    "date": "2026-10-03",
    "text": "r7: ตรวจผลกระทบเลิกห่อ template (B14–B18), FX-1 สองบัญชี (B16), คงข้อจำกัดแผนที่, เสนอ head+แผนทดสอบ",
+   "ref": "source 678a042"
+  },
+  {
+   "date": "2026-10-03",
+   "text": "เจ้าของ deploy Cloud TEST ที่ head 2c89759 และลองเคสสังเคราะห์เดิม: T10/T13/T14/T16 PASS, T12 FAIL; ปิด→เปิดใหม่→ปิดอีกครั้งผ่าน UI; รูปสาธารณะเดิม 1 ไฟล์ 404 หลังปิด",
+   "ref": "Cloud TEST 2c89759"
+  },
+  {
+   "date": "2026-10-03",
+   "text": "r8: ซิงก์ผล Cloud TEST ลงชุดส่งต่อ/แผง (เอกสารและแผงเท่านั้น)",
    "ref": "source 678a042"
   }
  ],
@@ -2092,7 +2166,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "id": "FX-1",
    "obs": "DOC-OBS-04",
    "title": "แยกตราอนุมัติรับเรื่อง / อนุมัติเผยแพร่ ให้แสดงผู้ดำเนินการตรงกับเหตุการณ์ (Work สั่งดำเนินการ — อยู่ใน draft)",
-   "finding": "ตรวจเพิ่ม: การอนุมัติรับเรื่องของ Case แบบใหม่ ตั้งใจไม่เขียน approvedBy (เขียนที่ server ตอนเผยแพร่เท่านั้น) จึงบรรทัด \"อนุมัติโดย -\" คือตราของ \"รับเรื่อง\" ที่ไม่มีที่มาให้แสดง; ผู้อนุมัติรับเรื่องอยู่ที่ submissions/{id}.reviewedBy; ผู้อนุมัติเผยแพร่อยู่ที่ approvedByEmail/Uid/Role (ภายใน). แก้: แสดง 2 บรรทัดแยก — \"อนุมัติรับเรื่องโดย <reviewedBy>\" และ \"อนุมัติเผยแพร่โดย <approvedByEmail>\"; ไม่มีอีเมล → บอกว่าไม่มีบันทึก (บทบาทแสดงเป็น \"บทบาทที่บันทึก: owner\" เท่านั้น ไม่ใช่ชื่อคน); ไม่เพิ่มฟิลด์ ไม่แตะ server · r7: เพิ่ม test สองบัญชีต่างกัน (B16) — ผู้อนุมัติรับเรื่อง ≠ ผู้เผยแพร่, ใช้ approvedSubmissionId, ข้าม submission ที่ถูกส่งกลับ",
+   "finding": "ตรวจเพิ่ม: การอนุมัติรับเรื่องของ Case แบบใหม่ ตั้งใจไม่เขียน approvedBy (เขียนที่ server ตอนเผยแพร่เท่านั้น) จึงบรรทัด \"อนุมัติโดย -\" คือตราของ \"รับเรื่อง\" ที่ไม่มีที่มาให้แสดง; ผู้อนุมัติรับเรื่องอยู่ที่ submissions/{id}.reviewedBy; ผู้อนุมัติเผยแพร่อยู่ที่ approvedByEmail/Uid/Role (ภายใน). แก้: แสดง 2 บรรทัดแยก — \"อนุมัติรับเรื่องโดย <reviewedBy>\" และ \"อนุมัติเผยแพร่โดย <approvedByEmail>\"; ไม่มีอีเมล → บอกว่าไม่มีบันทึก (บทบาทแสดงเป็น \"บทบาทที่บันทึก: owner\" เท่านั้น ไม่ใช่ชื่อคน); ไม่เพิ่มฟิลด์ ไม่แตะ server · r7: เพิ่ม test สองบัญชีต่างกัน (B16) — ผู้อนุมัติรับเรื่อง ≠ ผู้เผยแพร่, ใช้ approvedSubmissionId, ข้าม submission ที่ถูกส่งกลับ · r8: ยืนยันบน Cloud TEST ที่ head 2c89759 (T14 PASS, เคสสังเคราะห์เดียว); ยังไม่ merge",
    "evidence": "SOURCE (อ่านโค้ด 2 ฝั่ง) · ยังไม่เห็นข้อมูล Cloud (ไม่ได้ผูกกับภาพใดโดยเฉพาะ)",
    "minFix": "บรรทัดเดียวในหน้า Approvals: ใช้ p.approvedBy || p.approvedByEmail || p.approvedByRole || \"-\" (หน้าทีมงานเท่านั้น)",
    "reqCheck": [
@@ -2104,13 +2178,13 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "risk": "ต่ำ",
    "order": 1,
    "decider": "work",
-   "status": "in-draft"
+   "status": "verified-test"
   },
   {
    "id": "FX-2",
    "obs": "DOC-OBS-03",
    "title": "ซ่อนระยะ/ชื่อโซนที่ไม่มีหลักฐาน แทน 0 กม. / undefined (Work สั่งดำเนินการ — อยู่ใน draft)",
-   "finding": "ตรวจเส้นทางพิกัดที่ Staff บันทึก: Staff บันทึก coordsRaw ซึ่งเป็นฟิลด์ภายใน (ตำแหน่งแน่นอน) ตั้งใจไม่ถูกฉายเป็นข้อมูลสาธารณะ และไม่มีโค้ดใดสร้าง mapLink/ระยะ/โซนสาธารณะจากมัน — จึง \"ไม่ตกหล่น\" แต่ \"ไม่เคยมีทาง\" ให้ Case มีระยะ/โซนสาธารณะ (เป็นการออกแบบด้านความเป็นส่วนตัว). แก้: ซ่อนเฉพาะระยะ/ชื่อโซนที่ไม่มีหลักฐาน; คงค่า 0 ที่เป็นตัวเลขที่เก็บไว้จริง; data.js เลิกใส่ค่าเริ่ม 0; ไม่ผสมระยะที่เก็บไว้กับระยะที่คำนวณจากพิกัด. ยังไม่แก้ (รายงาน): แผนที่ยังตั้งจุดกลางเริ่มต้นเมื่อไม่มีโซน/พิกัด; ตัวเลขจากพิกัดคือระยะเส้นตรงถึงจุดอ้างอิงของพื้นที่ (เดิม) · r7 ข้อจำกัดที่ต้องคงไว้: พิกัดที่ Staff กรอก (coordsRaw) ยังไม่ถูกนำไปแสดงแผนที่สาธารณะ; แผนที่อาจใช้จุดกลางเริ่มต้น; ระยะจากพิกัดเป็นเส้นตรงถึงจุดอ้างอิงของพื้นที่ ไม่ใช่ระยะเดินทาง — ห้ามประกาศว่าแผนที่/ตำแหน่งถูกต้องครบแล้ว",
+   "finding": "ตรวจเส้นทางพิกัดที่ Staff บันทึก: Staff บันทึก coordsRaw ซึ่งเป็นฟิลด์ภายใน (ตำแหน่งแน่นอน) ตั้งใจไม่ถูกฉายเป็นข้อมูลสาธารณะ และไม่มีโค้ดใดสร้าง mapLink/ระยะ/โซนสาธารณะจากมัน — จึง \"ไม่ตกหล่น\" แต่ \"ไม่เคยมีทาง\" ให้ Case มีระยะ/โซนสาธารณะ (เป็นการออกแบบด้านความเป็นส่วนตัว). แก้: ซ่อนเฉพาะระยะ/ชื่อโซนที่ไม่มีหลักฐาน; คงค่า 0 ที่เป็นตัวเลขที่เก็บไว้จริง; data.js เลิกใส่ค่าเริ่ม 0; ไม่ผสมระยะที่เก็บไว้กับระยะที่คำนวณจากพิกัด. ยังไม่แก้ (รายงาน): แผนที่ยังตั้งจุดกลางเริ่มต้นเมื่อไม่มีโซน/พิกัด; ตัวเลขจากพิกัดคือระยะเส้นตรงถึงจุดอ้างอิงของพื้นที่ (เดิม) · r7 ข้อจำกัดที่ต้องคงไว้: พิกัดที่ Staff กรอก (coordsRaw) ยังไม่ถูกนำไปแสดงแผนที่สาธารณะ; แผนที่อาจใช้จุดกลางเริ่มต้น; ระยะจากพิกัดเป็นเส้นตรงถึงจุดอ้างอิงของพื้นที่ ไม่ใช่ระยะเดินทาง — ห้ามประกาศว่าแผนที่/ตำแหน่งถูกต้องครบแล้ว · r8: ยืนยันบน Cloud TEST ที่ head 2c89759 (T13 PASS, เคสสังเคราะห์เดียว); ยังไม่ merge",
    "evidence": "SOURCE (อ่านโค้ด) · ภาพ Cloud 015328 ตรงกัน · ยังไม่ได้ทดลองในเบราว์เซอร์",
    "minFix": "ถ้าไม่มีพิกัดและค่าระยะไม่ใช่ตัวเลขมากกว่า 0 ให้ซ่อนบรรทัดระยะนั้น (ไม่ต้องมีข้อความใหม่); ถ้าไม่มีชื่อโซนให้แสดงแค่ชื่ออำเภอ/พื้นที่ ไม่ใส่คำว่า undefined",
    "reqCheck": [
@@ -2123,13 +2197,13 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "risk": "ต่ำ",
    "order": 2,
    "decider": "work",
-   "status": "in-draft"
+   "status": "verified-test"
   },
   {
    "id": "FX-3",
    "obs": "DOC-OBS-05",
    "title": "แยก \"กำลังโหลด\" / \"ไม่พบ-ปิดแล้ว\" / \"โหลดไม่สำเร็จ\" แทนหน้าว่าง (Work สั่งดำเนินการ — อยู่ใน draft branch)",
-   "finding": "Property Details.dc.html บรรทัด 802: ถ้าไม่พบรายการ คืน hasProperty:false และส่วนเนื้อหาทั้งหน้าอยู่ใต้ sc-if hasProperty ไม่มีทางเลือกอื่น → หน้าว่าง (ยืนยันจากโค้ด ไม่ใช่ข้อสันนิษฐานแล้ว). หลังปิด เอกสารสาธารณะถูกลบ จึงเข้ากรณีนี้; ส่วน data.js ตั้ง window.__hhDataLoad.state = \"failed\" เมื่อโหลดไม่ได้ ซึ่งใช้แยกสองกรณีได้ · เพิ่มการตรวจตามคำสั่ง Work: กดลองอีกครั้ง = นำทาง 1 ครั้ง; direct read ล้มขณะ collection โหลดได้ = โหลดล้ม; ข้อความ loading/not-found/failed/retry/back ครบ 8 ภาษา",
+   "finding": "Property Details.dc.html บรรทัด 802: ถ้าไม่พบรายการ คืน hasProperty:false และส่วนเนื้อหาทั้งหน้าอยู่ใต้ sc-if hasProperty ไม่มีทางเลือกอื่น → หน้าว่าง (ยืนยันจากโค้ด ไม่ใช่ข้อสันนิษฐานแล้ว). หลังปิด เอกสารสาธารณะถูกลบ จึงเข้ากรณีนี้; ส่วน data.js ตั้ง window.__hhDataLoad.state = \"failed\" เมื่อโหลดไม่ได้ ซึ่งใช้แยกสองกรณีได้ · เพิ่มการตรวจตามคำสั่ง Work: กดลองอีกครั้ง = นำทาง 1 ครั้ง; direct read ล้มขณะ collection โหลดได้ = โหลดล้ม; ข้อความ loading/not-found/failed/retry/back ครบ 8 ภาษา · r8: ยืนยันบน Cloud TEST ที่ head 2c89759 (T16 PASS, เคสสังเคราะห์เดียว); ยังไม่ merge",
    "evidence": "SOURCE (อ่านโค้ด) · ภาพ Cloud หลังปิด (หน้าว่าง) ตรงกัน",
    "minFix": "เพิ่มบล็อกข้อความเมื่อ hasProperty เป็นเท็จ: state \"ok\" → \"ไม่พบประกาศนี้หรือปิดประกาศแล้ว\" (ข้อความเดียวสำหรับทุกกรณี ไม่บอกว่าเคยมีหรือไม่) + ปุ่มกลับหน้าค้นหา; state \"failed\" → \"โหลดไม่สำเร็จ ลองรีเฟรช\"",
    "reqCheck": [
@@ -2142,13 +2216,13 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "risk": "ปานกลาง (แตะ data.js สี่–แปดภาษา)",
    "order": 3,
    "decider": "work",
-   "status": "in-draft"
+   "status": "verified-test"
   },
   {
    "id": "FX-4",
    "obs": "DOC-OBS-01",
    "title": "Search ไม่มีรูปปก — พบต้นเหตุ: บิลด์ TEST ซ่อนสคริปต์ของ component (แก้ในเครื่องมือบิลด์ อยู่ใน draft)",
-   "finding": "ทำซ้ำได้ในเครื่อง (visitor): การ์ดไม่มีรูปปก. ต้นเหตุ: tools/build-listing-test.js ห่อ \"ทุก\" ไฟล์ .html — รวมไฟล์ component (PropertyCard ฯลฯ) — ไว้ใน <template> เพื่อให้หน้า inert; แต่ runtime ดึง component เป็นข้อความแล้วหา <script data-dc-script> ซึ่งถูกซ่อนในเทมเพลต → component ทำงานโดยไม่มีตรรกะ ค่าที่คำนวณ (รูปปก, สไตล์ปก ฯลฯ) ขาดหมด. ข้อมูล/Firestore/rules ถูกต้องตลอด (ตรวจแล้ว). ไฟล์ production ไม่ผ่านตัวบิลด์นี้ จึงไม่กระทบ production",
+   "finding": "ทำซ้ำได้ในเครื่อง (visitor): การ์ดไม่มีรูปปก. ต้นเหตุ: tools/build-listing-test.js ห่อ \"ทุก\" ไฟล์ .html — รวมไฟล์ component (PropertyCard ฯลฯ) — ไว้ใน <template> เพื่อให้หน้า inert; แต่ runtime ดึง component เป็นข้อความแล้วหา <script data-dc-script> ซึ่งถูกซ่อนในเทมเพลต → component ทำงานโดยไม่มีตรรกะ ค่าที่คำนวณ (รูปปก, สไตล์ปก ฯลฯ) ขาดหมด. ข้อมูล/Firestore/rules ถูกต้องตลอด (ตรวจแล้ว). ไฟล์ production ไม่ผ่านตัวบิลด์นี้ จึงไม่กระทบ production · r8: ยืนยันบน Cloud TEST ที่ head 2c89759 (T10 PASS, เคสสังเคราะห์เดียว); ยังไม่ merge",
    "evidence": "SOURCE: ไม่พบต้นเหตุ · test ในเครื่องไม่ assert รูปปกใน Search (ช่องว่างของ test) · ภาพ Cloud 015210",
    "minFix": "บิลด์ห่อ template เฉพาะหน้าที่เบราว์เซอร์เปิด (ENTRIES) ไม่ห่อไฟล์ component; ทดสอบ: Search แสดงรูปปกที่ decode ได้จริงสำหรับ visitor และ Owner (B7) + hosting-build ไม่ห่อ component และสคริปต์ component มองเห็นได้",
    "reqCheck": [
@@ -2161,7 +2235,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "risk": "ปานกลาง (เปลี่ยนพฤติกรรมของทุก component ใน TEST ให้เหมือน production)",
    "order": 4,
    "decider": "work",
-   "status": "in-draft"
+   "status": "verified-test"
   },
   {
    "id": "FX-5",

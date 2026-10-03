@@ -53,7 +53,7 @@ describe("status panel (docs-only, built from PROJECT-STATUS.md)", function () {
       assert.strictEqual(p.count.pass + p.count.fail + p.count.blocked + p.count.unverified + p.count.na, s.items.length);
     });
     const f = pct(d.reg.scopes.find((x) => x.id === "S-TEST-FLOW")), u = pct(d.reg.scopes.find((x) => x.id === "S-TEST-PUBLIC"));
-    assert.deepStrictEqual([f.pass, f.n, f.percent, u.pass, u.n, u.percent], [9, 9, 100, 2, 7, 29], "Work's locked figures");
+    assert.deepStrictEqual([f.pass, f.n, f.percent, u.pass, u.n, u.percent], [9, 9, 100, 6, 7, 86], "Work's locked figures (S-TEST-PUBLIC updated with the Cloud TEST results of head 2c89759)");
   });
   it("P5 percentage rules: a LOCKED scope shows pass/applicable = percent; N/A is removed from the divisor, BLOCKED/FAIL/UNVERIFIED stay; empty scope is not computable", () => {
     const mk = (items, locked) => ({ locked, items: items.map((st, i) => ({ id: "x" + i, status: st })) });
@@ -134,7 +134,7 @@ describe("status panel (docs-only, built from PROJECT-STATUS.md)", function () {
     assert.strictEqual(count(html, /<section id="ideas">/g), 1); assert.strictEqual(count(html, /<section id="props">/g), 1);
     d.reg.ideas.forEach((x) => assert.ok(html.includes(">" + x.id + "</div>")));
     ["DOC-OBS-01", "DOC-OBS-02", "DOC-OBS-03", "DOC-OBS-04", "DOC-OBS-05"].forEach((o) => assert.ok(d.reg.proposals.some((x) => x.obs === o), o + " has a proposal"));
-    d.reg.proposals.forEach((x) => { assert.ok(["proposed", "blocked-decision", "in-draft"].includes(x.status)); assert.ok(x.reqCheck.length >= 2 && x.test.length > 10, x.id); assert.ok(html.includes(">" + x.id + " · " + x.obs)); });
+    d.reg.proposals.forEach((x) => { assert.ok(["proposed", "blocked-decision", "in-draft", "verified-test"].includes(x.status)); assert.ok(x.reqCheck.length >= 2 && x.test.length > 10, x.id); assert.ok(html.includes(">" + x.id + " · " + x.obs)); });
     assert.ok(d.reg.proposals.find((x) => x.obs === "DOC-OBS-02").status === "blocked-decision" && d.reg.proposals.find((x) => x.obs === "DOC-OBS-02").decider === "owner", "the land-unit proposal waits for the owner decision D2");
     const bad = parse(MD); bad.reg.proposals[0].status = "done"; assert.ok(validate(bad).some((e) => /bad status/.test(e)));
     const bad2 = parse(MD); bad2.reg.ideas[0].tier = "later"; assert.ok(validate(bad2).some((e) => /bad tier/.test(e)));
@@ -152,15 +152,29 @@ describe("status panel (docs-only, built from PROJECT-STATUS.md)", function () {
   });
   it("P15 round r6: the four heads are separate fields (source / document base / Cloud TEST / production), the old ambiguous codeSha is gone, and D12 follows the real results (combined stays UNVERIFIED, D12d keeps the failed round, D08 stays FAIL)", () => {
     const P = d.reg.package, all = d.reg.scopes.flatMap((x) => x.items), it = (id) => all.find((x) => x.id === id);
-    assert.ok(!("codeSha" in P), "no ambiguous 'codeSha'"); assert.ok(/^[0-9a-f]{40}$/.test(P.sourceHeadSha) && /^[0-9a-f]{40}$/.test(P.docBaseSha) && P.deployedTestSha.startsWith("d0fe617") && P.deployedProdSha === "ไม่ทราบ");
-    assert.notStrictEqual(P.sourceHeadSha, P.deployedTestSha, "source head is not the deployed TEST head"); assert.ok(out.document.includes(P.sourceHeadSha.slice(0, 7)) && out.document.includes("Source / code head ปัจจุบัน"));
+    assert.ok(!("codeSha" in P), "no ambiguous 'codeSha'"); assert.ok(/^[0-9a-f]{40}$/.test(P.sourceHeadSha) && /^[0-9a-f]{40}$/.test(P.docBaseSha) && /^[0-9a-f]{40}$/.test(P.deployedTestSha) && P.deployedProdSha === "ไม่ทราบ");
+    assert.notStrictEqual(P.sourceHeadSha, P.deployedTestSha, "source head and the deployed TEST head are different fields (the deployed head is a documentation commit on top of the source head)"); assert.ok(out.document.includes(P.sourceHeadSha.slice(0, 7)) && out.document.includes("Source / code head ปัจจุบัน"));
     assert.strictEqual(it("D12a").status, "pass"); assert.ok(/90/.test(it("D12a").ref) && it("D12a").ref.includes(P.sourceHeadSha.slice(0, 7)));
     assert.strictEqual(it("D12b").status, "pass"); assert.ok(/34/.test(it("D12b").ref) && /[0-9a-f]{7}/.test(it("D12b").ref) && /ไม่เปลี่ยน/.test(it("D12b").ref), "D12b names the SHA it was run at and why it was not rerun");
     assert.strictEqual(it("D12c").status, "unverified"); assert.ok(/ไม่ได้รัน/.test(it("D12c").ref));
     assert.ok(/ล้ม 1/.test(it("D12d").ref) && /B2/.test(it("D12d").ref), "D12d keeps the round that failed on B2"); assert.strictEqual(it("D08").status, "fail", "the flake is never hidden");
-    ["FX-1", "FX-2", "FX-3", "FX-4"].forEach((id) => assert.strictEqual(d.reg.proposals.find((x) => x.id === id).status, "in-draft", id));
+    ["FX-1", "FX-2", "FX-3", "FX-4"].forEach((id) => assert.strictEqual(d.reg.proposals.find((x) => x.id === id).status, "verified-test", id));
     ["ISS-TESTBUILD", "ISS-RAIL-ANON", "ISS-MAP-LIMITS"].forEach((id) => assert.ok(d.reg.issues.some((x) => x.id === id && x.status === "open"), id + " is registered and open")); ["D17", "D18", "D19"].forEach((id) => assert.strictEqual(it(id).status, "pass", id)); assert.ok(/ไม่ลบ PASS|PASS เดิม/.test(d.reg.issues.find((x) => x.id === "ISS-TESTBUILD").source), "the earlier Cloud PASS results are kept, with the build limitation"); assert.strictEqual(d.reg.proposals.find((x) => x.id === "FX-5").status, "blocked-decision");
-    ["T10", "T12", "T13", "T14", "T16"].forEach((id) => assert.strictEqual(it(id).status, "fail", id + " stays FAIL until it is tried on Cloud TEST"));
+    assert.strictEqual(it("T12").status, "fail", "T12 stays FAIL");
+  });
+  it("P16 round r8 (Cloud TEST results of head 2c89759): T10/T13/T14/T16 PASS as REAL-TEST with the owner's screenshot ids, T12 FAIL, S-TEST-PUBLIC = 6/7 ≈ 86% for that scope only; the one-file photo result is not generalised; the earlier local results stay separate; source unchanged", () => {
+    const P = d.reg.package, all = d.reg.scopes.flatMap((x) => x.items), it = (id) => all.find((x) => x.id === id);
+    assert.strictEqual(P.deployedTestSha, "2c897593321713783d0ba81c7167962e1793be9a"); assert.strictEqual(P.sourceHeadSha, "678a04211879352d05e14fbe6166a9186a65507e"); assert.strictEqual(P.deployedProdSha, "ไม่ทราบ");
+    const want = { T10: /145029/, T13: /145317/, T14: /144101/, T16: /143124/ };
+    Object.keys(want).forEach((id) => { assert.strictEqual(it(id).status, "pass", id); assert.strictEqual(it(id).level, "REAL-TEST", id + " is Cloud evidence, not emulator"); assert.ok(want[id].test(it(id).ref) && /own-14a754ca222d54e405fe/.test(it(id).ref), id + " cites the owner's screenshot ids and the case"); });
+    assert.ok(/เฉพาะเคสนี้/.test(it("T13").ref + it("T13").text) && /บัญชี Owner เดียวกัน/.test(it("T14").ref), "T13 / T14 limits kept"); assert.ok(/150059/.test(it("T16").ref) && /ก่อน Ctrl\+Shift\+R/.test(it("T16").ref) && /ไม่มีหลักฐานว่ารูปเดิมแสดงระหว่างโหลด/.test(it("T16").ref), "owner's clarification kept");
+    assert.strictEqual(it("T12").status, "fail"); assert.ok(/100 ตร\.ว\./.test(d.reg.issues.find((x) => x.id === "DOC-OBS-02").source), "T12 reason kept");
+    assert.strictEqual(it("T18a").status, "pass"); assert.ok(/1 ไฟล์/.test(it("T18a").text) && /ห้ามสรุปว่าตรวจครบ 7 ไฟล์/.test(it("T18a").ref), "one file only"); assert.strictEqual(it("T18b").status, "unverified"); ["T17a", "T17b", "T17c"].forEach((id) => assert.strictEqual(it(id).status, "unverified", id)); assert.strictEqual(it("T23").status, "pass");
+    const sp = d.reg.scopes.find((x) => x.id === "S-TEST-PUBLIC"); assert.deepStrictEqual(["T09", "T10", "T11", "T12", "T13", "T14", "T16"], sp.items.map((x) => x.id), "the locked S-TEST-PUBLIC checklist is unchanged (no items added or removed)"); assert.ok(/ไม่ใช่เปอร์เซ็นต์ทั้งโครงการ/.test(sp.lockNote));
+    const flow = d.reg.scopes.find((x) => x.id === "S-TEST-FLOW"); assert.strictEqual(flow.items.length, 9, "the locked S-TEST-FLOW checklist is unchanged"); assert.ok(out.document.includes("6/7") && out.document.includes("= 86%"));
+    ["ISS-MAP-LIMITS", "ISS-TESTBUILD", "ISS-RAIL-ANON"].forEach((id) => assert.ok(d.reg.issues.some((x) => x.id === id && x.status === "open"), id + " stays open")); ["DOC-OBS-01", "DOC-OBS-03", "DOC-OBS-04", "DOC-OBS-05"].forEach((id) => assert.strictEqual(d.reg.issues.find((x) => x.id === id).status, "closed", id)); assert.strictEqual(d.reg.issues.find((x) => x.id === "DOC-OBS-02").status, "open");
+    assert.ok(it("D08").status === "fail" && it("D12c").status === "unverified" && it("D12d").ref.includes("ล้ม 1"), "local-test facts untouched: D08 FAIL, combined UNVERIFIED, the failed B2 round kept");
+    ["BLUEPRINT.md", "HANDOFF-NEXT-CHAT.md", "PROJECT-STATUS.md"].forEach((f) => { const t = fs.readFileSync(path.join(ROOT, f), "utf8"); assert.ok(t.includes("ผลปรับรอบ r8") && /Cloud TEST[^\n]{0,80}2c897593321713783d0ba81c7167962e1793be9a/.test(t.slice(0, 3000)), f + " carries the r8 block and the deployed head at the top"); });
   });
   it("P11 the package set shown in the panel is the one in the handoff files (same id and revision in the registry, the three files' CODE-V2-01 block and the page header)", () => {
     assert.ok(out.document.includes(d.reg.package.set));
