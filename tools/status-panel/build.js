@@ -73,7 +73,7 @@ function validate(d) {
     if (did.has(x.id)) e.push("duplicate decision " + x.id); did.add(x.id);
     if (!x.question || !Array.isArray(x.options) || x.options.length < 2 || !x.codeView || !r.actors[x.decider]) e.push("decision " + x.id + ": needs question, 2+ options, codeView, decider");
     if (!/ไม่ใช่มติ/.test(x.codeView || "")) e.push("decision " + x.id + ": codeView must say it is not a decision (ไม่ใช่มติ)");
-    if (!["open", "decided"].includes(x.status)) e.push("decision " + x.id + ": bad status");
+    if (!["open", "decided", "parked"].includes(x.status)) e.push("decision " + x.id + ": bad status");
   }
   const iid = new Set();
   for (const i of r.issues) {
@@ -140,7 +140,7 @@ ${blockers.length ? `<div class="blk"><strong>ตัวขวางหลัก:
 <header class="mast"><div><div class="eyebrow">แผง PROJECT-STATUS ภายใน · ไม่ใช่หน้าเว็บลูกค้า</div><h1>huahin . properties — สถานะโครงการ</h1></div>
 <dl class="stamp"><div><dt>ชุดส่งต่อ</dt><dd class="mono">${esc(P.set || P.id)}</dd></div><div><dt>วันที่</dt><dd>${esc(P.date)} (${esc(P.tz)})</dd></div><div><dt>แหล่งข้อมูล</dt><dd>PROJECT-STATUS.md · ${esc(stamp)}</dd></div></dl></header>
 <p class="fresh">ตัวเลขทั้งหมดมาจากไฟล์ PROJECT-STATUS.md ณ commit ที่ระบุ — แผงนี้ <strong>ไม่ตรวจความสดอัตโนมัติ</strong> ถ้าไฟล์เปลี่ยนต้องรัน <code>npm run status-panel</code> ใหม่</p>
-<nav class="jump" aria-label="ข้ามไปส่วน"><a href="#now">1 ปัจจุบัน</a><a href="#you">2 เจ้าของทำอะไร</a><a href="#prog">3 ความคืบหน้า</a><a href="#road">4 Roadmap 0–24</a><a href="#tasks">5 งาน</a><a href="#issues">6 ค้าง/ติดขัด (${open})</a><a href="#decisions">ข้อที่รอตัดสิน (${(r.decisions || []).length})</a><a href="#hist">7 ประวัติ</a></nav>
+<nav class="jump" aria-label="ข้ามไปส่วน"><a href="#now">1 ปัจจุบัน</a><a href="#you">2 เจ้าของทำอะไร</a><a href="#prog">3 ความคืบหน้า</a><a href="#road">4 Roadmap 0–24</a><a href="#tasks">5 งาน</a><a href="#issues">6 ค้าง/ติดขัด (${open})</a><a href="#decisions">ข้อรอตัดสิน/มติ (${(r.decisions || []).length})</a><a href="#hist">7 ประวัติ</a></nav>
 
 <section id="now" class="card hero"><div class="eyebrow">1 · CURRENT</div><h2>${esc(r.current.task)}</h2><p class="goal"><strong>เป้าหมายโครงการ:</strong> ${esc(r.goal)}</p>
 <div class="grid2"><div><h4>รหัสงาน / เฟส</h4><p>${r.current.phases.map((x) => `<span class="tag mono">${esc(x)}</span>`).join(" ")}</p><h4>สภาพแวดล้อมของรอบนี้</h4><p>${r.current.environments.map((x) => `<span class="tag">${esc(x)}</span>`).join(" ")}</p><h4>ผู้ทำตอนนี้</h4><p>${esc(r.current.actor)}</p></div>
@@ -163,7 +163,7 @@ ${["dev", "test", "prod", "docs"].map((env) => { const g = sc.filter((x) => x.s.
 <div class="tw"><table class="t" data-filter="rows"><thead><tr><th>รหัส</th><th>งาน</th><th>สถานะ</th><th>สภาพแวดล้อม / ขอบเขต</th><th>ผ่าน / ทั้งหมด</th><th>ขั้นถัดไป</th><th>ผู้รับผิดชอบ</th><th>วัน / commit</th><th>หลักฐาน</th></tr></thead><tbody>${taskRows}</tbody></table></div></section>
 
 <section id="issues"><div class="eyebrow">6 · ข้อที่รอตัดสิน และค้าง / ติดขัด / งานเก่าที่ยังมีประโยชน์</div><h2>ทะเบียนค้าง (${r.issues.length}) — DOC-OBS-01…05 และงานจากประวัติ</h2>
-<h3 class="sub3" id="decisions">ข้อที่รอตัดสิน (${(r.decisions || []).length}) — ข้อเสนอของ Code ไม่ใช่มติ</h3><div class="cards dec">${(r.decisions || []).map((x) => `<article class="card" data-env="docs"><div class="eyebrow">${esc(x.id)} · ผู้ตัดสิน: ${actor(x.decider)} · ${x.status === "open" ? "รอตัดสิน" : "ตัดสินแล้ว"}</div><h3>${inline(x.question)}</h3><ol class="opts">${x.options.map((o) => `<li>${inline(o)}</li>`).join("")}</ol><p class="cv">${inline(x.codeView)}</p><p class="sm">กระทบ: ${inline(x.affects || "-")}</p></article>`).join("")}</div>
+<h3 class="sub3" id="decisions">ข้อรอตัดสิน/มติ (${(r.decisions || []).length}) — ข้อเสนอของ Code ไม่ใช่มติ</h3><div class="cards dec">${(r.decisions || []).map((x) => `<article class="card" data-env="docs"><div class="eyebrow">${esc(x.id)} · ผู้ตัดสิน: ${actor(x.decider)} · ${x.status === "open" ? "รอตัดสิน" : x.status === "parked" ? "พักไว้" : "ตัดสินแล้ว"}</div><h3>${inline(x.question)}</h3><ol class="opts">${x.options.map((o) => `<li>${inline(o)}</li>`).join("")}</ol>${x.outcome ? `<p><strong>มติ/สถานะ:</strong> ${inline(x.outcome)}</p>` : ""}<p class="cv">${inline(x.codeView)}</p><p class="sm">กระทบ: ${inline(x.affects || "-")}</p></article>`).join("")}</div>
 <p class="rule">DOC-OBS เป็นรหัสชั่วคราวของข้อสังเกต ไม่ใช่เลข PENDING และ <strong>การบันทึกไม่ใช่คำสั่งให้แก้</strong> · ไม่พบหลักฐาน = UNVERIFIED · BLOCKED ไม่ใช่ FAIL</p>
 <div class="tw"><table class="t" data-filter="rows"><thead><tr><th>รหัส</th><th>ปัญหา</th><th>ระดับ</th><th>สถานะ</th><th>สภาพแวดล้อม</th><th>ผู้รับผิดชอบ</th><th>ขั้นถัดไป</th><th>ที่มา / หลักฐาน</th></tr></thead><tbody>${issueRows}</tbody></table></div></section>
 

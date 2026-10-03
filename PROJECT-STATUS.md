@@ -417,6 +417,20 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
 | ชุดส่งต่อรุ่นเดียวกัน | แผง, Viewer/พรีวิว และสามไฟล์แสดงชุดเดียวกัน: `HP-HANDOFF-2026-10-03-v2 + CODE-V2-01 r2` พร้อม commit เอกสารที่รายงานท้ายคอมเมนต์ PR |
 | Artifact | เผยแพร่แผงเป็น Artifact ส่วนตัวแล้ว; **Code เปิดหน้า claude.ai เองไม่ได้ จึงยืนยันการแสดงผลได้เฉพาะ HTML ชุดเดียวกันใน Chromium ในเครื่อง** (R11 = UNVERIFIED) — วิธีเปิดที่ใช้ได้จริง: ดาวน์โหลด `docs/status-panel/index.html` แล้วเปิดในเบราว์เซอร์ |
 
+## ผลปรับรอบ r3 — CODE-V2-01 r3 (3 ต.ค. 2569 · ตาม "5 จุด" ที่ Work ระบุ · เอกสารและแผงภายในเท่านั้น)
+
+**แก้ความเข้าใจรอบ r2:** "5 จุด" ที่ Work หมายถึง **ไม่ใช่ D1–D5** (r2 ตีความผิด — ข้อ D1–D5 ยังเก็บไว้เป็นทะเบียนข้อรอตัดสินเหมือนเดิม แต่ D3/D4 ปรับสถานะตามมติด้านล่าง) 5 จุดจริงและสิ่งที่ปรับ:
+
+| # | จุดของ Work | สิ่งที่ปรับ |
+|---|---|---|
+| 1 | ยืนยันการเปิด Artifact แผงจริง; ตรวจภาพเองไม่ได้ให้คง UNVERIFIED และใช้ภาพจากเจ้าของแยก | Code สั่งเปิด/อ่าน Artifact ได้ แต่ **เห็นภาพบน claude.ai เองไม่ได้** → `R11` คง UNVERIFIED; เพิ่ม `R12` "ภาพจากเจ้าของยืนยันการเปิดแผง" (UNVERIFIED รอภาพ) แยกจาก R11; วิธีเปิดที่ใช้ได้จริง = ดาวน์โหลด `docs/status-panel/index.html` แล้วเปิดในเบราว์เซอร์ |
+| 2 | แยก checklist แชท AI ออกจาก Listing ก่อนคำนวณ % | ย้าย `T22` (แชท AI จริงบน TEST) ออกจาก `S-TEST-NEG` ไปขอบเขตใหม่ **`S-TEST-CHAT`**; `S-PROD-CHAT` (P07) คงแยกอยู่แล้ว → ขอบเขตรวม **12 ชุด**: พัฒนา 4 · TEST 4 · production 3 · เอกสาร 1; ทุกชุดยัง `locked:false` → ยังไม่แสดง % |
+| 3 | Node.js 20 = UNVERIFIED จนตรวจ lifecycle ทางการ ไม่ใช่ FAIL เพียงเพราะใช้รุ่น 20 | `P06` เปลี่ยนจาก FAIL เป็น **UNVERIFIED** (ตัวหารยังนับ); `ISS-NODE20` ปรับเป็นความรุนแรงระดับกลาง ข้อความ "ยังไม่ตรวจ lifecycle ทางการ"; ขั้นถัดไป = Code ตรวจเอกสารทางการ (ยังไม่ทำรอบนี้) |
+| 4 | เจ้าของยืนยัน: แผง Code เป็นตัวหลัก + workflow Code → Work review → เจ้าของทดสอบ TEST ไม่ต้องถามซ้ำ | `D4` เปลี่ยนเป็น **ตัดสินแล้ว** (บันทึกที่มา: เจ้าของยืนยันผ่าน Work); `ISS-DOCS-SPLIT` เหลือเฉพาะการเขียน CLAUDE.md ฉบับปัจจุบันใหม่ (งานเอกสารแยกรอบ ไม่บล็อก) |
+| 5 | ลำดับ merge พักไว้ ไม่ใช้เป็นเงื่อนไขบล็อกการปิดรอบเอกสาร | `D3` สถานะ **พักไว้ (parked)**; `ISS-MERGE` ข้อความขั้นถัดไปแก้ตาม; ยัง **ห้าม merge** จนมีมติ |
+
+**ไม่เปลี่ยน:** code/TEST SHA `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5` · ไม่แก้ระบบเว็บ/Functions/rules · ไม่แก้ DOC-OBS · ไม่ merge/deploy · ไม่ lock เปอร์เซ็นต์ · ข้อความ r2 ข้างบนเก็บไว้เป็นประวัติ
+
 ## 6. STATUS-REGISTRY — ข้อมูลเครื่องอ่านของแผงภายใน (แก้ที่นี่ที่เดียว แล้วรัน `npm run status-panel`)
 
 ตาราง §1–§3 ด้านบนเป็นต้นทางของ Roadmap/ฐานระบบ/งานปัจจุบัน (แผงอ่านตรงจากตาราง). บล็อกนี้เก็บเฉพาะสิ่งที่ตารางไม่มี: ผู้รับผิดชอบ/ขอบเขต/วัน-commit ของแต่ละงาน (`taskMeta`), checklist ร่างสำหรับเปอร์เซ็นต์ (`scopes`, ทุกชุด `locked:false` จนกว่า Work lock), ทะเบียนค้าง (`issues`) และประวัติ. สถานะรายการใน checklist: `pass` / `fail` / `blocked` / `unverified` / `na` (N/A ต้องมีเหตุผลใน `ref`). ห้ามใส่รหัสผ่าน คีย์ อีเมล เบอร์ หรือ token.
@@ -435,8 +449,8 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   "deployedProdSha": "ไม่ทราบ",
   "prState": "PR #8 OPEN / DRAFT / NOT MERGED · base claude/chat-live-01",
   "website": "RED / Public Hidden (ตามรายงาน ไม่ได้ตรวจสดรอบนี้)",
-  "revision": "r2 (Code · หลัง Work ตรวจเบื้องต้น)",
-  "set": "HP-HANDOFF-2026-10-03-v2 + CODE-V2-01 r2"
+  "revision": "r3 (Code · ตาม 5 จุดของ Work)",
+  "set": "HP-HANDOFF-2026-10-03-v2 + CODE-V2-01 r3"
  },
  "goal": "ให้เจ้าของและทีมลงประกาศพร้อมรูปจนเผยแพร่ได้จริงอย่างปลอดภัย (ส่งฟอร์ม → Staff เตรียม → Owner อนุมัติ/เผยแพร่ → หน้าสาธารณะ) บนเว็บ huahin.properties โดยยังไม่เปิดเว็บสาธารณะจนกว่าเจ้าของอนุมัติ",
  "current": {
@@ -718,7 +732,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   {
    "id": "S-TEST-NEG",
    "env": "test",
-   "name": "Cloud TEST — ปฏิเสธ/ลบ/ซ้ำ/ช้า/AI (ยังไม่ทดสอบ)",
+   "name": "Cloud TEST — ปฏิเสธ/ลบ/ซ้ำ/ช้า (Listing · ยังไม่ทดสอบ)",
    "locked": false,
    "lockNote": "ร่าง — รอ Work ตรวจและ lock ชุดนี้แยกจากชุดอื่น",
    "items": [
@@ -756,10 +770,19 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
      "status": "unverified",
      "level": "REAL-TEST",
      "ref": "ทดสอบเฉพาะ local"
-    },
+    }
+   ]
+  },
+  {
+   "id": "S-TEST-CHAT",
+   "env": "test",
+   "name": "Cloud TEST — แชท AI (แยกจาก Listing)",
+   "locked": false,
+   "lockNote": "ร่าง — แยกจาก checklist Listing ตาม Work; รอ Work lock แยก",
+   "items": [
     {
      "id": "T22",
-     "text": "แชท AI จริงบน TEST (แยกงาน ต้องมี allow-list/เพดาน/คีย์)",
+     "text": "แชท AI จริงบน TEST (ต้องมี allow-list/เพดาน/คีย์; ไม่ใช้สคริปต์ CHAT-LIVE เดิม)",
      "status": "blocked",
      "level": "REAL-TEST",
      "ref": "ยังไม่มีแผน/คีย์ ห้ามใช้สคริปต์เก่า"
@@ -819,10 +842,10 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
     },
     {
      "id": "P06",
-     "text": "อัปเกรด runtime Node.js ก่อนกำหนดปิดรุ่น",
-     "status": "fail",
+     "text": "ยืนยัน lifecycle ทางการของ Node.js 20 / Firebase Functions runtime แล้วตัดสินแผนอัปเกรด",
+     "status": "unverified",
      "level": "SOURCE",
-     "ref": "engines=20; CLI เตือนปิด 2026-10-30 (ยังไม่เทียบเอกสารทางการ)"
+     "ref": "engines=20 (ใช้รุ่น 20 ไม่ใช่ความล้มเหลว); CLI เตือน 2026-10-30 ยังไม่เทียบเอกสาร lifecycle ทางการ"
     },
     {
      "id": "P08",
@@ -836,7 +859,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   {
    "id": "S-PROD-CHAT",
    "env": "prod",
-   "name": "Production — งานแชท #14–#18",
+   "name": "Production — งานแชท AI #14–#18 (แยกจาก Listing)",
    "locked": false,
    "lockNote": "ร่าง — ยังไม่มีมติขอบเขต production",
    "items": [
@@ -900,17 +923,17 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
     },
     {
      "id": "R07",
-     "text": "ตัดสินคำถามเปิด (หน่วยที่ดิน, ลำดับ merge, CLAUDE.md)",
+     "text": "ตัดสินคำถามเปิดที่ยังเหลือ (D1 lock %, D2 หน่วยที่ดิน, D5 ลำดับงาน)",
      "status": "unverified",
      "level": "DOCS",
      "ref": "รอ Work/เจ้าของ"
     },
     {
      "id": "R08",
-     "text": "แยก checklist เป็นขอบเขตย่อยตามสภาพแวดล้อม (พัฒนา 4 · TEST 3 · production 3 · เอกสาร 1)",
+     "text": "แยก checklist เป็นขอบเขตย่อยตามสภาพแวดล้อม (พัฒนา 4 · TEST 4 · production 3 · เอกสาร 1) และแยกแชท AI ออกจาก Listing",
      "status": "pass",
      "level": "DOCS",
-     "ref": "แผง r2"
+     "ref": "แผง r3"
     },
     {
      "id": "R09",
@@ -931,7 +954,14 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
      "text": "ยืนยันการแสดงผลของ Artifact บน claude.ai จริง",
      "status": "unverified",
      "level": "DOCS",
-     "ref": "ตรวจได้เฉพาะไฟล์เดียวกันใน Chromium ในเครื่อง; หน้า claude.ai Code เปิดดูเองไม่ได้"
+     "ref": "Code ตรวจภาพบน claude.ai เองไม่ได้ จึงคง UNVERIFIED; ต้องใช้ภาพจากเจ้าของยืนยัน (R12). ไฟล์เดียวกันตรวจใน Chromium ในเครื่องแล้ว"
+    },
+    {
+     "id": "R12",
+     "text": "ภาพจากเจ้าของยืนยันการเปิด Artifact แผง PROJECT-STATUS จริง (แยกจาก R11)",
+     "status": "unverified",
+     "level": "DOCS",
+     "ref": "รอภาพหน้าจอจากเจ้าของ"
     }
    ]
   }
@@ -1232,17 +1262,17 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "status": "open",
    "env": "prod",
    "actor": "owner",
-   "next": "เจ้าของตัดสินลำดับ; ห้าม merge จนมีมติ",
+   "next": "พักไว้ตามมติเจ้าของ (3 ต.ค.): ไม่ใช้เป็นเงื่อนไขบล็อกการปิดรอบเอกสาร; ยังห้าม merge จนมีมติ",
    "source": "SOURCE: git (ตรวจ 3 ต.ค.)"
   },
   {
    "id": "ISS-NODE20",
-   "title": "Node.js 20: Firebase CLI เตือนปิดรุ่น 2026-10-30",
-   "sev": "high",
+   "title": "Node.js 20: UNVERIFIED — Firebase CLI เตือนปิดรุ่น 2026-10-30 แต่ยังไม่ตรวจ lifecycle ทางการ (ไม่ใช่ FAIL เพียงเพราะใช้รุ่น 20)",
+   "sev": "med",
    "status": "open",
    "env": "prod",
    "actor": "code",
-   "next": "เทียบเอกสาร lifecycle ทางการ แล้วเสนอแผนอัปเกรด",
+   "next": "Code ตรวจเอกสาร lifecycle ทางการของ Node.js/Firebase Functions แล้วรายงาน; จึงจะตัดสินว่าต้องอัปเกรดหรือไม่",
    "source": "SOURCE: functions/package.json engines=20 · ข้อความจาก CLI ในภาพ deploy (ยังไม่ใช่เอกสารทางการ)"
   },
   {
@@ -1252,7 +1282,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "status": "open",
    "env": "docs",
    "actor": "owner",
-   "next": "เจ้าของยืนยัน workflow เดียว; แผง Code เป็นจุดดูหลัก",
+   "next": "เจ้าของยืนยันแล้ว: แผง Code เป็นตัวหลัก + workflow Code → Work review → เจ้าของทดสอบ TEST; เหลือเฉพาะการเขียน CLAUDE.md ฉบับปัจจุบันใหม่ (งานเอกสารแยกรอบ ไม่บล็อก)",
    "source": "A3 X5/X6 · repo CLAUDE.md มีบล็อกชี้ชุดส่งต่อแล้ว"
   },
   {
@@ -1465,12 +1495,13 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    ],
    "codeView": "ข้อเสนอของ Code (ไม่ใช่มติ): ทางกลไก branch เป็นเส้นตรง (main ไม่มี commit ที่ chat-live-01 ไม่มี) จึงชนกันได้ยาก แต่ประตู production (SEC-URGENT-01, ข้อมูลเก่า, rules) ยังไม่ผ่าน — คง 'ยังไม่ merge'",
    "decider": "owner",
-   "status": "open",
-   "affects": "ISS-MERGE, P03"
+   "status": "parked",
+   "affects": "ISS-MERGE, P03",
+   "outcome": "พักไว้ตามมติเจ้าของ (ผ่าน Work, 3 ต.ค.) — ไม่ใช้เป็นเงื่อนไขบล็อกการปิดรอบเอกสาร; ยังไม่ merge"
   },
   {
    "id": "D4",
-   "question": "CLAUDE.md ที่จะใช้จริงเพียงฉบับเดียว",
+   "question": "แผงหลักและ workflow ที่ใช้จริง (CLAUDE.md ฉบับเดียวแยกเป็นงานเอกสารต่างหาก)",
    "options": [
     "คงฉบับ repo + บล็อกชี้ชุดส่งต่อ (ตอนนี้)",
     "รวมสำเนาโปรเจกต์ออกแบบ (§29)",
@@ -1478,8 +1509,9 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    ],
    "codeView": "ข้อเสนอของ Code (ไม่ใช่มติ): ตัวเลือกสาม แต่เป็นงานเอกสารแยกรอบ; สำเนาโปรเจกต์ออกแบบเก่ากว่า workflow ปัจจุบัน ไม่ควรใช้ทับ",
    "decider": "owner",
-   "status": "open",
-   "affects": "ISS-DOCS-SPLIT"
+   "status": "decided",
+   "affects": "ISS-DOCS-SPLIT",
+   "outcome": "เจ้าของยืนยันแล้ว (ผ่าน Work, 3 ต.ค.): แผง Code เป็นตัวหลัก · workflow Code → Work review → เจ้าของทดสอบ TEST ไม่ต้องถามเลือกซ้ำ"
   },
   {
    "id": "D5",

@@ -109,15 +109,22 @@ describe("status panel (docs-only, built from PROJECT-STATUS.md)", function () {
     } finally { await b.close(); fs.rmSync(tmp, { force: true }); }
   });
 
-  it("P10 open decisions D1-D5 are listed with options, the Code proposal marked 'ไม่ใช่มติ', a decider; nothing is shown as decided", () => {
+  it("P10 decisions D1-D5 are listed with options, the Code proposal marked 'ไม่ใช่มติ', a decider; only an owner-confirmed decision may be 'decided' or 'parked' and it must carry an outcome naming that source", () => {
     const html = out.document; assert.strictEqual(d.reg.decisions.length, 5);
-    d.reg.decisions.forEach((x) => { assert.strictEqual(x.status, "open"); assert.ok(html.includes('id="decisions"') && html.includes(">" + x.id + " · ผู้ตัดสิน")); assert.ok(/ไม่ใช่มติ/.test(x.codeView)); });
-    assert.strictEqual(count(html, /รอตัดสิน<\/div><h3>/g), 5);
+    d.reg.decisions.forEach((x) => { assert.ok(html.includes('id="decisions"') && html.includes(">" + x.id + " · ผู้ตัดสิน")); assert.ok(/ไม่ใช่มติ/.test(x.codeView)); if (x.status !== "open") assert.ok(x.outcome && /เจ้าของ/.test(x.outcome), x.id + " non-open needs an owner-sourced outcome"); });
+    const by = (st) => d.reg.decisions.filter((x) => x.status === st).map((x) => x.id);
+    assert.deepStrictEqual([by("open"), by("decided"), by("parked")], [["D1", "D2", "D5"], ["D4"], ["D3"]]);
+    assert.strictEqual(count(html, /รอตัดสิน<\/div><h3>/g), 3); assert.strictEqual(count(html, /พักไว้<\/div><h3>/g), 1); assert.strictEqual(count(html, /ตัดสินแล้ว<\/div><h3>/g), 1);
     const bad = parse(MD); bad.reg.decisions[0].codeView = "ควร lock เลย"; assert.ok(validate(bad).some((e) => /not a decision/.test(e)));
   });
-
+  it("P12 round r3: AI chat is a separate checklist from Listing, Node.js 20 is UNVERIFIED not FAIL, and the owner-screenshot check R12 is separate from R11", () => {
+    const sc = (id) => d.reg.scopes.find((x) => x.id === id), it = (id) => d.reg.scopes.flatMap((x) => x.items).find((x) => x.id === id);
+    assert.ok(sc("S-TEST-CHAT") && sc("S-TEST-CHAT").items.map((x) => x.id).join() === "T22" && sc("S-PROD-CHAT"));
+    ["S-DEV-CORE", "S-TEST-FLOW", "S-TEST-PUBLIC", "S-TEST-NEG"].forEach((id) => assert.ok(!sc(id).items.some((x) => x.id === "T22" || x.id === "P07"), id + " must not hold chat items"));
+    assert.strictEqual(it("P06").status, "unverified"); assert.strictEqual(it("R11").status, "unverified"); assert.strictEqual(it("R12").status, "unverified"); assert.ok(d.reg.scopes.every((x) => x.locked === false));
+  });
   it("P11 the package set shown in the panel is the one in the handoff files (same id and revision in the registry, the three files' CODE-V2-01 block and the page header)", () => {
     assert.ok(out.document.includes(d.reg.package.set));
-    for (const f of ["BLUEPRINT.md", "HANDOFF-NEXT-CHAT.md", "PROJECT-STATUS.md"]) { const t = fs.readFileSync(path.join(ROOT, f), "utf8"); assert.ok(t.includes("CODE-V2-01 r2") && t.includes(d.reg.package.id), f + " must carry the r2 block"); }
+    for (const f of ["BLUEPRINT.md", "HANDOFF-NEXT-CHAT.md", "PROJECT-STATUS.md"]) { const t = fs.readFileSync(path.join(ROOT, f), "utf8"); assert.ok(t.includes(d.reg.package.set.replace(/^.*\+ /, "")) && t.includes(d.reg.package.id), f + " must carry the current revision block"); }
   });
 });
