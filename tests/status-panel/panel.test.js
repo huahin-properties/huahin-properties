@@ -155,10 +155,11 @@ describe("status panel (docs-only, built from PROJECT-STATUS.md)", function () {
     assert.ok(!("codeSha" in P), "no ambiguous 'codeSha'"); assert.ok(/^[0-9a-f]{40}$/.test(P.sourceHeadSha) && /^[0-9a-f]{40}$/.test(P.docBaseSha) && P.deployedTestSha.startsWith("d0fe617") && P.deployedProdSha === "ไม่ทราบ");
     assert.notStrictEqual(P.sourceHeadSha, P.deployedTestSha, "source head is not the deployed TEST head"); assert.ok(out.document.includes(P.sourceHeadSha.slice(0, 7)) && out.document.includes("Source / code head ปัจจุบัน"));
     assert.strictEqual(it("D12a").status, "pass"); assert.ok(/90/.test(it("D12a").ref) && it("D12a").ref.includes(P.sourceHeadSha.slice(0, 7)));
-    assert.strictEqual(it("D12b").status, "pass"); assert.ok(/34/.test(it("D12b").ref) && it("D12b").ref.includes(P.sourceHeadSha.slice(0, 7)));
+    assert.strictEqual(it("D12b").status, "pass"); assert.ok(/34/.test(it("D12b").ref) && /[0-9a-f]{7}/.test(it("D12b").ref) && /ไม่เปลี่ยน/.test(it("D12b").ref), "D12b names the SHA it was run at and why it was not rerun");
     assert.strictEqual(it("D12c").status, "unverified"); assert.ok(/ไม่ได้รัน/.test(it("D12c").ref));
     assert.ok(/ล้ม 1/.test(it("D12d").ref) && /B2/.test(it("D12d").ref), "D12d keeps the round that failed on B2"); assert.strictEqual(it("D08").status, "fail", "the flake is never hidden");
-    ["FX-1", "FX-2", "FX-3", "FX-4"].forEach((id) => assert.strictEqual(d.reg.proposals.find((x) => x.id === id).status, "in-draft", id)); assert.strictEqual(d.reg.proposals.find((x) => x.id === "FX-5").status, "blocked-decision");
+    ["FX-1", "FX-2", "FX-3", "FX-4"].forEach((id) => assert.strictEqual(d.reg.proposals.find((x) => x.id === id).status, "in-draft", id));
+    ["ISS-TESTBUILD", "ISS-RAIL-ANON", "ISS-MAP-LIMITS"].forEach((id) => assert.ok(d.reg.issues.some((x) => x.id === id && x.status === "open"), id + " is registered and open")); ["D17", "D18", "D19"].forEach((id) => assert.strictEqual(it(id).status, "pass", id)); assert.ok(/ไม่ลบ PASS|PASS เดิม/.test(d.reg.issues.find((x) => x.id === "ISS-TESTBUILD").source), "the earlier Cloud PASS results are kept, with the build limitation"); assert.strictEqual(d.reg.proposals.find((x) => x.id === "FX-5").status, "blocked-decision");
     ["T10", "T12", "T13", "T14", "T16"].forEach((id) => assert.strictEqual(it(id).status, "fail", id + " stays FAIL until it is tried on Cloud TEST"));
   });
   it("P11 the package set shown in the panel is the one in the handoff files (same id and revision in the registry, the three files' CODE-V2-01 block and the page header)", () => {

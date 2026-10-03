@@ -2,7 +2,8 @@
 
 **รุ่นหลัก: HP-HANDOFF-2026-10-03-v2 · 3 ตุลาคม 2569 · Asia/Bangkok**
 
-- **สถานะปัจจุบัน (r6):** source/code head `7c1ec6b40bc5c5008d3bd20eb4ed8274bc3a3b99` (draft, ยังไม่ deploy) · เอกสาร/build base head ที่ Work ตรวจ `4a49ea68377f1a8f881891b020a12e1bf70964df` · Cloud TEST deployed `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5` (ไม่ใช่ source ปัจจุบัน) · production deployed ไม่ทราบ · ขอบเขต checklist 12 ชุด (lock 2: S-TEST-FLOW 9/9, S-TEST-PUBLIC 2/7) · FX-1/2/3/4 อยู่ใน draft (ผลในเครื่อง) รอ Work ตรวจ — ดูบล็อก "ผลปรับรอบ r6" ท้ายเอกสาร; บรรทัดที่ระบุ SHA/สถานะรุ่นก่อนหน้าด้านล่างเป็น **ประวัติ**
+- **สถานะปัจจุบัน (r7):** source/code head `678a04211879352d05e14fbe6166a9186a65507e` (draft ยังไม่ deploy; โค้ดเว็บเท่ากับ `7c1ec6b`) · เอกสาร/build base head ที่ Work ตรวจ `59d3ecb76ba179ce661e74c90040353e404f7604` · Cloud TEST deployed `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5` (ไม่ใช่ source ปัจจุบัน) · production deployed ไม่ทราบ · ขอบเขต checklist 12 ชุด (lock 2: S-TEST-FLOW 9/9, S-TEST-PUBLIC 2/7) · FX-1/2/3/4 ใน draft (ผลในเครื่อง) + ตรวจผลกระทบ component แล้ว รอ Work — ดูบล็อก "ผลปรับรอบ r7" ท้ายเอกสาร; บรรทัดสถานะรุ่นก่อนหน้าด้านล่างเป็น **ประวัติ**
+- [ประวัติ r6] **สถานะ ณ r6:** source/code head `7c1ec6b40bc5c5008d3bd20eb4ed8274bc3a3b99` (draft, ยังไม่ deploy) · เอกสาร/build base head ที่ Work ตรวจ `4a49ea68377f1a8f881891b020a12e1bf70964df` · Cloud TEST deployed `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5` (ไม่ใช่ source ปัจจุบัน) · production deployed ไม่ทราบ · ขอบเขต checklist 12 ชุด (lock 2: S-TEST-FLOW 9/9, S-TEST-PUBLIC 2/7) · FX-1/2/3/4 อยู่ใน draft (ผลในเครื่อง) รอ Work ตรวจ — ดูบล็อก "ผลปรับรอบ r6" ท้ายเอกสาร; บรรทัดที่ระบุ SHA/สถานะรุ่นก่อนหน้าด้านล่างเป็น **ประวัติ**
 - [ประวัติ r5] **สถานะ ณ r5:** Work ตรวจ head เอกสาร `f4d8090e631ad990de43d27570c05fa12b724722`; code/TEST SHA `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5`; ขอบเขต checklist 12 ชุด (lock แล้ว 2: S-TEST-FLOW 9/9, S-TEST-PUBLIC 2/7); R12=PASS; ข้อกำหนดเจ้าของ A1–A10 บันทึกแล้ว; FX-3 อยู่ใน draft branch (ยังไม่ deploy). ดูบล็อก "ผลปรับรอบ r5" ท้ายเอกสาร. บรรทัดถัดไปที่ระบุ `34a0eb0` / "v2 ยังไม่ commit" เป็น **ประวัติ**
 - รวม Work v1 + Claude Code v1.1 ที่ document commit `34a0eb0ee27bddfa72003958dd7e0546a9b490b2` + Claude AI ADDENDUM-CLAUDE-AI-01 + มติแผง PROJECT-STATUS ที่เจ้าของยืนยัน 3 ต.ค. 10:19
 - [ประวัติ ณ v2] Code baseline/TEST ที่เจ้าของทดลอง: `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5`; PR #8 ตรวจรอบนี้ OPEN/DRAFT/NOT MERGED, head เอกสาร `34a0eb0`, base `claude/chat-live-01`
@@ -4480,4 +4481,43 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
 รักษาเป็น **ข้อกำหนดและช่องว่าง** ไม่ถือว่าเป็นฟังก์ชันที่ทำครบ ไม่สร้างระบบใหม่ตามข้อกำหนดทั้งหมดในรอบนี้ (ดูบล็อก r5 และแผงส่วน 5ข).
 
 **ข้อจำกัด / ไม่ได้ทำ:** ผลทั้งหมดเป็นในเครื่อง ไม่มีหลักฐาน Cloud · ไม่ merge · ไม่ deploy (รวม TEST) · ไม่แตะ production · ไม่ migrate/ลบข้อมูล Cloud · ไม่เปิด GREEN · ไม่รัน `tools/chat-live/deploy-test.sh` · เจ้าของไม่ต้องส่งเคสใหม่หรือทดสอบเพิ่มในรอบนี้ · **การเปลี่ยนไฟล์ production-facing (ยังไม่ merge):** `Property Details.dc.html`, `Listing Approvals.dc.html`, `PropertyCard.dc.html`, `data.js`
+
+## ผลปรับรอบ r7 — CODE-V2-01 r7 (3 ต.ค. 2569 · ตอบ WORK REVIEW r6: ตรวจผลกระทบจากการเลิกห่อ template)
+
+**รุ่น:** source/code head `678a04211879352d05e14fbe6166a9186a65507e` (draft ยังไม่ deploy; **รอบนี้ไม่มีการแก้โค้ดเว็บ** — เปลี่ยนเฉพาะไฟล์ test; โค้ดเว็บยังเป็นชุดเดียวกับ `7c1ec6b`) · เอกสาร/build base ที่ Work ตรวจ `59d3ecb76ba179ce661e74c90040353e404f7604` · Cloud TEST deployed `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5` · production ไม่ทราบ.
+
+### 1) รายชื่อ component ที่ build รวมไว้ และสิ่งที่แต่ละตัวทำ
+บิลด์ TEST (`ENTRIES` 18 หน้า) รวม component ที่ถูกดึงมาเป็นข้อความเพียง **4 ไฟล์** (ตรวจจาก build จริง) — ไม่ถือว่าทุกตัวเสียเหมือนกัน:
+| component | หน้าที่ใช้ | ตรรกะที่เริ่มทำงาน | อ่านข้อมูล | เขียนข้อมูล | เรียก Functions |
+|---|---|---|---|---|---|
+| `PropertyCard` | Home, Search, Details, index | รูปปก/สไตล์การ์ด, ป้ายโซน, หัวใจ (favorites), ปุ่มแชร์ | ไม่มี (ใช้ prop จากหน้า + `data.js`) | `localStorage` (รายการโปรด, คะแนนความสนใจ) เท่านั้น | ไม่มี |
+| `LanguageSwitcher` | About, Agent Profile, Contact, Home, Lister Dashboard, Details, Search, index | เปิด/ปิดเมนูภาษา เรียก callback ของหน้า | ไม่มี | ไม่มีเอง (หน้าเก็บ `hh_lang` ใน localStorage) | ไม่มี |
+| `SearchFilters` | Search, Lister Dashboard | คำนวณค่าที่แสดงของตัวกรอง เรียก callback ของหน้า | ไม่มี | ไม่มี | ไม่มี |
+| `ContactRail` (2,395 บรรทัด) | About, Contact, Home, Details, Search, index | แถบข้าง + แชท | `getEffectiveProperties` (properties/propertyPhotos), AI notes (`aiNotes`), persona/restrictions (`siteContent`), หา conversation เดิมของผู้เยี่ยมชม (`conversations`) | `localStorage` (สถานะแถบ, ประวัติแชท) + **ล็อกอิน anonymous** ให้ผู้เยี่ยมชม (Auth) | `startConversation`, `sendConversationTurn`, `receptionTurn`, `getPropertyDraft`, `createCaseFromConversation`, `claudeComplete` — **เฉพาะเมื่อผู้เยี่ยมชมส่งข้อความ/ยืนยันเอง** |
+หน้าฟอร์ม/ทีมงาน (Owner Submission, Track Submission, Case Data, Staff Workspace, Listing Approvals, Admin, Leads, Staff Handbook) **ไม่มี component ใด ๆ** จึงไม่ได้รับผลจากการเลิกห่อ; Lister Dashboard มี LanguageSwitcher + SearchFilters (ครอบคลุมโดย B4 เดิม).
+
+### 2) ContactRail และการเริ่มทำงานอัตโนมัติ — ตรวจใน browser จาก build จริง (B14, B18)
+- **เปิดหน้าอย่างเดียว** (Home, Search, Details, About, Contact, index): จำนวนเอกสารในทุก collection **ไม่เปลี่ยน** (ไม่มีเคส/บทสนทนา/ข้อความ/ลีด/submission ใหม่), **ไม่มี Function ฝั่งแชท/เคสถูกเรียก**, ไม่มี URL production หรือ endpoint AI/production. สิ่งเดียวที่เปลี่ยนในแบ็กเอนด์คือ **การล็อกอิน anonymous ของผู้เยี่ยมชม** ไม่เกิน 1 คนต่อการเปิดหน้า (Search/Details/About/Contact = 1; Home/index = 0 ในรอบที่วัด) — **พฤติกรรมเดิมของ production** ที่เพิ่งเริ่มทำงานบน TEST.
+- ข้อความทักทายอัตโนมัติของแถบ (หลัง 1.5 วินาที ตามรายการโปรด/เกณฑ์เดิม) เป็นข้อความ **ในเครื่องเท่านั้น** ไม่แตะแบ็กเอนด์. การเริ่ม conversation (`startConversation`) เกิดเมื่อผู้เยี่ยมชม **ส่งข้อความเอง** เท่านั้น (ตามพฤติกรรมเดิม).
+- **ผู้เยี่ยมชมที่ส่งข้อความบน TEST เห็นอะไร:** ฟังก์ชันแชทยังไม่ deploy บน TEST (สคริปต์ CHAT-LIVE เดิมค้างที่ 6/8) และกล่องทดสอบบล็อกโฮสต์ Functions ของโปรเจกต์ → การเรียก `getPropertyDraft`/`receptionTurn` ล้ม → แถบแชทแสดงข้อความขออภัย/ติดต่อเรา **ไม่ใช่คำตอบ AI**, ไม่มีเคสเกิดขึ้น, ไม่เรียก endpoint production; URL เดียวที่ถูกพยายามคือ URL ของโปรเจกต์ TEST เอง. **gate เดิมไม่ถูกเปิด/ข้าม/แก้** (B18 ไม่ได้ทดสอบ gate 401/403 — ส่วนนั้นอยู่ในชุด chat-live). Cloud: UNVERIFIED (ลงทะเบียน ISS-RAIL-ANON; Anonymous Auth น่าจะเปิดอยู่เพราะลูกค้าสังเคราะห์ส่งฟอร์มได้ที่ T02).
+
+### 3) TEST guard (B15 + hosting-build)
+- **หน้า entry ยังรอ guard**: ห่อ `<template id="chat-live-app">` + guard เป็นสคริปต์แรก + เริ่มผ่าน `__chatLiveStart` เท่านั้น (ชุด hosting-build เดิมตรวจครบทุก entry).
+- **ไฟล์ component ที่เปิด URL ตรง** (ทั้ง 4 ไฟล์): ไม่โหลด runtime/SDK, **ไม่มี request ไป Firestore/Auth/Functions/Storage หรือภายนอก**, ไม่เขียนข้อมูล, ไม่ล็อกอิน; guard ทำงานก่อน. สาเหตุที่ปลอดภัย: สคริปต์ที่ "รันได้" ของไฟล์ component มีเพียง `listing-test-config.js` + `listing-test-guard.js` (สคริปต์ตรรกะของ component เป็น `type="text/x-dc"` ไม่รัน) — เพิ่มการตรวจนี้ใน hosting-build แล้ว. **ไม่พบช่องว่าง จึงไม่แก้ build เพิ่ม.**
+
+### 4) Search / Details / ภาษา (B17) และ FX-1 สองบัญชี (B16)
+- B17: Search แสดงรูปปก decode ได้เฉพาะรายการที่มีรูป, ตัวกรองคำค้นลดรายการ, ตัวเลือกภาษาเปลี่ยนเมนูและจำค่า; Details แสดงรูปและเปลี่ยนภาษา. (สถานะ loading/notfound/failed ครอบคลุมโดย B12.)
+- B16: ผู้อนุมัติรับเรื่อง (`owner2`) ≠ ผู้เผยแพร่ (`owner`) แสดงตามเหตุการณ์ ไม่สลับตรา; เลือก submission ตาม `approvedSubmissionId`; ไม่มี `approvedSubmissionId` → ใช้ submission ที่ **อนุมัติ** ล่าสุด ไม่ใช่ที่ถูกส่งกลับ; ผู้ที่ปฏิเสธไม่ถูกแสดงเป็นผู้อนุมัติ; ข้อมูลบทบาทอย่างเดียวแสดงเป็น "บทบาทที่บันทึก: owner" ไม่ใช่ชื่อคน; ไม่เพิ่มข้อมูลผู้อนุมัติในเอกสารสาธารณะ.
+
+### 5) ข้อจำกัดที่คงไว้ (ห้ามประกาศว่าแผนที่/ตำแหน่งถูกต้องครบแล้ว)
+**พิกัดที่ Staff กรอก (`coordsRaw`) ยังไม่ถูกนำไปแสดงแผนที่สาธารณะ** · **แผนที่อาจใช้จุดกลางเริ่มต้น** เมื่อไม่มีโซน/พิกัด · **ระยะจากพิกัดเป็นเส้นตรงถึงจุดอ้างอิงของพื้นที่ ไม่ใช่ระยะเดินทาง** (ลงทะเบียน ISS-MAP-LIMITS). **FX-5 คงรอตรวจข้อมูล (ตัวอย่าง `landSize` จริงแบบอ่านอย่างเดียว) และมติ D2** — ไม่แก้ค่า Cloud ไม่เปลี่ยนหน่วยทั้งระบบ.
+
+### 6) หลักฐานและสถานะ
+ผล Cloud TEST เดิมเก็บเป็นประวัติที่มีข้อจำกัดของ build (component ไม่มีตรรกะ); **ไม่ลบ PASS เดิม** (T01–T08, T09, T11, T15) และไม่อ้างว่า component ทุกตัวบน Cloud ได้รับการทดสอบ. **T10, T12, T13, T14, T16 คง FAIL** จนทดสอบบน Cloud TEST. **D08 คง FAIL** (flake). **D12c combined คง UNVERIFIED** (ไม่ได้รัน). ผลทดสอบที่ source `678a042`: `test:listing` **90**, `test:browser-local` **18/18** (รวม B14–B18 ใหม่; ไม่รัน chat-live/combined ซ้ำเพราะโค้ดเว็บไม่เปลี่ยนจาก `7c1ec6b`). การรัน browser-local ทั้งชุดมีเหตุผลเพราะการเลิกห่อกระทบทุกหน้า.
+
+### 7) head ที่เสนอให้ deploy TEST + แผนให้เจ้าของทดสอบเฉพาะจุด (ข้อเสนอ — **ยังไม่สั่ง**, รอ Work)
+- **head ที่เสนอ:** หัวของ `claude/listing-e2e-01` ที่ commit เอกสารรอบ r7 นี้ (โค้ดเว็บ = source `7c1ec6b`/`678a042` ไม่เปลี่ยน; commit หลังนั้นเป็นเอกสาร/แผงเท่านั้น). เจ้าของ deploy เองด้วย `tools/listing-test/deploy-test.sh` ตาม head ที่ Work ระบุ (pin SHA, ตรวจ branch/HEAD ก่อน) — ไม่รัน `tools/chat-live/deploy-test.sh`.
+- **แผนทดสอบ (ข้อมูลสังเคราะห์เท่านั้น, ทำทีละข้อ, ไม่ต้องส่งเคสใหม่ก่อน Work สั่ง):** (1) เปิด Search ในฐานะผู้เยี่ยมชม — รูปปกของประกาศที่เผยแพร่แล้วแสดง (T10) + เปลี่ยนภาษา/ตัวกรองใช้ได้ · (2) เปิด Details — ไม่มีคำว่า undefined / "0 กม." ที่ไม่จริง (T13) · (3) เปิดลิงก์ของประกาศที่ปิดแล้ว — เห็น "ไม่พบประกาศนี้" ไม่ใช่หน้าว่าง (T16) · (4) ในหน้า Listing Approvals ในฐานะ Owner — เห็นแถว "อนุมัติรับเรื่องโดย …" และ "อนุมัติเผยแพร่โดย …" แยกกัน (T14) · (5) เปิดหน้าโฮม/ค้นหา — แถบแชทขึ้น; ถ้าพิมพ์ข้อความจะเห็นข้อความขออภัย/ติดต่อเรา (ไม่ใช่ AI) · (6) ตรวจว่าหน้าฟอร์ม/ทีมงานเดิมยังใช้ได้. ผลที่ได้จึงจะอัปเดต T10/T13/T14/T16 ตามหลักฐานจริง.
+
+**ไม่เปลี่ยน/ไม่ทำ:** ไม่ merge · ไม่ deploy (รวม TEST) · ไม่แตะ production · ไม่ migrate/ลบข้อมูล Cloud · ไม่เปิด GREEN · ไม่รัน `tools/chat-live/deploy-test.sh` · ไม่สร้างข้อมูล Cloud · เจ้าของยังไม่ต้องส่งเคสใหม่.
 
