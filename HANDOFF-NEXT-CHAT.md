@@ -1,3 +1,19 @@
+# ชุดส่งต่อโครงการ — สถานะปัจจุบัน (อ่านก่อนประวัติ)
+
+**รุ่นหลัก: HP-HANDOFF-2026-10-03-v2 · 3 ตุลาคม 2569 · Asia/Bangkok**
+
+- รวม Work v1 + Claude Code v1.1 ที่ document commit `34a0eb0ee27bddfa72003958dd7e0546a9b490b2` + Claude AI ADDENDUM-CLAUDE-AI-01 + มติแผง PROJECT-STATUS ที่เจ้าของยืนยัน 3 ต.ค. 10:19
+- Code baseline/TEST ที่เจ้าของทดลอง: `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5`; PR #8 ตรวจรอบนี้ OPEN/DRAFT/NOT MERGED, head เอกสาร `34a0eb0`, base `claude/chat-live-01`
+- v1/v1.1 และข้อความ "ยังไม่ commit" ด้านล่างเป็น snapshot ประวัติ; v1.1 อยู่ GitHub แล้ว ส่วน **v2 ฉบับนี้ยังไม่ commit**. ห้ามเอา code SHA/document SHA/deployed SHA ปนกัน
+- สถานะ: DOCUMENTATION RECONCILIATION; TEST หนึ่งเคสผ่าน UI ถึงปิดประกาศ; production NOT READY; ไม่ deploy/merge/GREEN ในรอบนี้
+- เจ้าของยืนยันให้แผงใน Claude Code เป็นจุดดูความคืบหน้าหลัก; PROJECT-STATUS.md เป็นข้อมูลสถานะกลาง; Claude AI ใช้ชุดรุ่นเดียวกัน อ้าง Viewer เก่าเป็นประวัติ ไม่แก้สถานะแข่งกัน
+- สิ่งที่ทำตอนนี้: Code ตรวจ/ประสานเอกสาร v2 และทำแผงติดตามภายในตามข้อกำหนดท้ายไฟล์; ไม่แก้ source เว็บไซต์/Functions/rules ในงานนี้
+- อ่านครบ BLUEPRINT.md + HANDOFF-NEXT-CHAT.md + PROJECT-STATUS.md; บล็อกสถานะปัจจุบันนี้และข้อสรุป Work ท้ายไฟล์มีผลเหนือข้อความสถานะเก่า ส่วนมติผลิตภัณฑ์เดิมไม่ถูกยกเลิก
+
+---
+
+# เนื้อหาฉบับ Claude Code v1.1 — เก็บครบเพื่อรักษาประวัติ
+
 **ชุดส่งต่อโครงการ — HUAHIN.PROPERTIES**
 
 - ชุด: `HP-HANDOFF-2026-10-03-v1` · วันที่ 3 ตุลาคม 2569 (2026-10-03), เวลาอ้างอิง Asia/Bangkok
@@ -590,3 +606,153 @@ prompt (กฎ ON-SCREEN ELEMENTS ทุกภาษา) → regex เพิ่�
 1. PENDING #9 / #10 — ยังไม่แตะ
 2. R7-3 — NOT TESTABLE จนกว่าจะมีทรัพย์เผยแพร่จริง (ห้ามสร้างเพื่อให้ผ่าน)
 3. Phase 2A-4 / 2B — NOT STARTED
+
+
+---
+
+# ภาคผนวกจาก Claude AI — เก็บตามที่ส่งมา (คำรายงานต้องอ่านคู่ข้อสรุป Work)
+
+# ภาคผนวก — ADDENDUM-CLAUDE-AI-01 · ตรวจและประสานเอกสารจาก Claude AI Project (3 ต.ค. 2569)
+
+- เพิ่มต่อท้ายชุด `HP-HANDOFF-2026-10-03-v1` · **ไม่ลบ ไม่แก้ข้อความเดิมแม้แต่บรรทัดเดียว** (ตรวจแล้ว: ชุดนี้มีเนื้อหา BLUEPRINT.md และ HANDOFF-NEXT-CHAT.md ฉบับในโปรเจกต์ครบทุกบรรทัด)
+- ผู้เพิ่ม: Claude AI (เครื่องมือออกแบบ · อ่าน GitHub ได้บางส่วน · commit/deploy ไม่ได้) · รอบนี้ **ไม่แก้ source ไม่ deploy ไม่เปิด GREEN**
+- การตั้งเลขชุดใหม่ (เช่น v2) ให้ Work/เจ้าของตัดสิน · ภาคผนวกนี้ไม่ใช่มติใหม่ เป็นรายการหลักฐานและข้อขัดแย้ง
+- แหล่งอ้างอิง: **V** = Viewer `Copy Code to GitHub.dc.html` (อยู่เฉพาะใน Claude AI Project) · **PKG** = `handoff-claude-code/HANDOFF-PACKAGE-2026-10-01.md` · **LIVE** = Claude AI ตรวจ GitHub main ด้วย blob hash 30 ก.ย. 2569 · **CHAT** = มติในแชท Claude AI (ผ่าน ChatGPT)
+
+## A1. ข้อจำกัดการตรวจ repository รอบนี้
+- อ่านโครงสร้าง `docs/` ของ branch `claude/listing-e2e-01` ได้ (03:10 UTC) · **เปรียบเทียบ commit ไม่ได้** เพราะสิทธิ์ GitHub หมดอายุระหว่างตรวจ (`bad_refresh_token`)
+- จึง **ยืนยันไม่ได้** ว่า head ปัจจุบันยังเป็น `d0fe617` หรือไม่ · Claude Code ต้องตรวจเอง
+- พบเอกสารบน branch ที่ชุดนี้ยังไม่ได้อ้าง: `docs/ceo-handoff/` (10 ไฟล์ เช่น CURRENT_PHASE_STATUS.md, KNOWN_ISSUES.md) · `docs/security/SEC-TEST-01.md` · `docs/security/SEC-URGENT-01-admin-default-credentials.md` · `docs/testing/CHAT-FIX-01.md`, `CHAT-FIX-02.md`, `CHAT-TEST-01.md` → **ยังไม่ได้อ่าน** · ต้อง reconcile ก่อนถือว่าชุดนี้เป็นภาพรวมครบ
+
+## A2. งานที่เกิดหลัง 21 ก.ย. บน main แต่ **ไม่อยู่ในชุดนี้เลย** (ค้นแล้ว 0 ครั้ง: STEP 99–114, #18, FIX F, 02230ae)
+
+| งาน | สถานะ (เสนอ/อนุมัติ/impl/main/deploy/prod) | แหล่ง |
+|---|---|---|
+| STEP 98–110: #14 prompt, #15 Contact CTA, #16-A/#16-B persona, #16 server guard, S-4 fix, #17 F-2 (WHOLE-SENTENCE), #16 Home prompt | ✅/✅/✅/✅ main/receptionTurn deploy หลัง STEP 106/ดูตาราง PASS | V · PKG §3 |
+| STEP 112 FIX F: `chat_error_generic` 8 ภาษา + แก้ขอบเขตตัวแปร `data` | ✅/✅/✅/✅ commit `02230ae` (23 ก.ย.)/— client/FR normal + FR error PASS 23 ก.ย. | V · github.md |
+| **#18** Firebase init race (ต้นเหตุ STEP 99 S-3 FAIL `backend_init_failed_local_only`) — `whenFirebaseReady()` + init gate 15 วินาที + Home รอ Firebase | ✅/✅ (ไฟล์ 1–2 มีการ์ด · ไฟล์ 3 Home **ไม่มีการ์ดอนุมัติ**)/✅/✅ ครบ 3 ไฟล์ (LIVE hash ตรง)/— client/**❌ ยังไม่ทดสอบ** | V STEP 113–114 · LIVE · CHAT |
+| STEP 99 combined regression §36.5 | **PAUSED** ที่ S-3 FAIL · ต้อง rerun S-3 หลัง #18 | V |
+
+## A3. ข้อขัดแย้งที่พบ (รายงาน ไม่ตัดสิน)
+
+| # | ชุดนี้เขียนว่า | หลักฐานอีกฝั่ง | ต้องให้ใครตัดสิน |
+|---|---|---|---|
+| X1 | H-2 = BLOCKED / NOT TESTABLE | V STEP 111: H-2 = PASS (Preview) · มติ CHAT: ใช้ "PASS (Preview)" ได้เฉพาะเมื่อมีหลักฐาน + ระบุ Production NOT VERIFIED · การตรวจสาธารณะที่ติด maintenance = BLOCKED แยก | Work + เจ้าของ (น่าจะเป็นทั้งคู่: Preview PASS · Production BLOCKED) |
+| X2 | FR technical-error fallback ได้ EN — ยังต้องตรวจ | FIX F (STEP 112, `02230ae`) แก้แล้ว: เดิม fr ไม่มีคีย์ `chat_error_generic` จึงตกเป็น en · FR error = PASS 23 ก.ย. · ต้นเหตุ technical error ของรอบนั้น = **ไม่ทราบ** | Work ตรวจหลักฐานว่าพอปิดหรือไม่ |
+| X3 | Home `submitWelcome` reachability ยังต้องตรวจ | การ audit ถูกสั่งในแชท Claude AI แต่ **ผลไม่ถูกเก็บไว้ในหลักฐานที่ส่งต่อได้** → UNVERIFIED | Claude Code ตรวจ source ใหม่ |
+| X4 | PR #8 base = `claude/chat-live-01` (beec235) | main มี #18 (3 ไฟล์: ContactRail, Home, firebase-client.js) + FIX F + โฟลเดอร์ `m17/` — **ไม่ทราบ** ว่า chat-live-01 มีงานเหล่านี้หรือไม่ → เสี่ยงชนกันตอน merge / ทับ #18 | Claude Code เทียบ main ↔ chat-live-01 ↔ listing-e2e-01 ก่อน merge ใด ๆ |
+| X5 | กฎข้อ 5: Claude Code อัปเดต Viewer | Viewer อยู่ใน Claude AI Project เท่านั้น ไม่อยู่ใน repo (HO เดิม) · ส่งสำเนาออกไปแล้ว 1 ต.ค. → **มี Viewer สองที่ เริ่มแยกกัน** · Viewer ใน Claude AI ล้าสมัย (STEP 114 ยังขึ้น "รอ commit", "#18 DELIVERY NOT STARTED") | เจ้าของเลือก Viewer ตัวหลักเพียงที่เดียว |
+| X6 | workflow ปัจจุบัน = Code push draft branch | CLAUDE.md ใน Claude AI Project ยังบังคับ §29 (Viewer + เจ้าของ commit) · CLAUDE.md บน main ยังเป็นแบบ zip เก่า → **CLAUDE.md มีสามสภาพ** | เจ้าของยืนยัน workflow เดียว แล้วให้ Code sync CLAUDE.md |
+| X7 | HO ประวัติ §3: Agent Signup `type="text"` | source ใน Claude AI Project: `type="{{ signupPasswordType }}"` / `{{ loginPasswordType }}` ค่าเริ่ม `password` + ปุ่มตา → ป้ายน่าจะล้าสมัย · ฉบับบน main/branch = ยังไม่ตรวจ | Claude Code ตรวจ branch |
+| X8 | — (ไม่กล่าวถึง) | โฟลเดอร์ `m17/` (102 ไฟล์) ถูกเพิ่มบน main ระหว่าง `02230ae`→`2192b0b` · ไม่มี maintenance gate · มี service worker · ผู้เพิ่ม/เจตนา = **ไม่ทราบ** | เจ้าของ |
+| X9 | บัญชี Staff TEST มีอยู่แล้ว | ในโปรเจกต์ production ไม่พบบันทึกบัญชี Staff ทดสอบ (PKG §9.4) — สอดคล้องกัน: บัญชีที่ชุดนี้ระบุอยู่ใน **TEST project** เท่านั้น | — (ไม่ขัด แค่ยืนยันขอบเขต) |
+| X10 | — | ไฟล์ในโปรเจกต์ Claude AI ต่างจาก main: Property Details (−20 KB) · Lister Dashboard (−20 KB) · AI Concierge · firebase.json · CLAUDE.md · rules ยังไม่ได้เทียบ → **อย่าใช้ไฟล์จาก Claude AI Project เป็น source** | Claude Code ใช้ GitHub เป็นตัวจริง |
+
+## A4. งานค้างจากประวัติที่ยังไม่อยู่ในตารางปัจจุบันของชุดนี้
+- **#10** VERIFICATION PENDING (R10-TRUTH) · **#12** OPEN (CHAT_I18N ขาดคีย์ · จำนวนที่เหลือไม่ทราบ) · **#13** OPEN (ภาษาไม่ส่งต่อ Owner Submission) · **#14** ยังไม่ CLOSED (S-3 ❌, S-5 ?) · **#15/#17** PASS ยังไม่ประกาศ CLOSED · **#16** Home Production NOT VERIFIED, AI Concierge ผลทดสอบไม่ทราบ · **#18** ยังไม่ทดสอบ production — PKG §4
+- 9 ข้อทดสอบ BLOCKED เพราะไม่มีทรัพย์เผยแพร่จริงบน production (T-1 V-1 V-2 V-4 V-5 B-1 C-4 TX-1 TX-2) — PD-12 ห้ามสร้างเพื่อให้ผ่าน · ข้อมูล TEST project **ไม่ใช้แทน** ได้ถ้าไม่มีมติ
+- **อัปเกรด Node.js 20 ก่อน 30 ต.ค. 2569** (BP ประวัติ · เหลือ ~27 วัน) — ไม่อยู่ในตารางปัจจุบัน
+- โหมด Stripe (Live/Test) · วันที่ deploy Functions ทุกตัว · rules ที่ deploy บน production = **ไม่ทราบ**
+- สูตรแบ่งค่าคอม 20/40/40 = **ไม่พบหลักฐาน ไม่ใช่มติ** · ระบบ Participants/Commission = ห้ามสร้าง (BP §26.6) — PKG §9
+
+## A5. สิ่งที่ Claude Code ควรตรวจก่อนรับช่วง (ไม่ใช่คำสั่งแก้)
+1. head ปัจจุบันของ `claude/listing-e2e-01` เทียบ `d0fe617`
+2. diff `main` ↔ `claude/chat-live-01` เฉพาะ ContactRail.dc.html · Home.dc.html · firebase-client.js (X4)
+3. อ่าน docs/ceo-handoff/, docs/security/, docs/testing/CHAT-FIX-*.md (A1)
+4. ตรวจ Home `submitWelcome` และ Agent Signup บน branch (X3, X7)
+
+
+---
+
+# ข้อสรุป Work และข้อกำหนดแผง PROJECT-STATUS — v2
+
+## 1. การประสานสองฝ่าย
+
+ชุดนี้เก็บ v1.1 จาก GitHub ครบและเพิ่มภาคผนวก Claude AI ครบ ไม่ใช้สำเนา Claude AI เป็น runtime source. ข้ออ้างใหม่ที่ยังไม่ตรวจเก็บ SOURCE-REPORTED/UNVERIFIED; ไม่เลือก PASS โดยผู้ใช้โหวตเมื่อหลักฐานต่างบริบท
+
+| เรื่อง | สถานะปัจจุบันที่ให้ใช้ | หลักฐาน/ขั้นถัดไป |
+|---|---|---|
+| #18 Firebase init / Home และ FIX F | Claude AI รายงาน source บน main; ยังต้องเทียบ source/commit จริงกับ branch | Code ตรวจ main ↔ chat-live ↔ listing เฉพาะ ContactRail/Home/firebase-client; ไม่ merge/cherry-pick รอบนี้ |
+| FR fallback | แยกปัญหาภาษา fallback (รายงาน FIX F ผ่าน 23 ก.ย.) จาก technical error ต้นทาง (ยังไม่ทราบ) | ตรวจ commit 02230ae และหลักฐานเดิมก่อนปิด; ไม่ retry FR รอบนี้ |
+| H-2 | Preview PASS ตามรายงาน / Production BLOCKED หรือ NOT VERIFIED ตามหลักฐานที่ขาด | ไม่ขัดกันหากคนละ environment; ต้องแนบหลักฐานก่อนเรียก Preview VERIFIED |
+| #14 / S-3 / combined regression | #14 PASS ใน snapshot เก่า ไม่ใช่ทั้งชุด regression CLOSED | Claude AI รายงาน STEP99 paused S-3; ตรวจ scope/date ก่อนปิด |
+| Home submitWelcome | UNVERIFIED execution/UI reachability | source audit ภายหลังตาม scope ไม่สร้าง UI แฝง |
+| Branch/main merge | ลำดับ merge ยังไม่มีมติ; branch มีฐาน main ตาม Code report ไม่สรุปว่า #18 หายหรือจะถูกทับแน่นอน | ทำ comparison แล้วรายงานความต่าง; ห้าม merge |
+| Viewer หลายฉบับ / CLAUDE หลายฉบับ | Code dashboard เป็น operational view หลัก; GitHub source จริงและชุดส่งต่อกลาง | รักษา Viewer เดิมเป็นประวัติ/เวอร์ชันอ้างอิง ไม่ต้องย้าย HTML ทั้งชุดเพื่อทำ status dashboard |
+| Agent password | default password ตาม Code source report; UI real ยังไม่ตรวจ | ไม่กลับไปแก้จากป้าย issue เก่าโดยไม่ดู source |
+| m17/ | Claude AI รายงานเพิ่มบน main; เจตนา/ผลกระทบยังไม่ทราบ | inventory/read-only ก่อนเสนอ scope; ไม่ลบ/ปิดอะไรเอง |
+| Node 20 | ข้อมูล deadline ที่พบจากรายงานเดิมยังไม่ยืนยันกับ official runtime lifecycle | Code ตรวจ Node engine/รุ่น dependencies และเอกสารทางการก่อนตั้ง deadline/แผนอัปเกรด ไม่ยืนยัน 30 ต.ค. เป็นข้อเท็จจริงในชุดนี้ |
+| Stripe mode / production deployed rules/functions | UNKNOWN ในหลักฐานที่มี | ห้ามประกาศพร้อมจาก docs อย่างเดียว |
+
+#10/#12/#13 ต้องอยู่ในตารางค้าง; #15/#17 มีรายงาน PASS แต่ CLOSED ต้องตรวจขอบเขต; #16 Home production/AI Concierge ยังไม่ยืนยันตาม Claude AI. Blocked production tests T-1/V-1/V-2/V-4/V-5/B-1/C-4/TX-1/TX-2 คงแยก ไม่ใช้ synthetic TEST แทนหลักฐาน production. ไม่ออกมติ commission 20/40/40 ที่ไม่มีที่มา
+
+ต้องอ่าน docs/ceo-handoff/, docs/security/, docs/testing/CHAT-FIX-01/02 และ CHAT-TEST-01 ก่อนรับรองว่า inventory ครบ. รอบ Work นี้ยังไม่ได้ audit เนื้อหาทั้งหมด; เก็บเป็นงานเอกสารตรวจต่อ ไม่เรียกชุดนี้ว่ารับรองระบบทุกส่วนแล้ว
+
+## 2. รูปแบบแผงหลักที่เจ้าของยืนยัน
+
+แผงใช้สำหรับ Claude Code/Claude AI/Work เข้าใจงาน ไม่ใช่หน้าเว็บลูกค้า. Claude Code เป็นผู้สร้างภายในช่องทางที่ใช้งานได้จริง; ถ้า Artifact ใช้ไม่ได้ให้บอกช่องทางทดแทนที่เปิดได้ ไม่อ้างว่าติดตั้งใน Work/Claude แล้วจากการสร้างไฟล์อย่างเดียว
+
+ลำดับการแสดง:
+1. CURRENT: เป้าหมายโครงการ, งานปัจจุบัน, รหัส phase, environment, package version, updated date, code SHA/doc SHA/deployed SHA
+2. YOU DO NOW: เจ้าของทำครั้งละหนึ่ง action หรือ "ยังไม่ต้องทำอะไร"; ระบุจอ/ลิงก์/เงื่อนไขผ่าน/ขั้นถัดไป
+3. ความคืบหน้าแยก development / real TEST verification / production readiness พร้อมตัวเศษ ตัวหาร และ blocking issue
+4. Roadmap 0–24 คงรหัสเดิม C/Phase; รายการงานปัจจุบัน CHAT-LIVE/LISTING เชื่อมกับ phase ไม่อ้างเท่ากัน
+5. Tasks table: id, plain Thai name, status+สี+ข้อความ, applicable scope, passed/total, next action, responsible actor, date/commit, expandable evidence
+6. Known issues/blocked/old useful work รวม DOC-OBS-01…05 และ issue registry ที่ reconcile แล้ว
+7. History/decision/evidence กดขยายได้; ข้อมูลสถานะปัจจุบันไม่จมในประวัติ
+
+หน้าจอภาษาไทยเป็นหลัก อ่านง่าย ฟอนต์ชัด desktop/mobile; ไม่ใช้สีอย่างเดียว; filter ตาม system/phase/environment/status ได้ถ้ารองรับ; ตารางแนวยาวบนมือถือใช้การ์ดหรือ horizontal scroll ที่อ่านได้. ไม่ต้องรื้อ Viewer เดิมทั้งหมด และไม่ย้ายข้อมูล runtime/customer เพื่อทำ dashboard
+
+## 3. เปอร์เซ็นต์ที่ตรวจสอบได้
+
+- ก่อนมี checklist/scope denominator ที่ review แล้ว แสดง "ยังคำนวณไม่ได้ — กำลังยืนยันรายการ" ไม่ใส่ 0% แทน unknown และไม่เดา % รวมเว็บ
+- Scope งานที่ยังไม่เริ่มและมี checklist แล้วแสดง 0/N = 0%; ข้อ N/A ตัดออกได้เฉพาะมีเหตุผล; BLOCKED/FAIL/UNVERIFIED ยังอยู่ในตัวหาร ไม่ตัดเพื่อให้ % สูง
+- สูตร = จำนวน acceptance items ที่ผ่านหลักฐานตามระดับที่แสดง / จำนวน applicable acceptance items ใน scope นั้น ×100; แสดงจำนวนคู่เปอร์เซ็นต์เสมอ ใช้น้ำหนักเท่ากันเว้นมีมติน้ำหนักใหม่
+- Development, local tests, real TEST, production ต่างตัวหาร/หลักฐาน ห้ามเอา 90 tests local ไปผสม 7 pictures ให้เป็น progress. ภาพ 7/7 เป็น photo-specific check ไม่ใช่ 100% ของ listing system
+- Parent phase % คิดจาก atomic criteria ที่ไม่ซ้ำ ไม่เฉลี่ย % งานย่อยที่คนละขนาด ไม่รวมแถวที่ทับกัน ไม่ใช้จำนวน commit/คำสั่ง/เวลาเป็นความสำเร็จ
+- 100% ของ checklist ไม่อนุมัติ release อัตโนมัติ: approval/security/migration/deploy gates ต้องผ่านและผู้มีอำนาจยืนยัน; defect critical ทำ readiness BLOCKED แม้บาง checklist 100%
+- ห้ามผสมกับ property-information %, photo readiness หรือ intake 19/19 ของหนึ่งเคส แผงนี้วัดงานพัฒนาโครงการ
+- เปลี่ยน scope ให้ version/date/reason/approver; แสดง scope เปลี่ยน ไม่แก้ตัวหารเงียบ ๆ เพื่อปรับ %
+
+สี: 🟢 ผ่านเฉพาะระดับระบุ; 🟡 กำลังทำ/บางส่วน/รอหลักฐาน; 🔴 fail/blocker; ⚪ not started; 🔵 approved direction/future. Production RED/Public Hidden เป็นสถานะเว็บไซต์ แยกจากสีความคืบหน้ารายงาน
+
+## 4. ข้อมูลกลางและการอัปเดต
+
+PROJECT-STATUS.md เป็นทะเบียนสถานะ; dashboard แสดงรายการเดียวกัน ห้ามมี manual status แยกสองชุดที่ไม่ sync. ถ้าต้องมี JSON/JS data ภายในแผง Code ต้องสร้างจากทะเบียนและมีคำสั่ง/วิธี sync ที่ตรวจได้ ไม่เพิ่มเป็นไฟล์หลักที่สี่. Dashboard แสดง source package version เสมอ; ถ้าไม่มีทางตรวจ version ล่าสุดให้แสดง "snapshot ณ… / ยังไม่ตรวจความสด" ไม่อ้าง live sync อัตโนมัติ
+
+ทุก closing round ส่งสามไฟล์ฉบับเต็ม + change summary + document commit link และ dashboard updated version. Code ตรวจ source guard/doc changes, เปิดดู dashboard จริงและตรวจว่าตัวเลขตรงทะเบียนก่อนรายงาน ready; ส่งลิงก์/วิธีเปิดที่เจ้าของใช้ได้ Work review. ไม่ต้อง rerun unrelated backend suite สำหรับ docs-only; ถ้าแก้ runtime dashboard ให้ตรวจ rendering/counts/status ตัวจริงที่เกี่ยวข้อง
+
+## 5. งานมอบหมายถัดไป — DOCUMENTATION + INTERNAL STATUS DISPLAY ONLY
+
+Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1.1 ใน repo รักษาประวัติ; ตรวจ source/report conflicts ที่อ่านได้และ docs inventory; ใส่ current header v2 ชัดเจน; สร้าง/ปรับ internal PROJECT-STATUS dashboard ตาม spec นี้. การสร้างแผงติดตามได้รับอนุมัติจากเจ้าของแล้ว ไม่ใช่อนุมัติแก้ source เว็บไซต์/Functions/rules
+
+ห้าม merge/deploy/GREEN, migration/production writes, old CHAT-LIVE script, defect fixes แฝง. Unknown เก็บ unknown; audit source ไม่จำเป็นต้อง production traffic/test. ส่ง head เอกสาร/แผงใหม่ + สามไฟล์เต็ม + review report ให้ Work; หากรายการ acceptance ยังไม่ lock ให้แผงแสดงยังคำนวณไม่ได้ก่อน
+
+---
+
+## ผลตรวจและประสานโดย Claude Code — ชุด v2 เทียบ repository (3 ต.ค. 2569 · CODE-V2-01 · เอกสารและแผงภายในเท่านั้น)
+
+**ขอบเขต:** รับ `HP-HANDOFF-2026-10-03-v2` (Work v1 + Code v1.1 + Claude AI ADDENDUM-CLAUDE-AI-01 + ข้อสรุป Work) ตรวจกับ git ของ repository; **ไม่แก้ระบบเว็บ/Functions/rules, ไม่แก้ DOC-OBS, ไม่ merge/deploy, ไม่แตะ production, ไม่รัน test ชุดหลังบ้านซ้ำ**. รักษาประวัติครบ: ทุกบรรทัดของ v2 และของไฟล์เดิมใน repo อยู่ครบ (ตรวจทีละบรรทัด) แล้วเพิ่มบล็อกนี้ท้ายไฟล์. SHA: **code/TEST = `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5`** · เอกสาร v1.1 = `34a0eb0ee27bddfa72003958dd7e0546a9b490b2` · document commit ของรอบนี้ = รายงานในข้อความส่งกลับหลัง commit · deployed production = ไม่ทราบ (ไม่แตะ). `origin/claude/listing-e2e-01` ก่อนรอบนี้ = `34a0eb0` (เทียบ `d0fe617` เปลี่ยนเฉพาะ `.md`) ตอบ A5-1.
+
+### ผลตรวจรายข้อ (SOURCE = git/ไฟล์ใน repo; ไม่ใช่ production)
+| ข้อ | ผลตรวจ | สถานะ |
+|---|---|---|
+| X4 / A5-2 ความเสี่ยงชน #18 | `main` (`4e358a5`) เป็น ancestor ของ `chat-live-01` (+18 commit) และของ `listing-e2e-01` (+32 อีก). `4e358a5` (Home #18) และ `02230ae` (FIX F) เป็น ancestor ของ `listing-e2e-01` → **อยู่ใน branch แล้ว**. ไฟล์ทั้งสาม: `Home.dc.html` ไม่ต่างจาก main; `ContactRail.dc.html` ต่าง main +3/−1 (CHAT-FIX-02: ส่งธง `guard:"pd16"` ที่เส้นทาง claudeComplete); `firebase-client.js` ต่าง chat-live-01 +298/−31 (ส่วน listing). ใน branch ปัจจุบันยังมี `whenFirebaseReady` (firebase-client.js, ContactRail, Home) และ `_convInitPromise`/`backend_init_forced_local` (ContactRail) | ไม่พบสัญญาณว่า #18 ถูกทับ; **ยังไม่ได้ทดลอง merge/rebase จริง** ลำดับ merge ยังไม่มีมติ |
+| X3 / A5-4 Home `submitWelcome` | ฟังก์ชันอยู่ `Home.dc.html` บรรทัด 733; ผูกกับปุ่มส่ง 2 จุด (121, 124) ภายใน `showWelcome` (ค่าเริ่ม true) | เข้าถึงได้ตาม source; **การรันจริง UNVERIFIED** |
+| X7 / A5-4 Agent Signup | `type="{{ signupPasswordType }}"` / `{{ loginPasswordType }}` ค่าเริ่ม `"password"` + ปุ่มตา (บรรทัด 149/171/552–555) บน branch | ป้าย `type=text` ล้าสมัยตาม source; UI จริงไม่ได้ทดสอบ |
+| X8 `m17/` | 102 ไฟล์ (มี `sw.js`, `sitemap.xml`, `manifest.webmanifest`, 8 ภาษา); เพิ่ม 2026-09-26 โดย 3 commit (3a0d4db, 3eed793, 2192b0b); `m17/index.html` ไม่มีคำว่า maintenance/ปิดปรับปรุง; `sitemap.xml` ราก **ไม่อ้าง** m17 | อ่านอย่างเดียว; เจตนา/ผลกระทบ = ไม่ทราบ ไม่แตะ |
+| X5 / X6 Viewer และ CLAUDE.md | repo `CLAUDE.md` มีบล็อกชี้ชุดส่งต่อ+workflow ปัจจุบันแล้ว (ข้อความเดิมเก็บ); สำเนาโปรเจกต์ Claude AI ไม่ใช่ source; แผงใหม่ (ด้านล่าง) เป็นจุดดูหลักของ Code | รอเจ้าของยืนยัน workflow เดียว |
+| X10 | ไฟล์ในโปรเจกต์ Claude AI ไม่ใช้เป็น source — ใช้ GitHub | ตรงกับข้อสรุป Work |
+| X1 / X2 | เป็นข้อขัดที่ Work/เจ้าของตัดสิน — Code ไม่ตัดสิน. ตรวจแล้วว่า `02230ae` เป็น ancestor ของ branch (FIX F อยู่) | ไม่เปลี่ยนสถานะ |
+| A1 เอกสารที่ยังไม่ได้อ้าง | `docs/ceo-handoff/` 10 ไฟล์ (ฟิลด์ Last Updated = 30 ก.ค. 2569 และมีแถบ PHS-CLOSE-1 → **ประวัติ ไม่ใช่ latest**); `docs/security/SEC-TEST-01.md` (probe ใน emulator, มีแถว GAP — ไม่ใช่ใบรับรอง), `SEC-URGENT-01-admin-default-credentials.md` (**เปิดอยู่ ยังไม่แก้ ไม่แสดงค่า**); `docs/testing/CHAT-FIX-01/02`, `CHAT-TEST-01`, `CHAT-LIVE-01-*` (stub+emulator ไม่ใช่ production PASS) | อ่านหัวเอกสาร/สถานะเท่านั้น ไม่ได้ audit เนื้อหาทั้งหมด; เพิ่ม SEC-URGENT-01 เข้าทะเบียนค้างแล้ว |
+| Node.js 20 (A4) | `functions/package.json` engines = "20"; ภาพ deploy ของเจ้าของ (2 ต.ค.) มีข้อความจาก Firebase CLI ว่า Node 20 deprecated 2026-04-30 และจะถูกปิด 2026-10-30 | เป็นหลักฐานจาก CLI **ไม่ใช่เอกสารทางการ**; วันที่/แผนอัปเกรด = UNVERIFIED จนเทียบเอกสาร lifecycle |
+| Stripe / rules-functions production | ไม่มีสิทธิ์/หลักฐาน | UNKNOWN คงเดิม |
+
+### แผง PROJECT-STATUS ภายใน (สร้างรอบนี้)
+- **ไฟล์:** `docs/status-panel/index.html` (หน้าเดียว เปิดได้โดยไม่ต้องต่อเน็ต) สร้างโดย `node tools/status-panel/build.js` (หรือ `npm run status-panel`) จาก **PROJECT-STATUS.md ที่เดียว**: ตารางเส้นทาง 0–24, ฐาน C0–C4.2 และงานปัจจุบัน §3 ถูกอ่านจากตารางในไฟล์นี้ตรงๆ; รายการที่เครื่องอ่านต้องใช้ (checklist เปอร์เซ็นต์, ผู้รับผิดชอบ, ทะเบียนค้าง, ประวัติ) อยู่ในบล็อก `STATUS-REGISTRY` ท้ายไฟล์ §6 — **แก้ที่นั่นแล้ว build ใหม่ ห้ามแก้ HTML**. ตรวจ: `npm run test:status-panel` (ตัวเลขใน HTML ต้องตรงทะเบียน).
+- **เปอร์เซ็นต์:** ตามสูตรข้อสรุป Work §3 (ผ่าน/จำนวนที่ใช้ได้ ตามระดับหลักฐาน; ไม่ผสม local กับ TEST กับ production). **ยังไม่มี checklist ที่ Work lock** ดังนั้นแผงแสดง "ยังคำนวณไม่ได้" ในทุกขอบเขต และแสดง "ตัวอย่างถ้า lock ตามร่าง" แยกชัดว่าไม่ใช่ความคืบหน้า.
+- **ความสดของข้อมูล:** แผงแสดง package/สถานะตามไฟล์ ณ commit ที่ build และบอกว่า "ไม่ตรวจความสดอัตโนมัติ".
+
+### เอกสารที่เปลี่ยนรอบนี้ (ไม่มีไฟล์ระบบเว็บ)
+`BLUEPRINT.md`, `HANDOFF-NEXT-CHAT.md`, `PROJECT-STATUS.md` (v2 + บล็อกนี้ + §6 ทะเบียน), `docs/status-panel/index.html`, `tools/status-panel/build.js`, `tests/status-panel/panel.test.js`, `package.json` (สคริปต์ 2 ตัว), ภาพตรวจ `docs/status-panel/shots/`.
+

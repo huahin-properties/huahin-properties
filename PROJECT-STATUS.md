@@ -1,3 +1,19 @@
+# ชุดส่งต่อโครงการ — สถานะปัจจุบัน (อ่านก่อนประวัติ)
+
+**รุ่นหลัก: HP-HANDOFF-2026-10-03-v2 · 3 ตุลาคม 2569 · Asia/Bangkok**
+
+- รวม Work v1 + Claude Code v1.1 ที่ document commit `34a0eb0ee27bddfa72003958dd7e0546a9b490b2` + Claude AI ADDENDUM-CLAUDE-AI-01 + มติแผง PROJECT-STATUS ที่เจ้าของยืนยัน 3 ต.ค. 10:19
+- Code baseline/TEST ที่เจ้าของทดลอง: `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5`; PR #8 ตรวจรอบนี้ OPEN/DRAFT/NOT MERGED, head เอกสาร `34a0eb0`, base `claude/chat-live-01`
+- v1/v1.1 และข้อความ "ยังไม่ commit" ด้านล่างเป็น snapshot ประวัติ; v1.1 อยู่ GitHub แล้ว ส่วน **v2 ฉบับนี้ยังไม่ commit**. ห้ามเอา code SHA/document SHA/deployed SHA ปนกัน
+- สถานะ: DOCUMENTATION RECONCILIATION; TEST หนึ่งเคสผ่าน UI ถึงปิดประกาศ; production NOT READY; ไม่ deploy/merge/GREEN ในรอบนี้
+- เจ้าของยืนยันให้แผงใน Claude Code เป็นจุดดูความคืบหน้าหลัก; PROJECT-STATUS.md เป็นข้อมูลสถานะกลาง; Claude AI ใช้ชุดรุ่นเดียวกัน อ้าง Viewer เก่าเป็นประวัติ ไม่แก้สถานะแข่งกัน
+- สิ่งที่ทำตอนนี้: Code ตรวจ/ประสานเอกสาร v2 และทำแผงติดตามภายในตามข้อกำหนดท้ายไฟล์; ไม่แก้ source เว็บไซต์/Functions/rules ในงานนี้
+- อ่านครบ BLUEPRINT.md + HANDOFF-NEXT-CHAT.md + PROJECT-STATUS.md; บล็อกสถานะปัจจุบันนี้และข้อสรุป Work ท้ายไฟล์มีผลเหนือข้อความสถานะเก่า ส่วนมติผลิตภัณฑ์เดิมไม่ถูกยกเลิก
+
+---
+
+# เนื้อหาฉบับ Claude Code v1.1 — เก็บครบเพื่อรักษาประวัติ
+
 **ชุดส่งต่อโครงการ — HUAHIN.PROPERTIES**
 
 - ชุด: `HP-HANDOFF-2026-10-03-v1` · วันที่ 3 ตุลาคม 2569 (2026-10-03), เวลาอ้างอิง Asia/Bangkok
@@ -233,3 +249,1072 @@ Matching/continuous tracking/canonical viewing ยังไม่สร้าง
 3. รวม/ไม่รวมสำเนา CLAUDE.md ฝั่งโปรเจกต์ออกแบบ (K2).
 4. ให้ Code audit DOC-OBS-01/03/05 ก่อน (ขอบเขตแก้แยกรายข้อ) หรือเริ่มชุดทดสอบ Cloud ที่ขาดก่อน.
 5. rerun ชุด test ทั้งหมด (รวม combined 175) ที่ head ปัจจุบันก่อนส่ง Work ตรวจ source ต่อ หรือไม่.
+
+
+---
+
+# ภาคผนวกจาก Claude AI — เก็บตามที่ส่งมา (คำรายงานต้องอ่านคู่ข้อสรุป Work)
+
+# ภาคผนวก — ADDENDUM-CLAUDE-AI-01 · ตรวจและประสานเอกสารจาก Claude AI Project (3 ต.ค. 2569)
+
+- เพิ่มต่อท้ายชุด `HP-HANDOFF-2026-10-03-v1` · **ไม่ลบ ไม่แก้ข้อความเดิมแม้แต่บรรทัดเดียว** (ตรวจแล้ว: ชุดนี้มีเนื้อหา BLUEPRINT.md และ HANDOFF-NEXT-CHAT.md ฉบับในโปรเจกต์ครบทุกบรรทัด)
+- ผู้เพิ่ม: Claude AI (เครื่องมือออกแบบ · อ่าน GitHub ได้บางส่วน · commit/deploy ไม่ได้) · รอบนี้ **ไม่แก้ source ไม่ deploy ไม่เปิด GREEN**
+- การตั้งเลขชุดใหม่ (เช่น v2) ให้ Work/เจ้าของตัดสิน · ภาคผนวกนี้ไม่ใช่มติใหม่ เป็นรายการหลักฐานและข้อขัดแย้ง
+- แหล่งอ้างอิง: **V** = Viewer `Copy Code to GitHub.dc.html` (อยู่เฉพาะใน Claude AI Project) · **PKG** = `handoff-claude-code/HANDOFF-PACKAGE-2026-10-01.md` · **LIVE** = Claude AI ตรวจ GitHub main ด้วย blob hash 30 ก.ย. 2569 · **CHAT** = มติในแชท Claude AI (ผ่าน ChatGPT)
+
+## A1. ข้อจำกัดการตรวจ repository รอบนี้
+- อ่านโครงสร้าง `docs/` ของ branch `claude/listing-e2e-01` ได้ (03:10 UTC) · **เปรียบเทียบ commit ไม่ได้** เพราะสิทธิ์ GitHub หมดอายุระหว่างตรวจ (`bad_refresh_token`)
+- จึง **ยืนยันไม่ได้** ว่า head ปัจจุบันยังเป็น `d0fe617` หรือไม่ · Claude Code ต้องตรวจเอง
+- พบเอกสารบน branch ที่ชุดนี้ยังไม่ได้อ้าง: `docs/ceo-handoff/` (10 ไฟล์ เช่น CURRENT_PHASE_STATUS.md, KNOWN_ISSUES.md) · `docs/security/SEC-TEST-01.md` · `docs/security/SEC-URGENT-01-admin-default-credentials.md` · `docs/testing/CHAT-FIX-01.md`, `CHAT-FIX-02.md`, `CHAT-TEST-01.md` → **ยังไม่ได้อ่าน** · ต้อง reconcile ก่อนถือว่าชุดนี้เป็นภาพรวมครบ
+
+## A2. งานที่เกิดหลัง 21 ก.ย. บน main แต่ **ไม่อยู่ในชุดนี้เลย** (ค้นแล้ว 0 ครั้ง: STEP 99–114, #18, FIX F, 02230ae)
+
+| งาน | สถานะ (เสนอ/อนุมัติ/impl/main/deploy/prod) | แหล่ง |
+|---|---|---|
+| STEP 98–110: #14 prompt, #15 Contact CTA, #16-A/#16-B persona, #16 server guard, S-4 fix, #17 F-2 (WHOLE-SENTENCE), #16 Home prompt | ✅/✅/✅/✅ main/receptionTurn deploy หลัง STEP 106/ดูตาราง PASS | V · PKG §3 |
+| STEP 112 FIX F: `chat_error_generic` 8 ภาษา + แก้ขอบเขตตัวแปร `data` | ✅/✅/✅/✅ commit `02230ae` (23 ก.ย.)/— client/FR normal + FR error PASS 23 ก.ย. | V · github.md |
+| **#18** Firebase init race (ต้นเหตุ STEP 99 S-3 FAIL `backend_init_failed_local_only`) — `whenFirebaseReady()` + init gate 15 วินาที + Home รอ Firebase | ✅/✅ (ไฟล์ 1–2 มีการ์ด · ไฟล์ 3 Home **ไม่มีการ์ดอนุมัติ**)/✅/✅ ครบ 3 ไฟล์ (LIVE hash ตรง)/— client/**❌ ยังไม่ทดสอบ** | V STEP 113–114 · LIVE · CHAT |
+| STEP 99 combined regression §36.5 | **PAUSED** ที่ S-3 FAIL · ต้อง rerun S-3 หลัง #18 | V |
+
+## A3. ข้อขัดแย้งที่พบ (รายงาน ไม่ตัดสิน)
+
+| # | ชุดนี้เขียนว่า | หลักฐานอีกฝั่ง | ต้องให้ใครตัดสิน |
+|---|---|---|---|
+| X1 | H-2 = BLOCKED / NOT TESTABLE | V STEP 111: H-2 = PASS (Preview) · มติ CHAT: ใช้ "PASS (Preview)" ได้เฉพาะเมื่อมีหลักฐาน + ระบุ Production NOT VERIFIED · การตรวจสาธารณะที่ติด maintenance = BLOCKED แยก | Work + เจ้าของ (น่าจะเป็นทั้งคู่: Preview PASS · Production BLOCKED) |
+| X2 | FR technical-error fallback ได้ EN — ยังต้องตรวจ | FIX F (STEP 112, `02230ae`) แก้แล้ว: เดิม fr ไม่มีคีย์ `chat_error_generic` จึงตกเป็น en · FR error = PASS 23 ก.ย. · ต้นเหตุ technical error ของรอบนั้น = **ไม่ทราบ** | Work ตรวจหลักฐานว่าพอปิดหรือไม่ |
+| X3 | Home `submitWelcome` reachability ยังต้องตรวจ | การ audit ถูกสั่งในแชท Claude AI แต่ **ผลไม่ถูกเก็บไว้ในหลักฐานที่ส่งต่อได้** → UNVERIFIED | Claude Code ตรวจ source ใหม่ |
+| X4 | PR #8 base = `claude/chat-live-01` (beec235) | main มี #18 (3 ไฟล์: ContactRail, Home, firebase-client.js) + FIX F + โฟลเดอร์ `m17/` — **ไม่ทราบ** ว่า chat-live-01 มีงานเหล่านี้หรือไม่ → เสี่ยงชนกันตอน merge / ทับ #18 | Claude Code เทียบ main ↔ chat-live-01 ↔ listing-e2e-01 ก่อน merge ใด ๆ |
+| X5 | กฎข้อ 5: Claude Code อัปเดต Viewer | Viewer อยู่ใน Claude AI Project เท่านั้น ไม่อยู่ใน repo (HO เดิม) · ส่งสำเนาออกไปแล้ว 1 ต.ค. → **มี Viewer สองที่ เริ่มแยกกัน** · Viewer ใน Claude AI ล้าสมัย (STEP 114 ยังขึ้น "รอ commit", "#18 DELIVERY NOT STARTED") | เจ้าของเลือก Viewer ตัวหลักเพียงที่เดียว |
+| X6 | workflow ปัจจุบัน = Code push draft branch | CLAUDE.md ใน Claude AI Project ยังบังคับ §29 (Viewer + เจ้าของ commit) · CLAUDE.md บน main ยังเป็นแบบ zip เก่า → **CLAUDE.md มีสามสภาพ** | เจ้าของยืนยัน workflow เดียว แล้วให้ Code sync CLAUDE.md |
+| X7 | HO ประวัติ §3: Agent Signup `type="text"` | source ใน Claude AI Project: `type="{{ signupPasswordType }}"` / `{{ loginPasswordType }}` ค่าเริ่ม `password` + ปุ่มตา → ป้ายน่าจะล้าสมัย · ฉบับบน main/branch = ยังไม่ตรวจ | Claude Code ตรวจ branch |
+| X8 | — (ไม่กล่าวถึง) | โฟลเดอร์ `m17/` (102 ไฟล์) ถูกเพิ่มบน main ระหว่าง `02230ae`→`2192b0b` · ไม่มี maintenance gate · มี service worker · ผู้เพิ่ม/เจตนา = **ไม่ทราบ** | เจ้าของ |
+| X9 | บัญชี Staff TEST มีอยู่แล้ว | ในโปรเจกต์ production ไม่พบบันทึกบัญชี Staff ทดสอบ (PKG §9.4) — สอดคล้องกัน: บัญชีที่ชุดนี้ระบุอยู่ใน **TEST project** เท่านั้น | — (ไม่ขัด แค่ยืนยันขอบเขต) |
+| X10 | — | ไฟล์ในโปรเจกต์ Claude AI ต่างจาก main: Property Details (−20 KB) · Lister Dashboard (−20 KB) · AI Concierge · firebase.json · CLAUDE.md · rules ยังไม่ได้เทียบ → **อย่าใช้ไฟล์จาก Claude AI Project เป็น source** | Claude Code ใช้ GitHub เป็นตัวจริง |
+
+## A4. งานค้างจากประวัติที่ยังไม่อยู่ในตารางปัจจุบันของชุดนี้
+- **#10** VERIFICATION PENDING (R10-TRUTH) · **#12** OPEN (CHAT_I18N ขาดคีย์ · จำนวนที่เหลือไม่ทราบ) · **#13** OPEN (ภาษาไม่ส่งต่อ Owner Submission) · **#14** ยังไม่ CLOSED (S-3 ❌, S-5 ?) · **#15/#17** PASS ยังไม่ประกาศ CLOSED · **#16** Home Production NOT VERIFIED, AI Concierge ผลทดสอบไม่ทราบ · **#18** ยังไม่ทดสอบ production — PKG §4
+- 9 ข้อทดสอบ BLOCKED เพราะไม่มีทรัพย์เผยแพร่จริงบน production (T-1 V-1 V-2 V-4 V-5 B-1 C-4 TX-1 TX-2) — PD-12 ห้ามสร้างเพื่อให้ผ่าน · ข้อมูล TEST project **ไม่ใช้แทน** ได้ถ้าไม่มีมติ
+- **อัปเกรด Node.js 20 ก่อน 30 ต.ค. 2569** (BP ประวัติ · เหลือ ~27 วัน) — ไม่อยู่ในตารางปัจจุบัน
+- โหมด Stripe (Live/Test) · วันที่ deploy Functions ทุกตัว · rules ที่ deploy บน production = **ไม่ทราบ**
+- สูตรแบ่งค่าคอม 20/40/40 = **ไม่พบหลักฐาน ไม่ใช่มติ** · ระบบ Participants/Commission = ห้ามสร้าง (BP §26.6) — PKG §9
+
+## A5. สิ่งที่ Claude Code ควรตรวจก่อนรับช่วง (ไม่ใช่คำสั่งแก้)
+1. head ปัจจุบันของ `claude/listing-e2e-01` เทียบ `d0fe617`
+2. diff `main` ↔ `claude/chat-live-01` เฉพาะ ContactRail.dc.html · Home.dc.html · firebase-client.js (X4)
+3. อ่าน docs/ceo-handoff/, docs/security/, docs/testing/CHAT-FIX-*.md (A1)
+4. ตรวจ Home `submitWelcome` และ Agent Signup บน branch (X3, X7)
+
+
+---
+
+# ข้อสรุป Work และข้อกำหนดแผง PROJECT-STATUS — v2
+
+## 1. การประสานสองฝ่าย
+
+ชุดนี้เก็บ v1.1 จาก GitHub ครบและเพิ่มภาคผนวก Claude AI ครบ ไม่ใช้สำเนา Claude AI เป็น runtime source. ข้ออ้างใหม่ที่ยังไม่ตรวจเก็บ SOURCE-REPORTED/UNVERIFIED; ไม่เลือก PASS โดยผู้ใช้โหวตเมื่อหลักฐานต่างบริบท
+
+| เรื่อง | สถานะปัจจุบันที่ให้ใช้ | หลักฐาน/ขั้นถัดไป |
+|---|---|---|
+| #18 Firebase init / Home และ FIX F | Claude AI รายงาน source บน main; ยังต้องเทียบ source/commit จริงกับ branch | Code ตรวจ main ↔ chat-live ↔ listing เฉพาะ ContactRail/Home/firebase-client; ไม่ merge/cherry-pick รอบนี้ |
+| FR fallback | แยกปัญหาภาษา fallback (รายงาน FIX F ผ่าน 23 ก.ย.) จาก technical error ต้นทาง (ยังไม่ทราบ) | ตรวจ commit 02230ae และหลักฐานเดิมก่อนปิด; ไม่ retry FR รอบนี้ |
+| H-2 | Preview PASS ตามรายงาน / Production BLOCKED หรือ NOT VERIFIED ตามหลักฐานที่ขาด | ไม่ขัดกันหากคนละ environment; ต้องแนบหลักฐานก่อนเรียก Preview VERIFIED |
+| #14 / S-3 / combined regression | #14 PASS ใน snapshot เก่า ไม่ใช่ทั้งชุด regression CLOSED | Claude AI รายงาน STEP99 paused S-3; ตรวจ scope/date ก่อนปิด |
+| Home submitWelcome | UNVERIFIED execution/UI reachability | source audit ภายหลังตาม scope ไม่สร้าง UI แฝง |
+| Branch/main merge | ลำดับ merge ยังไม่มีมติ; branch มีฐาน main ตาม Code report ไม่สรุปว่า #18 หายหรือจะถูกทับแน่นอน | ทำ comparison แล้วรายงานความต่าง; ห้าม merge |
+| Viewer หลายฉบับ / CLAUDE หลายฉบับ | Code dashboard เป็น operational view หลัก; GitHub source จริงและชุดส่งต่อกลาง | รักษา Viewer เดิมเป็นประวัติ/เวอร์ชันอ้างอิง ไม่ต้องย้าย HTML ทั้งชุดเพื่อทำ status dashboard |
+| Agent password | default password ตาม Code source report; UI real ยังไม่ตรวจ | ไม่กลับไปแก้จากป้าย issue เก่าโดยไม่ดู source |
+| m17/ | Claude AI รายงานเพิ่มบน main; เจตนา/ผลกระทบยังไม่ทราบ | inventory/read-only ก่อนเสนอ scope; ไม่ลบ/ปิดอะไรเอง |
+| Node 20 | ข้อมูล deadline ที่พบจากรายงานเดิมยังไม่ยืนยันกับ official runtime lifecycle | Code ตรวจ Node engine/รุ่น dependencies และเอกสารทางการก่อนตั้ง deadline/แผนอัปเกรด ไม่ยืนยัน 30 ต.ค. เป็นข้อเท็จจริงในชุดนี้ |
+| Stripe mode / production deployed rules/functions | UNKNOWN ในหลักฐานที่มี | ห้ามประกาศพร้อมจาก docs อย่างเดียว |
+
+#10/#12/#13 ต้องอยู่ในตารางค้าง; #15/#17 มีรายงาน PASS แต่ CLOSED ต้องตรวจขอบเขต; #16 Home production/AI Concierge ยังไม่ยืนยันตาม Claude AI. Blocked production tests T-1/V-1/V-2/V-4/V-5/B-1/C-4/TX-1/TX-2 คงแยก ไม่ใช้ synthetic TEST แทนหลักฐาน production. ไม่ออกมติ commission 20/40/40 ที่ไม่มีที่มา
+
+ต้องอ่าน docs/ceo-handoff/, docs/security/, docs/testing/CHAT-FIX-01/02 และ CHAT-TEST-01 ก่อนรับรองว่า inventory ครบ. รอบ Work นี้ยังไม่ได้ audit เนื้อหาทั้งหมด; เก็บเป็นงานเอกสารตรวจต่อ ไม่เรียกชุดนี้ว่ารับรองระบบทุกส่วนแล้ว
+
+## 2. รูปแบบแผงหลักที่เจ้าของยืนยัน
+
+แผงใช้สำหรับ Claude Code/Claude AI/Work เข้าใจงาน ไม่ใช่หน้าเว็บลูกค้า. Claude Code เป็นผู้สร้างภายในช่องทางที่ใช้งานได้จริง; ถ้า Artifact ใช้ไม่ได้ให้บอกช่องทางทดแทนที่เปิดได้ ไม่อ้างว่าติดตั้งใน Work/Claude แล้วจากการสร้างไฟล์อย่างเดียว
+
+ลำดับการแสดง:
+1. CURRENT: เป้าหมายโครงการ, งานปัจจุบัน, รหัส phase, environment, package version, updated date, code SHA/doc SHA/deployed SHA
+2. YOU DO NOW: เจ้าของทำครั้งละหนึ่ง action หรือ "ยังไม่ต้องทำอะไร"; ระบุจอ/ลิงก์/เงื่อนไขผ่าน/ขั้นถัดไป
+3. ความคืบหน้าแยก development / real TEST verification / production readiness พร้อมตัวเศษ ตัวหาร และ blocking issue
+4. Roadmap 0–24 คงรหัสเดิม C/Phase; รายการงานปัจจุบัน CHAT-LIVE/LISTING เชื่อมกับ phase ไม่อ้างเท่ากัน
+5. Tasks table: id, plain Thai name, status+สี+ข้อความ, applicable scope, passed/total, next action, responsible actor, date/commit, expandable evidence
+6. Known issues/blocked/old useful work รวม DOC-OBS-01…05 และ issue registry ที่ reconcile แล้ว
+7. History/decision/evidence กดขยายได้; ข้อมูลสถานะปัจจุบันไม่จมในประวัติ
+
+หน้าจอภาษาไทยเป็นหลัก อ่านง่าย ฟอนต์ชัด desktop/mobile; ไม่ใช้สีอย่างเดียว; filter ตาม system/phase/environment/status ได้ถ้ารองรับ; ตารางแนวยาวบนมือถือใช้การ์ดหรือ horizontal scroll ที่อ่านได้. ไม่ต้องรื้อ Viewer เดิมทั้งหมด และไม่ย้ายข้อมูล runtime/customer เพื่อทำ dashboard
+
+## 3. เปอร์เซ็นต์ที่ตรวจสอบได้
+
+- ก่อนมี checklist/scope denominator ที่ review แล้ว แสดง "ยังคำนวณไม่ได้ — กำลังยืนยันรายการ" ไม่ใส่ 0% แทน unknown และไม่เดา % รวมเว็บ
+- Scope งานที่ยังไม่เริ่มและมี checklist แล้วแสดง 0/N = 0%; ข้อ N/A ตัดออกได้เฉพาะมีเหตุผล; BLOCKED/FAIL/UNVERIFIED ยังอยู่ในตัวหาร ไม่ตัดเพื่อให้ % สูง
+- สูตร = จำนวน acceptance items ที่ผ่านหลักฐานตามระดับที่แสดง / จำนวน applicable acceptance items ใน scope นั้น ×100; แสดงจำนวนคู่เปอร์เซ็นต์เสมอ ใช้น้ำหนักเท่ากันเว้นมีมติน้ำหนักใหม่
+- Development, local tests, real TEST, production ต่างตัวหาร/หลักฐาน ห้ามเอา 90 tests local ไปผสม 7 pictures ให้เป็น progress. ภาพ 7/7 เป็น photo-specific check ไม่ใช่ 100% ของ listing system
+- Parent phase % คิดจาก atomic criteria ที่ไม่ซ้ำ ไม่เฉลี่ย % งานย่อยที่คนละขนาด ไม่รวมแถวที่ทับกัน ไม่ใช้จำนวน commit/คำสั่ง/เวลาเป็นความสำเร็จ
+- 100% ของ checklist ไม่อนุมัติ release อัตโนมัติ: approval/security/migration/deploy gates ต้องผ่านและผู้มีอำนาจยืนยัน; defect critical ทำ readiness BLOCKED แม้บาง checklist 100%
+- ห้ามผสมกับ property-information %, photo readiness หรือ intake 19/19 ของหนึ่งเคส แผงนี้วัดงานพัฒนาโครงการ
+- เปลี่ยน scope ให้ version/date/reason/approver; แสดง scope เปลี่ยน ไม่แก้ตัวหารเงียบ ๆ เพื่อปรับ %
+
+สี: 🟢 ผ่านเฉพาะระดับระบุ; 🟡 กำลังทำ/บางส่วน/รอหลักฐาน; 🔴 fail/blocker; ⚪ not started; 🔵 approved direction/future. Production RED/Public Hidden เป็นสถานะเว็บไซต์ แยกจากสีความคืบหน้ารายงาน
+
+## 4. ข้อมูลกลางและการอัปเดต
+
+PROJECT-STATUS.md เป็นทะเบียนสถานะ; dashboard แสดงรายการเดียวกัน ห้ามมี manual status แยกสองชุดที่ไม่ sync. ถ้าต้องมี JSON/JS data ภายในแผง Code ต้องสร้างจากทะเบียนและมีคำสั่ง/วิธี sync ที่ตรวจได้ ไม่เพิ่มเป็นไฟล์หลักที่สี่. Dashboard แสดง source package version เสมอ; ถ้าไม่มีทางตรวจ version ล่าสุดให้แสดง "snapshot ณ… / ยังไม่ตรวจความสด" ไม่อ้าง live sync อัตโนมัติ
+
+ทุก closing round ส่งสามไฟล์ฉบับเต็ม + change summary + document commit link และ dashboard updated version. Code ตรวจ source guard/doc changes, เปิดดู dashboard จริงและตรวจว่าตัวเลขตรงทะเบียนก่อนรายงาน ready; ส่งลิงก์/วิธีเปิดที่เจ้าของใช้ได้ Work review. ไม่ต้อง rerun unrelated backend suite สำหรับ docs-only; ถ้าแก้ runtime dashboard ให้ตรวจ rendering/counts/status ตัวจริงที่เกี่ยวข้อง
+
+## 5. งานมอบหมายถัดไป — DOCUMENTATION + INTERNAL STATUS DISPLAY ONLY
+
+Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1.1 ใน repo รักษาประวัติ; ตรวจ source/report conflicts ที่อ่านได้และ docs inventory; ใส่ current header v2 ชัดเจน; สร้าง/ปรับ internal PROJECT-STATUS dashboard ตาม spec นี้. การสร้างแผงติดตามได้รับอนุมัติจากเจ้าของแล้ว ไม่ใช่อนุมัติแก้ source เว็บไซต์/Functions/rules
+
+ห้าม merge/deploy/GREEN, migration/production writes, old CHAT-LIVE script, defect fixes แฝง. Unknown เก็บ unknown; audit source ไม่จำเป็นต้อง production traffic/test. ส่ง head เอกสาร/แผงใหม่ + สามไฟล์เต็ม + review report ให้ Work; หากรายการ acceptance ยังไม่ lock ให้แผงแสดงยังคำนวณไม่ได้ก่อน
+
+---
+
+## ผลตรวจและประสานโดย Claude Code — ชุด v2 เทียบ repository (3 ต.ค. 2569 · CODE-V2-01 · เอกสารและแผงภายในเท่านั้น)
+
+**ขอบเขต:** รับ `HP-HANDOFF-2026-10-03-v2` (Work v1 + Code v1.1 + Claude AI ADDENDUM-CLAUDE-AI-01 + ข้อสรุป Work) ตรวจกับ git ของ repository; **ไม่แก้ระบบเว็บ/Functions/rules, ไม่แก้ DOC-OBS, ไม่ merge/deploy, ไม่แตะ production, ไม่รัน test ชุดหลังบ้านซ้ำ**. รักษาประวัติครบ: ทุกบรรทัดของ v2 และของไฟล์เดิมใน repo อยู่ครบ (ตรวจทีละบรรทัด) แล้วเพิ่มบล็อกนี้ท้ายไฟล์. SHA: **code/TEST = `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5`** · เอกสาร v1.1 = `34a0eb0ee27bddfa72003958dd7e0546a9b490b2` · document commit ของรอบนี้ = รายงานในข้อความส่งกลับหลัง commit · deployed production = ไม่ทราบ (ไม่แตะ). `origin/claude/listing-e2e-01` ก่อนรอบนี้ = `34a0eb0` (เทียบ `d0fe617` เปลี่ยนเฉพาะ `.md`) ตอบ A5-1.
+
+### ผลตรวจรายข้อ (SOURCE = git/ไฟล์ใน repo; ไม่ใช่ production)
+| ข้อ | ผลตรวจ | สถานะ |
+|---|---|---|
+| X4 / A5-2 ความเสี่ยงชน #18 | `main` (`4e358a5`) เป็น ancestor ของ `chat-live-01` (+18 commit) และของ `listing-e2e-01` (+32 อีก). `4e358a5` (Home #18) และ `02230ae` (FIX F) เป็น ancestor ของ `listing-e2e-01` → **อยู่ใน branch แล้ว**. ไฟล์ทั้งสาม: `Home.dc.html` ไม่ต่างจาก main; `ContactRail.dc.html` ต่าง main +3/−1 (CHAT-FIX-02: ส่งธง `guard:"pd16"` ที่เส้นทาง claudeComplete); `firebase-client.js` ต่าง chat-live-01 +298/−31 (ส่วน listing). ใน branch ปัจจุบันยังมี `whenFirebaseReady` (firebase-client.js, ContactRail, Home) และ `_convInitPromise`/`backend_init_forced_local` (ContactRail) | ไม่พบสัญญาณว่า #18 ถูกทับ; **ยังไม่ได้ทดลอง merge/rebase จริง** ลำดับ merge ยังไม่มีมติ |
+| X3 / A5-4 Home `submitWelcome` | ฟังก์ชันอยู่ `Home.dc.html` บรรทัด 733; ผูกกับปุ่มส่ง 2 จุด (121, 124) ภายใน `showWelcome` (ค่าเริ่ม true) | เข้าถึงได้ตาม source; **การรันจริง UNVERIFIED** |
+| X7 / A5-4 Agent Signup | `type="{{ signupPasswordType }}"` / `{{ loginPasswordType }}` ค่าเริ่ม `"password"` + ปุ่มตา (บรรทัด 149/171/552–555) บน branch | ป้าย `type=text` ล้าสมัยตาม source; UI จริงไม่ได้ทดสอบ |
+| X8 `m17/` | 102 ไฟล์ (มี `sw.js`, `sitemap.xml`, `manifest.webmanifest`, 8 ภาษา); เพิ่ม 2026-09-26 โดย 3 commit (3a0d4db, 3eed793, 2192b0b); `m17/index.html` ไม่มีคำว่า maintenance/ปิดปรับปรุง; `sitemap.xml` ราก **ไม่อ้าง** m17 | อ่านอย่างเดียว; เจตนา/ผลกระทบ = ไม่ทราบ ไม่แตะ |
+| X5 / X6 Viewer และ CLAUDE.md | repo `CLAUDE.md` มีบล็อกชี้ชุดส่งต่อ+workflow ปัจจุบันแล้ว (ข้อความเดิมเก็บ); สำเนาโปรเจกต์ Claude AI ไม่ใช่ source; แผงใหม่ (ด้านล่าง) เป็นจุดดูหลักของ Code | รอเจ้าของยืนยัน workflow เดียว |
+| X10 | ไฟล์ในโปรเจกต์ Claude AI ไม่ใช้เป็น source — ใช้ GitHub | ตรงกับข้อสรุป Work |
+| X1 / X2 | เป็นข้อขัดที่ Work/เจ้าของตัดสิน — Code ไม่ตัดสิน. ตรวจแล้วว่า `02230ae` เป็น ancestor ของ branch (FIX F อยู่) | ไม่เปลี่ยนสถานะ |
+| A1 เอกสารที่ยังไม่ได้อ้าง | `docs/ceo-handoff/` 10 ไฟล์ (ฟิลด์ Last Updated = 30 ก.ค. 2569 และมีแถบ PHS-CLOSE-1 → **ประวัติ ไม่ใช่ latest**); `docs/security/SEC-TEST-01.md` (probe ใน emulator, มีแถว GAP — ไม่ใช่ใบรับรอง), `SEC-URGENT-01-admin-default-credentials.md` (**เปิดอยู่ ยังไม่แก้ ไม่แสดงค่า**); `docs/testing/CHAT-FIX-01/02`, `CHAT-TEST-01`, `CHAT-LIVE-01-*` (stub+emulator ไม่ใช่ production PASS) | อ่านหัวเอกสาร/สถานะเท่านั้น ไม่ได้ audit เนื้อหาทั้งหมด; เพิ่ม SEC-URGENT-01 เข้าทะเบียนค้างแล้ว |
+| Node.js 20 (A4) | `functions/package.json` engines = "20"; ภาพ deploy ของเจ้าของ (2 ต.ค.) มีข้อความจาก Firebase CLI ว่า Node 20 deprecated 2026-04-30 และจะถูกปิด 2026-10-30 | เป็นหลักฐานจาก CLI **ไม่ใช่เอกสารทางการ**; วันที่/แผนอัปเกรด = UNVERIFIED จนเทียบเอกสาร lifecycle |
+| Stripe / rules-functions production | ไม่มีสิทธิ์/หลักฐาน | UNKNOWN คงเดิม |
+
+### แผง PROJECT-STATUS ภายใน (สร้างรอบนี้)
+- **ไฟล์:** `docs/status-panel/index.html` (หน้าเดียว เปิดได้โดยไม่ต้องต่อเน็ต) สร้างโดย `node tools/status-panel/build.js` (หรือ `npm run status-panel`) จาก **PROJECT-STATUS.md ที่เดียว**: ตารางเส้นทาง 0–24, ฐาน C0–C4.2 และงานปัจจุบัน §3 ถูกอ่านจากตารางในไฟล์นี้ตรงๆ; รายการที่เครื่องอ่านต้องใช้ (checklist เปอร์เซ็นต์, ผู้รับผิดชอบ, ทะเบียนค้าง, ประวัติ) อยู่ในบล็อก `STATUS-REGISTRY` ท้ายไฟล์ §6 — **แก้ที่นั่นแล้ว build ใหม่ ห้ามแก้ HTML**. ตรวจ: `npm run test:status-panel` (ตัวเลขใน HTML ต้องตรงทะเบียน).
+- **เปอร์เซ็นต์:** ตามสูตรข้อสรุป Work §3 (ผ่าน/จำนวนที่ใช้ได้ ตามระดับหลักฐาน; ไม่ผสม local กับ TEST กับ production). **ยังไม่มี checklist ที่ Work lock** ดังนั้นแผงแสดง "ยังคำนวณไม่ได้" ในทุกขอบเขต และแสดง "ตัวอย่างถ้า lock ตามร่าง" แยกชัดว่าไม่ใช่ความคืบหน้า.
+- **ความสดของข้อมูล:** แผงแสดง package/สถานะตามไฟล์ ณ commit ที่ build และบอกว่า "ไม่ตรวจความสดอัตโนมัติ".
+
+### เอกสารที่เปลี่ยนรอบนี้ (ไม่มีไฟล์ระบบเว็บ)
+`BLUEPRINT.md`, `HANDOFF-NEXT-CHAT.md`, `PROJECT-STATUS.md` (v2 + บล็อกนี้ + §6 ทะเบียน), `docs/status-panel/index.html`, `tools/status-panel/build.js`, `tests/status-panel/panel.test.js`, `package.json` (สคริปต์ 2 ตัว), ภาพตรวจ `docs/status-panel/shots/`.
+
+
+## 6. STATUS-REGISTRY — ข้อมูลเครื่องอ่านของแผงภายใน (แก้ที่นี่ที่เดียว แล้วรัน `npm run status-panel`)
+
+ตาราง §1–§3 ด้านบนเป็นต้นทางของ Roadmap/ฐานระบบ/งานปัจจุบัน (แผงอ่านตรงจากตาราง). บล็อกนี้เก็บเฉพาะสิ่งที่ตารางไม่มี: ผู้รับผิดชอบ/ขอบเขต/วัน-commit ของแต่ละงาน (`taskMeta`), checklist ร่างสำหรับเปอร์เซ็นต์ (`scopes`, ทุกชุด `locked:false` จนกว่า Work lock), ทะเบียนค้าง (`issues`) และประวัติ. สถานะรายการใน checklist: `pass` / `fail` / `blocked` / `unverified` / `na` (N/A ต้องมีเหตุผลใน `ref`). ห้ามใส่รหัสผ่าน คีย์ อีเมล เบอร์ หรือ token.
+
+<!-- STATUS-REGISTRY:BEGIN -->
+```json
+{
+ "schema": 1,
+ "package": {
+  "id": "HP-HANDOFF-2026-10-03-v2",
+  "date": "2026-10-03",
+  "tz": "Asia/Bangkok",
+  "codeSha": "d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5",
+  "docBaseSha": "34a0eb0ee27bddfa72003958dd7e0546a9b490b2",
+  "deployedTestSha": "d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5",
+  "deployedProdSha": "ไม่ทราบ",
+  "prState": "PR #8 OPEN / DRAFT / NOT MERGED · base claude/chat-live-01",
+  "website": "RED / Public Hidden (ตามรายงาน ไม่ได้ตรวจสดรอบนี้)"
+ },
+ "goal": "ให้เจ้าของและทีมลงประกาศพร้อมรูปจนเผยแพร่ได้จริงอย่างปลอดภัย (ส่งฟอร์ม → Staff เตรียม → Owner อนุมัติ/เผยแพร่ → หน้าสาธารณะ) บนเว็บ huahin.properties โดยยังไม่เปิดเว็บสาธารณะจนกว่าเจ้าของอนุมัติ",
+ "current": {
+  "task": "ประสานเอกสารชุดส่งต่อ v2 + สร้างแผงติดตามภายใน (เอกสารเท่านั้น)",
+  "phases": [
+   "LISTING-E2E-01",
+   "CHAT-LIVE-01",
+   "ชุดส่งต่อ"
+  ],
+  "environments": [
+   "เอกสาร",
+   "TEST (ผลเดิม)"
+  ],
+  "actor": "Claude Code → ส่ง ChatGPT Work ตรวจ"
+ },
+ "youDoNow": {
+  "text": "ยังไม่ต้องทำอะไร — รอ ChatGPT Work ตรวจชุดส่งต่อ v2 และแผงนี้",
+  "where": "ไม่มีหน้าจอที่ต้องเปิด",
+  "passWhen": "Work แจ้งผลตรวจ แล้วจะมีขั้นถัดไปครั้งละหนึ่งอย่าง",
+  "next": "ตามมติ Work/เจ้าของ (ยังไม่มีคำสั่งแก้ DOC-OBS, merge หรือ deploy)"
+ },
+ "actors": {
+  "owner": "เจ้าของ (Product Owner)",
+  "work": "ChatGPT Work (ผู้ตรวจ)",
+  "code": "Claude Code (ผู้พัฒนา)",
+  "ai": "Claude AI (ภาพรวมผลิตภัณฑ์)"
+ },
+ "scopes": [
+  {
+   "id": "S-DEV",
+   "env": "dev",
+   "name": "LISTING-E2E-01 — โค้ดและทดสอบในเครื่อง",
+   "locked": false,
+   "lockNote": "ร่างจาก git/รายงาน Code — รอ Work ตรวจและ lock รายการ",
+   "items": [
+    {
+     "id": "D01",
+     "text": "Case record ทีมงานเท่านั้น + เอกสารสาธารณะจาก allow-list ตอน Owner เผยแพร่",
+     "status": "pass",
+     "level": "LOCAL",
+     "ref": "test:listing (core/rules)"
+    },
+    {
+     "id": "D02",
+     "text": "เผยแพร่/ปิดประกาศผ่านฟังก์ชันฝั่ง server (Owner เท่านั้น)",
+     "status": "pass",
+     "level": "LOCAL",
+     "ref": "core S-series, B6/B9"
+    },
+    {
+     "id": "D03",
+     "text": "รูปส่วนตัวไม่เปิดสาธารณะ ไม่มี token; ทีมงานเห็นผ่าน getCasePhoto",
+     "status": "pass",
+     "level": "LOCAL",
+     "ref": "PP1, B5/B10"
+    },
+    {
+     "id": "D04",
+     "text": "Checklist การส่ง + Photo Standard v1 (server และฟอร์ม)",
+     "status": "pass",
+     "level": "LOCAL",
+     "ref": "core, B1/B3"
+    },
+    {
+     "id": "D05",
+     "text": "หน้า Case Data ให้ Staff กรอกข้อมูลเคสโดยไม่แตะ guard เดิม",
+     "status": "pass",
+     "level": "LOCAL",
+     "ref": "B11"
+    },
+    {
+     "id": "D06",
+     "text": "สคริปต์ deploy TEST แยก + โฟลเดอร์ฟังก์ชัน listing 10 ตัว + selector ผ่านโค้ดจริงของ CLI",
+     "status": "pass",
+     "level": "LOCAL",
+     "ref": "L1–L4, F1–F3"
+    },
+    {
+     "id": "D07",
+     "text": "หน้าสาธารณะรอ SDK แบบมีเพดานเวลา ไม่แสดงข้อมูลตัวอย่างแทนของจริงใน TEST",
+     "status": "pass",
+     "level": "LOCAL",
+     "ref": "B7/B8, H9"
+    },
+    {
+     "id": "D08",
+     "text": "ชุดทดสอบ browser นิ่ง (รันเต็มซ้ำแล้วผ่านสม่ำเสมอ)",
+     "status": "fail",
+     "level": "LOCAL",
+     "ref": "ล้มเป็นพักๆ ราว 1 ใน 4 รอบ"
+    },
+    {
+     "id": "D09",
+     "text": "rules บังคับ 'Staff ผู้รับผิดชอบเท่านั้น' (ไม่ใช่แค่หน้าเว็บ)",
+     "status": "fail",
+     "level": "SOURCE",
+     "ref": "rules ให้ Staff คนใดเขียนฟิลด์ที่ไม่ใช่ตราอนุมัติได้"
+    },
+    {
+     "id": "D10",
+     "text": "ตรวจใหม่: สิทธิ์เขียนรูปของ flow agent เก่าไม่ข้ามสมาชิก",
+     "status": "unverified",
+     "level": "SOURCE",
+     "ref": "รายงาน Code ยังไม่ audit ซ้ำ"
+    },
+    {
+     "id": "D11",
+     "text": "จำกัดอัตราต่อ IP ที่ trackListingCase / ล้างไฟล์อัปโหลดค้าง",
+     "status": "fail",
+     "level": "SOURCE",
+     "ref": "รายงาน Code: ยังไม่มี"
+    },
+    {
+     "id": "D12",
+     "text": "ทดสอบชุดเต็มที่ head ปัจจุบัน (listing/chat-live/combined/browser-local) ซ้ำ",
+     "status": "unverified",
+     "level": "LOCAL",
+     "ref": "รอบเอกสารไม่ได้รัน; combined 175 เป็นผลรอบก่อน"
+    }
+   ]
+  },
+  {
+   "id": "S-TEST",
+   "env": "test",
+   "name": "LISTING-E2E-01 — ลองจริงบน Cloud TEST (หนึ่งเคสสังเคราะห์)",
+   "locked": false,
+   "lockNote": "ร่างจากตารางหลักฐานเจ้าของ 2–3 ต.ค. — รอ Work lock รายการ",
+   "items": [
+    {
+     "id": "T01",
+     "text": "Deploy TEST ที่ head d0fe617",
+     "status": "pass",
+     "level": "REAL-TEST",
+     "ref": "ภาพ 010910"
+    },
+    {
+     "id": "T02",
+     "text": "ลูกค้าส่งฟอร์มพร้อม 7 รูป",
+     "status": "pass",
+     "level": "REAL-TEST",
+     "ref": "ภาพ+คำยืนยัน"
+    },
+    {
+     "id": "T03",
+     "text": "Staff เห็นรูปส่วนตัวครบ 7 และเปิดภาพใหญ่ตรงกัน",
+     "status": "pass",
+     "level": "REAL-TEST",
+     "ref": "คำยืนยัน 2 ต.ค. 23:41"
+    },
+    {
+     "id": "T04",
+     "text": "Staff กรอกข้อมูล บันทึก รีเฟรชแล้วค่าอยู่ครบ",
+     "status": "pass",
+     "level": "REAL-TEST",
+     "ref": "011030–011249"
+    },
+    {
+     "id": "T05",
+     "text": "Staff ส่งตรวจ checklist 19/19",
+     "status": "pass",
+     "level": "REAL-TEST",
+     "ref": "012115, 012206"
+    },
+    {
+     "id": "T06",
+     "text": "Owner อนุมัติรับเรื่องและออกรหัสประกาศ",
+     "status": "pass",
+     "level": "REAL-TEST",
+     "ref": "014754"
+    },
+    {
+     "id": "T07",
+     "text": "Owner preview แสดงข้อมูลสาธารณะ + รูป 7 ก่อนยืนยัน",
+     "status": "pass",
+     "level": "REAL-TEST",
+     "ref": "014857"
+    },
+    {
+     "id": "T08",
+     "text": "Owner เผยแพร่ (ขึ้นสถานะกำลังแสดง)",
+     "status": "pass",
+     "level": "REAL-TEST",
+     "ref": "015012"
+    },
+    {
+     "id": "T09",
+     "text": "หน้า Search พบประกาศตั้งแต่เปิดครั้งแรก",
+     "status": "pass",
+     "level": "REAL-TEST",
+     "ref": "015210"
+    },
+    {
+     "id": "T10",
+     "text": "หน้า Search แสดงรูปปก",
+     "status": "fail",
+     "level": "REAL-TEST",
+     "ref": "DOC-OBS-01"
+    },
+    {
+     "id": "T11",
+     "text": "หน้า Details แสดงรูปครบ 7 และภาพใหญ่ตรงกัน",
+     "status": "pass",
+     "level": "REAL-TEST",
+     "ref": "015318, 015323"
+    },
+    {
+     "id": "T12",
+     "text": "หน้า Details แสดงหน่วยพื้นที่ที่ดินถูกต้อง",
+     "status": "fail",
+     "level": "REAL-TEST",
+     "ref": "DOC-OBS-02"
+    },
+    {
+     "id": "T13",
+     "text": "แผนที่/ระยะทางไม่แสดง undefined หรือ 0 กม. ที่ไม่จริง",
+     "status": "fail",
+     "level": "REAL-TEST",
+     "ref": "DOC-OBS-03"
+    },
+    {
+     "id": "T14",
+     "text": "หน้าอนุมัติแสดงผู้อนุมัติ",
+     "status": "fail",
+     "level": "REAL-TEST",
+     "ref": "DOC-OBS-04"
+    },
+    {
+     "id": "T15",
+     "text": "ปิดประกาศแล้ว Search = 0 รายการ",
+     "status": "pass",
+     "level": "REAL-TEST",
+     "ref": "020034"
+    },
+    {
+     "id": "T16",
+     "text": "หลังปิด หน้า Details แจ้งสถานะ 'ปิดแล้ว/ไม่พบ' ชัดเจน",
+     "status": "fail",
+     "level": "REAL-TEST",
+     "ref": "DOC-OBS-05 (ว่างเปล่า)"
+    },
+    {
+     "id": "T17",
+     "text": "หลังปิด ไฟล์/เอกสารฝั่ง backend ถูกลบครบ",
+     "status": "unverified",
+     "level": "REAL-TEST",
+     "ref": "ยังไม่ได้ตรวจ Cloud"
+    },
+    {
+     "id": "T18",
+     "text": "ลิงก์รูปสาธารณะเดิมใช้ไม่ได้หลังปิด",
+     "status": "unverified",
+     "level": "REAL-TEST",
+     "ref": "ต้องเก็บ URL ก่อนปิดรอบหน้า"
+    },
+    {
+     "id": "T19",
+     "text": "ผู้ไม่มีสิทธิ์ถูกปฏิเสธบน Cloud (agent / outsider / uid อื่น)",
+     "status": "unverified",
+     "level": "REAL-TEST",
+     "ref": "ยังไม่ได้ทดสอบ"
+    },
+    {
+     "id": "T20",
+     "text": "เส้นทาง agent และ Owner-ส่งเองครบบน Cloud",
+     "status": "unverified",
+     "level": "REAL-TEST",
+     "ref": "ทดสอบเฉพาะ local"
+    },
+    {
+     "id": "T21",
+     "text": "retry / ส่งซ้ำ / เครือข่ายช้าบน Cloud",
+     "status": "unverified",
+     "level": "REAL-TEST",
+     "ref": "ทดสอบเฉพาะ local"
+    },
+    {
+     "id": "T22",
+     "text": "แชท AI จริงบน TEST (แยกงาน ต้องมี allow-list/เพดาน/คีย์)",
+     "status": "blocked",
+     "level": "REAL-TEST",
+     "ref": "ยังไม่มีแผน/คีย์ ห้ามใช้สคริปต์เก่า"
+    }
+   ]
+  },
+  {
+   "id": "S-PROD",
+   "env": "prod",
+   "name": "ความพร้อม production (ยังไม่เริ่ม — ห้ามเปิด GREEN)",
+   "locked": false,
+   "lockNote": "ร่าง — ยังไม่มีมติขอบเขต production",
+   "items": [
+    {
+     "id": "P01",
+     "text": "ย้ายข้อมูลเก่าที่ยังมีเบอร์/trackToken ในเอกสารสาธารณะ",
+     "status": "blocked",
+     "level": "PROD",
+     "ref": "LEGACY-DATA-PLAN.md (ห้ามรันจนอนุมัติ)"
+    },
+    {
+     "id": "P02",
+     "text": "แก้ค่าเริ่มต้นบัญชีแอดมินในไฟล์สาธารณะ (SEC-URGENT-01)",
+     "status": "fail",
+     "level": "SOURCE",
+     "ref": "บันทึกแล้ว ยังไม่แก้"
+    },
+    {
+     "id": "P03",
+     "text": "ตัดสินลำดับ merge chat-live-01 / PR #8 / main",
+     "status": "unverified",
+     "level": "SOURCE",
+     "ref": "ยังไม่มีมติ"
+    },
+    {
+     "id": "P04",
+     "text": "ยืนยัน rules และ functions ที่ deploy บน production ตรงกับโค้ด",
+     "status": "unverified",
+     "level": "PROD",
+     "ref": "ไม่มีสิทธิ์/ข้อมูล"
+    },
+    {
+     "id": "P05",
+     "text": "ยืนยันโหมด Stripe (Live/Test)",
+     "status": "unverified",
+     "level": "PROD",
+     "ref": "เอกสารขัดกัน"
+    },
+    {
+     "id": "P06",
+     "text": "อัปเกรด runtime Node.js ก่อนกำหนดปิดรุ่น",
+     "status": "fail",
+     "level": "SOURCE",
+     "ref": "engines=20; CLI เตือนปิด 2026-10-30 (ยังไม่เทียบเอกสารทางการ)"
+    },
+    {
+     "id": "P07",
+     "text": "ทดสอบ production ของงานแชท #14–#18 ที่ยังไม่ครบ",
+     "status": "unverified",
+     "level": "PROD",
+     "ref": "ดูทะเบียนค้าง"
+    },
+    {
+     "id": "P08",
+     "text": "มติเจ้าของอนุมัติ merge/deploy/เปิดเว็บ (GREEN)",
+     "status": "blocked",
+     "level": "PROD",
+     "ref": "ยังไม่มี"
+    }
+   ]
+  },
+  {
+   "id": "S-DOC",
+   "env": "docs",
+   "name": "รอบเอกสารชุดส่งต่อ v2 + แผงติดตาม",
+   "locked": false,
+   "lockNote": "ร่าง — Work ยังไม่ lock",
+   "items": [
+    {
+     "id": "R01",
+     "text": "รับชุด v2 ครบสามไฟล์และเก็บทุกบรรทัดเดิมของ repo",
+     "status": "pass",
+     "level": "DOCS",
+     "ref": "ตรวจทีละบรรทัด 0 บรรทัดหาย"
+    },
+    {
+     "id": "R02",
+     "text": "ตรวจข้อขัดแย้ง X1–X10 / A5 กับ repository",
+     "status": "pass",
+     "level": "SOURCE",
+     "ref": "บล็อก Code v2 ท้ายไฟล์"
+    },
+    {
+     "id": "R03",
+     "text": "สร้างแผงติดตามภายในจากทะเบียนเดียว",
+     "status": "pass",
+     "level": "DOCS",
+     "ref": "docs/status-panel/index.html"
+    },
+    {
+     "id": "R04",
+     "text": "ทดสอบแผง: ตัวเลขตรงทะเบียน, เปิดจริงทั้งจอใหญ่/มือถือ",
+     "status": "pass",
+     "level": "LOCAL",
+     "ref": "tests/status-panel + ภาพหน้าจอ"
+    },
+    {
+     "id": "R05",
+     "text": "ไม่แก้ source เว็บ/Functions/rules ในรอบนี้",
+     "status": "pass",
+     "level": "SOURCE",
+     "ref": "git diff เทียบ d0fe617"
+    },
+    {
+     "id": "R06",
+     "text": "Work ตรวจชุด v2 + แผง",
+     "status": "unverified",
+     "level": "DOCS",
+     "ref": "รอ"
+    },
+    {
+     "id": "R07",
+     "text": "ตัดสินคำถามเปิด (หน่วยที่ดิน, ลำดับ merge, CLAUDE.md)",
+     "status": "unverified",
+     "level": "DOCS",
+     "ref": "รอ Work/เจ้าของ"
+    }
+   ]
+  }
+ ],
+ "taskMeta": {
+  "ชุดส่งต่อ v1": {
+   "id": "W01",
+   "env": "docs",
+   "scope": "S-DOC",
+   "actor": "work",
+   "date": "2026-10-03",
+   "commit": "34a0eb0 (v1.1)",
+   "items": [
+    "R01",
+    "R02",
+    "R03",
+    "R04",
+    "R05",
+    "R06",
+    "R07"
+   ]
+  },
+  "CHAT-LIVE-01": {
+   "id": "W02",
+   "env": "dev",
+   "scope": null,
+   "actor": "code",
+   "date": "2026-10-01",
+   "commit": "beec235 (chat-live-01)",
+   "items": []
+  },
+  "LISTING-E2E submit case/photos": {
+   "id": "W03",
+   "env": "test",
+   "scope": "S-TEST",
+   "actor": "owner",
+   "date": "2026-10-03",
+   "commit": "d0fe617",
+   "items": [
+    "T01",
+    "T02"
+   ]
+  },
+  "Staff 7 photos/lightbox": {
+   "id": "W04",
+   "env": "test",
+   "scope": "S-TEST",
+   "actor": "owner",
+   "date": "2026-10-02",
+   "commit": "e837d93→d0fe617",
+   "items": [
+    "T03"
+   ]
+  },
+  "Staff data save/refresh": {
+   "id": "W05",
+   "env": "test",
+   "scope": "S-TEST",
+   "actor": "owner",
+   "date": "2026-10-03",
+   "commit": "d0fe617",
+   "items": [
+    "T04"
+   ]
+  },
+  "Staff submit review": {
+   "id": "W06",
+   "env": "test",
+   "scope": "S-TEST",
+   "actor": "owner",
+   "date": "2026-10-03",
+   "commit": "d0fe617",
+   "items": [
+    "T05"
+   ]
+  },
+  "Owner intake/preview/publish": {
+   "id": "W07",
+   "env": "test",
+   "scope": "S-TEST",
+   "actor": "owner",
+   "date": "2026-10-03",
+   "commit": "d0fe617",
+   "items": [
+    "T06",
+    "T07",
+    "T08",
+    "T14"
+   ]
+  },
+  "Public details 7 photos": {
+   "id": "W08",
+   "env": "test",
+   "scope": "S-TEST",
+   "actor": "owner",
+   "date": "2026-10-03",
+   "commit": "d0fe617",
+   "items": [
+    "T11"
+   ]
+  },
+  "Public search cover/data labels/map": {
+   "id": "W09",
+   "env": "test",
+   "scope": "S-TEST",
+   "actor": "code",
+   "date": "2026-10-03",
+   "commit": "d0fe617",
+   "items": [
+    "T09",
+    "T10",
+    "T12",
+    "T13"
+   ]
+  },
+  "Take-down search/details": {
+   "id": "W10",
+   "env": "test",
+   "scope": "S-TEST",
+   "actor": "owner",
+   "date": "2026-10-03",
+   "commit": "d0fe617",
+   "items": [
+    "T15",
+    "T16",
+    "T17",
+    "T18"
+   ]
+  },
+  "Full 3 submitter groups": {
+   "id": "W11",
+   "env": "test",
+   "scope": "S-TEST",
+   "actor": "owner",
+   "date": "2026-10-03",
+   "commit": "d0fe617",
+   "items": [
+    "T19",
+    "T20",
+    "T21"
+   ]
+  },
+  "Privacy legacy migration": {
+   "id": "W12",
+   "env": "prod",
+   "scope": "S-PROD",
+   "actor": "owner",
+   "date": "2026-10-01",
+   "commit": "LEGACY-DATA-PLAN.md",
+   "items": [
+    "P01"
+   ]
+  },
+  "Production release": {
+   "id": "W13",
+   "env": "prod",
+   "scope": "S-PROD",
+   "actor": "owner",
+   "date": "2026-10-03",
+   "commit": "—",
+   "items": [
+    "P03",
+    "P04",
+    "P05",
+    "P08"
+   ]
+  }
+ },
+ "issues": [
+  {
+   "id": "DOC-OBS-01",
+   "title": "Search ไม่แสดงรูปปกของประกาศที่เผยแพร่",
+   "sev": "high",
+   "status": "open",
+   "env": "test",
+   "actor": "code",
+   "next": "Code audit ต้นเหตุ → เสนอขอบเขตแก้ (รออนุมัติ)",
+   "source": "REAL-TEST ภาพ 015210 · SOURCE: อ่านโค้ดยังไม่พบต้นเหตุ; test ในเครื่องไม่ได้ตรวจรูปปก"
+  },
+  {
+   "id": "DOC-OBS-02",
+   "title": "ขนาดที่ดินกรอกเป็น ตร.ว. แต่หน้า Details แสดง ตร.ม.",
+   "sev": "high",
+   "status": "open",
+   "env": "test",
+   "actor": "owner",
+   "next": "เจ้าของตัดสินหน่วยหลักก่อน Code แก้",
+   "source": "SOURCE: ป้ายหน่วยไม่ตรงกันเดิม (Lister Dashboard/Case Data = ตร.ว., Property Details = ตร.ม.) ไม่มีโค้ดแปลงหน่วย"
+  },
+  {
+   "id": "DOC-OBS-03",
+   "title": "แผนที่แสดง undefined และระยะทาง 0 กม.",
+   "sev": "med",
+   "status": "open",
+   "env": "test",
+   "actor": "code",
+   "next": "Code ตรวจฟิลด์ที่ขาด + ออกแบบค่า 'ไม่ทราบ'",
+   "source": "REAL-TEST ภาพ 015328 · ยังไม่ตรวจ source"
+  },
+  {
+   "id": "DOC-OBS-04",
+   "title": "หน้าอนุมัติแสดง 'อนุมัติโดย -'",
+   "sev": "low",
+   "status": "open",
+   "env": "test",
+   "actor": "code",
+   "next": "Code ตรวจการ map ฟิลด์ approvedBy กับ approvedByEmail/Uid/Role",
+   "source": "SOURCE: UI อ่าน approvedBy; server เขียน approvedBy* ตอนเผยแพร่ (ยังไม่ตรวจข้อมูล Cloud)"
+  },
+  {
+   "id": "DOC-OBS-05",
+   "title": "หลังปิดประกาศ หน้า Details ว่างเปล่า ไม่บอกสถานะ",
+   "sev": "med",
+   "status": "open",
+   "env": "test",
+   "actor": "code",
+   "next": "Code แยกหน้า 'ปิดแล้ว/ไม่พบ' จาก 'โหลดไม่สำเร็จ'",
+   "source": "SOURCE: TEST build ไม่มี sample fallback + ไม่มี not-found view (ข้อสันนิษฐาน ยังไม่พิสูจน์)"
+  },
+  {
+   "id": "SEC-URGENT-01",
+   "title": "ค่าเริ่มต้นบัญชีแอดมินอยู่ในไฟล์สาธารณะ (ไม่แสดงค่า)",
+   "sev": "critical",
+   "status": "open",
+   "env": "prod",
+   "actor": "owner",
+   "next": "เจ้าของจัดลำดับ; ห้ามนำค่าไปแสดงซ้ำ",
+   "source": "docs/security/SEC-URGENT-01 (บันทึกแล้ว ยังไม่แก้ ยังไม่ทดสอบ production)"
+  },
+  {
+   "id": "ISS-LEGACY",
+   "title": "เคสเก่าใน production ยังมีเบอร์/trackToken ในเอกสารที่ public อ่านได้",
+   "sev": "critical",
+   "status": "blocked",
+   "env": "prod",
+   "actor": "owner",
+   "next": "ห้าม migrate/ลบ จนเจ้าของอนุมัติแยก",
+   "source": "docs/listing-e2e/LEGACY-DATA-PLAN.md"
+  },
+  {
+   "id": "ISS-ASSIGN",
+   "title": "'Staff ผู้รับผิดชอบเท่านั้น' บังคับที่หน้าเว็บ ไม่ใช่ใน rules",
+   "sev": "med",
+   "status": "open",
+   "env": "dev",
+   "actor": "work",
+   "next": "Work/เจ้าของตัดสินว่าจะ harden rules หรือไม่",
+   "source": "SOURCE: firestore.rules caseInternal"
+  },
+  {
+   "id": "ISS-FLAKE",
+   "title": "ชุดทดสอบ browser ล้มเป็นพักๆ ราว 1 ใน 4 รอบเต็ม",
+   "sev": "med",
+   "status": "open",
+   "env": "dev",
+   "actor": "code",
+   "next": "ตรวจสาเหตุแยกจากงานแก้ DOC-OBS",
+   "source": "CODE-REPORT (B2, B5→B9 cascade, B11)"
+  },
+  {
+   "id": "ISS-AGENTPHOTO",
+   "title": "rules รูป flow agent เก่าเคยเขียนทับข้ามสมาชิกได้ — ต้อง re-audit",
+   "sev": "high",
+   "status": "open",
+   "env": "prod",
+   "actor": "code",
+   "next": "audit ก่อน production",
+   "source": "CODE-REPORT"
+  },
+  {
+   "id": "ISS-RATE",
+   "title": "ไม่มี rate limit ต่อ IP ที่ trackListingCase; ไฟล์อัปโหลดค้างยังไม่ล้างครบ; quota agent ยังไม่รวมเคสจากฟอร์ม",
+   "sev": "low",
+   "status": "open",
+   "env": "dev",
+   "actor": "code",
+   "next": "ตรวจ source ล่าสุดก่อนเสนอ",
+   "source": "CODE-REPORT"
+  },
+  {
+   "id": "ISS-ADMINLINKS",
+   "title": "ลิงก์ Admin Dashboard 10 หน้าไม่อยู่ใน TEST build (404 โดยตั้งใจ)",
+   "sev": "info",
+   "status": "open",
+   "env": "test",
+   "actor": "code",
+   "next": "ไม่ขยายงานอัตโนมัติ",
+   "source": "tools/build-listing-test.js (รายการชื่อ)"
+  },
+  {
+   "id": "ISS-MERGE",
+   "title": "ลำดับ merge: main ⊂ chat-live-01 (+18) ⊂ listing-e2e-01 (+32); PR #8 ชี้ chat-live-01",
+   "sev": "high",
+   "status": "open",
+   "env": "prod",
+   "actor": "owner",
+   "next": "เจ้าของตัดสินลำดับ; ห้าม merge จนมีมติ",
+   "source": "SOURCE: git (ตรวจ 3 ต.ค.)"
+  },
+  {
+   "id": "ISS-NODE20",
+   "title": "Node.js 20: Firebase CLI เตือนปิดรุ่น 2026-10-30",
+   "sev": "high",
+   "status": "open",
+   "env": "prod",
+   "actor": "code",
+   "next": "เทียบเอกสาร lifecycle ทางการ แล้วเสนอแผนอัปเกรด",
+   "source": "SOURCE: functions/package.json engines=20 · ข้อความจาก CLI ในภาพ deploy (ยังไม่ใช่เอกสารทางการ)"
+  },
+  {
+   "id": "ISS-DOCS-SPLIT",
+   "title": "CLAUDE.md สามสภาพ (repo/main/โปรเจกต์ Claude AI) และ Viewer สองที่",
+   "sev": "low",
+   "status": "open",
+   "env": "docs",
+   "actor": "owner",
+   "next": "เจ้าของยืนยัน workflow เดียว; แผง Code เป็นจุดดูหลัก",
+   "source": "A3 X5/X6 · repo CLAUDE.md มีบล็อกชี้ชุดส่งต่อแล้ว"
+  },
+  {
+   "id": "ISS-M17",
+   "title": "โฟลเดอร์ m17/ บน main (มี service worker, sitemap ของตัวเอง) เจตนา/ผลกระทบไม่ทราบ",
+   "sev": "med",
+   "status": "open",
+   "env": "prod",
+   "actor": "owner",
+   "next": "inventory อ่านอย่างเดียว ไม่ลบ/ปิดเอง",
+   "source": "SOURCE: เพิ่ม 2026-09-26 (3a0d4db, 3eed793, 2192b0b)"
+  },
+  {
+   "id": "ISS-STRIPE",
+   "title": "โหมด Stripe และ rules/functions ที่ deploy บน production ไม่ทราบ",
+   "sev": "high",
+   "status": "open",
+   "env": "prod",
+   "actor": "owner",
+   "next": "ต้องมีหลักฐานจาก console — ห้ามประกาศพร้อมจากเอกสาร",
+   "source": "UNKNOWN"
+  },
+  {
+   "id": "P-10",
+   "title": "#10 AI ห้ามสัญญา 'ทีมงานจะติดต่อกลับ' — ยืนยัน production ค้าง",
+   "sev": "med",
+   "status": "open",
+   "env": "prod",
+   "actor": "work",
+   "next": "R10-TRUTH (T-2..T-5 พร้อม, T-1 BLOCKED)",
+   "source": "HANDOFF/BLUEPRINT §35.34"
+  },
+  {
+   "id": "P-12",
+   "title": "#12 CHAT_I18N ขาดคีย์หลายภาษา (จำนวนที่เหลือไม่ทราบ)",
+   "sev": "low",
+   "status": "open",
+   "env": "prod",
+   "actor": "work",
+   "next": "backlog — ตรวจจำนวนคีย์ก่อนเสนอ",
+   "source": "BLUEPRINT §35.29"
+  },
+  {
+   "id": "P-13",
+   "title": "#13 ภาษาไม่ถูกส่งต่อไปหน้า Owner Submission",
+   "sev": "low",
+   "status": "open",
+   "env": "prod",
+   "actor": "work",
+   "next": "backlog — ยังไม่ audit",
+   "source": "BLUEPRINT §35.32"
+  },
+  {
+   "id": "P-14",
+   "title": "#14 Viewing/handoff ยังไม่ CLOSED (S-3 ไม่ผ่าน, S-5 ไม่ทราบ)",
+   "sev": "med",
+   "status": "open",
+   "env": "prod",
+   "actor": "work",
+   "next": "rerun S-3 หลัง #18 ตามมติ",
+   "source": "HANDOFF/AI addendum A2"
+  },
+  {
+   "id": "P-15-17",
+   "title": "#15 และ #17 รายงาน PASS แต่ยังไม่ประกาศ CLOSED",
+   "sev": "info",
+   "status": "open",
+   "env": "prod",
+   "actor": "work",
+   "next": "ตรวจขอบเขตก่อนปิด",
+   "source": "HANDOFF (V STEP 102/111)"
+  },
+  {
+   "id": "P-16",
+   "title": "#16 persona หญิง: Home production ไม่ได้ยืนยัน, AI Concierge ผลทดสอบไม่ทราบ",
+   "sev": "med",
+   "status": "open",
+   "env": "prod",
+   "actor": "work",
+   "next": "ต้องหลักฐาน production",
+   "source": "AI addendum A4"
+  },
+  {
+   "id": "P-18",
+   "title": "#18 Firebase init race: ส่งขึ้น main ครบ 3 ไฟล์ แต่ยังไม่ทดสอบ production",
+   "sev": "high",
+   "status": "open",
+   "env": "prod",
+   "actor": "work",
+   "next": "Code ยืนยันแล้วว่าอยู่ใน branch; รอทดสอบ production ตามมติ",
+   "source": "SOURCE: 4e358a5 เป็น ancestor ของ listing-e2e-01; มี whenFirebaseReady ในไฟล์ปัจจุบัน"
+  },
+  {
+   "id": "ISS-X1",
+   "title": "H-2: Preview PASS vs Production BLOCKED/NOT VERIFIED (ต่างสภาพแวดล้อม)",
+   "sev": "info",
+   "status": "open",
+   "env": "prod",
+   "actor": "work",
+   "next": "แนบหลักฐานก่อนเรียก Preview VERIFIED",
+   "source": "HANDOFF X1"
+  },
+  {
+   "id": "ISS-X2",
+   "title": "FR fallback: แก้ภาษา (FIX F, 02230ae ผ่าน 23 ก.ย.) แต่ต้นเหตุ technical error ไม่ทราบ",
+   "sev": "low",
+   "status": "open",
+   "env": "prod",
+   "actor": "work",
+   "next": "ตรวจหลักฐานเดิมก่อนปิด ห้าม retry FR",
+   "source": "HANDOFF X2 · SOURCE: 02230ae เป็น ancestor"
+  },
+  {
+   "id": "ISS-X3",
+   "title": "Home submitWelcome: อยู่ใน template และผูกปุ่มส่งแล้ว แต่ยังไม่ได้รันจริง",
+   "sev": "low",
+   "status": "open",
+   "env": "prod",
+   "actor": "code",
+   "next": "UNVERIFIED เชิงรันจริง — audit ตาม scope ภายหลัง",
+   "source": "SOURCE: Home.dc.html บรรทัด 733, 121, 124"
+  },
+  {
+   "id": "ISS-BLOCKED9",
+   "title": "9 ข้อทดสอบ production BLOCKED (T-1 V-1 V-2 V-4 V-5 B-1 C-4 TX-1 TX-2) — ไม่มีทรัพย์เผยแพร่จริง",
+   "sev": "med",
+   "status": "blocked",
+   "env": "prod",
+   "actor": "owner",
+   "next": "PD-12 ห้ามสร้างทรัพย์เพื่อให้ผ่าน; TEST ใช้แทนไม่ได้ถ้าไม่มีมติ",
+   "source": "HANDOFF/AI addendum A4"
+  }
+ ],
+ "history": [
+  {
+   "date": "2026-09-21",
+   "text": "บล็อกสถานะเอกสารเดิมสิ้นสุด (มติ PD-01…16, #6–#9, #11 ปิด)",
+   "ref": "BLUEPRINT §36"
+  },
+  {
+   "date": "2026-09-23",
+   "text": "FIX F ภาษา FR ขึ้น main (02230ae)",
+   "ref": "02230ae"
+  },
+  {
+   "date": "2026-09-26",
+   "text": "เพิ่มหน้า m17/ บน main",
+   "ref": "3a0d4db…2192b0b"
+  },
+  {
+   "date": "2026-10-01",
+   "text": "PR #2–#7 (SEC/CHAT test, gate, CHAT-LIVE) ใน chat-live-01; เริ่ม LISTING-E2E-01",
+   "ref": "beec235, be9250f"
+  },
+  {
+   "date": "2026-10-01",
+   "text": "รอบ 2–4: record-only, preview, local browser, deploy script",
+   "ref": "8ff7f3e…e6a99b5"
+  },
+  {
+   "date": "2026-10-02",
+   "text": "deploy TEST: โฟลเดอร์ฟังก์ชันแยก, selector, getCasePhoto, รูปครบ, Case Data",
+   "ref": "e7603b8…d0fe617"
+  },
+  {
+   "date": "2026-10-03",
+   "text": "เจ้าของลอง Cloud TEST หนึ่งเคสถึงปิดประกาศ; ชุดส่งต่อ v1 → v1.1",
+   "ref": "34a0eb0"
+  },
+  {
+   "date": "2026-10-03",
+   "text": "ชุดส่งต่อ v2 + แผงติดตามภายใน (เอกสารเท่านั้น)",
+   "ref": "รอ commit"
+  }
+ ]
+}
+```
+<!-- STATUS-REGISTRY:END -->
+
