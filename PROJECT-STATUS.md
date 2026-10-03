@@ -2,7 +2,8 @@
 
 **รุ่นหลัก: HP-HANDOFF-2026-10-03-v2 · 3 ตุลาคม 2569 · Asia/Bangkok**
 
-- **สถานะปัจจุบัน (r9e):** source/code head `958c8770fed6bdd0265239cf030c3a43a2505dc3` · **Cloud TEST deployed `958c8770fed6bdd0265239cf030c3a43a2505dc3`** (เจ้าของ deploy สำเร็จ — แก้จาก `2c89759` ที่เคยระบุ) · เอกสาร/build base ที่ Work ตรวจ `d293f8d5c01d5a123a6be9ddb13b478180187137` · production deployed ไม่ทราบ (RED) · หลักฐาน Cloud TEST ของ D2 (HH-24379): Owner preview / เผยแพร่ / ไทย / จีน ถูกต้อง — แยกจาก LOCAL; ล้างค่าที่ดินและครบ 8 ภาษา **ยังไม่ทดสอบบน Cloud** · T12 ยังไม่เปลี่ยน (รอ Work) · D08 FAIL · combined UNVERIFIED · ดูบล็อก "ผลปรับรอบ r9e" ท้ายเอกสาร; บรรทัด r9d ด้านล่างเป็น **ประวัติ**
+- **สถานะปัจจุบัน (r9f):** source/code head `958c8770fed6bdd0265239cf030c3a43a2505dc3` · **Cloud TEST deployed `958c8770fed6bdd0265239cf030c3a43a2505dc3`** · เอกสาร/build base ที่ Work ตรวจ `a99aafdd07b473776db810ffdc9b46ea38c4e004` · production deployed ไม่ทราบ (RED) · D2 บน Cloud TEST: Owner preview / เผยแพร่ (Owner) / ไทย / จีน ถูกต้อง; ล้างค่าที่ดิน, อีก 6 ภาษา และบันทึกซ้ำไม่แปลงซ้ำ ยังไม่ครบบน Cloud · T12 คงสถานะเดิม (รอ Work) · D08 FAIL · combined UNVERIFIED · ดูบล็อก "ผลปรับรอบ r9f" ท้ายเอกสาร; บรรทัด r9e ด้านล่างเป็น **ประวัติ**
+- [ประวัติ r9e] **สถานะ ณ r9e:** source/code head `958c8770fed6bdd0265239cf030c3a43a2505dc3` · **Cloud TEST deployed `958c8770fed6bdd0265239cf030c3a43a2505dc3`** (เจ้าของ deploy สำเร็จ — แก้จาก `2c89759` ที่เคยระบุ) · เอกสาร/build base ที่ Work ตรวจ `d293f8d5c01d5a123a6be9ddb13b478180187137` · production deployed ไม่ทราบ (RED) · หลักฐาน Cloud TEST ของ D2 (HH-24379): Owner preview / เผยแพร่ / ไทย / จีน ถูกต้อง — แยกจาก LOCAL; ล้างค่าที่ดินและครบ 8 ภาษา **ยังไม่ทดสอบบน Cloud** · T12 ยังไม่เปลี่ยน (รอ Work) · D08 FAIL · combined UNVERIFIED · ดูบล็อก "ผลปรับรอบ r9e" ท้ายเอกสาร; บรรทัด r9d ด้านล่างเป็น **ประวัติ**
 - [ประวัติ r9d — Cloud TEST ที่ระบุตรงนี้ผิด แก้แล้วใน r9e] **สถานะ ณ r9d:** source/code head `958c8770fed6bdd0265239cf030c3a43a2505dc3` (ไม่เปลี่ยน) · เอกสาร/build base ที่ Work ตรวจ `0490b4a30c1913b8f44dba1f441593487bdddf69` · **Cloud TEST deployed ยังเป็น `2c897593321713783d0ba81c7167962e1793be9a`** (ไม่มี D2) · production deployed ไม่ทราบ (RED) · รอบนี้: ตรวจกลไกแปลเดิม 8 ภาษา (รายงานเท่านั้น) · D2 ผ่านเฉพาะ LOCAL · T12 FAIL · D08 FAIL · combined UNVERIFIED · ดูบล็อก "ผลปรับรอบ r9d" ท้ายเอกสาร; บรรทัด r9c ด้านล่างเป็น **ประวัติ**
 - [ประวัติ r9c] **สถานะ ณ r9c:** source/code head `958c8770fed6bdd0265239cf030c3a43a2505dc3` (Work ตรวจ diff แล้ว; รอบนี้ไม่เปลี่ยนโค้ดเว็บ/Functions/rules) · เอกสาร/build base ที่ Work ตรวจ `84339ea46f1bc1edfbc49986a1749ce456bf20bb` · **Cloud TEST deployed ยังเป็น `2c897593321713783d0ba81c7167962e1793be9a`** (ยังไม่ deploy D2) · production deployed ไม่ทราบ (RED) · D2 ผ่านเฉพาะ LOCAL · T12 FAIL · D08 FAIL · combined UNVERIFIED · ดูบล็อก "ผลปรับรอบ r9c" ท้ายเอกสาร; บรรทัด r9b ด้านล่างเป็น **ประวัติ**
 - [ประวัติ r9b] **สถานะ ณ r9b:** source/code head `958c8770fed6bdd0265239cf030c3a43a2505dc3` (แก้ข้อพบ Work review r9: Case Data ล้างที่ดิน + Lister validation) · เอกสาร/build base ที่ Work ตรวจ `7f596631ef11587d0532c5931d37cff69b4eded0` · **Cloud TEST deployed ยังเป็น `2c897593321713783d0ba81c7167962e1793be9a`** (ยังไม่ deploy r9/r9b) · production deployed ไม่ทราบ (RED) · T12 คง FAIL จนกว่า Work ตรวจและเจ้าของลอง Cloud TEST · S-TEST-FLOW 9/9 · S-TEST-PUBLIC 6/7 ≈ 86% (ผล Cloud ที่ 2c89759 ไม่เปลี่ยน) · ดูบล็อก "ผลปรับรอบ r9b" ท้ายเอกสาร; บรรทัด r9 ด้านล่างเป็น **ประวัติ**
@@ -681,7 +682,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
 
 **"1 pending" ของ test:listing = ST3** (`tests/listing/rules.test.js`, "members via Firestore lookups (listers/adminUsers)"): Storage emulator แก้ lookup ข้าม service ไม่ได้ (log: `lister=false staff=false`) จึง skip โดยตั้งใจ — **ไม่เกี่ยวกับ D2**, มีมาตั้งแต่ SEC-TEST-01 (บันทึกเดิมใน LISTING-E2E-01.md). ยังขาดหลักฐาน: สิทธิ์เขียน `propertyPhotos` ของสมาชิก/Staff ผ่าน lookup ต้องยืนยันบน Cloud TEST จริง; **ไม่นับเป็น PASS** (ISS-ST3-PENDING). ใช้ log จากการรันรอบ r9b (100 passing / 1 pending) ไม่รันซ้ำโดยไม่มีเหตุ.
 
-**ข้อจำกัดคงเดิม:** B22 ไม่ได้กด Owner publish จริงในฉากนั้น (เคสที่คัดลอกมามีรูปไม่ครบ) — ตรวจแถว preview จาก `public-preview.js` + L5 ฝั่ง server แทน. D2 ผ่านเฉพาะ LOCAL ยังไม่ deploy. T12 = FAIL จนเจ้าของยืนยันบน Cloud TEST. D08 = FAIL. combined = UNVERIFIED.
+**ข้อจำกัดคงเดิม:** B22 ไม่ได้กด Owner publish จริงในฉากนั้น (เคสที่คัดลอกมามีรูปไม่ครบ) — ตรวจแถว preview จาก `public-preview.js` + L5 ฝั่ง server แทน. D2 ณ เวลานั้นผ่านหลักฐาน LOCAL (ต่อมา deploy TEST ที่ 958c877 — ดู r9e/r9f). T12 คงสถานะเดิม รอ Work. D08 = FAIL. combined = UNVERIFIED.
 
 **Viewer v45:** https://claude.ai/artifact/J9paCdLvTqg6qvjvh5gVJ8 (แยกแสดง source / documentation / Cloud TEST deployed / production; แผง Artifact v10 = https://claude.ai/artifact/WKkZMmpSMSdYjxQ812qdCs).
 
@@ -761,6 +762,39 @@ bash tools/listing-test/deploy-test.sh huahin-chat-test-01
 **อาการ:** ขั้น "อนุมัติรับเรื่อง" แสดง "ไม่มีบันทึกผู้ดำเนินการ" และประวัติส่งงานยังขึ้น "รอตรวจ" หลังอนุมัติแล้ว; ส่วน **ตราผู้เผยแพร่แสดงถูกต้อง** (บัญชี Owner).
 **ต้นเหตุตาม source:** (ก) Case แบบแยก (`caseInternal`) — `decideSubmission` **ไม่เขียน** `approvedBy` (เขียนเฉพาะ Case แบบเก่า; ตราที่ server เขียนมีเฉพาะตอนเผยแพร่) หน้า `_approvalStamps` จึงต้องอ่านผู้อนุมัติรับเรื่องจาก `reviewedBy` ของแถว submission ที่อนุมัติ (`state.submissions[p.id]`); (ข) รายการ submission ถูกโหลด **ครั้งเดียวต่อเคส** (`!this.state.submissions[p.id]` + `_subsAsked`) ตอนการ์ดแสดงสถานะ "รอตรวจ" แล้ว **ไม่โหลดซ้ำหลังกดอนุมัติ** (`decide()` เรียก `componentDidMount()` ซึ่งโหลดเคสใหม่ แต่ไม่ล้างแคช submissions) → แถวค้างเก่า `reviewResult=null, reviewedBy=null` → ข้อความ "ไม่มีบันทึกผู้ดำเนินการ" และ "รอตรวจ" (อาการเดียวกันทั้งสองจุด); (ค) ตราผู้เผยแพร่ไม่ใช้แคชนี้ (server เขียน `approvedByEmail` ตอนเผยแพร่) จึงถูกต้อง. **ข้อสงสัยอีกทาง:** `reviewedBy = (admin && admin.email) || ""` ถ้าบัญชีไม่มีอีเมลที่หน้าอ่านได้ จะว่างแม้รีเฟรช — แยกได้ด้วยภาพหลังรีเฟรชหน้า. **ทำไมเทสต์ในเครื่องไม่เจอ:** B16 เขียนข้อมูลลงฐานโดยตรง ไม่ได้ทำลำดับ "เปิดการ์ด → อนุมัติ → ดูต่อโดยไม่รีเฟรช". **ข้อเสนอแก้ขั้นต่ำ (ยังไม่แก้):** โหลดรายการ submission ซ้ำหลัง `decide`/ส่งงาน + ทดสอบลำดับดังกล่าว (ISS-APPROVER-STALE).
 
+
+## ผลปรับรอบ r9f — CODE-V2-01 r9f (3 ต.ค. 2569 · ตอบ Work review r9e · ไม่แก้ source เว็บ)
+
+**หัวสี่แบบ (แยกกัน):** source `958c8770fed6bdd0265239cf030c3a43a2505dc3` (ไม่เปลี่ยน) · **Cloud TEST deployed `958c8770fed6bdd0265239cf030c3a43a2505dc3`** · documentation head = commit ของรอบนี้ (ดู PR; เอกสาร/แผง/ไฟล์ทดสอบเท่านั้น) · doc base ก่อนรอบนี้ `a99aafdd07b473776db810ffdc9b46ea38c4e004` · production deployed: ไม่ทราบ (RED). ไม่ merge ไม่ deploy ไม่แก้ข้อมูล Cloud ไม่ใช้ AI จริง ไม่เปิด GREEN.
+
+### 1. Viewer v47 เปิดไม่สำเร็จ (ภาพ 214621) — ต้นเหตุและการแก้
+**ต้นเหตุ:** เนื้อหาของ Viewer อยู่ใน JSON (บล็อก `__bundler/template`) ซึ่งเป็นสตริง; ข้อความใหม่ที่ผมใส่ในรอบ r9e มีเครื่องหมายคำพูด `"` ดิบ (เช่น "ไม่มีบันทึกผู้ดำเนินการ") จึงปิดสตริงก่อนเวลา → `JSON.parse` พังที่ตำแหน่ง 15665 ("Unexpected non-whitespace character after JSON"). **การแก้ (เฉพาะการบรรจุ ไม่เปลี่ยนเนื้อหา/สถานะ):** escape ข้อความตามกติกา JSON ก่อนฝัง + ตรวจว่าทุกบล็อก `__bundler/*` parse ได้ + **เปิดจริงใน Chromium** (ไม่ใช่แค่ตรวจไวยากรณ์) ยืนยันว่าไม่มี "Error unpacking" และมีข้อความที่คาดไว้ — ทำซ้ำอาการเดิมกับ v47 ได้ และ v46 เปิดได้ → ใช้ v48.
+
+### 2. สถานะ T12 และ TD7
+**T12:** คงสถานะเดิม (FAIL จากเคสเก่าที่ 2c89759). การแสดงหน่วยใน **Owner preview และหน้าสาธารณะภาษาไทย/จีนผ่านบน Cloud แล้ว** (TD1–TD4, HH-24379, head 958c877); **การล้างค่าและการทดสอบส่วนที่เหลือยังไม่ครบ** (TD5 ล้างค่า, TD6 อีก 6 ภาษา, TD7b บันทึกซ้ำ). **TD7 แยกสองพฤติกรรม:** TD7a = บันทึกครั้งแรก+รีเฟรช — เจ้าของยืนยัน "ข้อมูลครบถูกต้อง" → **PASS** (REAL-TEST, คำยืนยันของเจ้าของ ไม่มีรหัสภาพ); TD7b = บันทึกซ้ำแล้วไม่แปลงซ้ำ — ยังไม่มีคำยืนยันชัดเจน → **UNVERIFIED** (LOCAL B11 ผ่าน แต่ไม่ใช่ Cloud). ไม่มีข้อความในสถานะปัจจุบันที่ว่า D2 ยังไม่ deploy หรือผ่านเฉพาะ LOCAL (ข้อความดังกล่าวในบล็อกรอบก่อนเป็นประวัติ ณ เวลานั้น).
+
+### 3. แบบฟังก์ชันแปลฝั่ง server สำหรับทีมงาน (เสนอ — ยังไม่ลงมือ; ใช้กลไกแปลเดิมเป็นฐาน)
+**ชื่อ/ที่อยู่:** callable `translateCaseText` ใน listing codebase (asia-southeast1) · ใช้ prompt/โครง JSON 8 ภาษาเดียวกับ `translateDescriptionAll` ย้ายมาเรียกจาก server (ไม่เรียกจาก browser) · เรียก AI **ครั้งเดียวต่อรอบ** แบบรวมหลายฟิลด์ (ลดการเรียก 3 ครั้งต่อ Save เดิม).
+**สิทธิ์ (ตามนโยบายผู้รับผิดชอบเคส):** `requireTeam` + Owner ทำได้ทุกเคส; **Staff ทำได้เฉพาะเคสที่ `assignedToUid` = ตัวเอง บังคับที่ server** (ปัจจุบันบังคับแค่ฝั่งหน้าเว็บ — นี่คือข้อควรตัดสินเรื่องนโยบายที่ Work ต้องยืนยัน); ผู้ไม่ใช่ทีม/คนละเคส = `permission-denied`; ใช้ Authorization ของ Firebase Auth ตามเดิม (ไม่เปิด `claudeComplete` ให้ไม่ผ่านตัวตน).
+**ขั้นตอน (ตามลำดับ):**
+1. ตรวจ `assertEnabled` + สิทธิ์ + gate/โควตาเดิม (`enforceCallable`; จอง `reserve` เมื่อจะเรียก AI จริงเท่านั้น; มีเพดานต่อผู้ใช้/รวม).
+2. **ธุรกรรม A (claim):** อ่านเคส คำนวณ `sourceHash` ต่อฟิลด์ (hash ของข้อความต้นฉบับที่ normalize + เวอร์ชัน prompt) เทียบกับ `translations[field].sourceHash`; ฟิลด์ที่ hash ตรงและทั้ง 8 ภาษา `ok` = **ไม่ต้องแปล**; ถ้าไม่เหลือฟิลด์ที่ต้องแปล → ตอบ `complete` ทันที **ไม่เรียก AI ไม่หักโควตา** (Save ซ้ำเนื้อหาเดิม = 0 การเรียก). **ป้องกันคำขอซ้ำ:** มี `translationJob {id, hashes, startedAt, by}` ที่ยังไม่หมดอายุ (เช่น 90 วินาที) ของ hash เดียวกัน → ตอบ `in_progress` ไม่เรียกซ้ำ; งานค้างเกินกำหนด = ถือว่า `failed(timeout)` เพื่อลองใหม่ได้.
+3. เรียก AI (นอกธุรกรรม) แล้วตรวจผลเข้ม: ทุกภาษาต้องเป็นข้อความไม่ว่าง; **ภาษาที่ขาด/ว่าง = `failed` ไม่เติมต้นฉบับแทน**.
+4. **ธุรกรรม B (commit):** อ่านเคสใหม่ **เทียบ `sourceHash` ปัจจุบันกับ hash ที่ขอแปล**; ถ้าเนื้อหาเปลี่ยนระหว่างแปล → **ทิ้งผลเก่าของฟิลด์นั้น** (`superseded`) ไม่เขียนทับคำแปลของรุ่นใหม่; ถ้าตรง → เขียน `translations[field] = {sourceHash, sourceLang, translatedAt, promptVersion, langs: {th..it: {text, status: ok|failed}}}` แล้วล้าง job.
+5. **ล้มเหลว (AI error/timeout/parse):** ล้าง job; คำแปลเก่า (ถ้ามี) **เก็บไว้แต่ติด `stale`** (เพราะ hash ไม่ตรงต้นฉบับใหม่) ไม่ถูกนับว่าเป็นฉบับปัจจุบัน; ภาษาที่ไม่เคยแปล = `failed`/`pending`.
+6. **ลองใหม่ชัดเจน:** ปุ่ม/พารามิเตอร์ `retry: true` แปลซ้ำเฉพาะภาษาที่ `failed`/`pending`/`stale` (ผ่านขั้นตอน 1–4 ครบ รวมโควตา) ; แสดงสถานะรายภาษาและเหตุผลให้ทีม/Owner เห็น.
+**การเก็บ/ป้องกัน:** `caseInternal/{id}.translations` เขียนได้เฉพาะ server (เพิ่มคีย์นี้ในรายการที่ rules ห้ามไคลเอนต์เขียน — แตะ `firestore.rules`); ไม่ backfill ข้อมูลเก่า (เริ่มเมื่อคนกด Save).
+**ฟิลด์:** `description` (ข้อความฟรีของ Staff) และ ชื่อทำเล/soi ที่พิมพ์เอง (ชื่อพื้นที่มาตรฐานใช้พจนานุกรม i18n เดิม ไม่ต้องใช้ AI); **คำถามเปิดสำหรับ Work:** Case ไม่มีช่องชื่อประกาศ — ปัจจุบัน `title` สร้างจากแม่แบบ th/en; จะแปลชื่อที่สร้างเป็น 6 ภาษาที่เหลือด้วย AI หรือเพิ่มแม่แบบ i18n (ไม่เสียโทเคน) ให้ Work เลือก.
+**การฉายและ preview:** `buildPublicDoc` ฉายคำแปลที่ **ครบและตรงรุ่น** เท่านั้นผ่าน allow-list (เพิ่มฟิลด์แบบ D2) และ `projectionSig` ต้องรวมคำแปล เพื่อให้ "สิ่งที่ Owner ตรวจ = สิ่งที่เผยแพร่" (กลไก reviewedSig เดิม); **Owner preview** มีตัวเลือก 8 ภาษา แสดงข้อความที่จะขึ้นจริงรายภาษา เทียบกับที่เผยแพร่อยู่ พร้อมสถานะ ok/stale/failed/pending และเหตุผลที่ถูกบล็อก; **หน้าสาธารณะอ่านที่เก็บไว้ ไม่แปลสด** (ไม่เพิ่มการเรียก AI ตอนเปิดหน้า/สลับภาษา).
+**เกณฑ์ A (เสนอ — ต้องให้เจ้าของยืนยันก่อนนำไปใช้):** เผยแพร่/อัปเดตหน้าสาธารณะได้เมื่อ **ครบทั้ง 8 ภาษาและตรงรุ่นต้นฉบับปัจจุบัน** ของฟิลด์ที่ต้องแปลทุกฟิลด์; คำแปลเก่าเก็บไว้ได้แต่ **ห้ามเผยแพร่คู่กับต้นฉบับใหม่โดยอ้างว่าครบ** (รายการที่เผยแพร่แล้วคงฉบับที่เผยแพร่ไว้จนกว่าฉบับใหม่ครบและ Owner อนุมัติผ่าน preview/sync). **ยังไม่ใช้ B/C หรือการติ๊กรับทราบเป็นทางข้าม** จนกว่าจะมีมติ.
+**แผนทดสอบ (ไม่ใช้ AI จริง — ใช้ตัวแปล mock ผ่านจุดฉีด dependency แบบเดียวกับ hook ที่มีอยู่):** Save เนื้อหาเดิมครบแล้ว = 0 การเรียกและไม่หักโควตา; แก้เนื้อหา = 1 การเรียก; เนื้อหาเปลี่ยนระหว่างแปล → ผลเก่าไม่ทับรุ่นใหม่; คำขอซ้ำขณะ job ค้าง = `in_progress`; mock คืนภาษาไม่ครบ = failed (ไม่เติมต้นฉบับ); mock ล้ม = stale + คำแปลเก่าไม่ถูกฉายเป็นปัจจุบัน; retry แปลเฉพาะที่ล้ม; Staff คนอื่น/ผู้ไม่ใช่ทีม/คนละเคส = ปฏิเสธ; ไคลเอนต์เขียน `translations` ตรง ๆ = rules ปฏิเสธ; เพดานโควตา; เกณฑ์ A: ไม่ครบ = publish/sync ถูกบล็อก, preview แสดงเหตุผลรายภาษา; หน้าสาธารณะเปิด/สลับภาษา = 0 การเรียกเครือข่ายแปล.
+**ขอบเขตที่จะแตะ (เมื่อ Work อนุมัติ):** ฟังก์ชันใหม่ + รายการไฟล์/selector ของ listing deploy (`build-functions.js`, `deploy-test.sh`, ชุดทดสอบ) · `functions/case-fields.js`/`listing-case.js` · `firestore.rules` · Case Data (Save + สถานะ) · `public-preview.js` + Listing Approvals · i18n ป้ายสถานะ 8 ภาษา. **ความเสี่ยง:** แตะ Functions + rules (ต้อง deploy คู่ hosting); ค่าใช้จ่าย AI/โควตาต้องตั้งค่า; คุณภาพคำแปลเทสต์ไม่รับรอง.
+
+### 4. ISS-APPROVER-STALE — ทำซ้ำใน browser ด้วยลำดับจริง (B24, LOCAL; ไม่แก้ source เว็บ)
+ลำดับ: เปิดการ์ดเคสที่รอตรวจ → อนุมัติรับเรื่อง (ปุ่มจริง) → ตรวจชื่อ/ประวัติ **ไม่รีเฟรช** → รีเฟรช. ผล: **ก่อนอนุมัติ** ประวัติ "ครั้งที่ 1 · รอตรวจ"; **หลังอนุมัติ ไม่รีเฟรช** "อนุมัติรับเรื่องโดย ไม่มีบันทึกผู้ดำเนินการ" + ประวัติ "รอตรวจ" (ตรงกับภาพ 211350/212703); **ฐานข้อมูลในจังหวะเดียวกัน** `reviewResult=approved`, `reviewedBy=owner@example.test`, `approvedSubmissionId` ตรง; **หลังรีเฟรช** "อนุมัติรับเรื่องโดย owner@example.test" + ประวัติ "อนุมัติ". **สรุป:** เป็นปัญหาแคชรายการส่งงานที่ไม่โหลดซ้ำหลังอนุมัติ **ไม่ใช่ข้อมูลที่ไม่ถูกบันทึก**. ข้อจำกัด: B24 ใช้บัญชี Owner สังเคราะห์ที่มีอีเมล — ถ้าบัญชีจริงไม่มีอีเมลที่หน้าอ่านได้ ควรเทียบกับภาพหลังรีเฟรชของเจ้าของเพื่อตัดความเป็นไปได้นี้. ข้อเสนอแก้ขั้นต่ำ (ยังไม่ทำ): โหลดรายการส่งงานซ้ำหลัง `decide`/ส่งงาน + เปลี่ยน B24 เป็นการยืนยัน (assert) หลังแก้. ตราผู้เผยแพร่ถูกต้องเพราะ server เขียน `approvedByEmail` (ไม่ผ่านแคชนี้).
+
+**ผลทดสอบรอบนี้ (LOCAL; ไม่ใช่ Cloud):** test:browser-local **24/24 ผ่าน** ที่ HEAD ของรอบนี้ (เพิ่ม B24 แบบบันทึกผลสังเกต; source เว็บไม่เปลี่ยนจาก `958c877`); test:status-panel ผ่าน. test:listing/chat-live ไม่ได้รันซ้ำ (ไม่มีไฟล์ระบบเปลี่ยน; ผลล่าสุด 100 passing + 1 pending ST3 / 34 passing ที่ `958c877`). combined UNVERIFIED, D08 FAIL.
+
 ## 6. STATUS-REGISTRY — ข้อมูลเครื่องอ่านของแผงภายใน (แก้ที่นี่ที่เดียว แล้วรัน `npm run status-panel`)
 
 ตาราง §1–§3 ด้านบนเป็นต้นทางของ Roadmap/ฐานระบบ/งานปัจจุบัน (แผงอ่านตรงจากตาราง). บล็อกนี้เก็บเฉพาะสิ่งที่ตารางไม่มี: ผู้รับผิดชอบ/ขอบเขต/วัน-commit ของแต่ละงาน (`taskMeta`), checklist ร่างสำหรับเปอร์เซ็นต์ (`scopes`, ทุกชุด `locked:false` จนกว่า Work lock), ทะเบียนค้าง (`issues`) และประวัติ. สถานะรายการใน checklist: `pass` / `fail` / `blocked` / `unverified` / `na` (N/A ต้องมีเหตุผลใน `ref`). ห้ามใส่รหัสผ่าน คีย์ อีเมล เบอร์ หรือ token.
@@ -773,18 +807,18 @@ bash tools/listing-test/deploy-test.sh huahin-chat-test-01
   "id": "HP-HANDOFF-2026-10-03-v2",
   "date": "2026-10-03",
   "tz": "Asia/Bangkok",
-  "docBaseSha": "d293f8d5c01d5a123a6be9ddb13b478180187137",
+  "docBaseSha": "a99aafdd07b473776db810ffdc9b46ea38c4e004",
   "deployedTestSha": "958c8770fed6bdd0265239cf030c3a43a2505dc3",
   "deployedProdSha": "ไม่ทราบ",
   "prState": "PR #8 OPEN / DRAFT / NOT MERGED · base claude/chat-live-01",
   "website": "RED / Public Hidden (ตามรายงาน ไม่ได้ตรวจสดรอบนี้)",
-  "revision": "r9e (Code · Cloud TEST deployed = source 958c877 · หลักฐาน HH-24379 · แผนแก้ระบบแปลขั้นต่ำ · ต้นเหตุตราผู้อนุมัติรับเรื่อง)",
-  "set": "HP-HANDOFF-2026-10-03-v2 + CODE-V2-01 r9e",
+  "revision": "r9f (Code · Viewer v48 แก้การบรรจุ · TD7 แยกสองพฤติกรรม · แบบฟังก์ชันแปลฝั่ง server · ทำซ้ำอาการตราผู้อนุมัติ B24)",
+  "set": "HP-HANDOFF-2026-10-03-v2 + CODE-V2-01 r9f",
   "sourceHeadSha": "958c8770fed6bdd0265239cf030c3a43a2505dc3"
  },
  "goal": "ให้เจ้าของและทีมลงประกาศพร้อมรูปจนเผยแพร่ได้จริงอย่างปลอดภัย (ส่งฟอร์ม → Staff เตรียม → Owner อนุมัติ/เผยแพร่ → หน้าสาธารณะ) บนเว็บ huahin.properties โดยยังไม่เปิดเว็บสาธารณะจนกว่าเจ้าของอนุมัติ",
  "current": {
-  "task": "r9e: Cloud TEST ที่ 958c877 (D2 ผ่านหลักฐาน Cloud 4 ข้อ); เสนอแผนแก้ระบบแปลขั้นต่ำและต้นเหตุตราผู้อนุมัติรับเรื่องให้ Work ตรวจ — ยังไม่แก้ source",
+  "task": "r9f: ส่ง Work ตรวจ — Viewer v48 แก้แล้ว, แบบฟังก์ชันแปลฝั่ง server (เกณฑ์ A รอเจ้าของยืนยัน), ผลทำซ้ำตราผู้อนุมัติ (แคช) — ยังไม่แก้ source เว็บ/ไม่ merge/ไม่ deploy",
   "phases": [
    "LISTING-E2E-01",
    "ชุดส่งต่อ"
@@ -848,28 +882,28 @@ bash tools/listing-test/deploy-test.sh huahin-chat-test-01
      "text": "หน้า Details แยกสถานะ กำลังโหลด / ไม่พบหรือปิดแล้ว / โหลดไม่สำเร็จ ครบ 8 ภาษา ไม่เผยข้อมูลเคสส่วนตัว (FX-3, draft)",
      "status": "pass",
      "level": "LOCAL",
-     "ref": "browser-local B12: retry = 1 navigation, direct read ล้ม = โหลดล้ม (ไม่ใช่ไม่พบ), ข้อความ 7 รายการ × 8 ภาษา + negative control ล้มเมื่อตัดการตรวจ direct read; ยังไม่ deploy / ยังไม่ลอง Cloud · Cloud TEST 2c89759: T16 PASS"
+     "ref": "browser-local B12: retry = 1 navigation, direct read ล้ม = โหลดล้ม (ไม่ใช่ไม่พบ), ข้อความ 7 รายการ × 8 ภาษา + negative control ล้มเมื่อตัดการตรวจ direct read (หลักฐาน LOCAL) · Cloud TEST 2c89759: T16 PASS"
     },
     {
      "id": "D14",
      "text": "หน้าอนุมัติแสดงตราอนุมัติรับเรื่องกับตราอนุมัติเผยแพร่แยกกัน ตรงกับผู้ดำเนินการของเหตุการณ์นั้น ไม่ใช้บทบาทเป็นชื่อบุคคล ไม่เพิ่มข้อมูลผู้อนุมัติในข้อมูลสาธารณะ (FX-1, draft)",
      "status": "pass",
      "level": "LOCAL",
-     "ref": "browser-local B6 + negative control ล้มเมื่อไม่มี FX-1; ยังไม่ deploy / ยังไม่ลอง Cloud · Cloud TEST 2c89759: T14 (บัญชีเดียว) PASS"
+     "ref": "browser-local B6 + negative control ล้มเมื่อไม่มี FX-1 (หลักฐาน LOCAL) · Cloud TEST 2c89759: T14 (บัญชีเดียว) PASS"
     },
     {
      "id": "D15",
      "text": "หน้า Details/การ์ดค้นหา ซ่อนระยะและชื่อโซนที่ไม่มีหลักฐาน ไม่แสดง 0 กม. หรือ undefined แทน \"ไม่ทราบ\" และคงค่า 0 ที่เก็บไว้จริง (FX-2, draft)",
      "status": "pass",
      "level": "LOCAL",
-     "ref": "browser-local B13 + negative control ล้มเมื่อไม่มี FX-2; ยังไม่ deploy / ยังไม่ลอง Cloud · Cloud TEST 2c89759: T13 (เคสนี้) PASS"
+     "ref": "browser-local B13 + negative control ล้มเมื่อไม่มี FX-2 (หลักฐาน LOCAL) · Cloud TEST 2c89759: T13 (เคสนี้) PASS"
     },
     {
      "id": "D16",
      "text": "บิลด์ TEST ไม่ห่อไฟล์ component ในเทมเพลต จึงรูปปกการ์ดค้นหาโหลดจริงทั้ง visitor และ Owner (FX-4, draft)",
      "status": "pass",
      "level": "LOCAL",
-     "ref": "browser-local B7 (ล้มก่อนแก้ ทำซ้ำได้) + B17 + hosting-build; ยังไม่ deploy — T10 ยังเป็น FAIL จนลองบน TEST · Cloud TEST 2c89759: T10 PASS"
+     "ref": "browser-local B7 (ล้มก่อนแก้ ทำซ้ำได้) + B17 + hosting-build · Cloud TEST 2c89759: T10 PASS"
     },
     {
      "id": "D17",
@@ -1145,7 +1179,7 @@ bash tools/listing-test/deploy-test.sh huahin-chat-test-01
      "text": "หน้า Details แสดงหน่วยพื้นที่ที่ดินถูกต้อง",
      "status": "fail",
      "level": "REAL-TEST",
-     "ref": "DOC-OBS-02 · ผลที่ 2c89759 (เคสเก่า): FAIL · หลักฐานใหม่ที่ 958c877 (HH-24379) บันทึกแยกใน TD1–TD4; ยังไม่เปลี่ยน T12 — รอ Work ตัดสิน"
+     "ref": "DOC-OBS-02 · คงสถานะเดิม (FAIL จากเคสเก่าที่ 2c89759) · ที่ 958c877 (HH-24379) การแสดงหน่วยใน Owner preview และหน้าสาธารณะไทย/จีนผ่านบน Cloud แล้ว (TD1–TD4); การล้างค่าและการทดสอบส่วนที่เหลือยังไม่ครบ (TD5, TD6, TD7b) — รอ Work ตัดสิน"
     },
     {
      "id": "T13",
@@ -1530,7 +1564,7 @@ bash tools/listing-test/deploy-test.sh huahin-chat-test-01
    "env": "test",
    "name": "Cloud TEST — หน่วยที่ดิน D2 (head 958c877)",
    "locked": false,
-   "lockNote": "ร่าง — แยกจาก S-TEST-PUBLIC ที่ Work lock; ยังไม่เปลี่ยน T12 (รอ Work ตัดสิน)",
+   "lockNote": "ร่าง — แยกจาก S-TEST-PUBLIC ที่ Work lock; T12 คงสถานะเดิมรอ Work ตัดสิน",
    "items": [
     {
      "id": "TD1",
@@ -1575,11 +1609,18 @@ bash tools/listing-test/deploy-test.sh huahin-chat-test-01
      "ref": "เห็นเฉพาะไทยและจีน — ยังไม่รับรองครบ 8 ภาษา (LOCAL B19 ครบ 8 ภาษา แต่ไม่ใช่ Cloud)"
     },
     {
-     "id": "TD7",
-     "text": "บันทึก/รีเฟรช/แก้ซ้ำแล้วไม่แปลงซ้ำ บน Cloud",
+     "id": "TD7a",
+     "text": "บันทึกครั้งแรก + รีเฟรช: ข้อมูลที่ดินครบถูกต้อง บน Cloud",
+     "status": "pass",
+     "level": "REAL-TEST",
+     "ref": "คำยืนยันของเจ้าของ \"ข้อมูลครบถูกต้อง\" หลังบันทึกและรีเฟรชครั้งแรก (คำยืนยันจากเจ้าของ ไม่มีรหัสภาพ) · HH-24379 · Cloud TEST 958c877"
+    },
+    {
+     "id": "TD7b",
+     "text": "บันทึกซ้ำ (เนื้อหาเดิม) แล้วไม่แปลงซ้ำ บน Cloud",
      "status": "unverified",
      "level": "REAL-TEST",
-     "ref": "ไม่มีภาพยืนยันในชุดที่ Work ส่ง (มีเฉพาะ LOCAL: B11)"
+     "ref": "ยังไม่มีคำยืนยันชัดเจนของเจ้าของว่าบันทึกซ้ำแล้วไม่แปลงซ้ำ (LOCAL: B11 บันทึกซ้ำ 3 ครั้งไม่แปลงซ้ำ — ไม่ใช่ Cloud)"
     }
    ]
   }
@@ -1864,7 +1905,8 @@ bash tools/listing-test/deploy-test.sh huahin-chat-test-01
     "TD4",
     "TD5",
     "TD6",
-    "TD7"
+    "TD7a",
+    "TD7b"
    ]
   }
  },
@@ -2226,7 +2268,7 @@ bash tools/listing-test/deploy-test.sh huahin-chat-test-01
    "status": "open",
    "env": "dev",
    "actor": "work",
-   "next": "แผนแก้ขั้นต่ำเสนอ Work แล้ว (บล็อก r9e) — รอ Work ตรวจ/ตัดสินเกณฑ์เผยแพร่; ยังไม่แก้ source",
+   "next": "แบบฟังก์ชันแปลฝั่ง server เสนอแล้ว (บล็อก r9f) — เกณฑ์ A รอเจ้าของยืนยัน; ยังไม่แก้ source",
    "source": "SOURCE (r9d, อ่านโค้ดเท่านั้น ยังไม่ทดสอบ/ไม่รัน): Case Data.dc.html:177 (description=string); functions/listing-case.js publicTitle/buildPublicDoc; Property Details.dc.html:896; public-preview.js (ไม่มีแถวคำแปล)"
   },
   {
@@ -2261,13 +2303,13 @@ bash tools/listing-test/deploy-test.sh huahin-chat-test-01
   },
   {
    "id": "ISS-APPROVER-STALE",
-   "title": "หน้าอนุมัติแสดง \"ไม่มีบันทึกผู้ดำเนินการ\" ที่ผู้อนุมัติรับเรื่อง และประวัติส่งงานขึ้น \"รอตรวจ\" หลังอนุมัติแล้ว (ภาพ 211350 / 212703) — ต้นเหตุจาก source: รายการส่งงาน (submissions) ถูกโหลดครั้งเดียวต่อเคสและไม่โหลดซ้ำหลังกดอนุมัติ → แถวค้างเก่า (reviewResult/reviewedBy ว่าง) ส่วนตราผู้เผยแพร่ถูกต้องเพราะ server เขียน approvedByEmail ตอนเผยแพร่",
+   "title": "หน้าอนุมัติแสดง \"ไม่มีบันทึกผู้ดำเนินการ\" ที่ผู้อนุมัติรับเรื่อง และประวัติส่งงาน \"รอตรวจ\" หลังอนุมัติ (ภาพ 211350 / 212703) — ทำซ้ำใน browser แล้ว (B24): เป็นแคชรายการส่งงานที่ไม่โหลดซ้ำ ไม่ใช่ข้อมูลที่ไม่ถูกบันทึก (ฐานข้อมูลมีผลอนุมัติและชื่อผู้อนุมัติ; หลังรีเฟรชหน้าแสดงถูกต้อง)",
    "sev": "med",
    "status": "open",
    "env": "test",
    "actor": "work",
-   "next": "Work ตัดสินแก้ขั้นต่ำ (โหลดรายการส่งงานซ้ำหลัง decide/ส่งงาน) + ยืนยันด้วยการรีเฟรชหน้า/ภาพหลังรีเฟรช เพื่อแยกว่าเป็นแค่แคช หรือ reviewedBy ว่างจริง — ยังไม่แก้ source",
-   "source": "SOURCE (r9e, ยังไม่ reproduce): Listing Approvals.dc.html:1025,1040,1135-1142,1151-1156 (โหลดครั้งเดียว ไม่ invalidate); firebase-client.js:2666-2684 (decideSubmission เขียน reviewResult/reviewedBy ที่ submission; Case แบบแยกข้ามการเขียน approvedBy); ตรวจ B16 เป็นข้อมูลที่เขียนตรงลงฐาน จึงไม่ครอบคลุมลำดับ \"เปิดการ์ด → อนุมัติ → ดูต่อโดยไม่รีเฟรช\""
+   "next": "Work ตัดสินแก้ขั้นต่ำ: โหลดรายการส่งงานซ้ำหลัง decide/ส่งงาน (ยังไม่แก้ source); ภาพจริง 211350/212703 ยังควรเทียบกับภาพหลังรีเฟรชของเจ้าของ เพื่อตัดความเป็นไปได้ว่าบัญชีจริงไม่มีอีเมล (B24 ใช้บัญชี Owner สังเคราะห์ที่มีอีเมล)",
+   "source": "SOURCE (r9e, ยังไม่ reproduce): Listing Approvals.dc.html:1025,1040,1135-1142,1151-1156 (โหลดครั้งเดียว ไม่ invalidate); firebase-client.js:2666-2684 (decideSubmission เขียน reviewResult/reviewedBy ที่ submission; Case แบบแยกข้ามการเขียน approvedBy); ตรวจ B16 เป็นข้อมูลที่เขียนตรงลงฐาน จึงไม่ครอบคลุมลำดับ \"เปิดการ์ด → อนุมัติ → ดูต่อโดยไม่รีเฟรช\" · LOCAL B24 (ทำซ้ำ, ลำดับจริง: เปิดการ์ด → อนุมัติรับเรื่อง → ไม่รีเฟรช → รีเฟรช): ก่อน = ประวัติ \"รอตรวจ\"; หลังอนุมัติไม่รีเฟรช = \"อนุมัติรับเรื่องโดย ไม่มีบันทึกผู้ดำเนินการ\" + ประวัติ \"รอตรวจ\"; ฐานข้อมูล = reviewResult approved, reviewedBy = อีเมลของบัญชี Owner สังเคราะห์, approvedSubmissionId ตรง; หลังรีเฟรช = \"อนุมัติรับเรื่องโดย อีเมล Owner สังเคราะห์\" + ประวัติ \"อนุมัติ\""
   }
  ],
  "history": [
@@ -2370,6 +2412,11 @@ bash tools/listing-test/deploy-test.sh huahin-chat-test-01
    "date": "2026-10-03",
    "text": "r9e: แก้หัว Cloud TEST deployed = 958c877 (เจ้าของ deploy สำเร็จ); บันทึกหลักฐาน Cloud HH-24379 (211504/212703/212839/212903) แยกจาก LOCAL; เสนอแผนแก้ระบบแปลขั้นต่ำ; รายงานต้นเหตุตราผู้อนุมัติรับเรื่อง — ไม่แก้ source/ไม่ merge/ไม่ใช้ AI จริง",
    "ref": "TD1–TD7, ISS-APPROVER-STALE"
+  },
+  {
+   "date": "2026-10-03",
+   "text": "r9f: แก้การบรรจุ Viewer (v48); T12 คงเดิม + ระบุหลักฐาน Cloud; TD7 แยก TD7a (เจ้าของยืนยัน) / TD7b (ยังไม่ยืนยัน); ออกแบบฟังก์ชันแปลฝั่ง server (เกณฑ์ A รอเจ้าของยืนยัน); ทำซ้ำอาการตราผู้อนุมัติใน browser (B24) — ไม่แก้ source เว็บ",
+   "ref": "TD7a/TD7b, B24, ISS-APPROVER-STALE"
   }
  ],
  "decisions": [
@@ -2665,7 +2712,7 @@ bash tools/listing-test/deploy-test.sh huahin-chat-test-01
    "id": "FX-5",
    "obs": "DOC-OBS-02",
    "title": "หน่วยที่ดิน (D2 อนุมัติแล้ว) — แก้ขั้นต่ำใน draft: เก็บค่าที่กรอก + หน่วย + ค่ามาตรฐาน ตร.ม.; ข้อมูลเก่าไม่เดา",
-   "finding": "ตรวจทุกเส้นทางอ่าน/เขียน landSize (ดูบล็อก r9): Case Data และ Lister Dashboard เขียน; Admin Dashboard/AI Quick Add เขียน (ป้าย ตร.ม.); AI draft ใน Functions เขียนตาม prompt \"ตารางวา\"; Owner Submission ไม่มีช่องที่ดิน; Details/Home/ContactRail อ่าน. แก้: ฟิลด์ใหม่ landAreaValue (ค่าที่กรอก) + landAreaUnit (sqwa|sqm) + landAreaSqm (ค่ามาตรฐาน ตร.ม. — คำนวณใหม่จากค่าที่กรอก+หน่วยทุกครั้ง ไม่แปลงซ้ำ และ server คำนวณใหม่ตอนฉายเป็นข้อมูลสาธารณะ); landSize เดิมไม่ถูกแตะ/ติดป้าย/แปลง; หน้าสาธารณะแสดง \"100 ตร.ว. (400 ตร.ม.)\" หรือเลขเดิม \"(ไม่ระบุหน่วย)\" · r9b (Work review): (1) Case Data — ล้างพื้นที่ที่คนบันทึกไว้แล้วล้าง landSize เดิมด้วย (ไม่ให้ preview/public fallback กลับมา); เคสเก่าที่ไม่แตะช่องที่ดินยังเก็บ landSize ไว้; (2) Lister — ตรวจด้วยกติกาเดียวกับ landAreaFields: ค่าที่ builder ปฏิเสธ/ล้างหน่วยจากรายการที่มีหน่วยแล้ว = แจ้งข้อผิดพลาดและไม่เขียนข้อมูล; legacy ที่ไม่ได้แก้จริงยังไม่ถูกบล็อก",
+   "finding": "ตรวจทุกเส้นทางอ่าน/เขียน landSize (ดูบล็อก r9): Case Data และ Lister Dashboard เขียน; Admin Dashboard/AI Quick Add เขียน (ป้าย ตร.ม.); AI draft ใน Functions เขียนตาม prompt \"ตารางวา\"; Owner Submission ไม่มีช่องที่ดิน; Details/Home/ContactRail อ่าน. แก้: ฟิลด์ใหม่ landAreaValue (ค่าที่กรอก) + landAreaUnit (sqwa|sqm) + landAreaSqm (ค่ามาตรฐาน ตร.ม. — คำนวณใหม่จากค่าที่กรอก+หน่วยทุกครั้ง ไม่แปลงซ้ำ และ server คำนวณใหม่ตอนฉายเป็นข้อมูลสาธารณะ); landSize เดิมไม่ถูกแตะ/ติดป้าย/แปลง; หน้าสาธารณะแสดง \"100 ตร.ว. (400 ตร.ม.)\" หรือเลขเดิม \"(ไม่ระบุหน่วย)\" · r9b (Work review): (1) Case Data — ล้างพื้นที่ที่คนบันทึกไว้แล้วล้าง landSize เดิมด้วย (ไม่ให้ preview/public fallback กลับมา); เคสเก่าที่ไม่แตะช่องที่ดินยังเก็บ landSize ไว้; (2) Lister — ตรวจด้วยกติกาเดียวกับ landAreaFields: ค่าที่ builder ปฏิเสธ/ล้างหน่วยจากรายการที่มีหน่วยแล้ว = แจ้งข้อผิดพลาดและไม่เขียนข้อมูล; legacy ที่ไม่ได้แก้จริงยังไม่ถูกบล็อก · r9e/r9f: deploy TEST ที่ 958c877 แล้ว (เจ้าของ deploy; Work ยืนยัน) — หลักฐาน Cloud: Owner preview, เผยแพร่ (Owner), ไทย, จีน ถูกต้อง (TD1–TD4); ล้างค่า/อีก 6 ภาษา/บันทึกซ้ำ ยังไม่ครบบน Cloud",
    "evidence": "SOURCE (อ่านโค้ด) · ภาพ Cloud ตรงกัน",
    "minFix": "ไฟล์ที่แก้: land-area.js (ใหม่), functions/land-area.js (ใหม่), case-fields.js ×2 (allow-list), functions/listing-case.js (คำนวณใหม่ตอนฉาย), tools/listing-test/build-functions.js, Case Data.dc.html, Lister Dashboard.dc.html, public-preview.js, Property Details.dc.html, intake-workflow.js, data.js (ข้อความ 8 ภาษา). ไม่แก้: พื้นที่ใช้สอย, ข้อมูล Cloud, Admin Dashboard, AI Quick Add, AI draft (Functions), Owner Submission",
    "reqCheck": [

@@ -919,4 +919,30 @@ const preview = async (page, state, ms) => waitFor(async () => (await page.getAt
     await a.ctx.close(); await db.doc("properties/" + id).delete();
     rec("B23", "r9 review: agent form refuses a too-large value and a cleared unit (no write, error shown); clearing the box clears all land fields", "PASS (local browser + emulators)", "synthetic listing written to the emulator and deleted afterwards");
   });
+
+  it("B24 (r9e, characterisation — NO source fix) the real sequence Work asked for: Owner opens the case card → intake-approves → reads the approver name and the submission history WITHOUT refreshing → refreshes. Records what the page shows each time and what the database holds, to tell a stale cache from a missing record", async () => {
+    const tpl = (await db.doc("caseInternal/" + (ids.sevenCase || ids.agentCase)).get()).data(); const lid = "d24-stale-case"; const now = Date.now();
+    const clean = { ...tpl }; ["approvedBy", "approvedByEmail", "approvedByUid", "approvedByRole", "approvedAt", "approvedSubmissionId", "intakeCompletedAt", "publishedAt", "publicId", "reviewReturn"].forEach((k) => delete clean[k]);
+    await db.doc("caseInternal/" + lid).set({ ...clean, source: "owner_submission", internalSplit: true, listingStatus: "pending", reviewStatus: "waiting_review", submissionCount: 1, lastSubmissionId: "s-d24", lastSubmittedAt: now - 60000, assignedToEmail: "staff@example.test", assignedToUid: ids.staff });
+    await db.doc("properties/" + lid + "/submissions/s-d24").set({ submissionNumber: 1, workflowVersion: "intake_v1", submittedAt: now - 60000, submittedBy: "staff@example.test", submittedByUid: ids.staff, workflowState: null, keyData: null, photoCount: 0, reviewResult: null, reviewedBy: null, reviewedAt: null, returnReason: null });
+    const keep = ids.outsiderCase; ids.outsiderCase = lid; const obs = {};
+    try {
+      const o = await newPage({}, "owner-d24"); await loginAdmin(o.page, "owner@example.test"); await openCase(o.page); await sleep(2000);
+      const card = async (page) => page.evaluate((cid) => { const leaf = Array.from(document.querySelectorAll("*")).find((e) => e.children.length === 0 && (e.textContent || "").trim() === cid); let a = leaf; for (let i = 0; i < 14 && a; i++, a = a.parentElement) { const t = a.innerText || ""; if (/ส่งงานแล้ว|อนุมัติรับเรื่องโดย|ประวัติการส่งงาน/.test(t) && t.length > 200) return t.replace(/\s+/g, " "); } return ""; }, lid);
+      const lines = (t) => ({ approver: (/อนุมัติรับเรื่องโดย [^·]*?(?= ·| ✓|$)/.exec(t) || [""])[0].trim(), history: (/ครั้งที่ 1 ·[^📝]*?(รอตรวจ|อนุมัติ|ส่งกลับ|ขอข้อมูลเพิ่ม)/.exec(t) || [""])[0].trim().slice(-60) });
+      await scrollToCase(o.page); obs.before = lines(await card(o.page)); await H.shot(o.page, "69-d24-before-approve");
+      await clickIntakeApprove(o.page);
+      await waitFor(async () => (await db.doc("caseInternal/" + lid).get()).data().reviewStatus === "approved", 20000, "intake approved by the Owner's click");
+      await sleep(3000); obs.afterNoRefresh = lines(await card(o.page)); obs.afterNoRefreshText = (await card(o.page)).slice(0, 700); await H.shot(o.page, "70-d24-after-approve-no-refresh");
+      const sub = (await db.doc("properties/" + lid + "/submissions/s-d24").get()).data(); const rc = (await db.doc("caseInternal/" + lid).get()).data();
+      obs.db = { submissionReviewResult: sub.reviewResult, submissionReviewedBy: sub.reviewedBy, caseApprovedBy: rc.approvedBy || null, caseApprovedSubmissionId: rc.approvedSubmissionId, caseReviewStatus: rc.reviewStatus };
+      await o.page.reload(); await o.page.waitForSelector("text=" + lid, { timeout: 30000 }); await sleep(3000); await scrollToCase(o.page);
+      obs.afterRefresh = lines(await card(o.page)); obs.afterRefreshText = (await card(o.page)).slice(0, 700); await H.shot(o.page, "71-d24-after-refresh");
+      await o.ctx.close();
+    } finally { ids.outsiderCase = keep; }
+    ids.d24 = obs; console.log("B24 observations: " + JSON.stringify(obs));
+    assert.strictEqual(obs.db.submissionReviewResult, "approved", "the database holds the decision"); assert.strictEqual(obs.db.submissionReviewedBy, "owner@example.test", "the database holds the reviewer");
+    rec("B24", "characterisation (no source fix): intake approval from the UI, read WITHOUT refresh vs AFTER refresh. DB: " + JSON.stringify(obs.db) + " · page before: " + JSON.stringify(obs.before) + " · after approve, no refresh: " + JSON.stringify(obs.afterNoRefresh) + " · after refresh: " + JSON.stringify(obs.afterRefresh), "RECORDED (observation, not a pass/fail of the page)", "synthetic case; shows whether the page text comes from a stale submissions cache or from missing data");
+    for (const sd of (await db.collection("properties/" + lid + "/submissions").get()).docs) await sd.ref.delete(); await db.doc("caseInternal/" + lid).delete();
+  });
 });
