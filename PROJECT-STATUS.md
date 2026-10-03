@@ -2,7 +2,8 @@
 
 **รุ่นหลัก: HP-HANDOFF-2026-10-03-v2 · 3 ตุลาคม 2569 · Asia/Bangkok**
 
-- **สถานะปัจจุบัน (r8):** source/code head `678a04211879352d05e14fbe6166a9186a65507e` (โค้ดเว็บ ไม่เปลี่ยน) · เอกสาร/build base ที่ Work ตรวจ `2c897593321713783d0ba81c7167962e1793be9a` · **Cloud TEST deployed `2c897593321713783d0ba81c7167962e1793be9a`** (เจ้าของลองเคสสังเคราะห์เดิมแล้ว) · production deployed ไม่ทราบ (RED) · Cloud TEST: T10/T13/T14/T16 PASS, T12 FAIL → S-TEST-PUBLIC 6/7 ≈ 86% (เฉพาะขอบเขตนี้) · S-TEST-FLOW 9/9 · ดูบล็อก "ผลปรับรอบ r8" ท้ายเอกสาร; บรรทัดสถานะรุ่นก่อนหน้าด้านล่างเป็น **ประวัติ**
+- **สถานะปัจจุบัน (r9):** source/code head `d7ee37e9323115168e8d0179372e9c2015ec42c4` (โค้ดเว็บ+Functions เปลี่ยน: หน่วยที่ดิน D2) · เอกสาร/build base ที่ Work ตรวจ `d0ffd49b56c5303e69c8c82ddb9b8db374442915` · **Cloud TEST deployed ยังเป็น `2c897593321713783d0ba81c7167962e1793be9a`** (ยังไม่ deploy r9) · production deployed ไม่ทราบ (RED) · T12 คง FAIL จนกว่า Work ตรวจและเจ้าของลอง Cloud TEST · S-TEST-FLOW 9/9 · S-TEST-PUBLIC 6/7 ≈ 86% (ผล Cloud ที่ 2c89759 ไม่เปลี่ยน) · ดูบล็อก "ผลปรับรอบ r9" ท้ายเอกสาร; บรรทัด r8 ด้านล่างเป็น **ประวัติ**
+- [ประวัติ r8] **สถานะ ณ r8:** source/code head `678a04211879352d05e14fbe6166a9186a65507e` (โค้ดเว็บ ไม่เปลี่ยน) · เอกสาร/build base ที่ Work ตรวจ `2c897593321713783d0ba81c7167962e1793be9a` · **Cloud TEST deployed `2c897593321713783d0ba81c7167962e1793be9a`** (เจ้าของลองเคสสังเคราะห์เดิมแล้ว) · production deployed ไม่ทราบ (RED) · Cloud TEST: T10/T13/T14/T16 PASS, T12 FAIL → S-TEST-PUBLIC 6/7 ≈ 86% (เฉพาะขอบเขตนี้) · S-TEST-FLOW 9/9 · ดูบล็อก "ผลปรับรอบ r8" ท้ายเอกสาร; บรรทัดสถานะรุ่นก่อนหน้าด้านล่างเป็น **ประวัติ**
 - [ประวัติ r7] **สถานะ ณ r7:** source/code head `678a04211879352d05e14fbe6166a9186a65507e` (draft ยังไม่ deploy; โค้ดเว็บเท่ากับ `7c1ec6b`) · เอกสาร/build base head ที่ Work ตรวจ `59d3ecb76ba179ce661e74c90040353e404f7604` · Cloud TEST deployed `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5` (ไม่ใช่ source ปัจจุบัน) · production deployed ไม่ทราบ · ขอบเขต checklist 12 ชุด (lock 2: S-TEST-FLOW 9/9, S-TEST-PUBLIC 2/7) · FX-1/2/3/4 ใน draft (ผลในเครื่อง) + ตรวจผลกระทบ component แล้ว รอ Work — ดูบล็อก "ผลปรับรอบ r7" ท้ายเอกสาร; บรรทัดสถานะรุ่นก่อนหน้าด้านล่างเป็น **ประวัติ**
 - [ประวัติ r6] **สถานะ ณ r6:** source/code head `7c1ec6b40bc5c5008d3bd20eb4ed8274bc3a3b99` (draft, ยังไม่ deploy) · เอกสาร/build base head ที่ Work ตรวจ `4a49ea68377f1a8f881891b020a12e1bf70964df` · Cloud TEST deployed `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5` (ไม่ใช่ source ปัจจุบัน) · production deployed ไม่ทราบ · ขอบเขต checklist 12 ชุด (lock 2: S-TEST-FLOW 9/9, S-TEST-PUBLIC 2/7) · FX-1/2/3/4 อยู่ใน draft (ผลในเครื่อง) รอ Work ตรวจ — ดูบล็อก "ผลปรับรอบ r6" ท้ายเอกสาร; บรรทัดที่ระบุ SHA/สถานะรุ่นก่อนหน้าด้านล่างเป็น **ประวัติ**
 - [ประวัติ r5] **สถานะ ณ r5:** Work ตรวจ head เอกสาร `f4d8090e631ad990de43d27570c05fa12b724722`; code/TEST SHA `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5`; ขอบเขต checklist 12 ชุด (lock แล้ว 2: S-TEST-FLOW 9/9, S-TEST-PUBLIC 2/7); R12=PASS; ข้อกำหนดเจ้าของ A1–A10 บันทึกแล้ว; FX-3 อยู่ใน draft branch (ยังไม่ deploy). ดูบล็อก "ผลปรับรอบ r5" ท้ายเอกสาร. บรรทัดถัดไปที่ระบุ `34a0eb0` / "v2 ยังไม่ commit" เป็น **ประวัติ**
@@ -104,6 +105,7 @@ Evidence tags: HISTORY=บันทึกเดิม; OWNER-OLD-CHAT=ข้อ�
 | FX-1/2/4 ใน draft + ทดสอบ FX-3 เพิ่ม + ทะเบียนรุ่น/ผลทดสอบ r6 | 🟡 พร้อมส่ง Work ตรวจ; LOCAL ผ่าน; ยังไม่ deploy | LOCAL/SOURCE | Work ตรวจ diff → เจ้าของ deploy TEST ตาม head ที่ตรวจ |
 | ตรวจผลกระทบ component + FX-1 สองบัญชี r7 | 🟡 พร้อมส่ง Work ตรวจ; LOCAL ผ่าน; ยังไม่ deploy | LOCAL/SOURCE | Work ระบุ head → เจ้าของ deploy TEST → ทดสอบเฉพาะจุด |
 | ซิงก์ผล Cloud TEST ที่ head 2c89759 (r8) | 🟢 REAL-TEST Cloud: T10/T13/T14/T16 PASS, T12 FAIL; S-TEST-PUBLIC 6/7 ≈ 86% (เฉพาะขอบเขตนี้) | ภาพเจ้าของ (Work ตรวจแล้ว) | Work ตรวจชุดส่งต่อ r8; ยังไม่ต้องทดสอบเพิ่ม |
+| D2 หน่วยที่ดิน (FX-5) ใน draft r9 | 🟡 D2 อนุมัติ; แก้ขั้นต่ำใน draft ผ่านทดสอบในเครื่อง; T12 คง FAIL | LOCAL/SOURCE | Work ตรวจ → เจ้าของ deploy TEST (functions+hosting) → ทดสอบ T12 |
 
 ## 4. งานค้างและลำดับถัดไป
 
@@ -615,6 +617,25 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
 
 **ไม่เปลี่ยน/ไม่ทำ:** รอบนี้เอกสารและแผงเท่านั้น — ไม่แก้ source เว็บไซต์/Functions/rules · ไม่ merge · ไม่ deploy · ไม่ migrate หรือลบข้อมูลเพิ่มเติม · ไม่เปิด GREEN · ไม่รัน `tools/chat-live/deploy-test.sh` · production คง RED · เจ้าของยังไม่ต้องส่งเคสใหม่.
 
+
+## ผลปรับรอบ r9 — CODE-V2-01 r9 (3 ต.ค. 2569 · D2 อนุมัติ: แก้หน่วยขนาดที่ดินขั้นต่ำใน draft)
+
+**หัวสี่แบบ (แยกกัน):** source head `d7ee37e9323115168e8d0179372e9c2015ec42c4` (โค้ดเว็บ + Functions) · doc/build base ที่ Work ตรวจ `d0ffd49b56c5303e69c8c82ddb9b8db374442915` · documentation head = commit เอกสารของรอบนี้ (ดู PR) · **Cloud TEST deployed `2c897593321713783d0ba81c7167962e1793be9a`** (ไม่เปลี่ยน) · production deployed: ไม่ทราบ (คง RED). ไม่ merge ไม่ deploy (TEST/production) ไม่เปิด GREEN; ไม่แก้/ไม่ migrate ข้อมูล Cloud รวมเคส TEST เดิม.
+
+**มติ D2 (อนุมัติผ่าน Work):** กรอกขนาดที่ดินได้ทั้ง ตร.ว. และ ตร.ม. มีตัวเลือกหน่วยชัดเจน; 1 ตร.ว. = 4 ตร.ม.; ข้อมูลเก่าที่ไม่ระบุหน่วยห้ามเดาหรือแปลงอัตโนมัติ.
+
+**รูปแบบข้อมูลหลัก (สั้น):** `landAreaValue` (ตัวเลขที่คนกรอก) · `landAreaUnit` (`sqwa`|`sqm`) · `landAreaSqm` (ค่ามาตรฐาน ตร.ม. ปัดทศนิยม 2 ตำแหน่ง คำนวณใหม่จากค่าที่กรอก+หน่วยทุกครั้ง จึงไม่แปลงซ้ำ; server คำนวณใหม่ตอนฉายสู่ข้อมูลสาธารณะ ค่าที่แก้มือไปไม่ถึงหน้าสาธารณะ). `landSize` เดิม = **ไม่มีหน่วย**: โค้ดใหม่ไม่เขียน ไม่ติดป้าย ไม่แปลง; มีขนาดแบบมีหน่วยเมื่อไหร่ ขนาดนั้นชนะค่าเก่า; หน่วยหายหรือผิด = ไม่สร้างฟิลด์. พื้นที่ใช้สอยไม่เปลี่ยน.
+
+**ผลตรวจทุกเส้นทาง landSize:** (1) Case Data (Staff/Owner) — เขียน: แก้แล้ว; (2) Lister Dashboard (เอเจนต์) — เขียน + ข้อความโพสต์: แก้แล้ว; (3) Owner preview (`public-preview.js`) — อ่าน: แก้แล้ว; (4) Property Details สาธารณะ — อ่าน: แก้แล้ว "100 ตร.ว. (400 ตร.ม.)" / เลขเก่า "(ไม่ระบุหน่วย)"; (5) Staff checklist (`intake-workflow.js`) — presence เท่านั้น: รองรับฟิลด์ใหม่; (6) projection ฝั่ง server (`functions/listing-case.js`, allow-list สองชุด): แก้แล้ว; (7) i18n 8 ภาษา: เพิ่ม `sqwa`, `land_unit_unspecified`. **ไม่แก้ (รายงานเท่านั้น):** Owner Submission (ไม่มีช่องที่ดิน), Admin Dashboard และ AI Quick Add (เขียน landSize ป้าย ตร.ม. เลขไม่มีหน่วย), AI draft ใน `functions/index.js` + `draft-completeness.js` (prompt ใช้ "ตารางวา"), Home (sqwah) / ContactRail (sqm) ข้อความบริบท AI ไม่ตรงกัน, ช่อง ไร่/งาน/ตร.ว. ของ Lister เป็นอีกชุด.
+
+**ข้อขัดแย้งกับมติ/ขอบเขตเดิมที่ต้องให้ Work ตัดสิน:** (ก) เส้นทาง AI draft ถือ landSize เป็นตารางวา แต่ข้อมูลเก่าที่เก็บไว้ไม่มีหน่วย — Code ไม่ติดป้ายให้เองแม้รู้ที่มา; (ข) รายการเก่าที่เดิมแสดง "X ตร.ม." จะแสดง "X (ไม่ระบุหน่วย)" หลัง merge (ISS-LAND-LEGACY-DISPLAY); (ค) ต้อง deploy listing functions คู่กับ hosting (ISS-LAND-DEPLOY) เพราะ allow-list/projection เปลี่ยน.
+
+**ไฟล์ที่แก้:** `land-area.js` (ใหม่), `functions/land-area.js` (ใหม่), `case-fields.js`, `functions/case-fields.js`, `functions/listing-case.js`, `tools/listing-test/build-functions.js`, `Case Data.dc.html`, `Lister Dashboard.dc.html`, `Property Details.dc.html`, `public-preview.js`, `intake-workflow.js`, `data.js`, `package.json`, `tests/listing/land-area.test.js` (ใหม่), `tests/listing/core.test.js`, `tests/listing/functions-build.test.js`, `tests/browser-local/scenarios.test.js`, `docs/listing-e2e/browser-local/*` + เอกสาร/แผงสถานะ.
+
+**ผลทดสอบ (LOCAL ที่ source `d7ee37e` — ไม่ใช่ Cloud):** test:listing **99 ผ่าน** (LA1–LA5: 100 ตร.ว.=400 ตร.ม., 400 ตร.ม.=100 ตร.ว., แปลงครั้งเดียว/ซ้ำไม่เปลี่ยน, ไม่เดาข้อมูลเก่า, browser/server ตรงกัน; L1–L4: server คำนวณใหม่, legacy ผ่านตามเดิม, หน่วยผิดไม่ขึ้นสาธารณะ, แก้ซ้ำไม่แปลงซ้ำ) · test:browser-local **21/21 ผ่าน** (B11 บันทึก→รีเฟรช→แก้→บันทึกซ้ำ 3 ครั้งไม่แปลงซ้ำ; B19 Staff→Owner preview→เผยแพร่ ครบ 8 ภาษา; B20 ข้อมูลเก่าไม่เดา; B21 ฟอร์มเอเจนต์) · test:chat-live 34 ผ่าน (12 pending) · negative control: ใช้หน้าเดิม → B11/B19/B20/B21 ล้ม (17 ผ่าน/4 ล้ม); ปิดการคำนวณใหม่ของ server → L1/L3 ล้ม · combined suite: ไม่ได้รัน (คง UNVERIFIED) · D08 (B2 flake) คง FAIL ตามบันทึกเดิม.
+
+**ข้อจำกัด:** ยังไม่ทดสอบบน Cloud TEST (T12 คง FAIL); เส้นทาง Lister ครอบคลุมเฉพาะ edit/save ที่ B21 ทดสอบ; ไม่ได้เปลี่ยนข้อมูลเก่าใด ๆ; ผล PASS ทั้งหมดของรอบนี้เป็นหลักฐาน LOCAL เท่านั้น. Production RED.
+
 ## 6. STATUS-REGISTRY — ข้อมูลเครื่องอ่านของแผงภายใน (แก้ที่นี่ที่เดียว แล้วรัน `npm run status-panel`)
 
 ตาราง §1–§3 ด้านบนเป็นต้นทางของ Roadmap/ฐานระบบ/งานปัจจุบัน (แผงอ่านตรงจากตาราง). บล็อกนี้เก็บเฉพาะสิ่งที่ตารางไม่มี: ผู้รับผิดชอบ/ขอบเขต/วัน-commit ของแต่ละงาน (`taskMeta`), checklist ร่างสำหรับเปอร์เซ็นต์ (`scopes`, ทุกชุด `locked:false` จนกว่า Work lock), ทะเบียนค้าง (`issues`) และประวัติ. สถานะรายการใน checklist: `pass` / `fail` / `blocked` / `unverified` / `na` (N/A ต้องมีเหตุผลใน `ref`). ห้ามใส่รหัสผ่าน คีย์ อีเมล เบอร์ หรือ token.
@@ -627,33 +648,33 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   "id": "HP-HANDOFF-2026-10-03-v2",
   "date": "2026-10-03",
   "tz": "Asia/Bangkok",
-  "docBaseSha": "2c897593321713783d0ba81c7167962e1793be9a",
+  "docBaseSha": "d0ffd49b56c5303e69c8c82ddb9b8db374442915",
   "deployedTestSha": "2c897593321713783d0ba81c7167962e1793be9a",
   "deployedProdSha": "ไม่ทราบ",
   "prState": "PR #8 OPEN / DRAFT / NOT MERGED · base claude/chat-live-01",
   "website": "RED / Public Hidden (ตามรายงาน ไม่ได้ตรวจสดรอบนี้)",
-  "revision": "r8 (Code · ซิงก์ผล Cloud TEST ที่ head 2c89759 — เอกสารและแผงเท่านั้น)",
-  "set": "HP-HANDOFF-2026-10-03-v2 + CODE-V2-01 r8",
-  "sourceHeadSha": "678a04211879352d05e14fbe6166a9186a65507e"
+  "revision": "r9 (Code · D2 หน่วยที่ดิน — แก้ขั้นต่ำใน draft)",
+  "set": "HP-HANDOFF-2026-10-03-v2 + CODE-V2-01 r9",
+  "sourceHeadSha": "d7ee37e9323115168e8d0179372e9c2015ec42c4"
  },
  "goal": "ให้เจ้าของและทีมลงประกาศพร้อมรูปจนเผยแพร่ได้จริงอย่างปลอดภัย (ส่งฟอร์ม → Staff เตรียม → Owner อนุมัติ/เผยแพร่ → หน้าสาธารณะ) บนเว็บ huahin.properties โดยยังไม่เปิดเว็บสาธารณะจนกว่าเจ้าของอนุมัติ",
  "current": {
-  "task": "ซิงก์ผล Cloud TEST ที่ head 2c89759 (เอกสารและแผงเท่านั้น) — T10/T13/T14/T16 PASS, T12 FAIL, S-TEST-PUBLIC 6/7",
+  "task": "D2 อนุมัติ: แก้ขนาดที่ดิน (ตร.ว./ตร.ม.) ขั้นต่ำใน draft — เก็บค่าที่กรอก+หน่วย+ค่ามาตรฐาน; ข้อมูลเก่าไม่เดา; รอ Work ตรวจ",
   "phases": [
    "LISTING-E2E-01",
    "ชุดส่งต่อ"
   ],
   "environments": [
    "เอกสาร",
-   "TEST (Cloud ผลใหม่)"
+   "พัฒนา (โค้ด/ในเครื่อง)"
   ],
   "actor": "Claude Code → ส่ง ChatGPT Work ตรวจ"
  },
  "youDoNow": {
-  "text": "ยังไม่ต้องทำอะไร — เจ้าของยังไม่ต้องส่งเคสใหม่หรือทดสอบเพิ่ม; รอ ChatGPT Work ตรวจชุดส่งต่อรุ่นนี้",
+  "text": "ยังไม่ต้องทำอะไร — ไม่ต้องส่งเคสใหม่หรือทดสอบเพิ่ม; รอ ChatGPT Work ตรวจ draft หน่วยที่ดิน",
   "where": "ไม่มีหน้าจอที่ต้องเปิด",
-  "passWhen": "Work แจ้งผลตรวจ",
-  "next": "ยังไม่มีคำสั่ง deploy/merge/ทดสอบเพิ่ม; ค้างต่อ: T12 (หน่วยที่ดิน D2), ISS-MAP-LIMITS, T17a–c/T18b, บัญชีอื่น/สิทธิ์/ข้อมูลเก่า/AI จริง"
+  "passWhen": "Work ตรวจและระบุ head ที่ให้ deploy TEST (เจ้าของ deploy เองเท่านั้น)",
+  "next": "T12 คง FAIL จนกว่า Work ตรวจและเจ้าของทดสอบบน Cloud TEST; ยังไม่มีคำสั่ง deploy/merge"
  },
  "actors": {
   "owner": "เจ้าของ (Product Owner)",
@@ -745,6 +766,34 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
      "status": "pass",
      "level": "LOCAL",
      "ref": "browser-local B16 (3 กรณี: สองบัญชี / ไม่มี approvedSubmissionId / บทบาทอย่างเดียว) — เป็นข้อมูลสังเคราะห์ที่เขียนตรงใน emulator"
+    },
+    {
+     "id": "D20",
+     "text": "โมเดลข้อมูลขนาดที่ดิน: เก็บค่าที่กรอก + หน่วย (sqwa|sqm) + ค่ามาตรฐาน ตร.ม. คำนวณครั้งเดียวจากค่าที่กรอก; 100 ตร.ว. = 400 ตร.ม.; 400 ตร.ม. = 100 ตร.ว.; หน่วยหายหรือผิด = ไม่มีค่า (ไม่เดา); server คำนวณใหม่ตอนฉายสาธารณะ ค่า landAreaSqm ที่แก้มือผ่านไปหน้าสาธารณะไม่ได้ (D2, draft)",
+     "status": "pass",
+     "level": "LOCAL",
+     "ref": "tests/listing/land-area.test.js LA1–LA5 + core.test.js L1–L4 (ล้มเมื่อปิดการคำนวณใหม่ของ server) · ที่ source d7ee37e"
+    },
+    {
+     "id": "D21",
+     "text": "หน้า Case Data (Staff/Owner): กรอกขนาดที่ดิน + เลือกหน่วย; ไม่มีหน่วย = ปฏิเสธ; บันทึก → รีเฟรช → เปิดแก้ → บันทึกซ้ำ 3 ครั้ง ไม่แปลงซ้ำ (100 ตร.ว. คง 400 ตร.ม.); สลับเป็น 400 ตร.ม. ได้; ข้อมูลเก่าแสดงเป็นข้อมูลเฉย ๆ ไม่เติมค่า ไม่แปลง (D2, draft)",
+     "status": "pass",
+     "level": "LOCAL",
+     "ref": "browser-local B11 + B20 (ผ่าน; negative control ล้มเมื่อใช้หน้าเดิม)"
+    },
+    {
+     "id": "D22",
+     "text": "Staff → Owner preview → เผยแพร่ แสดง \"100 ตร.ว. (400 ตร.ม.)\" ใน preview และหน้าสาธารณะครบ 8 ภาษา; ข้อมูลเก่าไม่ระบุหน่วยแสดงเลขโดยไม่ติดป้ายหน่วย + \"ไม่ระบุหน่วย\" ไม่แปลง; ขนาดที่มีหน่วยชนะค่าเก่า (D2, draft)",
+     "status": "pass",
+     "level": "LOCAL",
+     "ref": "browser-local B19 (8 ภาษา) + B20 (th/en/ru/de/zh) — ไม่ใช่ Cloud"
+    },
+    {
+     "id": "D23",
+     "text": "ฟอร์มเอเจนต์ (Lister Dashboard): มีตัวเลือกหน่วย; ค่าเก่าไม่ระบุหน่วยแสดงพร้อมหมายเหตุ ไม่เดา และไม่บล็อกการบันทึกฟิลด์อื่น; แก้ค่าแล้วต้องเลือกหน่วย; 150 ตร.ว. เก็บเป็น 150 / sqwa / 600 ตร.ม. ค่า landSize เดิมไม่ถูกแตะ (D2, draft)",
+     "status": "pass",
+     "level": "LOCAL",
+     "ref": "browser-local B21"
     }
    ]
   },
@@ -827,14 +876,14 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
      "text": "test:listing ที่ head ปัจจุบัน",
      "status": "pass",
      "level": "LOCAL",
-     "ref": "LOCAL · test:listing 90 ผ่าน ที่ source SHA 678a042 (รันรอบนี้)"
+     "ref": "LOCAL · test:listing 99 ผ่าน ที่ source SHA d7ee37e (รวม land-area LA1–LA5 และ L1–L4)"
     },
     {
      "id": "D12b",
      "text": "test:chat-live ที่ head ปัจจุบัน",
      "status": "pass",
      "level": "LOCAL",
-     "ref": "LOCAL · test:chat-live 34 ผ่าน ที่ source SHA 7c1ec6b — ไฟล์เว็บ production-facing ไม่เปลี่ยนตั้งแต่นั้น (รอบ r7 เปลี่ยนเฉพาะไฟล์ test) จึงไม่รันซ้ำ"
+     "ref": "LOCAL · test:chat-live 34 ผ่าน ที่ source SHA d7ee37e (รันเพราะแตะ data.js)"
     },
     {
      "id": "D12c",
@@ -848,7 +897,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
      "text": "test:browser-local ที่ head ปัจจุบัน",
      "status": "pass",
      "level": "LOCAL",
-     "ref": "LOCAL · browser-local ที่ source SHA 678a042: รอบเต็ม 18/18 ผ่าน (รวม B14–B18 ใหม่); ก่อนหน้า head 4a49ea6 = 3 รอบ ผ่าน 2 / ล้ม 1 ที่ B2 (flake เดิม ดู D08) — ไม่ได้ลบรอบที่ล้ม"
+     "ref": "LOCAL · browser-local ที่ source SHA d7ee37e: รอบเต็ม 21/21 ผ่าน (รวม B19–B21 ใหม่); ก่อนหน้า head 4a49ea6 = 3 รอบ ผ่าน 2 / ล้ม 1 ที่ B2 (flake เดิม ดู D08) — ไม่ได้ลบรอบที่ล้ม"
     }
    ]
   },
@@ -1320,6 +1369,13 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
      "status": "pass",
      "level": "DOCS",
      "ref": "tests/status-panel P16"
+    },
+    {
+     "id": "R18",
+     "text": "บันทึกมติ D2 + ผลตรวจทุกเส้นทาง landSize + ข้อขัดแย้งที่รายงาน + ผลทดสอบ ลงชุดส่งต่อสามไฟล์/แผง (r9)",
+     "status": "pass",
+     "level": "DOCS",
+     "ref": "tests/status-panel P17"
     }
    ]
   }
@@ -1563,6 +1619,20 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
     "T14",
     "T16"
    ]
+  },
+  "D2 หน่วยที่ดิน (FX-5) ใน draft r9": {
+   "id": "W19",
+   "env": "dev",
+   "scope": "S-DEV-CORE",
+   "actor": "work",
+   "date": "2026-10-03",
+   "commit": "source d7ee37e",
+   "items": [
+    "D20",
+    "D21",
+    "D22",
+    "D23"
+   ]
   }
  },
  "issues": [
@@ -1578,13 +1648,13 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   },
   {
    "id": "DOC-OBS-02",
-   "title": "ขนาดที่ดินกรอกเป็น ตร.ว. แต่หน้า Details แสดง ตร.ม.",
+   "title": "ขนาดที่ดินกรอก ตร.ว. แต่ Details แสดง ตร.ม. — D2 อนุมัติ; แก้ใน draft (FX-5) รอ Work ตรวจ + เจ้าของลอง TEST",
    "sev": "high",
    "status": "open",
    "env": "test",
-   "actor": "owner",
-   "next": "เจ้าของตัดสิน D2 + Code ต้องการตัวอย่างข้อมูลจริงแบบอ่านอย่างเดียว (หน่วยของ landSize ที่มีอยู่) ก่อนเสนอแก้",
-   "source": "SOURCE (r6): ที่มาแต่ละ flow = ตร.ว./ตร.ม./sqwah/sqm ปนกัน (ดู FX-5); ไม่มีโค้ดแปลง · Cloud TEST 3 ต.ค.: T12 ยัง FAIL — กรอก 100 ตร.ว. แต่ Details แสดง 100 sqm"
+   "actor": "work",
+   "next": "Work ตรวจ draft → เจ้าของ deploy TEST (listing functions + hosting) ตาม head ที่ Work ระบุ → ทดสอบ T12 บนเคสสังเคราะห์ใหม่; T12 คง FAIL จนกว่าจะลองบน Cloud TEST",
+   "source": "SOURCE (r6): ที่มาแต่ละ flow = ตร.ว./ตร.ม./sqwah/sqm ปนกัน (ดู FX-5); ไม่มีโค้ดแปลง · Cloud TEST 3 ต.ค.: T12 ยัง FAIL — กรอก 100 ตร.ว. แต่ Details แสดง 100 sqm · r9 LOCAL: B11/B19/B20/B21 + LA1–LA5 + L1–L4 ผ่านที่ source d7ee37e (ยังไม่ deploy; ยังไม่แก้/ไม่ migrate ข้อมูล Cloud)"
   },
   {
    "id": "DOC-OBS-03",
@@ -1875,6 +1945,36 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "actor": "work",
    "next": "ห้ามประกาศว่าแผนที่/ตำแหน่งถูกต้องครบ; ต้องมีมติว่า \"พื้นที่ระดับใดเปิดสาธารณะได้\" ก่อนออกแบบ (ขึ้นกับ D2/ข้อกำหนดความเป็นส่วนตัว)",
    "source": "SOURCE (r7): coordsRaw เป็นฟิลด์ภายใน; Property Details ใช้ ZONE_COORDS หรือจุดกลาง 12.55,99.96 · Cloud TEST 3 ต.ค.: แผนที่พื้นที่ทั่วไปยังไม่ยืนยันตำแหน่งจริง (คงข้อจำกัด)"
+  },
+  {
+   "id": "ISS-LAND-CONFLICTS",
+   "title": "ส่วนที่พบข้อขัดแย้งกับมติเดิม/ขอบเขต — รายงานแล้วยังไม่แก้: AI draft (Functions) ใช้ landSize เป็น \"ตารางวา\" ตาม prompt + เกณฑ์ completeness ของ AI; Owner Submission ไม่มีช่องที่ดิน; Admin Dashboard/AI Quick Add เขียน landSize ป้าย ตร.ม. เป็นตัวเลขไม่มีหน่วย; ข้อความบริบท AI ใน Home (sqwah) กับ ContactRail (sqm) ไม่ตรงกัน; ช่อง ไร่/งาน/ตร.ว. ของ Lister เป็นอีกชุด",
+   "sev": "med",
+   "status": "open",
+   "env": "dev",
+   "actor": "work",
+   "next": "Work ตัดสินว่าจะให้ทำส่วนใดต่อ (ต้องแตะ Functions AI/Phase 2A หรือหน้า Admin) — Code ไม่ติดป้ายหน่วยให้ข้อมูลเก่าเองแม้รู้ที่มา (เช่นแหล่ง AI = ตร.ว.) จนกว่าจะมีมติ",
+   "source": "SOURCE (r9): functions/index.js:387,455,698; functions/draft-completeness.js:56-58; Owner Submission.dc.html (ไม่มีช่อง); Admin Dashboard.dc.html; AI Quick Add.dc.html; Home.dc.html:828; ContactRail.dc.html:1729"
+  },
+  {
+   "id": "ISS-LAND-LEGACY-DISPLAY",
+   "title": "หน้าสาธารณะของรายการเก่าที่มีเลข landSize ไม่ระบุหน่วย: เดิมแสดง \"X ตร.ม.\" (เดาหน่วย) — หลังแก้แสดง \"X (ไม่ระบุหน่วย)\" และ Owner preview แสดงเช่นกัน",
+   "sev": "med",
+   "status": "open",
+   "env": "prod",
+   "actor": "work",
+   "next": "Work รับทราบการเปลี่ยนพฤติกรรมก่อน merge (ตามมติห้ามเดา); ผู้ที่ทราบหน่วยแก้รายการทีละรายการผ่านฟอร์ม; ไม่มีการแปลงอัตโนมัติ",
+   "source": "LOCAL (r9): B20; SOURCE: Property Details.dc.html landAreaSpec"
+  },
+  {
+   "id": "ISS-LAND-DEPLOY",
+   "title": "ฟิลด์ที่ดินใหม่ต้องใช้ listing functions ใหม่ด้วย: Cloud TEST ที่ deploy อยู่ (2c89759) ยังไม่ฉาย landAreaValue/Unit/Sqm สู่หน้าสาธารณะ — ถ้า deploy เฉพาะ hosting หน้าสาธารณะจะไม่เห็นขนาดที่ดินใหม่",
+   "sev": "low",
+   "status": "open",
+   "env": "test",
+   "actor": "work",
+   "next": "เมื่อ Work สั่ง deploy TEST ให้ deploy ทั้ง listing functions และ hosting ด้วย tools/listing-test/deploy-test.sh ตาม head ที่ตรวจ",
+   "source": "SOURCE (r9): functions/case-fields.js, functions/listing-case.js, functions/land-area.js เปลี่ยน"
   }
  ],
  "history": [
@@ -1947,6 +2047,16 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "date": "2026-10-03",
    "text": "r8: ซิงก์ผล Cloud TEST ลงชุดส่งต่อ/แผง (เอกสารและแผงเท่านั้น)",
    "ref": "source 678a042"
+  },
+  {
+   "date": "2026-10-03",
+   "text": "Work/เจ้าของอนุมัติ D2 (กรอกได้ทั้ง ตร.ว./ตร.ม., 1 ตร.ว. = 4 ตร.ม., ข้อมูลเก่าห้ามเดา/แปลง)",
+   "ref": "มติ D2"
+  },
+  {
+   "date": "2026-10-03",
+   "text": "r9: แก้ขั้นต่ำหน่วยที่ดินใน draft (FX-5) + ผลตรวจทุกเส้นทาง + ข้อขัดแย้งที่รายงาน",
+   "ref": "source d7ee37e"
   }
  ],
  "decisions": [
@@ -1973,8 +2083,9 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    ],
    "codeView": "ข้อเสนอของ Code (ไม่ใช่มติ): ตัดสินหน่วยก่อน แล้วค่อยตั้งขอบเขตแก้ DOC-OBS-02; ห้ามแก้ค่าบน Cloud. หมายเหตุจาก source: ฟอร์มสมาชิกมีทั้ง landSize (ตร.ว.) และ ไร่/งาน/ตร.ว. แยกชุด",
    "decider": "owner",
-   "status": "open",
-   "affects": "DOC-OBS-02, T12"
+   "status": "decided",
+   "affects": "DOC-OBS-02, T12",
+   "outcome": "เจ้าของเห็นด้วยกับข้อเสนอ (ผ่าน Work, 3 ต.ค.): กรอกขนาดที่ดินได้ทั้ง ตร.ว. และ ตร.ม. มีตัวเลือกหน่วยชัดเจนและแปลงถูกต้อง (1 ตร.ว. = 4 ตร.ม.); ข้อมูลเก่าที่ไม่ระบุหน่วย ห้ามเดาหรือแปลงอัตโนมัติ"
   },
   {
    "id": "D3",
@@ -2240,20 +2351,22 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   {
    "id": "FX-5",
    "obs": "DOC-OBS-02",
-   "title": "หน่วยที่ดิน — ตรวจที่มาแต่ละ flow แล้ว ยังไม่เปลี่ยนอะไร (รอข้อมูล/มติ)",
-   "finding": "หน่วยที่แต่ละ flow ใช้กับ landSize (ตรวจจาก source): Lister Dashboard และ Case Data = ตร.ว. (ป้าย) · Admin Dashboard \"ขนาดที่ดิน (ตร.ม.)\" · AI Quick Add \"ที่ดิน (ตร.ม.)\" และ prompt ใช้ sqm · หน้า Details = ตร.ม. · Home (ข้อความสเปคให้ AI) \"sqwah\" แต่ ContactRail ส่ง \"sqm\" · Owner Submission (ฟอร์มสาธารณะ) ไม่มีช่องที่ดิน · ฟอร์ม Lister มีช่อง ไร่/งาน/ตร.ว. แยกอีกชุด · ไม่มีโค้ดแปลงหน่วยที่ใด. ผลคือฟิลด์เดียวมีสองความหมายตามช่องทางที่กรอก",
+   "title": "หน่วยที่ดิน (D2 อนุมัติแล้ว) — แก้ขั้นต่ำใน draft: เก็บค่าที่กรอก + หน่วย + ค่ามาตรฐาน ตร.ม.; ข้อมูลเก่าไม่เดา",
+   "finding": "ตรวจทุกเส้นทางอ่าน/เขียน landSize (ดูบล็อก r9): Case Data และ Lister Dashboard เขียน; Admin Dashboard/AI Quick Add เขียน (ป้าย ตร.ม.); AI draft ใน Functions เขียนตาม prompt \"ตารางวา\"; Owner Submission ไม่มีช่องที่ดิน; Details/Home/ContactRail อ่าน. แก้: ฟิลด์ใหม่ landAreaValue (ค่าที่กรอก) + landAreaUnit (sqwa|sqm) + landAreaSqm (ค่ามาตรฐาน ตร.ม. — คำนวณใหม่จากค่าที่กรอก+หน่วยทุกครั้ง ไม่แปลงซ้ำ และ server คำนวณใหม่ตอนฉายเป็นข้อมูลสาธารณะ); landSize เดิมไม่ถูกแตะ/ติดป้าย/แปลง; หน้าสาธารณะแสดง \"100 ตร.ว. (400 ตร.ม.)\" หรือเลขเดิม \"(ไม่ระบุหน่วย)\"",
    "evidence": "SOURCE (อ่านโค้ด) · ภาพ Cloud ตรงกัน",
-   "minFix": "ยังไม่เปลี่ยนหน่วย ป้ายทั้งระบบ หรือข้อมูล Cloud. ข้อมูลที่ขาดเพื่อเสนอทางแก้ได้: (1) หน่วยของค่า landSize ที่มีอยู่แล้วใน properties บน production/TEST แยกตามช่องทางที่กรอก (ต้องดูตัวอย่างข้อมูลจริงแบบอ่านอย่างเดียว) (2) มติ D2 ว่าหน่วยหลักคืออะไร. เมื่อได้ทั้งสองข้อ จะเสนอ: ป้ายหน่วยเดียวทั้งระบบ + ฟิลด์ที่บันทึกหน่วยพร้อมค่า (ไม่แปลงข้อมูลเดิมเงียบๆ)",
+   "minFix": "ไฟล์ที่แก้: land-area.js (ใหม่), functions/land-area.js (ใหม่), case-fields.js ×2 (allow-list), functions/listing-case.js (คำนวณใหม่ตอนฉาย), tools/listing-test/build-functions.js, Case Data.dc.html, Lister Dashboard.dc.html, public-preview.js, Property Details.dc.html, intake-workflow.js, data.js (ข้อความ 8 ภาษา). ไม่แก้: พื้นที่ใช้สอย, ข้อมูล Cloud, Admin Dashboard, AI Quick Add, AI draft (Functions), Owner Submission",
    "reqCheck": [
-    "ต้องตัดสิน D2 ก่อน",
-    "ข้อมูลที่บันทึกไปแล้ว (เช่น 100) ต้องไม่ถูกคูณ/แปลงย้อนหลังโดยอัตโนมัติ",
-    "ต้องมีคำแปลหน่วยครบ 8 ภาษา"
+    "ตามมติ D2: 1 ตร.ว. = 4 ตร.ม.; ข้อมูลเก่าห้ามเดา/แปลง",
+    "ไม่เปลี่ยนหน่วยพื้นที่ใช้สอย",
+    "ไม่แก้/ไม่ migrate ข้อมูล Cloud (รวมเคส TEST เดิม)",
+    "ข้อความหน่วยครบ 8 ภาษาในระบบ i18n เดิม",
+    "แตะ Functions เล็กน้อย (allow-list + คำนวณใหม่ตอนฉาย) — ต้อง deploy listing functions คู่กับ hosting เมื่อเจ้าของลอง"
    ],
-   "test": "page test ตามหน่วยที่เลือก (100 ตร.ว. ต้องแสดงตรงกับหน่วยที่ประกาศ)",
-   "risk": "ปานกลาง (เกี่ยวข้องความหมายข้อมูล)",
+   "test": "tests/listing/land-area.test.js (LA1–LA5) + core.test.js L1–L4 + browser-local B11/B19/B20/B21",
+   "risk": "ปานกลาง (เปลี่ยนความหมายข้อมูลใหม่ + แตะ Functions เล็กน้อย; ข้อมูลเก่าไม่ถูกแตะ)",
    "order": 5,
-   "decider": "owner",
-   "status": "blocked-decision"
+   "decider": "work",
+   "status": "in-draft"
   }
  ],
  "reqs": [
