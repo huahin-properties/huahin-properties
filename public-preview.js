@@ -3,13 +3,20 @@
 // private-photo loader), the reasons the server would refuse, and — for a live listing — what changes compared with the page as it is now.
 // Resolves true only if the Owner presses the confirm button. The decision is bound to the preview's signature: if the content changes afterwards, the
 // server refuses (reviewed_content_changed) and the Owner has to look again.
-const FIELD_LABELS = { title: "ชื่อประกาศ", type: "ประเภท", status: "ขาย/เช่า", price: "ราคา", area: "อำเภอ", subdistrict: "ตำบล", zone: "โซน", bedrooms: "ห้องนอน", bathrooms: "ห้องน้ำ", description: "คำอธิบาย", fullDesc: "คำอธิบายเต็ม", shortDesc: "คำอธิบายสั้น", features: "จุดเด่น", landSize: "ที่ดิน", livingArea: "พื้นที่ใช้สอย", mapLink: "ลิงก์แผนที่" };
+import { landAreaView } from "./land-area.js";
+const FIELD_LABELS = { title: "ชื่อประกาศ", type: "ประเภท", status: "ขาย/เช่า", price: "ราคา", area: "อำเภอ", subdistrict: "ตำบล", zone: "โซน", bedrooms: "ห้องนอน", bathrooms: "ห้องน้ำ", description: "คำอธิบาย", fullDesc: "คำอธิบายเต็ม", shortDesc: "คำอธิบายสั้น", features: "จุดเด่น", landSize: "ที่ดิน (ค่าเดิม ไม่ระบุหน่วย)", landArea: "ที่ดิน", livingArea: "พื้นที่ใช้สอย", mapLink: "ลิงก์แผนที่" };
 const REFUSALS = { public_text_has_contact_info: "ข้อความที่จะขึ้นเว็บมีเบอร์/อีเมล/ลิงก์/ไอดีติดต่อ — แก้ข้อความก่อน", price_required_to_publish: "ยังไม่มีราคา (เคสขอประเมินราคา) — ใส่ราคาก่อนเผยแพร่", intake_not_approved: "ยังไม่ได้บันทึกผลอนุมัติการรับเรื่อง", photos_below_minimum: "รูปยังไม่ถึงขั้นต่ำตามประเภททรัพย์", not_publishable_status: "สถานะปัจจุบันเผยแพร่ไม่ได้" };
 export function previewRows(pv) {
   const cur = pv.currentPublicDocument || null;
   const rows = [];
   const keys = Object.keys(pv.publicDocument || {}).filter((k) => pv.publicDocument[k] !== null && pv.publicDocument[k] !== undefined && pv.publicDocument[k] !== "");
+  // D2: the three land-area fields are ONE row "ที่ดิน": the value as entered with its unit and the same area in the other unit; the old unitless landSize is shown without any unit.
+  const landText = (doc) => { const v = doc ? landAreaView(doc) : null; if (!v) return ""; const u = (k) => (k === "sqwa" ? "ตร.ว." : "ตร.ม."), n = (x) => String(Math.round(x * 100) / 100); return v.kind === "known" ? n(v.value) + " " + u(v.unit) + " (" + n(v.otherValue) + " " + u(v.otherUnit) + ")" : n(v.value) + " (ไม่ระบุหน่วย)"; };
+  const isLand = (k) => k === "landAreaValue" || k === "landAreaUnit" || k === "landAreaSqm" || k === "landSize";
+  const nowLand = landText(pv.publicDocument);
+  if (nowLand) { const before = cur ? landText(cur) : null; rows.push({ key: "landArea", label: FIELD_LABELS.landArea, text: nowLand, before, changed: before !== null && before !== nowLand }); }
   keys.forEach((k) => {
+    if (isLand(k)) return;
     const v = pv.publicDocument[k];
     const show = (x) => (x && typeof x === "object" && !Array.isArray(x) && (x.th || x.en) ? [x.th, x.en].filter(Boolean).join(" / ") : x && typeof x === "object" ? JSON.stringify(x) : k === "price" && Number(x) > 0 ? Number(x).toLocaleString("en-US") : String(x));
     const text = show(v);

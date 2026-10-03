@@ -442,6 +442,15 @@ function parseLatLngHH(input) {
 // calculations from the owner's actual pinned coordinates (2026-08 fix —
 // previously these read a static distanceBeach/distanceTown field that
 // self-serve listings never set, always showing "0 km").
+// D2 land size for the public page. Known unit → the value as entered WITH its unit, and the same area in the other unit; an old unitless number is shown WITHOUT any unit and says
+// "unit not specified" (never labelled ตร.ม./ตร.ว. by guessing); nothing → no row.
+function landAreaSpec(raw, t, lm) {
+  if (!lm) return null;
+  const v = lm.landAreaView(raw); if (!v) return null;
+  const u = (k) => (k === "sqwa" ? t.sqwa : t.sqm), n = (x) => String(Math.round(x * 100) / 100);
+  if (v.kind === "known") return { label: t.land_size_label, value: n(v.value) + " " + u(v.unit) + " (" + n(v.otherValue) + " " + u(v.otherUnit) + ")" };
+  return { label: t.land_size_label, value: n(v.value) + " (" + t.land_unit_unspecified + ")" };
+}
 // Distance line for the public page (FX-2). "" = no evidence → the line is not shown.
 function distanceLabel(raw, which, placeLabel, t) {
   const exact = parseLatLngHH(raw.mapLink);
@@ -522,6 +531,7 @@ class Component extends DCLogic {
     }
     const mod = await import("./data.js");
     this._mod = mod;
+    try { this._landMod = await import("./land-area.js"); } catch (e) { console.warn("land-area module failed:", e); }
     const params = new URLSearchParams(window.location.search);
     this._id = params.get("id") || (mod.PROPERTIES[0] && mod.PROPERTIES[0].id);
     this.setState({ lang: mod.getLang(), data: mod });
@@ -906,7 +916,7 @@ class Component extends DCLogic {
       { label: t.type_label, value: normalized ? normalized.typeLabel : typeLabelOf(raw.type) },
       (normalized ? normalized.bedrooms : raw.bedrooms) ? { label: t.bedrooms_label, value: normalized ? normalized.bedrooms : raw.bedrooms } : null,
       (normalized ? normalized.bathrooms : raw.bathrooms) ? { label: t.bathrooms_label, value: normalized ? normalized.bathrooms : raw.bathrooms } : null,
-      (normalized ? normalized.landSize : raw.landSize) ? { label: t.land_size_label, value: (normalized ? normalized.landSize : raw.landSize) + " " + t.sqm } : null,
+      landAreaSpec(raw, t, this._landMod),
       (normalized ? normalized.livingArea : raw.livingArea) ? { label: t.living_area_label, value: (normalized ? normalized.livingArea : raw.livingArea) + " " + t.sqm } : null,
       { label: t.admin_field_parking, value: (normalized ? normalized.parking : raw.parking) || "—" },
       { label: t.admin_field_ownership, value: mod.ownershipLabel(normalized ? normalized.ownership : raw.ownership, lang) },

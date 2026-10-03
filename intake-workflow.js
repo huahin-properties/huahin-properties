@@ -138,7 +138,7 @@ export const WORKFLOW_DEFS = {
             applies: (c) => !isLand(c), get: (c) => num(c.prop.livingArea) },
           { key: "land_size", level: LEVEL.CRITICAL, label: "ขนาดที่ดิน",
             applies: (c) => !isCondo(c),
-            get: (c) => num(c.prop.landSize) || num(c.prop.landRai) || num(c.prop.landNgan) || num(c.prop.landWah) },
+            get: (c) => num(c.prop.landAreaValue) || num(c.prop.landSize) || num(c.prop.landRai) || num(c.prop.landNgan) || num(c.prop.landWah) }, // (D2: a size entered with its unit counts; so does an old unitless one — presence only, never converted)
           { key: "floor", level: LEVEL.REQUIRED, label: "ชั้นที่ (คอนโด)",
             applies: (c) => isCondo(c), get: (c) => str(c.prop.floor) },
           { key: "description", level: LEVEL.REQUIRED, label: "รายละเอียดทรัพย์",

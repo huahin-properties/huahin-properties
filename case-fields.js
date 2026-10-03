@@ -27,6 +27,8 @@ export const PUBLIC_FIELDS = [
   "projectStatus", "projectName", "poolStatus", "furnishing", "commercialSubtype", "yearBuilt", "floor", "floors",
   "commonFee", "foreignQuota", "landShape", "roadWidth", "landCondition", "utilities", "zoningColor", "electricalPhase",
   "landRai", "landNgan", "landWah", "livingArea", "landSize",
+  // D2: land size with its explicit unit (landAreaSqm = canonical ตร.ม., recomputed by the server at projection time)
+  "landAreaValue", "landAreaUnit", "landAreaSqm",
   "title", "shortDesc", "fullDesc", "description", "features", "collections", "seoTags", "seo",
   "mapLink", "mapDisplayMode", "distanceBeach", "distanceTown", "publicPropertyCode", "vipTier",
 ];

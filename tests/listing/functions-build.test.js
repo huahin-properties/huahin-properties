@@ -32,7 +32,7 @@ describe("LISTING-E2E-01 listing-only functions folder", function () {
   it("F2 content: only the listing modules, byte-identical to the sources; no chat gate, no Stripe/AI; its own firebase.json; deploy command names are the same 9", () => {
     const out = path.join(ROOT, "build", "f-test2-" + process.pid); made.push(out);
     const r = build(ROOT, out);
-    assert.deepStrictEqual(r.files, ["case-fields.js", "firebase.json", "index.js", "listing-case.js", "package.json", "photo-standard.js", "submission-checklist.js"]);
+    assert.deepStrictEqual(r.files, ["case-fields.js", "firebase.json", "index.js", "land-area.js", "listing-case.js", "package.json", "photo-standard.js", "submission-checklist.js"]);
     for (const f of FILES) assert.ok(fs.readFileSync(path.join(out, f)).equals(fs.readFileSync(path.join(ROOT, "functions", f))), f + " identical");
     const all = r.files.map((f) => fs.readFileSync(path.join(out, f), "utf8")).join("\n");
     assert.ok(!/defineSecret|stripe|ANTHROPIC|chat-test-gate|RESEND|LINE_/i.test(all.replace(/listing-case\.js[^]*/, "")), "no secret / Stripe / AI in the generated files");

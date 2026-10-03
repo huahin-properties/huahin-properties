@@ -519,19 +519,35 @@ const preview = async (page, state, ms) => waitFor(async () => (await page.getAt
     // invalid first: coordinates as a share link
     await page.locator('[data-f="coordsRaw"]').fill("https://maps.app.goo.gl/abc"); await page.locator('[data-case-data-save]').click();
     await page.waitForSelector("[data-case-data-error]"); assert.ok(!(await db.doc("caseInternal/" + id).get()).data().coordsRaw, "invalid input wrote nothing"); await H.shot(page, "37-staff-case-data-invalid-coordinates-refused");
-    const fill = { bedrooms: "3", bathrooms: "2", livingArea: "140", landSize: "400", coordsRaw: "12.558940,99.909039" };
+    const fill = { bedrooms: "3", bathrooms: "2", livingArea: "140", coordsRaw: "12.558940,99.909039" };
     for (const [k, v] of Object.entries(fill)) await page.locator('[data-f="' + k + '"]').fill(v);
+    // D2: a land size needs its unit — a value without one is refused and writes nothing
+    await page.locator('[data-f="landAreaValue"]').fill("100"); await page.locator("[data-case-data-save]").click(); await page.waitForSelector("[data-case-data-error]");
+    assert.ok(/เลือกหน่วย/.test(await page.locator("[data-case-data-error]").innerText()), "asks for the unit"); assert.ok(!(await db.doc("caseInternal/" + id).get()).data().landAreaValue, "no land size written without a unit");
+    await page.locator('[data-f="landAreaUnit"]').selectOption("sqwa"); assert.ok(/400 ตร\.ม\./.test(await page.locator("[data-land-hint]").innerText()), "the page shows 100 ตร.ว. = 400 ตร.ม.");
     await page.locator('[data-f="area"]').selectOption("hua-hin");
     await page.locator('[data-f="description"]').fill("Seven-photo house, quiet street, near the beach.");
     await page.locator("[data-case-data-save]").click(); await page.waitForSelector("[data-case-data-saved]", { timeout: 20000 }); await H.shot(page, "38-staff-case-data-saved");
     const after = (await db.doc("caseInternal/" + id).get()).data();
-    assert.deepStrictEqual([after.bedrooms, after.bathrooms, after.livingArea, after.landSize, after.coordsRaw, after.area], [3, 2, 140, 400, "12.558940,99.909039", "hua-hin"]);
+    assert.deepStrictEqual([after.bedrooms, after.bathrooms, after.livingArea, after.coordsRaw, after.area], [3, 2, 140, "12.558940,99.909039", "hua-hin"]);
+    assert.deepStrictEqual([after.landAreaValue, after.landAreaUnit, after.landAreaSqm, "landSize" in after], [100, "sqwa", 400, false], "D2: the entered value + unit, and the canonical ตร.ม. computed once (the old unitless field is not written)");
     assert.strictEqual(after.listingStatus, "pending"); assert.strictEqual((await db.doc("properties/" + id).get()).exists, false, "still not public"); assert.ok(!("approvedBy" in after), "no approval stamp");
     assert.strictEqual((await db.collection("casePhotos").where("propertyId", "==", id).get()).size, 7, "photos untouched");
     // reopen from scratch: values persist
     await page.goto(site.url + "/Case%20Data.dc.html?id=" + encodeURIComponent(id)); await page.waitForSelector('[data-f="price"]', { timeout: 20000 });
-    const reopened = {}; for (const k of ["bedrooms", "bathrooms", "livingArea", "landSize", "coordsRaw", "description"]) reopened[k] = await page.locator('[data-f="' + k + '"]').inputValue();
+    const reopened = {}; for (const k of ["bedrooms", "bathrooms", "livingArea", "coordsRaw", "description"]) reopened[k] = await page.locator('[data-f="' + k + '"]').inputValue();
     assert.deepStrictEqual(reopened, Object.assign({}, fill, { description: "Seven-photo house, quiet street, near the beach." })); await H.shot(page, "39-staff-case-data-reopened-values-kept");
+    // D2 save → reload → edit → save again: the page shows what was ENTERED (100 ตร.ว.), and saving it again never converts twice
+    const landNow = async () => ({ v: await page.locator('[data-f="landAreaValue"]').inputValue(), u: await page.locator('[data-f="landAreaUnit"]').inputValue() });
+    assert.deepStrictEqual(await landNow(), { v: "100", u: "sqwa" }, "reopened: 100 ตร.ว. as entered (not 400, not the canonical value)");
+    for (let i = 0; i < 3; i++) { await page.locator("[data-case-data-save]").click(); await page.waitForSelector("[data-case-data-saved]", { timeout: 20000 }); await page.goto(site.url + "/Case%20Data.dc.html?id=" + encodeURIComponent(id)); await page.waitForSelector('[data-f="price"]', { timeout: 20000 }); assert.deepStrictEqual(await landNow(), { v: "100", u: "sqwa" }, "round " + i); }
+    { const r = (await db.doc("caseInternal/" + id).get()).data(); assert.deepStrictEqual([r.landAreaValue, r.landAreaUnit, r.landAreaSqm], [100, "sqwa", 400], "three saves later: still 100 / sqwa / 400 (never 1,600)"); }
+    // the other direction: 400 ตร.ม. entered → stored as 400 ตร.ม., shown as 100 ตร.ว. in the other unit; then back to 100 ตร.ว. for the publish step
+    await page.locator('[data-f="landAreaValue"]').fill("400"); await page.locator('[data-f="landAreaUnit"]').selectOption("sqm"); assert.ok(/100 ตร\.ว\./.test(await page.locator("[data-land-hint]").innerText()));
+    await page.locator("[data-case-data-save]").click(); await page.waitForSelector("[data-case-data-saved]", { timeout: 20000 });
+    { const r = (await db.doc("caseInternal/" + id).get()).data(); assert.deepStrictEqual([r.landAreaValue, r.landAreaUnit, r.landAreaSqm], [400, "sqm", 400]); }
+    await page.locator('[data-f="landAreaValue"]').fill("100"); await page.locator('[data-f="landAreaUnit"]').selectOption("sqwa"); await page.locator("[data-case-data-save]").click(); await page.waitForSelector("[data-case-data-saved]", { timeout: 20000 });
+    { const r = (await db.doc("caseInternal/" + id).get()).data(); assert.deepStrictEqual([r.landAreaValue, r.landAreaUnit, r.landAreaSqm], [100, "sqwa", 400]); }
     // the approvals page now counts the data (the workflow reads the same record)
     await page.goto(site.url + "/Listing%20Approvals.dc.html"); await page.waitForSelector("text=" + id, { timeout: 30000 }); await sleep(2500); await H.shot(page, "40-staff-approvals-after-data-entry");
     // Staff can NOT publish / approve / fake a stamp from the browser (rules), and the Lister Dashboard guard still sends Staff away
@@ -766,5 +782,96 @@ const preview = async (page, state, ms) => waitFor(async () => (await page.getAt
       seen[scenario] = "calls=" + JSON.stringify(calls) + "; TEST-project claudeComplete URL attempted (blocked here)=" + JSON.stringify(testEndpoint) + "; new anonymous users=" + ((await authUsers()).length - usersBefore); await H.shot(c.page, /not deployed/.test(scenario) ? "63-rail-send-not-deployed" : "62-rail-send-gated"); await c.ctx.close();
     }
     rec("B18", "a visitor sending a message in the chat rail on the TEST site: " + JSON.stringify(seen), "PASS (local browser + emulators)", "the gate is untouched (not opened, not bypassed, not exercised here: the harness blocks the project\'s own Function host, so the gate\'s 401/403 answers are covered by the chat-live tests, not by this one); on Cloud TEST the chat Functions are not deployed (old CHAT-LIVE script paused at 6/8) → this is what a visitor sees there");
+  });
+  // ───────────────────────── D2 land size (owner decision 3 ต.ค. 2569): ตร.ว. or ตร.ม., 1 ตร.ว. = 4 ตร.ม.; old unitless data never guessed or converted
+  const LANGS8 = ["th", "en", "ru", "no", "de", "zh", "fr", "it"];
+  const landText = (d, lang) => `${d.value} ${d.t[lang].sqwa} (${d.sqm} ${d.t[lang].sqm})`;
+
+  it("B19 Staff → Owner preview → publish shows the land size correctly: 100 ตร.ว. (400 ตร.ม.) in the Owner's preview and on the public page, in all 8 languages", async () => {
+    const id = ids.sevenCase; assert.ok(id, "needs the case from B10/B11 (Staff entered 100 ตร.ว. through Case Data)");
+    const rec0 = (await db.doc("caseInternal/" + id).get()).data(); assert.deepStrictEqual([rec0.landAreaValue, rec0.landAreaUnit, rec0.landAreaSqm], [100, "sqwa", 400], "the Staff's entry through the page");
+    // scaffolding only for the intake step (it is covered by B5/B6): the Owner's intake decision is recorded directly so the publish preview of THIS case can be reached
+    await db.doc("caseInternal/" + id).update({ reviewStatus: "approved", approvedSubmissionId: "syn-sub-d2" });
+    const keep = ids.outsiderCase; ids.outsiderCase = id; // the helpers act on ids.outsiderCase
+    try {
+      const o = await newPage({}, "owner-d2"); await loginAdmin(o.page, "owner@example.test"); await openCase(o.page);
+      await clickInCase(o.page, APPROVE); await o.page.waitForSelector("[data-preview-confirm]", { timeout: 30000 }); await preview(o.page, "ready", 40000);
+      const dialog = await o.page.evaluate(() => { const b = document.querySelector("[data-preview-confirm]"); let n = b; for (let i = 0; i < 6 && n && n.parentElement; i++) n = n.parentElement; return n ? n.innerText : ""; });
+      assert.ok(/ที่ดิน\s*\n?\s*100 ตร\.ว\. \(400 ตร\.ม\.\)/.test(dialog) || /100 ตร\.ว\. \(400 ตร\.ม\.\)/.test(dialog), "the Owner's preview shows 100 ตร.ว. (400 ตร.ม.): " + dialog.slice(0, 600)); assert.ok(!/ไม่ระบุหน่วย/.test(dialog), "no 'unit not specified' for a size with a unit");
+      await H.shot(o.page, "64-owner-preview-land-area");
+      await o.page.locator("[data-preview-confirm]").click();
+      await waitFor(async () => (await db.doc("caseInternal/" + id).get()).data().listingStatus === "live", 30000, "published");
+      const pub = (await db.doc("properties/" + id).get()).data();
+      assert.deepStrictEqual([pub.landAreaValue, pub.landAreaUnit, pub.landAreaSqm], [100, "sqwa", 400]); assert.ok(!("landSize" in pub), "no unitless size next to it"); assert.ok(!("approvedByEmail" in pub));
+      await o.ctx.close();
+      // the public page, every language: the value as entered with ITS unit, and the same area in the other unit — from the language dictionary
+      const probe = await newPage({}, "d2-dict"); await probe.page.goto(site.url + "/Property%20Details.dc.html?id=" + id); await probe.page.waitForSelector("[data-view-state], body", { timeout: 20000 });
+      const t = await probe.page.evaluate(async (ls) => { const m = await import("./data.js"); return Object.fromEntries(ls.map((l) => [l, { sqwa: m.I18N[l].sqwa, sqm: m.I18N[l].sqm, unspecified: m.I18N[l].land_unit_unspecified }])); }, LANGS8); await probe.ctx.close();
+      for (const k of ["sqwa", "unspecified"]) { const vals = LANGS8.map((l) => t[l][k]); assert.ok(vals.every((v) => typeof v === "string" && v.trim().length > 1), k + " exists in all 8 languages"); if (k === "unspecified") assert.strictEqual(new Set(vals).size, 8, k + " is different in every language: " + JSON.stringify(vals)); else assert.ok(new Set(vals).size >= 7, "sqwa: the unit symbol (French and Italian share 'wah²'): " + JSON.stringify(vals)); }
+      const seen = {};
+      await Promise.all(LANGS8.map(async (lang) => { const c = await newPage({}, "d2-public-" + lang); await c.ctx.addInitScript((l) => { try { localStorage.setItem("hh_lang", l); } catch (e) { /* none */ } }, lang);
+        await c.page.goto(site.url + "/Property%20Details.dc.html?id=" + id); const want = landText({ value: 100, sqm: 400, t }, lang);
+        await waitFor(async () => (await c.page.innerText("body")).includes(want), 40000, lang + ": " + want); seen[lang] = want; assert.ok(!(await c.page.innerText("body")).includes(t[lang].unspecified), lang + ": no 'unit not specified'"); if (lang === "th") await H.shot(c.page, "65-public-land-area-th"); if (lang === "en") await H.shot(c.page, "66-public-land-area-en"); await c.ctx.close(); }));
+      ids.d2Seen = seen;
+    } finally { ids.outsiderCase = keep; }
+    rec("B19", "Staff (Case Data) → Owner preview → publish: 100 ตร.ว. (= 400 ตร.ม.) shown in the preview and on the public page in all 8 languages: " + JSON.stringify(ids.d2Seen), "PASS (local browser + emulators)", "the intake decision was recorded directly (scaffolding; the intake UI is covered by B5/B6)");
+  });
+
+  it("B20 OLD unitless data is never guessed or converted: the public page shows the number without any unit and says so; the Staff page shows it as information and writes nothing until a person states the unit", async () => {
+    const base = { status: "sale", type: "house", area: "hua-hin", price: 5200000, bedrooms: 3, bathrooms: 2, livingArea: 120, listingStatus: "live", isDraft: false, features: [], source: "owner_submission", internalSplit: true, publishedAt: Date.now(), expiresAt: Date.now() + 86400000 };
+    await db.doc("properties/d2-legacy").set({ ...base, title: { th: "ข้อมูลเก่าไม่ระบุหน่วย", en: "Legacy unitless" }, landSize: 100 });
+    await db.doc("properties/d2-both").set({ ...base, title: { th: "มีทั้งสองแบบ", en: "Both kinds" }, landSize: 100, landAreaValue: 50, landAreaUnit: "sqm", landAreaSqm: 50 });
+    const probe = await newPage({}, "d2-dict2"); await probe.page.goto(site.url + "/Property%20Details.dc.html?id=d2-legacy"); await probe.page.waitForSelector("body");
+    const t = await probe.page.evaluate(async (ls) => { const m = await import("./data.js"); return Object.fromEntries(ls.map((l) => [l, { sqwa: m.I18N[l].sqwa, sqm: m.I18N[l].sqm, unspecified: m.I18N[l].land_unit_unspecified }])); }, LANGS8); await probe.ctx.close();
+    for (const lang of ["th", "en", "ru", "de", "zh"]) { const c = await newPage({}, "d2-legacy-" + lang); await c.ctx.addInitScript((l) => { try { localStorage.setItem("hh_lang", l); } catch (e) { /* none */ } }, lang);
+      await c.page.goto(site.url + "/Property%20Details.dc.html?id=d2-legacy"); const want = "100 (" + t[lang].unspecified + ")";
+      await waitFor(async () => (await c.page.innerText("body")).includes(want), 40000, lang + ": " + want);
+      const body = await c.page.innerText("body"); assert.ok(!body.includes("100 " + t[lang].sqm) && !body.includes("100 " + t[lang].sqwa) && !body.includes("400 "), lang + ": the old number is NOT given a unit and NOT converted"); if (lang === "th") await H.shot(c.page, "67-public-legacy-unspecified"); await c.ctx.close(); }
+    const both = await newPage({}, "d2-both"); await both.page.goto(site.url + "/Property%20Details.dc.html?id=d2-both"); await waitFor(async () => (await both.page.innerText("body")).includes("50 ตร.ม. (12.5 ตร.ว.)"), 30000, "unit-aware size shown");
+    assert.ok(!(await both.page.innerText("body")).includes("100 (" + t.th.unspecified + ")"), "the old unitless number is not shown next to a size with a unit"); await both.ctx.close();
+    for (const id of ["d2-legacy", "d2-both"]) await db.doc("properties/" + id).delete();
+    // Staff page: a Case with ONLY the old landSize
+    const tpl = (await db.doc("caseInternal/" + ids.sevenCase).get()).data(); const lid = "d2-legacy-case";
+    const clean = { ...tpl }; ["landAreaValue", "landAreaUnit", "landAreaSqm"].forEach((k) => delete clean[k]);
+    await db.doc("caseInternal/" + lid).set({ ...clean, listingStatus: "pending", reviewStatus: "submitted", landSize: 100, assignedToEmail: "staff@example.test", assignedToUid: ids.staff });
+    const st = await newPage({}, "d2-staff-legacy"); await loginAdmin(st.page, "staff@example.test"); await st.page.goto(site.url + "/Case%20Data.dc.html?id=" + lid); await st.page.waitForSelector('[data-f="landAreaValue"]', { timeout: 30000 });
+    assert.ok(/ไม่ระบุหน่วย/.test(await st.page.locator("[data-land-legacy]").innerText()) && /100/.test(await st.page.locator("[data-land-legacy]").innerText()), "the old number is shown as information, unit unknown");
+    assert.deepStrictEqual([await st.page.locator('[data-f="landAreaValue"]').inputValue(), await st.page.locator('[data-f="landAreaUnit"]').inputValue()], ["", ""], "nothing is pre-filled or guessed");
+    await st.page.locator('[data-f="description"]').fill("Edited something else only."); await st.page.locator("[data-case-data-save]").click(); await st.page.waitForSelector("[data-case-data-saved]", { timeout: 20000 });
+    { const r = (await db.doc("caseInternal/" + lid).get()).data(); assert.strictEqual(r.landSize, 100, "the old number is untouched"); assert.ok(!r.landAreaValue && !r.landAreaUnit && !r.landAreaSqm, "no land area was created or converted by saving something else"); }
+    await st.page.locator('[data-f="landAreaValue"]').fill("100"); await st.page.locator('[data-f="landAreaUnit"]').selectOption("sqm"); await st.page.locator("[data-case-data-save]").click(); await st.page.waitForSelector("[data-case-data-saved]", { timeout: 20000 });
+    { const r = (await db.doc("caseInternal/" + lid).get()).data(); assert.deepStrictEqual([r.landAreaValue, r.landAreaUnit, r.landAreaSqm, r.landSize], [100, "sqm", 100, 100], "only a PERSON stating the unit creates the unit-aware size: 100 ตร.ม. stays 100 (not 400); the old field is still as it was"); }
+    await st.ctx.close(); await db.doc("caseInternal/" + lid).delete();
+    rec("B20", "old unitless landSize: public page shows the number without a unit + 'unit not specified' (th/en/ru/de/zh), never converted; unit-aware size wins over it; Staff page shows it as information, pre-fills nothing, saving other fields writes no land area, and the person's stated unit (100 ตร.ม.) is stored as 100 ตร.ม.", "PASS (local browser + emulators)", "synthetic documents written to the emulator and deleted afterwards");
+  });
+
+  it("B21 agent (Lister Dashboard) land size: the unit selector is there, an OLD unitless value is shown with a note and does not block saving other fields, a changed value needs a unit, and a stated unit stores value + unit + canonical ตร.ม.", async () => {
+    const id = "d2-lister-1";
+    await db.doc("properties/" + id).set({ status: "sale", type: "house", area: "hua-hin", zone: "ทดสอบ", price: 3900000, bedrooms: 2, bathrooms: 1, livingArea: 90, landSize: 100, listingStatus: "live", isDraft: false, features: [], listerId: ids.agent, approvedAt: Date.now() - 5000, publishedAt: Date.now() - 5000, expiresAt: Date.now() + 86400000, title: { th: "บ้านของเอเจนต์", en: "Agent house" }, description: { th: "ทดสอบ", en: "test" }, photos: [] });
+    const a = await newPage({}, "agent-d2"); await loginAgent(a.page, "agent@example.test"); await a.page.goto(site.url + "/Lister%20Dashboard.dc.html?edit=" + id);
+    await a.page.locator("text=📋 รายการทรัพย์").first().click(); // the editor lives on the property-list tab
+    await a.page.locator("text=✏️").first().click({ timeout: 30000 }); // the pencil of the listing opens the editor
+    try { await a.page.waitForSelector("select:has(option[value='sqwa'])", { state: "attached", timeout: 40000 }); } catch (e) { await H.shot(a.page, "68-lister-land-area-missing"); throw new Error("land unit selector not found; url=" + a.page.url() + " hasLandLabel=" + /ขนาดที่ดิน/.test(await a.page.innerText("body")) + " selects=" + (await a.page.locator("select").count()) + " opts=" + JSON.stringify(await a.page.evaluate(() => Array.from(document.querySelectorAll("select")).map((x) => Array.from(x.options).map((o) => o.value).join("/")).slice(0, 12))) + " text=" + (await a.page.innerText("body")).replace(/\s+/g, " ").slice(700, 1500)); }
+    await H.shot(a.page, "68-lister-land-area");
+    const landBox = a.page.locator("select:has(option[value='sqwa'])").locator("xpath=preceding-sibling::input[1]");
+    assert.strictEqual(await landBox.inputValue(), "100", "the old value is shown"); assert.strictEqual(await a.page.locator("select:has(option[value='sqwa'])").inputValue(), "", "its unit is NOT guessed"); assert.ok(/ไม่ระบุหน่วย/.test(await a.page.innerText("body")), "the legacy note is shown");
+    const saveBtn = async () => { const ok = await a.page.evaluate(() => { const b = Array.from(document.querySelectorAll("*")).find((e) => e.children.length === 0 && /^บันทึกแบบร่าง/.test((e.textContent || "").trim())); if (b) { b.click(); return (b.textContent || "").trim(); } return ""; }); assert.ok(ok, "a save button was found"); };
+    // 1. changing the value without a unit is refused
+    await landBox.fill("150"); await saveBtn(); await waitFor(async () => /เลือกหน่วยของขนาดที่ดิน/.test(await a.page.innerText("body")), 15000, "asks for the unit");
+    assert.strictEqual((await db.doc("properties/" + id).get()).data().landSize, 100, "nothing was written");
+    // 2. a stated unit stores value + unit + canonical
+    await a.page.locator("select:has(option[value='sqwa'])").selectOption("sqwa"); await saveBtn();
+    try { await waitFor(async () => (await db.doc("properties/" + id).get()).data().landAreaValue === 150, 60000, "saved with the stated unit"); } catch (e) { const tx = (await a.page.innerText("body")).replace(/\s+/g, " "); throw new Error(e.message + " | page: " + (tx.match(/(บันทึกไม่สำเร็จ|กรุณา)[^.]{0,120}/g) || []).join(" || ") + " | console: " + JSON.stringify(a.page.__logs.console.filter((m) => /Failed to save/.test(m)).concat(a.page.__logs.console.slice(-1))) + " | errors: " + JSON.stringify(a.page.__logs.pageerrors.slice(-3))); }
+    { const r = (await db.doc("properties/" + id).get()).data(); assert.deepStrictEqual([r.landAreaValue, r.landAreaUnit, r.landAreaSqm, r.landSize], [150, "sqwa", 600, 100], "150 ตร.ว. → 600 ตร.ม.; the old unitless field is left exactly as it was"); }
+    await a.ctx.close(); await db.doc("properties/" + id).delete();
+    // 3. an OLD unitless value left untouched never blocks saving (and is not converted or labelled by the save)
+    const id2 = "d2-lister-2"; await db.doc("properties/" + id2).set({ status: "sale", type: "house", area: "hua-hin", zone: "ทดสอบ", price: 3100000, bedrooms: 2, bathrooms: 1, livingArea: 80, landSize: 77, listingStatus: "live", isDraft: false, features: [], listerId: ids.agent, approvedAt: Date.now() - 5000, publishedAt: Date.now() - 5000, expiresAt: Date.now() + 86400000, title: { th: "บ้านเอเจนต์ 2", en: "Agent house 2" }, description: { th: "ทดสอบ", en: "test" }, photos: [] });
+    const b = await newPage({}, "agent-d2b"); await loginAgent(b.page, "agent@example.test"); await b.page.goto(site.url + "/Lister%20Dashboard.dc.html?edit=" + id2);
+    await b.page.locator("text=📋 รายการทรัพย์").first().click(); await b.page.locator("text=✏️").first().click({ timeout: 30000 }); await b.page.waitForSelector("select:has(option[value='sqwa'])", { state: "attached", timeout: 40000 });
+    await b.page.evaluate(() => { const x = Array.from(document.querySelectorAll("*")).find((e) => e.children.length === 0 && /^บันทึกแบบร่าง/.test((e.textContent || "").trim())); if (x) x.click(); });
+    await waitFor(async () => !!(await db.doc("properties/" + id2).get()).data().seo, 60000, "saved (the payload adds the seo block)");
+    { const r = (await db.doc("properties/" + id2).get()).data(); assert.strictEqual(r.landSize, 77, "the old number is as it was"); assert.ok(!r.landAreaValue && !r.landAreaUnit && !r.landAreaSqm, "no unit was invented by the save"); }
+    await b.ctx.close(); await db.doc("properties/" + id2).delete();
+    rec("B21", "agent land size: unit selector present; old unitless value shown with a note and not guessed; a changed value without a unit is refused; 150 ตร.ว. stored as 150 / sqwa / 600 ตร.ม.; old landSize untouched", "PASS (local browser + emulators)", "synthetic listing written to the emulator and deleted afterwards");
   });
 });

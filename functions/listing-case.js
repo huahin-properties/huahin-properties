@@ -23,6 +23,7 @@
 const nodeCrypto = require("crypto");
 const { PHOTO_STANDARD, photoStandardFor } = require("./photo-standard");
 const { projectPublic, publicTextProblems } = require("./case-fields");
+const { normalizeLandArea } = require("./land-area");
 const { missingForSubmit, usableContact, COMMERCIAL_SUBTYPES } = require("./submission-checklist");
 
 // The original hard-coded Owner uid (same value as firestore.rules / storage.rules).
@@ -373,7 +374,13 @@ function publicTitle(rec, type, area) {
 function buildPublicDoc(rec) {
   const type = TYPES.includes(rec.type) ? rec.type : "house";
   const area = rec.area && AREA_TH[rec.area] ? rec.area : "";
-  return Object.assign({}, projectPublic(rec), { type, title: publicTitle(rec, type, area) });
+  const pub = Object.assign({}, projectPublic(rec), { type, title: publicTitle(rec, type, area) });
+  // D2: the land size on the public page is ALWAYS derived here from what was entered (value + unit) — a stale or hand-edited landAreaSqm can not reach the public page.
+  // With a unit-aware size the old unitless `landSize` is NOT published next to it (two meanings on one page); a record WITHOUT a unit keeps its old `landSize`, which the page then shows as "unit not specified".
+  const land = normalizeLandArea(rec);
+  delete pub.landAreaValue; delete pub.landAreaUnit; delete pub.landAreaSqm;
+  if (land) { Object.assign(pub, land); delete pub.landSize; }
+  return pub;
 }
 const stable = (v) => (Array.isArray(v) ? "[" + v.map(stable).join(",") + "]" : v && typeof v === "object" ? "{" + Object.keys(v).sort().map((k) => JSON.stringify(k) + ":" + stable(v[k])).join(",") + "}" : JSON.stringify(v === undefined ? null : v));
 const hash = (s) => nodeCrypto.createHash("sha256").update(s).digest("hex");

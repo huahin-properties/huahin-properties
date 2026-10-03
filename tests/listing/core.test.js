@@ -605,4 +605,52 @@ describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, 
     assert.strictEqual((await db.collection("propertyPhotos").where("propertyId", "==", r.propertyId).get()).size, 2, "the update did not publish the new private photo");
     assert.strictEqual((await getDoc("properties/" + r.propertyId)).photos.length, 2);
   });
+  // ── D2 land size (owner decision 3 ต.ค. 2569): value + unit, canonical ตร.ม. computed by the SERVER at projection time; old unitless data untouched ─────────────
+  it("L1 publish: the public land size comes from the ENTERED value + unit (100 ตร.ว. → 400 ตร.ม.; 400 ตร.ม. → 100 ตร.ว.); a hand-edited landAreaSqm can not reach the public page; the old unitless landSize is not published next to it", async () => {
+    const a = await ready(A.extA, { n: 2 });
+    await db.doc("caseInternal/" + a.r.propertyId).update({ landAreaValue: 100, landAreaUnit: "sqwa", landAreaSqm: 9999, landSize: 55 });
+    const pv = await call("previewListingCase", A.owner, { propertyId: a.r.propertyId });
+    assert.deepStrictEqual([pv.publicDocument.landAreaValue, pv.publicDocument.landAreaUnit, pv.publicDocument.landAreaSqm], [100, "sqwa", 400], "the Owner's preview already shows the recomputed value");
+    assert.ok(!("landSize" in pv.publicDocument), "no second, unitless land size in the preview");
+    await publish(A.owner, a.r.propertyId);
+    const pubA = await getDoc("properties/" + a.r.propertyId);
+    assert.deepStrictEqual([pubA.landAreaValue, pubA.landAreaUnit, pubA.landAreaSqm], [100, "sqwa", 400]); assert.ok(!("landSize" in pubA));
+    assert.deepStrictEqual([(await getDoc("caseInternal/" + a.r.propertyId)).landAreaSqm, (await getDoc("caseInternal/" + a.r.propertyId)).landSize], [9999, 55], "the server never rewrites the team record");
+    const b = await ready(A.extA, { n: 2 });
+    await db.doc("caseInternal/" + b.r.propertyId).update({ landAreaValue: 400, landAreaUnit: "sqm", landAreaSqm: 400 });
+    await publish(A.owner, b.r.propertyId);
+    const pubB = await getDoc("properties/" + b.r.propertyId); assert.deepStrictEqual([pubB.landAreaValue, pubB.landAreaUnit, pubB.landAreaSqm], [400, "sqm", 400]);
+    assert.strictEqual(require("../../functions/land-area.js").landAreaView(pubB).otherValue, 100, "the same page shows 100 ตร.ว. as the other unit");
+  });
+  it("L2 an OLD record with only the unitless landSize is published exactly as it is: no unit, no conversion, no landArea fields — and the team record is not touched", async () => {
+    const a = await ready(A.extA, { n: 2 });
+    await db.doc("caseInternal/" + a.r.propertyId).update({ landSize: 100 });
+    await publish(A.owner, a.r.propertyId);
+    const pub = await getDoc("properties/" + a.r.propertyId);
+    assert.strictEqual(pub.landSize, 100); assert.ok(!("landAreaValue" in pub) && !("landAreaUnit" in pub) && !("landAreaSqm" in pub));
+    const rec = await getDoc("caseInternal/" + a.r.propertyId); assert.strictEqual(rec.landSize, 100); assert.ok(!("landAreaValue" in rec) && !("landAreaSqm" in rec), "nothing was upgraded in the record");
+  });
+  it("L3 an invalid unit or value never produces a public land area (and never a guessed one); the old landSize stays as it was", async () => {
+    const a = await ready(A.extA, { n: 2 });
+    await db.doc("caseInternal/" + a.r.propertyId).update({ landAreaValue: 100, landAreaUnit: "rai", landAreaSqm: 160000, landSize: 7 });
+    await publish(A.owner, a.r.propertyId);
+    const pub = await getDoc("properties/" + a.r.propertyId); assert.ok(!("landAreaValue" in pub) && !("landAreaUnit" in pub) && !("landAreaSqm" in pub)); assert.strictEqual(pub.landSize, 7);
+    const b = await ready(A.extA, { n: 2 });
+    await db.doc("caseInternal/" + b.r.propertyId).update({ landAreaValue: -5, landAreaUnit: "sqm", landAreaSqm: -5 });
+    await publish(A.owner, b.r.propertyId);
+    const pubB = await getDoc("properties/" + b.r.propertyId); assert.ok(!("landAreaValue" in pubB) && !("landAreaSqm" in pubB));
+  });
+  it("L4 a later Staff edit (value or unit changed, then saved again unchanged) re-projects once: 100 ตร.ว. → 400 ตร.ม. entered; saving the same entry again changes nothing", async () => {
+    const a = await ready(A.extA, { n: 2 });
+    await db.doc("caseInternal/" + a.r.propertyId).update({ landAreaValue: 100, landAreaUnit: "sqwa", landAreaSqm: 400 });
+    await publish(A.owner, a.r.propertyId);
+    await db.doc("caseInternal/" + a.r.propertyId).update({ landAreaValue: 400, landAreaUnit: "sqm", landAreaSqm: 400 });
+    const pv = await call("previewListingCase", A.owner, { propertyId: a.r.propertyId });
+    assert.deepStrictEqual([pv.currentPublicDocument.landAreaValue, pv.currentPublicDocument.landAreaUnit], [100, "sqwa"]); assert.deepStrictEqual([pv.publicDocument.landAreaValue, pv.publicDocument.landAreaUnit, pv.publicDocument.landAreaSqm], [400, "sqm", 400]);
+    assert.strictEqual((await call("syncListingCase", A.owner, { propertyId: a.r.propertyId, reviewedSig: pv.updateSig })).synced, true);
+    let pub = await getDoc("properties/" + a.r.propertyId); assert.deepStrictEqual([pub.landAreaValue, pub.landAreaUnit, pub.landAreaSqm], [400, "sqm", 400]);
+    await db.doc("caseInternal/" + a.r.propertyId).update({ landAreaValue: 400, landAreaUnit: "sqm", landAreaSqm: 400 }); // saved again, nothing changed
+    const same = await call("syncListingCase", A.staff, { propertyId: a.r.propertyId });
+    assert.ok(same.synced === false || same.reason, "an identical save is not a change"); pub = await getDoc("properties/" + a.r.propertyId); assert.deepStrictEqual([pub.landAreaValue, pub.landAreaUnit, pub.landAreaSqm], [400, "sqm", 400]);
+  });
 });
