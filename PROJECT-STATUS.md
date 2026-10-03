@@ -95,6 +95,7 @@ Evidence tags: HISTORY=บันทึกเดิม; OWNER-OLD-CHAT=ข้อ�
 | Full 3 submitter groups | 🟡 LOCAL reported; REAL-TEST ไม่ครบ | CODE-REPORT | agent flow และ negative Cloud ต้องเติม |
 | Privacy legacy migration | 🔴 BLOCKED production | CODE-REPORT plan | ห้าม migrate/delete จนอนุมัติแยก |
 | Production release | 🔴 NOT READY | draft/unmerged + blockers | ห้าม merge/deploy/GREEN |
+| ตรวจ source DOC-OBS + ทะเบียนแนวคิด r4 | 🟡 ข้อค้นพบพร้อมส่ง Work; ยังไม่แก้ระบบเว็บ | SOURCE · CODE-V2-01 r4 | Work ตรวจข้อเสนอแก้ขั้นต่ำ FX-1…FX-5 ก่อนแก้ |
 
 ## 4. งานค้างและลำดับถัดไป
 
@@ -431,6 +432,32 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
 
 **ไม่เปลี่ยน:** code/TEST SHA `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5` · ไม่แก้ระบบเว็บ/Functions/rules · ไม่แก้ DOC-OBS · ไม่ merge/deploy · ไม่ lock เปอร์เซ็นต์ · ข้อความ r2 ข้างบนเก็บไว้เป็นประวัติ
 
+## ผลปรับรอบ r4 — CODE-V2-01 r4 (3 ต.ค. 2569 · ทะเบียนแนวคิดของเจ้าของ + ตรวจ source DOC-OBS · เอกสารเท่านั้น ยังไม่แก้ระบบเว็บ)
+
+**หลักการของรอบนี้ (ตามที่ Work สั่ง):** เดินต่อจากระบบและเคส TEST เดิม มุ่งปิดเส้นทาง **รับข้อมูล → Staff → Owner → เผยแพร่/ปิด** ให้ครบ ไม่สร้างใหม่ ไม่ทำทุกแนวคิดพร้อมกัน · ก่อนเสนอแก้ทุกจุด ตรวจข้อกำหนดที่เกี่ยวข้องก่อน (ดูคอลัมน์ "ตรวจข้อกำหนด" ด้านล่างและในแผง ส่วน 5ข) · รอบนี้เป็นการตรวจ source และเอกสาร — **ส่งข้อค้นพบกับข้อเสนอแก้ขั้นต่ำให้ Work ตรวจก่อนแก้ระบบเว็บ**
+
+**หมายเหตุสำคัญเรื่องที่มาของแนวคิด:** ข้อความสั่งงานรอบนี้ไม่ได้แนบรายการ "แนวคิดที่เจ้าของเสริม" ฉบับใหม่มา — Code จึง **รวบรวมจากแนวคิด/ทิศทางที่เจ้าของเคยให้ไว้และบันทึกอยู่ในชุดส่งต่อแล้ว** (Roadmap 0–24, BLUEPRINT §26.15/§28/§24.8/โมเดลรายได้/social roadmap, CLAUDE.md, ทะเบียนค้าง) แล้วจัดชั้นใหม่; ถ้าเจ้าของมีแนวคิดอื่นที่ยังไม่อยู่ในรายการ ให้ส่งมาเพื่อเพิ่มในทะเบียน (แผง ส่วน 5ก) — Code ไม่เดาเพิ่มเอง
+
+### ทะเบียนแนวคิด (แผง ส่วน 5ก · `ideas` ใน STATUS-REGISTRY)
+| ชั้น | รหัส | เนื้อหา |
+|---|---|---|
+| **งานปัจจุบัน** (ปิดเส้นทางหลัก) | I01–I04 | รับข้อมูลพร้อมรูป · Staff เตรียมข้อมูลกลาง · Owner preview/อนุมัติ/เผยแพร่/ปิด · หน้าสาธารณะแสดงถูกต้อง (DOC-OBS-01…05) |
+| **จำเป็นต่อขั้นถัดไป** | I05–I08 | ตัดสินหน่วยที่ดิน (D2) · เติม Cloud TEST ฝั่งปฏิเสธ/ลบ/ซ้ำ/ช้า (T17–T21) · บังคับสิทธิ์ที่ rules + rate limit (D09–D11) · ย้ายข้อมูลเก่าก่อน production (P01, BLOCKED) |
+| **งานอนาคต** (บันทึกไว้ ไม่ทำรอบนี้) | F01–F08 | Demand/Qualification (C5) · Matching/คอลเลกชัน (C6) · Viewing/Handoff/Negotiation/Deal · Phase 2B/2C/2D · แชท AI จริงบน TEST · Supply/Demand umbrella + โมเดลรายได้ · Facebook/LINE/TikTok · alt-text SEO + guardrail ค่า API |
+
+### ข้อค้นพบจากการตรวจ source (ยังไม่แก้) และข้อเสนอแก้ขั้นต่ำ — รอ Work ตรวจ
+| ข้อเสนอ | จุดสังเกต | ที่พบ (SOURCE) | แก้ขั้นต่ำ | ตรวจข้อกำหนดก่อนเสนอ | ความเสี่ยง |
+|---|---|---|---|---|---|
+| **FX-1** | DOC-OBS-04 อนุมัติโดย "-" | ยืนยัน: `Listing Approvals.dc.html:1091` อ่าน `p.approvedBy` แต่ server เขียน `approvedByEmail/Uid/Role` (`listing-case.js:517`) และ `approvedBy*` เป็นฟิลด์ภายใน (`case-fields.js` PRIVATE_FIELDS) | หน้า Approvals ใช้ `approvedBy \|\| approvedByEmail \|\| approvedByRole \|\| "-"` | อีเมลอยู่ใน Case ภายใน ไม่รั่วหน้าสาธารณะ; ไม่แตะ rules/Functions/Cloud | ต่ำ |
+| **FX-2** | DOC-OBS-03 แผนที่ undefined / 0 กม. | พบต้นเหตุ: `Property Details.dc.html:856–867` ตกไปใช้ `raw.distanceBeach/Town` เมื่อไม่มีพิกัด → `0` (data.js ใส่ค่าเริ่ม) หรือ `undefined`; บรรทัด 872–874 ใช้ `zoneText` ที่อาจว่าง | ถ้าไม่มีพิกัดและระยะไม่ใช่ตัวเลข > 0 ให้ซ่อนบรรทัดระยะ; ไม่มีโซนให้แสดงเฉพาะพื้นที่ | ห้ามอ้างว่าคำนวณระยะจริง; ตัวอย่างเดิมที่มีค่าต้องไม่ regress; ไม่เพิ่มข้อความจึงไม่ติดกฎ 8 ภาษา | ต่ำ |
+| **FX-3** | DOC-OBS-05 หลังปิดหน้าว่าง | ยืนยัน (ไม่ใช่ข้อสันนิษฐานแล้ว): `Property Details.dc.html:802` คืน `hasProperty:false` และเนื้อหาทั้งหน้าอยู่ใต้ `sc-if hasProperty` ไม่มีมุมมองทดแทน; `window.__hhDataLoad.state="failed"` แยกกรณีโหลดล้มได้ | บล็อกข้อความ: state ok → "ไม่พบประกาศนี้หรือปิดประกาศแล้ว" (ข้อความเดียวทุกกรณี) + ปุ่มกลับค้นหา; failed → "โหลดไม่สำเร็จ ลองรีเฟรช" | ต้องมี 8 ภาษา (เพิ่มคีย์ใน data.js); ไม่เปิดเผยว่า Case ส่วนตัวเคยมี; ไม่ทำให้ TEST build มี sample fallback; ไม่แสดงข้อมูล/รูปใดๆ | ปานกลาง |
+| **FX-4** | DOC-OBS-01 Search ไม่มีรูปปก | **ยังไม่พบต้นเหตุจากการอ่าน**: เส้นทาง Search → `getEffectiveProperties` → `fetchAllPhotos` → `photosById` → `p.photos[0].url` → `PropertyCard` ถูกต้องตามทฤษฎี; test ในเครื่องไม่ assert รูปปก | ขั้น 1 (ไม่แก้เว็บ): เพิ่ม test เผยแพร่เคสแล้วเปิด Search จริง (ผู้เยี่ยมชม/Owner) assert รูปปก; ถ้า pass ให้เจ้าของเก็บภาพ Network 1 ครั้ง; ขั้น 2: แก้เฉพาะที่พิสูจน์ได้ | รูปส่วนตัวห้ามเปิดสาธารณะ; ไม่ใช้ sample แทน (PD-12); ไม่เปลี่ยน rules propertyPhotos | ประเมินไม่ได้ |
+| **FX-5** | DOC-OBS-02 หน่วยที่ดิน | ยืนยัน: ฟอร์ม/Case Data = ตร.ว.; `Property Details.dc.html:881` ต่อ `t.sqm`; `property-adapter.js:66` ไม่แปลง (100 ตร.ว. = 400 ตร.ม.) | **รอมติเจ้าของ D2** แล้วแก้ป้าย/แปลงแบบมีป้าย | ห้ามแก้ค่าบน Cloud; ห้ามแปลงข้อมูลเดิมย้อนหลังเงียบๆ; ต้องมีหน่วย 8 ภาษา | ปานกลาง |
+
+**ลำดับที่เสนอ (ข้อเสนอของ Code ไม่ใช่มติ):** FX-1 → FX-2 → FX-3 (เล็ก ไม่ต้องรอมติหน่วย) · FX-4 ต้องมีหลักฐานก่อน · FX-5 หลัง D2. ทุกข้อ **ยังไม่ได้แก้** และรอ Work ตรวจ
+
+**ไม่เปลี่ยน:** code/TEST SHA `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5` · ไม่แก้ระบบเว็บ/Functions/rules · ไม่แก้ DOC-OBS · ไม่ merge/deploy · ไม่ lock เปอร์เซ็นต์ · ไม่รันชุดทดสอบ backend/browser ในรอบนี้ (ตรวจด้วยการอ่าน source เท่านั้น — ยังไม่ได้ทดลองในเบราว์เซอร์) · ข้อความ r2/r3 เก็บเป็นประวัติ
+
 ## 6. STATUS-REGISTRY — ข้อมูลเครื่องอ่านของแผงภายใน (แก้ที่นี่ที่เดียว แล้วรัน `npm run status-panel`)
 
 ตาราง §1–§3 ด้านบนเป็นต้นทางของ Roadmap/ฐานระบบ/งานปัจจุบัน (แผงอ่านตรงจากตาราง). บล็อกนี้เก็บเฉพาะสิ่งที่ตารางไม่มี: ผู้รับผิดชอบ/ขอบเขต/วัน-commit ของแต่ละงาน (`taskMeta`), checklist ร่างสำหรับเปอร์เซ็นต์ (`scopes`, ทุกชุด `locked:false` จนกว่า Work lock), ทะเบียนค้าง (`issues`) และประวัติ. สถานะรายการใน checklist: `pass` / `fail` / `blocked` / `unverified` / `na` (N/A ต้องมีเหตุผลใน `ref`). ห้ามใส่รหัสผ่าน คีย์ อีเมล เบอร์ หรือ token.
@@ -449,28 +476,27 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   "deployedProdSha": "ไม่ทราบ",
   "prState": "PR #8 OPEN / DRAFT / NOT MERGED · base claude/chat-live-01",
   "website": "RED / Public Hidden (ตามรายงาน ไม่ได้ตรวจสดรอบนี้)",
-  "revision": "r3 (Code · ตาม 5 จุดของ Work)",
-  "set": "HP-HANDOFF-2026-10-03-v2 + CODE-V2-01 r3"
+  "revision": "r4 (Code · ทะเบียนแนวคิด + ตรวจ source DOC-OBS)",
+  "set": "HP-HANDOFF-2026-10-03-v2 + CODE-V2-01 r4"
  },
  "goal": "ให้เจ้าของและทีมลงประกาศพร้อมรูปจนเผยแพร่ได้จริงอย่างปลอดภัย (ส่งฟอร์ม → Staff เตรียม → Owner อนุมัติ/เผยแพร่ → หน้าสาธารณะ) บนเว็บ huahin.properties โดยยังไม่เปิดเว็บสาธารณะจนกว่าเจ้าของอนุมัติ",
  "current": {
-  "task": "ประสานเอกสารชุดส่งต่อ v2 + สร้างแผงติดตามภายใน (เอกสารเท่านั้น)",
+  "task": "ตรวจ source DOC-OBS + ทะเบียนแนวคิดของเจ้าของ (แยก ปัจจุบัน / จำเป็นต่อขั้นถัดไป / อนาคต) — ยังไม่แก้ระบบเว็บ",
   "phases": [
    "LISTING-E2E-01",
-   "CHAT-LIVE-01",
    "ชุดส่งต่อ"
   ],
   "environments": [
    "เอกสาร",
    "TEST (ผลเดิม)"
   ],
-  "actor": "Claude Code → ส่ง ChatGPT Work ตรวจ"
+  "actor": "Claude Code → ส่ง ChatGPT Work ตรวจข้อเสนอแก้ขั้นต่ำก่อนแก้"
  },
  "youDoNow": {
-  "text": "ยังไม่ต้องทำอะไร — รอ ChatGPT Work ตรวจชุดส่งต่อ v2 และแผงนี้",
+  "text": "ยังไม่ต้องทำอะไร — รอ ChatGPT Work ตรวจข้อค้นพบและข้อเสนอแก้ขั้นต่ำ (FX-1…FX-5)",
   "where": "ไม่มีหน้าจอที่ต้องเปิด",
-  "passWhen": "Work แจ้งผลตรวจ แล้วจะมีขั้นถัดไปครั้งละหนึ่งอย่าง",
-  "next": "ตามมติ Work/เจ้าของ (ยังไม่มีคำสั่งแก้ DOC-OBS, merge หรือ deploy)"
+  "passWhen": "Work แจ้งผลตรวจและเลือกข้อที่ให้แก้ก่อน",
+  "next": "เจ้าของตัดสินหน่วยที่ดิน (D2) เมื่อ Work พร้อม · ไม่มีคำสั่งแก้เว็บ, merge หรือ deploy"
  },
  "actors": {
   "owner": "เจ้าของ (Product Owner)",
@@ -962,6 +988,20 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
      "status": "unverified",
      "level": "DOCS",
      "ref": "รอภาพหน้าจอจากเจ้าของ"
+    },
+    {
+     "id": "R13",
+     "text": "บันทึกแนวคิดของเจ้าของแยก ปัจจุบัน / จำเป็นต่อขั้นถัดไป / อนาคต และคงเส้นทาง รับข้อมูล → Staff → Owner → เผยแพร่/ปิด เป็นงานปัจจุบัน",
+     "status": "pass",
+     "level": "DOCS",
+     "ref": "ทะเบียนแนวคิด I01–I08, F01–F08"
+    },
+    {
+     "id": "R14",
+     "text": "ตรวจ source DOC-OBS-01…05 พร้อมข้อเสนอแก้ขั้นต่ำ FX-1…FX-5 ให้ Work ตรวจก่อนแก้",
+     "status": "pass",
+     "level": "SOURCE",
+     "ref": "4 จาก 5 พบต้นเหตุ; DOC-OBS-01 ยังไม่พบ"
     }
    ]
   }
@@ -1132,6 +1172,18 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
     "P05",
     "P08"
    ]
+  },
+  "ตรวจ source DOC-OBS + ทะเบียนแนวคิด r4": {
+   "id": "W14",
+   "env": "docs",
+   "scope": "S-DOC",
+   "actor": "work",
+   "date": "2026-10-03",
+   "commit": "r4",
+   "items": [
+    "R13",
+    "R14"
+   ]
   }
  },
  "issues": [
@@ -1142,8 +1194,8 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "status": "open",
    "env": "test",
    "actor": "code",
-   "next": "Code audit ต้นเหตุ → เสนอขอบเขตแก้ (รออนุมัติ)",
-   "source": "REAL-TEST ภาพ 015210 · SOURCE: อ่านโค้ดยังไม่พบต้นเหตุ; test ในเครื่องไม่ได้ตรวจรูปปก"
+   "next": "Code ทำตาม FX-4: test ในเครื่องก่อน → หลักฐาน Network 1 ครั้ง → แก้",
+   "source": "SOURCE (r4): เส้นทางอ่านโค้ดถูกต้องตามทฤษฎี ยังไม่พบต้นเหตุ; test ไม่ assert รูปปก"
   },
   {
    "id": "DOC-OBS-02",
@@ -1152,8 +1204,8 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "status": "open",
    "env": "test",
    "actor": "owner",
-   "next": "เจ้าของตัดสินหน่วยหลักก่อน Code แก้",
-   "source": "SOURCE: ป้ายหน่วยไม่ตรงกันเดิม (Lister Dashboard/Case Data = ตร.ว., Property Details = ตร.ม.) ไม่มีโค้ดแปลงหน่วย"
+   "next": "เจ้าของตัดสิน D2 → จึงเสนอ FX-5",
+   "source": "SOURCE (r4): Details ต่อ \"ตร.ม.\" กับ landSize ที่ฟอร์มเก็บเป็น \"ตร.ว.\" ไม่มีการแปลง (property-adapter.js:66, Property Details:881)"
   },
   {
    "id": "DOC-OBS-03",
@@ -1162,8 +1214,8 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "status": "open",
    "env": "test",
    "actor": "code",
-   "next": "Code ตรวจฟิลด์ที่ขาด + ออกแบบค่า 'ไม่ทราบ'",
-   "source": "REAL-TEST ภาพ 015328 · ยังไม่ตรวจ source"
+   "next": "Work ตรวจ FX-2 (ซ่อนระยะที่ไม่รู้) ก่อนแก้",
+   "source": "SOURCE (r4): พบต้นเหตุ — Details:856–867 ตกไปใช้ raw.distance* เมื่อไม่มีพิกัด → 0 / undefined"
   },
   {
    "id": "DOC-OBS-04",
@@ -1172,18 +1224,18 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "status": "open",
    "env": "test",
    "actor": "code",
-   "next": "Code ตรวจการ map ฟิลด์ approvedBy กับ approvedByEmail/Uid/Role",
-   "source": "SOURCE: UI อ่าน approvedBy; server เขียน approvedBy* ตอนเผยแพร่ (ยังไม่ตรวจข้อมูล Cloud)"
+   "next": "Work ตรวจ FX-1 (แก้บรรทัดเดียว) ก่อนแก้",
+   "source": "SOURCE (r4): ยืนยัน — UI อ่าน approvedBy ส่วน server เขียน approvedByEmail/Uid/Role"
   },
   {
    "id": "DOC-OBS-05",
-   "title": "หลังปิดประกาศ หน้า Details ว่างเปล่า ไม่บอกสถานะ",
+   "title": "หลังปิดประกาศ หน้า Details ว่างเปล่า ไม่บอกสถานะ (ต้นเหตุจาก source ยืนยันแล้ว)",
    "sev": "med",
    "status": "open",
    "env": "test",
    "actor": "code",
-   "next": "Code แยกหน้า 'ปิดแล้ว/ไม่พบ' จาก 'โหลดไม่สำเร็จ'",
-   "source": "SOURCE: TEST build ไม่มี sample fallback + ไม่มี not-found view (ข้อสันนิษฐาน ยังไม่พิสูจน์)"
+   "next": "Work ตรวจ FX-3 (ข้อความไม่พบ/โหลดล้ม 8 ภาษา) ก่อนแก้",
+   "source": "SOURCE (r4): ยืนยัน — Details:802 hasProperty:false ไม่มีมุมมองทดแทน → หน้าว่าง"
   },
   {
    "id": "SEC-URGENT-01",
@@ -1456,6 +1508,11 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "date": "2026-10-03",
    "text": "ชุดส่งต่อ v2 + แผงติดตามภายใน (เอกสารเท่านั้น)",
    "ref": "รอ commit"
+  },
+  {
+   "date": "2026-10-03",
+   "text": "r4: ทะเบียนแนวคิด 3 ชั้น + ตรวจ source DOC-OBS + ข้อเสนอแก้ขั้นต่ำ (ยังไม่แก้ระบบ)",
+   "ref": "รอ commit"
   }
  ],
  "decisions": [
@@ -1525,6 +1582,230 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "decider": "owner",
    "status": "open",
    "affects": "S-TEST-PUBLIC, S-TEST-NEG"
+  }
+ ],
+ "ideas": [
+  {
+   "id": "I01",
+   "tier": "current",
+   "title": "รับข้อมูลทรัพย์พร้อมรูป (ฟอร์ม/ลูกค้า/agent/Owner) ตาม Photo Standard",
+   "detail": "ส่งแล้วได้เคสทีมงานเท่านั้น รูปส่วนตัวไม่เปิดสาธารณะ",
+   "source": "BLUEPRINT §32/§35 · LISTING-E2E-01",
+   "state": "REAL-TEST หนึ่งเคสผ่าน (T02/T03); agent / Owner-ส่งเอง บน Cloud ยังไม่ยืนยัน (T20)"
+  },
+  {
+   "id": "I02",
+   "tier": "current",
+   "title": "Staff เตรียมข้อมูลกลาง (Case Data) แล้วส่งตรวจ checklist",
+   "detail": "Staff ผู้รับผิดชอบเท่านั้น; ไม่แตะ guard เดิมของ Lister Dashboard",
+   "source": "LISTING-E2E-01 · Case Data.dc.html",
+   "state": "REAL-TEST ผ่าน (T04/T05); บังคับ \"Staff ผู้รับผิดชอบ\" ที่ rules ยังไม่ผ่าน (D09)"
+  },
+  {
+   "id": "I03",
+   "tier": "current",
+   "title": "Owner preview → อนุมัติ → เผยแพร่ → ปิดประกาศ",
+   "detail": "หน้าสาธารณะสร้างจาก allow-list ตอน Owner เผยแพร่เท่านั้น; ปิดแล้วเอกสารสาธารณะ+รูปสาธารณะถูกลบ",
+   "source": "LISTING-E2E-01",
+   "state": "REAL-TEST ผ่านหนึ่งเคส (T06–T08, T15); ลบ backend/ลิงก์รูปเดิมยังไม่ยืนยัน (T17/T18)"
+  },
+  {
+   "id": "I04",
+   "tier": "current",
+   "title": "หน้าสาธารณะแสดงผลถูกต้อง (DOC-OBS-01…05)",
+   "detail": "รูปปกใน Search · หน่วยที่ดิน · แผนที่/ระยะทางที่ไม่รู้ · ผู้อนุมัติ · สถานะหลังปิด",
+   "source": "PROJECT-STATUS §5 DOC-OBS",
+   "state": "พบข้อบกพร่อง 5 จุด; ตรวจ source แล้ว ดู \"ข้อเสนอแก้ขั้นต่ำ\" (ยังไม่แก้)"
+  },
+  {
+   "id": "I05",
+   "tier": "next",
+   "title": "ตัดสินหน่วยที่ดินหลัก (ตร.ว. / ตร.ม. / ไร่-งาน-ตร.ว.)",
+   "detail": "ต้องตัดสินก่อนแก้ DOC-OBS-02 เพราะฟอร์ม ป้าย และหน้า Details ใช้หน่วยไม่ตรงกัน",
+   "source": "D2 · DOC-OBS-02",
+   "state": "รอเจ้าของ"
+  },
+  {
+   "id": "I06",
+   "tier": "next",
+   "title": "เติม Cloud TEST ฝั่งปฏิเสธ/ลบ/ซ้ำ/ช้า",
+   "detail": "ผู้ไม่มีสิทธิ์ถูกปฏิเสธ · ลิงก์รูปเดิมใช้ไม่ได้หลังปิด · ไฟล์ backend ถูกลบ · agent/Owner-ส่งเอง · retry",
+   "source": "S-TEST-NEG (T17–T21)",
+   "state": "ยังไม่ทดสอบ; ต้องให้เจ้าของลองบน TEST"
+  },
+  {
+   "id": "I07",
+   "tier": "next",
+   "title": "บังคับสิทธิ์ที่ rules + จำกัดอัตรา trackListingCase/ล้างไฟล์ค้าง",
+   "detail": "ปิดช่องที่ \"Staff ผู้รับผิดชอบเท่านั้น\" บังคับแค่ในหน้า; rate limit ยังไม่มี",
+   "source": "D09/D10/D11 (S-DEV-QUALITY)",
+   "state": "ยังไม่ผ่าน/ยังไม่ audit — เสนอเป็นงานแยกรอบหลัง DOC-OBS"
+  },
+  {
+   "id": "I08",
+   "tier": "next",
+   "title": "ย้ายข้อมูลเก่า (เบอร์/trackToken ในเอกสารสาธารณะ) ก่อน production",
+   "detail": "จำเป็นก่อนเปิดเว็บสาธารณะจริง ไม่ใช่ก่อนทดสอบ TEST",
+   "source": "LEGACY-DATA-PLAN.md · P01",
+   "state": "BLOCKED — ห้ามรันจนเจ้าของอนุมัติแยก"
+  },
+  {
+   "id": "F01",
+   "tier": "future",
+   "title": "Demand Profile / Qualification (C5, C5.1–C5.3)",
+   "detail": "BUY/RENT demands/{demandId}; ถามทีละ 1–2 เรื่อง",
+   "source": "BLUEPRINT §26.15 · Roadmap 10–13",
+   "state": "ทิศทางอนาคต — ยังไม่สร้าง"
+  },
+  {
+   "id": "F02",
+   "tier": "future",
+   "title": "Matching Engine และคอลเลกชัน (C6, C6.1–C6.6)",
+   "detail": "Progressive/Smart Match, ลิงก์คอลเลกชัน, auto-match, Save/Hide/History",
+   "source": "Roadmap 14–20 (PD-14)",
+   "state": "ทิศทางอนาคต — ยังไม่สร้าง"
+  },
+  {
+   "id": "F03",
+   "tier": "future",
+   "title": "Canonical Viewing Request · Human Handoff · Negotiation · Deal/Commission",
+   "detail": "Customer ↔ Demand ↔ Property ↔ Match ↔ Viewing; ต่อด้วยเจรจา/คอมมิชชัน",
+   "source": "Roadmap 21–24 (PD-05/06/07)",
+   "state": "ทิศทางอนาคต — ยังไม่สร้าง"
+  },
+  {
+   "id": "F04",
+   "tier": "future",
+   "title": "Phase 2B/2C/2D — Customer Workspace · AI↔Workspace Sync · Explicit Submit",
+   "detail": "record เดียว ไม่ถามซ้ำ; ฟอร์ม TEST ไม่ใช่หลักฐานของ workspace",
+   "source": "Roadmap 7–9 · BLUEPRINT §28",
+   "state": "ยังไม่เริ่ม"
+  },
+  {
+   "id": "F05",
+   "tier": "future",
+   "title": "แชท AI จริงบน TEST และ AI ช่วยกรอก",
+   "detail": "ต้องมี allow-list/เพดาน/คีย์แยกงาน; ห้ามใช้สคริปต์ CHAT-LIVE เดิม",
+   "source": "T22 · S-TEST-CHAT",
+   "state": "BLOCKED — แยกงาน ไม่อยู่ในเส้นทางหลักรอบนี้"
+  },
+  {
+   "id": "F06",
+   "tier": "future",
+   "title": "Supply/Demand umbrella และโมเดลรายได้ (pay-per-listing, Featured/แบนเนอร์, แพ็กเกจ Agent)",
+   "detail": "แนวคิดธุรกิจ/สมาชิก ไม่แตะเส้นทางรับข้อมูลรอบนี้",
+   "source": "BLUEPRINT §26.15.10 และหมวดโมเดลรายได้",
+   "state": "แนวคิด — บางส่วน (Stripe) มีแล้วแยกเรื่อง"
+  },
+  {
+   "id": "F07",
+   "tier": "future",
+   "title": "ช่องทางภายนอก: Facebook auto-post, LINE OA, TikTok (Priority-A)",
+   "detail": "คุยแนวคิดแล้ว เจ้าของให้เลื่อนไว้",
+   "source": "CLAUDE.md · BLUEPRINT (social roadmap)",
+   "state": "แนวคิด — ยังไม่สร้าง"
+  },
+  {
+   "id": "F08",
+   "tier": "future",
+   "title": "SEO: นำคำบรรยายรูปจาก AI ไปใส่ <img alt> จริง; guardrail ค่า API ของแชท",
+   "detail": "ช่องว่างที่ BLUEPRINT §24.8 ระบุไว้; ยังไม่มีเพดานค่าใช้จ่าย",
+   "source": "BLUEPRINT §24.8 · CLAUDE.md",
+   "state": "ยังไม่ทำ"
+  }
+ ],
+ "proposals": [
+  {
+   "id": "FX-1",
+   "obs": "DOC-OBS-04",
+   "title": "แสดง \"อนุมัติโดย\" ให้ตรงกับฟิลด์ที่ server เขียน",
+   "finding": "Listing Approvals.dc.html บรรทัด 1091 แสดง p.approvedBy แต่ตอนเผยแพร่ server เขียน approvedByEmail / approvedByUid / approvedByRole ลงเอกสาร Case ภายใน (listing-case.js บรรทัด 517) และไม่เขียน approvedBy — \"-\" จึงเกิดจากชื่อฟิลด์ไม่ตรง ไม่ใช่ประวัติหาย",
+   "evidence": "SOURCE (อ่านโค้ด 2 ฝั่ง) · ยังไม่เห็นข้อมูล Cloud (ไม่ได้ผูกกับภาพใดโดยเฉพาะ)",
+   "minFix": "บรรทัดเดียวในหน้า Approvals: ใช้ p.approvedBy || p.approvedByEmail || p.approvedByRole || \"-\" (หน้าทีมงานเท่านั้น)",
+   "reqCheck": [
+    "อีเมลผู้อนุมัติอยู่ใน Case ภายในและไม่อยู่ใน allow-list สาธารณะ → ไม่รั่วหน้าเว็บสาธารณะ",
+    "ไม่แตะ rules/Functions/ข้อมูลบน Cloud",
+    "เจ้าของเป็นผู้เดียวที่เผยแพร่ได้ (approvedByRole=owner) — ไม่ขัด"
+   ],
+   "test": "component/page test: Case ที่เผยแพร่แล้วต้องแสดงอีเมลหรือบทบาท ไม่ใช่ \"-\"; negative control: ไม่มีฟิลด์ → \"-\"",
+   "risk": "ต่ำ",
+   "order": 1,
+   "decider": "work",
+   "status": "proposed"
+  },
+  {
+   "id": "FX-2",
+   "obs": "DOC-OBS-03",
+   "title": "ระยะทางและชื่อโซนที่ไม่ทราบต้องไม่แสดง undefined / 0 กม.",
+   "finding": "Property Details.dc.html บรรทัด 856–867: ถ้าไม่มีพิกัดที่อ่านได้จาก mapLink ใช้ raw.distanceBeach / distanceTown ซึ่งเอกสารสาธารณะของ Case ไม่มี → data.js ใส่ค่าเริ่ม 0 (\"0 กม.\") หรือ undefined (\"undefined กม.\"); บรรทัด 872–874 ใช้ zoneText ที่อาจว่างเป็น \"undefined\"",
+   "evidence": "SOURCE (อ่านโค้ด) · ภาพ Cloud 015328 ตรงกัน · ยังไม่ได้ทดลองในเบราว์เซอร์",
+   "minFix": "ถ้าไม่มีพิกัดและค่าระยะไม่ใช่ตัวเลขมากกว่า 0 ให้ซ่อนบรรทัดระยะนั้น (ไม่ต้องมีข้อความใหม่); ถ้าไม่มีชื่อโซนให้แสดงแค่ชื่ออำเภอ/พื้นที่ ไม่ใส่คำว่า undefined",
+   "reqCheck": [
+    "ห้ามอ้างว่าคำนวณระยะจริง (DOC-OBS-03) — ซ่อนดีกว่าแสดง 0",
+    "ข้อมูลตัวอย่างเดิมที่มีค่าระยะจริงต้องแสดงเหมือนเดิม (ไม่ regress)",
+    "ไม่เพิ่มข้อความใหม่ จึงไม่ติดกฎ 8 ภาษา",
+    "Photo/ทะเบียนสาธารณะไม่เปลี่ยน"
+   ],
+   "test": "page test: Case ไม่มีพิกัด → ไม่มีคำว่า undefined และไม่มี \"0 กม.\"; ทรัพย์ตัวอย่างที่มีค่า → ยังแสดงค่าเดิม",
+   "risk": "ต่ำ",
+   "order": 2,
+   "decider": "work",
+   "status": "proposed"
+  },
+  {
+   "id": "FX-3",
+   "obs": "DOC-OBS-05",
+   "title": "แยก \"ไม่พบ/ปิดแล้ว\" ออกจาก \"โหลดไม่สำเร็จ\" แทนหน้าว่าง",
+   "finding": "Property Details.dc.html บรรทัด 802: ถ้าไม่พบรายการ คืน hasProperty:false และส่วนเนื้อหาทั้งหน้าอยู่ใต้ sc-if hasProperty ไม่มีทางเลือกอื่น → หน้าว่าง (ยืนยันจากโค้ด ไม่ใช่ข้อสันนิษฐานแล้ว). หลังปิด เอกสารสาธารณะถูกลบ จึงเข้ากรณีนี้; ส่วน data.js ตั้ง window.__hhDataLoad.state = \"failed\" เมื่อโหลดไม่ได้ ซึ่งใช้แยกสองกรณีได้",
+   "evidence": "SOURCE (อ่านโค้ด) · ภาพ Cloud หลังปิด (หน้าว่าง) ตรงกัน",
+   "minFix": "เพิ่มบล็อกข้อความเมื่อ hasProperty เป็นเท็จ: state \"ok\" → \"ไม่พบประกาศนี้หรือปิดประกาศแล้ว\" (ข้อความเดียวสำหรับทุกกรณี ไม่บอกว่าเคยมีหรือไม่) + ปุ่มกลับหน้าค้นหา; state \"failed\" → \"โหลดไม่สำเร็จ ลองรีเฟรช\"",
+   "reqCheck": [
+    "ต้องมีข้อความครบ 8 ภาษา (กติกาโปรเจกต์) — ต้องเพิ่มคีย์ใน data.js ทุกภาษา",
+    "ข้อความเดียวกันสำหรับ \"ปิดแล้ว\" และ \"ไม่เคยมี\" เพื่อไม่เปิดเผยการมีอยู่ของ Case ส่วนตัว",
+    "TEST build ไม่มี sample fallback (SAMPLE_FALLBACK_ON_ERROR=false) — ต้องไม่ถูกบิดเบือน",
+    "ห้ามแสดงข้อมูลส่วนตัวหรือรูปใดๆ ในหน้านี้"
+   ],
+   "test": "page test: id ที่ไม่มี → ข้อความไม่พบ (ไม่ว่าง); จำลองโหลดล้ม → ข้อความโหลดไม่สำเร็จ; ทั้ง 8 ภาษามีคีย์ครบ",
+   "risk": "ปานกลาง (แตะ data.js สี่–แปดภาษา)",
+   "order": 3,
+   "decider": "work",
+   "status": "proposed"
+  },
+  {
+   "id": "FX-4",
+   "obs": "DOC-OBS-01",
+   "title": "Search ไม่มีรูปปก — ยังหาต้นเหตุจาก source ไม่ได้ ต้องมีหลักฐานก่อนแก้",
+   "finding": "เส้นทางอ่านโค้ด: Search → getEffectiveProperties (data.js 846–) → fetchCollection(\"properties\") + fetchAllPhotos → photosById[id-index] → p.photos[0].url → PropertyCard. อ่านตามแล้วถูกต้องตามทฤษฎี (รูปสาธารณะชนะรูปส่วนตัว id ซ้ำกัน) จึง **ไม่พบต้นเหตุ**; ทฤษฎีที่ยังเหลือ: (ก) ผู้ดูเป็นทีมงาน/Owner ทำให้ผสมรายการรูปส่วนตัว (ข) ลำดับ/จังหวะโหลด (ค) ฟิลด์ photos ของ Case แบบรวมเรคคอร์ดทับ — ไม่มีข้อใดยืนยัน",
+   "evidence": "SOURCE: ไม่พบต้นเหตุ · test ในเครื่องไม่ assert รูปปกใน Search (ช่องว่างของ test) · ภาพ Cloud 015210",
+   "minFix": "ขั้น 1 (ไม่แก้เว็บ): เพิ่ม test ในเครื่องที่เผยแพร่เคสแล้วเปิด Search จริงสองแบบ (ผู้เยี่ยมชม / Owner) และ assert รูปปก — ถ้า fail ในเครื่องจะได้ต้นเหตุ; ถ้า pass ให้เจ้าของเก็บภาพ Network (จำนวน propertyPhotos ที่ Search โหลด) หนึ่งครั้งบน TEST. ขั้น 2: แก้เฉพาะจุดที่พิสูจน์ได้",
+   "reqCheck": [
+    "รูปส่วนตัวห้ามเปิดสาธารณะ — ห้าม \"แก้\" โดยให้ผู้เยี่ยมชมอ่าน casePhotos",
+    "ต้องไม่ใช้ข้อมูลตัวอย่างแทน (PD-12) และไม่สร้างทรัพย์เพื่อให้ผ่าน",
+    "ไม่เปลี่ยน rules ของ propertyPhotos (read: true เดิม)"
+   ],
+   "test": "test ใหม่ B-search-cover (ผู้เยี่ยมชม + Owner) ต้อง fail ก่อนแก้ถ้าปัญหาเกิดในเครื่อง; negative control ลบรูป → ต้อง \"ไม่มีรูป\"",
+   "risk": "ยังประเมินไม่ได้ (ไม่รู้ต้นเหตุ)",
+   "order": 4,
+   "decider": "work",
+   "status": "proposed"
+  },
+  {
+   "id": "FX-5",
+   "obs": "DOC-OBS-02",
+   "title": "หน่วยที่ดิน — รอมติเจ้าของ (D2) ก่อนเสนอโค้ด",
+   "finding": "Lister Dashboard / Case Data ติดป้าย landSize เป็น \"ตร.ว.\" (และมีช่องไร่/งาน/ตร.ว. แยกอีกชุด) แต่ Property Details.dc.html บรรทัด 881 ต่อ t.sqm (ตร.ม.) ทุกภาษา และ property-adapter.js เก็บ landSize เป็นตัวเลขเฉยๆ ไม่มีการแปลง; 100 ตร.ว. = 400 ตร.ม. จึงแสดงเป็นตัวเลขเดิมกับหน่วยผิด",
+   "evidence": "SOURCE (อ่านโค้ด) · ภาพ Cloud ตรงกัน",
+   "minFix": "หลังเจ้าของเลือกหน่วย: แก้ \"ป้ายหน่วย\" หน้า Details ให้ตรงกับที่ฟอร์มเก็บ หรือแปลงหน่วยแบบมีป้าย — ห้ามแก้ค่าข้อมูลบน Cloud และห้ามเปลี่ยนความหมายของข้อมูลเดิมเงียบๆ",
+   "reqCheck": [
+    "ต้องตัดสิน D2 ก่อน",
+    "ข้อมูลที่บันทึกไปแล้ว (เช่น 100) ต้องไม่ถูกคูณ/แปลงย้อนหลังโดยอัตโนมัติ",
+    "ต้องมีคำแปลหน่วยครบ 8 ภาษา"
+   ],
+   "test": "page test ตามหน่วยที่เลือก (100 ตร.ว. ต้องแสดงตรงกับหน่วยที่ประกาศ)",
+   "risk": "ปานกลาง (เกี่ยวข้องความหมายข้อมูล)",
+   "order": 5,
+   "decider": "owner",
+   "status": "blocked-decision"
   }
  ]
 }

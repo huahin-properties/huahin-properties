@@ -18,6 +18,7 @@ const ITEM_STATUS = { pass: ["ผ่าน", "✓"], fail: ["ไม่ผ่า�
 const SEV = { critical: ["วิกฤต", 0], high: ["สูง", 1], med: ["กลาง", 2], low: ["ต่ำ", 3], info: ["ข้อมูล", 4] };
 const ISSUE_STATUS = { open: "เปิดอยู่", blocked: "ติดขัด", closed: "ปิดแล้ว" };
 const EMOJI = [["🟢", "ok", "ผ่านเฉพาะขอบเขตที่ระบุ", "●"], ["🟡", "part", "บางส่วน / กำลังตรวจ / รอหลักฐาน", "◐"], ["🔴", "bad", "ติดขัด / มีข้อบกพร่อง", "✕"], ["⚪", "none", "ยังไม่เริ่ม", "○"], ["🔵", "dir", "ทิศทางที่อนุมัติ / อนาคต (ไม่ใช่โค้ดเสร็จ)", "◇"]];
+const TIER = { current: "งานปัจจุบัน — ปิดเส้นทาง รับข้อมูล → Staff → Owner → เผยแพร่/ปิด (ระบบและเคส TEST เดิม)", next: "จำเป็นต่อขั้นถัดไป — ทำเมื่อ Work/เจ้าของสั่ง ไม่ทำพร้อมกัน", future: "งานอนาคต — บันทึกแนวคิดไว้ ยังไม่สร้าง ไม่ใช่ขอบเขตรอบนี้" };
 const esc = (s) => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const inline = (s) => esc(s).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
 
@@ -68,6 +69,11 @@ function validate(d) {
     for (const i of m.items || []) if (!ids.has(i)) e.push("task " + m.id + ": unknown item " + i);
   }
   for (const k of Object.keys(r.taskMeta)) if (!d.tasks.some((t) => t.name === k)) e.push("taskMeta for a row that is not in section 3: " + k);
+  const ideaIds = new Set();
+  for (const x of r.ideas || []) { if (ideaIds.has(x.id)) e.push("duplicate idea " + x.id); ideaIds.add(x.id); if (!TIER[x.tier]) e.push("idea " + x.id + ": bad tier"); if (!x.title || !x.source || !x.state) e.push("idea " + x.id + ": needs title, source, state"); }
+  for (const t of Object.keys(TIER)) if ((r.ideas || []).length && !(r.ideas || []).some((x) => x.tier === t)) e.push("ideas: tier " + t + " is empty");
+  const pid = new Set();
+  for (const x of r.proposals || []) { if (pid.has(x.id)) e.push("duplicate proposal " + x.id); pid.add(x.id); if (!x.obs || !x.finding || !x.minFix || !x.test || !Array.isArray(x.reqCheck) || !x.reqCheck.length || !r.actors[x.decider]) e.push("proposal " + x.id + ": needs obs, finding, minFix, reqCheck[], test, decider"); if (!["proposed", "blocked-decision"].includes(x.status)) e.push("proposal " + x.id + ": bad status (nothing may be shown as done before Work reviews)"); }
   const did = new Set();
   for (const x of r.decisions || []) {
     if (did.has(x.id)) e.push("duplicate decision " + x.id); did.add(x.id);
@@ -75,9 +81,9 @@ function validate(d) {
     if (!/ไม่ใช่มติ/.test(x.codeView || "")) e.push("decision " + x.id + ": codeView must say it is not a decision (ไม่ใช่มติ)");
     if (!["open", "decided", "parked"].includes(x.status)) e.push("decision " + x.id + ": bad status");
   }
-  const iid = new Set();
+  const issueIds = new Set();
   for (const i of r.issues) {
-    if (iid.has(i.id)) e.push("duplicate issue " + i.id); iid.add(i.id);
+    if (issueIds.has(i.id)) e.push("duplicate issue " + i.id); issueIds.add(i.id);
     if (!SEV[i.sev]) e.push("issue " + i.id + ": bad sev"); if (!ISSUE_STATUS[i.status]) e.push("issue " + i.id + ": bad status");
     if (!ENV[i.env]) e.push("issue " + i.id + ": bad env"); if (!r.actors[i.actor]) e.push("issue " + i.id + ": bad actor"); if (!i.next || !i.source) e.push("issue " + i.id + ": needs next and source");
   }
@@ -140,7 +146,7 @@ ${blockers.length ? `<div class="blk"><strong>ตัวขวางหลัก:
 <header class="mast"><div><div class="eyebrow">แผง PROJECT-STATUS ภายใน · ไม่ใช่หน้าเว็บลูกค้า</div><h1>huahin . properties — สถานะโครงการ</h1></div>
 <dl class="stamp"><div><dt>ชุดส่งต่อ</dt><dd class="mono">${esc(P.set || P.id)}</dd></div><div><dt>วันที่</dt><dd>${esc(P.date)} (${esc(P.tz)})</dd></div><div><dt>แหล่งข้อมูล</dt><dd>PROJECT-STATUS.md · ${esc(stamp)}</dd></div></dl></header>
 <p class="fresh">ตัวเลขทั้งหมดมาจากไฟล์ PROJECT-STATUS.md ณ commit ที่ระบุ — แผงนี้ <strong>ไม่ตรวจความสดอัตโนมัติ</strong> ถ้าไฟล์เปลี่ยนต้องรัน <code>npm run status-panel</code> ใหม่</p>
-<nav class="jump" aria-label="ข้ามไปส่วน"><a href="#now">1 ปัจจุบัน</a><a href="#you">2 เจ้าของทำอะไร</a><a href="#prog">3 ความคืบหน้า</a><a href="#road">4 Roadmap 0–24</a><a href="#tasks">5 งาน</a><a href="#issues">6 ค้าง/ติดขัด (${open})</a><a href="#decisions">ข้อรอตัดสิน/มติ (${(r.decisions || []).length})</a><a href="#hist">7 ประวัติ</a></nav>
+<nav class="jump" aria-label="ข้ามไปส่วน"><a href="#now">1 ปัจจุบัน</a><a href="#you">2 เจ้าของทำอะไร</a><a href="#prog">3 ความคืบหน้า</a><a href="#road">4 Roadmap 0–24</a><a href="#tasks">5 งาน</a><a href="#ideas">5ก แนวคิด</a><a href="#props">5ข ข้อเสนอแก้</a><a href="#issues">6 ค้าง/ติดขัด (${open})</a><a href="#decisions">ข้อรอตัดสิน/มติ (${(r.decisions || []).length})</a><a href="#hist">7 ประวัติ</a></nav>
 
 <section id="now" class="card hero"><div class="eyebrow">1 · CURRENT</div><h2>${esc(r.current.task)}</h2><p class="goal"><strong>เป้าหมายโครงการ:</strong> ${esc(r.goal)}</p>
 <div class="grid2"><div><h4>รหัสงาน / เฟส</h4><p>${r.current.phases.map((x) => `<span class="tag mono">${esc(x)}</span>`).join(" ")}</p><h4>สภาพแวดล้อมของรอบนี้</h4><p>${r.current.environments.map((x) => `<span class="tag">${esc(x)}</span>`).join(" ")}</p><h4>ผู้ทำตอนนี้</h4><p>${esc(r.current.actor)}</p></div>
@@ -161,6 +167,9 @@ ${["dev", "test", "prod", "docs"].map((env) => { const g = sc.filter((x) => x.s.
 
 <section id="tasks"><div class="eyebrow">5 · งานปัจจุบันและตำแหน่งที่หยุด</div><h2>ตารางงาน (${d.tasks.length})</h2>
 <div class="tw"><table class="t" data-filter="rows"><thead><tr><th>รหัส</th><th>งาน</th><th>สถานะ</th><th>สภาพแวดล้อม / ขอบเขต</th><th>ผ่าน / ทั้งหมด</th><th>ขั้นถัดไป</th><th>ผู้รับผิดชอบ</th><th>วัน / commit</th><th>หลักฐาน</th></tr></thead><tbody>${taskRows}</tbody></table></div></section>
+
+<section id="ideas"><div class="eyebrow">5ก · แนวคิดของเจ้าของ แยกตามความจำเป็น</div><h2>ทะเบียนแนวคิด (${(r.ideas || []).length}) — ทำทีละชั้น ไม่ทำพร้อมกัน</h2><p class="rule">เส้นทางหลักคือ รับข้อมูล → Staff → Owner → เผยแพร่/ปิด บนระบบและเคส TEST เดิม ไม่สร้างใหม่ · แนวคิดในชั้น "อนาคต" ไม่นับในเปอร์เซ็นต์ใดๆ</p>${Object.keys(TIER).map((k) => `<h3 class="sub3">${esc(TIER[k])}</h3><div class="cards">${(r.ideas || []).filter((x) => x.tier === k).map((x) => `<article class="card"><div class="eyebrow">${esc(x.id)}</div><h3>${inline(x.title)}</h3><p>${inline(x.detail || "")}</p><p class="sm"><strong>สถานะ:</strong> ${inline(x.state)}</p><p class="sm">ที่มา: ${inline(x.source)}</p></article>`).join("")}</div>`).join("")}</section>
+<section id="props"><div class="eyebrow">5ข · ข้อค้นพบจากการตรวจ source และข้อเสนอแก้ขั้นต่ำ</div><h2>รอ Work ตรวจก่อนแก้ระบบเว็บ (${(r.proposals || []).length}) — ยังไม่มีข้อใดถูกแก้</h2><div class="cards">${(r.proposals || []).map((x) => `<article class="card"><div class="eyebrow">${esc(x.id)} · ${esc(x.obs)} · ลำดับเสนอ ${esc(x.order)} · ผู้ตัดสิน: ${actor(x.decider)}</div><h3>${inline(x.title)}</h3><p><strong>ที่พบ:</strong> ${inline(x.finding)}</p><p class="sm"><strong>หลักฐาน:</strong> ${inline(x.evidence)}</p><p><strong>แก้ขั้นต่ำ:</strong> ${inline(x.minFix)}</p><h4>ตรวจข้อกำหนดก่อนเสนอ</h4><ul class="opts">${x.reqCheck.map((c) => `<li>${inline(c)}</li>`).join("")}</ul><p class="sm"><strong>test ที่ต้องมี:</strong> ${inline(x.test)}</p><p class="sm">ความเสี่ยง: ${inline(x.risk)} · สถานะ: ${x.status === "proposed" ? "เสนอ — รอ Work ตรวจ" : "รอมติเจ้าของก่อน"}</p></article>`).join("")}</div></section>
 
 <section id="issues"><div class="eyebrow">6 · ข้อที่รอตัดสิน และค้าง / ติดขัด / งานเก่าที่ยังมีประโยชน์</div><h2>ทะเบียนค้าง (${r.issues.length}) — DOC-OBS-01…05 และงานจากประวัติ</h2>
 <h3 class="sub3" id="decisions">ข้อรอตัดสิน/มติ (${(r.decisions || []).length}) — ข้อเสนอของ Code ไม่ใช่มติ</h3><div class="cards dec">${(r.decisions || []).map((x) => `<article class="card" data-env="docs"><div class="eyebrow">${esc(x.id)} · ผู้ตัดสิน: ${actor(x.decider)} · ${x.status === "open" ? "รอตัดสิน" : x.status === "parked" ? "พักไว้" : "ตัดสินแล้ว"}</div><h3>${inline(x.question)}</h3><ol class="opts">${x.options.map((o) => `<li>${inline(o)}</li>`).join("")}</ol>${x.outcome ? `<p><strong>มติ/สถานะ:</strong> ${inline(x.outcome)}</p>` : ""}<p class="cv">${inline(x.codeView)}</p><p class="sm">กระทบ: ${inline(x.affects || "-")}</p></article>`).join("")}</div>

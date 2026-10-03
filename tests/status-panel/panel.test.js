@@ -123,6 +123,17 @@ describe("status panel (docs-only, built from PROJECT-STATUS.md)", function () {
     ["S-DEV-CORE", "S-TEST-FLOW", "S-TEST-PUBLIC", "S-TEST-NEG"].forEach((id) => assert.ok(!sc(id).items.some((x) => x.id === "T22" || x.id === "P07"), id + " must not hold chat items"));
     assert.strictEqual(it("P06").status, "unverified"); assert.strictEqual(it("R11").status, "unverified"); assert.strictEqual(it("R12").status, "unverified"); assert.ok(d.reg.scopes.every((x) => x.locked === false));
   });
+  it("P13 round r4: owner ideas are kept in three separate tiers, the proposals are only 'proposed' (nothing fixed), every DOC-OBS has a proposal, and the proposals show a requirement check", () => {
+    const html = out.document; const tier = (t) => d.reg.ideas.filter((x) => x.tier === t).length;
+    assert.ok(tier("current") >= 3 && tier("next") >= 3 && tier("future") >= 3, "ideas are split into current / next / future");
+    assert.strictEqual(count(html, /<section id="ideas">/g), 1); assert.strictEqual(count(html, /<section id="props">/g), 1);
+    d.reg.ideas.forEach((x) => assert.ok(html.includes(">" + x.id + "</div>")));
+    ["DOC-OBS-01", "DOC-OBS-02", "DOC-OBS-03", "DOC-OBS-04", "DOC-OBS-05"].forEach((o) => assert.ok(d.reg.proposals.some((x) => x.obs === o), o + " has a proposal"));
+    d.reg.proposals.forEach((x) => { assert.ok(["proposed", "blocked-decision"].includes(x.status)); assert.ok(x.reqCheck.length >= 2 && x.test.length > 10, x.id); assert.ok(html.includes(">" + x.id + " · " + x.obs)); });
+    assert.ok(d.reg.proposals.find((x) => x.obs === "DOC-OBS-02").status === "blocked-decision" && d.reg.proposals.find((x) => x.obs === "DOC-OBS-02").decider === "owner", "the land-unit proposal waits for the owner decision D2");
+    const bad = parse(MD); bad.reg.proposals[0].status = "done"; assert.ok(validate(bad).some((e) => /bad status/.test(e)));
+    const bad2 = parse(MD); bad2.reg.ideas[0].tier = "later"; assert.ok(validate(bad2).some((e) => /bad tier/.test(e)));
+  });
   it("P11 the package set shown in the panel is the one in the handoff files (same id and revision in the registry, the three files' CODE-V2-01 block and the page header)", () => {
     assert.ok(out.document.includes(d.reg.package.set));
     for (const f of ["BLUEPRINT.md", "HANDOFF-NEXT-CHAT.md", "PROJECT-STATUS.md"]) { const t = fs.readFileSync(path.join(ROOT, f), "utf8"); assert.ok(t.includes(d.reg.package.set.replace(/^.*\+ /, "")) && t.includes(d.reg.package.id), f + " must carry the current revision block"); }
