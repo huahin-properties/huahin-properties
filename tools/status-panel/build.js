@@ -68,6 +68,13 @@ function validate(d) {
     for (const i of m.items || []) if (!ids.has(i)) e.push("task " + m.id + ": unknown item " + i);
   }
   for (const k of Object.keys(r.taskMeta)) if (!d.tasks.some((t) => t.name === k)) e.push("taskMeta for a row that is not in section 3: " + k);
+  const did = new Set();
+  for (const x of r.decisions || []) {
+    if (did.has(x.id)) e.push("duplicate decision " + x.id); did.add(x.id);
+    if (!x.question || !Array.isArray(x.options) || x.options.length < 2 || !x.codeView || !r.actors[x.decider]) e.push("decision " + x.id + ": needs question, 2+ options, codeView, decider");
+    if (!/ไม่ใช่มติ/.test(x.codeView || "")) e.push("decision " + x.id + ": codeView must say it is not a decision (ไม่ใช่มติ)");
+    if (!["open", "decided"].includes(x.status)) e.push("decision " + x.id + ": bad status");
+  }
   const iid = new Set();
   for (const i of r.issues) {
     if (iid.has(i.id)) e.push("duplicate issue " + i.id); iid.add(i.id);
@@ -110,10 +117,14 @@ ${blockers.length ? `<div class="blk"><strong>ตัวขวางหลัก:
   const roadRows = d.roadmap.map((x) => `<tr data-st="${x.status.key}"><td data-l="ลำดับ" class="mono">${esc(x.no)}</td><td data-l="รหัส / ขั้นตอน"><strong>${inline(x.code)}</strong></td><td data-l="สถานะ">${pill(x.status)}</td><td data-l="ความหมายและข้อจำกัด">${inline(x.meaning)}</td><td data-l="หลักฐาน" class="ev">${inline(x.evidence)}</td></tr>`).join("");
   const baseRows = d.foundation.map((x) => `<tr data-st="${x.status.key}"><td data-l="รหัส" class="mono">${esc(x.code)}</td><td data-l="งาน">${inline(x.name)}</td><td data-l="สถานะ">${pill(x.status)}</td><td data-l="คงไว้ / กลับไปทำ">${inline(x.note)}</td></tr>`).join("");
   const scopeById = Object.fromEntries(r.scopes.map((s) => [s.id, s]));
+  const itemById = {}; r.scopes.forEach((sc) => sc.items.forEach((it) => { itemById[it.id] = { it, sc }; }));
   const taskRows = d.tasks.map((t) => {
     const m = r.taskMeta[t.name]; const s = m.scope ? scopeById[m.scope] : null;
     let pc = '<span class="nc">ยังคำนวณไม่ได้</span>';
-    if (s && m.items && m.items.length) { const its = m.items.map((i) => s.items.find((x) => x.id === i)).filter(Boolean).filter((x) => x.status !== "na"); const ps = its.filter((x) => x.status === "pass").length; pc = `${ps}/${its.length}${s.locked ? " = " + Math.round((ps / its.length) * 100) + "%" : ' <em class="draft">ร่าง ยังไม่ lock</em>'}`; }
+    if (s && m.items && m.items.length) {
+      const its = m.items.map((i) => itemById[i]).filter(Boolean).filter((x) => x.it.status !== "na"); const ps = its.filter((x) => x.it.status === "pass").length; const allLocked = its.every((x) => x.sc.locked);
+      pc = `${ps}/${its.length}${allLocked ? " = " + Math.round((ps / its.length) * 100) + "%" : ' <em class="draft">ร่าง ยังไม่ lock</em>'}`;
+    }
     return `<tr data-st="${t.status.key}" data-env="${m.env}"><td data-l="รหัส" class="mono">${esc(m.id)}</td><td data-l="งาน"><strong>${inline(t.name)}</strong></td><td data-l="สถานะ">${pill(t.status)}<div class="sub">${inline(t.status.text)}</div></td><td data-l="สภาพแวดล้อม / ขอบเขต">${esc(ENV[m.env])}${m.scope ? " · " + esc(m.scope) : ""}</td><td data-l="ผ่าน / ทั้งหมด">${pc}</td><td data-l="ขั้นถัดไป">${inline(t.next)}</td><td data-l="ผู้รับผิดชอบ">${actor(m.actor)}</td><td data-l="วัน / commit" class="mono sm">${esc(m.date)}<br>${esc(m.commit)}</td><td data-l="หลักฐาน" class="ev">${inline(t.evidence)}</td></tr>`;
   }).join("");
   const issues = r.issues.slice().sort((a, b) => SEV[a.sev][1] - SEV[b.sev][1] || a.id.localeCompare(b.id));
@@ -127,9 +138,9 @@ ${blockers.length ? `<div class="blk"><strong>ตัวขวางหลัก:
 <style>${css}</style>
 <div class="wrap" id="top">
 <header class="mast"><div><div class="eyebrow">แผง PROJECT-STATUS ภายใน · ไม่ใช่หน้าเว็บลูกค้า</div><h1>huahin . properties — สถานะโครงการ</h1></div>
-<dl class="stamp"><div><dt>ชุดส่งต่อ</dt><dd class="mono">${esc(P.id)}</dd></div><div><dt>วันที่</dt><dd>${esc(P.date)} (${esc(P.tz)})</dd></div><div><dt>แหล่งข้อมูล</dt><dd>PROJECT-STATUS.md · ${esc(stamp)}</dd></div></dl></header>
+<dl class="stamp"><div><dt>ชุดส่งต่อ</dt><dd class="mono">${esc(P.set || P.id)}</dd></div><div><dt>วันที่</dt><dd>${esc(P.date)} (${esc(P.tz)})</dd></div><div><dt>แหล่งข้อมูล</dt><dd>PROJECT-STATUS.md · ${esc(stamp)}</dd></div></dl></header>
 <p class="fresh">ตัวเลขทั้งหมดมาจากไฟล์ PROJECT-STATUS.md ณ commit ที่ระบุ — แผงนี้ <strong>ไม่ตรวจความสดอัตโนมัติ</strong> ถ้าไฟล์เปลี่ยนต้องรัน <code>npm run status-panel</code> ใหม่</p>
-<nav class="jump" aria-label="ข้ามไปส่วน"><a href="#now">1 ปัจจุบัน</a><a href="#you">2 เจ้าของทำอะไร</a><a href="#prog">3 ความคืบหน้า</a><a href="#road">4 Roadmap 0–24</a><a href="#tasks">5 งาน</a><a href="#issues">6 ค้าง/ติดขัด (${open})</a><a href="#hist">7 ประวัติ</a></nav>
+<nav class="jump" aria-label="ข้ามไปส่วน"><a href="#now">1 ปัจจุบัน</a><a href="#you">2 เจ้าของทำอะไร</a><a href="#prog">3 ความคืบหน้า</a><a href="#road">4 Roadmap 0–24</a><a href="#tasks">5 งาน</a><a href="#issues">6 ค้าง/ติดขัด (${open})</a><a href="#decisions">ข้อที่รอตัดสิน (${(r.decisions || []).length})</a><a href="#hist">7 ประวัติ</a></nav>
 
 <section id="now" class="card hero"><div class="eyebrow">1 · CURRENT</div><h2>${esc(r.current.task)}</h2><p class="goal"><strong>เป้าหมายโครงการ:</strong> ${esc(r.goal)}</p>
 <div class="grid2"><div><h4>รหัสงาน / เฟส</h4><p>${r.current.phases.map((x) => `<span class="tag mono">${esc(x)}</span>`).join(" ")}</p><h4>สภาพแวดล้อมของรอบนี้</h4><p>${r.current.environments.map((x) => `<span class="tag">${esc(x)}</span>`).join(" ")}</p><h4>ผู้ทำตอนนี้</h4><p>${esc(r.current.actor)}</p></div>
@@ -140,7 +151,7 @@ ${blockers.length ? `<div class="blk"><strong>ตัวขวางหลัก:
 
 <section id="prog"><div class="eyebrow">3 · ความคืบหน้า แยกตามสภาพแวดล้อม</div><h2>พัฒนา / TEST จริง / production — ตัวหารและหลักฐานคนละชุด ห้ามเฉลี่ยรวม</h2>
 <p class="rule">สูตร = รายการที่ผ่านหลักฐานตามระดับ ÷ รายการที่ใช้ได้ในขอบเขตนั้น ×100 แสดงจำนวนคู่เปอร์เซ็นต์เสมอ · ไม่นับ BLOCKED/FAIL/UNVERIFIED ออกจากตัวหาร · 100% ของ checklist ไม่อนุมัติ release · ผล test ในเครื่อง ภาพจากเจ้าของ และ production ไม่รวมกัน</p>
-<div class="cards">${sc.map(scopeCard).join("")}</div></section>
+${["dev", "test", "prod", "docs"].map((env) => { const g = sc.filter((x) => x.s.env === env); return g.length ? `<div class="envh" data-env="${env}"><h3>${esc(ENV[env])} — ${g.length} ขอบเขต · ตัวหารแยกกัน</h3></div><div class="cards">${g.map(scopeCard).join("")}</div>` : ""; }).join("")}</section>
 
 <div class="filters" role="group" aria-label="กรองข้อมูล"><div class="fl"><span>สภาพแวดล้อม (กรองความคืบหน้า / งาน / ค้าง)</span>${envChips}</div><div class="fl"><span>สถานะ (Roadmap / งาน)</span>${stChips}</div><label class="fl"><span>ค้นหา</span><input id="q" type="search" placeholder="พิมพ์รหัสหรือคำ เช่น DOC-OBS, Staff"></label><div id="fcount" class="sm" aria-live="polite"></div></div>
 
@@ -151,7 +162,8 @@ ${blockers.length ? `<div class="blk"><strong>ตัวขวางหลัก:
 <section id="tasks"><div class="eyebrow">5 · งานปัจจุบันและตำแหน่งที่หยุด</div><h2>ตารางงาน (${d.tasks.length})</h2>
 <div class="tw"><table class="t" data-filter="rows"><thead><tr><th>รหัส</th><th>งาน</th><th>สถานะ</th><th>สภาพแวดล้อม / ขอบเขต</th><th>ผ่าน / ทั้งหมด</th><th>ขั้นถัดไป</th><th>ผู้รับผิดชอบ</th><th>วัน / commit</th><th>หลักฐาน</th></tr></thead><tbody>${taskRows}</tbody></table></div></section>
 
-<section id="issues"><div class="eyebrow">6 · ค้าง / ติดขัด / งานเก่าที่ยังมีประโยชน์</div><h2>ทะเบียนค้าง (${r.issues.length}) — DOC-OBS-01…05 และงานจากประวัติ</h2>
+<section id="issues"><div class="eyebrow">6 · ข้อที่รอตัดสิน และค้าง / ติดขัด / งานเก่าที่ยังมีประโยชน์</div><h2>ทะเบียนค้าง (${r.issues.length}) — DOC-OBS-01…05 และงานจากประวัติ</h2>
+<h3 class="sub3" id="decisions">ข้อที่รอตัดสิน (${(r.decisions || []).length}) — ข้อเสนอของ Code ไม่ใช่มติ</h3><div class="cards dec">${(r.decisions || []).map((x) => `<article class="card" data-env="docs"><div class="eyebrow">${esc(x.id)} · ผู้ตัดสิน: ${actor(x.decider)} · ${x.status === "open" ? "รอตัดสิน" : "ตัดสินแล้ว"}</div><h3>${inline(x.question)}</h3><ol class="opts">${x.options.map((o) => `<li>${inline(o)}</li>`).join("")}</ol><p class="cv">${inline(x.codeView)}</p><p class="sm">กระทบ: ${inline(x.affects || "-")}</p></article>`).join("")}</div>
 <p class="rule">DOC-OBS เป็นรหัสชั่วคราวของข้อสังเกต ไม่ใช่เลข PENDING และ <strong>การบันทึกไม่ใช่คำสั่งให้แก้</strong> · ไม่พบหลักฐาน = UNVERIFIED · BLOCKED ไม่ใช่ FAIL</p>
 <div class="tw"><table class="t" data-filter="rows"><thead><tr><th>รหัส</th><th>ปัญหา</th><th>ระดับ</th><th>สถานะ</th><th>สภาพแวดล้อม</th><th>ผู้รับผิดชอบ</th><th>ขั้นถัดไป</th><th>ที่มา / หลักฐาน</th></tr></thead><tbody>${issueRows}</tbody></table></div></section>
 
@@ -208,11 +220,11 @@ details{margin-top:8px}summary{cursor:pointer;font-weight:600;font-size:14px;pad
 input[type=search]{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:5px 9px;min-width:0;width:min(260px,100%)}
 .pill{display:inline-flex;gap:5px;align-items:center;border-radius:999px;padding:1px 10px;font-size:12.5px;font-weight:600;white-space:nowrap}
 .s-ok{background:var(--ok-bg);color:var(--ok)}.s-part{background:var(--part-bg);color:var(--part)}.s-bad{background:var(--bad-bg);color:var(--bad)}.s-none{background:var(--none-bg);color:var(--none)}.s-dir{background:var(--dir-bg);color:var(--dir)}
-.key{display:flex;flex-wrap:wrap;gap:6px}.sev{font-weight:700;font-size:12.5px;padding:1px 8px;border-radius:5px}
+.key{display:flex;flex-wrap:wrap;gap:6px}.sev{font-weight:700;font-size:12.5px;padding:1px 8px;border-radius:5px;white-space:nowrap}
 .sev-critical{background:var(--bad);color:#fff}.sev-high{background:var(--bad-bg);color:var(--bad)}.sev-med{background:var(--part-bg);color:var(--part)}.sev-low,.sev-info{background:var(--none-bg);color:var(--none)}
 .tw{overflow-x:auto}.t{border-collapse:collapse;width:100%;font-size:13.5px}.t th{text-align:left;font-size:12px;color:var(--muted);font-weight:600;border-bottom:2px solid var(--ink);padding:6px 10px;white-space:nowrap}
 .t td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;min-width:0;overflow-wrap:anywhere}.t tr:target td{background:var(--soft)}.ev{color:var(--muted);font-size:12.5px}.sub{font-size:12px;color:var(--muted);margin-top:3px}
-.hist{margin:6px 0 0;padding-left:18px}.hist li{margin:4px 0}.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+.envh h3{margin:14px 0 6px;font-size:14px;color:var(--muted);letter-spacing:.03em}.sub3{margin:18px 0 8px;font-size:16px}.opts{margin:6px 0 8px;padding-left:20px;font-size:13.5px}.cv{font-size:13px;color:var(--muted);border-left:3px solid var(--line);padding-left:10px}.hist{margin:6px 0 0;padding-left:18px}.hist li{margin:4px 0}.foot{font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
 tr[hidden]{display:none}
 @media (max-width:820px){.t thead{position:absolute;left:-9999px}.t,.t tbody,.t tr,.t td{display:block;width:100%}.t tr{border:1px solid var(--line);border-radius:8px;margin:0 0 10px;padding:6px 10px;background:var(--surface)}
 .t td{border:0;padding:5px 0}.t td::before{content:attr(data-l);display:block;font-size:11.5px;color:var(--muted);font-weight:600;margin-bottom:1px}.tw{overflow:visible}}

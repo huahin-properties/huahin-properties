@@ -63,7 +63,9 @@ describe("status panel (docs-only, built from PROJECT-STATUS.md)", function () {
   });
 
   it("P6 environments are kept apart: dev, TEST and production are separate scopes with their own divisor; the panel never shows one combined percentage", () => {
-    const envs = d.reg.scopes.map((s) => s.env); assert.deepStrictEqual(envs.sort(), ["dev", "docs", "prod", "test"]);
+    const envs = Array.from(new Set(d.reg.scopes.map((s) => s.env))).sort(); assert.deepStrictEqual(envs, ["dev", "docs", "prod", "test"]);
+    const per = (e) => d.reg.scopes.filter((s) => s.env === e).length; assert.ok(per("dev") >= 2 && per("test") >= 2 && per("prod") >= 2, "dev/TEST/production are split into separate checklists");
+    d.reg.scopes.filter((s) => s.env !== "docs").forEach((s) => s.items.forEach((i) => assert.strictEqual(i.id[0], { dev: "D", test: "T", prod: "P" }[s.env], i.id + " is in a " + s.env + " scope but belongs to another environment")));
     assert.ok(!/รวมทั้งโครงการ|ภาพรวม\s*\d+%|overall/i.test(out.document));
     assert.ok(/ห้ามเฉลี่ยรวม/.test(out.document));
   });
@@ -99,11 +101,23 @@ describe("status panel (docs-only, built from PROJECT-STATUS.md)", function () {
         if (w === 1280) {
           const total = await p.evaluate(() => document.querySelectorAll("table[data-filter=rows] tbody tr").length);
           await p.fill("#q", "DOC-OBS"); const n = await p.evaluate(() => document.querySelectorAll("table[data-filter=rows] tbody tr:not([hidden])").length); assert.ok(n > 0 && n < total, "search narrows the rows");
-          await p.fill("#q", ""); await p.click('[data-f-env="prod"]'); const sc = await p.evaluate(() => document.querySelectorAll(".scope:not([hidden])").length); assert.strictEqual(sc, 1, "env filter shows the production scope only");
+          await p.fill("#q", ""); await p.click('[data-f-env="prod"]'); const sc = await p.evaluate(() => document.querySelectorAll(".scope:not([hidden])").length); assert.strictEqual(sc, d.reg.scopes.filter((x) => x.env === "prod").length, "env filter shows the production scopes only");
           await p.click('[data-f-env="all"]'); await p.click('[data-f-st="bad"]'); const bad = await p.evaluate(() => Array.from(document.querySelectorAll("#road tbody tr:not([hidden])")).every((r) => r.getAttribute("data-st") === "bad")); assert.ok(bad);
         }
         await c.close();
       }
     } finally { await b.close(); fs.rmSync(tmp, { force: true }); }
+  });
+
+  it("P10 open decisions D1-D5 are listed with options, the Code proposal marked 'ไม่ใช่มติ', a decider; nothing is shown as decided", () => {
+    const html = out.document; assert.strictEqual(d.reg.decisions.length, 5);
+    d.reg.decisions.forEach((x) => { assert.strictEqual(x.status, "open"); assert.ok(html.includes('id="decisions"') && html.includes(">" + x.id + " · ผู้ตัดสิน")); assert.ok(/ไม่ใช่มติ/.test(x.codeView)); });
+    assert.strictEqual(count(html, /รอตัดสิน<\/div><h3>/g), 5);
+    const bad = parse(MD); bad.reg.decisions[0].codeView = "ควร lock เลย"; assert.ok(validate(bad).some((e) => /not a decision/.test(e)));
+  });
+
+  it("P11 the package set shown in the panel is the one in the handoff files (same id and revision in the registry, the three files' CODE-V2-01 block and the page header)", () => {
+    assert.ok(out.document.includes(d.reg.package.set));
+    for (const f of ["BLUEPRINT.md", "HANDOFF-NEXT-CHAT.md", "PROJECT-STATUS.md"]) { const t = fs.readFileSync(path.join(ROOT, f), "utf8"); assert.ok(t.includes("CODE-V2-01 r2") && t.includes(d.reg.package.id), f + " must carry the r2 block"); }
   });
 });

@@ -399,6 +399,23 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
 ### เอกสารที่เปลี่ยนรอบนี้ (ไม่มีไฟล์ระบบเว็บ)
 `BLUEPRINT.md`, `HANDOFF-NEXT-CHAT.md`, `PROJECT-STATUS.md` (v2 + บล็อกนี้ + §6 ทะเบียน), `docs/status-panel/index.html`, `tools/status-panel/build.js`, `tests/status-panel/panel.test.js`, `package.json` (สคริปต์ 2 ตัว), ภาพตรวจ `docs/status-panel/shots/`.
 
+---
+
+## ผลปรับรอบ r2 — CODE-V2-01 r2 (3 ต.ค. 2569 · หลัง Work ตรวจเบื้องต้น · เอกสารและแผงภายในเท่านั้น)
+
+**ที่มาของงาน:** คำสั่งให้ "ปรับเอกสารและแผงตาม 5 จุดข้างต้น" **ไม่มีรายการ 5 จุดแนบมา** และไม่พบความเห็นใหม่ของ Work ใน PR #8 — Code จึงตีความว่าหมายถึง 5 ข้อที่รอตัดสินในรายงานรอบก่อน (D1–D5 ด้านล่าง) และ **ไม่ตัดสินแทนใคร**: บันทึกเป็น "รอตัดสิน" พร้อมตัวเลือกและข้อเสนอของ Code (ติดป้าย "ไม่ใช่มติ"). ถ้า 5 จุดของ Work คือเรื่องอื่น ให้ส่งรายการมา Code จะปรับต่อโดยไม่ทิ้งรอบนี้.
+**ไม่เปลี่ยน:** code/TEST SHA `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5` · ไม่แก้ระบบเว็บ/Functions/rules · ไม่แก้ DOC-OBS · ไม่ merge/deploy · **ยังไม่ lock เปอร์เซ็นต์** (ทุกขอบเขตยัง `locked:false` จนกว่า Work ตรวจ checklist ที่แยกขอบเขตแล้ว).
+
+| ข้อ | สิ่งที่ปรับ |
+|---|---|
+| แยกขอบเขต checklist | เดิม 4 ชุดรวม → **11 ชุด ตัวหารแยกกัน**: พัฒนา 4 (`S-DEV-CORE` โมเดล/เผยแพร่ · `S-DEV-PHOTOSTAFF` รูป/Staff · `S-DEV-DEPLOY` · `S-DEV-QUALITY` ช่องโหว่/ทดสอบซ้ำ), TEST 3 (`S-TEST-FLOW` เส้นทางหลัก · `S-TEST-PUBLIC` หน้าสาธารณะ/DOC-OBS · `S-TEST-NEG` ปฏิเสธ/ลบ/ซ้ำ/ช้า/AI), production 3 (`S-PROD-SEC` · `S-PROD-REL` · `S-PROD-CHAT`), เอกสาร 1 (`S-DOC`, เพิ่ม R08–R11). รายการเดิมครบ (49) ไม่แก้ผลสถานะ; รวม 53 รายการ. ไม่มีเปอร์เซ็นต์รวมข้ามสภาพแวดล้อม |
+| D1 lock เปอร์เซ็นต์ | รอ Work ตรวจและ lock ทีละชุด (ผู้ตัดสิน: Work) |
+| D2 หน่วยขนาดที่ดิน | รอเจ้าของ: ตร.ว. / ตร.ม. / ใช้ ไร่-งาน-ตร.ว. (กระทบ DOC-OBS-02 · T12) |
+| D3 ลำดับ merge | รอเจ้าของ (กลไก branch เป็นเส้นตรง แต่ประตู production ยังไม่ผ่าน → ข้อเสนอ Code: ยังไม่ merge) |
+| D4 CLAUDE.md ฉบับเดียว | รอเจ้าของ (ตอนนี้: ฉบับ repo + บล็อกชี้ชุดส่งต่อ) |
+| D5 ลำดับงานถัดไป | รอเจ้าของ (ข้อเสนอ Code: audit DOC-OBS ก่อน แบบอ่านอย่างเดียว) |
+| ชุดส่งต่อรุ่นเดียวกัน | แผง, Viewer/พรีวิว และสามไฟล์แสดงชุดเดียวกัน: `HP-HANDOFF-2026-10-03-v2 + CODE-V2-01 r2` พร้อม commit เอกสารที่รายงานท้ายคอมเมนต์ PR |
+| Artifact | เผยแพร่แผงเป็น Artifact ส่วนตัวแล้ว; **Code เปิดหน้า claude.ai เองไม่ได้ จึงยืนยันการแสดงผลได้เฉพาะ HTML ชุดเดียวกันใน Chromium ในเครื่อง** (R11 = UNVERIFIED) — วิธีเปิดที่ใช้ได้จริง: ดาวน์โหลด `docs/status-panel/index.html` แล้วเปิดในเบราว์เซอร์ |
 
 ## 6. STATUS-REGISTRY — ข้อมูลเครื่องอ่านของแผงภายใน (แก้ที่นี่ที่เดียว แล้วรัน `npm run status-panel`)
 
@@ -417,7 +434,9 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   "deployedTestSha": "d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5",
   "deployedProdSha": "ไม่ทราบ",
   "prState": "PR #8 OPEN / DRAFT / NOT MERGED · base claude/chat-live-01",
-  "website": "RED / Public Hidden (ตามรายงาน ไม่ได้ตรวจสดรอบนี้)"
+  "website": "RED / Public Hidden (ตามรายงาน ไม่ได้ตรวจสดรอบนี้)",
+  "revision": "r2 (Code · หลัง Work ตรวจเบื้องต้น)",
+  "set": "HP-HANDOFF-2026-10-03-v2 + CODE-V2-01 r2"
  },
  "goal": "ให้เจ้าของและทีมลงประกาศพร้อมรูปจนเผยแพร่ได้จริงอย่างปลอดภัย (ส่งฟอร์ม → Staff เตรียม → Owner อนุมัติ/เผยแพร่ → หน้าสาธารณะ) บนเว็บ huahin.properties โดยยังไม่เปิดเว็บสาธารณะจนกว่าเจ้าของอนุมัติ",
  "current": {
@@ -447,11 +466,11 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
  },
  "scopes": [
   {
-   "id": "S-DEV",
+   "id": "S-DEV-CORE",
    "env": "dev",
-   "name": "LISTING-E2E-01 — โค้ดและทดสอบในเครื่อง",
+   "name": "โมเดลข้อมูลและการเผยแพร่ (โค้ด/ในเครื่อง)",
    "locked": false,
-   "lockNote": "ร่างจาก git/รายงาน Code — รอ Work ตรวจและ lock รายการ",
+   "lockNote": "ร่าง — รอ Work ตรวจและ lock ชุดนี้แยกจากชุดอื่น",
    "items": [
     {
      "id": "D01",
@@ -468,13 +487,6 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
      "ref": "core S-series, B6/B9"
     },
     {
-     "id": "D03",
-     "text": "รูปส่วนตัวไม่เปิดสาธารณะ ไม่มี token; ทีมงานเห็นผ่าน getCasePhoto",
-     "status": "pass",
-     "level": "LOCAL",
-     "ref": "PP1, B5/B10"
-    },
-    {
      "id": "D04",
      "text": "Checklist การส่ง + Photo Standard v1 (server และฟอร์ม)",
      "status": "pass",
@@ -482,26 +494,60 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
      "ref": "core, B1/B3"
     },
     {
+     "id": "D07",
+     "text": "หน้าสาธารณะรอ SDK แบบมีเพดานเวลา ไม่แสดงข้อมูลตัวอย่างแทนของจริงใน TEST",
+     "status": "pass",
+     "level": "LOCAL",
+     "ref": "B7/B8, H9"
+    }
+   ]
+  },
+  {
+   "id": "S-DEV-PHOTOSTAFF",
+   "env": "dev",
+   "name": "รูปส่วนตัว และหน้า Staff (โค้ด/ในเครื่อง)",
+   "locked": false,
+   "lockNote": "ร่าง — รอ Work ตรวจและ lock ชุดนี้แยกจากชุดอื่น",
+   "items": [
+    {
+     "id": "D03",
+     "text": "รูปส่วนตัวไม่เปิดสาธารณะ ไม่มี token; ทีมงานเห็นผ่าน getCasePhoto",
+     "status": "pass",
+     "level": "LOCAL",
+     "ref": "PP1, B5/B10"
+    },
+    {
      "id": "D05",
      "text": "หน้า Case Data ให้ Staff กรอกข้อมูลเคสโดยไม่แตะ guard เดิม",
      "status": "pass",
      "level": "LOCAL",
      "ref": "B11"
-    },
+    }
+   ]
+  },
+  {
+   "id": "S-DEV-DEPLOY",
+   "env": "dev",
+   "name": "เครื่องมือ deploy TEST (โค้ด/ในเครื่อง)",
+   "locked": false,
+   "lockNote": "ร่าง — รอ Work ตรวจและ lock ชุดนี้แยกจากชุดอื่น",
+   "items": [
     {
      "id": "D06",
      "text": "สคริปต์ deploy TEST แยก + โฟลเดอร์ฟังก์ชัน listing 10 ตัว + selector ผ่านโค้ดจริงของ CLI",
      "status": "pass",
      "level": "LOCAL",
      "ref": "L1–L4, F1–F3"
-    },
-    {
-     "id": "D07",
-     "text": "หน้าสาธารณะรอ SDK แบบมีเพดานเวลา ไม่แสดงข้อมูลตัวอย่างแทนของจริงใน TEST",
-     "status": "pass",
-     "level": "LOCAL",
-     "ref": "B7/B8, H9"
-    },
+    }
+   ]
+  },
+  {
+   "id": "S-DEV-QUALITY",
+   "env": "dev",
+   "name": "คุณภาพ/ช่องโหว่ที่ยังเปิด (ทดสอบซ้ำ, rules, rate limit)",
+   "locked": false,
+   "lockNote": "ร่าง — รอ Work ตรวจและ lock ชุดนี้แยกจากชุดอื่น",
+   "items": [
     {
      "id": "D08",
      "text": "ชุดทดสอบ browser นิ่ง (รันเต็มซ้ำแล้วผ่านสม่ำเสมอ)",
@@ -540,11 +586,11 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    ]
   },
   {
-   "id": "S-TEST",
+   "id": "S-TEST-FLOW",
    "env": "test",
-   "name": "LISTING-E2E-01 — ลองจริงบน Cloud TEST (หนึ่งเคสสังเคราะห์)",
+   "name": "Cloud TEST — เส้นทางหลัก ส่ง→Staff→Owner→เผยแพร่→ปิด (หนึ่งเคส)",
    "locked": false,
-   "lockNote": "ร่างจากตารางหลักฐานเจ้าของ 2–3 ต.ค. — รอ Work lock รายการ",
+   "lockNote": "ร่าง — รอ Work ตรวจและ lock ชุดนี้แยกจากชุดอื่น",
    "items": [
     {
      "id": "T01",
@@ -603,6 +649,22 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
      "ref": "015012"
     },
     {
+     "id": "T15",
+     "text": "ปิดประกาศแล้ว Search = 0 รายการ",
+     "status": "pass",
+     "level": "REAL-TEST",
+     "ref": "020034"
+    }
+   ]
+  },
+  {
+   "id": "S-TEST-PUBLIC",
+   "env": "test",
+   "name": "Cloud TEST — หน้าสาธารณะแสดงถูกต้อง (DOC-OBS)",
+   "locked": false,
+   "lockNote": "ร่าง — รอ Work ตรวจและ lock ชุดนี้แยกจากชุดอื่น",
+   "items": [
+    {
      "id": "T09",
      "text": "หน้า Search พบประกาศตั้งแต่เปิดครั้งแรก",
      "status": "pass",
@@ -645,19 +707,21 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
      "ref": "DOC-OBS-04"
     },
     {
-     "id": "T15",
-     "text": "ปิดประกาศแล้ว Search = 0 รายการ",
-     "status": "pass",
-     "level": "REAL-TEST",
-     "ref": "020034"
-    },
-    {
      "id": "T16",
      "text": "หลังปิด หน้า Details แจ้งสถานะ 'ปิดแล้ว/ไม่พบ' ชัดเจน",
      "status": "fail",
      "level": "REAL-TEST",
      "ref": "DOC-OBS-05 (ว่างเปล่า)"
-    },
+    }
+   ]
+  },
+  {
+   "id": "S-TEST-NEG",
+   "env": "test",
+   "name": "Cloud TEST — ปฏิเสธ/ลบ/ซ้ำ/ช้า/AI (ยังไม่ทดสอบ)",
+   "locked": false,
+   "lockNote": "ร่าง — รอ Work ตรวจและ lock ชุดนี้แยกจากชุดอื่น",
+   "items": [
     {
      "id": "T17",
      "text": "หลังปิด ไฟล์/เอกสารฝั่ง backend ถูกลบครบ",
@@ -703,9 +767,9 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    ]
   },
   {
-   "id": "S-PROD",
+   "id": "S-PROD-SEC",
    "env": "prod",
-   "name": "ความพร้อม production (ยังไม่เริ่ม — ห้ามเปิด GREEN)",
+   "name": "Production — ความปลอดภัยและข้อมูลเก่า",
    "locked": false,
    "lockNote": "ร่าง — ยังไม่มีมติขอบเขต production",
    "items": [
@@ -724,18 +788,27 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
      "ref": "บันทึกแล้ว ยังไม่แก้"
     },
     {
-     "id": "P03",
-     "text": "ตัดสินลำดับ merge chat-live-01 / PR #8 / main",
-     "status": "unverified",
-     "level": "SOURCE",
-     "ref": "ยังไม่มีมติ"
-    },
-    {
      "id": "P04",
      "text": "ยืนยัน rules และ functions ที่ deploy บน production ตรงกับโค้ด",
      "status": "unverified",
      "level": "PROD",
      "ref": "ไม่มีสิทธิ์/ข้อมูล"
+    }
+   ]
+  },
+  {
+   "id": "S-PROD-REL",
+   "env": "prod",
+   "name": "Production — การ merge/release และสภาพแวดล้อม",
+   "locked": false,
+   "lockNote": "ร่าง — ยังไม่มีมติขอบเขต production",
+   "items": [
+    {
+     "id": "P03",
+     "text": "ตัดสินลำดับ merge chat-live-01 / PR #8 / main",
+     "status": "unverified",
+     "level": "SOURCE",
+     "ref": "ยังไม่มีมติ"
     },
     {
      "id": "P05",
@@ -752,18 +825,27 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
      "ref": "engines=20; CLI เตือนปิด 2026-10-30 (ยังไม่เทียบเอกสารทางการ)"
     },
     {
-     "id": "P07",
-     "text": "ทดสอบ production ของงานแชท #14–#18 ที่ยังไม่ครบ",
-     "status": "unverified",
-     "level": "PROD",
-     "ref": "ดูทะเบียนค้าง"
-    },
-    {
      "id": "P08",
      "text": "มติเจ้าของอนุมัติ merge/deploy/เปิดเว็บ (GREEN)",
      "status": "blocked",
      "level": "PROD",
      "ref": "ยังไม่มี"
+    }
+   ]
+  },
+  {
+   "id": "S-PROD-CHAT",
+   "env": "prod",
+   "name": "Production — งานแชท #14–#18",
+   "locked": false,
+   "lockNote": "ร่าง — ยังไม่มีมติขอบเขต production",
+   "items": [
+    {
+     "id": "P07",
+     "text": "ทดสอบ production ของงานแชท #14–#18 ที่ยังไม่ครบ",
+     "status": "unverified",
+     "level": "PROD",
+     "ref": "ดูทะเบียนค้าง"
     }
    ]
   },
@@ -822,6 +904,34 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
      "status": "unverified",
      "level": "DOCS",
      "ref": "รอ Work/เจ้าของ"
+    },
+    {
+     "id": "R08",
+     "text": "แยก checklist เป็นขอบเขตย่อยตามสภาพแวดล้อม (พัฒนา 4 · TEST 3 · production 3 · เอกสาร 1)",
+     "status": "pass",
+     "level": "DOCS",
+     "ref": "แผง r2"
+    },
+    {
+     "id": "R09",
+     "text": "บันทึกข้อที่รอตัดสิน D1–D5 พร้อมตัวเลือกและข้อเสนอของ Code (ยังไม่ใช่มติ)",
+     "status": "pass",
+     "level": "DOCS",
+     "ref": "ทะเบียน decisions"
+    },
+    {
+     "id": "R10",
+     "text": "Viewer/พรีวิวสเตตัสแสดงรุ่นเดียวกับชุดส่งต่อ (ชุด + commit เอกสาร)",
+     "status": "unverified",
+     "level": "DOCS",
+     "ref": "อัปเดตหลัง commit รอบนี้"
+    },
+    {
+     "id": "R11",
+     "text": "ยืนยันการแสดงผลของ Artifact บน claude.ai จริง",
+     "status": "unverified",
+     "level": "DOCS",
+     "ref": "ตรวจได้เฉพาะไฟล์เดียวกันใน Chromium ในเครื่อง; หน้า claude.ai Code เปิดดูเองไม่ได้"
     }
    ]
   }
@@ -841,7 +951,11 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
     "R04",
     "R05",
     "R06",
-    "R07"
+    "R07",
+    "R08",
+    "R09",
+    "R10",
+    "R11"
    ]
   },
   "CHAT-LIVE-01": {
@@ -856,7 +970,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   "LISTING-E2E submit case/photos": {
    "id": "W03",
    "env": "test",
-   "scope": "S-TEST",
+   "scope": "S-TEST-FLOW",
    "actor": "owner",
    "date": "2026-10-03",
    "commit": "d0fe617",
@@ -868,7 +982,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   "Staff 7 photos/lightbox": {
    "id": "W04",
    "env": "test",
-   "scope": "S-TEST",
+   "scope": "S-TEST-FLOW",
    "actor": "owner",
    "date": "2026-10-02",
    "commit": "e837d93→d0fe617",
@@ -879,7 +993,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   "Staff data save/refresh": {
    "id": "W05",
    "env": "test",
-   "scope": "S-TEST",
+   "scope": "S-TEST-FLOW",
    "actor": "owner",
    "date": "2026-10-03",
    "commit": "d0fe617",
@@ -890,7 +1004,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   "Staff submit review": {
    "id": "W06",
    "env": "test",
-   "scope": "S-TEST",
+   "scope": "S-TEST-FLOW",
    "actor": "owner",
    "date": "2026-10-03",
    "commit": "d0fe617",
@@ -901,7 +1015,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   "Owner intake/preview/publish": {
    "id": "W07",
    "env": "test",
-   "scope": "S-TEST",
+   "scope": "S-TEST-FLOW",
    "actor": "owner",
    "date": "2026-10-03",
    "commit": "d0fe617",
@@ -915,7 +1029,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   "Public details 7 photos": {
    "id": "W08",
    "env": "test",
-   "scope": "S-TEST",
+   "scope": "S-TEST-PUBLIC",
    "actor": "owner",
    "date": "2026-10-03",
    "commit": "d0fe617",
@@ -926,7 +1040,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   "Public search cover/data labels/map": {
    "id": "W09",
    "env": "test",
-   "scope": "S-TEST",
+   "scope": "S-TEST-PUBLIC",
    "actor": "code",
    "date": "2026-10-03",
    "commit": "d0fe617",
@@ -940,7 +1054,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   "Take-down search/details": {
    "id": "W10",
    "env": "test",
-   "scope": "S-TEST",
+   "scope": "S-TEST-FLOW",
    "actor": "owner",
    "date": "2026-10-03",
    "commit": "d0fe617",
@@ -954,7 +1068,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   "Full 3 submitter groups": {
    "id": "W11",
    "env": "test",
-   "scope": "S-TEST",
+   "scope": "S-TEST-NEG",
    "actor": "owner",
    "date": "2026-10-03",
    "commit": "d0fe617",
@@ -967,7 +1081,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   "Privacy legacy migration": {
    "id": "W12",
    "env": "prod",
-   "scope": "S-PROD",
+   "scope": "S-PROD-SEC",
    "actor": "owner",
    "date": "2026-10-01",
    "commit": "LEGACY-DATA-PLAN.md",
@@ -978,7 +1092,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   "Production release": {
    "id": "W13",
    "env": "prod",
-   "scope": "S-PROD",
+   "scope": "S-PROD-REL",
    "actor": "owner",
    "date": "2026-10-03",
    "commit": "—",
@@ -1312,6 +1426,73 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "date": "2026-10-03",
    "text": "ชุดส่งต่อ v2 + แผงติดตามภายใน (เอกสารเท่านั้น)",
    "ref": "รอ commit"
+  }
+ ],
+ "decisions": [
+  {
+   "id": "D1",
+   "question": "ล็อก (lock) เปอร์เซ็นต์ — Work ตรวจ checklist ที่แยกขอบเขตแล้ว (ทั้ง 11 ชุดในแผง) และสั่ง lock/แก้ทีละชุด",
+   "options": [
+    "lock ทีละชุดหลังตรวจ (ชุดที่ lock จึงแสดง %)",
+    "ให้ Code แก้รายการแล้วส่งตรวจใหม่",
+    "ไม่ใช้ % จนกว่าจะมี scope production"
+   ],
+   "codeView": "ข้อเสนอของ Code (ไม่ใช่มติ): lock ทีละชุด เริ่มจากชุด Cloud TEST เพราะมีหลักฐานจากภาพ; ชุด production ยังไม่มีขอบเขตจึงควรคงร่าง",
+   "decider": "work",
+   "status": "open",
+   "affects": "ทุกขอบเขต / ส่วน 3 ของแผง"
+  },
+  {
+   "id": "D2",
+   "question": "หน่วยหลักของขนาดที่ดิน (`landSize`) คือ ตร.ว. หรือ ตร.ม. และให้ฟอร์มกับหน้าแสดงสอดคล้องกันอย่างไร",
+   "options": [
+    "ตร.ว. เป็นหน่วยหลัก — หน้า Details แสดง ตร.ว. (หรือแปลงเป็น ตร.ม. พร้อมระบุ)",
+    "ตร.ม. เป็นหน่วยหลัก — แก้ป้ายและค่าในฟอร์ม",
+    "ใช้ฟิลด์ ไร่/งาน/ตร.ว. ที่มีอยู่แทน landSize"
+   ],
+   "codeView": "ข้อเสนอของ Code (ไม่ใช่มติ): ตัดสินหน่วยก่อน แล้วค่อยตั้งขอบเขตแก้ DOC-OBS-02; ห้ามแก้ค่าบน Cloud. หมายเหตุจาก source: ฟอร์มสมาชิกมีทั้ง landSize (ตร.ว.) และ ไร่/งาน/ตร.ว. แยกชุด",
+   "decider": "owner",
+   "status": "open",
+   "affects": "DOC-OBS-02, T12"
+  },
+  {
+   "id": "D3",
+   "question": "ลำดับ merge: chat-live-01 / PR #8 / main",
+   "options": [
+    "merge chat-live-01 เข้า main ก่อน แล้ว retarget #8",
+    "รวม #8 เข้า chat-live-01 แล้ว merge ครั้งเดียว",
+    "ยังไม่ merge จนผ่านเกณฑ์ production"
+   ],
+   "codeView": "ข้อเสนอของ Code (ไม่ใช่มติ): ทางกลไก branch เป็นเส้นตรง (main ไม่มี commit ที่ chat-live-01 ไม่มี) จึงชนกันได้ยาก แต่ประตู production (SEC-URGENT-01, ข้อมูลเก่า, rules) ยังไม่ผ่าน — คง 'ยังไม่ merge'",
+   "decider": "owner",
+   "status": "open",
+   "affects": "ISS-MERGE, P03"
+  },
+  {
+   "id": "D4",
+   "question": "CLAUDE.md ที่จะใช้จริงเพียงฉบับเดียว",
+   "options": [
+    "คงฉบับ repo + บล็อกชี้ชุดส่งต่อ (ตอนนี้)",
+    "รวมสำเนาโปรเจกต์ออกแบบ (§29)",
+    "เขียน CLAUDE.md ฉบับปัจจุบันใหม่ให้สะท้อน Case model และ workflow ปัจจุบัน"
+   ],
+   "codeView": "ข้อเสนอของ Code (ไม่ใช่มติ): ตัวเลือกสาม แต่เป็นงานเอกสารแยกรอบ; สำเนาโปรเจกต์ออกแบบเก่ากว่า workflow ปัจจุบัน ไม่ควรใช้ทับ",
+   "decider": "owner",
+   "status": "open",
+   "affects": "ISS-DOCS-SPLIT"
+  },
+  {
+   "id": "D5",
+   "question": "ลำดับงานถัดไป: audit DOC-OBS ก่อน หรือเติม Cloud test ที่ขาดก่อน",
+   "options": [
+    "audit DOC-OBS-01/03/05 ก่อน (ยังไม่แก้) แล้วเสนอขอบเขตแก้",
+    "เติม Cloud test: ลิงก์รูปเดิมหลังปิด, ปฏิเสธสิทธิ์, agent/outsider",
+    "ทำสองอย่างแยกรอบ"
+   ],
+   "codeView": "ข้อเสนอของ Code (ไม่ใช่มติ): audit DOC-OBS ก่อน เพราะกระทบ T10/T13/T16 และเป็นงานอ่านอย่างเดียว; ชุด Cloud test ต้องให้เจ้าของลองจริงจึงค่อยตามหลัง",
+   "decider": "owner",
+   "status": "open",
+   "affects": "S-TEST-PUBLIC, S-TEST-NEG"
   }
  ]
 }
