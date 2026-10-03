@@ -2,7 +2,8 @@
 
 **รุ่นหลัก: HP-HANDOFF-2026-10-03-v2 · 3 ตุลาคม 2569 · Asia/Bangkok**
 
-- **สถานะปัจจุบัน (r5):** Work ตรวจ head เอกสาร `f4d8090e631ad990de43d27570c05fa12b724722`; code/TEST SHA `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5`; ขอบเขต checklist 12 ชุด (lock แล้ว 2: S-TEST-FLOW 9/9, S-TEST-PUBLIC 2/7); R12=PASS; ข้อกำหนดเจ้าของ A1–A10 บันทึกแล้ว; FX-3 อยู่ใน draft branch (ยังไม่ deploy). ดูบล็อก "ผลปรับรอบ r5" ท้ายเอกสาร. บรรทัดถัดไปที่ระบุ `34a0eb0` / "v2 ยังไม่ commit" เป็น **ประวัติ**
+- **สถานะปัจจุบัน (r6):** source/code head `7c1ec6b40bc5c5008d3bd20eb4ed8274bc3a3b99` (draft, ยังไม่ deploy) · เอกสาร/build base head ที่ Work ตรวจ `4a49ea68377f1a8f881891b020a12e1bf70964df` · Cloud TEST deployed `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5` (ไม่ใช่ source ปัจจุบัน) · production deployed ไม่ทราบ · ขอบเขต checklist 12 ชุด (lock 2: S-TEST-FLOW 9/9, S-TEST-PUBLIC 2/7) · FX-1/2/3/4 อยู่ใน draft (ผลในเครื่อง) รอ Work ตรวจ — ดูบล็อก "ผลปรับรอบ r6" ท้ายเอกสาร; บรรทัดที่ระบุ SHA/สถานะรุ่นก่อนหน้าด้านล่างเป็น **ประวัติ**
+- [ประวัติ r5] **สถานะ ณ r5:** Work ตรวจ head เอกสาร `f4d8090e631ad990de43d27570c05fa12b724722`; code/TEST SHA `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5`; ขอบเขต checklist 12 ชุด (lock แล้ว 2: S-TEST-FLOW 9/9, S-TEST-PUBLIC 2/7); R12=PASS; ข้อกำหนดเจ้าของ A1–A10 บันทึกแล้ว; FX-3 อยู่ใน draft branch (ยังไม่ deploy). ดูบล็อก "ผลปรับรอบ r5" ท้ายเอกสาร. บรรทัดถัดไปที่ระบุ `34a0eb0` / "v2 ยังไม่ commit" เป็น **ประวัติ**
 - รวม Work v1 + Claude Code v1.1 ที่ document commit `34a0eb0ee27bddfa72003958dd7e0546a9b490b2` + Claude AI ADDENDUM-CLAUDE-AI-01 + มติแผง PROJECT-STATUS ที่เจ้าของยืนยัน 3 ต.ค. 10:19
 - [ประวัติ ณ v2] Code baseline/TEST ที่เจ้าของทดลอง: `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5`; PR #8 ตรวจรอบนี้ OPEN/DRAFT/NOT MERGED, head เอกสาร `34a0eb0`, base `claude/chat-live-01`
 - [ประวัติ ณ v2] v1/v1.1 และข้อความ "ยังไม่ commit" ด้านล่างเป็น snapshot ประวัติ; v1.1 อยู่ GitHub แล้ว ส่วน **v2 ฉบับนี้ยังไม่ commit**. ห้ามเอา code SHA/document SHA/deployed SHA ปนกัน
@@ -98,6 +99,7 @@ Evidence tags: HISTORY=บันทึกเดิม; OWNER-OLD-CHAT=ข้อ�
 | Production release | 🔴 NOT READY | draft/unmerged + blockers | ห้าม merge/deploy/GREEN |
 | ตรวจ source DOC-OBS + ทะเบียนแนวคิด r4 | 🟡 ข้อค้นพบพร้อมส่ง Work; ยังไม่แก้ระบบเว็บ | SOURCE · CODE-V2-01 r4 | Work ตรวจข้อเสนอแก้ขั้นต่ำ FX-1…FX-5 ก่อนแก้ |
 | ข้อกำหนดเจ้าของ A1–A10 + FX-3 (DOC-OBS-05) r5 | 🟡 บันทึกแล้ว; FX-3 อยู่ใน draft branch (LOCAL) รอ Work ตรวจ | SOURCE/LOCAL | Work ตรวจ diff → เจ้าของ deploy TEST ตาม head ที่ตรวจ |
+| FX-1/2/4 ใน draft + ทดสอบ FX-3 เพิ่ม + ทะเบียนรุ่น/ผลทดสอบ r6 | 🟡 พร้อมส่ง Work ตรวจ; LOCAL ผ่าน; ยังไม่ deploy | LOCAL/SOURCE | Work ตรวจ diff → เจ้าของ deploy TEST ตาม head ที่ตรวจ |
 
 ## 4. งานค้างและลำดับถัดไป
 
@@ -496,6 +498,54 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
 
 **ไม่เปลี่ยน:** ไม่แก้ FX-1/FX-2/FX-4/FX-5, ไม่แก้ DOC-OBS อื่น, ไม่ merge/deploy/GREEN, ไม่แตะ Functions/rules, ไม่ใช้ข้อมูลจริง, ไม่รัน `tools/chat-live/deploy-test.sh`
 
+## ผลปรับรอบ r6 — CODE-V2-01 r6 (3 ต.ค. 2569 · ตอบ WORK REVIEW head 4a49ea6)
+
+**ทะเบียนรุ่น (แยกฟิลด์ ไม่ให้ baseline เก่าถูกเข้าใจว่าเป็น source ปัจจุบัน):**
+| ฟิลด์ | ค่า | ความหมาย |
+|---|---|---|
+| `sourceHeadSha` — current source/code head | `7c1ec6b40bc5c5008d3bd20eb4ed8274bc3a3b99` | commit ล่าสุดที่มีโค้ดเว็บ/เครื่องมือบิลด์เปลี่ยน (draft, ยังไม่ deploy); commit หลังจากนี้เป็นเอกสาร/แผงเท่านั้น (ตรวจโดย test P8) |
+| `docBaseSha` — document/build base head | `4a49ea68377f1a8f881891b020a12e1bf70964df` | head ที่ Work ตรวจรอบนี้ (ฐานของรอบ r6) |
+| `deployedTestSha` — Cloud TEST deployed head | `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5` | สิ่งที่เจ้าของลองบน Cloud TEST (รหัสนี้ **ไม่ใช่** source ปัจจุบัน) |
+| `deployedProdSha` — production deployed head | ไม่ทราบ | ไม่ได้ตรวจ |
+(ฟิลด์เดิม `codeSha` ถูกยกเลิกเพราะกำกวมระหว่าง "source ปัจจุบัน" กับ "TEST ที่ deploy")
+
+### 1) FX-3 — รับไว้ใน draft; เพิ่มการตรวจตามคำสั่ง
+หลักฐานเป็นผลในเครื่อง (Chromium + emulator, ข้อมูลสังเคราะห์) ไม่ใช่ Cloud — **T16 คง FAIL** จนทดสอบบน TEST. เพิ่มใน browser test B12: (ก) กดปุ่ม "ลองอีกครั้ง" จริง = การนำทางจากผู้ใช้ **1 ครั้ง** และไม่มีการนำทางอัตโนมัติก่อน/หลัง; (ข) จำลอง direct read ล้มขณะ collection โหลดได้ → แสดง "โหลดไม่สำเร็จ" ไม่ใช่ "ไม่พบ"; (ค) ข้อความ loading / not-found (หัวข้อ+ข้อความ+กลับ) / failed (หัวข้อ+ข้อความ+ลองอีกครั้ง+กลับ) ครบ **7 คีย์ × 8 ภาษา** ตรงกับพจนานุกรมและต่างกันทุกภาษา. Negative control: ตัดการตรวจ direct read → B12 ล้มที่ข้อ (ข).
+
+### 2) FX-1 — ตราอนุมัติรับเรื่อง ≠ ตราอนุมัติเผยแพร่ (DOC-OBS-04) — ใน draft
+ที่พบ: การอนุมัติรับเรื่องของ Case แบบใหม่ **ตั้งใจไม่เขียน `approvedBy`** (ตราผู้อนุมัติเขียนที่ server ตอนเผยแพร่เท่านั้น) — บรรทัด "อนุมัติโดย -" จึงเป็นตราของ "รับเรื่อง" ที่ไม่มีที่มา. ที่มาจริงของแต่ละเหตุการณ์: รับเรื่อง = `submissions/{id}.reviewedBy`; เผยแพร่ = `approvedByEmail/Uid/Role` (ภายใน). แก้ในหน้า Listing Approvals: แสดง 2 บรรทัดแยก "อนุมัติรับเรื่องโดย …" และ "อนุมัติเผยแพร่โดย …" ตรงกับผู้ดำเนินการของเหตุการณ์นั้น; ไม่มีอีเมลบันทึก → บอกว่า "ไม่มีบันทึก" (บทบาทแสดงเป็น "บทบาทที่บันทึก: …" เท่านั้น ไม่ใช้เป็นชื่อบุคคล); **ไม่เพิ่มฟิลด์ ไม่แตะ server ไม่เพิ่มข้อมูลผู้อนุมัติในข้อมูลสาธารณะ** (test: เอกสารสาธารณะไม่มี approvedBy*/reviewedBy). ตรวจ: B6 + negative control (เอา FX-1 ออก → B6 ล้ม).
+
+### 3) FX-2 — ระยะ/ชื่อโซนที่ไม่มีหลักฐาน (DOC-OBS-03) — ใน draft
+ตรวจเส้นทางพิกัดที่ Staff บันทึก: Staff บันทึก **`coordsRaw` ซึ่งเป็นฟิลด์ภายใน (ตำแหน่งแน่นอน)** ตั้งใจไม่ถูกฉายสู่ข้อมูลสาธารณะ และไม่มีโค้ดใดสร้าง `mapLink`/ระยะ/โซนสาธารณะจากมัน → ไม่ได้ "ตกหล่น" แต่ **ไม่เคยมีทาง** ให้ Case มีระยะ/โซนสาธารณะ (การออกแบบเพื่อความเป็นส่วนตัว). แก้: ซ่อนเฉพาะบรรทัดระยะ/ชื่อโซนที่ไม่มีหลักฐาน (ไม่แสดง 0 กม. หรือ undefined แทน "ไม่ทราบ"); **คงค่า 0 ที่เป็นตัวเลขที่เก็บไว้จริง**; `data.js` เลิกใส่ค่าเริ่ม 0; ระยะที่เก็บไว้กับระยะที่คำนวณจากพิกัดไม่ถูกผสม/แปลงเป็นกัน; การ์ดค้นหาไม่มีคำนำหน้า " · " ว่าง. ตรวจ: B13 (ไม่มีพิกัด/ไม่มีโซน → ไม่มี undefined/0; เก็บ 0 จริง; มีพิกัด → ยังแสดง) + negative control. **ยังไม่แก้ (รายงานให้ Work):** แผนที่ยังตั้งจุดกลางเริ่มต้นเมื่อไม่มีโซน/พิกัด; ตัวเลขจากพิกัดเป็นระยะเส้นตรงถึงจุดอ้างอิงของพื้นที่ (พฤติกรรมเดิม ไม่ใช่ระยะเดินทาง).
+
+### 4) FX-4 — Search ไม่มีรูปปก (DOC-OBS-01) — พบต้นเหตุ แล้วจึงแก้ (draft)
+ทำซ้ำได้ในเครื่องก่อนแก้ (B7 ล้มทั้ง visitor; ข้อมูลที่ Search ได้รับถูกต้องมี URL รูปครบ). **ต้นเหตุ:** `tools/build-listing-test.js` ห่อ **ทุก** ไฟล์ `.html` — รวมไฟล์ component (PropertyCard ฯลฯ) — ไว้ใน `<template id="chat-live-app">` เพื่อให้หน้า inert; แต่ runtime ดึง component เป็นข้อความแล้วหา `<script data-dc-script>` ซึ่งถูกซ่อนในเทมเพลต → component ทำงานโดยไม่มีตรรกะ ค่าที่คำนวณ (รูปปก/สไตล์ปก ฯลฯ) หายหมด (การ์ดยังแสดงราคา/ชื่อเพราะเป็น prop ตรง). **ข้อมูล Firestore/rules/รูปสาธารณะถูกต้องตลอด; ไฟล์ production ไม่ผ่านตัวบิลด์นี้ จึงไม่กระทบ production.** แก้: ห่อ template เฉพาะหน้าที่เบราว์เซอร์เปิด (ENTRIES). ตรวจ: B7 — รูปปกที่ **decode ได้จริง** (ไม่ใช่แค่มี URL) สำหรับ visitor 3 รอบ และ Owner; hosting-build: component ไม่ถูกห่อและสคริปต์ของ component มองเห็นได้. **ผลข้างเคียงที่ Work ต้องรับทราบ:** ใน TEST component ทุกตัว (LanguageSwitcher, SearchFilters, ContactRail ฯลฯ) จะ "ทำงานจริง" เหมือน production เป็นครั้งแรก และ **หลักฐาน Cloud TEST d0fe617 ทั้งหมดเกิดตอน component ไม่มีตรรกะ** (ลงทะเบียนเป็น ISS-TESTBUILD). ไม่ได้ขอให้เจ้าของเก็บ Network. T10 คง FAIL จนลองบน TEST.
+
+### 5) FX-5 — หน่วยที่ดิน (DOC-OBS-02) — ตรวจที่มาแล้ว ยังไม่เปลี่ยนอะไร
+| flow | หน่วยของ `landSize` ที่ปรากฏ (จาก source) |
+|---|---|
+| Lister Dashboard (เอเจนต์/เจ้าของ) | ตร.ว. (ป้าย, ข้อความสรุป/แชร์) + ช่อง ไร่/งาน/ตร.ว. แยกอีกชุด |
+| Case Data (Staff) | ตร.ว. (คัดลอกจาก Lister) |
+| Admin Dashboard / AI Quick Add | ตร.ม. (ป้าย; prompt AI ใช้ sqm) |
+| Owner Submission (ฟอร์มสาธารณะ) | ไม่มีช่องที่ดิน |
+| Property Details (หน้าสาธารณะ) | ต่อ "ตร.ม." เสมอ ไม่แปลงหน่วย |
+| Home (ข้อความสเปคให้ AI) / ContactRail | `sqwah` / `sqm` (ไม่ตรงกัน) |
+สรุป: ฟิลด์เดียวมีสองความหมายตามช่องทางที่กรอก และไม่มีโค้ดแปลง. **ข้อมูลที่ขาด (เฉพาะเจาะจง):** (1) หน่วยของค่า `landSize` ที่มีอยู่แล้วใน `properties` แยกตามช่องทางที่กรอก — ต้องดูตัวอย่างข้อมูลจริงแบบอ่านอย่างเดียว (Code ตรวจจาก source ไม่ได้); (2) มติ D2. ยังไม่เปลี่ยนหน่วย/ป้ายทั้งระบบ/ข้อมูล Cloud.
+
+### 6) ผลทดสอบ ที่ source SHA `7c1ec6b` (ทะเบียน D12)
+| ชุด | ผล | หมายเหตุ |
+|---|---|---|
+| D12a `test:listing` | **90 ผ่าน** | รันรอบนี้ |
+| D12b `test:chat-live` | **34 ผ่าน** (12 pending) | รันรอบนี้; ก่อน commit เคยล้ม B6 เพราะ working tree ยังไม่ commit — ผ่านหลัง commit |
+| D12c combined | **UNVERIFIED** | ไม่ได้รัน (175 เป็นผลรอบก่อน) |
+| D12d `test:browser-local` | **13/13 ผ่าน** รอบสุดท้าย | หัวข้อก่อนหน้า (head 4a49ea6) 3 รอบ = ผ่าน 2 / **ล้ม 1 ที่ B2**; ในรอบพัฒนา FX-4–FX-2 มีรอบ B7/B12/B13 ล้มตามที่ทำซ้ำ/negative control — ไม่ได้ลบ |
+**D08 คง FAIL** (browser test ยังล้มเป็นพัก ๆ; ต้นเหตุยังไม่สรุป — ไม่ปรับจากรอบที่ผ่าน). Negative control รอบนี้: เอา FX-1/2/4 ออก → B6, B7, B13 ล้ม; ตัดการตรวจ direct read ของ FX-3 → B12 ล้ม; ทุกข้อล้มด้วยเหตุผลตรงกับจุดที่แก้.
+
+### 7) ข้อกำหนดเจ้าของ A1–A10
+รักษาเป็น **ข้อกำหนดและช่องว่าง** ไม่ถือว่าเป็นฟังก์ชันที่ทำครบ ไม่สร้างระบบใหม่ตามข้อกำหนดทั้งหมดในรอบนี้ (ดูบล็อก r5 และแผงส่วน 5ข).
+
+**ข้อจำกัด / ไม่ได้ทำ:** ผลทั้งหมดเป็นในเครื่อง ไม่มีหลักฐาน Cloud · ไม่ merge · ไม่ deploy (รวม TEST) · ไม่แตะ production · ไม่ migrate/ลบข้อมูล Cloud · ไม่เปิด GREEN · ไม่รัน `tools/chat-live/deploy-test.sh` · เจ้าของไม่ต้องส่งเคสใหม่หรือทดสอบเพิ่มในรอบนี้ · **การเปลี่ยนไฟล์ production-facing (ยังไม่ merge):** `Property Details.dc.html`, `Listing Approvals.dc.html`, `PropertyCard.dc.html`, `data.js`
+
 ## 6. STATUS-REGISTRY — ข้อมูลเครื่องอ่านของแผงภายใน (แก้ที่นี่ที่เดียว แล้วรัน `npm run status-panel`)
 
 ตาราง §1–§3 ด้านบนเป็นต้นทางของ Roadmap/ฐานระบบ/งานปัจจุบัน (แผงอ่านตรงจากตาราง). บล็อกนี้เก็บเฉพาะสิ่งที่ตารางไม่มี: ผู้รับผิดชอบ/ขอบเขต/วัน-commit ของแต่ละงาน (`taskMeta`), checklist ร่างสำหรับเปอร์เซ็นต์ (`scopes`, ทุกชุด `locked:false` จนกว่า Work lock), ทะเบียนค้าง (`issues`) และประวัติ. สถานะรายการใน checklist: `pass` / `fail` / `blocked` / `unverified` / `na` (N/A ต้องมีเหตุผลใน `ref`). ห้ามใส่รหัสผ่าน คีย์ อีเมล เบอร์ หรือ token.
@@ -508,18 +558,18 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   "id": "HP-HANDOFF-2026-10-03-v2",
   "date": "2026-10-03",
   "tz": "Asia/Bangkok",
-  "codeSha": "d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5",
-  "docBaseSha": "f4d8090e631ad990de43d27570c05fa12b724722",
+  "docBaseSha": "4a49ea68377f1a8f881891b020a12e1bf70964df",
   "deployedTestSha": "d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5",
   "deployedProdSha": "ไม่ทราบ",
   "prState": "PR #8 OPEN / DRAFT / NOT MERGED · base claude/chat-live-01",
   "website": "RED / Public Hidden (ตามรายงาน ไม่ได้ตรวจสดรอบนี้)",
-  "revision": "r5 (Code · ข้อกำหนดเจ้าของ + lock Work + FX-3 ใน draft)",
-  "set": "HP-HANDOFF-2026-10-03-v2 + CODE-V2-01 r5"
+  "revision": "r6 (Code · FX-1/2/4 + ทดสอบ FX-3 เพิ่ม + แก้ทะเบียนรุ่น/ผลทดสอบ)",
+  "set": "HP-HANDOFF-2026-10-03-v2 + CODE-V2-01 r6",
+  "sourceHeadSha": "7c1ec6b40bc5c5008d3bd20eb4ed8274bc3a3b99"
  },
  "goal": "ให้เจ้าของและทีมลงประกาศพร้อมรูปจนเผยแพร่ได้จริงอย่างปลอดภัย (ส่งฟอร์ม → Staff เตรียม → Owner อนุมัติ/เผยแพร่ → หน้าสาธารณะ) บนเว็บ huahin.properties โดยยังไม่เปิดเว็บสาธารณะจนกว่าเจ้าของอนุมัติ",
  "current": {
-  "task": "บันทึกข้อกำหนดเจ้าของ 10 ข้อ (แยก ปัจจุบัน / เมื่อถึงขั้น / อนาคต) + lock S-TEST-FLOW/PUBLIC ตามผล Work + FX-3 (DOC-OBS-05) ใน draft branch",
+  "task": "ตอบ Work review head 4a49ea6: FX-1/FX-2/FX-4 ใน draft + ทดสอบ FX-3 เพิ่ม + FX-5 ตรวจที่มา + แก้ทะเบียนรุ่น/ผลทดสอบ",
   "phases": [
    "LISTING-E2E-01",
    "ชุดส่งต่อ"
@@ -529,13 +579,13 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "พัฒนา (โค้ด/ในเครื่อง)",
    "TEST (ผลเดิม)"
   ],
-  "actor": "Claude Code → ส่ง ChatGPT Work ตรวจ diff FX-3 ก่อนเจ้าของ deploy TEST"
+  "actor": "Claude Code → ส่ง ChatGPT Work ตรวจ diff ก่อนเจ้าของ deploy TEST"
  },
  "youDoNow": {
-  "text": "ยังไม่ต้องทำอะไร — รอ ChatGPT Work ตรวจ diff FX-3 และข้อกำหนดที่บันทึกใหม่",
+  "text": "ยังไม่ต้องทำอะไร — ไม่ต้องส่งเคสใหม่หรือทดสอบเพิ่มในรอบนี้; รอ ChatGPT Work ตรวจ diff + ผลทดสอบ",
   "where": "ไม่มีหน้าจอที่ต้องเปิด",
-  "passWhen": "Work ตรวจแล้วระบุ head ที่ให้เจ้าของ deploy TEST (เจ้าของ deploy เองตาม head ที่ตรวจเท่านั้น)",
-  "next": "หลัง deploy TEST: เจ้าของเปิดลิงก์ของเคสที่ปิดแล้ว (ควรเห็นข้อความ \"ไม่พบประกาศนี้\") — ยังไม่มีคำสั่งให้ทำตอนนี้"
+  "passWhen": "Work ตรวจแล้วระบุ head ที่ให้เจ้าของ deploy TEST (เจ้าของ deploy เองเท่านั้น)",
+  "next": "ยังไม่มีคำสั่งให้ deploy, merge หรือทดสอบ"
  },
  "actors": {
   "owner": "เจ้าของ (Product Owner)",
@@ -581,10 +631,31 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
     },
     {
      "id": "D13",
-     "text": "หน้า Details แยกสถานะ กำลังโหลด / ไม่พบหรือปิดแล้ว / โหลดไม่สำเร็จ ครบ 8 ภาษา ไม่เผยข้อมูลเคสส่วนตัว (FX-3, draft branch)",
+     "text": "หน้า Details แยกสถานะ กำลังโหลด / ไม่พบหรือปิดแล้ว / โหลดไม่สำเร็จ ครบ 8 ภาษา ไม่เผยข้อมูลเคสส่วนตัว (FX-3, draft)",
      "status": "pass",
      "level": "LOCAL",
-     "ref": "browser-local B12 12/12 ผ่าน + negative control ล้มเมื่อไม่มี FX-3 (เฉพาะในเครื่อง ยังไม่ deploy / ยังไม่ลอง Cloud TEST)"
+     "ref": "browser-local B12: retry = 1 navigation, direct read ล้ม = โหลดล้ม (ไม่ใช่ไม่พบ), ข้อความ 7 รายการ × 8 ภาษา + negative control ล้มเมื่อตัดการตรวจ direct read; ยังไม่ deploy / ยังไม่ลอง Cloud"
+    },
+    {
+     "id": "D14",
+     "text": "หน้าอนุมัติแสดงตราอนุมัติรับเรื่องกับตราอนุมัติเผยแพร่แยกกัน ตรงกับผู้ดำเนินการของเหตุการณ์นั้น ไม่ใช้บทบาทเป็นชื่อบุคคล ไม่เพิ่มข้อมูลผู้อนุมัติในข้อมูลสาธารณะ (FX-1, draft)",
+     "status": "pass",
+     "level": "LOCAL",
+     "ref": "browser-local B6 + negative control ล้มเมื่อไม่มี FX-1; ยังไม่ deploy / ยังไม่ลอง Cloud"
+    },
+    {
+     "id": "D15",
+     "text": "หน้า Details/การ์ดค้นหา ซ่อนระยะและชื่อโซนที่ไม่มีหลักฐาน ไม่แสดง 0 กม. หรือ undefined แทน \"ไม่ทราบ\" และคงค่า 0 ที่เก็บไว้จริง (FX-2, draft)",
+     "status": "pass",
+     "level": "LOCAL",
+     "ref": "browser-local B13 + negative control ล้มเมื่อไม่มี FX-2; ยังไม่ deploy / ยังไม่ลอง Cloud"
+    },
+    {
+     "id": "D16",
+     "text": "บิลด์ TEST ไม่ห่อไฟล์ component ในเทมเพลต จึงรูปปกการ์ดค้นหาโหลดจริงทั้ง visitor และ Owner (FX-4, draft)",
+     "status": "pass",
+     "level": "LOCAL",
+     "ref": "browser-local B7 (ล้มก่อนแก้ ทำซ้ำได้) + hosting-build test; ยังไม่ deploy — T10 ยังเป็น FAIL จนลองบน TEST"
     }
    ]
   },
@@ -639,7 +710,7 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
      "text": "ชุดทดสอบ browser นิ่ง (รันเต็มซ้ำแล้วผ่านสม่ำเสมอ)",
      "status": "fail",
      "level": "LOCAL",
-     "ref": "ล้มเป็นพักๆ ราว 1 ใน 4 รอบ"
+     "ref": "LOCAL · ยังล้มเป็นพักๆ: head 4a49ea6 รัน 3 รอบ ผ่าน 2 ล้ม 1 (B2); ต้นเหตุยังไม่สรุป — ไม่ปรับเป็นผ่านจากรอบที่ผ่าน"
     },
     {
      "id": "D09",
@@ -665,30 +736,30 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
     {
      "id": "D12a",
      "text": "test:listing ที่ head ปัจจุบัน",
-     "status": "unverified",
+     "status": "pass",
      "level": "LOCAL",
-     "ref": "รอบเอกสารไม่ได้รัน; combined 175 เป็นผลรอบก่อน"
+     "ref": "LOCAL · test:listing 90 ผ่าน ที่ source SHA 7c1ec6b (รันรอบนี้)"
     },
     {
      "id": "D12b",
      "text": "test:chat-live ที่ head ปัจจุบัน",
-     "status": "unverified",
+     "status": "pass",
      "level": "LOCAL",
-     "ref": "รอบเอกสารไม่ได้รัน; combined 175 เป็นผลรอบก่อน"
+     "ref": "LOCAL · test:chat-live 34 ผ่าน ที่ source SHA 7c1ec6b (รันรอบนี้; ก่อน commit รอบนี้เคยล้ม B6 เพราะ working tree ยังไม่ commit — ผ่านหลัง commit)"
     },
     {
      "id": "D12c",
      "text": "test:combined ที่ head ปัจจุบัน",
      "status": "unverified",
      "level": "LOCAL",
-     "ref": "รอบเอกสารไม่ได้รัน; combined 175 เป็นผลรอบก่อน"
+     "ref": "ไม่ได้รันรอบนี้ — ผล combined 175 เป็นของรอบก่อน (คง UNVERIFIED)"
     },
     {
      "id": "D12d",
      "text": "test:browser-local ที่ head ปัจจุบัน",
-     "status": "unverified",
+     "status": "pass",
      "level": "LOCAL",
-     "ref": "รอบเอกสารไม่ได้รัน; combined 175 เป็นผลรอบก่อน"
+     "ref": "LOCAL · browser-local ที่ source SHA 7c1ec6b: รอบเต็มล่าสุด 13/13 ผ่าน; ก่อนหน้า (head 4a49ea6) รัน 3 รอบ = ผ่าน 2 / ล้ม 1 ที่ B2 (flake เดิม ดู D08) — ไม่ได้ลบ/กลบรอบที่ล้ม"
     }
    ]
   },
@@ -1340,18 +1411,31 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "items": [
     "D13"
    ]
+  },
+  "FX-1/2/4 ใน draft + ทดสอบ FX-3 เพิ่ม + ทะเบียนรุ่น/ผลทดสอบ r6": {
+   "id": "W16",
+   "env": "dev",
+   "scope": "S-DEV-CORE",
+   "actor": "work",
+   "date": "2026-10-03",
+   "commit": "source 7c1ec6b",
+   "items": [
+    "D14",
+    "D15",
+    "D16"
+   ]
   }
  },
  "issues": [
   {
    "id": "DOC-OBS-01",
-   "title": "Search ไม่แสดงรูปปกของประกาศที่เผยแพร่",
+   "title": "Search ไม่แสดงรูปปก — พบต้นเหตุ (บิลด์ TEST ซ่อนสคริปต์ component) แก้ใน draft รอ Work ตรวจ",
    "sev": "high",
    "status": "open",
    "env": "test",
    "actor": "code",
-   "next": "Code ทำตาม FX-4: test ในเครื่องก่อน → หลักฐาน Network 1 ครั้ง → แก้",
-   "source": "SOURCE (r4): เส้นทางอ่านโค้ดถูกต้องตามทฤษฎี ยังไม่พบต้นเหตุ; test ไม่ assert รูปปก"
+   "next": "Work ตรวจ diff FX-4 → เจ้าของ deploy TEST ตาม head ที่ตรวจ แล้วเปิด Search; T10 ยังเป็น FAIL จนกว่าจะลองบน TEST",
+   "source": "LOCAL (r6): ทำซ้ำได้แล้วแก้แล้ว (B7); SOURCE: ต้นเหตุ tools/build-listing-test.js; ยังไม่มีหลักฐาน Cloud"
   },
   {
    "id": "DOC-OBS-02",
@@ -1360,28 +1444,28 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "status": "open",
    "env": "test",
    "actor": "owner",
-   "next": "เจ้าของตัดสิน D2 → จึงเสนอ FX-5",
-   "source": "SOURCE (r4): Details ต่อ \"ตร.ม.\" กับ landSize ที่ฟอร์มเก็บเป็น \"ตร.ว.\" ไม่มีการแปลง (property-adapter.js:66, Property Details:881)"
+   "next": "เจ้าของตัดสิน D2 + Code ต้องการตัวอย่างข้อมูลจริงแบบอ่านอย่างเดียว (หน่วยของ landSize ที่มีอยู่) ก่อนเสนอแก้",
+   "source": "SOURCE (r6): ที่มาแต่ละ flow = ตร.ว./ตร.ม./sqwah/sqm ปนกัน (ดู FX-5); ไม่มีโค้ดแปลง"
   },
   {
    "id": "DOC-OBS-03",
-   "title": "แผนที่แสดง undefined และระยะทาง 0 กม.",
+   "title": "แผนที่แสดง undefined และระยะทาง 0 กม. — แก้ใน draft (FX-2) รอ Work ตรวจ",
    "sev": "med",
    "status": "open",
    "env": "test",
    "actor": "code",
-   "next": "Work ตรวจ FX-2 (ซ่อนระยะที่ไม่รู้) ก่อนแก้",
-   "source": "SOURCE (r4): พบต้นเหตุ — Details:856–867 ตกไปใช้ raw.distance* เมื่อไม่มีพิกัด → 0 / undefined"
+   "next": "Work ตรวจ diff FX-2 → เจ้าของ deploy TEST ตาม head ที่ตรวจ; T13 ยังเป็น FAIL จนลองบน TEST",
+   "source": "LOCAL (r6): B13 + negative control; SOURCE: coordsRaw เป็นฟิลด์ภายในไม่ถูกฉายสาธารณะ จึงไม่มีระยะ/โซนให้แสดงสำหรับ Case"
   },
   {
    "id": "DOC-OBS-04",
-   "title": "หน้าอนุมัติแสดง 'อนุมัติโดย -'",
+   "title": "หน้าอนุมัติแสดง \"อนุมัติโดย -\" — แก้ใน draft (FX-1) รอ Work ตรวจ",
    "sev": "low",
    "status": "open",
    "env": "test",
    "actor": "code",
-   "next": "Work ตรวจ FX-1 (แก้บรรทัดเดียว) ก่อนแก้",
-   "source": "SOURCE (r4): ยืนยัน — UI อ่าน approvedBy ส่วน server เขียน approvedByEmail/Uid/Role"
+   "next": "Work ตรวจ diff FX-1 → เจ้าของ deploy TEST ตาม head ที่ตรวจ; T14 ยังเป็น FAIL จนลองบน TEST",
+   "source": "LOCAL (r6): B6 + negative control; SOURCE: ตราอนุมัติรับเรื่อง ≠ ตราอนุมัติเผยแพร่"
   },
   {
    "id": "DOC-OBS-05",
@@ -1622,6 +1706,16 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "actor": "owner",
    "next": "PD-12 ห้ามสร้างทรัพย์เพื่อให้ผ่าน; TEST ใช้แทนไม่ได้ถ้าไม่มีมติ",
    "source": "HANDOFF/AI addendum A4"
+  },
+  {
+   "id": "ISS-TESTBUILD",
+   "title": "บิลด์ TEST ห่อไฟล์ component ใน <template> ทำให้ component ไม่มีตรรกะบน Cloud TEST d0fe617 (แก้ใน draft)",
+   "sev": "high",
+   "status": "open",
+   "env": "test",
+   "actor": "work",
+   "next": "Work ตรวจ + รับทราบว่าหลักฐาน Cloud TEST ก่อนหน้าเกิดตอน component ไม่ทำงาน (การ์ด/ตัวเลือกภาษา/ตัวกรอง/ContactRail); เจ้าของ deploy TEST ตาม head ที่ตรวจ แล้วทดสอบซ้ำจุดที่เกี่ยวข้อง",
+   "source": "SOURCE/LOCAL (r6): tools/build-listing-test.js; ยืนยันด้วยการทำซ้ำใน Chromium; ไม่กระทบ production"
   }
  ],
  "history": [
@@ -1674,6 +1768,11 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "date": "2026-10-03",
    "text": "r5: Work lock S-TEST-FLOW (9/9) และ S-TEST-PUBLIC (2/7); R12 = PASS (ภาพเจ้าของ); ข้อกำหนดเจ้าของ 10 ข้อ; FX-3 ใน draft branch",
    "ref": "รอ commit"
+  },
+  {
+   "date": "2026-10-03",
+   "text": "r6: FX-1/FX-2/FX-4 ใน draft (พบต้นเหตุ DOC-OBS-01 = บิลด์ TEST ซ่อนสคริปต์ component), เพิ่มการตรวจ FX-3, FX-5 ตรวจที่มา, แยกฟิลด์รุ่น source/doc/TEST/prod",
+   "ref": "source 7c1ec6b"
   }
  ],
  "decisions": [
@@ -1892,8 +1991,8 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   {
    "id": "FX-1",
    "obs": "DOC-OBS-04",
-   "title": "แสดง \"อนุมัติโดย\" ให้ตรงกับฟิลด์ที่ server เขียน",
-   "finding": "Listing Approvals.dc.html บรรทัด 1091 แสดง p.approvedBy แต่ตอนเผยแพร่ server เขียน approvedByEmail / approvedByUid / approvedByRole ลงเอกสาร Case ภายใน (listing-case.js บรรทัด 517) และไม่เขียน approvedBy — \"-\" จึงเกิดจากชื่อฟิลด์ไม่ตรง ไม่ใช่ประวัติหาย",
+   "title": "แยกตราอนุมัติรับเรื่อง / อนุมัติเผยแพร่ ให้แสดงผู้ดำเนินการตรงกับเหตุการณ์ (Work สั่งดำเนินการ — อยู่ใน draft)",
+   "finding": "ตรวจเพิ่ม: การอนุมัติรับเรื่องของ Case แบบใหม่ ตั้งใจไม่เขียน approvedBy (เขียนที่ server ตอนเผยแพร่เท่านั้น) จึงบรรทัด \"อนุมัติโดย -\" คือตราของ \"รับเรื่อง\" ที่ไม่มีที่มาให้แสดง; ผู้อนุมัติรับเรื่องอยู่ที่ submissions/{id}.reviewedBy; ผู้อนุมัติเผยแพร่อยู่ที่ approvedByEmail/Uid/Role (ภายใน). แก้: แสดง 2 บรรทัดแยก — \"อนุมัติรับเรื่องโดย <reviewedBy>\" และ \"อนุมัติเผยแพร่โดย <approvedByEmail>\"; ไม่มีอีเมล → บอกว่าไม่มีบันทึก (บทบาทแสดงเป็น \"บทบาทที่บันทึก: owner\" เท่านั้น ไม่ใช่ชื่อคน); ไม่เพิ่มฟิลด์ ไม่แตะ server",
    "evidence": "SOURCE (อ่านโค้ด 2 ฝั่ง) · ยังไม่เห็นข้อมูล Cloud (ไม่ได้ผูกกับภาพใดโดยเฉพาะ)",
    "minFix": "บรรทัดเดียวในหน้า Approvals: ใช้ p.approvedBy || p.approvedByEmail || p.approvedByRole || \"-\" (หน้าทีมงานเท่านั้น)",
    "reqCheck": [
@@ -1905,13 +2004,13 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "risk": "ต่ำ",
    "order": 1,
    "decider": "work",
-   "status": "proposed"
+   "status": "in-draft"
   },
   {
    "id": "FX-2",
    "obs": "DOC-OBS-03",
-   "title": "ระยะทางและชื่อโซนที่ไม่ทราบต้องไม่แสดง undefined / 0 กม.",
-   "finding": "Property Details.dc.html บรรทัด 856–867: ถ้าไม่มีพิกัดที่อ่านได้จาก mapLink ใช้ raw.distanceBeach / distanceTown ซึ่งเอกสารสาธารณะของ Case ไม่มี → data.js ใส่ค่าเริ่ม 0 (\"0 กม.\") หรือ undefined (\"undefined กม.\"); บรรทัด 872–874 ใช้ zoneText ที่อาจว่างเป็น \"undefined\"",
+   "title": "ซ่อนระยะ/ชื่อโซนที่ไม่มีหลักฐาน แทน 0 กม. / undefined (Work สั่งดำเนินการ — อยู่ใน draft)",
+   "finding": "ตรวจเส้นทางพิกัดที่ Staff บันทึก: Staff บันทึก coordsRaw ซึ่งเป็นฟิลด์ภายใน (ตำแหน่งแน่นอน) ตั้งใจไม่ถูกฉายเป็นข้อมูลสาธารณะ และไม่มีโค้ดใดสร้าง mapLink/ระยะ/โซนสาธารณะจากมัน — จึง \"ไม่ตกหล่น\" แต่ \"ไม่เคยมีทาง\" ให้ Case มีระยะ/โซนสาธารณะ (เป็นการออกแบบด้านความเป็นส่วนตัว). แก้: ซ่อนเฉพาะระยะ/ชื่อโซนที่ไม่มีหลักฐาน; คงค่า 0 ที่เป็นตัวเลขที่เก็บไว้จริง; data.js เลิกใส่ค่าเริ่ม 0; ไม่ผสมระยะที่เก็บไว้กับระยะที่คำนวณจากพิกัด. ยังไม่แก้ (รายงาน): แผนที่ยังตั้งจุดกลางเริ่มต้นเมื่อไม่มีโซน/พิกัด; ตัวเลขจากพิกัดคือระยะเส้นตรงถึงจุดอ้างอิงของพื้นที่ (เดิม)",
    "evidence": "SOURCE (อ่านโค้ด) · ภาพ Cloud 015328 ตรงกัน · ยังไม่ได้ทดลองในเบราว์เซอร์",
    "minFix": "ถ้าไม่มีพิกัดและค่าระยะไม่ใช่ตัวเลขมากกว่า 0 ให้ซ่อนบรรทัดระยะนั้น (ไม่ต้องมีข้อความใหม่); ถ้าไม่มีชื่อโซนให้แสดงแค่ชื่ออำเภอ/พื้นที่ ไม่ใส่คำว่า undefined",
    "reqCheck": [
@@ -1924,13 +2023,13 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "risk": "ต่ำ",
    "order": 2,
    "decider": "work",
-   "status": "proposed"
+   "status": "in-draft"
   },
   {
    "id": "FX-3",
    "obs": "DOC-OBS-05",
    "title": "แยก \"กำลังโหลด\" / \"ไม่พบ-ปิดแล้ว\" / \"โหลดไม่สำเร็จ\" แทนหน้าว่าง (Work สั่งดำเนินการ — อยู่ใน draft branch)",
-   "finding": "Property Details.dc.html บรรทัด 802: ถ้าไม่พบรายการ คืน hasProperty:false และส่วนเนื้อหาทั้งหน้าอยู่ใต้ sc-if hasProperty ไม่มีทางเลือกอื่น → หน้าว่าง (ยืนยันจากโค้ด ไม่ใช่ข้อสันนิษฐานแล้ว). หลังปิด เอกสารสาธารณะถูกลบ จึงเข้ากรณีนี้; ส่วน data.js ตั้ง window.__hhDataLoad.state = \"failed\" เมื่อโหลดไม่ได้ ซึ่งใช้แยกสองกรณีได้",
+   "finding": "Property Details.dc.html บรรทัด 802: ถ้าไม่พบรายการ คืน hasProperty:false และส่วนเนื้อหาทั้งหน้าอยู่ใต้ sc-if hasProperty ไม่มีทางเลือกอื่น → หน้าว่าง (ยืนยันจากโค้ด ไม่ใช่ข้อสันนิษฐานแล้ว). หลังปิด เอกสารสาธารณะถูกลบ จึงเข้ากรณีนี้; ส่วน data.js ตั้ง window.__hhDataLoad.state = \"failed\" เมื่อโหลดไม่ได้ ซึ่งใช้แยกสองกรณีได้ · เพิ่มการตรวจตามคำสั่ง Work: กดลองอีกครั้ง = นำทาง 1 ครั้ง; direct read ล้มขณะ collection โหลดได้ = โหลดล้ม; ข้อความ loading/not-found/failed/retry/back ครบ 8 ภาษา",
    "evidence": "SOURCE (อ่านโค้ด) · ภาพ Cloud หลังปิด (หน้าว่าง) ตรงกัน",
    "minFix": "เพิ่มบล็อกข้อความเมื่อ hasProperty เป็นเท็จ: state \"ok\" → \"ไม่พบประกาศนี้หรือปิดประกาศแล้ว\" (ข้อความเดียวสำหรับทุกกรณี ไม่บอกว่าเคยมีหรือไม่) + ปุ่มกลับหน้าค้นหา; state \"failed\" → \"โหลดไม่สำเร็จ ลองรีเฟรช\"",
    "reqCheck": [
@@ -1948,28 +2047,29 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   {
    "id": "FX-4",
    "obs": "DOC-OBS-01",
-   "title": "Search ไม่มีรูปปก — ยังหาต้นเหตุจาก source ไม่ได้ ต้องมีหลักฐานก่อนแก้",
-   "finding": "เส้นทางอ่านโค้ด: Search → getEffectiveProperties (data.js 846–) → fetchCollection(\"properties\") + fetchAllPhotos → photosById[id-index] → p.photos[0].url → PropertyCard. อ่านตามแล้วถูกต้องตามทฤษฎี (รูปสาธารณะชนะรูปส่วนตัว id ซ้ำกัน) จึง **ไม่พบต้นเหตุ**; ทฤษฎีที่ยังเหลือ: (ก) ผู้ดูเป็นทีมงาน/Owner ทำให้ผสมรายการรูปส่วนตัว (ข) ลำดับ/จังหวะโหลด (ค) ฟิลด์ photos ของ Case แบบรวมเรคคอร์ดทับ — ไม่มีข้อใดยืนยัน",
+   "title": "Search ไม่มีรูปปก — พบต้นเหตุ: บิลด์ TEST ซ่อนสคริปต์ของ component (แก้ในเครื่องมือบิลด์ อยู่ใน draft)",
+   "finding": "ทำซ้ำได้ในเครื่อง (visitor): การ์ดไม่มีรูปปก. ต้นเหตุ: tools/build-listing-test.js ห่อ \"ทุก\" ไฟล์ .html — รวมไฟล์ component (PropertyCard ฯลฯ) — ไว้ใน <template> เพื่อให้หน้า inert; แต่ runtime ดึง component เป็นข้อความแล้วหา <script data-dc-script> ซึ่งถูกซ่อนในเทมเพลต → component ทำงานโดยไม่มีตรรกะ ค่าที่คำนวณ (รูปปก, สไตล์ปก ฯลฯ) ขาดหมด. ข้อมูล/Firestore/rules ถูกต้องตลอด (ตรวจแล้ว). ไฟล์ production ไม่ผ่านตัวบิลด์นี้ จึงไม่กระทบ production",
    "evidence": "SOURCE: ไม่พบต้นเหตุ · test ในเครื่องไม่ assert รูปปกใน Search (ช่องว่างของ test) · ภาพ Cloud 015210",
-   "minFix": "ขั้น 1 (ไม่แก้เว็บ): เพิ่ม test ในเครื่องที่เผยแพร่เคสแล้วเปิด Search จริงสองแบบ (ผู้เยี่ยมชม / Owner) และ assert รูปปก — ถ้า fail ในเครื่องจะได้ต้นเหตุ; ถ้า pass ให้เจ้าของเก็บภาพ Network (จำนวน propertyPhotos ที่ Search โหลด) หนึ่งครั้งบน TEST. ขั้น 2: แก้เฉพาะจุดที่พิสูจน์ได้",
+   "minFix": "บิลด์ห่อ template เฉพาะหน้าที่เบราว์เซอร์เปิด (ENTRIES) ไม่ห่อไฟล์ component; ทดสอบ: Search แสดงรูปปกที่ decode ได้จริงสำหรับ visitor และ Owner (B7) + hosting-build ไม่ห่อ component และสคริปต์ component มองเห็นได้",
    "reqCheck": [
-    "รูปส่วนตัวห้ามเปิดสาธารณะ — ห้าม \"แก้\" โดยให้ผู้เยี่ยมชมอ่าน casePhotos",
-    "ต้องไม่ใช้ข้อมูลตัวอย่างแทน (PD-12) และไม่สร้างทรัพย์เพื่อให้ผ่าน",
-    "ไม่เปลี่ยน rules ของ propertyPhotos (read: true เดิม)"
+    "ไม่เปลี่ยน rules ของ propertyPhotos / ไม่ให้ผู้เยี่ยมชมอ่านรูปส่วนตัว",
+    "ไม่ใช้ข้อมูลตัวอย่างแทน และไม่แตะข้อมูล Cloud",
+    "ผลข้างเคียง: component ทุกตัวใน TEST (LanguageSwitcher, SearchFilters, ContactRail ฯลฯ) จะ \"ทำงานจริง\" เหมือน production เป็นครั้งแรก — ชุดทดสอบเต็มผ่าน แต่ต้องให้ Work/เจ้าของรับทราบเมื่อลอง TEST",
+    "หลักฐาน TEST d0fe617 ก่อนหน้านี้ทั้งหมดเกิดตอน component ไม่มีตรรกะ"
    ],
-   "test": "test ใหม่ B-search-cover (ผู้เยี่ยมชม + Owner) ต้อง fail ก่อนแก้ถ้าปัญหาเกิดในเครื่อง; negative control ลบรูป → ต้อง \"ไม่มีรูป\"",
-   "risk": "ยังประเมินไม่ได้ (ไม่รู้ต้นเหตุ)",
+   "test": "B7 (visitor 3 รอบ + Owner) ต้องเห็นรูปปก decode ได้; negative control: ใช้บิลด์เดิม → B7 ล้ม",
+   "risk": "ปานกลาง (เปลี่ยนพฤติกรรมของทุก component ใน TEST ให้เหมือน production)",
    "order": 4,
    "decider": "work",
-   "status": "proposed"
+   "status": "in-draft"
   },
   {
    "id": "FX-5",
    "obs": "DOC-OBS-02",
-   "title": "หน่วยที่ดิน — รอมติเจ้าของ (D2) ก่อนเสนอโค้ด",
-   "finding": "Lister Dashboard / Case Data ติดป้าย landSize เป็น \"ตร.ว.\" (และมีช่องไร่/งาน/ตร.ว. แยกอีกชุด) แต่ Property Details.dc.html บรรทัด 881 ต่อ t.sqm (ตร.ม.) ทุกภาษา และ property-adapter.js เก็บ landSize เป็นตัวเลขเฉยๆ ไม่มีการแปลง; 100 ตร.ว. = 400 ตร.ม. จึงแสดงเป็นตัวเลขเดิมกับหน่วยผิด",
+   "title": "หน่วยที่ดิน — ตรวจที่มาแต่ละ flow แล้ว ยังไม่เปลี่ยนอะไร (รอข้อมูล/มติ)",
+   "finding": "หน่วยที่แต่ละ flow ใช้กับ landSize (ตรวจจาก source): Lister Dashboard และ Case Data = ตร.ว. (ป้าย) · Admin Dashboard \"ขนาดที่ดิน (ตร.ม.)\" · AI Quick Add \"ที่ดิน (ตร.ม.)\" และ prompt ใช้ sqm · หน้า Details = ตร.ม. · Home (ข้อความสเปคให้ AI) \"sqwah\" แต่ ContactRail ส่ง \"sqm\" · Owner Submission (ฟอร์มสาธารณะ) ไม่มีช่องที่ดิน · ฟอร์ม Lister มีช่อง ไร่/งาน/ตร.ว. แยกอีกชุด · ไม่มีโค้ดแปลงหน่วยที่ใด. ผลคือฟิลด์เดียวมีสองความหมายตามช่องทางที่กรอก",
    "evidence": "SOURCE (อ่านโค้ด) · ภาพ Cloud ตรงกัน",
-   "minFix": "หลังเจ้าของเลือกหน่วย: แก้ \"ป้ายหน่วย\" หน้า Details ให้ตรงกับที่ฟอร์มเก็บ หรือแปลงหน่วยแบบมีป้าย — ห้ามแก้ค่าข้อมูลบน Cloud และห้ามเปลี่ยนความหมายของข้อมูลเดิมเงียบๆ",
+   "minFix": "ยังไม่เปลี่ยนหน่วย ป้ายทั้งระบบ หรือข้อมูล Cloud. ข้อมูลที่ขาดเพื่อเสนอทางแก้ได้: (1) หน่วยของค่า landSize ที่มีอยู่แล้วใน properties บน production/TEST แยกตามช่องทางที่กรอก (ต้องดูตัวอย่างข้อมูลจริงแบบอ่านอย่างเดียว) (2) มติ D2 ว่าหน่วยหลักคืออะไร. เมื่อได้ทั้งสองข้อ จะเสนอ: ป้ายหน่วยเดียวทั้งระบบ + ฟิลด์ที่บันทึกหน่วยพร้อมค่า (ไม่แปลงข้อมูลเดิมเงียบๆ)",
    "reqCheck": [
     "ต้องตัดสิน D2 ก่อน",
     "ข้อมูลที่บันทึกไปแล้ว (เช่น 100) ต้องไม่ถูกคูณ/แปลงย้อนหลังโดยอัตโนมัติ",

@@ -83,10 +83,12 @@ describe("status panel (docs-only, built from PROJECT-STATUS.md)", function () {
     }
   });
 
-  it("P8 scope guard: against the code SHA of the package, the ONLY non-document files that differ are the FX-3 draft change (Property Details page, data.js texts, its browser test) — nothing else (no Functions, rules, other pages)", function () {
-    let names; try { names = execSync("git diff --name-only " + d.reg.package.codeSha + " -- . ':!docs' ':!tools/status-panel' ':!tests/status-panel' ':!*.md' ':!package.json'", { cwd: ROOT, encoding: "utf8" }).trim(); } catch (e) { return this.skip(); }
-    const ALLOWED = ["Property Details.dc.html", "data.js", "tests/browser-local/scenarios.test.js"];
-    const extra = names.split("\n").filter(Boolean).filter((f) => !ALLOWED.includes(f)); assert.deepStrictEqual(extra, [], "unexpected non-doc files differ from the package code SHA:\n" + extra.join("\n"));
+  it("P8 scope guard: against the CLOUD-TEST-deployed SHA, the ONLY non-document files that differ are the five Work-approved fixes (FX-1…FX-4 + their tests/build tool); and after the recorded source head only documents/panel files change", function () {
+    const P = d.reg.package; let names, after;
+    try { names = execSync("git diff --name-only " + P.deployedTestSha + " -- . ':!docs' ':!tools/status-panel' ':!tests/status-panel' ':!*.md' ':!package.json'", { cwd: ROOT, encoding: "utf8" }).trim(); } catch (e) { return this.skip(); }
+    const ALLOWED = ["Property Details.dc.html", "Listing Approvals.dc.html", "PropertyCard.dc.html", "data.js", "tools/build-listing-test.js", "tests/browser-local/scenarios.test.js", "tests/listing/hosting-build.test.js"];
+    const extra = names.split("\n").filter(Boolean).filter((f) => !ALLOWED.includes(f)); assert.deepStrictEqual(extra, [], "unexpected non-doc files differ from the deployed TEST sha:\n" + extra.join("\n"));
+    if (/^[0-9a-f]{40}$/.test(P.sourceHeadSha)) { try { after = execSync("git diff --name-only " + P.sourceHeadSha + " HEAD -- . ':!docs' ':!tools/status-panel' ':!tests/status-panel' ':!*.md' ':!package.json'", { cwd: ROOT, encoding: "utf8" }).trim(); } catch (e) { return; } assert.strictEqual(after, "", "after the recorded source head only documents/panel files may change:\n" + after); }
   });
   it("P9 real browser: loads with no script error, no sideways scroll at desktop and phone width, filters and search change the rows, section 2 'YOU DO NOW' is visible at rest", async function () {
     let chromium; for (const m of ["playwright", "/opt/node22/lib/node_modules/playwright"]) { try { chromium = require(m).chromium; break; } catch (e) { /* next */ } }
@@ -143,11 +145,21 @@ describe("status panel (docs-only, built from PROJECT-STATUS.md)", function () {
     assert.strictEqual(count(html, /<section id="reqs">/g), 1); d.reg.reqs.forEach((x) => assert.ok(html.includes(">" + x.id + "</div>")));
     const all = d.reg.scopes.flatMap((x) => x.items), it = (id) => all.find((x) => x.id === id);
     assert.strictEqual(it("R12").status, "pass"); assert.ok(/11:08/.test(it("R12").ref) && /6 ภาพ/.test(it("R12").ref)); assert.strictEqual(it("R11").status, "unverified");
-    ["T17", "T19", "T20", "T21", "P04", "D12"].forEach((id) => { assert.ok(!all.some((x) => x.id === id), id + " was split"); const kids = all.filter((x) => new RegExp("^" + id + "[a-z]$").test(x.id)); assert.ok(kids.length >= 2 && kids.every((x) => x.status !== "pass"), id + " sub-items add no pass"); });
-    assert.ok(all.every((x) => !/^(T17|T19|T20|T21|P04|D12)[a-z]$/.test(x.id) || x.status === "unverified" || x.status === "blocked" || x.status === "fail"));
+    ["T17", "T19", "T20", "T21", "P04", "D12"].forEach((id) => { assert.ok(!all.some((x) => x.id === id), id + " was split"); const kids = all.filter((x) => new RegExp("^" + id + "[a-z]$").test(x.id)); assert.ok(kids.length >= 2, id + " has sub-items"); if (id !== "D12") assert.ok(kids.every((x) => x.status !== "pass"), id + " sub-items add no pass (splitting never creates a PASS; D12's results come from real runs — see P15)"); });
     assert.strictEqual(d.reg.scopes.length, 12);
     const P = d.reg.package; assert.ok(/^[0-9a-f]{40}$/.test(P.docBaseSha) && P.docBaseSha !== "34a0eb0ee27bddfa72003958dd7e0546a9b490b2", "the document head shown is not the old v1.1 commit"); assert.ok(html.includes(P.docBaseSha.slice(0, 7)) && !/เอกสารล่าสุดใน GitHub \(v1\.1\)/.test(html));
-    ["BLUEPRINT.md", "HANDOFF-NEXT-CHAT.md", "PROJECT-STATUS.md"].forEach((f) => { const t = fs.readFileSync(path.join(ROOT, f), "utf8"); const head = t.slice(0, 2500); assert.ok(head.includes(P.docBaseSha) && head.includes("สถานะปัจจุบัน (r5)"), f + " names the current head at the top"); assert.ok(/\[ประวัติ ณ v2\] Code baseline/.test(head), f + " marks the old PR-head line as history"); });
+    ["BLUEPRINT.md", "HANDOFF-NEXT-CHAT.md", "PROJECT-STATUS.md"].forEach((f) => { const t = fs.readFileSync(path.join(ROOT, f), "utf8"); const head = t.slice(0, 2500); assert.ok(head.includes(P.docBaseSha) && head.includes(P.sourceHeadSha) && head.includes(P.deployedTestSha) && /สถานะปัจจุบัน \(r\d+\)/.test(head), f + " names source head, document base and the deployed TEST head at the top"); assert.ok(/\[ประวัติ ณ v2\] Code baseline/.test(head), f + " marks the old PR-head line as history"); });
+  });
+  it("P15 round r6: the four heads are separate fields (source / document base / Cloud TEST / production), the old ambiguous codeSha is gone, and D12 follows the real results (combined stays UNVERIFIED, D12d keeps the failed round, D08 stays FAIL)", () => {
+    const P = d.reg.package, all = d.reg.scopes.flatMap((x) => x.items), it = (id) => all.find((x) => x.id === id);
+    assert.ok(!("codeSha" in P), "no ambiguous 'codeSha'"); assert.ok(/^[0-9a-f]{40}$/.test(P.sourceHeadSha) && /^[0-9a-f]{40}$/.test(P.docBaseSha) && P.deployedTestSha.startsWith("d0fe617") && P.deployedProdSha === "ไม่ทราบ");
+    assert.notStrictEqual(P.sourceHeadSha, P.deployedTestSha, "source head is not the deployed TEST head"); assert.ok(out.document.includes(P.sourceHeadSha.slice(0, 7)) && out.document.includes("Source / code head ปัจจุบัน"));
+    assert.strictEqual(it("D12a").status, "pass"); assert.ok(/90/.test(it("D12a").ref) && it("D12a").ref.includes(P.sourceHeadSha.slice(0, 7)));
+    assert.strictEqual(it("D12b").status, "pass"); assert.ok(/34/.test(it("D12b").ref) && it("D12b").ref.includes(P.sourceHeadSha.slice(0, 7)));
+    assert.strictEqual(it("D12c").status, "unverified"); assert.ok(/ไม่ได้รัน/.test(it("D12c").ref));
+    assert.ok(/ล้ม 1/.test(it("D12d").ref) && /B2/.test(it("D12d").ref), "D12d keeps the round that failed on B2"); assert.strictEqual(it("D08").status, "fail", "the flake is never hidden");
+    ["FX-1", "FX-2", "FX-3", "FX-4"].forEach((id) => assert.strictEqual(d.reg.proposals.find((x) => x.id === id).status, "in-draft", id)); assert.strictEqual(d.reg.proposals.find((x) => x.id === "FX-5").status, "blocked-decision");
+    ["T10", "T12", "T13", "T14", "T16"].forEach((id) => assert.strictEqual(it(id).status, "fail", id + " stays FAIL until it is tried on Cloud TEST"));
   });
   it("P11 the package set shown in the panel is the one in the handoff files (same id and revision in the registry, the three files' CODE-V2-01 block and the page header)", () => {
     assert.ok(out.document.includes(d.reg.package.set));
