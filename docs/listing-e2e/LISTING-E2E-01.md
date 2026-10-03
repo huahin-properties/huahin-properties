@@ -58,3 +58,14 @@
 5. รูปที่ Staff เพิ่มหลังเผยแพร่ขึ้นหน้าสาธารณะเมื่อ Owner ปลด/เผยแพร่ใหม่เท่านั้น; การลบ/เรียงรูปของเคสจาก Lister Dashboard ยังไม่รองรับ
 6. `trackListingCase` ยังไม่มี rate limit ต่อ IP (เพดาน 500 ข้อความ/เคส) · staging ที่ไม่ถูกส่งยังไม่มี lifecycle rule ของ bucket (reconcile ล้างได้เฉพาะเคสที่มีเรคคอร์ด)
 7. `profilePhotos` (Firestore) ยังเขียนได้โดยผู้ล็อกอินใดๆ (ช่องโหว่เดิม ไม่เกี่ยวกับ flow นี้)
+
+## 8) ภาคผนวก — รอบ 4–9 (1–2 ต.ค. 2569) และผล Cloud TEST (เพิ่ม 3 ต.ค. 2569; เอกสารด้านบนเขียนถึงรอบ 3)
+ที่มา: git `be9250f…d0fe617`; หลักฐาน Cloud = ภาพ/คำยืนยันของเจ้าของ (ไม่ใช่การเข้า Cloud ของ Code)
+- **ผู้เห็นรูปส่วนตัว:** หน้าไม่ขอ Storage ตรง (cross-origin ถูก CORS บล็อกบน TEST) → ฟังก์ชัน `getCasePhoto` (เฉพาะ Owner/Staff, พาธต้องเป็น `casePhotos/<เคส>/…` ที่บันทึกไว้, ≤6 MB, ไม่มี token) — `3c9a73f`. หน้า Listing Approvals โหลดรูปครบทั้งเคส (เดิมโหลดแค่ปก) และ lightbox เรียงตรง — `e837d93` (B10).
+- **Staff กรอกข้อมูลเคส:** หน้า `Case Data.dc.html` (Owner หรือ Staff ผู้รับผิดชอบ; เขียนเฉพาะข้อมูลทรัพย์ลง `caseInternal`; ไม่แตะรูป/สถานะ/ตราอนุมัติ) — `d0fe617` (B11). guard เดิมของ `Lister Dashboard` (ส่ง Staff ไป Staff Workspace) ไม่เปลี่ยน.
+- **หน้าสาธารณะ:** `whenSdkPart()` รอ SDK (≤8 วินาที) ก่อนอ่าน Firestore; build TEST ตั้ง `SAMPLE_FALLBACK_ON_ERROR=false` (ไม่แสดงข้อมูลตัวอย่างแทนของจริง; production ยัง fallback) — `9b0341b`.
+- **Deploy TEST:** `tools/listing-test/deploy-test.sh` → ฟังก์ชัน 10 ตัวจากโฟลเดอร์แยก `build/listing-functions` (codebase `listing`, ไม่มี secret) เพราะ Firebase CLI เช็ก secret ทุกตัวของ `functions/index.js` ก่อนกรอง `--only` (`e7603b8`); selector `functions:listing:<name>` (`1b1c3fc`); build รับ `huahin-chat-test-*` (`e6a99b5`).
+- **ผลทดสอบในเครื่อง (head d0fe617, รายงานของ Code):** test:listing 90 · test:chat-live 34 · test:browser-local 11 (ล้มเป็นพักๆ ราว 1 ใน 4 รอบเต็ม — ยังไม่สรุปสาเหตุ).
+- **ผล Cloud TEST (REAL-TEST, เจ้าของ):** ดู PROJECT-STATUS §3 และ HANDOFF "หลักฐานการทดลองจริงล่าสุด". ข้อสังเกตเปิด: DOC-OBS-01…05.
+- **ข้อจำกัดคงเดิม:** ข้อมูลเก่าใน production ยังมีเบอร์/trackToken (BLOCKED, ห้าม migrate/ลบ); "Staff ผู้รับผิดชอบ" บังคับที่หน้าเว็บ ไม่ใช่ rules; ไม่มี rate limit ต่อ IP ที่ `trackListingCase`; ยังไม่รันแชท AI จริง; PR #8 เป็น draft ชี้ base `claude/chat-live-01` (main ยังไม่มีงานนี้).
+
