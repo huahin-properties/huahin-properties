@@ -2,7 +2,8 @@
 
 **รุ่นหลัก: HP-HANDOFF-2026-10-03-v2 · 3 ตุลาคม 2569 · Asia/Bangkok**
 
-- **สถานะปัจจุบัน (r9b):** source/code head `958c8770fed6bdd0265239cf030c3a43a2505dc3` (แก้ข้อพบ Work review r9: Case Data ล้างที่ดิน + Lister validation) · เอกสาร/build base ที่ Work ตรวจ `7f596631ef11587d0532c5931d37cff69b4eded0` · **Cloud TEST deployed ยังเป็น `2c897593321713783d0ba81c7167962e1793be9a`** (ยังไม่ deploy r9/r9b) · production deployed ไม่ทราบ (RED) · T12 คง FAIL จนกว่า Work ตรวจและเจ้าของลอง Cloud TEST · S-TEST-FLOW 9/9 · S-TEST-PUBLIC 6/7 ≈ 86% (ผล Cloud ที่ 2c89759 ไม่เปลี่ยน) · ดูบล็อก "ผลปรับรอบ r9b" ท้ายเอกสาร; บรรทัด r9 ด้านล่างเป็น **ประวัติ**
+- **สถานะปัจจุบัน (r9c):** source/code head `958c8770fed6bdd0265239cf030c3a43a2505dc3` (Work ตรวจ diff แล้ว; รอบนี้ไม่เปลี่ยนโค้ดเว็บ/Functions/rules) · เอกสาร/build base ที่ Work ตรวจ `84339ea46f1bc1edfbc49986a1749ce456bf20bb` · **Cloud TEST deployed ยังเป็น `2c897593321713783d0ba81c7167962e1793be9a`** (ยังไม่ deploy D2) · production deployed ไม่ทราบ (RED) · D2 ผ่านเฉพาะ LOCAL · T12 FAIL · D08 FAIL · combined UNVERIFIED · ดูบล็อก "ผลปรับรอบ r9c" ท้ายเอกสาร; บรรทัด r9b ด้านล่างเป็น **ประวัติ**
+- [ประวัติ r9b] **สถานะ ณ r9b:** source/code head `958c8770fed6bdd0265239cf030c3a43a2505dc3` (แก้ข้อพบ Work review r9: Case Data ล้างที่ดิน + Lister validation) · เอกสาร/build base ที่ Work ตรวจ `7f596631ef11587d0532c5931d37cff69b4eded0` · **Cloud TEST deployed ยังเป็น `2c897593321713783d0ba81c7167962e1793be9a`** (ยังไม่ deploy r9/r9b) · production deployed ไม่ทราบ (RED) · T12 คง FAIL จนกว่า Work ตรวจและเจ้าของลอง Cloud TEST · S-TEST-FLOW 9/9 · S-TEST-PUBLIC 6/7 ≈ 86% (ผล Cloud ที่ 2c89759 ไม่เปลี่ยน) · ดูบล็อก "ผลปรับรอบ r9b" ท้ายเอกสาร; บรรทัด r9 ด้านล่างเป็น **ประวัติ**
 - [ประวัติ r9] **สถานะ ณ r9:** source/code head `d7ee37e9323115168e8d0179372e9c2015ec42c4` (โค้ดเว็บ+Functions เปลี่ยน: หน่วยที่ดิน D2) · เอกสาร/build base ที่ Work ตรวจ `d0ffd49b56c5303e69c8c82ddb9b8db374442915` · **Cloud TEST deployed ยังเป็น `2c897593321713783d0ba81c7167962e1793be9a`** (ยังไม่ deploy r9) · production deployed ไม่ทราบ (RED) · T12 คง FAIL จนกว่า Work ตรวจและเจ้าของลอง Cloud TEST · S-TEST-FLOW 9/9 · S-TEST-PUBLIC 6/7 ≈ 86% (ผล Cloud ที่ 2c89759 ไม่เปลี่ยน) · ดูบล็อก "ผลปรับรอบ r9" ท้ายเอกสาร; บรรทัด r8 ด้านล่างเป็น **ประวัติ**
 - [ประวัติ r8] **สถานะ ณ r8:** source/code head `678a04211879352d05e14fbe6166a9186a65507e` (โค้ดเว็บ ไม่เปลี่ยน) · เอกสาร/build base ที่ Work ตรวจ `2c897593321713783d0ba81c7167962e1793be9a` · **Cloud TEST deployed `2c897593321713783d0ba81c7167962e1793be9a`** (เจ้าของลองเคสสังเคราะห์เดิมแล้ว) · production deployed ไม่ทราบ (RED) · Cloud TEST: T10/T13/T14/T16 PASS, T12 FAIL → S-TEST-PUBLIC 6/7 ≈ 86% (เฉพาะขอบเขตนี้) · S-TEST-FLOW 9/9 · ดูบล็อก "ผลปรับรอบ r8" ท้ายเอกสาร; บรรทัดสถานะรุ่นก่อนหน้าด้านล่างเป็น **ประวัติ**
 - [ประวัติ r7] **สถานะ ณ r7:** source/code head `678a04211879352d05e14fbe6166a9186a65507e` (draft ยังไม่ deploy; โค้ดเว็บเท่ากับ `7c1ec6b`) · เอกสาร/build base head ที่ Work ตรวจ `59d3ecb76ba179ce661e74c90040353e404f7604` · Cloud TEST deployed `d0fe6173ed2aa49fa92337b8519ca3eefb5fe7a5` (ไม่ใช่ source ปัจจุบัน) · production deployed ไม่ทราบ · ขอบเขต checklist 12 ชุด (lock 2: S-TEST-FLOW 9/9, S-TEST-PUBLIC 2/7) · FX-1/2/3/4 ใน draft (ผลในเครื่อง) + ตรวจผลกระทบ component แล้ว รอ Work — ดูบล็อก "ผลปรับรอบ r7" ท้ายเอกสาร; บรรทัดสถานะรุ่นก่อนหน้าด้านล่างเป็น **ประวัติ**
@@ -670,6 +671,33 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
 
 **ข้อจำกัด:** ผล PASS ทั้งหมดเป็นหลักฐาน LOCAL; ยังไม่ทดสอบบน Cloud TEST (T12 คง FAIL); รายการเก่าจะแสดง "X (ไม่ระบุหน่วย)" หลัง merge (ISS-LAND-LEGACY-DISPLAY); ต้อง deploy listing functions คู่ hosting (ISS-LAND-DEPLOY). Production RED.
 
+
+## ผลปรับรอบ r9c — CODE-V2-01 r9c (3 ต.ค. 2569 · ปิดข้อมูลก่อนทดสอบ Cloud TEST · เอกสารเท่านั้น)
+
+**หัวสี่แบบ (แยกกัน):** source `958c8770fed6bdd0265239cf030c3a43a2505dc3` (Work ตรวจ diff แล้ว; ไม่เปลี่ยนในรอบนี้) · documentation head = commit ของรอบนี้ (ดู PR; เอกสาร/แผงเท่านั้น) · doc base ที่ Work ตรวจ `84339ea46f1bc1edfbc49986a1749ce456bf20bb` · **Cloud TEST deployed `2c897593321713783d0ba81c7167962e1793be9a`** (ไม่มี D2) · production deployed: ไม่ทราบ (RED). ไม่ merge ไม่ deploy ไม่แก้/migrate/ลบข้อมูล Cloud ไม่รันสคริปต์ CHAT-LIVE เดิม.
+
+**"1 pending" ของ test:listing = ST3** (`tests/listing/rules.test.js`, "members via Firestore lookups (listers/adminUsers)"): Storage emulator แก้ lookup ข้าม service ไม่ได้ (log: `lister=false staff=false`) จึง skip โดยตั้งใจ — **ไม่เกี่ยวกับ D2**, มีมาตั้งแต่ SEC-TEST-01 (บันทึกเดิมใน LISTING-E2E-01.md). ยังขาดหลักฐาน: สิทธิ์เขียน `propertyPhotos` ของสมาชิก/Staff ผ่าน lookup ต้องยืนยันบน Cloud TEST จริง; **ไม่นับเป็น PASS** (ISS-ST3-PENDING). ใช้ log จากการรันรอบ r9b (100 passing / 1 pending) ไม่รันซ้ำโดยไม่มีเหตุ.
+
+**ข้อจำกัดคงเดิม:** B22 ไม่ได้กด Owner publish จริงในฉากนั้น (เคสที่คัดลอกมามีรูปไม่ครบ) — ตรวจแถว preview จาก `public-preview.js` + L5 ฝั่ง server แทน. D2 ผ่านเฉพาะ LOCAL ยังไม่ deploy. T12 = FAIL จนเจ้าของยืนยันบน Cloud TEST. D08 = FAIL. combined = UNVERIFIED.
+
+**Viewer v45:** https://claude.ai/artifact/J9paCdLvTqg6qvjvh5gVJ8 (แยกแสดง source / documentation / Cloud TEST deployed / production; แผง Artifact v10 = https://claude.ai/artifact/WKkZMmpSMSdYjxQ812qdCs).
+
+**คำสั่ง deploy TEST (เตรียมไว้ — ยังไม่รัน; รอ Work ตรวจชุดปิดรอบนี้ แล้วเจ้าของรันเองใน Codespace terminal "จอดำ"):** deploy จาก source `958c8770fed6bdd0265239cf030c3a43a2505dc3` (เอกสารหลังจากนี้ไม่เปลี่ยนโค้ด) — สคริปต์เดียวนี้ deploy listing Functions (10 ตัวจากโฟลเดอร์ `build/listing-functions`) + Firestore/Storage rules + Hosting (หน้า TEST) คู่กัน; ไม่ใช่สคริปต์ CHAT-LIVE เดิม; ใช้โปรเจกต์ `huahin-chat-test-01` เท่านั้น. แต่ละบรรทัดรันทีละคำสั่ง:
+
+```
+git fetch origin claude/listing-e2e-01
+git checkout --detach 958c8770fed6bdd0265239cf030c3a43a2505dc3
+git rev-parse HEAD
+git status --short
+bash tools/listing-test/deploy-test.sh huahin-chat-test-01
+```
+
+ตรวจก่อนไปบรรทัดถัดไป: `git rev-parse HEAD` ต้องพิมพ์ `958c8770fed6bdd0265239cf030c3a43a2505dc3`; `git status --short` ต้องไม่พิมพ์อะไร; สคริปต์จะถามให้พิมพ์ `DEPLOY-TEST` (ถ้าไม่ใช่ให้หยุด). ห้ามใช้ `tools/chat-live/deploy-test.sh`; ห้ามชี้ production.
+
+**ขั้นทดสอบ TEST สั้น ๆ (เคสสังเคราะห์ใหม่เท่านั้น ห้ามแก้เคสเดิม):** (1) Case Data กรอกที่ดิน 100 เลือก ตร.ว. บันทึก → ดูว่าแสดง = 400 ตร.ม. (2) รีเฟรช/เปิดแก้ใหม่แล้วบันทึกซ้ำ → ยัง 100 ตร.ว. (ไม่เป็น 400 หรือ 1600) (3) Owner ตรวจก่อนเผยแพร่ ต้องเห็น "100 ตร.ว. (400 ตร.ม.)" → เผยแพร่ → หน้าสาธารณะ Details แสดงเท่ากัน (ลองสลับภาษา) (4) อีกเคสสังเคราะห์: ใส่แล้วล้างช่องที่ดิน บันทึก → preview และหน้าสาธารณะต้องไม่มีที่ดิน/ไม่มีเลขเก่า. จดผลแต่ละข้อ (ผ่าน/ไม่ผ่าน + ภาพหน้าจอ); T12 เปลี่ยนเป็น PASS ได้เมื่อ Work ตรวจและเจ้าของยืนยันเท่านั้น.
+
+**ยืนยันไฟล์ไม่เปลี่ยนจาก source `958c877`:** `git diff 958c877 HEAD` ของไฟล์ระบบเว็บ/Functions/rules (ทุกไฟล์นอก `docs/`, `*.md`, `tools/status-panel/`, `tests/status-panel/`) = ว่าง (ตรวจในรอบส่งมอบ; แผง test P8 ตรวจเช่นกัน).
+
 ## 6. STATUS-REGISTRY — ข้อมูลเครื่องอ่านของแผงภายใน (แก้ที่นี่ที่เดียว แล้วรัน `npm run status-panel`)
 
 ตาราง §1–§3 ด้านบนเป็นต้นทางของ Roadmap/ฐานระบบ/งานปัจจุบัน (แผงอ่านตรงจากตาราง). บล็อกนี้เก็บเฉพาะสิ่งที่ตารางไม่มี: ผู้รับผิดชอบ/ขอบเขต/วัน-commit ของแต่ละงาน (`taskMeta`), checklist ร่างสำหรับเปอร์เซ็นต์ (`scopes`, ทุกชุด `locked:false` จนกว่า Work lock), ทะเบียนค้าง (`issues`) และประวัติ. สถานะรายการใน checklist: `pass` / `fail` / `blocked` / `unverified` / `na` (N/A ต้องมีเหตุผลใน `ref`). ห้ามใส่รหัสผ่าน คีย์ อีเมล เบอร์ หรือ token.
@@ -682,18 +710,18 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
   "id": "HP-HANDOFF-2026-10-03-v2",
   "date": "2026-10-03",
   "tz": "Asia/Bangkok",
-  "docBaseSha": "7f596631ef11587d0532c5931d37cff69b4eded0",
+  "docBaseSha": "84339ea46f1bc1edfbc49986a1749ce456bf20bb",
   "deployedTestSha": "2c897593321713783d0ba81c7167962e1793be9a",
   "deployedProdSha": "ไม่ทราบ",
   "prState": "PR #8 OPEN / DRAFT / NOT MERGED · base claude/chat-live-01",
   "website": "RED / Public Hidden (ตามรายงาน ไม่ได้ตรวจสดรอบนี้)",
-  "revision": "r9b (Code · แก้ข้อพบจาก Work review r9 — หน่วยที่ดิน)",
-  "set": "HP-HANDOFF-2026-10-03-v2 + CODE-V2-01 r9b",
+  "revision": "r9c (Code · ปิดข้อมูลก่อนทดสอบ Cloud TEST — ไม่เปลี่ยน source)",
+  "set": "HP-HANDOFF-2026-10-03-v2 + CODE-V2-01 r9c",
   "sourceHeadSha": "958c8770fed6bdd0265239cf030c3a43a2505dc3"
  },
  "goal": "ให้เจ้าของและทีมลงประกาศพร้อมรูปจนเผยแพร่ได้จริงอย่างปลอดภัย (ส่งฟอร์ม → Staff เตรียม → Owner อนุมัติ/เผยแพร่ → หน้าสาธารณะ) บนเว็บ huahin.properties โดยยังไม่เปิดเว็บสาธารณะจนกว่าเจ้าของอนุมัติ",
  "current": {
-  "task": "D2 หน่วยที่ดิน: แก้ข้อพบ Work review r9 ใน draft (ล้างที่ดินไม่ให้ค่าเก่ากลับ; Lister ไม่ fallback) — รอ Work ตรวจ",
+  "task": "r9c: ปิดข้อมูลก่อนทดสอบ Cloud TEST (D2) — รอ Work ตรวจชุดปิดรอบ; ยังไม่ deploy",
   "phases": [
    "LISTING-E2E-01",
    "ชุดส่งต่อ"
@@ -2042,6 +2070,16 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "actor": "work",
    "next": "เมื่อ Work สั่ง deploy TEST ให้ deploy ทั้ง listing functions และ hosting ด้วย tools/listing-test/deploy-test.sh ตาม head ที่ตรวจ",
    "source": "SOURCE (r9): functions/case-fields.js, functions/listing-case.js, functions/land-area.js เปลี่ยน"
+  },
+  {
+   "id": "ISS-ST3-PENDING",
+   "title": "test:listing \"1 pending\" = ST3 (tests/listing/rules.test.js): สิทธิ์ Storage ที่ใช้ lookup ข้าม service (สมาชิก/Staff เขียน propertyPhotos เดิม) — Storage emulator แก้ lookup นี้ไม่ได้ จึง skip โดยตั้งใจ (lister=false, staff=false); ไม่เกี่ยวกับ D2; ไม่นับเป็น PASS",
+   "sev": "low",
+   "status": "open",
+   "env": "test",
+   "actor": "work",
+   "next": "ยืนยันบน Cloud TEST จริงเมื่อ Work ต้องการ (ไม่ใช่เงื่อนไขของ D2); ห้ามเปลี่ยนเป็น PASS จนกว่าจะทดสอบจริง",
+   "source": "LOCAL log (r9c): NOT-TESTED (pending) lister=false staff=false · บันทึกเดิมใน docs/listing-e2e/LISTING-E2E-01.md (หัวข้อ pending ที่ตั้งใจ, ตั้งแต่ SEC-TEST-01)"
   }
  ],
  "history": [
@@ -2129,6 +2167,11 @@ Claude Code อ่าน v2 ทั้งสามไฟล์ เทียบ v1
    "date": "2026-10-03",
    "text": "r9b: แก้ข้อพบจาก Work review r9 (Case Data ล้างที่ดิน, Lister validation) + บันทึกช่องทางที่รองรับ/ไม่รองรับ",
    "ref": "source 958c877"
+  },
+  {
+   "date": "2026-10-03",
+   "text": "r9c: Work รับการแก้ r9b (source 958c877); ระบุ pending = ST3; Viewer v45; เตรียมคำสั่ง deploy TEST (ยังไม่รัน); ยืนยัน web/Functions/rules ไม่เปลี่ยนจาก 958c877",
+   "ref": "doc head ดู PR"
   }
  ],
  "decisions": [
