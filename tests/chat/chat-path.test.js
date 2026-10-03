@@ -157,7 +157,7 @@ describe("CHAT-TEST-01: chat + draft path (synthetic, emulator, stubbed model)",
     const r = await turn(UID_A, "สวัสดี");
     const conv = await admin.firestore().doc("conversations/" + convId(UID_A)).get();
     const draft = await admin.firestore().doc("propertyDrafts/" + draftId(UID_A)).get();
-    const cases = await admin.firestore().collection("properties").get();
+    const cases = await admin.firestore().collection("caseInternal").get();
     const ok = r.persisted === false && !conv.exists && !draft.exists && cases.empty;
     rec("C1", "casual first turn: no conversation, no draft, no case", ok ? "CONTROL" : "CONTROL-FAILED", "persisted=" + r.persisted + " conv=" + conv.exists + " draft=" + draft.exists + " cases=" + cases.size);
     assert.ok(ok);
@@ -312,21 +312,25 @@ describe("CHAT-TEST-01: chat + draft path (synthetic, emulator, stubbed model)",
     // 5a: gate not met (no name/contact) -> no case even with confirmed:true
     await buildQualifiedChat(UID_A, { contact: false });
     const gate = await createCase(UID_A, { confirmed: true });
-    const none = await admin.firestore().collection("properties").get();
+    const none = await admin.firestore().collection("caseInternal").get();
     rec("C5a", "name/contact missing => no case (confirmed:true still refused)", gate.created === false && none.empty ? "CONTROL" : "CONTROL-FAILED", "reason=" + gate.reason + " cases=" + none.size);
     assert.ok(gate.created === false && none.empty);
     // 5b: complete the chat
     iso.setScript([withContact]);
     await turn(UID_A, "ชื่อ Synthetic Seller เบอร์ " + CONTACT);
     const unconfirmed = await createCase(UID_A, {});
-    const noneYet = await admin.firestore().collection("properties").get();
+    const noneYet = await admin.firestore().collection("caseInternal").get();
     rec("C5b", "no user confirmation (confirmed !== true) => no case", unconfirmed.created === false && noneYet.empty ? "CONTROL" : "CONTROL-FAILED", "reason=" + unconfirmed.reason);
     const c1 = await createCase(UID_A, { confirmed: true });
     const c2 = await createCase(UID_A, { confirmed: true });
-    const all = await admin.firestore().collection("properties").get();
+    const all = await admin.firestore().collection("caseInternal").get();
     const dupOk = c1.created === true && c2.created === true && c2.alreadyExisted === true && c1.propertyId === c2.propertyId && c1.trackToken === c2.trackToken && all.size === 1;
     rec("C5c", "confirmed twice => ONE case, same id + same track link (dedupe by server-side conversation link)", dupOk ? "CONTROL" : "CONTROL-FAILED", "cases=" + all.size + " sameId=" + (c1.propertyId === c2.propertyId));
-    const caseDoc = (await admin.firestore().doc("properties/" + c1.propertyId).get()).data();
+    // LISTING-E2E-01: a chat-created Case is ONE team-only record (caseInternal); there is no public properties document until the Owner publishes.
+    const intDoc = (await admin.firestore().doc("caseInternal/" + c1.propertyId).get()).data();
+    const pubSnap = await admin.firestore().doc("properties/" + c1.propertyId).get();
+    const caseDoc = Object.assign({}, intDoc);
+    assert.ok(pubSnap.exists === false && intDoc.internalSplit === true, "no public document: contact / token / conversation link live only in the team-only record");
     const link = caseDoc.conversationId === convId(UID_A) && caseDoc.receptionVisitorId === UID_A && caseDoc.caseSource === "ai_assistant" && caseDoc.source === "owner_submission";
     const conv = (await admin.firestore().doc("conversations/" + convId(UID_A)).get()).data();
     rec("C5d", "case carries conversationId/receptionVisitorId; conversation links back (linkedCaseIds)", link && (conv.linkedCaseIds || [])[0] === c1.propertyId ? "CONTROL" : "CONTROL-FAILED", "caseSource=" + caseDoc.caseSource + " linked=" + JSON.stringify(conv.linkedCaseIds));
@@ -344,37 +348,43 @@ describe("CHAT-TEST-01: chat + draft path (synthetic, emulator, stubbed model)",
       missing.length ? "GAP-CONFIRMED" : "GAP-NOT-REPRODUCED",
       "draft fields not in case: [" + missing.join(", ") + "]; draft fields in case: [" + present.join(", ") + "]; case instead carries (from conversation, not draft): [" + carried.join(", ") + "]");
     const draftAfter = draft;
-    const noBackLink = draftAfter.caseId === undefined && caseDoc.draftId === undefined;
-    rec("C5f", "draft <-> case link (draft.caseId / case.draftId)", noBackLink ? "GAP-CONFIRMED" : "GAP-NOT-REPRODUCED", "draft.status=" + draftAfter.status + "; draft.caseId=" + draftAfter.caseId + "; case.draftId=" + caseDoc.draftId);
+    // LISTING-E2E-01: the link now exists (draft.caseId <-> case.draftId in the internal record) — one draft, one case.
+    const draftNow = (await admin.firestore().doc("propertyDrafts/" + draftId(UID_A)).get()).data();
+    const linkedBack = draftNow.caseId === c1.propertyId && caseDoc.draftId === draftId(UID_A);
+    rec("C5f", "draft <-> case link (draft.caseId / case.draftId) — fixed by LISTING-E2E-01", linkedBack ? "CONTROL" : "CONTROL-FAILED", "draft.status=" + draftNow.status + "; draft.caseId=" + draftNow.caseId + "; case.draftId=" + caseDoc.draftId);
+    assert.ok(linkedBack);
     results.chatCaseId = c1.propertyId;
   });
 
   // ── C6 ────────────────────────────────────────────────────────────────
-  it("C6 chat vs form: same person, two paths (policy: one draft + one submit path; NOT implemented, only recorded)", async () => {
+  it("C6 chat vs form: same person — one draft binding, one server submit path (LISTING-E2E-01)", async () => {
     needFns();
     await buildQualifiedChat(UID_A, { contact: true });
     const chat = await createCase(UID_A, { confirmed: true });
     // The form (Owner Submission.dc.html) creates a case straight from the browser (anonymous, rules isPublicOwnerSubmission).
     const formId = "own-SYN-FORM-1";
-    const f = await attempt(anon().doc("properties/" + formId).set({
+    const formDocData = {
       source: "owner_submission", caseSource: "owner_form", listingStatus: "pending",
       contactName: NAME, ownerContact: CONTACT, trackToken: "SYNTHETIC-FORM-TOKEN-0123456789", submittedAt: Date.now(),
-    }));
-    rec("C6a", "form-style anonymous create is accepted by rules (current intended path)", f.allowed ? "CONTROL" : "CONTROL-FAILED", f.allowed ? "allowed" : "denied with " + f.error.code);
-    assert.ok(f.allowed);
-    const same = await admin.firestore().collection("properties").where("ownerContact", "==", CONTACT).get();
-    const ids = same.docs.map((d) => d.id);
-    const formDoc = (await admin.firestore().doc("properties/" + formId).get()).data();
-    const linked = formDoc.conversationId || formDoc.draftId || (formDoc.linkedCaseIds || []).length;
-    rec("C6b", "same contact via chat and via form => TWO separate cases, no link between them (policy 'one draft/one path/no duplicate case' NOT implemented)",
-      same.size === 2 && !linked ? "GAP-CONFIRMED" : "GAP-NOT-REPRODUCED", "cases=" + same.size + " ids=" + ids.join(",") + " chatCase=" + chat.propertyId + " formCase.conversationId=" + formDoc.conversationId);
+    };
+    const f = await attempt(anon().doc("properties/" + formId).set(formDocData));
+    // LISTING-E2E-01: the browser can no longer create a Case directly; the form submits through submitListingCase (server).
+    rec("C6a", "form-style anonymous direct create is now REFUSED by rules (closed by LISTING-E2E-01; the form uses submitListingCase)", !f.allowed ? "CONTROL" : "CONTROL-FAILED", f.allowed ? "allowed" : "denied with " + f.error.code);
+    assert.ok(!f.allowed);
+    // LISTING-E2E-01: the chat Case and the form share ONE draft (draft__<uid>): the form's server path (submitListingCase)
+    // completes the Case the chat opened instead of opening a second one (tests/listing/e2e.test.js "E2E-CHAT").
+    const draftLinked = (await admin.firestore().doc("propertyDrafts/" + draftId(UID_A)).get()).data();
+    rec("C6b", "chat Case is bound to the visitor's draft (draft.caseId) so the form completes it instead of opening a second Case (fixed by LISTING-E2E-01; proof in tests/listing/e2e.test.js E2E-CHAT)",
+      draftLinked.caseId === chat.propertyId ? "CONTROL" : "CONTROL-FAILED", "draft.caseId=" + draftLinked.caseId + " chatCase=" + chat.propertyId);
+    assert.strictEqual(draftLinked.caseId, chat.propertyId);
     // No merge was attempted by this test or by the code under test.
     // source checks
     const osub = read("Owner Submission.dc.html");
     const rail = read("ContactRail.dc.html");
-    const formReadsDraft = /propertyDraft|getPropertyDraft|receptionTurn|conversationId/.test(osub);
+    const formReadsDraft = /submitListingCase/.test(osub); // the form submits through the server path, which binds the draft by uid
     const railPlainNav = /_navigate\(\s*"Owner Submission\.dc\.html"\s*\)/.test(rail) && !/Owner Submission\.dc\.html\?/.test(rail);
-    rec("C6c", "source: Owner Submission form does not read the chat draft or conversation id", !formReadsDraft ? "GAP-CONFIRMED" : "GAP-NOT-REPRODUCED", "form references draft/conversation: " + formReadsDraft);
+    rec("C6c", "source: Owner Submission form submits through submitListingCase (server binds the chat draft by uid) — fixed by LISTING-E2E-01", formReadsDraft ? "CONTROL" : "CONTROL-FAILED", "uses submitListingCase: " + formReadsDraft);
+    assert.ok(formReadsDraft);
     rec("C6d", "source: chat 'List property' button opens the form with NO draft/conversation parameter", railPlainNav ? "GAP-CONFIRMED" : "GAP-NOT-REPRODUCED", "plain navigate: " + railPlainNav);
   });
 
@@ -408,7 +418,7 @@ describe("CHAT-TEST-01: chat + draft path (synthetic, emulator, stubbed model)",
       const conv = (await db.doc("conversations/" + convId(uid)).get()).data() || {};
       const draft = (await db.doc("propertyDrafts/" + draftId(uid)).get()).data() || {};
       const f = draft.fields || {};
-      const cases = await db.collection("properties").get();
+      const cases = await db.collection("caseInternal").get();
       const lastMsg = (await db.collection("conversations/" + convId(uid) + "/messages").where("role", "==", "ai").get()).docs.map((d) => d.data().text);
       return { r, conv, f, cases, lastMsg, calls: iso.anthropicCalls.length };
     }

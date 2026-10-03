@@ -218,6 +218,13 @@
                       </div>
                     </sc-if>
 
+                    <sc-if value="{{ r.wfHasPublishStamp }}" hint-placeholder-val="{{ false }}">
+                      <div data-publish-approval style="margin-top:11px; background:white; border:1px solid oklch(88% 0.02 70); border-radius:8px; padding:12px 14px;">
+                        <div style="font-size:12.5px; font-weight:700; color:oklch(35% 0.13 25); margin-bottom:3px;">{{ r.wfPublishTitle }}</div>
+                        <div style="font-size:11.5px; color:oklch(50% 0.02 60);">{{ r.wfPublishSub }}</div>
+                      </div>
+                    </sc-if>
+
                     <sc-if value="{{ r.wfHasReview }}" hint-placeholder-val="{{ false }}">
                       <div style="margin-top:11px; background:white; border:1px solid oklch(88% 0.02 70); border-radius:8px; padding:12px 14px;">
                         <div style="font-size:12.5px; font-weight:700; color:oklch(35% 0.13 25); margin-bottom:3px;">{{ r.wfReviewTitle }}</div>
@@ -231,7 +238,7 @@
                             </sc-for>
                           </select>
                           <div style="display:flex; gap:7px; flex-wrap:wrap;">
-                            <div onClick="{{ r.onApprove }}" style="background:oklch(40% 0.11 150); color:white; padding:7px 16px; border-radius:100px; font-size:11.5px; font-weight:700; cursor:pointer;">✓ อนุมัติ</div>
+                            <div onClick="{{ r.onIntakeApprove }}" style="background:oklch(40% 0.11 150); color:white; padding:7px 16px; border-radius:100px; font-size:11.5px; font-weight:700; cursor:pointer;">✓ อนุมัติ</div>
                             <div onClick="{{ r.onReturn }}" style="background:white; border:1px solid oklch(80% 0.09 27); color:oklch(45% 0.17 27); padding:7px 15px; border-radius:100px; font-size:11.5px; font-weight:600; cursor:pointer;">↩️ ส่งกลับให้แก้</div>
                             <div onClick="{{ r.onMoreInfo }}" style="background:white; border:1px solid oklch(84% 0.06 75); color:oklch(45% 0.12 70); padding:7px 15px; border-radius:100px; font-size:11.5px; font-weight:600; cursor:pointer;">＋ ขอข้อมูลเพิ่ม</div>
                           </div>
@@ -441,6 +448,9 @@
             <sc-if value="{{ r.showReject }}">
               <div onClick="{{ r.onReject }}" style="background:oklch(95% 0.02 30); color:oklch(45% 0.15 30); padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">✕ ปฏิเสธ</div>
             </sc-if>
+            <sc-if value="{{ r.showApplyUpdate }}">
+              <div onClick="{{ r.onApplyUpdate }}" style="background:oklch(94% 0.06 85); color:oklch(35% 0.1 70); padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap; font-weight:700;">📝 มีการแก้ไขรออนุมัติ — ตรวจและอัปเดตหน้าเว็บ</div>
+            </sc-if>
             <sc-if value="{{ r.showOffline }}">
               <div onClick="{{ r.onOffline }}" style="background:oklch(95% 0.02 30); color:oklch(45% 0.15 30); padding:8px 16px; border-radius:6px; font-size:13px; cursor:pointer; white-space:nowrap;">⛔ ปิดประกาศ</div>
             </sc-if>
@@ -521,6 +531,8 @@ class Component extends DCLogic {
       });
       Object.values(actByProp).forEach((arr) => arr.sort((a, b) => (b.at || 0) - (a.at || 0)));
       this.setState({ properties: properties.filter((p) => p.listerId || p.source === "owner_submission"), listersById, suspects, reports, photosByProp, actByProp, loaded: true });
+      // fetchAllPhotos() loads only the cover of each private Case. The thumbnail strip shows EVERY photo, so load the rest here (4 at a time, each as it arrives).
+      this._loadRestPhotos(Object.keys(photosByProp));
       // C3.1 FIX: this MUST run on the success path. It was previously only
       // called from the catch block below, so a normal (successful) load never
       // restored the deep-linked case at all — ?open=conversation resolved the
@@ -800,6 +812,23 @@ class Component extends DCLogic {
     }
   }
 
+  // Loads the photos of these Cases that are still missing (private Cases: only the cover came with the list) and puts each into state as it arrives.
+  async _loadRestPhotos(ids) {
+    const rows = [];
+    (ids || []).forEach((id) => (this.state.photosByProp[id] || []).forEach((ph) => rows.push(ph)));
+    try {
+      await this._fb.loadRemainingPrivatePhotos(rows, 4, (row, patch) => this.setState((st) => {
+        const by = { ...st.photosByProp }; const list = (by[row.propertyId] || []).map((x) => (x.id === row.id ? { ...x, ...patch } : x)); by[row.propertyId] = list; return { photosByProp: by };
+      }));
+    } catch (e) { console.warn("[Approvals] loading the remaining photos failed:", e && e.message); }
+  }
+  async openPhotoLightbox(p, i) {
+    await this._loadRestPhotos([p.id]); // anything the strip has not loaded yet (a no-op when all are there)
+    const list = (this.state.photosByProp[p.id] || []);
+    // aligned with the strip: index i is ALWAYS the photo that was clicked (a photo that failed to load shows as an empty frame, it does not shift the others)
+    this.setState({ lightboxUrls: list.map((x) => x.dataUrl || x.url || ""), lightboxIndex: i });
+  }
+
   // Verification is the ONE place a staff action alone completes a
   // requirement — and it writes an auditable record (who, when, how), not a
   // bare checkbox.
@@ -996,6 +1025,7 @@ class Component extends DCLogic {
     const subs = this.state.submissions[p.id] || [];
     const levelLabels = { critical: "จำเป็น", required: "ต้องมี", optional: "ถ้ามี" };
     const st = (k) => this._wf.stateStyle(k);
+    const stamps = this._approvalStamps(p);
     return {
       wfProgressLabel: ev.overallDone + "/" + ev.overallTotal + " ครบ · " + ev.overallPercent + "%",
       // Rendered from the definition: a step added later appears here with no
@@ -1065,9 +1095,13 @@ class Component extends DCLogic {
         : ev.reviewStatus === "waiting_review" ? "🔔 รอผู้บริหารตรวจสอบ"
         : ev.reviewStatus === "returned" ? "↩️ ส่งกลับให้แก้ไข"
         : ev.reviewStatus === "more_info_required" ? "＋ ขอข้อมูลเพิ่มเติม" : "การตรวจสอบ",
+      // FX-1 (DOC-OBS-04): TWO different events, each shown with the person who did THAT event — never one field standing in for the other.
+      //   intake approval  = the review decision on the submission (who: the submission's reviewedBy; older cases: the approvedBy stamp written at that moment)
+      //   publish approval = the stamp the server writes when the Owner publishes (approvedByEmail; the ROLE is only ever labelled as a role, never shown as a name)
       wfReviewSub: ev.reviewStatus === "approved"
-        ? ("อนุมัติโดย " + (p.approvedBy || "-") + (p.intakeCompletedAt ? " · " + new Date(p.intakeCompletedAt).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + " น." : ""))
+        ? ("อนุมัติรับเรื่องโดย " + stamps.intakeWho + (p.intakeCompletedAt ? " · " + stamps.fmt(p.intakeCompletedAt) : ""))
         : ("ส่งงานแล้ว " + ev.submissionCount + " ครั้ง"),
+      wfHasPublishStamp: stamps.hasPublish, wfPublishTitle: "✓ อนุมัติเผยแพร่", wfPublishSub: stamps.publishText,
       wfCanDecide: this._canDecideOn(p) && ev.reviewStatus !== "approved",
       wfStepOptions: ev.steps.filter((x) => !x.isSubmit)
         .map((x) => ({ key: x.stepKey, value: x.stepKey, label: x.number + ". " + x.title })),
@@ -1075,7 +1109,8 @@ class Component extends DCLogic {
       onReviewNote: (e) => this.setState((s2) => ({ reviewNote: { ...s2.reviewNote, [p.id]: e.target.value } })),
       reviewStepKey: this.state.reviewStepKey[p.id] || (ev.steps[0] ? ev.steps[0].stepKey : ""),
       onReviewStepKey: (e) => this.setState((s2) => ({ reviewStepKey: { ...s2.reviewStepKey, [p.id]: e.target.value } })),
-      onApprove: () => this.decide(p, "approved"),
+      // (named onIntakeApprove: the card's own onApprove — the PUBLISH approval — is spread after these values and used to replace this one, so the panel button published instead of recording the intake decision)
+      onIntakeApprove: () => this.decide(p, "approved"),
       onReturn: () => this.decide(p, "returned"),
       onMoreInfo: () => this.decide(p, "more_info"),
       hasReviewErr: !!this.state.reviewErr[p.id],
@@ -1088,6 +1123,29 @@ class Component extends DCLogic {
           + (v.reviewResult === "approved" ? "อนุมัติ" : v.reviewResult === "returned" ? "ส่งกลับ" : v.reviewResult === "more_info" ? "ขอข้อมูลเพิ่ม" : "รอตรวจ"),
       })),
     };
+  }
+
+  // The people behind the two approval events of a Case (see FX-1). Reads only what the team page already holds (the merged record);
+  // nothing here is public: approvedBy* / reviewedBy are internal fields (case-fields.js PRIVATE_FIELDS) and the public projection is an allow-list.
+  _approvalStamps(p) {
+    const fmt = (t) => new Date(t).toLocaleString("th-TH", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) + " น.";
+    let intakeWho = "";
+    if (p.approvedBy) intakeWho = p.approvedBy; // cases that pre-date the server stamp: written at the moment of the intake approval
+    else {
+      const rows = this.state.submissions[p.id];
+      if (Array.isArray(rows)) {
+        const hit = rows.find((x) => String(x.id) === String(p.approvedSubmissionId)) || rows.filter((x) => x.reviewResult === "approved").sort((a, b) => (b.reviewedAt || 0) - (a.reviewedAt || 0))[0];
+        intakeWho = (hit && hit.reviewedBy) || "ไม่มีบันทึกผู้ดำเนินการ";
+      } else {
+        intakeWho = "กำลังโหลด…";
+        this._subsAsked = this._subsAsked || {};
+        if (!this._subsAsked[p.id]) { this._subsAsked[p.id] = true; Promise.resolve().then(() => this._loadSubs(p)); }
+      }
+    }
+    const hasPublish = !!(p.approvedByEmail || p.approvedByUid || p.approvedByRole || (p.listingStatus === "live" && (p.approvedAt || p.publishedAt) && p.source === "owner_submission"));
+    const when = p.approvedAt || p.publishedAt;
+    const who = p.approvedByEmail ? p.approvedByEmail : (p.approvedByRole ? "ไม่มีอีเมลบันทึก (บทบาทที่บันทึก: " + p.approvedByRole + ")" : "ไม่มีบันทึกผู้อนุมัติเผยแพร่");
+    return { fmt, intakeWho, hasPublish, publishText: "อนุมัติเผยแพร่โดย " + who + (when ? " · " + fmt(when) : "") };
   }
 
   async _loadSubs(p) {
@@ -1218,14 +1276,34 @@ class Component extends DCLogic {
     }
   }
 
+  // Publishing a new-style Case is a two-step act (Owner only): the server previews EXACTLY what will become public, the Owner confirms it, and the
+  // server publishes only if nothing changed since. A cancelled preview changes nothing.
+  _publishErrorText(e) {
+    const r = (e && e.details && e.details.reason) || "";
+    const map = { public_text_has_contact_info: "ข้อความที่จะขึ้นเว็บมีเบอร์/อีเมล/ลิงก์/ไอดีติดต่อ — แก้ข้อความของเคสก่อน", price_required_to_publish: "เคสนี้ยังไม่มีราคา — ใส่ราคาก่อนเผยแพร่",
+      intake_not_approved: "ยังไม่ได้บันทึกผลอนุมัติการรับเรื่อง", photos_below_minimum: "รูปยังไม่ถึงขั้นต่ำตามประเภททรัพย์", reviewed_content_changed: "ข้อมูลเปลี่ยนหลังจากที่คุณตรวจ — กดอนุมัติใหม่เพื่อดูตัวอย่างล่าสุด",
+      publish_in_progress: "กำลังเผยแพร่อยู่ รอสักครู่", photos_changed: "รูปเปลี่ยนระหว่างเผยแพร่ — ลองใหม่", publish_cancelled: "การเผยแพร่ถูกยกเลิก (มีการปิดประกาศ)" };
+    return map[r] || "";
+  }
   async approve(id) {
     const prev = this.state.properties;
     this.setState((s) => ({ actionError: "", properties: s.properties.map((p) => (p.id === id ? { ...p, listingStatus: "live" } : p)) }));
     try { await this._fb.approveListing(id); } catch (e) {
       console.warn("approve failed:", e);
-      this.setState({ properties: prev, actionError: "อนุมัติไม่สำเร็จ — เฉพาะ Owner เท่านั้นที่อนุมัติประกาศได้ (บัญชี Staff ทำได้แค่เตรียมข้อมูล)" });
+      const known = this._publishErrorText(e);
+      this.setState({ properties: prev, actionError: e && e.code === "publish_not_confirmed" ? "" : (known || "อนุมัติไม่สำเร็จ — เฉพาะ Owner เท่านั้นที่อนุมัติประกาศได้ (บัญชี Staff ทำได้แค่เตรียมข้อมูล)") });
       return;
     }
+    try { const fresh = await this._fb.fetchDocById("properties", id); if (fresh) this.setState((s) => ({ properties: s.properties.map((p) => (p.id === id ? { ...p, ...fresh } : p)) })); } catch (e) {}
+  }
+
+  async applyUpdate(id) {
+    this.setState({ actionError: "" });
+    try {
+      const r = await this._fb.applyPublicUpdate(id);
+      if (r && r.synced === false && r.reason !== "not_confirmed") this.setState({ actionError: r.reason === "public_text_has_contact_info" ? "ข้อความมีเบอร์/อีเมล/ลิงก์ — แก้ก่อน หน้าเว็บยังเป็นข้อความเดิม" : "ยังไม่ได้อัปเดตหน้าเว็บ (" + (r.reason || "") + ")" });
+      const fresh = await this._fb.fetchDocById("properties", id); if (fresh) this.setState((s) => ({ properties: s.properties.map((p) => (p.id === id ? { ...p, ...fresh } : p)) }));
+    } catch (e) { console.warn("applyUpdate failed:", e); this.setState({ actionError: this._publishErrorText(e) || "อัปเดตหน้าเว็บไม่สำเร็จ" }); }
   }
 
   async reject(id) {
@@ -1241,8 +1319,12 @@ class Component extends DCLogic {
   }
 
   async reinstate(id) {
-    this.setState((s) => ({ properties: s.properties.map((p) => (p.id === id ? { ...p, listingStatus: "live" } : p)) }));
-    try { await this._fb.reinstateProperty(id); } catch (e) { console.warn("reinstate failed:", e); }
+    const prev = this.state.properties;
+    this.setState((s) => ({ actionError: "", properties: s.properties.map((p) => (p.id === id ? { ...p, listingStatus: "live" } : p)) }));
+    try { await this._fb.reinstateProperty(id); } catch (e) {
+      console.warn("reinstate failed:", e);
+      this.setState({ properties: prev, actionError: e && e.code === "publish_not_confirmed" ? "" : (this._publishErrorText(e) || "เปิดใช้งานไม่สำเร็จ") });
+    }
   }
 
   async resolveReport(id, propertyId) {
@@ -1517,7 +1599,8 @@ class Component extends DCLogic {
           // Opens THIS property in the existing editor and carries only the
           // case id back — no trackToken, no arbitrary return URL.
           onEditProperty: () => {
-            window.location.href = "Lister Dashboard.dc.html?edit=" + encodeURIComponent(p.id) + "&from=case";
+            // Staff are (rightly) kept out of Lister Dashboard; the case data has its own team-only page that edits only the Case record.
+            window.location.href = "Case Data.dc.html?id=" + encodeURIComponent(p.id);
           },
           onSendReply: () => this.sendCaseReply(p),
           onPreviewReply: () => this.previewReply(p),
@@ -1560,14 +1643,16 @@ class Component extends DCLogic {
           photoCountLabel: ((this.state.photosByProp[p.id] || []).length) + " รูป",
           submissionPhotos: (this.state.photosByProp[p.id] || []).map((ph, i) => ({
             key: ph.id || String(i),
-            style: { width: "88px", height: "66px", borderRadius: "6px", flexShrink: 0, backgroundImage: (ph.dataUrl || ph.url) ? `url('${ph.dataUrl || ph.url}')` : "none", backgroundColor: "oklch(92% 0.01 70)", backgroundSize: "cover", backgroundPosition: "center", cursor: "pointer" },
-            onClick: () => this.setState({ lightboxUrls: (this.state.photosByProp[p.id] || []).map((x) => x.dataUrl || x.url).filter(Boolean), lightboxIndex: i }),
+            style: { outline: ph.privatePhotoError ? "2px solid #c0392b" : "none", width: "88px", height: "66px", borderRadius: "6px", flexShrink: 0, backgroundImage: (ph.dataUrl || ph.url) ? `url('${ph.dataUrl || ph.url}')` : "none", backgroundColor: "oklch(92% 0.01 70)", backgroundSize: "cover", backgroundPosition: "center", cursor: "pointer" },
+            onClick: () => this.openPhotoLightbox(p, i),
           })),
           phoneHref: p.contactPhone ? "tel:" + String(p.contactPhone).replace(/[^0-9+]/g, "") : "",
           hasPhone: !!p.contactPhone,
           showApprove: this.state.adminRole === "owner" && (p.listingStatus === "pending" || p.listingStatus === "pending_owner"),
           showReject: this.state.adminRole === "owner" && (p.listingStatus === "pending" || p.listingStatus === "pending_owner"),
           showOffline: p.listingStatus === "live",
+          showApplyUpdate: this.state.adminRole === "owner" && p.listingStatus === "live" && p.publicUpdatePending === true,
+          onApplyUpdate: () => this.applyUpdate(p.id),
           showReinstate: p.listingStatus === "offline",
           onApprove: () => this.approve(p.id),
           onReject: () => this.reject(p.id),

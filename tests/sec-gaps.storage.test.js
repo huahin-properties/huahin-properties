@@ -74,7 +74,7 @@ describe("SEC-TEST-01 A2: Storage rules probes (synthetic, emulator)", function 
     () => anonSt().ref("propertyPhotos").listAll(), "read rule also covers list");
 
   // ── anonymous upload channel ──────────────────────────────────────────
-  control("S2a", "anonymous may create a small own-*.webp image (intended submission channel)", true,
+  control("S2a", "anonymous can NO LONGER create an own-*.webp image in propertyPhotos (closed by LISTING-E2E-01; submissions upload to caseUploads/<uid>/ instead)", false,
     () => anonSt().ref("propertyPhotos/own-1800000000000-xyz-0.webp").put(img(), WEBP));
   control("S2b", "anonymous cannot upload a PDF under own-*.webp name", false,
     () => anonSt().ref("propertyPhotos/own-1800000000001-xyz-0.webp").put(img(), { contentType: "application/pdf" }));

@@ -35,7 +35,7 @@ const EXPECTED = {
   propertiesFetchAll: [
     "AI Quick Add.dc.html", "Admin Dashboard.dc.html", "Developer Maintenance Center.dc.html",
     "Listing Approvals.dc.html", "Member Management.dc.html", "Owners.dc.html", "Property Map.dc.html",
-    "Staff Workspace.dc.html", "Track Submission.dc.html", "data.js", "firebase-client.js", "seed-package-demo.js",
+    "Staff Workspace.dc.html", "data.js", "firebase-client.js", "seed-package-demo.js",
   ],
   // Files that call getEffectiveProperties() (-> data.js:fetchCollection("properties")): PUBLIC pages.
   publicPropertyReaders: [
@@ -77,9 +77,9 @@ describe("SEC-TEST-01 C: call-site inventory (source only)", function () {
     assert.ok(!/where\(/.test(body), "a where() filter appeared; the public read is no longer unfiltered");
   });
 
-  it("Track Submission compares trackToken client-side after downloading all properties", () => {
+  it("Track Submission no longer downloads the whole properties collection (LISTING-E2E-01): server-checked token for new Cases, read-by-id for legacy Cases", () => {
     const src = read("Track Submission.dc.html");
-    assert.ok(/fetchCollection\(\s*["']properties["']\s*\)/.test(src));
-    assert.ok(/p\.trackToken\s*!==\s*token/.test(src));
+    assert.ok(!/fetchCollection\(\s*["']properties["']\s*\)/.test(src), "whole-collection fetch is back");
+    assert.ok(/trackListingCase\(/.test(src) && !/fetchDocById\(/.test(src) && !/fetchCaseMessages\(|watchCaseMessages\(|addCaseMessage\(/.test(src), "the customer page must use only the server-checked function");
   });
 });

@@ -70,3 +70,7 @@ node_modules/
 
 # CHAT-LIVE-01 test-site build output (never committed)
 /build/
+
+# browser-local test libraries and run output
+.browser-vendor/
+build/

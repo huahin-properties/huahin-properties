@@ -1601,7 +1601,9 @@ exports.createCaseFromConversation = onCall(
           // caller's uid - never from the request - so this cannot be steered
           // toward another customer's Case.
           const existingId = String(linked[0]);
-          const caseSnap = await t.get(db.collection("properties").doc(existingId));
+          // LISTING-E2E-01: a Case created from now on is the team-only record caseInternal/{id}; an older Case is a properties document.
+          const intSnap = await t.get(db.collection("caseInternal").doc(existingId));
+          const caseSnap = intSnap.exists ? intSnap : await t.get(db.collection("properties").doc(existingId));
           // Unreachable while creation stays atomic (below); fails closed
           // anyway rather than returning a token for a Case we cannot see.
           if (!caseSnap.exists) return { created: false, reason: "case_missing" };
@@ -1625,8 +1627,13 @@ exports.createCaseFromConversation = onCall(
         if (reason) return { created: false, reason };
 
         const pb = d.propertyBasics || {};
+        // LISTING-E2E-01: ONE draft binding with the form. If this visitor has a form draft, the Case is linked to it
+        // (case.draftId in the internal record, draft.caseId) — never matched by name or phone.
+        const draftRef = db.collection("propertyDrafts").doc("draft__" + visitorId);
+        const draftSnap = await t.get(draftRef);
+        const draftLink = draftSnap.exists && !(draftSnap.data() || {}).caseId;
         // ── The canonical Property Case ───────────────────────────────────
-        t.create(db.collection("properties").doc(propertyId), {
+        const caseDoc = {
           // COMPATIBILITY, NOT LAZINESS. `source` is a capability key in
           // firestore.rules (isPublicOwnerSubmission, the trackToken reply
           // branches, the caseMessages tokenOk check) and gates ~15 behaviours
@@ -1676,7 +1683,21 @@ exports.createCaseFromConversation = onCall(
           // takes responsibility. An AI-created Case has never been touched by
           // a human, so writing it here would permanently disable AI on a Case
           // no human has seen - and would forge the human-handoff record.
-        });
+          // (LISTING-E2E-01) who submitted: the verified visitor uid, recorded in the internal record only.
+          submittedByUid: visitorId, submittedByRole: "external",
+          ...(draftLink ? { draftId: "draft__" + visitorId } : {}),
+        };
+        // LISTING-E2E-01: the SAME split the form path uses — contact, token and conversation link never go on the
+        // publicly readable document.
+        if (listingCase.isEnabled()) {
+          // LISTING-E2E-01: the Case is ONE team-only record (caseInternal). There is no public document until the Owner publishes.
+          t.create(db.collection("caseInternal").doc(propertyId), Object.assign({ propertyId, createdAt: now, internalSplit: true }, caseDoc));
+          if (draftLink) t.set(draftRef, { caseId: propertyId, status: "submitted", submittedAt: now, updatedAt: now }, { merge: true });
+        } else {
+          // Not a LISTING-E2E-01 project: exactly the previous shape (single document), nothing new written.
+          const legacy = Object.assign({}, caseDoc); delete legacy.submittedByUid; delete legacy.submittedByRole; delete legacy.draftId;
+          t.create(db.collection("properties").doc(propertyId), legacy);
+        }
         // Same commit as the Case. linkedCaseIds non-empty therefore IMPLIES
         // the Case exists: the dangling-pointer state cannot occur.
         t.update(convRef, {
@@ -1802,6 +1823,50 @@ async function resolveSenderIdentity(senderId) {
     `Sender identity "${senderId || "(none)"}" is not a registered member or admin. An adminUsers/{uid} or listers/{uid} Firestore document must exist before this account can share a Collection link.`
   );
 }
+
+// LISTING-E2E-01 — the single server-side submit path and the Owner-only publish step.
+// Logic lives in listing-case.js (identity is derived from the verified token there).
+const listingCase = require("./listing-case");
+exports.submitListingCase = onCall(
+  { region: "asia-southeast1", timeoutSeconds: 120, memory: "512MiB" },
+  (request) => listingCase.submitListingCase({ admin, HttpsError, request })
+);
+exports.publishListingCase = onCall(
+  { region: "asia-southeast1", timeoutSeconds: 120, memory: "512MiB" },
+  (request) => listingCase.publishListingCase({ admin, HttpsError, request })
+);
+exports.unpublishListingCase = onCall(
+  { region: "asia-southeast1", timeoutSeconds: 120, memory: "512MiB" },
+  (request) => listingCase.unpublishListingCase({ admin, HttpsError, request })
+);
+exports.listMyCases = onCall(
+  { region: "asia-southeast1", timeoutSeconds: 60 },
+  (request) => listingCase.listMyCases({ admin, HttpsError, request })
+);
+exports.getCasePhoto = onCall(
+  { region: "asia-southeast1", timeoutSeconds: 60, memory: "512MiB" },
+  (request) => listingCase.getCasePhoto({ admin, HttpsError, request })
+);
+exports.previewListingCase = onCall(
+  { region: "asia-southeast1", timeoutSeconds: 60 },
+  (request) => listingCase.previewListingCase({ admin, HttpsError, request })
+);
+exports.syncListingCase = onCall(
+  { region: "asia-southeast1", timeoutSeconds: 60 },
+  (request) => listingCase.syncListingCase({ admin, HttpsError, request })
+);
+exports.addCasePhotos = onCall(
+  { region: "asia-southeast1", timeoutSeconds: 120, memory: "512MiB" },
+  (request) => listingCase.addCasePhotos({ admin, HttpsError, request })
+);
+exports.reconcileListingFiles = onCall(
+  { region: "asia-southeast1", timeoutSeconds: 120 },
+  (request) => listingCase.reconcileListingFiles({ admin, HttpsError, request })
+);
+exports.trackListingCase = onCall(
+  { region: "asia-southeast1", timeoutSeconds: 60 },
+  (request) => listingCase.trackListingCase({ admin, HttpsError, request })
+);
 
 // startConversation (Callable): creates the conversation doc (if it
 // doesn't already exist) and writes the FIRST message as an AI-role

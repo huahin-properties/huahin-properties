@@ -23,6 +23,12 @@ service cloud.firestore {
       );
     }
 
+    // LISTING-E2E-01: anonymous sign-in (every chat visitor has one) is NOT an account that may
+    // publish, edit listings or touch property photos.
+    function isAnonymousAuth() {
+      return request.auth != null && request.auth.token.firebase.sign_in_provider == "anonymous";
+    }
+
     // Owner-only: financial/settings collections (Site Content, external
     // service costs, team management) — Staff can use the rest of the admin
     // tools but not these. The original hardcoded UID is always Owner.
@@ -59,18 +65,7 @@ service cloud.firestore {
           get(/databases/$(database)/documents/listers/$(request.auth.uid)).data.subscriptionStatus == "active" &&
           get(/databases/$(database)/documents/listers/$(request.auth.uid)).data.tier in ["pro", "agency", "level3", "level4"];
       }
-      // Aug 2026: auto-publish — a lister may now set their own listing
-      // straight to "live" (previously admin-only). The one thing they can
-      // NEVER do is move it OUT of "offline" — that status only exists
-      // because an admin put it there (see setPropertyOffline in
-      // firebase-client.js), and only an admin write (isAdmin() above) can
-      // undo it. This is enforced here, not just in the UI, so it can't be
-      // bypassed from devtools/console.
-      function listerListingStatusOk() {
-        return request.resource.data.listingStatus == resource.data.listingStatus
-          || (request.resource.data.listingStatus == "live" && resource.data.listingStatus != "offline")
-          || (request.resource.data.listingStatus == "paused" && resource.data.listingStatus != "offline");
-      }
+      // (Aug 2026 "auto-publish" — a lister setting their own listing live — was REMOVED by LISTING-E2E-01: see listerStatusOk below.)
       // Staff role (Aug 2026, Owner-approval workflow): a Staff member may
       // prepare a listing (create/edit/upload photos, draft it, mark it
       // "pending_owner") but may NEVER put it live — only the Owner can flip
@@ -80,18 +75,67 @@ service cloud.firestore {
         return isAdmin() && !isOwner();
       }
       function staffStatusOk() {
-        return request.resource.data.listingStatus != "live";
+        return request.resource.data.get("listingStatus", "") != "live";
       }
-      // Public owner-submission channel (Owner Submission.dc.html): a visitor
-      // with no account may create a listing ONLY as an unpublished pending
-      // submission carrying the owner_submission marker. It can never go live
-      // this way — an Owner still has to approve it in Listing Approvals.
-      function isPublicOwnerSubmission() {
-        return request.resource.data.source == "owner_submission"
-          && request.resource.data.listingStatus == "pending";
+      // (The anonymous public-submission create path was removed: see submitListingCase.)
+      // LISTING-E2E-01 — no self-publishing, no leaking of internal fields.
+      //  * An agent/lister can create/edit their own listing but can NEVER set it "live": new listings
+      //    start "pending" (or as a draft), and only the Owner (publishListingCase / Listing Approvals)
+      //    turns a listing live. The one exception is resuming a listing the Owner already approved
+      //    (paused → live, approvedAt present and untouched).
+      //  * Approval/attribution/workflow fields and every INTERNAL field are not writable by listers.
+      //  * Staff may never approve (reviewStatus stays off "approved"; approval stamps are Owner-only).
+      //  * A Case whose internal data lives in caseInternal (internalSplit == true) can never get
+      //    internal fields written back into this publicly readable document by anyone.
+      //  * The old anonymous create path (isPublicOwnerSubmission) is gone: new submissions go
+      //    through the submitListingCase Cloud Function.
+      function approvalKeys() {
+        return ["approvedAt", "publishedAt", "expiresAt", "approvedSubmissionId", "intakeCompletedAt", "publicPropertyCode", "publicCodeAssignedAt",
+          "publishedPhotoCount", "reviewStatus", "submissionCount", "lastSubmissionId", "lastSubmittedAt", "source", "caseSource",
+          "internalSplit", "workflowVersion", "photoCount", "photoStandard"];
       }
-      allow create: if (isOwner()) || (isStaffOnly() && staffStatusOk()) || isPublicOwnerSubmission() || (request.auth != null && request.resource.data.listerId == request.auth.uid && request.resource.data.listingStatus != "offline");
-      allow update: if (isOwner()) || (isStaffOnly() && staffStatusOk()) || (request.auth != null && resource.data.listerId == request.auth.uid && request.resource.data.listerId == request.auth.uid && listerListingStatusOk())
+      // LISTING-E2E-01: a Case that went through submitListingCase is the team-only record caseInternal/{id}; properties/{id}
+      // is only its PUBLIC PROJECTION, written by the server (Admin SDK) at publish time. No browser — not even the Owner's —
+      // creates, edits or deletes a projection (it would bypass the allow-list, the public-text check and the approval record).
+      function splitCase() {
+        return exists(/databases/$(database)/documents/caseInternal/$(id));
+      }
+      function staffMayNotApprove() {
+        return !request.resource.data.diff(resource.data).affectedKeys().hasAny(["approvedAt", "publishedAt", "expiresAt", "approvedSubmissionId", "intakeCompletedAt", "publicPropertyCode", "publicCodeAssignedAt"])
+          && (request.resource.data.get("reviewStatus", "") != "approved" || resource.data.get("reviewStatus", "") == "approved");
+      }
+      function staffMayNotApproveOnCreate() {
+        return !request.resource.data.keys().hasAny(["approvedAt", "publishedAt", "expiresAt", "approvedSubmissionId", "intakeCompletedAt", "publicPropertyCode", "publicCodeAssignedAt"])
+          && request.resource.data.get("reviewStatus", "") != "approved";
+      }
+      function listerCreateOk() {
+        return request.auth != null && !isAnonymousAuth()
+          && request.resource.data.listerId == request.auth.uid
+          && !request.resource.data.keys().hasAny(approvalKeys())
+          && (request.resource.data.get("isDraft", false) == true || request.resource.data.get("listingStatus", "") == "pending");
+      }
+      function listerStatusOk() {
+        return (request.resource.data.get("listingStatus", null) == resource.data.get("listingStatus", null)
+                && (request.resource.data.get("listingStatus", null) != null
+                    || request.resource.data.get("isDraft", false) == resource.data.get("isDraft", false)))
+          || (request.resource.data.get("listingStatus", null) in ["pending", "paused"] && resource.data.get("listingStatus", null) != "offline")
+          || (request.resource.data.get("listingStatus", null) == "live" && resource.data.get("listingStatus", null) == "paused"
+              && resource.data.get("approvedAt", null) != null);
+      }
+      function listerUpdateOk() {
+        return request.auth != null && !isAnonymousAuth()
+          && resource.data.listerId == request.auth.uid && request.resource.data.listerId == request.auth.uid
+          && listerStatusOk()
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(approvalKeys());
+      }
+      // LISTING-E2E-01: a lister/agent can no longer CREATE a listing document from a browser (that made a publicly readable "pending" record and
+      // wrote photos through the member-writable legacy path). New submissions go through Owner Submission → submitListingCase (private Case).
+      // Existing listings stay editable by their owner (update rule below).
+      allow create: if !splitCase() && (isOwner()
+        || (isStaffOnly() && staffStatusOk() && staffMayNotApproveOnCreate()));
+      allow update: if (!splitCase() && (isOwner()
+        || (isStaffOnly() && staffStatusOk() && staffMayNotApprove())
+        || listerUpdateOk()))
         // Public view-count increment (Property Details page, any visitor,
         // no auth) — restricted to ONLY the viewCount field changing so
         // this can't be abused to alter price/status/etc.
@@ -140,20 +184,8 @@ service cloud.firestore {
             && resource.data.trackToken.size() > 20
             && request.resource.data.trackToken == resource.data.trackToken
             && request.resource.data.diff(resource.data).affectedKeys()
-                 .hasOnly(['customerLastReadAt', 'lastCustomerMessageAt']))
-
-        // PHASE 1A.2 (ก.ย. 2569) — photo-upload follow-up markers.
-        // Owner Submission no longer aborts the whole submission when one
-        // photo upload fails; it records the failure on the case so Staff can
-        // chase the missing photos. That note is written by a signed-out
-        // visitor immediately after their own create, so it needs its own
-        // narrow branch. Three harmless boolean/count/string fields only —
-        // no price, status, contact or workflow field is reachable here.
-        || (resource.data.source == "owner_submission"
-            && request.resource.data.diff(resource.data).affectedKeys()
-                 .hasOnly(['photoUploadFailedCount', 'photoUploadFollowUpNeeded', 'photoUploadLastError'])
-            && request.resource.data.photoUploadFollowUpNeeded == true);
-      allow delete: if isOwner() || (request.auth != null && resource.data.listerId == request.auth.uid);
+                 .hasOnly(['customerLastReadAt', 'lastCustomerMessageAt']));
+      allow delete: if !splitCase() && (isOwner() || (request.auth != null && resource.data.listerId == request.auth.uid));
 
       // STEP 2B.2 — Case conversation for owner-submission cases.
       // Append-only history. The customer has no account: their private
@@ -181,31 +213,12 @@ service cloud.firestore {
         allow update: if isOwner();
         allow delete: if false;
       }
+      // LISTING-E2E-01: caseMessages are TEAM-ONLY from the browser. A customer holds no account, and a rule can not prove that
+      // the person asking owns the case token (the earlier rule compared a stored message token with the stored case token, which
+      // anyone who knew the case id could satisfy). The customer reads and writes their conversation through the trackListingCase
+      // function, which verifies the token they present. History is immutable.
       match /caseMessages/{msgId} {
-        function parent() {
-          return get(/databases/$(database)/documents/properties/$(id)).data;
-        }
-        function tokenOk(t) {
-          return parent().source == "owner_submission"
-            && parent().trackToken is string
-            && parent().trackToken.size() > 20
-            && t == parent().trackToken;
-        }
-        // Reads: team sees everything; a token-holder sees only messages
-        // marked visible to the customer. Client queries MUST filter on
-        // visibility == "customer" for a customer-side list to succeed.
-        allow read: if isAdmin()
-          || (resource.data.visibility == "customer" && resource.data.caseToken is string && tokenOk(resource.data.caseToken));
-        allow create: if isAdmin()
-          || (request.resource.data.senderType == "customer"
-              && request.resource.data.direction == "inbound"
-              && request.resource.data.visibility == "customer"
-              && request.resource.data.caseToken is string
-              && tokenOk(request.resource.data.caseToken)
-              && request.resource.data.originalText is string
-              && request.resource.data.originalText.size() > 0
-              && request.resource.data.originalText.size() < 4000);
-        // History is immutable — no edits, no deletes, by anyone.
+        allow read, create: if isAdmin();
         allow update, delete: if false;
       }
     }
@@ -247,26 +260,53 @@ service cloud.firestore {
       // impossible to test as a plain lister (found auditing Admin
       // Dashboard's delete-cleanup fix). Delete must check resource (the
       // doc being removed) instead.
-      // Public owner-submission photos: a visitor with no account may attach
-      // photos to a property that is itself an unpublished pending
-      // owner_submission (see the properties rule above). Nothing else.
-      function isPhotoForPublicSubmission() {
-        return exists(/databases/$(database)/documents/properties/$(request.resource.data.propertyId))
-          && get(/databases/$(database)/documents/properties/$(request.resource.data.propertyId)).data.source == "owner_submission"
-          && get(/databases/$(database)/documents/properties/$(request.resource.data.propertyId)).data.listingStatus == "pending";
+      // LISTING-E2E-01: this collection is PUBLIC (read) so it may only ever hold photos of listings
+      // that are meant to be public. Pending-case photos live in casePhotos (private) and are copied
+      // here by publishListingCase; takeDown removes them again. Clients: only team members, or a
+      // signed-in (non-anonymous) lister for a property they own, may create/update/delete here.
+      function ownsPropertyForPhoto(pid) {
+        return request.auth != null && !isAnonymousAuth() &&
+          exists(/databases/$(database)/documents/properties/$(pid)) &&
+          get(/databases/$(database)/documents/properties/$(pid)).data.get("listerId", null) == request.auth.uid;
       }
-      // A create always carries a propertyId; that alone is enough for the
-      // public owner-submission flow (photos are useless without the parent
-      // listing, which itself can only be created as an unpublished pending
-      // submission). Simpler and more reliable than a cross-document get(),
-      // which failed for real visitors.
-      allow create: if request.resource.data.propertyId is string && request.resource.data.propertyId.size() > 0;
-      allow update: if isAdmin() || isPhotoForPublicSubmission() || (request.auth != null &&
-        exists(/databases/$(database)/documents/properties/$(request.resource.data.propertyId)) &&
-        get(/databases/$(database)/documents/properties/$(request.resource.data.propertyId)).data.listerId == request.auth.uid);
-      allow delete: if isAdmin() || (request.auth != null &&
-        exists(/databases/$(database)/documents/properties/$(resource.data.propertyId)) &&
-        get(/databases/$(database)/documents/properties/$(resource.data.propertyId)).data.listerId == request.auth.uid);
+      // Photos of a Case that went through submitListingCase are written by the server only (publish / take-down).
+      function caseOwnedPhoto(pid) {
+        return exists(/databases/$(database)/documents/caseInternal/$(pid));
+      }
+      allow create, update: if request.resource.data.propertyId is string && !caseOwnedPhoto(request.resource.data.propertyId)
+        && (isAdmin() || ownsPropertyForPhoto(request.resource.data.propertyId));
+      allow delete: if resource.data.propertyId is string && !caseOwnedPhoto(resource.data.propertyId)
+        && (isAdmin() || ownsPropertyForPhoto(resource.data.propertyId));
+    }
+
+    // LISTING-E2E-01 — THE CASE RECORD. Everything about a Case that came through submitListingCase (contact, owner, token,
+    // assignment, verifications, status, approval attribution…) lives here. Team only: nobody else reads it — the submitter
+    // included (they use the trackListingCase function, which returns a minimal view). Nothing is created or deleted from a
+    // browser (submitListingCase / createCaseFromConversation create it, nothing deletes it). Staff may prepare the Case but can
+    // not publish it, can not approve it and can not forge approval attribution; NOBODY writes "live" or the publish stamps from a
+    // browser — publishListingCase (Owner, server) does, together with the public projection.
+    match /caseInternal/{id} {
+      function stampKeys() {
+        return ["approvedBy", "approvedByUid", "approvedByEmail", "approvedByRole", "approvalPath", "approvedAt", "publishedAt", "expiresAt", "publishOp", "publishedPhotoCount", "offlineByUid", "submittedByUid", "submittedByRole", "trackToken", "source", "internalSplit", "propertyId"];
+      }
+      function notLive() {
+        return request.resource.data.get("listingStatus", "") != "live" || resource.data.get("listingStatus", "") == "live";
+      }
+      allow read: if isAdmin();
+      allow create: if false;
+      function staffMayWrite() {
+        return (request.resource.data.get("reviewStatus", "") != "approved" || resource.data.get("reviewStatus", "") == "approved")
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(["publicPropertyCode", "publicCodeAssignedAt", "intakeCompletedAt", "approvedSubmissionId"]);
+      }
+      allow update: if isAdmin() && notLive()
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(stampKeys())
+        && (isOwner() || staffMayWrite());
+      allow delete: if false;
+    }
+    // Private photo records of a Case (pending review). Team read only; written by the server only.
+    match /casePhotos/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
     }
     // C4.3 Phase 1 — customer property drafts (working data, NOT a Case).
     //

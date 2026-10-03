@@ -1,3 +1,7 @@
+> ⚠️ **3 ต.ค. 2569 — อ่านชุดส่งต่อก่อน:** `BLUEPRINT.md` + `HANDOFF-NEXT-CHAT.md` + `PROJECT-STATUS.md` (ชุด `HP-HANDOFF-2026-10-03-v1.1`) คือสถานะล่าสุด; แถบ "PHS-CLOSE-1 · 8 ส.ค. 2569" ด้านล่างเป็นประวัติ ไม่ใช่ latest.
+> **Workflow ปัจจุบัน (แทนหัวข้อ Deployment workflow / "re-export to export-for-github/" ด้านล่าง ซึ่งเก็บไว้เป็นประวัติ):** Claude Code ทำงานบน draft branch/PR → ChatGPT Work ตรวจ → เจ้าของ deploy **TEST เท่านั้น** ตาม head ที่ตรวจ (pin SHA, ตรวจ branch/HEAD ก่อน) → เจ้าของลอง UI → sync ชุดส่งต่อ. ห้าม merge/deploy production/เปิด GREEN โดยไม่มีมติเจ้าของ; ห้ามรัน `tools/chat-live/deploy-test.sh` (พักที่ 6/8); listing TEST ใช้ `tools/listing-test/deploy-test.sh`.
+> **ข้อมูลล้าสมัยใน CLAUDE.md นี้ที่ตรวจแล้ว:** ป้าย "Agent Signup ช่องรหัสผ่าน type=text" (โค้ดปัจจุบันเป็น `password` + ปุ่มตา). ยังไม่มีหัวข้อ Case model / LISTING-E2E ในไฟล์นี้ — ดู `docs/listing-e2e/` และชุดส่งต่อ.
+
 > 🔒 **PHS-CLOSE-1 — 8 สิงหาคม 2569 (2026-08-08)** — ปิดงานรอบสุดท้าย: ไฟล์นี้ตรวจสอบแล้วว่าเป็นเวอร์ชันล่าสุดที่ใช้งานจริง ณ รอบส่งมอบนี้ ไม่มีเนื้อหาล้าสมัยหรือขัดแย้งกับไฟล์อื่นในชุดส่งมอบ (ตรวจสอบพร้อมกันทั้ง 23 ไฟล์ในชุด Handoff Package)
 
 ---

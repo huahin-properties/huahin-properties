@@ -11,6 +11,8 @@
 // data), and Storage holds uploaded photos served from a fast CDN URL —
 // replacing the browser-only localStorage + local-file demo used earlier.
 
+import { PRIVATE_FIELDS, PUBLIC_FIELDS } from "./case-fields.js";
+
 const firebaseConfig = {
   apiKey: "AIzaSyCTfx0ucOxEvfcP15Gf-SJEXRS-_-F1oWQ",
   // Same-site custom authDomain (a subdomain of huahin.properties itself,
@@ -85,15 +87,102 @@ export function whenFirebaseReady() {
   return p;
 }
 
+// LISTING-E2E-01 (O1): the SDK <script> tags in <helmet> are inserted by the runtime and nothing else waits for them, so the FIRST read of a public page
+// could run before window.firebase.<part> existed and fail ("Firebase SDK not loaded"). Data helpers wait for the one part they need — bounded
+// (50 ms steps, 8 s), rejecting with code "sdk-timeout" so the caller shows an error state instead of guessing. No automatic reload anywhere.
+export function whenSdkPart(part, budgetMs) {
+  const limit = budgetMs || 8000;
+  return new Promise((resolve, reject) => {
+    let waited = 0;
+    const poll = () => {
+      const f = window.firebase;
+      if (f && typeof f[part] === "function" && typeof f.initializeApp === "function") { resolve(f); return; }
+      waited += 50;
+      if (waited >= limit) { const err = new Error("Firebase SDK part '" + part + "' not ready after " + limit + " ms"); err.code = "sdk-timeout"; reject(err); return; }
+      setTimeout(poll, 50);
+    };
+    poll();
+  });
+}
+
 function db() { return getApp().firestore(); }
 function storageRef() { return getApp().storage(); }
 
 // ── Firestore helpers ───────────────────────────────────────────────────
 
 export async function fetchCollection(name) {
+  await whenSdkPart("firestore");
   const snap = await db().collection(name).get();
-  return snap.docs.map((d) => ({ ...d.data(), id: d.id }));
+  const rows = snap.docs.map((d) => ({ ...d.data(), id: d.id }));
+  return name === "properties" ? attachCaseRecords(rows) : rows;
 }
+
+// ── LISTING-E2E-01: a Case is the team-only record caseInternal/{id} ────────────────────────────────
+// Cases that came through submitListingCase / the chat live ONLY in caseInternal/{id} (team read/write). properties/{id} is just the
+// public projection of a PUBLISHED listing, written by the server. To keep every existing team page working unchanged, THIS layer
+// (a) adds the Case records to what a team member reads from "properties" (public projection + record, record wins), and
+// (b) sends a team member's writes for such a Case to caseInternal (and asks the server to re-project it if it is live).
+// Older Cases (a properties document with no caseInternal record) behave exactly as before. Visitors, anonymous users and
+// non-team members never read caseInternal (rules) and never get this merge.
+const _splitCache = new Map(); // caseId -> boolean (is this Case a record?)
+let _teamCache = { uid: null, isTeam: false };
+async function _isTeamSession() {
+  const a = authApp();
+  const u = a && a.currentUser;
+  if (!u || u.isAnonymous) return false;
+  if (_teamCache.uid === u.uid) return _teamCache.isTeam;
+  let role = null;
+  try { role = await fetchAdminRole(); } catch (e) { role = null; }
+  _teamCache = { uid: u.uid, isTeam: role === "owner" || role === "staff" };
+  return _teamCache.isTeam;
+}
+export function mergeCaseRecords(publicRows, records) {
+  const by = new Map();
+  (publicRows || []).forEach((p) => { if (p && p.id) by.set(p.id, p); });
+  (records || []).forEach((r) => {
+    if (!r || !r.id) return;
+    const { propertyId, createdAt, ...rest } = r; // eslint-disable-line no-unused-vars
+    by.set(r.id, { ...(by.get(r.id) || {}), ...rest, id: r.id });
+  });
+  return Array.from(by.values());
+}
+async function attachCaseRecords(rows) {
+  if (!(await _isTeamSession())) { rows.forEach((p) => { if (p && p.id) _splitCache.set(p.id, false); }); return rows; }
+  try {
+    const snap = await db().collection("caseInternal").get();
+    const recs = snap.docs.map((d) => ({ ...d.data(), id: d.id }));
+    recs.forEach((r) => _splitCache.set(r.id, true));
+    return mergeCaseRecords(rows, recs);
+  } catch (e) { console.warn("case records not merged:", e && e.code); return rows; }
+}
+async function _isSplitCase(propertyId) {
+  const id = String(propertyId);
+  if (_splitCache.get(id) === true) return true;
+  if (!(await _isTeamSession())) return false;
+  let split = false;
+  try { split = (await db().collection("caseInternal").doc(id).get()).exists; } catch (e) { split = false; }
+  _splitCache.set(id, split);
+  return split;
+}
+// Ref to write a Case's data to: the record for a new-style Case, the properties document otherwise.
+async function _refForPrivateWrite(propertyId) {
+  return (await _isSplitCase(propertyId)) ? db().collection("caseInternal").doc(String(propertyId)) : db().collection("properties").doc(String(propertyId));
+}
+// After a team member edits a Case that is LIVE, the server re-projects the public page from the record (allow-list + public-text check).
+// A team member's edit never changes the public page by itself: Staff's request is recorded for the Owner; the Owner sees the preview (what changes) and approves it.
+async function _syncIfLive(propertyId) {
+  try {
+    const r = await callFn("syncListingCase", { propertyId: String(propertyId) });
+    if (r && r.reason === "owner_approval_required") console.info("public page update is waiting for the Owner's approval:", propertyId);
+  } catch (e) { console.warn("public page not re-projected:", e && (e.code || e.message)); }
+}
+export async function applyPublicUpdate(propertyId) {
+  const pv = await previewListingCase(propertyId);
+  const ok = await confirmPublicPreview(pv, "ตรวจก่อนอัปเดตหน้าเว็บ — เปรียบเทียบกับที่ขึ้นอยู่ตอนนี้");
+  if (!ok) return { synced: false, reason: "not_confirmed" };
+  return callFn("syncListingCase", { propertyId: String(propertyId), reviewedSig: pv.updateSig });
+}
+export { PRIVATE_FIELDS };
 
 // ── Developer Maintenance Center (DMC) — read-only helpers ──────────────
 // Added for DMC Phase 1 (System Overview / Firestore Inventory). These are
@@ -179,6 +268,12 @@ export async function fetchStorageFolderInventory(folderPath) {
 // operation under clearer names for NEW call sites, so intent is explicit
 // at the call site instead of only in this comment.
 export async function setDoc(collectionName, id, data) {
+  if (collectionName === "properties" && (await _isSplitCase(id))) {
+    await db().collection("caseInternal").doc(String(id)).set(data, { merge: true });
+    // keys that can change what the public sees → ask the server to re-project (no-op when the Case is not live)
+    if (data && typeof data === "object" && Object.keys(data).some((k) => PUBLIC_FIELDS.includes(k))) await _syncIfLive(id);
+    return;
+  }
   await db().collection(collectionName).doc(String(id)).set(data, { merge: true });
 }
 
@@ -205,8 +300,19 @@ export async function replaceDoc(collectionName, id, data) {
 // change made elsewhere (e.g. an admin approval) in between page load and
 // save isn't silently clobbered by a stale client-side copy.
 export async function fetchDocById(collectionName, id) {
+  if (collectionName === "properties" && (await _isTeamSession())) {
+    try {
+      const i = await db().collection("caseInternal").doc(String(id)).get();
+      if (i.exists) {
+        _splitCache.set(String(id), true);
+        const pub = await db().collection("properties").doc(String(id)).get();
+        return mergeCaseRecords(pub.exists ? [{ ...pub.data(), id: pub.id }] : [], [{ ...i.data(), id: i.id }])[0];
+      }
+    } catch (e) { console.warn("case record not merged:", e && e.code); }
+  }
   const snap = await db().collection(collectionName).doc(String(id)).get();
-  return snap.exists ? { ...snap.data(), id: snap.id } : null;
+  if (!snap.exists) return null;
+  return { ...snap.data(), id: snap.id };
 }
 
 export async function deleteDocById(collectionName, id) {
@@ -251,7 +357,17 @@ export async function uploadImage(file, path) {
 
 export async function fetchWhere(collectionName, field, value) {
   const snap = await db().collection(collectionName).where(field, "==", value).get();
-  return snap.docs.map((d) => ({ ...d.data(), id: d.id }));
+  const rows = snap.docs.map((d) => ({ ...d.data(), id: d.id }));
+  if (collectionName === "properties" && (await _isTeamSession())) {
+    // team: also the new-style Case records that match (they have no public document until published)
+    try {
+      const rs = await db().collection("caseInternal").where(field, "==", value).get();
+      const recs = rs.docs.map((d) => ({ ...d.data(), id: d.id }));
+      recs.forEach((r) => _splitCache.set(r.id, true));
+      return mergeCaseRecords(rows.filter((r) => !recs.some((x) => x.id === r.id)), recs);
+    } catch (e) { console.warn("case records not merged:", e && e.code); }
+  }
+  return rows;
 }
 
 // Resizes an image File/Blob to a data: URL capped at ~1000px longest
@@ -303,6 +419,17 @@ async function dataUrlToBlob(dataUrl) {
 // URL for some other reason, they can still call uploadImage directly.
 export async function savePhoto(propertyId, index, photoUrl) {
   const id = `${propertyId}-${index}`;
+  // LISTING-E2E-01: photos of a new-style Case are never written to the public collection from a browser. An existing photo
+  // (an https link read back from the Case) is already stored; a NEW one is staged and registered by the server (private).
+  if (await _isSplitCase(propertyId)) {
+    if (typeof photoUrl === "string" && /^https?:\/\//i.test(photoUrl)) return id;
+    const uid = await ensureSignedIn();
+    const rnd = new Uint8Array(18); (window.crypto || window.msCrypto).getRandomValues(rnd);
+    const key = "s" + Array.from(rnd).map((b) => b.toString(36).padStart(2, "0")).join("").slice(0, 30);
+    const path = await uploadCaseStagingPhoto(uid, key, "0", photoUrl);
+    await callFn("addCasePhotos", { propertyId: String(propertyId), paths: [path] });
+    return id;
+  }
   if (typeof photoUrl === "string" && /^https?:\/\//i.test(photoUrl)) {
     await setDoc("propertyPhotos", id, { propertyId, index, dataUrl: photoUrl });
     return id;
@@ -313,12 +440,66 @@ export async function savePhoto(propertyId, index, photoUrl) {
   return id;
 }
 
+// LISTING-E2E-01: pending Cases keep their photos in casePhotos (private). A team member's view of
+// "all photos" therefore adds them (shape identical: id, propertyId, index, dataUrl); a published
+// photo of the same id wins. Visitors/anonymous/non-team callers get the public collection only.
+function _mergePhotoLists(pub, priv) {
+  const by = new Map();
+  (priv || []).forEach((p) => by.set(p.id, { ...p, privateCopy: true }));
+  (pub || []).forEach((p) => by.set(p.id, p));
+  return Array.from(by.values());
+}
+// Private copies are stored WITHOUT a download token (storage.rules: team read only). The team's browser asks the getCasePhoto function (team members only; a direct
+// Storage request from the page is blocked by CORS unless the bucket has a policy) and shows an in-memory object URL (private-photo.js); nothing is minted, stored or shareable. `onlyFirst`: lists need just the cover of each Case.
+let _privateLoader = null;
+async function _privatePhotoLoader() {
+  if (!_privateLoader) {
+    const { createPrivatePhotoLoader } = await import("./private-photo.js");
+    _privateLoader = createPrivatePhotoLoader({ callFn });
+  }
+  return _privateLoader;
+}
+async function _resolvePrivate(rows, onlyFirst) {
+  const loader = await _privatePhotoLoader();
+  return Promise.all((rows || []).map(async (p) => {
+    if (!p || !p.storagePath) return p;
+    if (onlyFirst && p.index !== 0) return { ...p, dataUrl: "" }; // not needed in a list; fetchPhotosFor(id) loads them all
+    try { return { ...p, dataUrl: await loader.load(p.storagePath) }; } catch (e) { return { ...p, dataUrl: "", privatePhotoError: (e && e.status) || "error" }; }
+  }));
+}
+// fetchAllPhotos(...) loads only the COVER of each private Case (a list does not need 70 photos). A page that shows every photo of a Case (thumbnail strip, lightbox) calls
+// this for the rows that still have no image: it loads them through the same loader/cache with a small concurrency and reports each row as it settles
+// (patch = { dataUrl } or { dataUrl: "", privatePhotoError }), so one failed photo never hides the others.
+export async function loadRemainingPrivatePhotos(rows, concurrency, onEach) {
+  const todo = (rows || []).filter((p) => p && p.privateCopy && p.storagePath && !p.dataUrl);
+  if (!todo.length) return [];
+  const loader = await _privatePhotoLoader();
+  let next = 0; const out = [];
+  const worker = async () => {
+    for (;;) {
+      const i = next++; if (i >= todo.length) return;
+      const row = todo[i]; let patch;
+      try { patch = { dataUrl: await loader.load(row.storagePath), privatePhotoError: "" }; } catch (e) { patch = { dataUrl: "", privatePhotoError: (e && e.status) || "error" }; }
+      out.push({ id: row.id, ...patch }); if (onEach) onEach(row, patch);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.max(1, concurrency || 4) }, worker));
+  return out;
+}
 export async function fetchPhotosFor(propertyId) {
-  return fetchWhere("propertyPhotos", "propertyId", propertyId);
+  const pub = await fetchWhere("propertyPhotos", "propertyId", propertyId);
+  if (!(await _isTeamSession())) return pub;
+  let priv = [];
+  try { priv = await _resolvePrivate(await fetchWhere("casePhotos", "propertyId", propertyId)); } catch (e) { priv = []; }
+  return _mergePhotoLists(pub, priv);
 }
 
 export async function fetchAllPhotos() {
-  return fetchCollection("propertyPhotos");
+  const pub = await fetchCollection("propertyPhotos");
+  if (!(await _isTeamSession())) return pub;
+  let priv = [];
+  try { priv = await _resolvePrivate(await fetchCollection("casePhotos"), true); } catch (e) { priv = []; }
+  return _mergePhotoLists(pub, priv);
 }
 
 // ── Leads (from ContactRail contact form + auto-bot engagement) ──────────
@@ -1356,8 +1537,7 @@ export async function fetchTeam() {
 export async function assignCase(propertyId, target) {
   if (!propertyId) throw new Error("assignCase: propertyId required");
   const actor = await currentActor();
-  const snap = await db().collection("properties").doc(String(propertyId)).get();
-  const cur = snap.exists ? (snap.data() || {}) : {};
+  const cur = (await fetchDocById("properties", propertyId)) || {}; // merged with caseInternal for a split Case
   const previous = { uid: cur.assignedToUid || "", email: cur.assignedToEmail || "" };
   const next = {
     uid: (target && target.uid) || "",
@@ -1457,7 +1637,7 @@ export async function assignCase(propertyId, target) {
 // still only one assignment writer.
 async function _stampHumanHandling(propertyId) {
   try {
-    const ref = db().collection("properties").doc(propertyId);
+    const ref = await _refForPrivateWrite(propertyId);
     return await db().runTransaction(async (t) => {
       const snap = await t.get(ref);
       const d = snap.exists ? (snap.data() || {}) : {};
@@ -1800,21 +1980,27 @@ export function trialStatus(lister) {
 // rules block a lister from flipping "offline" back to "live" themselves).
 export async function submitForApproval(propertyId, payload, opts) {
   const now = Date.now();
-  // Staff (adminUsers role "staff") may prepare a listing but never publish
-  // it — their submit lands in "pending_owner" for the Owner to approve in
-  // Listing Approvals. Firestore rules enforce this too, so a modified
-  // client can't bypass it. Owners and ordinary paying listers publish
-  // straight to "live" as before.
+  // LISTING-E2E-01 — nobody publishes their own listing:
+  //   * Staff       → "pending_owner" (prepared; the Owner approves in Listing Approvals)
+  //   * Owner       → "live" (the Owner IS the approver; the write is attributed in the activity log)
+  //   * everyone else (agents / paying listers) → "pending": the Owner approves it in Listing
+  //     Approvals. firestore.rules refuse a non-Owner "live" write, so this is enforced server-side too.
   if (opts && opts.staffPending) {
     await setDoc("properties", propertyId, {
       ...(payload || {}), listingStatus: "pending_owner", submittedAt: now, isDraft: false,
     });
     return;
   }
-  await setDoc("properties", propertyId, {
-    ...(payload || {}), listingStatus: "live", submittedAt: now, isDraft: false,
-    publishedAt: now, expiresAt: now + LISTING_DURATION_DAYS * 86400000, approvedAt: now,
-  });
+  let role = null;
+  try { role = await fetchAdminRole(); } catch (e) { role = null; }
+  if (role === "owner") {
+    await setDoc("properties", propertyId, {
+      ...(payload || {}), listingStatus: "live", submittedAt: now, isDraft: false,
+      publishedAt: now, expiresAt: now + LISTING_DURATION_DAYS * 86400000, approvedAt: now,
+    });
+    return;
+  }
+  await setDoc("properties", propertyId, { ...(payload || {}), listingStatus: "pending", submittedAt: now, isDraft: false });
 }
 
 // Reads the signed-in user's admin role from adminUsers/{uid}: "owner",
@@ -1857,11 +2043,13 @@ export async function setListerPropertyPaused(propertyId, paused) {
 }
 
 export async function setPropertyOffline(propertyId, reason) {
+  if (await _isSplitCase(propertyId)) { await callFn("unpublishListingCase", { propertyId: String(propertyId), reason: reason || "" }); return; }
   await updateDocFields("properties", propertyId, { listingStatus: "offline", offlineAt: Date.now(), offlineReason: reason || "" });
 }
 
 // Admin-only: reverses setPropertyOffline, putting the listing back live.
 export async function reinstateProperty(propertyId) {
+  if (await _isSplitCase(propertyId)) { await publishCaseWithPreview(propertyId, { confirm: (pv) => confirmPublicPreview(pv) }); return; }
   await updateDocFields("properties", propertyId, { listingStatus: "live", offlineAt: null, offlineReason: null });
 }
 
@@ -1881,7 +2069,24 @@ export async function resolveReport(reportId) {
   await updateDocFields("propertyReports", reportId, { resolved: true, resolvedAt: Date.now() });
 }
 
-export async function approveListing(propertyId) {
+// Publishing a Case that went through submitListingCase is a two-step, Owner-only act: the server previews EXACTLY what would become public, the Owner
+// confirms that preview (opts.confirm(preview) → true), and the server publishes only if the content is still the one that was reviewed.
+export async function publishCaseWithPreview(propertyId, opts) {
+  const pv = await previewListingCase(propertyId);
+  const ok = opts && opts.confirm ? await opts.confirm(pv) : false;
+  if (!ok) { const e = new Error("publish_not_confirmed"); e.code = "publish_not_confirmed"; throw e; }
+  return publishListingCase(propertyId, pv.publishSig);
+}
+// Shows the preview dialog (public-preview.js) with the private photos loaded through the authenticated transport.
+export async function confirmPublicPreview(pv, heading) {
+  const { showPublicPreview } = await import("./public-preview.js");
+  const loader = await _privatePhotoLoader();
+  return showPublicPreview(pv, { loadPhoto: (p) => loader.load(p), heading });
+}
+export async function approveListing(propertyId, opts) {
+  // A Case created by submitListingCase is published by the server (checks the Owner role, the intake decision, the photo standard, the public text and
+  // the reviewed content; copies the photos to the public path; records who approved). The caller passes opts.confirm to show the preview.
+  if (await _isSplitCase(propertyId)) { await publishCaseWithPreview(propertyId, { confirm: (opts && opts.confirm) || ((pv) => confirmPublicPreview(pv)) }); return; }
   const now = Date.now();
   await updateDocFields("properties", propertyId, { listingStatus: "live", publishedAt: now, expiresAt: now + LISTING_DURATION_DAYS * 86400000, approvedAt: now, expiredAt: null, photosDeletedAt: null });
 }
@@ -2131,7 +2336,7 @@ export function watchCaseMessages(propertyId, customerOnly, caseToken, limit, cb
 export async function markCaseRead(propertyId, who) {
   const field = who === "customer" ? "customerLastReadAt" : "staffLastReadAt";
   try {
-    await db().collection("properties").doc(String(propertyId)).update({ [field]: Date.now() });
+    await (await _refForPrivateWrite(propertyId)).set({ [field]: Date.now() }, { merge: true });
   } catch (e) { console.warn("markCaseRead failed:", e); }
 }
 
@@ -2185,7 +2390,9 @@ export async function addCaseMessage(propertyId, msg) {
   // with ONE read per case instead of opening every thread.
   try {
     const field = msg && msg.direction === "inbound" ? "lastCustomerMessageAt" : "lastStaffMessageAt";
-    await db().collection("properties").doc(String(propertyId)).update({ [field]: now });
+    // lastCustomerMessageAt is an internal field (caseInternal for a split Case); lastStaffMessageAt stays public-safe
+    const target = await _refForPrivateWrite(propertyId);
+    await target.set({ [field]: now }, { merge: true });
   } catch (e) { console.warn("lastMessageAt stamp failed:", e); }
   return ref.id;
 }
@@ -2404,14 +2611,12 @@ export async function recordVerification(propertyId, key, payload) {
     source: (payload && payload.source) || "staff_entry",
     note: (payload && payload.note) || "",
   };
-  await db().collection("properties").doc(String(propertyId))
-    .set({ verifications: { [key]: rec } }, { merge: true });
+  await setDoc("properties", String(propertyId), { verifications: { [key]: rec } });
   return rec;
 }
 
 export async function clearVerification(propertyId, key) {
-  await db().collection("properties").doc(String(propertyId))
-    .set({ verifications: { [key]: null } }, { merge: true });
+  await setDoc("properties", String(propertyId), { verifications: { [key]: null } });
 }
 
 // A submission version. Never overwritten: submission #1 stays on record even
@@ -2419,8 +2624,9 @@ export async function clearVerification(propertyId, key) {
 // Stores references, not copies of photos.
 export async function createSubmission(propertyId, snapshot) {
   const admin = currentAdminUser();
-  const propRef = db().collection("properties").doc(String(propertyId));
-  const propSnap = await propRef.get();
+  const propRef = db().collection("properties").doc(String(propertyId)); // subcollection parent
+  const caseRef = await _refForPrivateWrite(propertyId); // where the Case's own fields live
+  const propSnap = await caseRef.get();
   const prev = Number((propSnap.data() || {}).submissionCount) || 0;
   const number = prev + 1;
   const doc = {
@@ -2437,7 +2643,7 @@ export async function createSubmission(propertyId, snapshot) {
     reviewResult: null, reviewedBy: null, reviewedAt: null, returnReason: null,
   };
   const ref = await propRef.collection("submissions").add(doc);
-  await propRef.set({
+  await caseRef.set({
     submissionCount: number,
     reviewStatus: "waiting_review",
     lastSubmittedAt: doc.submittedAt,
@@ -2461,6 +2667,7 @@ export async function decideSubmission(propertyId, submissionId, decision, opts)
   const admin = currentAdminUser();
   const now = Date.now();
   const propRef = db().collection("properties").doc(String(propertyId));
+  const caseRef = await _refForPrivateWrite(propertyId);
   await propRef.collection("submissions").doc(String(submissionId)).update({
     reviewResult: decision,
     reviewedBy: (admin && admin.email) || "",
@@ -2469,13 +2676,14 @@ export async function decideSubmission(propertyId, submissionId, decision, opts)
     returnStepKey: (opts && opts.stepKey) || null,
   });
   if (decision === "approved") {
-    await propRef.set({
+    await caseRef.set({
       reviewStatus: "approved", intakeCompletedAt: now,
-      approvedBy: (admin && admin.email) || "", approvedSubmissionId: String(submissionId),
+      // (approvedBy is an approval-attribution key: only the server writes it on a new-style Case, at publish time)
+      ...((await _isSplitCase(propertyId)) ? {} : { approvedBy: (admin && admin.email) || "" }), approvedSubmissionId: String(submissionId),
       reviewReturn: null,
     }, { merge: true });
   } else {
-    await propRef.set({
+    await caseRef.set({
       reviewStatus: decision === "more_info" ? "more_info_required" : "returned",
       reviewReturn: {
         stepKey: (opts && opts.stepKey) || null,
@@ -2498,7 +2706,7 @@ export async function decideSubmission(propertyId, submissionId, decision, opts)
 export async function assignPublicCode(internalCaseId, publicCode) {
   const code = String(publicCode || "").trim();
   if (!code) throw new Error("publicCode required");
-  await db().collection("properties").doc(String(internalCaseId)).set({
+  await (await _refForPrivateWrite(internalCaseId)).set({
     publicPropertyCode: code,
     publicCodeAssignedAt: Date.now(),
   }, { merge: true });
@@ -2539,3 +2747,62 @@ export async function createNotificationEvent(evt) {
   const ref = await db().collection("notificationEvents").add(doc);
   return ref.id;
 }
+
+
+// ── LISTING-E2E-01: the single submit path + Owner publish, called through Cloud Functions ─────────
+const FN_COMPAT_SRC = "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js";
+async function _functionsApp() {
+  await whenSdkPart("app");
+  const app = getApp();
+  if (typeof app.functions !== "function") {
+    await new Promise((resolve, reject) => {
+      const existing = document.querySelector('script[src="' + FN_COMPAT_SRC + '"]');
+      if (existing) { existing.addEventListener("load", resolve); existing.addEventListener("error", () => reject(new Error("functions sdk"))); return; }
+      const sc = document.createElement("script");
+      sc.src = FN_COMPAT_SRC; sc.async = false; sc.onload = resolve; sc.onerror = () => reject(new Error("functions sdk"));
+      document.head.appendChild(sc);
+    });
+  }
+  if (typeof getApp().functions !== "function") throw new Error("functions sdk unavailable");
+  return getApp().functions("asia-southeast1");
+}
+export async function callFn(name, data) {
+  const fn = (await _functionsApp()).httpsCallable(name);
+  const res = await fn(data || {});
+  return res.data;
+}
+
+// Signs the visitor in anonymously when nobody is signed in, and returns the uid. A signed-in
+// member/team account is left untouched (their role is derived by the server from their account).
+export async function ensureSignedIn() {
+  await whenSdkPart("auth");
+  const a = authApp();
+  if (a.currentUser) return a.currentUser.uid;
+  const cred = await a.signInAnonymously();
+  return cred.user.uid;
+}
+
+// Uploads one photo to the caller's PRIVATE staging folder (storage.rules: caseUploads/<uid>/<key>/...).
+// Create-only; the server verifies and copies it when the Case is submitted.
+export async function uploadCaseStagingPhoto(uid, submissionKey, name, dataUrlOrBlob) {
+  const blob = typeof dataUrlOrBlob === "string" ? await dataUrlToBlob(dataUrlOrBlob) : dataUrlOrBlob;
+  const path = "caseUploads/" + uid + "/" + submissionKey + "/" + name + ".webp";
+  try {
+    await storageRef().ref().child(path).put(blob, { contentType: "image/webp" });
+  } catch (e) {
+    // A retry after a half-finished earlier attempt finds the file already there (create-only rule): that is fine.
+    if (!(e && (e.code === "storage/unauthorized" || e.code === "storage/object-already-exists") && await _stagingPhotoExists(path))) throw e;
+  }
+  return path;
+}
+async function _stagingPhotoExists(path) {
+  try { await storageRef().ref().child(path).getMetadata(); return true; } catch (e) { return false; }
+}
+export const submitListingCase = (data) => callFn("submitListingCase", data);
+export const listMyCases = () => callFn("listMyCases", {});
+export const previewListingCase = (propertyId) => callFn("previewListingCase", { propertyId: String(propertyId) });
+export const getPropertyDraft = () => callFn("getPropertyDraft", {});
+export const updatePropertyDraft = (fields) => callFn("updatePropertyDraft", { fields });
+export const publishListingCase = (propertyId, reviewedSig) => callFn("publishListingCase", { propertyId: String(propertyId), reviewedSig });
+export const unpublishListingCase = (propertyId, reason) => callFn("unpublishListingCase", { propertyId: String(propertyId), reason: reason || "" });
+export const trackListingCase = (id, token, extra) => callFn("trackListingCase", Object.assign({ id, token }, extra || {}));

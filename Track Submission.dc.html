@@ -123,7 +123,7 @@
 class Component extends DCLogic {
   state = { phase: "loading", prop: null, photoCount: 0, replyText: "", sending: false, replyError: "", msgs: [], msgsFailed: false, hasNewIncoming: false, atBottom: true };
 
-  componentWillUnmount() { if (this._unsub) { try { this._unsub(); } catch (e) {} } }
+  componentWillUnmount() { if (this._unsub) { try { this._unsub(); } catch (e) {} } if (this._poll) clearInterval(this._poll); }
 
   _threadRef = (el) => { this._threadEl = el; };
   _threadEndRef = (el) => { this._endEl = el; };
@@ -169,32 +169,32 @@ class Component extends DCLogic {
     this._id = id;
     this._token = token;
     try {
-      const all = await fb.fetchCollection("properties");
-      const p = (all || []).find((x) => x.id === id);
-      // The token — not the id — is what authorises this page.
-      if (!p || !p.trackToken || p.trackToken !== token) { this.setState({ phase: "denied" }); return; }
-      let photoCount = 0;
+      // LISTING-E2E-01: EVERYTHING the customer sees or sends goes through trackListingCase, which verifies the token on the server
+      // (for a new-style Case and for an older one). The browser reads no Case document, no caseMessages and never lists a collection.
+      let p = null, photoCount = 0;
       try {
-        const photos = await fb.fetchAllPhotos();
-        photoCount = (photos || []).filter((ph) => ph.propertyId === id).length;
-      } catch (e) {}
+        const v = await fb.trackListingCase(id, token, { action: "view" });
+        p = Object.assign({}, v);
+        photoCount = Number(v.photoCount) || 0;
+      } catch (e) {
+        if (e && (e.code === "functions/permission-denied" || e.code === "permission-denied")) { this.setState({ phase: "denied" }); return; }
+        throw e;
+      }
       let msgs = [];
       let msgsFailed = false;
-      try { msgs = await fb.fetchCaseMessages(id, true, token); }
+      try { msgs = (await fb.trackListingCase(id, token, { action: "messages" })).messages || []; }
       catch (e) { msgsFailed = true; console.warn("case messages read failed:", e); }
-      // Live updates: staff replies appear without the customer refreshing.
-      // Scoped to THIS case only, newest 50, so reads stay predictable.
-      try {
-        this._unsub = fb.watchCaseMessages(id, true, token, 50, (rows) => {
-          if (!rows) return;
+      // Staff replies appear without the customer refreshing: a light poll of THIS case's customer-visible messages.
+      this._poll = setInterval(async () => {
+        try {
+          const rows = (await fb.trackListingCase(id, token, { action: "messages" })).messages || [];
           this.setState((s) => {
-            const seen = s.msgs.length;
-            const grew = rows.length > seen;
+            const grew = rows.length > (s.msgs || []).filter((m) => !String(m.id).startsWith("legacy-")).length;
             return { msgs: rows, msgsFailed: false, hasNewIncoming: grew && !this._stick ? true : s.hasNewIncoming };
           });
-        });
-      } catch (e) { console.warn("watch failed:", e); }
-      try { await fb.markCaseRead(id, "customer"); } catch (e) {}
+        } catch (e) { /* next tick */ }
+      }, 8000);
+      try { await fb.trackListingCase(id, token, { action: "read" }); } catch (e) {}
       // Legacy compatibility: a case created before caseMessages existed still
       // has its request/response in the old fields. Show them as the first two
       // entries WITHOUT writing anything (idempotent — nothing is duplicated
@@ -228,11 +228,7 @@ class Component extends DCLogic {
         // Only written once, and only when detection actually succeeded — the
         // Firestore rule for this path accepts nothing else.
         try {
-          await this._fb.setDoc("properties", this._id, {
-            customerLanguage: lang,
-            customerLanguageConfirmed: true,
-            customerLanguageSource: "message_detected",
-          }, { merge: true });
+          await this._fb.trackListingCase(this._id, this._token, { action: "language", lang });
         } catch (e) { console.warn("could not save detected language:", e); }
       }
     }
@@ -240,35 +236,16 @@ class Component extends DCLogic {
       // Customer writes in their own language; we store the original AND a Thai
       // translation so Staff read Thai and the original stays auditable.
       const thai = lang === "th" ? msg : await this._fb.translateMessage(msg, "th");
-      const rec = {
-        senderType: "customer", direction: "inbound", messageType: "response",
-        // C1 SECURITY CORRECTION: no identity fields written here either.
-        // The customer is not an authenticated account, and their own name
-        // already lives on the Case document (contactName) where the team
-        // reads it — duplicating it onto every message adds no capability
-        // and only widens what a readable document contains.
-        // senderType "customer" is the whole authorship claim.
-        originalLanguage: lang, originalText: msg, thaiText: thai,
-        customerLanguage: lang, customerText: msg,
-        // channel names the actual surface. Legacy messages carry "tracking".
-        channel: "track_submission", visibility: "customer",
-        caseToken: this._token, createdAt: Date.now(),
-      };
-      // The message itself is the only write that may block the send.
-      rec.caseId = this._id;
-      await this._fb.addCaseMessage(this._id, rec);
+      // The server stores the message (original + Thai translation for the team) and the bookkeeping on the Case.
+      await this._fb.trackListingCase(this._id, this._token, { action: "send", message: msg, thaiText: thai, lang });
+      try {
+        const rows = (await this._fb.trackListingCase(this._id, this._token, { action: "messages" })).messages || [];
+        this.setState({ msgs: rows });
+      } catch (e) { /* the poll will catch up */ }
       // Confirmed — now it is safe to clear what the customer typed.
       this._stick = true;
       this.setState({ sending: false, replyText: "", replyError: "", hasNewIncoming: false, atBottom: true });
       setTimeout(() => this._scrollToLatest(true), 60);
-      // Bookkeeping is best-effort: it keeps the legacy Staff card fields in
-      // step, but a rejection here must never look like a failed send.
-      try {
-        await this._fb.updateDocFields("properties", this._id, {
-          infoResponseMessage: thai, infoResponseAt: Date.now(), infoResponseStatus: "responded",
-        });
-      } catch (e) { console.error("[CaseMessenger][bookkeeping] failed (message WAS sent):", e && e.code, e && e.message); }
-      try { await this._fb.markCaseRead(this._id, "customer"); } catch (e) {}
     } catch (e) {
       console.error("[CaseMessenger][customer-send] failed:", e && e.code, e && e.message, e);
       // Keep the text so the customer never loses what they wrote.
@@ -287,7 +264,7 @@ class Component extends DCLogic {
       data_complete: "ข้อมูลครบ — กำลังเตรียมประกาศ",
       ready: "กำลังเตรียมประกาศ",
     };
-    const typeLabels = { villa: "พูลวิลล่า", house: "บ้านเดี่ยว", condo: "คอนโด", land: "ที่ดิน", commercial: "อาคารพาณิชย์" };
+    const typeLabels = { villa: "พูลวิลล่า", house: "บ้านเดี่ยว", townhouse: "ทาวน์เฮ้าส์", condo: "คอนโด", land: "ที่ดิน", commercial: "อาคารพาณิชย์" };
     const rs = p.reviewStatus || "submitted";
     return {
       isLoading: this.state.phase === "loading",

@@ -1,6 +1,8 @@
 // huahin.properties — shared data & i18n
 // Plain ES module: PROPERTIES (sample listings), I18N (UI strings), AREAS/TYPES/FEATURES/STATUS labels.
 
+import { PRIVATE_FIELDS } from "./case-fields.js";
+
 export const LANGS = ["en", "th", "ru", "zh", "de", "no", "fr", "it"];
 
 export const LANG_LABELS = { en: "English", th: "ไทย", ru: "Русский", zh: "中文", de: "Deutsch", no: "Norsk", fr: "Français", it: "Italiano" };
@@ -136,11 +138,13 @@ export const I18N = {
     status_label: "Status", features_label: "Features",
     no_results: "No properties match your filters.",
     sqm: "sqm", per_month: "/ month",
+    sqwa: "sq. wah", land_unit_unspecified: "unit not specified",
     km_to: "km to", mini_site_label: "Mini Site", video_tour_soon: "Video Tour — Coming Soon", tour_360_soon: "360° Virtual Tour — Coming Soon",
     compare_property: "Compare property", share_listing: "Share listing", fav_add: "Save to favorites", fav_remove: "Remove from favorites",
     beach: "beach", town: "town",
     gallery_photo: "Photo",
-    property_overview: "Overview", property_description: "Property Description", no_description: "No description provided yet.", property_features: "Features & Amenities", property_location: "Location", property_general_area: "General area", similar_properties: "Similar Properties",
+    property_overview: "Overview", property_description: "Property Description", no_description: "No description provided yet.",
+    detail_state_loading: "Loading the listing…", detail_state_notfound_title: "Listing not found", detail_state_notfound_text: "This listing could not be found. It may have been closed, or the link may be incorrect.", detail_state_failed_title: "Couldn't load the listing", detail_state_failed_text: "Something went wrong while loading. Please check your connection and try again.", detail_state_back: "Back to search", detail_state_retry: "Try again", property_features: "Features & Amenities", property_location: "Location", property_general_area: "General area", similar_properties: "Similar Properties",
     contact_agent: "Contact an Agent", enquiry_form: "Send an Enquiry", name_label: "Name", email_label: "Email", phone_label: "Phone", message_label: "Message", send: "Send Enquiry",
     call: "Call", whatsapp: "WhatsApp", line_app: "Line", email_cta: "Email",
     sell_title: "List Your Property", sell_sub: "Tell us about your property — for sale or for rent — and our team will get in touch within 24 hours.",
@@ -221,11 +225,13 @@ export const I18N = {
     status_label: "สถานะ", features_label: "คุณสมบัติ",
     no_results: "ไม่พบทรัพย์ที่ตรงกับตัวกรองของคุณ",
     sqm: "ตร.ม.", per_month: "/ เดือน",
+    sqwa: "ตร.ว.", land_unit_unspecified: "ไม่ระบุหน่วย",
     km_to: "กม. ถึง", mini_site_label: "มินิเว็บไซต์", video_tour_soon: "วิดีโอนำชม — เร็วๆ นี้", tour_360_soon: "ทัวร์ 360° — เร็วๆ นี้",
     compare_property: "เปรียบเทียบทรัพย์", share_listing: "แชร์ประกาศ", fav_add: "บันทึกไว้ในรายการโปรด", fav_remove: "นำออกจากรายการโปรด",
     beach: "ชายหาด", town: "ตัวเมือง",
     gallery_photo: "รูปภาพ",
-    property_overview: "รายละเอียดสรุป", property_description: "รายละเอียดประกาศ", no_description: "ยังไม่มีรายละเอียด", property_features: "คุณสมบัติและสิ่งอำนวยความสะดวก", property_location: "ทำเล", property_general_area: "บริเวณโดยประมาณ", similar_properties: "ทรัพย์ใกล้เคียง",
+    property_overview: "รายละเอียดสรุป", property_description: "รายละเอียดประกาศ", no_description: "ยังไม่มีรายละเอียด",
+    detail_state_loading: "กำลังโหลดประกาศ…", detail_state_notfound_title: "ไม่พบประกาศนี้", detail_state_notfound_text: "ไม่พบประกาศนี้ อาจปิดประกาศแล้วหรือลิงก์ไม่ถูกต้อง", detail_state_failed_title: "โหลดประกาศไม่สำเร็จ", detail_state_failed_text: "เกิดข้อผิดพลาดระหว่างโหลด กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง", detail_state_back: "กลับไปหน้าค้นหา", detail_state_retry: "ลองอีกครั้ง", property_features: "คุณสมบัติและสิ่งอำนวยความสะดวก", property_location: "ทำเล", property_general_area: "บริเวณโดยประมาณ", similar_properties: "ทรัพย์ใกล้เคียง",
     contact_agent: "ติดต่อเอเจนต์", enquiry_form: "ส่งข้อความสอบถาม", name_label: "ชื่อ", email_label: "อีเมล", phone_label: "เบอร์โทร", message_label: "ข้อความ", send: "ส่งข้อความ",
     call: "โทร", whatsapp: "WhatsApp", line_app: "Line", email_cta: "อีเมล",
     sell_title: "ฝากขาย / ฝากให้เช่าทรัพย์", sell_sub: "บอกรายละเอียดทรัพย์ของคุณ ทั้งขายหรือเช่า ทีมงานจะติดต่อกลับภายใน 24 ชั่วโมง",
@@ -306,11 +312,13 @@ export const I18N = {
     status_label: "Статус", features_label: "Особенности",
     no_results: "Нет объектов, соответствующих фильтрам.",
     sqm: "кв.м", per_month: "/ месяц",
+    sqwa: "кв. ва", land_unit_unspecified: "единица не указана",
     km_to: "км до", mini_site_label: "Мини-сайт", video_tour_soon: "Видеотур — скоро", tour_360_soon: "Виртуальный тур 360° — скоро",
     compare_property: "Сравнить объект", share_listing: "Поделиться объявлением", fav_add: "Сохранить в избранное", fav_remove: "Удалить из избранного",
     beach: "пляж", town: "город",
     gallery_photo: "Фото",
-    property_overview: "Обзор", property_description: "Описание", no_description: "Описание пока не добавлено.", property_features: "Особенности и удобства", property_location: "Расположение", property_general_area: "Примерный район", similar_properties: "Похожие объекты",
+    property_overview: "Обзор", property_description: "Описание", no_description: "Описание пока не добавлено.",
+    detail_state_loading: "Загрузка объявления…", detail_state_notfound_title: "Объявление не найдено", detail_state_notfound_text: "Объявление не найдено. Возможно, оно закрыто или ссылка неверна.", detail_state_failed_title: "Не удалось загрузить объявление", detail_state_failed_text: "Произошла ошибка при загрузке. Проверьте подключение и попробуйте снова.", detail_state_back: "Назад к поиску", detail_state_retry: "Повторить", property_features: "Особенности и удобства", property_location: "Расположение", property_general_area: "Примерный район", similar_properties: "Похожие объекты",
     contact_agent: "Связаться с агентом", enquiry_form: "Отправить запрос", name_label: "Имя", email_label: "Email", phone_label: "Телефон", message_label: "Сообщение", send: "Отправить запрос",
     call: "Позвонить", whatsapp: "WhatsApp", line_app: "Line", email_cta: "Email",
     sell_title: "Разместить объект", sell_sub: "Расскажите нам о вашей недвижимости — на продажу или в аренду — и наша команда свяжется с вами в течение 24 часов.",
@@ -391,11 +399,13 @@ export const I18N = {
     status_label: "Status", features_label: "Fasiliteter",
     no_results: "Ingen eiendommer samsvarer med filtrene dine.",
     sqm: "kvm", per_month: "/ måned",
+    sqwa: "kvadrat-wah", land_unit_unspecified: "enhet ikke oppgitt",
     km_to: "km til", mini_site_label: "Miniside", video_tour_soon: "Videotur — Kommer snart", tour_360_soon: "360° Virtuell tur — Kommer snart",
     compare_property: "Sammenlign eiendom", share_listing: "Del annonse", fav_add: "Lagre som favoritt", fav_remove: "Fjern fra favoritter",
     beach: "strand", town: "by",
     gallery_photo: "Bilde",
-    property_overview: "Oversikt", property_description: "Beskrivelse", no_description: "Ingen beskrivelse ennå.", property_features: "Fasiliteter", property_location: "Beliggenhet", property_general_area: "Omtrentlig område", similar_properties: "Lignende eiendommer",
+    property_overview: "Oversikt", property_description: "Beskrivelse", no_description: "Ingen beskrivelse ennå.",
+    detail_state_loading: "Laster annonsen…", detail_state_notfound_title: "Fant ikke annonsen", detail_state_notfound_text: "Annonsen ble ikke funnet. Den kan være avsluttet, eller lenken kan være feil.", detail_state_failed_title: "Kunne ikke laste annonsen", detail_state_failed_text: "Noe gikk galt under lasting. Sjekk tilkoblingen og prøv igjen.", detail_state_back: "Tilbake til søk", detail_state_retry: "Prøv igjen", property_features: "Fasiliteter", property_location: "Beliggenhet", property_general_area: "Omtrentlig område", similar_properties: "Lignende eiendommer",
     contact_agent: "Kontakt megler", enquiry_form: "Send en forespørsel", name_label: "Navn", email_label: "E-post", phone_label: "Telefon", message_label: "Melding", send: "Send forespørsel",
     call: "Ring", whatsapp: "WhatsApp", line_app: "Line", email_cta: "E-post",
     sell_title: "Legg ut din eiendom", sell_sub: "Fortell oss om eiendommen din — til salgs eller utleie — så tar teamet vårt kontakt innen 24 timer.",
@@ -476,11 +486,13 @@ export const I18N = {
     status_label: "Status", features_label: "Ausstattung",
     no_results: "Keine Immobilien entsprechen Ihren Filtern.",
     sqm: "m²", per_month: "/ Monat",
+    sqwa: "Quadrat-Wah", land_unit_unspecified: "Einheit nicht angegeben",
     km_to: "km bis", mini_site_label: "Mini-Website", video_tour_soon: "Videotour — Demnächst", tour_360_soon: "360°-Rundgang — Demnächst",
     compare_property: "Objekt vergleichen", share_listing: "Angebot teilen", fav_add: "Zu Favoriten hinzufügen", fav_remove: "Aus Favoriten entfernen",
     beach: "Strand", town: "Stadt",
     gallery_photo: "Foto",
-    property_overview: "Übersicht", property_description: "Beschreibung", no_description: "Noch keine Beschreibung vorhanden.", property_features: "Ausstattung & Annehmlichkeiten", property_location: "Lage", property_general_area: "Ungefähre Lage", similar_properties: "Ähnliche Immobilien",
+    property_overview: "Übersicht", property_description: "Beschreibung", no_description: "Noch keine Beschreibung vorhanden.",
+    detail_state_loading: "Inserat wird geladen…", detail_state_notfound_title: "Inserat nicht gefunden", detail_state_notfound_text: "Dieses Inserat wurde nicht gefunden. Es wurde möglicherweise beendet oder der Link ist falsch.", detail_state_failed_title: "Inserat konnte nicht geladen werden", detail_state_failed_text: "Beim Laden ist ein Fehler aufgetreten. Bitte Verbindung prüfen und erneut versuchen.", detail_state_back: "Zurück zur Suche", detail_state_retry: "Erneut versuchen", property_features: "Ausstattung & Annehmlichkeiten", property_location: "Lage", property_general_area: "Ungefähre Lage", similar_properties: "Ähnliche Immobilien",
     contact_agent: "Makler kontaktieren", enquiry_form: "Anfrage senden", name_label: "Name", email_label: "E-Mail", phone_label: "Telefon", message_label: "Nachricht", send: "Anfrage senden",
     call: "Anrufen", whatsapp: "WhatsApp", line_app: "Line", email_cta: "E-Mail",
     sell_title: "Immobilie inserieren", sell_sub: "Erzählen Sie uns von Ihrer Immobilie — zum Verkauf oder zur Miete — und unser Team meldet sich innerhalb von 24 Stunden.",
@@ -561,11 +573,13 @@ export const I18N = {
     status_label: "状态", features_label: "特色设施",
     no_results: "没有符合筛选条件的房源。",
     sqm: "平方米", per_month: "/ 月",
+    sqwa: "平方哇", land_unit_unspecified: "未注明单位",
     km_to: "公里至", mini_site_label: "个人网站", video_tour_soon: "视频导览 — 即将推出", tour_360_soon: "360° 全景 — 即将推出",
     compare_property: "比较房源", share_listing: "分享房源", fav_add: "收藏此房源", fav_remove: "取消收藏",
     beach: "海滩", town: "市中心",
     gallery_photo: "照片",
-    property_overview: "概览", property_description: "详细描述", no_description: "暂无描述。", property_features: "特色与设施", property_location: "位置", property_general_area: "大致区域", similar_properties: "相似房源",
+    property_overview: "概览", property_description: "详细描述", no_description: "暂无描述。",
+    detail_state_loading: "正在加载房源…", detail_state_notfound_title: "未找到该房源", detail_state_notfound_text: "未找到该房源，可能已下架或链接有误。", detail_state_failed_title: "无法加载房源", detail_state_failed_text: "加载时出错，请检查网络后重试。", detail_state_back: "返回搜索", detail_state_retry: "重试", property_features: "特色与设施", property_location: "位置", property_general_area: "大致区域", similar_properties: "相似房源",
     contact_agent: "联系经纪人", enquiry_form: "发送咨询", name_label: "姓名", email_label: "邮箱", phone_label: "电话", message_label: "留言", send: "发送咨询",
     call: "致电", whatsapp: "WhatsApp", line_app: "Line", email_cta: "邮箱",
     sell_title: "委托出售/出租房产", sell_sub: "告诉我们您的房产信息——出售或出租——我们的团队将在24小时内与您联系。",
@@ -646,11 +660,13 @@ export const I18N = {
     status_label: "Statut", features_label: "Équipements",
     no_results: "Aucun bien ne correspond à vos filtres.",
     sqm: "m²", per_month: "/ mois",
+    sqwa: "wah²", land_unit_unspecified: "unité non précisée",
     km_to: "km jusqu'à", mini_site_label: "Mini-site", video_tour_soon: "Visite vidéo — Bientôt disponible", tour_360_soon: "Visite virtuelle 360° — Bientôt disponible",
     compare_property: "Comparer le bien", share_listing: "Partager l'annonce", fav_add: "Ajouter aux favoris", fav_remove: "Retirer des favoris",
     beach: "Plage", town: "Ville",
     gallery_photo: "Photo",
-    property_overview: "Aperçu", property_description: "Description", no_description: "Aucune description pour le moment.", property_features: "Équipements & prestations", property_location: "Emplacement", property_general_area: "Zone approximative", similar_properties: "Biens similaires",
+    property_overview: "Aperçu", property_description: "Description", no_description: "Aucune description pour le moment.",
+    detail_state_loading: "Chargement de l'annonce…", detail_state_notfound_title: "Annonce introuvable", detail_state_notfound_text: "Cette annonce est introuvable. Elle a peut-être été clôturée ou le lien est incorrect.", detail_state_failed_title: "Impossible de charger l'annonce", detail_state_failed_text: "Une erreur est survenue pendant le chargement. Vérifiez votre connexion et réessayez.", detail_state_back: "Retour à la recherche", detail_state_retry: "Réessayer", property_features: "Équipements & prestations", property_location: "Emplacement", property_general_area: "Zone approximative", similar_properties: "Biens similaires",
     contact_agent: "Contacter un agent", enquiry_form: "Envoyer une demande", name_label: "Nom", email_label: "E-mail", phone_label: "Téléphone", message_label: "Message", send: "Envoyer la demande",
     call: "Appeler", whatsapp: "WhatsApp", line_app: "Line", email_cta: "E-mail",
     sell_title: "Confier un bien", sell_sub: "Parlez-nous de votre bien — à vendre ou à louer — et notre équipe vous contactera sous 24 heures.",
@@ -731,11 +747,13 @@ export const I18N = {
     status_label: "Stato", features_label: "Caratteristiche",
     no_results: "Nessun immobile corrisponde ai tuoi filtri.",
     sqm: "m²", per_month: "/ mese",
+    sqwa: "wah²", land_unit_unspecified: "unità non specificata",
     km_to: "km da", mini_site_label: "Mini sito", video_tour_soon: "Tour video — Prossimamente", tour_360_soon: "Tour virtuale 360° — Prossimamente",
     compare_property: "Confronta immobile", share_listing: "Condividi annuncio", fav_add: "Salva nei preferiti", fav_remove: "Rimuovi dai preferiti",
     beach: "Spiaggia", town: "Città",
     gallery_photo: "Foto",
-    property_overview: "Panoramica", property_description: "Descrizione", no_description: "Nessuna descrizione ancora disponibile.", property_features: "Caratteristiche e servizi", property_location: "Posizione", property_general_area: "Zona approssimativa", similar_properties: "Immobili simili",
+    property_overview: "Panoramica", property_description: "Descrizione", no_description: "Nessuna descrizione ancora disponibile.",
+    detail_state_loading: "Caricamento dell'annuncio…", detail_state_notfound_title: "Annuncio non trovato", detail_state_notfound_text: "Questo annuncio non è stato trovato. Potrebbe essere stato chiuso o il link non è corretto.", detail_state_failed_title: "Impossibile caricare l'annuncio", detail_state_failed_text: "Si è verificato un errore durante il caricamento. Controlla la connessione e riprova.", detail_state_back: "Torna alla ricerca", detail_state_retry: "Riprova", property_features: "Caratteristiche e servizi", property_location: "Posizione", property_general_area: "Zona approssimativa", similar_properties: "Immobili simili",
     contact_agent: "Contatta un agente", enquiry_form: "Invia una richiesta", name_label: "Nome", email_label: "E-mail", phone_label: "Telefono", message_label: "Messaggio", send: "Invia richiesta",
     call: "Chiama", whatsapp: "WhatsApp", line_app: "Line", email_cta: "E-mail",
     sell_title: "Affida un immobile", sell_sub: "Raccontaci del tuo immobile — in vendita o in affitto — e il nostro team ti contatterà entro 24 ore.",
@@ -814,13 +832,43 @@ export function getEffectivePropertiesSync(mod) {
 // falling back to the static bundled sample data if Firebase is
 // unreachable. This replaces the old localStorage-based merge above, which
 // only ever reflected edits made in that one browser.
+// LISTING-E2E-01 — defence in depth for the public site. A Case created through the intake path
+// (source "owner_submission") must never expose its private fields on a public page, even if one ever
+// reached the public document (a Case created before the split still carries them — see the legacy plan).
+// This is NOT the protection (the protection is where the data is stored + the rules); it is the last filter.
+export function toPublicProperty(p) {
+  if (!p || p.source !== "owner_submission") return p;
+  const out = { ...p };
+  PRIVATE_FIELDS.forEach((k) => { delete out[k]; });
+  return out;
+}
+
+// What a public page shows when the backend can not be read. true (production, unchanged): the bundled sample catalogue. The listing TEST build sets it to false
+// (tools/build-listing-test.js) so sample properties can never pass for real listings after an SDK delay or backend failure: the page gets an EMPTY list, an
+// explicit state in window.__hhDataLoad and a visible notice instead.
+const SAMPLE_FALLBACK_ON_ERROR = true;
+function reportLoadFailure(e) {
+  try {
+    window.__hhDataLoad = { state: "failed", code: (e && e.code) || "error", message: String((e && e.message) || e).slice(0, 200) };
+    if (typeof document !== "undefined" && document.body && !document.getElementById("hh-data-load-failed")) {
+      const n = document.createElement("div"); n.id = "hh-data-load-failed"; n.setAttribute("role", "alert");
+      n.style.cssText = "position:fixed;left:0;right:0;top:0;z-index:2147483000;background:#7a1f2b;color:#fff;padding:10px 16px;font:14px sans-serif;text-align:center;";
+      n.textContent = "โหลดข้อมูลประกาศไม่สำเร็จ — กรุณารีเฟรชหน้านี้ (Could not load listings — please refresh)";
+      document.body.appendChild(n);
+    }
+  } catch (x) { /* never let the notice break the page */ }
+}
+
 export async function getEffectiveProperties(mod) {
   try {
     const fb = await import("./firebase-client.js");
+    // (several components of one page call this: a later call must not turn an already-"ok" state back into "loading" while it is in flight)
+    if (typeof window !== "undefined" && !(window.__hhDataLoad && window.__hhDataLoad.state === "ok")) window.__hhDataLoad = { state: "loading" };
     const [properties, allPhotos] = await Promise.all([
       fb.fetchCollection("properties"),
       fb.fetchAllPhotos(),
     ]);
+    if (typeof window !== "undefined") window.__hhDataLoad = { state: "ok" };
     if (!properties || !properties.length) return mod.PROPERTIES;
     // "live" is the only publicly-visible state under the trial/expiry/
     // approval model (pending/expired/rejected all hidden). Listings saved
@@ -830,8 +878,12 @@ export async function getEffectiveProperties(mod) {
     const visible = properties.filter((p) => p.listingStatus === "live" || (p.listingStatus === undefined && !p.isDraft));
     const photosById = {};
     allPhotos.forEach((ph) => { photosById[ph.id] = ph.dataUrl; });
-    const fromFirestore = visible.map((p) => {
-      const photos = (p.photos || []).map((ph, i) => {
+    const fromFirestore = visible.map(toPublicProperty).map((p) => {
+      // A listing published through the intake path carries its photos in propertyPhotos/{id}-{n};
+      // use them when the document has no photos[] list of its own.
+      const own = (p.photos && p.photos.length) ? p.photos
+        : allPhotos.filter((ph) => ph.propertyId === p.id).sort((a, b) => (a.index || 0) - (b.index || 0)).map((ph) => ({ label: "", url: ph.dataUrl }));
+      const photos = own.map((ph, i) => {
         const label = typeof ph === "string" ? ph : ph.label;
         const url = photosById[`${p.id}-${i}`] || (typeof ph === "object" && ph.url) || "";
         return { label, url };
@@ -845,7 +897,7 @@ export async function getEffectiveProperties(mod) {
         // Self-serve listings (Lister Dashboard) don't collect these fields
         // yet — default them so pages that assume they're always arrays/
         // numbers (feature filters, distance display) don't crash.
-        features: p.features || [], distanceBeach: p.distanceBeach || 0, distanceTown: p.distanceTown || 0,
+        features: p.features || [], distanceBeach: p.distanceBeach, distanceTown: p.distanceTown, // (never default an unknown distance to 0: 0 is a real distance)
       };
     });
     // CRITICAL: the bundled sample catalog (mod.PROPERTIES — HH-101, CA-301,
@@ -861,8 +913,15 @@ export async function getEffectiveProperties(mod) {
     const staticOnly = (mod.PROPERTIES || []).filter((p) => !firestoreIds.has(p.id));
     return [...fromFirestore, ...staticOnly];
   } catch (e) {
-    console.warn("getEffectiveProperties: Firebase fetch failed, using bundled sample data:", e);
-    return mod.PROPERTIES;
+    if (SAMPLE_FALLBACK_ON_ERROR) {
+      console.warn("getEffectiveProperties: Firebase fetch failed, using bundled sample data:", e);
+      // The state must say "failed" even when the samples are shown, so a page never mistakes a failed load for "this listing does not exist".
+      if (typeof window !== "undefined") window.__hhDataLoad = { state: "failed", fallback: "sample", code: (e && e.code) || "error" };
+      return mod.PROPERTIES;
+    }
+    console.warn("getEffectiveProperties: Firebase fetch failed, showing an error state (no sample data):", e);
+    reportLoadFailure(e);
+    return [];
   }
 }
 

@@ -100,9 +100,33 @@
             <select value="{{ f_type }}" onChange="{{ onFType }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px; background:white;">
               <option value="villa">พูลวิลล่า</option>
               <option value="house">บ้านเดี่ยว</option>
+              <option value="townhouse">ทาวน์เฮ้าส์</option>
               <option value="condo">คอนโด</option>
               <option value="land">ที่ดิน</option>
               <option value="commercial">อาคารพาณิชย์</option>
+            </select>
+          </div>
+          <sc-if value="{{ isCommercial }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ประเภทอาคารพาณิชย์</div>
+              <select value="{{ f_subtype }}" onChange="{{ onFSubtype }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px; background:white;">
+                <option value="">— เลือก —</option>
+                <option value="shophouse">ตึกแถว/อาคารพาณิชย์</option>
+                <option value="retail">ร้านค้า</option>
+                <option value="office">สำนักงาน</option>
+                <option value="warehouse">โกดัง/โรงงาน</option>
+                <option value="hotel_resort">โรงแรม/รีสอร์ท</option>
+                <option value="other">อื่น ๆ</option>
+              </select>
+            </div>
+          </sc-if>
+          <div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ทำเลหลัก (อำเภอ) — หรือปักหมุดแผนที่ด้านล่างแทนก็ได้</div>
+            <select value="{{ f_area }}" onChange="{{ onFArea }}" style="width:100%; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px; background:white;">
+              <option value="">— เลือก —</option>
+              <option value="hua-hin">หัวหิน</option>
+              <option value="pranburi">ปราณบุรี</option>
+              <option value="cha-am">ชะอำ</option>
             </select>
           </div>
           <div>
@@ -115,14 +139,19 @@
           <div>
             <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">ราคา (บาท)</div>
             <input type="number" value="{{ f_price }}" onChange="{{ onFPrice }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px;" />
+            <label style="display:flex; gap:8px; align-items:center; font-size:12.5px; margin-top:6px; color:oklch(40% 0.02 60);"><input type="checkbox" checked="{{ isAppraisal }}" onChange="{{ onAppraisal }}" /> ยังไม่ทราบราคา — ขอให้ทีมงานช่วยประเมินราคา</label>
           </div>
           <div>
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รายละเอียดทรัพย์ (ห้องนอน/ห้องน้ำ/พื้นที่/สิ่งอำนวยความสะดวก ฯลฯ)</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รายละเอียดทรัพย์ (ไม่บังคับ — ห้องนอน/ห้องน้ำ/พื้นที่/สิ่งอำนวยความสะดวก ฯลฯ · อย่าใส่เบอร์โทร/ไลน์/อีเมลในช่องนี้ เพราะข้อความนี้อาจขึ้นเว็บ)</div>
             <textarea rows="4" value="{{ f_details }}" onChange="{{ onFDetails }}" style="width:100%; box-sizing:border-box; border:1px solid oklch(85% 0.01 70); border-radius:6px; padding:11px 12px; font-size:14px; resize:vertical;"></textarea>
           </div>
           <div>
-            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รูปทรัพย์ (ขั้นต่ำ 5 รูป) — อัปโหลดแล้ว {{ photoCount }} รูป</div>
+            <div style="font-size:12px; color:oklch(50% 0.02 60); margin-bottom:5px;">รูปทรัพย์ ({{ photoRule }}) — อัปโหลดแล้ว {{ photoCount }} รูป</div>
             <input type="file" accept="image/*" multiple="{{ true }}" onChange="{{ onPhotosChange }}" style="width:100%; font-size:13px;" />
+            <div style="font-size:12px; color:oklch(45% 0.1 150);">{{ uploadingLabel }}</div>
+            <div style="font-size:12px; color:oklch(45% 0.16 30);">{{ photoError }}</div>
+            <div style="font-size:12px; color:oklch(45% 0.1 150);">{{ prefilledNote }}</div>
+            <div style="font-size:12px; color:oklch(45% 0.16 30);">{{ missingText }}</div>
             <sc-if value="{{ hasPhotos }}" hint-placeholder-val="{{ false }}">
               <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
                 <sc-for list="{{ photoThumbs }}" as="ph" hint-placeholder-count="0">
@@ -223,8 +252,8 @@ class Component extends DCLogic {
   state = {
     step: 1, f_name: "", f_phone: "", f_email: "", hasPriorSubmission: false,
     txnType: "", f_type: "villa", f_condition: "resale", f_price: "", f_details: "",
-    f_coords: "", f_ownerContact: "", photos: [], ownershipDocUrl: "",
-    step3Error: "", submitting: false, submitted: false, showDevBar: false, submittedId: "", trackUrl: "", copied: false,
+    f_coords: "", f_ownerContact: "", f_area: "", f_subtype: "", f_appraisal: false, photos: [], ownershipDocUrl: "",
+    step3Error: "", submitting: false, submitted: false, showDevBar: false, uploading: false, photoError: "", prefilledNote: "", submittedId: "", trackUrl: "", copied: false,
   };
 
   async componentDidMount() {
@@ -232,10 +261,28 @@ class Component extends DCLogic {
     this.setState({ showDevBar: isPreviewEnv || (() => { try { return localStorage.getItem("hhDevBar") === "1"; } catch (e) { return false; } })() });
     const fb0 = await import("./firebase-client.js");
     this._fb = fb0;
+    try { this._ps = await import("./photo-standard.js"); } catch (e) { this._ps = null; }
+    const { OwnerFormFlow } = await import("./owner-form-flow.js");
+    let relation; // left empty unless team: the server then defaults by role (agent → representative, visitor → self)
+    try { const role = await fb0.fetchAdminRole(); relation = role === "owner" ? "website" : role === "staff" ? "representative" : undefined; } catch (e) {}
+    const lang = (() => {
+      try { const l = localStorage.getItem("hh_lang"); if (l) return l; } catch (e) {}
+      const n = (navigator.language || "th").slice(0, 2).toLowerCase();
+      return ["th", "en", "zh", "ru", "de", "no", "fr", "it"].includes(n) ? n : "th";
+    })();
+    this.flow = new OwnerFormFlow({ storage: window.localStorage, fb: { ensureSignedIn: fb0.ensureSignedIn, uploadCaseStagingPhoto: fb0.uploadCaseStagingPhoto, submitListingCase: fb0.submitListingCase, getPropertyDraft: fb0.getPropertyDraft, updatePropertyDraft: fb0.updatePropertyDraft }, relation, language: lang, crypto: window.crypto });
+    Object.keys(this._pending || {}).forEach((k) => this.flow.setField(k, this._pending[k])); this._pending = {};
+    this._sync();
+    // a submit that already succeeded (the answer arrived, the page was refreshed): show the confirmation + link again
+    const done = this.flow.state.done;
+    if (done) this.setState({ step: 4, submitted: true, submittedId: done.propertyId, trackUrl: location.origin + location.pathname.replace(/[^/]*$/, "") + "Track%20Submission.dc.html?id=" + encodeURIComponent(done.propertyId) + "&t=" + encodeURIComponent(done.trackToken) });
+    // chat draft → form (never over what was typed)
+    this.flow.prefillFromDraft().then((applied) => { if (applied.length) { this._sync(); this.setState({ prefilledNote: "เติมข้อมูลจากที่คุยกับผู้ช่วยให้แล้ว (" + applied.length + " ช่อง) ตรวจแก้ได้เลย" }); } }).catch(() => {});
     try {
       const saved = JSON.parse(localStorage.getItem("hhOwnerContact") || "null");
       if (saved && saved.phone) {
         this.setState({ f_name: saved.name || "", f_phone: saved.phone || "", f_email: saved.email || "", hasPriorSubmission: true });
+        if (this.flow && !this.flow.state.fields.name) { this.flow.setField("name", saved.name || ""); this.flow.setField("phone", saved.phone || ""); this.flow.setField("email", saved.email || ""); this._sync(); }
       }
     } catch (e) {}
     this._suppressPrefillForStaff();
@@ -256,12 +303,17 @@ class Component extends DCLogic {
     let tries = 0;
     const check = () => {
       if (!this._fb || !this._fb.currentAdminUser) return;
-      let staff = null;
-      try { staff = this._fb.currentAdminUser(); } catch (e) {}
-      if (staff) {
-        if (this.state.hasPriorSubmission) {
-          this.setState({ f_name: "", f_phone: "", f_email: "", hasPriorSubmission: false });
-        }
+      let user = null;
+      try { user = this._fb.currentAdminUser(); } catch (e) {}
+      if (user) {
+        // Any signed-in user is NOT a team member: a visitor who already uploaded a photo is signed in anonymously and must keep their own saved form after a refresh
+        // (found by BROWSER-LOCAL-01: the old "signed in = staff" test blanked the restored form). Only a verified team role starts blank.
+        this._fb.fetchAdminRole().then((role) => {
+          if ((role === "owner" || role === "staff") && (this.state.hasPriorSubmission || (this.flow && this.flow.state.fields.name))) {
+            if (this.flow) { this.flow.setField("name", ""); this.flow.setField("phone", ""); this.flow.setField("email", ""); this._sync(); }
+            this.setState({ f_name: "", f_phone: "", f_email: "", hasPriorSubmission: false });
+          }
+        }).catch(() => {});
         return;
       }
       if (++tries < 8) this._staffCheckT = setTimeout(check, 400);
@@ -281,6 +333,7 @@ class Component extends DCLogic {
   // remembering stays; this clears it on demand, on the spot.
   clearPrior() {
     try { localStorage.removeItem("hhOwnerContact"); } catch (e) {}
+    if (this.flow) { this.flow.setField("name", ""); this.flow.setField("phone", ""); this.flow.setField("email", ""); this._sync(); }
     this.setState({ f_name: "", f_phone: "", f_email: "", hasPriorSubmission: false });
   }
 
@@ -290,114 +343,75 @@ class Component extends DCLogic {
     this.setState({ step: 2 });
   }
 
+  // LISTING-E2E-01 — ONE submit path (all the logic lives in owner-form-flow.js, which is unit-tested): photos are uploaded to the
+  // private staging folder the moment they are chosen, the form + uploaded-photo list + submission key survive a refresh, and a
+  // submit whose answer was lost is simply repeated and returns the SAME Case.
+  _sync() {
+    const f = this.flow.state.fields, st = this.flow.state;
+    this.setState({
+      f_name: f.name, f_phone: f.phone, f_email: f.email, txnType: f.txnType, f_type: f.type, f_condition: f.condition, f_price: f.price,
+      f_details: f.description, f_coords: f.coords, f_ownerContact: f.ownerContact, f_area: f.area, f_subtype: f.commercialSubtype, f_appraisal: f.priceMode === "appraisal",
+      photos: st.slots.map((x) => ({ url: x.thumb, path: x.path })), ownershipDocUrl: st.doc ? "uploaded" : "",
+      step3Error: st.lostPhotos ? "รูปที่อัปโหลดไว้ก่อนหน้าใช้ไม่ได้แล้ว (เปลี่ยนอุปกรณ์/ล้างข้อมูลเบราว์เซอร์) กรุณาเลือกรูปใหม่อีกครั้ง" : this.state.step3Error,
+    });
+  }
+  // A field can be typed before the form logic has finished loading (it is imported asynchronously): remember it and hand it over as soon as the flow exists, so
+  // nothing typed in the first moments is lost (found by BROWSER-LOCAL-01: typing right after the page appeared left the name empty).
+  _setField(k, v) {
+    const STATE = { name: "f_name", phone: "f_phone", email: "f_email", txnType: "txnType", type: "f_type", condition: "f_condition", price: "f_price", description: "f_details", coords: "f_coords", ownerContact: "f_ownerContact", area: "f_area", commercialSubtype: "f_subtype" };
+    if (!this.flow) { this._pending = Object.assign(this._pending || {}, { [k]: v }); if (STATE[k]) this.setState({ [STATE[k]]: v }); return; }
+    this.flow.setField(k, v); this._sync();
+  }
+
   async submit() {
+    if (this._submitting) return;
+    this._submitting = true;
     this.setState({ submitting: true, step3Error: "" });
     try {
-      const id = "own-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7);
-      // Unguessable private tracking token (~32 chars). The property id alone
-      // is NEVER the key to the tracking page — this token is.
-      const rnd = new Uint8Array(24);
-      (window.crypto || window.msCrypto).getRandomValues(rnd);
-      const token = Array.from(rnd).map((b) => b.toString(36).padStart(2, "0")).join("").slice(0, 32);
-      await this._fb.setDoc("properties", id, {
-        // DO NOT rename/overload `source` — application logic AND
-        // firestore.rules (isPublicOwnerSubmission, the trackToken reply
-        // branches, the caseMessages tokenOk check) all key off the exact
-        // string "owner_submission".
-        source: "owner_submission",
-        // C1 additive Case provenance: WHICH CHANNEL created this Case.
-        // `source` says "this is an owner submission" (a security/logic
-        // marker); caseSource says how the Case actually arrived, so future
-        // channels (ai_assistant, contact_conversion, line, facebook) are
-        // distinguishable without touching `source`. Nothing reads caseSource
-        // yet — it is written now so historical data exists when C4/C7 need it.
-        caseSource: "owner_form",
-        listingStatus: "pending",
-        reviewStatus: "submitted",
-        status: this.state.txnType,
-        type: this.state.f_type,
-        condition: this.state.f_condition,
-        price: Number(this.state.f_price) || 0,
-        description: this.state.f_details,
-        coordsRaw: this.state.f_coords,
-        // Location is optional for the CUSTOMER but still required internally.
-        // These two flags are the handover: the Staff intake workflow reads
-        // them so a submission with no pin shows up as an outstanding
-        // follow-up item instead of quietly looking complete.
-        locationProvided: /^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$/.test(this.state.f_coords),
-        locationFollowUpNeeded: !/^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$/.test(this.state.f_coords),
-        ownerContact: this.state.f_ownerContact,
-        ownershipDocUrl: this.state.ownershipDocUrl || null,
-        contactName: this.state.f_name,
-        contactPhone: this.state.f_phone,
-        contactEmail: this.state.f_email,
-        submittedAt: Date.now(),
-        trackToken: token,
-        // Which language the customer used, so every later reply reaches them
-        // in that language. Reuses the site's existing language preference.
-        customerLanguage: (() => {
-          try { const l = localStorage.getItem("hh_lang"); if (l) return l; } catch (e) {}
-          const n = (navigator.language || "th").slice(0, 2).toLowerCase();
-          return ["th", "en", "zh", "ru", "de", "no", "fr", "it"].includes(n) ? n : "th";
-        })(),
-      });
-      // PHASE 1A.2 — photo upload must never destroy a captured lead.
-      // Previously all photos went up in one Promise.all: a single rejected
-      // upload (one oversized file, one flaky connection, one rule mismatch)
-      // rejected the whole thing, the catch below fired, and the customer saw
-      // "ส่งข้อมูลไม่สำเร็จ" even though their property document had already
-      // been written successfully. They then either gave up or submitted
-      // again, creating a duplicate case. Uploads are now sequential and
-      // individually guarded; whatever fails is recorded on the case for Staff
-      // to chase, and the submission itself still completes.
-      const photoErrors = [];
-      for (let i = 0; i < this.state.photos.length; i++) {
-        try {
-          await this._fb.savePhoto(id, i, this.state.photos[i].url);
-        } catch (pe) {
-          photoErrors.push((pe && (pe.code || pe.message)) || String(pe));
-          console.warn("Owner submission photo " + i + " failed:", pe);
-        }
-      }
-      if (photoErrors.length) {
-        // Best-effort note on the case. If even this write is refused we still
-        // do not fail the submission — the lead is already saved.
-        try {
-          await this._fb.setDoc("properties", id, {
-            photoUploadFailedCount: photoErrors.length,
-            photoUploadFollowUpNeeded: true,
-            photoUploadLastError: photoErrors[0],
-          });
-        } catch (e2) { console.warn("could not record photo upload issue:", e2); }
-      }
-      this.setState({ submitted: true, submitting: false, submittedId: id, trackUrl: location.origin + location.pathname.replace(/[^/]*$/, "") + "Track%20Submission.dc.html?id=" + encodeURIComponent(id) + "&t=" + token });
+      const done = await this.flow.submit();
+      this.setState({ submitted: true, submitting: false, submittedId: done.propertyId, trackUrl: location.origin + location.pathname.replace(/[^/]*$/, "") + "Track%20Submission.dc.html?id=" + encodeURIComponent(done.propertyId) + "&t=" + encodeURIComponent(done.trackToken) });
     } catch (e) {
       console.warn("Owner submission failed:", e);
-      // Show the machine code too. "Missing or insufficient permissions" alone
-      // never said WHICH layer refused; permission-denied (Firestore) and
-      // storage/unauthorized (Storage) are different bugs with different fixes.
       const code = (e && e.code) ? " [" + e.code + "]" : "";
-      this.setState({ submitting: false, step3Error: "ส่งข้อมูลไม่สำเร็จ: " + (e.message || e) + code });
+      const reason = e && e.details && e.details.reason ? " (" + e.details.reason + ")" : "";
+      this.setState({ submitting: false, step3Error: "ส่งข้อมูลไม่สำเร็จ: " + (e.message || e) + reason + code + " — กดส่งอีกครั้งได้ ระบบจะไม่สร้างรายการซ้ำ และข้อมูล/รูปที่กรอกไว้ยังอยู่" });
+    } finally {
+      this._submitting = false;
     }
   }
 
   async onPhotosChange(e) {
     const files = Array.from(e.target.files || []);
+    this.setState({ photoError: "", uploading: true });
     for (const file of files) {
-      const dataUrl = await this._fb.fileToDataUrl(file, 1000);
-      this.setState((s) => ({ photos: [...s.photos, { url: dataUrl }] }));
+      try {
+        const dataUrl = await this._fb.fileToDataUrl(file, 1000);
+        const thumb = await this._fb.fileToDataUrl(file, 96);
+        await this.flow.addPhoto(dataUrl, thumb);
+        this._sync();
+      } catch (err) {
+        console.warn("photo upload failed:", err);
+        this.setState({ photoError: "อัปโหลดรูปไม่สำเร็จ: " + ((err && err.message) || err) + " — เลือกรูปนี้อีกครั้งได้" });
+      }
     }
+    this.setState({ uploading: false });
+    try { e.target.value = ""; } catch (x) {}
   }
 
   removePhoto(i) {
-    this.setState((s) => ({ photos: s.photos.filter((_, idx) => idx !== i) }));
+    const ph = this.state.photos[i];
+    if (ph) this.flow.removePhoto(ph.path);
+    this._sync();
   }
 
   async onOwnershipDocChange(e) {
     const file = e.target.files && e.target.files[0];
     if (!file) return;
-    const dataUrl = await this._fb.fileToDataUrl(file, 1400);
-    this.setState({ ownershipDocUrl: dataUrl });
+    try {
+      const dataUrl = await this._fb.fileToDataUrl(file, 1400);
+      await this.flow.setOwnershipDoc(dataUrl);
+      this._sync();
+    } catch (err) { this.setState({ photoError: "อัปโหลดเอกสารไม่สำเร็จ: " + ((err && err.message) || err) }); }
   }
 
   renderVals() {
@@ -413,38 +427,48 @@ class Component extends DCLogic {
     // Staff side (intake-workflow.js "coords" requirement + the
     // locationFollowUpNeeded flag written below), so nothing is silently lost
     // — it moves from "customer must supply now" to "staff must obtain".
-    const canStep3Next = s.f_price && s.f_details.trim() && s.photos.length >= 5;
+    const std = this._ps ? this._ps.photoStandardFor(s.f_type) : { min: 2, target: 5 };
+    // ONE checklist (submission-checklist.js — the server's own): the type/area/price/photos items gate step 3; contactability gates step 1; a description is not required.
+    const missing = this.flow ? this.flow.missing() : [];
+    const step3Items = ["type", "commercialSubtype", "price", "location", "photos"];
+    const canStep3Next = !!this.flow && !missing.some((m) => step3Items.includes(m));
     return {
       isStep1: s.step === 1, isStep2: s.step === 2, isStep3: s.step === 3, isStep4: s.step === 4,
       stepDots: stepColors.map((c) => ({ color: c })),
-      f_name: s.f_name, onFName: (e) => this.setState({ f_name: e.target.value }),
-      f_phone: s.f_phone, onFPhone: (e) => this.setState({ f_phone: e.target.value }),
-      f_email: s.f_email, onFEmail: (e) => this.setState({ f_email: e.target.value }),
+      f_name: s.f_name, onFName: (e) => this._setField("name", e.target.value),
+      f_phone: s.f_phone, onFPhone: (e) => this._setField("phone", e.target.value),
+      f_email: s.f_email, onFEmail: (e) => this._setField("email", e.target.value),
       hasPriorSubmission: s.hasPriorSubmission,
       onGoStep2: () => this.goStep2(),
       saleCardStyle: cardBase + (s.txnType === "sale" ? "oklch(40% 0.13 25); background:oklch(97% 0.03 25);" : "oklch(88% 0.01 70); background:white;"),
       rentCardStyle: cardBase + (s.txnType === "rent" ? "oklch(40% 0.13 25); background:oklch(97% 0.03 25);" : "oklch(88% 0.01 70); background:white;"),
-      onSelectSale: () => this.setState({ txnType: "sale" }),
-      onSelectRent: () => this.setState({ txnType: "rent" }),
+      onSelectSale: () => this._setField("txnType", "sale"),
+      onSelectRent: () => this._setField("txnType", "rent"),
       onBackStep1: () => this.setState({ step: 1 }),
-      onGoStep3: () => canStep2Next && this.setState({ step: 3 }),
+      onGoStep3: () => { if (canStep2Next) { this.setState({ step: 3 }); this.flow.saveToDraft(); } },
       step2NextStyle: nextBase + (canStep2Next ? "background:oklch(22% 0.02 60); color:white;" : "background:oklch(92% 0.01 70); color:oklch(65% 0.01 70); cursor:not-allowed;"),
-      f_type: s.f_type, onFType: (e) => this.setState({ f_type: e.target.value }),
-      f_condition: s.f_condition, onFCondition: (e) => this.setState({ f_condition: e.target.value }),
-      f_price: s.f_price, onFPrice: (e) => this.setState({ f_price: e.target.value }),
-      f_details: s.f_details, onFDetails: (e) => this.setState({ f_details: e.target.value }),
-      f_coords: s.f_coords, onFCoords: (e) => this.setState({ f_coords: e.target.value }),
+      isCommercial: s.f_type === "commercial", f_subtype: s.f_subtype, onFSubtype: (e) => this._setField("commercialSubtype", e.target.value),
+      f_area: s.f_area, onFArea: (e) => this._setField("area", e.target.value),
+      isAppraisal: !!s.f_appraisal, onAppraisal: (e) => this._setField("priceMode", e.target.checked ? "appraisal" : "fixed"),
+      f_type: s.f_type, onFType: (e) => this._setField("type", e.target.value),
+      f_condition: s.f_condition, onFCondition: (e) => this._setField("condition", e.target.value),
+      f_price: s.f_price, onFPrice: (e) => this._setField("price", e.target.value),
+      f_details: s.f_details, onFDetails: (e) => this._setField("description", e.target.value),
+      f_coords: s.f_coords, onFCoords: (e) => this._setField("coords", e.target.value),
       hasValidCoords: /^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$/.test(s.f_coords),
       noCoords: !s.f_coords.trim(),
       onClearPrior: () => this.clearPrior(),
       mapEmbedUrl: `https://www.google.com/maps?q=${encodeURIComponent(s.f_coords.trim())}&hl=th&z=16&output=embed`,
-      f_ownerContact: s.f_ownerContact, onFOwnerContact: (e) => this.setState({ f_ownerContact: e.target.value }),
+      f_ownerContact: s.f_ownerContact, onFOwnerContact: (e) => this._setField("ownerContact", e.target.value),
+      photoRule: "ขั้นต่ำ " + std.min + " รูป · แนะนำ " + std.target + " รูปขึ้นไป",
+      missingText: (() => { const t = { type: "ประเภททรัพย์", commercialSubtype: "ประเภทอาคารพาณิชย์", price: "ราคา (หรือติ๊กขอประเมินราคา)", location: "ทำเลหลัก (อำเภอ หรือปักหมุด)", photos: "รูปให้ถึงขั้นต่ำ" }; const m = missing.filter((x) => t[x]).map((x) => t[x]); return m.length ? "ยังขาด: " + m.join(" · ") : ""; })(),
+      photoError: s.photoError, prefilledNote: s.prefilledNote, uploadingLabel: s.uploading ? "กำลังอัปโหลดรูป…" : "",
       photoCount: s.photos.length, hasPhotos: s.photos.length > 0,
       photoThumbs: s.photos.map((p, i) => ({ url: p.url, onRemove: () => this.removePhoto(i) })),
       onPhotosChange: (e) => this.onPhotosChange(e),
       hasOwnershipDoc: !!s.ownershipDocUrl, onOwnershipDocChange: (e) => this.onOwnershipDocChange(e),
       onBackStep2: () => this.setState({ step: 2 }),
-      onGoStep4: () => canStep3Next && this.setState({ step: 4, step3Error: "" }),
+      onGoStep4: () => { if (canStep3Next) { this.setState({ step: 4, step3Error: "" }); this.flow.saveToDraft(); } },
       step3NextStyle: nextBase + (canStep3Next ? "background:oklch(22% 0.02 60); color:white;" : "background:oklch(92% 0.01 70); color:oklch(65% 0.01 70); cursor:not-allowed;"),
       step3Error: s.step3Error,
       txnLabel: s.txnType === "sale" ? "ฝากขาย" : "ฝากเช่า",

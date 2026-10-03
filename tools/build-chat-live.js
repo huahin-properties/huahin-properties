@@ -13,7 +13,7 @@ const ROOT = path.resolve(__dirname, "..");
 const PRODUCTION_PROJECT = "huahin-properties-5f1b5";
 // Closure computed from index.html's dc-imports/imports (CHAT-LIVE-01 scope doc §2).
 const FILES = ["index.html", "support.js", "image-slot.js", "data.js", "favorites.js", "firebase-client.js",
-  "conversation-firestore.js", "conversation-store.js", "ContactRail.dc.html", "PropertyCard.dc.html", "LanguageSwitcher.dc.html", "logo.png"];
+  "conversation-firestore.js", "conversation-store.js", "case-fields.js", "private-photo.js", "ContactRail.dc.html", "PropertyCard.dc.html", "LanguageSwitcher.dc.html", "logo.png"];
 const REQUIRED = ["projectId", "apiKey", "appId", "messagingSenderId", "authDomain", "storageBucket", "region"];
 const PROJECT_ID_RE = /^huahin-chat-test-[a-z0-9]+(-[a-z0-9]+)*$/; // same rule the Function gate uses (functions/chat-test-gate.js)
 // The claudeComplete endpoint is DERIVED from the test project id, never accepted from the config:

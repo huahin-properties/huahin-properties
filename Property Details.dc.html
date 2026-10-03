@@ -95,6 +95,20 @@
     </div>
   </sc-if>
 
+  <!-- FX-3 (DOC-OBS-05): while the page has no listing to show it says WHY, instead of staying blank. Three separate states:
+       loading (never "not found" while the data is still on its way) / not found or closed (one message for both — it does not reveal whether a private case ever existed) / load failed.
+       Nothing from any case is shown here: only fixed text. -->
+  <sc-if value="{{ showViewState }}">
+    <div role="status" aria-live="polite" data-view-state="{{ viewState }}" style="max-width:640px; margin:0 auto; padding:clamp(48px,12vh,120px) clamp(20px,6vw,56px); text-align:center; display:flex; flex-direction:column; gap:14px; align-items:center;">
+      <h1 style="font-family:'Playfair Display',serif; font-size:clamp(22px,4vw,30px); font-weight:500; margin:0; color:oklch(22% 0.02 60);">{{ viewStateTitle }}</h1>
+      <p style="margin:0; font-size:15px; line-height:1.7; color:oklch(40% 0.02 60);">{{ viewStateText }}</p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+        <sc-if value="{{ viewStateCanRetry }}"><a href="" onClick="{{ onViewStateRetry }}" data-view-state-retry style="padding:11px 20px; background:oklch(40% 0.13 25); color:white; text-decoration:none; font-size:14px; border-radius:2px;">{{ viewStateRetry }}</a></sc-if>
+        <sc-if value="{{ viewStateCanBack }}"><a href="Search Results.dc.html" data-view-state-back style="padding:11px 20px; border:1px solid oklch(40% 0.13 25); color:oklch(40% 0.13 25); text-decoration:none; font-size:14px; border-radius:2px;">{{ viewStateBack }}</a></sc-if>
+      </div>
+    </div>
+  </sc-if>
+
   <sc-if value="{{ hasProperty }}" hint-placeholder-val="{{ true }}">
 
     <!-- ============ BANNER SLOT (top) ============ -->
@@ -216,8 +230,8 @@
             <div style="position:absolute; top:12px; left:12px; background:oklch(99% 0.005 80 / 0.92); border-radius:4px; padding:6px 12px; font-size:12px; color:oklch(30% 0.02 60);">{{ p.locationBadgeLabel }}</div>
           </div>
           <div style="display:flex; gap:24px; margin-top:12px; font-size:13px; color:oklch(45% 0.02 60);">
-            <div>{{ p.distanceBeachLabel }}</div>
-            <div>{{ p.distanceTownLabel }}</div>
+            <sc-if value="{{ p.hasDistanceBeach }}"><div>{{ p.distanceBeachLabel }}</div></sc-if>
+            <sc-if value="{{ p.hasDistanceTown }}"><div>{{ p.distanceTownLabel }}</div></sc-if>
           </div>
         </div>
       </div>
@@ -428,6 +442,25 @@ function parseLatLngHH(input) {
 // calculations from the owner's actual pinned coordinates (2026-08 fix —
 // previously these read a static distanceBeach/distanceTown field that
 // self-serve listings never set, always showing "0 km").
+// D2 land size for the public page. Known unit → the value as entered WITH its unit, and the same area in the other unit; an old unitless number is shown WITHOUT any unit and says
+// "unit not specified" (never labelled ตร.ม./ตร.ว. by guessing); nothing → no row.
+function landAreaSpec(raw, t, lm) {
+  if (!lm) return null;
+  const v = lm.landAreaView(raw); if (!v) return null;
+  const u = (k) => (k === "sqwa" ? t.sqwa : t.sqm), n = (x) => String(Math.round(x * 100) / 100);
+  if (v.kind === "known") return { label: t.land_size_label, value: n(v.value) + " " + u(v.unit) + " (" + n(v.otherValue) + " " + u(v.otherUnit) + ")" };
+  return { label: t.land_size_label, value: n(v.value) + " (" + t.land_unit_unspecified + ")" };
+}
+// Distance line for the public page (FX-2). "" = no evidence → the line is not shown.
+function distanceLabel(raw, which, placeLabel, t) {
+  const exact = parseLatLngHH(raw.mapLink);
+  const ref = AREA_REF_POINTS[raw.area];
+  let km = null;
+  if (exact && ref) km = haversineKm(exact.lat, exact.lng, ref[which].lat, ref[which].lng).toFixed(1);
+  else { const v = raw[which === "beach" ? "distanceBeach" : "distanceTown"]; if (typeof v === "number" && isFinite(v) && v >= 0) km = String(v); }
+  if (km === null) return "";
+  return `${km} ${t.km_to} ${placeLabel ? placeLabel : ""}`.trim();
+}
 const AREA_REF_POINTS = {
   "hua-hin": { beach: { lat: 12.5683, lng: 99.9577 }, town: { lat: 12.5683, lng: 99.9577 } },
   pranburi: { beach: { lat: 12.3853, lng: 99.9847 }, town: { lat: 12.3831, lng: 99.9425 } },
@@ -498,6 +531,7 @@ class Component extends DCLogic {
     }
     const mod = await import("./data.js");
     this._mod = mod;
+    try { this._landMod = await import("./land-area.js"); } catch (e) { console.warn("land-area module failed:", e); }
     const params = new URLSearchParams(window.location.search);
     this._id = params.get("id") || (mod.PROPERTIES[0] && mod.PROPERTIES[0].id);
     this.setState({ lang: mod.getLang(), data: mod });
@@ -527,7 +561,7 @@ class Component extends DCLogic {
           if (!Array.isArray(safe.features)) safe.features = [];
           effProps = [...effProps, safe];
         }
-      } catch (e) { console.warn("direct property fetch failed:", e); }
+      } catch (e) { this._directFetchFailed = true; console.warn("direct property fetch failed:", e); }
     }
     this.setState({ effProps }, () => this._maybeFetchMedia());
     // Self-serve listings (Lister Dashboard) track a per-listing view count
@@ -779,7 +813,7 @@ class Component extends DCLogic {
       gateError: this.state.gateError,
     };
     const mod = this.state.data;
-    if (!mod) return { t: {}, isDesktopNav: true, isMobileNav: false, hasProperty: false, langOptions: [], currentPropertyId: this._id, ...gateVals };
+    if (!mod) return { t: {}, isDesktopNav: true, isMobileNav: false, hasProperty: false, showViewState: false, langOptions: [], currentPropertyId: this._id, ...gateVals };
 
     const lang = this.state.lang;
     const t = mod.I18N[lang];
@@ -800,7 +834,16 @@ class Component extends DCLogic {
     // avoid regressing tested behavior) — see property-adapter.js header.
     const normalized = (this._adapter && raw) ? this._adapter.normalizeProperty(raw, mod, lang) : null;
     if (!raw) {
+      // loading (the data has not arrived yet) / failed (the load failed, or the direct read failed) / notfound (loaded fine, nothing under this id — closed or never public).
+      const loadedOk = !!this.state.effProps;
+      const failed = loadedOk && (!!this._directFetchFailed || !!(typeof window !== "undefined" && window.__hhDataLoad && window.__hhDataLoad.state === "failed"));
+      const viewState = !loadedOk ? "loading" : (failed ? "failed" : "notfound");
       return { t, lang, isDesktopNav: !this.state.isMobile, isMobileNav: this.state.isMobile, hasProperty: false, langValue, onLangChange, langOptions,
+        showViewState: true, viewState,
+        viewStateTitle: { loading: t.detail_state_loading, notfound: t.detail_state_notfound_title, failed: t.detail_state_failed_title }[viewState],
+        viewStateText: { loading: "", notfound: t.detail_state_notfound_text, failed: t.detail_state_failed_text }[viewState],
+        viewStateCanRetry: viewState === "failed", viewStateCanBack: viewState !== "loading", viewStateRetry: t.detail_state_retry, viewStateBack: t.detail_state_back,
+        onViewStateRetry: (e) => { if (e && e.preventDefault) e.preventDefault(); try { window.location.reload(); } catch (x) { /* nothing */ } },
         currentPropertyId: this._id,
         toggleMenu: () => this.setState((s) => ({ mobileMenuOpen: !s.mobileMenuOpen })), mobileMenuOpen: false };
     }
@@ -853,24 +896,19 @@ class Component extends DCLogic {
         || (raw.description && (typeof raw.description === "object" ? raw.description[lang] : raw.description))
         || t.no_description,
       features: raw.features.map((f) => mod.FEATURES[f][lang]),
-      distanceBeachLabel: (() => {
-        const exact = parseLatLngHH(raw.mapLink);
-        const ref = AREA_REF_POINTS[raw.area];
-        const km = (exact && ref) ? haversineKm(exact.lat, exact.lng, ref.beach.lat, ref.beach.lng).toFixed(1) : raw.distanceBeach;
-        return `${km} ${t.km_to} ${t.beach ? t.beach : ""}`;
-      })(),
-      distanceTownLabel: (() => {
-        const exact = parseLatLngHH(raw.mapLink);
-        const ref = AREA_REF_POINTS[raw.area];
-        const km = (exact && ref) ? haversineKm(exact.lat, exact.lng, ref.town.lat, ref.town.lng).toFixed(1) : raw.distanceTown;
-        return `${km} ${t.km_to} ${t.town}`;
-      })(),
+      // FX-2 (DOC-OBS-03): a distance is shown ONLY when there is evidence for it — either the coordinates on the public record (straight-line figure to the area's reference point, as before)
+      // or a stored NUMBER. Unknown is never written as 0 or "undefined"; a stored 0 (a real number) is kept. The two sources are never mixed or converted into each other.
+      distanceBeachLabel: distanceLabel(raw, "beach", t.beach, t),
+      distanceTownLabel: distanceLabel(raw, "town", t.town, t),
+      hasDistanceBeach: distanceLabel(raw, "beach", t.beach, t) !== "",
+      hasDistanceTown: distanceLabel(raw, "town", t.town, t) !== "",
       locationBadgeLabel: (() => {
-        const zoneText = (raw.zone && typeof raw.zone === "object") ? (raw.zone[lang] || raw.zone.th) : raw.zone;
+        const zoneRaw = (raw.zone && typeof raw.zone === "object") ? (raw.zone[lang] || raw.zone.th) : raw.zone;
+        const zoneText = (typeof zoneRaw === "string" && zoneRaw.trim() && zoneRaw.trim() !== "undefined") ? zoneRaw.trim() : ""; // no zone on the record → no zone name (never the word "undefined")
         const exact = parseLatLngHH(raw.mapLink);
-        if (raw.mapDisplayMode === "exact" && exact) return `${areaLabelOf(raw.area)} · ${zoneText}`;
+        if (raw.mapDisplayMode === "exact" && exact) return zoneText ? `${areaLabelOf(raw.area)} · ${zoneText}` : areaLabelOf(raw.area);
         const tambon = (exact && this._tambonMod) ? this._tambonMod.findTambonFor(exact.lat, exact.lng) : null;
-        return tambon ? `${t.property_general_area} · ตำบล${tambon.nameTh}` : `${t.property_general_area} · ${zoneText}`;
+        return tambon ? `${t.property_general_area} · ตำบล${tambon.nameTh}` : (zoneText ? `${t.property_general_area} · ${zoneText}` : t.property_general_area);
       })(),
     };
 
@@ -878,7 +916,7 @@ class Component extends DCLogic {
       { label: t.type_label, value: normalized ? normalized.typeLabel : typeLabelOf(raw.type) },
       (normalized ? normalized.bedrooms : raw.bedrooms) ? { label: t.bedrooms_label, value: normalized ? normalized.bedrooms : raw.bedrooms } : null,
       (normalized ? normalized.bathrooms : raw.bathrooms) ? { label: t.bathrooms_label, value: normalized ? normalized.bathrooms : raw.bathrooms } : null,
-      (normalized ? normalized.landSize : raw.landSize) ? { label: t.land_size_label, value: (normalized ? normalized.landSize : raw.landSize) + " " + t.sqm } : null,
+      landAreaSpec(raw, t, this._landMod),
       (normalized ? normalized.livingArea : raw.livingArea) ? { label: t.living_area_label, value: (normalized ? normalized.livingArea : raw.livingArea) + " " + t.sqm } : null,
       { label: t.admin_field_parking, value: (normalized ? normalized.parking : raw.parking) || "—" },
       { label: t.admin_field_ownership, value: mod.ownershipLabel(normalized ? normalized.ownership : raw.ownership, lang) },
@@ -962,7 +1000,7 @@ class Component extends DCLogic {
       mobileMenuOpen: this.state.isMobile && this.state.mobileMenuOpen,
       toggleMenu: () => this.setState((s) => ({ mobileMenuOpen: !s.mobileMenuOpen })),
       langValue, onLangChange, langOptions,
-      hasProperty: true,
+      hasProperty: true, showViewState: false,
       currentPropertyId: raw.id,
       favIcon: this.state.isFav ? "⭐" : "☆",
       favTitle: this.state.isFav ? t.fav_remove : t.fav_add,
