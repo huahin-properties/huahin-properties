@@ -53,6 +53,9 @@ describe("LISTING-E2E-01 TEST-only hosting build (no network, nothing deployed)"
         if (ENTRIES.includes(f)) assert.ok(t.includes('<template id="chat-live-app">') && t.includes("__chatLiveStart"), f + ": inert until the guard passes");
         else { // DOC-OBS-01: a COMPONENT is fetched as text by the runtime; its logic script must NOT be hidden inside a <template>
           assert.ok(!t.includes('<template id="chat-live-app">'), f + ": a component file is not wrapped in the inert template");
+          // (Work review r6) a component file opened by its URL must run nothing: the only EXECUTABLE scripts are the TEST config and the TEST guard
+          const exec = (t.match(/<script\b[^>]*>/g) || []).filter((tag) => !/type="text\/x-dc"/.test(tag)); assert.deepStrictEqual(exec, ['<script src="./listing-test-config.js">', '<script src="./listing-test-guard.js">'], f + ": only the config and the guard are executable");
+          assert.ok(!/<link[^>]+href="https?:/.test(t) && !/<img[^>]+src="https?:/.test(t.replace(/<x-dc>[\s\S]*<\/x-dc>/, "")), f + ": nothing external outside the component markup");
           if (/data-dc-script/.test(t)) assert.ok(/<script[^>]*data-dc-script/.test(t.replace(/<template[\s\S]*?<\/template>/g, "")), f + ": its data-dc-script is visible to the component parser");
         }
         assert.ok(!/<link rel="canonical"|<script type="application\/ld\+json">|<meta name="google-site-verification"/.test(t), f + ": static SEO tags removed (pages that add them at run time only point at the .invalid host and stay noindex)");

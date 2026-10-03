@@ -644,4 +644,127 @@ const preview = async (page, state, ms) => waitFor(async () => (await page.getAt
     for (const id of ["fx2-unknown", "fx2-zero", "fx2-coords"]) await db.doc("properties/" + id).delete();
     rec("B13", "FX-2: unknown distance/zone hidden (no 0 km / undefined); stored 0 and real coordinates kept; search card has no empty zone prefix", "PASS (local browser + emulators)", "synthetic documents written straight to the emulator; deleted afterwards");
   });
+  // ───────────────────────── Work review r6: what the un-wrapped COMPONENTS do now (build = tools/build-listing-test.js, 4 components: ContactRail, LanguageSwitcher, PropertyCard, SearchFilters)
+  const FN_DENY = /startConversation|sendConversationTurn|receptionTurn|claudeComplete|createCaseFromConversation|submitListingCase|addCasePhotos|publishListingCase|unpublishListingCase|syncListingCase|trackListingCase|getCasePhoto|reconcileListingFiles/;
+  const countAll = async () => { const out = {}; for (const c of await db.listCollections()) out[c.id] = (await c.get()).size; out["(messages)"] = (await db.collectionGroup("messages").get()).size; out["(submissions)"] = (await db.collectionGroup("submissions").get()).size; return out; };
+  const authUsers = async () => (await auth.listUsers(1000)).users.map((u) => ({ uid: u.uid, anon: !(u.providerData && u.providerData.length) && !u.email }));
+
+  it("B14 merely OPENING a page that carries the chat rail (ContactRail) creates no case, no conversation, no message, no lead, calls no Function and no production/AI endpoint; the only backend effect is the existing anonymous sign-in", async () => {
+    const PAGES = ["Home.dc.html", "Search%20Results.dc.html", "Property%20Details.dc.html?id=NO-SUCH-LISTING", "About.dc.html", "Contact.dc.html", "index.html"];
+    const E = H.emulators(); const report = [];
+    for (const pg of PAGES) {
+      const before = await countAll(), usersBefore = await authUsers();
+      const c = await newPage({}, "open-only-" + pg.split(".")[0]); const fnCalls = [];
+      c.page.on("request", (r) => { try { const u = new URL(r.url()); if (Number(u.port) === E.fnPort) fnCalls.push(u.pathname.split("/").pop()); } catch (e) { /* data: */ } });
+      await c.page.goto(site.url + "/" + pg); await sleep(8000); // the rail's init (properties, AI notes, existing-reception lookup) and its 1.5 s auto-greeting timer have all run by now
+      const after = await countAll(), usersAfter = await authUsers();
+      assert.deepStrictEqual(after, before, pg + ": no document was created in any collection (cases, conversations, messages, leads, submissions…)");
+      assert.deepStrictEqual(fnCalls.filter((f) => FN_DENY.test(f)), [], pg + ": no chat / case Function was called by opening the page: " + JSON.stringify(fnCalls));
+      assert.deepStrictEqual(c.ctx.__log.prodHits, [], pg + ": no production URL requested"); assert.deepStrictEqual(c.ctx.__log.external.filter((u) => /run\.app|cloudfunctions\.net|claudecomplete|5f1b5|huahin\.properties/i.test(u)), [], pg + ": no AI / production endpoint requested");
+      const created = usersAfter.filter((u) => !usersBefore.some((b) => b.uid === u.uid)); assert.ok(created.every((u) => u.anon) && created.length <= 1, pg + ": the only Auth change is at most ONE anonymous visitor (existing rail behaviour): " + JSON.stringify(created));
+      report.push(pg.split(".")[0] + " → functions=" + JSON.stringify(fnCalls) + ", new anonymous users=" + created.length); await c.ctx.close();
+    }
+    rec("B14", "opening Home / Search / Details / About / Contact / index: zero documents created in any collection, zero chat/case Function calls, zero production or AI endpoint requests; the rail's init reads data and signs the visitor in anonymously (existing behaviour, at most one anonymous user per visit) — " + report.join("; "), "PASS (local browser + emulators)", "the rail's auto-greeting is a local-only message (no backend); a conversation starts only when the visitor sends a message (not tested here: would call the gated chat Functions)");
+  });
+
+  it("B15 a COMPONENT file opened by its URL runs nothing: no script engine, no Firestore / Auth / Functions / Storage request, no external request (only the TEST guard + config load); entry pages still start only through the guard", async () => {
+    const E = H.emulators(); const comps = ["ContactRail", "LanguageSwitcher", "PropertyCard", "SearchFilters"];
+    for (const name of comps) {
+      const before = await countAll(), usersBefore = (await authUsers()).length;
+      const c = await newPage({}, "component-direct-" + name); const hits = [];
+      c.page.on("request", (r) => { try { const u = new URL(r.url()); if (u.port && [E.fnPort, E.fsPort, E.stPort].includes(Number(u.port))) hits.push(u.port + u.pathname.slice(0, 40)); if (/identitytoolkit|securetoken/.test(u.hostname)) hits.push(u.hostname); } catch (e) { /* none */ } });
+      await c.page.goto(site.url + "/" + name + ".dc.html"); await sleep(3000);
+      assert.deepStrictEqual(hits, [], name + ": opening the component file called a backend: " + JSON.stringify(hits));
+      assert.deepStrictEqual(await countAll(), before, name + ": nothing written"); assert.strictEqual((await authUsers()).length, usersBefore, name + ": no sign-in");
+      assert.deepStrictEqual(c.ctx.__log.prodHits, []); assert.deepStrictEqual(c.ctx.__log.external, [], name + ": no external request");
+      assert.strictEqual(await c.page.evaluate(() => !!(window.firebase || window.React || document.querySelector("script[src*='support']"))), false, name + ": no runtime / SDK was loaded");
+      assert.ok(await c.page.evaluate(() => !!document.getElementById("chat-live-bar") || !!document.querySelector("[data-chat-live-stop]")), name + ": the TEST guard ran first"); await c.ctx.close();
+    }
+    // entry pages: the page content is still inert until the guard has passed (template wrapper + guard-first), and starts only through __chatLiveStart
+    const entry = await newPage({}, "entry-inert"); await entry.page.goto(site.url + "/Property%20Details.dc.html?id=NO-SUCH-LISTING", { waitUntil: "domcontentloaded" });
+    assert.strictEqual(await entry.page.evaluate(() => !!document.getElementById("chat-live-app") || !!window.__CHAT_LIVE_OK__), true, "entry: template + guard config present"); await entry.page.waitForSelector("[data-view-state]", { timeout: 30000 }); await entry.ctx.close();
+    rec("B15", "4 component files opened directly: no script engine/SDK loaded, no backend or external request, nothing written, no sign-in, TEST guard ran; entry pages start only through the guard", "PASS (local browser + emulators)", "static side: tests/listing/hosting-build.test.js (component files carry only config + guard scripts)");
+  });
+
+  it("B16 (FX-1, two different accounts) the intake-approval stamp and the publish-approval stamp are shown for the person of THAT event; the approved submission is the one in approvedSubmissionId, a rejected submission is never the approver; the public record carries neither", async () => {
+    const tplSnap = await db.doc("caseInternal/" + (ids.sevenCase || ids.agentCase)).get(); assert.ok(tplSnap.exists, "template case");
+    const tpl = tplSnap.data(); const now = Date.now();
+    const mk = async (id, extra, subs) => {
+      const rec1 = { ...tpl, ...extra, source: "owner_submission", internalSplit: true, listingStatus: "live", reviewStatus: "approved", submissionCount: Object.keys(subs).length, intakeCompletedAt: now - 3000, approvedAt: now - 1000, publishedAt: now - 1000 };
+      await db.doc("caseInternal/" + id).set(rec1);
+      for (const [sid, v] of Object.entries(subs)) await db.doc("properties/" + id + "/submissions/" + sid).set({ submittedAt: now - 9000, reviewedAt: now - 5000, ...v });
+    };
+    // case 1: approvedSubmissionId names the approved one; a LATER rejected submission by someone else must not be shown as approver
+    await mk("fx1-two-accounts", { approvedSubmissionId: "s-ok", approvedByEmail: "owner@example.test", approvedByUid: ids.owner, approvedByRole: "owner" }, { "s-old-rej": { reviewResult: "returned", reviewedBy: "rejecter-old@example.test", reviewedAt: now - 8000 }, "s-ok": { reviewResult: "approved", reviewedBy: "owner2@example.test", reviewedAt: now - 5000 }, "s-new-rej": { reviewResult: "returned", reviewedBy: "rejecter-new@example.test", reviewedAt: now - 2000 } });
+    // case 2: no approvedSubmissionId → the newest APPROVED one, never the newer rejected one
+    await mk("fx1-no-id", { approvedSubmissionId: null, approvedByEmail: "owner@example.test", approvedByRole: "owner" }, { "a-ok": { reviewResult: "approved", reviewedBy: "owner2@example.test", reviewedAt: now - 5000 }, "b-rej": { reviewResult: "returned", reviewedBy: "rejecter-x@example.test", reviewedAt: now - 2000 } });
+    // case 3: the publish stamp has only a ROLE (no e-mail) → labelled as a role, never as a person; the intake line has no reviewer recorded
+    await mk("fx1-role-only", { approvedSubmissionId: "s1", approvedByEmail: "", approvedByUid: "", approvedByRole: "owner" }, { s1: { reviewResult: "approved", reviewedBy: "", reviewedAt: now - 5000 } });
+    const ctx = await newPage({}, "fx1-two"); await loginAdmin(ctx.page, "owner@example.test"); await ctx.page.goto(site.url + "/Listing%20Approvals.dc.html");
+    const cardText = async (id) => { await waitFor(async () => (await ctx.page.innerText("body")).includes(id), 30000, "case card " + id); return ctx.page.evaluate((cid) => { const leaf = Array.from(document.querySelectorAll("*")).find((e) => e.children.length === 0 && (e.textContent || "").trim() === cid); let n = leaf; for (let k = 0; k < 14 && n && n.parentElement; k++) { n = n.parentElement; if (/อนุมัติรับเรื่องโดย/.test(n.innerText || "")) return n.innerText; } return n ? n.innerText : ""; }, id); };
+    await waitFor(async () => { const t = await cardText("fx1-two-accounts"); return /อนุมัติรับเรื่องโดย owner2@example\.test/.test(t) && /อนุมัติเผยแพร่โดย owner@example\.test/.test(t); }, 30000, "two different accounts shown on their own events");
+    const t1 = await cardText("fx1-two-accounts"); assert.ok(!/rejecter-(old|new)@example\.test/.test(t1), "a rejected submission's reviewer is never shown as the approver"); assert.ok(!/อนุมัติรับเรื่องโดย owner@example\.test/.test(t1) && !/อนุมัติเผยแพร่โดย owner2@example\.test/.test(t1), "the two stamps are not swapped");
+    await waitFor(async () => /อนุมัติรับเรื่องโดย owner2@example\.test/.test(await cardText("fx1-no-id")), 30000, "no approvedSubmissionId → the newest APPROVED submission");
+    const t2 = await cardText("fx1-no-id"); assert.ok(!/rejecter-x@example\.test/.test(t2), "the newer rejected submission is not the approver");
+    await waitFor(async () => /อนุมัติเผยแพร่โดย ไม่มีอีเมลบันทึก \(บทบาทที่บันทึก: owner\)/.test(await cardText("fx1-role-only")), 30000, "role-only stamp is labelled as a role");
+    const t3 = await cardText("fx1-role-only"); assert.ok(/อนุมัติรับเรื่องโดย ไม่มีบันทึกผู้ดำเนินการ/.test(t3), "no reviewer recorded → says so"); assert.ok(!/อนุมัติ(รับเรื่อง|เผยแพร่)โดย owner(\s|$)/.test(t3), "a role is never used as a person's name");
+    await H.shot(ctx.page, "58-approvals-two-accounts-stamps");
+    // the public side: a public properties document is built by the server from an allow-list; here the records' approver fields exist ONLY in caseInternal
+    for (const id of ["fx1-two-accounts", "fx1-no-id", "fx1-role-only"]) { assert.strictEqual((await db.doc("properties/" + id).get()).exists, false, "no public document was created by the page"); }
+    await ctx.ctx.close();
+    for (const id of ["fx1-two-accounts", "fx1-no-id", "fx1-role-only"]) { for (const sd of (await db.collection("properties/" + id + "/submissions").get()).docs) await sd.ref.delete(); await db.doc("caseInternal/" + id).delete(); }
+    rec("B16", "FX-1 with two accounts: intake approver (owner2) ≠ publisher (owner) shown on their own events; approvedSubmissionId respected; rejected submissions never shown as approver; role-only stamp labelled as a role; nothing written to public data", "PASS (local browser + emulators)", "synthetic records written directly to the emulator and deleted afterwards");
+  });
+  it("B17 the components that now run on the built site work for a visitor: Search (cover photo, filter, language switch) and Details (language switch, photo, states); Lister Dashboard (LanguageSwitcher + SearchFilters) was exercised by B4", async () => {
+    const PNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+    const base = { status: "sale", type: "house", area: "hua-hin", listingStatus: "live", isDraft: false, features: [], source: "owner_submission", internalSplit: true, livingArea: 100, bathrooms: 2, publishedAt: Date.now(), expiresAt: Date.now() + 86400000 };
+    await db.doc("properties/fx17-alpha").set({ ...base, price: 4100000, bedrooms: 2, title: { th: "อัลฟาทดสอบ", en: "Alpha test" }, photos: [{ label: "Photo 1" }] });
+    await db.doc("properties/fx17-beta").set({ ...base, price: 9300000, bedrooms: 5, title: { th: "เบต้าทดสอบ", en: "Beta test" }, photos: [{ label: "Photo 1" }] });
+    await db.doc("propertyPhotos/fx17-beta-0").set({ propertyId: "fx17-beta", index: 0, dataUrl: PNG });
+    const v = await newPage({}, "fx17-search"); await v.page.goto(site.url + "/Search%20Results.dc.html");
+    await waitFor(async () => /4,100,000/.test(await v.page.innerText("body")) && /9,300,000/.test(await v.page.innerText("body")), 30000, "both synthetic listings in Search");
+    // cover photo: the listing WITH a photo shows a decoded image, the one without shows none (and no broken image)
+    const cover = (id) => v.page.evaluate((cid) => { const a = Array.from(document.querySelectorAll("a")).find((x) => (x.getAttribute("href") || "").endsWith("id=" + cid)); const img = a && Array.from(a.querySelectorAll("img")).find((i) => /^data:image/.test(i.src)); return { has: !!img, w: img ? img.naturalWidth : 0 }; }, id);
+    await waitFor(async () => (await cover("fx17-beta")).w > 0, 20000, "cover photo decoded for the listing that has a photo"); assert.strictEqual((await cover("fx17-alpha")).has, false, "no photo → no image element");
+    // SearchFilters: the keyword filter narrows the list
+    await v.page.locator("input[placeholder*='HH-101']").first().fill("เบต้า"); await v.page.locator("input[placeholder*='HH-101']").first().blur();
+    await waitFor(async () => { const t = await v.page.innerText("body"); return /9,300,000/.test(t) && !/4,100,000/.test(t); }, 15000, "keyword filter shows only the matching listing"); await H.shot(v.page, "59-search-filter-keyword");
+    // LanguageSwitcher: choose English → the page text changes and the choice is remembered
+    const nav = await v.page.evaluate(async () => { const m = await import("./data.js"); return { th: m.I18N.th.nav_buy, en: m.I18N.en.nav_buy, thSearch: m.I18N.th.nav_rent, enSearch: m.I18N.en.nav_rent }; });
+    const navText = async () => v.page.evaluate(() => Array.from(document.querySelectorAll("a")).map((a) => (a.innerText || "").trim()).filter(Boolean));
+    assert.ok((await navText()).includes(nav.th), "starts in Thai: " + JSON.stringify(await navText()));
+    await v.page.locator("text=ไทย").first().click(); await v.page.locator("text=English").first().click();
+    await waitFor(async () => (await navText()).includes(nav.en) && !(await navText()).includes(nav.th), 15000, "navigation switched to English"); assert.strictEqual(await v.page.evaluate(() => localStorage.getItem("hh_lang")), "en", "the language choice is remembered");
+    await H.shot(v.page, "60-search-english"); await v.ctx.close();
+    // Details: photo + language switch
+    const d = await newPage({}, "fx17-details"); await d.page.goto(site.url + "/Property%20Details.dc.html?id=fx17-beta");
+    await waitFor(async () => /9,300,000/.test(await d.page.innerText("body")), 30000, "details of the listing");
+    await waitFor(async () => d.page.evaluate(() => Array.from(document.querySelectorAll("img")).some((i) => /^data:image/.test(i.src) && i.naturalWidth > 0)), 20000, "details photo decoded");
+    const dTitle = async () => d.page.evaluate(() => (document.querySelector("h1") || {}).innerText || "");
+    assert.ok(/เบต้า/.test(await d.page.innerText("body")), "Thai title"); await d.page.locator("text=ไทย").first().click(); await d.page.locator("text=English").first().click();
+    await waitFor(async () => /Beta test/.test(await d.page.innerText("body")) && !/เบต้าทดสอบ/.test(await d.page.innerText("body")), 15000, "details switched to English"); await H.shot(d.page, "61-details-english"); await d.ctx.close();
+    for (const id of ["fx17-alpha", "fx17-beta"]) await db.doc("properties/" + id).delete(); await db.doc("propertyPhotos/fx17-beta-0").delete();
+    rec("B17", "built site, components running: Search shows the cover photo (decoded) only where there is one, the keyword filter narrows the list, the language switcher changes the page and is remembered; Details shows the photo and switches language", "PASS (local browser + emulators)", "synthetic documents written to the emulator and deleted afterwards; forms and Staff pages (Owner Submission, Case Data, Staff Workspace, Listing Approvals) carry no component — their tests B1–B11 are unchanged");
+  });
+  it("B18 (what a visitor SEES when they send a message in the rail on the TEST site): the chat Functions are unreachable or not deployed — no AI answer, no case, no production endpoint, and a polite error/contact message", async () => {
+    const E = H.emulators(); const seen = {};
+    for (const scenario of ["unreachable (the sandbox blocks the project's own Function host)", "not deployed (404 injected)"]) {
+      const casesBefore = (await db.collection("caseInternal").get()).size, usersBefore = (await authUsers()).length;
+      const c = await newPage({}, "rail-send"); const calls = [];
+      if (/not deployed/.test(scenario)) await c.ctx.route(new RegExp(":" + E.fnPort + "/"), (r) => r.fulfill({ status: 404, contentType: "application/json", headers: { "access-control-allow-origin": "*" }, body: JSON.stringify({ error: { status: "NOT_FOUND", message: "not deployed (injected)" } }) }));
+      c.page.on("response", (r) => { try { const u = new URL(r.url()); if (Number(u.port) === E.fnPort) calls.push(u.pathname.split("/").pop() + ":" + r.status()); } catch (e) { /* data: */ } });
+      await c.page.goto(site.url + "/Search%20Results.dc.html"); await sleep(5000);
+      await c.page.locator("text=แชทกับเรา").first().click(); const input = c.page.locator("input[placeholder*='พิมพ์หรือกด']").first(); await input.waitFor({ timeout: 15000 });
+      const botBefore = await c.page.evaluate(() => document.body.innerText.length); await input.fill("สวัสดีค่ะ ขอสอบถามบ้านหน่อย"); await input.press("Enter"); await sleep(9000);
+      const txt = await c.page.innerText("body");
+      assert.ok(/ขออภัย|ติดต่อเรา|เกิดข้อผิดพลาด/.test(txt), scenario + ": the visitor sees a polite error / contact message, not an AI answer");
+      assert.ok(calls.every((x) => !/:200$/.test(x) || !/claudeComplete|receptionTurn|sendConversationTurn|createCaseFromConversation/.test(x)), scenario + ": no chat Function answered 200 (no AI generation): " + JSON.stringify(calls));
+      assert.strictEqual((await db.collection("caseInternal").get()).size, casesBefore, scenario + ": no case created"); assert.deepStrictEqual(c.ctx.__log.prodHits, [], "no production URL");
+      assert.deepStrictEqual(c.ctx.__log.external.filter((u) => /run\.app|claudecomplete-|5f1b5|huahin\.properties/i.test(u)), [], scenario + ": no production endpoint requested");
+      const testEndpoint = c.ctx.__log.external.filter((u) => /cloudfunctions\.net/.test(u)).map((u) => new URL(u).hostname + new URL(u).pathname); // the TEST project's OWN claudeComplete URL (guard-bound); the sandbox blocks it, on Cloud TEST it is the gated function
+      assert.ok(testEndpoint.every((u) => u.startsWith("asia-southeast1-" + H.CFG.projectId + ".cloudfunctions.net/")), scenario + ": any external Function URL is the TEST project's own: " + JSON.stringify(testEndpoint));
+      seen[scenario] = "calls=" + JSON.stringify(calls) + "; TEST-project claudeComplete URL attempted (blocked here)=" + JSON.stringify(testEndpoint) + "; new anonymous users=" + ((await authUsers()).length - usersBefore); await H.shot(c.page, /not deployed/.test(scenario) ? "63-rail-send-not-deployed" : "62-rail-send-gated"); await c.ctx.close();
+    }
+    rec("B18", "a visitor sending a message in the chat rail on the TEST site: " + JSON.stringify(seen), "PASS (local browser + emulators)", "the gate is untouched (not opened, not bypassed, not exercised here: the harness blocks the project\'s own Function host, so the gate\'s 401/403 answers are covered by the chat-live tests, not by this one); on Cloud TEST the chat Functions are not deployed (old CHAT-LIVE script paused at 6/8) → this is what a visitor sees there");
+  });
 });
