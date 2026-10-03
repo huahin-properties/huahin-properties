@@ -2,7 +2,8 @@
 
 **รุ่นหลัก: HP-HANDOFF-2026-10-03-v2 · 3 ตุลาคม 2569 · Asia/Bangkok**
 
-- **สถานะปัจจุบัน (r9c):** source/code head `958c8770fed6bdd0265239cf030c3a43a2505dc3` (Work ตรวจ diff แล้ว; รอบนี้ไม่เปลี่ยนโค้ดเว็บ/Functions/rules) · เอกสาร/build base ที่ Work ตรวจ `84339ea46f1bc1edfbc49986a1749ce456bf20bb` · **Cloud TEST deployed ยังเป็น `2c897593321713783d0ba81c7167962e1793be9a`** (ยังไม่ deploy D2) · production deployed ไม่ทราบ (RED) · D2 ผ่านเฉพาะ LOCAL · T12 FAIL · D08 FAIL · combined UNVERIFIED · ดูบล็อก "ผลปรับรอบ r9c" ท้ายเอกสาร; บรรทัด r9b ด้านล่างเป็น **ประวัติ**
+- **สถานะปัจจุบัน (r9d):** source/code head `958c8770fed6bdd0265239cf030c3a43a2505dc3` (ไม่เปลี่ยน) · เอกสาร/build base ที่ Work ตรวจ `0490b4a30c1913b8f44dba1f441593487bdddf69` · **Cloud TEST deployed ยังเป็น `2c897593321713783d0ba81c7167962e1793be9a`** (ไม่มี D2) · production deployed ไม่ทราบ (RED) · รอบนี้: ตรวจกลไกแปลเดิม 8 ภาษา (รายงานเท่านั้น) · D2 ผ่านเฉพาะ LOCAL · T12 FAIL · D08 FAIL · combined UNVERIFIED · ดูบล็อก "ผลปรับรอบ r9d" ท้ายเอกสาร; บรรทัด r9c ด้านล่างเป็น **ประวัติ**
+- [ประวัติ r9c] **สถานะ ณ r9c:** source/code head `958c8770fed6bdd0265239cf030c3a43a2505dc3` (Work ตรวจ diff แล้ว; รอบนี้ไม่เปลี่ยนโค้ดเว็บ/Functions/rules) · เอกสาร/build base ที่ Work ตรวจ `84339ea46f1bc1edfbc49986a1749ce456bf20bb` · **Cloud TEST deployed ยังเป็น `2c897593321713783d0ba81c7167962e1793be9a`** (ยังไม่ deploy D2) · production deployed ไม่ทราบ (RED) · D2 ผ่านเฉพาะ LOCAL · T12 FAIL · D08 FAIL · combined UNVERIFIED · ดูบล็อก "ผลปรับรอบ r9c" ท้ายเอกสาร; บรรทัด r9b ด้านล่างเป็น **ประวัติ**
 - [ประวัติ r9b] **สถานะ ณ r9b:** source/code head `958c8770fed6bdd0265239cf030c3a43a2505dc3` (แก้ข้อพบ Work review r9: Case Data ล้างที่ดิน + Lister validation) · เอกสาร/build base ที่ Work ตรวจ `7f596631ef11587d0532c5931d37cff69b4eded0` · **Cloud TEST deployed ยังเป็น `2c897593321713783d0ba81c7167962e1793be9a`** (ยังไม่ deploy r9/r9b) · production deployed ไม่ทราบ (RED) · T12 คง FAIL จนกว่า Work ตรวจและเจ้าของลอง Cloud TEST · S-TEST-FLOW 9/9 · S-TEST-PUBLIC 6/7 ≈ 86% (ผล Cloud ที่ 2c89759 ไม่เปลี่ยน) · ดูบล็อก "ผลปรับรอบ r9b" ท้ายเอกสาร; บรรทัด r9 ด้านล่างเป็น **ประวัติ**
 - [ประวัติ r9] **สถานะ ณ r9:** source/code head `d7ee37e9323115168e8d0179372e9c2015ec42c4` (โค้ดเว็บ+Functions เปลี่ยน: หน่วยที่ดิน D2) · เอกสาร/build base ที่ Work ตรวจ `d0ffd49b56c5303e69c8c82ddb9b8db374442915` · **Cloud TEST deployed ยังเป็น `2c897593321713783d0ba81c7167962e1793be9a`** (ยังไม่ deploy r9) · production deployed ไม่ทราบ (RED) · T12 คง FAIL จนกว่า Work ตรวจและเจ้าของลอง Cloud TEST · S-TEST-FLOW 9/9 · S-TEST-PUBLIC 6/7 ≈ 86% (ผล Cloud ที่ 2c89759 ไม่เปลี่ยน) · ดูบล็อก "ผลปรับรอบ r9" ท้ายเอกสาร; บรรทัด r8 ด้านล่างเป็น **ประวัติ**
 - [ประวัติ r8] **สถานะ ณ r8:** source/code head `678a04211879352d05e14fbe6166a9186a65507e` (โค้ดเว็บ ไม่เปลี่ยน) · เอกสาร/build base ที่ Work ตรวจ `2c897593321713783d0ba81c7167962e1793be9a` · **Cloud TEST deployed `2c897593321713783d0ba81c7167962e1793be9a`** (เจ้าของลองเคสสังเคราะห์เดิมแล้ว) · production deployed ไม่ทราบ (RED) · Cloud TEST: T10/T13/T14/T16 PASS, T12 FAIL → S-TEST-PUBLIC 6/7 ≈ 86% (เฉพาะขอบเขตนี้) · S-TEST-FLOW 9/9 · ดูบล็อก "ผลปรับรอบ r8" ท้ายเอกสาร; บรรทัดสถานะรุ่นก่อนหน้าด้านล่างเป็น **ประวัติ**
@@ -698,6 +699,33 @@ bash tools/listing-test/deploy-test.sh huahin-chat-test-01
 
 **ยืนยันไฟล์ไม่เปลี่ยนจาก source `958c877`:** `git diff 958c877 HEAD` ของไฟล์ระบบเว็บ/Functions/rules (ทุกไฟล์นอก `docs/`, `*.md`, `tools/status-panel/`, `tests/status-panel/`) = ว่าง (ตรวจในรอบส่งมอบ; แผง test P8 ตรวจเช่นกัน).
 
+
+## ผลปรับรอบ r9d — CODE-V2-01 r9d · กลไกแปลอัตโนมัติ 8 ภาษา (ข้อมูลเพิ่มจากเจ้าของ · ตรวจ source เท่านั้น · ไม่แก้ source ไม่ deploy)
+
+**หัวสี่แบบ (แยกกัน):** source `958c8770fed6bdd0265239cf030c3a43a2505dc3` (ไม่เปลี่ยน) · documentation head = commit ของรอบนี้ (ดู PR; เอกสาร/แผงเท่านั้น) · doc base ก่อนรอบนี้ `0490b4a30c1913b8f44dba1f441593487bdddf69` · **Cloud TEST deployed `2c897593321713783d0ba81c7167962e1793be9a`** · production deployed: ไม่ทราบ (RED).
+
+### ส่วน A — ความทรงจำเจ้าของและข้อกำหนดผลิตภัณฑ์ (ไม่ใช่หลักฐานว่าโค้ดปัจจุบันทำครบ)
+(1) ระบบเดิมเรียกแปลอัตโนมัติครบ 8 ภาษาตอน Save/อัปเดต ก่อนส่ง Owner อนุมัติ และเก็บคำแปลในฐานข้อมูล; (2) ผู้เยี่ยมชมเปิดประกาศ/เปลี่ยนภาษา ต้อง **อ่านคำแปลที่เก็บไว้** ไม่เรียก AI แปลสดตามการเปิดหน้า (ประหยัดโทเคน); (3) ต่อยอดกลไกเดิมก่อนเสนอระบบใหม่; (4) Owner ต้องตรวจเนื้อหาฉบับที่จะเผยแพร่ได้.
+
+### ส่วน B — สิ่งที่ source ปัจจุบันทำจริง (อ่านโค้ด; ยังไม่ได้รันทดสอบ = SOURCE ไม่ใช่ LOCAL/REAL-TEST)
+| คำถาม | ผลตรวจ |
+|---|---|
+| ปุ่ม Save เดิมเรียกฟังก์ชันแปลใด | **Lister Dashboard** (`saveProperty`): `translateDescriptionAll()` ใน `firebase-client.js` → POST ไป Cloud Function `claudeComplete` (Anthropic, โมเดลที่ฝั่ง server กำหนด) 1 การเรียก/ฟิลด์ คืน JSON ครบ 8 ภาษา (th en ru zh de no fr it). เรียกกับ **description, zone และ title** (3 การเรียกต่อ Save) และ bio ใน Agent Profile settings. **AI Quick Add** (แอดมิน) แปลต่างหากตอนสร้างร่าง (`translateDraft`, EN→TH→ภาษาอื่น) ก่อนยืนยันบันทึก |
+| คำแปล 8 ภาษาเก็บที่ไหน | ใน Firestore `properties/{id}` เป็นออบเจ็กต์ภาษา: `description.{th,en,ru,zh,de,no,fr,it}`, `title.{…}`, `zone.{…}` (AI Quick Add: `title/shortDesc/fullDesc` ต่อภาษา). ฟิลด์ที่ขาดภาษาใดถูกเติมด้วยข้อความต้นฉบับ |
+| หน้าสาธารณะอ่านหรือแปลสด | **อ่านที่เก็บไว้**: Property Details อ่าน `description[lang]` / `title[lang]` / `zone[lang]`; ไม่พบการเรียกแปลสดตามการเปิดหน้า/เปลี่ยนภาษาในหน้า Home/Search/Details/Card. การเรียก AI จากหน้าสาธารณะมีเฉพาะ **แชต** (ContactRail, Home, Agent Profile) ซึ่งไม่ใช่การแปลประกาศ |
+| Save โดยเนื้อหาไม่เปลี่ยน แปลซ้ำหรือไม่ | **แปลซ้ำ** — ไม่มีการเทียบเนื้อหาเดิม/hash ใน `saveProperty`; ทุก Save เรียก 3 ครั้งใหม่ (เปลืองโทเคน และผลอาจเปลี่ยนเอง) (ISS-TR-RESAVE) |
+| แก้เนื้อหา: คำแปลเก่า / แปลไม่สำเร็จ | คำแปลเก่าถูก **เขียนทับทั้งก้อน** ด้วยผลแปลใหม่ (ไม่มี stale marker ไม่มีการเทียบ). แปลไม่สำเร็จ = `console.warn` แล้วบันทึก **ข้อความต้นฉบับเป็น string** (ไม่ใช่ออบเจ็กต์ 8 ภาษา) ไม่มีสถานะ/ธง/retry/แจ้งผู้ใช้; ถ้า AI ข้ามบางภาษาจะเติมต้นฉบับโดยไม่บอก (ISS-TR-FAIL). หน้า Details ที่ได้ string จะแสดง string เดียวกันทุกภาษา |
+| เส้นทาง Listing Case ใหม่ขาดการเชื่อมตรงไหน | (ก) **Case Data** เก็บ `description` เป็น string ข้อความเดียวและไม่เรียกแปลตอน Save; (ข) **publish/sync** (`buildPublicDoc`) ส่ง string นั้นขึ้นสาธารณะ และสร้าง `title` จากแม่แบบ th/en เท่านั้น ไม่มีคำแปลภาษา ru/zh/de/no/fr/it; (ค) **Owner preview** (`public-preview.js`) แสดงข้อความเดียว ไม่มีแถว/ตัวเลือกภาษาให้ Owner ตรวจฉบับที่จะเผยแพร่; (ง) ไม่มีตัวบันทึกสถานะการแปลต่อภาษา; (จ) ข้อควรตรวจ: ฟังก์ชันแปลเดิมไม่ส่ง Authorization — ถ้า gate ของโปรเจกต์เปิด (TEST) จะได้ 401 ผลแปลว่าง (UNVERIFIED, ISS-TR-GATE). ข้อมูลฝั่งฟอร์มลูกค้า (Owner Submission) เก็บข้อความภาษาที่ลูกค้าพิมพ์ ไม่มีการแปลเช่นกัน |
+
+### ส่วน C — ข้อเสนอแนวทาง (ไม่ใช่มติ; ต่อยอดกลไกเดิม ยังไม่แก้ source)
+1. ใช้ `translateDescriptionAll` เดิมซ้ำที่ขั้น Save ของ Staff/Case (ไม่สร้างฟังก์ชันแปลใหม่ตอนนี้) เก็บเป็นออบเจ็กต์ 8 ภาษารูปเดียวกับของเดิม ใน Case (ทีมเท่านั้น) พร้อมข้อมูลกำกับ: hash ของข้อความต้นฉบับ + สถานะแปลต่อภาษา (ok/pending/failed) + เวลา.
+2. เรียกแปลเฉพาะเมื่อ hash ต้นฉบับเปลี่ยน (Save ซ้ำเนื้อหาเดิม = ไม่เรียก AI); แปลไม่สำเร็จ = ทำเครื่องหมาย pending/failed และคงคำแปลเก่าไว้ ไม่เขียนทับด้วยต้นฉบับเงียบ ๆ.
+3. Owner preview แสดงฉบับที่จะเผยแพร่แยกตามภาษา (เทียบกับที่เผยแพร่อยู่) พร้อมสถานะ; ห้ามเผยแพร่ภาษาที่ยังไม่แปลโดยไม่ให้ Owner รับทราบ.
+4. `buildPublicDoc` ส่งออบเจ็กต์ภาษาที่เก็บไว้ผ่าน allow-list (เพิ่มฟิลด์ตามแบบ D2) และหน้าสาธารณะอ่านที่เก็บไว้ตามเดิม ไม่แปลสด.
+ผลกระทบ: แตะ Functions/allow-list และฟอร์ม Staff ต้องมี gate/Authorization และการทดสอบ AI แบบ mock เท่านั้น (ห้ามใช้ AI จริงจนกว่าจะมีมติ). **รอ Work ตัดสิน** — รอบนี้ไม่แก้ source ไม่ deploy.
+
+**ข้อจำกัดของรายงานนี้:** ตรวจจากการอ่านโค้ดเท่านั้น ไม่ได้รันแปลจริง ไม่ได้ทดสอบบน Cloud; ความจำเจ้าของ (ส่วน A) แยกจากผลตรวจโค้ด (ส่วน B) ชัดเจน; ไม่ได้สรุปว่า "ระบบเดิมทำครบแล้ว" สำหรับเส้นทาง Listing Case. D2/T12/D08/combined/production สถานะเดิม.
+
 ## 6. STATUS-REGISTRY — ข้อมูลเครื่องอ่านของแผงภายใน (แก้ที่นี่ที่เดียว แล้วรัน `npm run status-panel`)
 
 ตาราง §1–§3 ด้านบนเป็นต้นทางของ Roadmap/ฐานระบบ/งานปัจจุบัน (แผงอ่านตรงจากตาราง). บล็อกนี้เก็บเฉพาะสิ่งที่ตารางไม่มี: ผู้รับผิดชอบ/ขอบเขต/วัน-commit ของแต่ละงาน (`taskMeta`), checklist ร่างสำหรับเปอร์เซ็นต์ (`scopes`, ทุกชุด `locked:false` จนกว่า Work lock), ทะเบียนค้าง (`issues`) และประวัติ. สถานะรายการใน checklist: `pass` / `fail` / `blocked` / `unverified` / `na` (N/A ต้องมีเหตุผลใน `ref`). ห้ามใส่รหัสผ่าน คีย์ อีเมล เบอร์ หรือ token.
@@ -710,18 +738,18 @@ bash tools/listing-test/deploy-test.sh huahin-chat-test-01
   "id": "HP-HANDOFF-2026-10-03-v2",
   "date": "2026-10-03",
   "tz": "Asia/Bangkok",
-  "docBaseSha": "84339ea46f1bc1edfbc49986a1749ce456bf20bb",
+  "docBaseSha": "0490b4a30c1913b8f44dba1f441593487bdddf69",
   "deployedTestSha": "2c897593321713783d0ba81c7167962e1793be9a",
   "deployedProdSha": "ไม่ทราบ",
   "prState": "PR #8 OPEN / DRAFT / NOT MERGED · base claude/chat-live-01",
   "website": "RED / Public Hidden (ตามรายงาน ไม่ได้ตรวจสดรอบนี้)",
-  "revision": "r9c (Code · ปิดข้อมูลก่อนทดสอบ Cloud TEST — ไม่เปลี่ยน source)",
-  "set": "HP-HANDOFF-2026-10-03-v2 + CODE-V2-01 r9c",
+  "revision": "r9d (Code · ตรวจกลไกแปลเดิม 8 ภาษา — รายงานเท่านั้น ไม่แก้ source)",
+  "set": "HP-HANDOFF-2026-10-03-v2 + CODE-V2-01 r9d",
   "sourceHeadSha": "958c8770fed6bdd0265239cf030c3a43a2505dc3"
  },
  "goal": "ให้เจ้าของและทีมลงประกาศพร้อมรูปจนเผยแพร่ได้จริงอย่างปลอดภัย (ส่งฟอร์ม → Staff เตรียม → Owner อนุมัติ/เผยแพร่ → หน้าสาธารณะ) บนเว็บ huahin.properties โดยยังไม่เปิดเว็บสาธารณะจนกว่าเจ้าของอนุมัติ",
  "current": {
-  "task": "r9c: ปิดข้อมูลก่อนทดสอบ Cloud TEST (D2) — รอ Work ตรวจชุดปิดรอบ; ยังไม่ deploy",
+  "task": "r9d: ตรวจกลไกแปลเดิม (8 ภาษา) — พบ Listing Case ยังไม่เชื่อม; รอ Work ตัดสินแนวทาง (ยังไม่แก้ source/ไม่ deploy); D2 ยัง LOCAL เท่านั้น",
   "phases": [
    "LISTING-E2E-01",
    "ชุดส่งต่อ"
@@ -2080,6 +2108,46 @@ bash tools/listing-test/deploy-test.sh huahin-chat-test-01
    "actor": "work",
    "next": "ยืนยันบน Cloud TEST จริงเมื่อ Work ต้องการ (ไม่ใช่เงื่อนไขของ D2); ห้ามเปลี่ยนเป็น PASS จนกว่าจะทดสอบจริง",
    "source": "LOCAL log (r9c): NOT-TESTED (pending) lister=false staff=false · บันทึกเดิมใน docs/listing-e2e/LISTING-E2E-01.md (หัวข้อ pending ที่ตั้งใจ, ตั้งแต่ SEC-TEST-01)"
+  },
+  {
+   "id": "ISS-TR-CASE",
+   "title": "เส้นทาง Listing Case ไม่มีการแปล 8 ภาษา: Case Data เก็บ description เป็นข้อความเดียว (string), ไม่เรียกแปลตอน Save, buildPublicDoc ส่ง string นั้นขึ้นสาธารณะ (title สร้างจากแม่แบบ th/en เท่านั้น) → หน้า Details ภาษาอื่นไม่ได้คำแปล (อ่าน description[lang] ไม่ได้ จึงตกไปข้อความเดียวกันทุกภาษา) และ Owner preview ไม่แสดงฉบับแปลที่จะเผยแพร่",
+   "sev": "high",
+   "status": "open",
+   "env": "dev",
+   "actor": "work",
+   "next": "Work ตัดสินแนวทางต่อยอดกลไกเดิม (ดูบล็อก r9d) ก่อนแก้ source; ยังไม่แก้",
+   "source": "SOURCE (r9d, อ่านโค้ดเท่านั้น ยังไม่ทดสอบ/ไม่รัน): Case Data.dc.html:177 (description=string); functions/listing-case.js publicTitle/buildPublicDoc; Property Details.dc.html:896; public-preview.js (ไม่มีแถวคำแปล)"
+  },
+  {
+   "id": "ISS-TR-RESAVE",
+   "title": "กลไกเดิม (Lister Dashboard) เรียกแปลทุกครั้งที่กด Save แม้เนื้อหาไม่เปลี่ยน: 3 การเรียก AI ต่อครั้ง (description, zone, title) ไม่มี hash/เทียบกับค่าเดิม → เปลืองโทเคน และผลแปลอาจต่างจากเดิมโดยไม่มีใครแก้",
+   "sev": "med",
+   "status": "open",
+   "env": "dev",
+   "actor": "work",
+   "next": "ถ้าต่อยอดกลไกเดิมให้เพิ่มการเทียบเนื้อหาต้นทาง (hash) ก่อนเรียกแปล — ยังไม่แก้",
+   "source": "SOURCE (r9d, อ่านโค้ดเท่านั้น ยังไม่ทดสอบ/ไม่รัน): Lister Dashboard.dc.html:2164-2187 (translateDescriptionAll ×3 ใน saveProperty ไม่มีเงื่อนไขเนื้อหาเปลี่ยน); firebase-client.js:1424"
+  },
+  {
+   "id": "ISS-TR-FAIL",
+   "title": "การแปลไม่สำเร็จเงียบ: catch แค่ console.warn แล้วบันทึกข้อความต้นฉบับเป็น string (ไม่ใช่ object 8 ภาษา) โดยไม่มีสถานะ/ธง/retry/แจ้งผู้ใช้; ภาษาที่ AI ข้ามถูกเติมด้วยข้อความต้นฉบับโดยไม่บอก; คำแปลเก่าถูกเขียนทับทั้งก้อน (ไม่มี stale marker ไม่มีคำแปลที่เก็บไว้เทียบ)",
+   "sev": "med",
+   "status": "open",
+   "env": "dev",
+   "actor": "work",
+   "next": "ออกแบบสถานะการแปลรายภาษา + ห้ามเผยแพร่ภาษาที่ยังไม่แปลโดยไม่แจ้ง Owner — ยังไม่แก้",
+   "source": "SOURCE (r9d, อ่านโค้ดเท่านั้น ยังไม่ทดสอบ/ไม่รัน): firebase-client.js:1424-1451 (fallback ต้นฉบับ/ null เมื่อ parse พลาด); Lister Dashboard.dc.html:2169,2179,2186"
+  },
+  {
+   "id": "ISS-TR-GATE",
+   "title": "ข้อควรตรวจ: translateDescriptionAll ส่ง POST ไป claudeComplete โดยไม่มี Authorization — ถ้า gate ของโปรเจกต์เปิด (TEST) enforceHttp ตอบ 401 → ผลแปลว่าง → บันทึกต้นฉบับ; บน production gate ปิด (state off) พฤติกรรมเดิม. ยังไม่ได้ทดสอบ",
+   "sev": "low",
+   "status": "open",
+   "env": "test",
+   "actor": "work",
+   "next": "ยืนยันด้วยการทดสอบก่อนอ้างอิง (UNVERIFIED) — ห้ามเปิด AI จริงโดยไม่มีมติ",
+   "source": "SOURCE (r9d, อ่านโค้ดเท่านั้น ยังไม่ทดสอบ/ไม่รัน): functions/chat-test-gate.js:79-90; firebase-client.js:1424-1436"
   }
  ],
  "history": [
@@ -2172,6 +2240,11 @@ bash tools/listing-test/deploy-test.sh huahin-chat-test-01
    "date": "2026-10-03",
    "text": "r9c: Work รับการแก้ r9b (source 958c877); ระบุ pending = ST3; Viewer v45; เตรียมคำสั่ง deploy TEST (ยังไม่รัน); ยืนยัน web/Functions/rules ไม่เปลี่ยนจาก 958c877",
    "ref": "doc head ดู PR"
+  },
+  {
+   "date": "2026-10-03",
+   "text": "r9d: เจ้าของแจ้งกลไกแปลเดิม 8 ภาษาตอน Save — Code ตรวจ source และแยกความทรงจำเจ้าของ/ข้อกำหนดผลิตภัณฑ์ ออกจากหลักฐานโค้ดปัจจุบัน; เส้นทาง Listing Case ยังไม่เชื่อม; ไม่แก้ source ไม่ deploy",
+   "ref": "ISS-TR-CASE/RESAVE/FAIL/GATE"
   }
  ],
  "decisions": [
