@@ -101,7 +101,7 @@
 class Component extends DCLogic {
   state = {
     loaded: false, blocked: false, blockedTitle: "", blockedText: "", caseId: "", saving: false, saved: false, error: "", subtitle: "",
-    f_price: "", f_area: "", f_bedrooms: "", f_bathrooms: "", f_livingArea: "", f_landValue: "", f_landUnit: "", legacyLand: null, f_floor: "", f_coordsRaw: "", f_description: "",
+    f_price: "", f_area: "", f_bedrooms: "", f_bathrooms: "", f_livingArea: "", f_landValue: "", f_landUnit: "", legacyLand: null, hadLandArea: false, f_floor: "", f_coordsRaw: "", f_description: "",
   };
 
   async componentDidMount() {
@@ -139,7 +139,7 @@ class Component extends DCLogic {
   _landFromRecord(rec) {
     const f = this._land.landAreaFields(rec.landAreaValue, rec.landAreaUnit);
     const old = typeof rec.landSize === "number" && rec.landSize > 0 ? rec.landSize : null;
-    return f ? { f_landValue: String(f.landAreaValue), f_landUnit: f.landAreaUnit, legacyLand: null } : { f_landValue: "", f_landUnit: "", legacyLand: old };
+    return f ? { f_landValue: String(f.landAreaValue), f_landUnit: f.landAreaUnit, legacyLand: null, hadLandArea: true } : { f_landValue: "", f_landUnit: "", legacyLand: old, hadLandArea: false };
   }
 
   num(v, label, min) {
@@ -157,13 +157,16 @@ class Component extends DCLogic {
     if (patch.price === null) { this.setState({ error: "กรุณากรอกราคา", saved: false }); return; }
     // D2 land size: the value as entered + its unit; the canonical ตร.ม. is computed ONCE here from those two (the old unitless `landSize` is never written or changed from this page)
     const landTxt = String(st.f_landValue === null || st.f_landValue === undefined ? "" : st.f_landValue).trim();
-    if (landTxt === "") { patch.landAreaValue = null; patch.landAreaUnit = null; patch.landAreaSqm = null; }
+    // Emptying a land size that a person had recorded (unit-aware) is a deliberate clear: the OLD unitless landSize is cleared with it so preview/public cannot fall back to it.
+    // A record that only ever had the old unitless value (hadLandArea=false, box untouched) keeps it exactly as it is.
+    let landCleared = false, landSet = false;
+    if (landTxt === "") { patch.landAreaValue = null; patch.landAreaUnit = null; patch.landAreaSqm = null; if (st.hadLandArea) { patch.landSize = null; landCleared = true; } }
     else {
       const lv = Number(landTxt);
       if (!isFinite(lv) || lv <= 0) { this.setState({ error: "ขนาดที่ดินต้องเป็นตัวเลขมากกว่า 0", saved: false }); return; }
       const lf = this._land.landAreaFields(lv, st.f_landUnit);
       if (!lf) { this.setState({ error: "เลือกหน่วยของขนาดที่ดิน (ตร.ว. หรือ ตร.ม.)", saved: false }); return; }
-      Object.assign(patch, lf);
+      Object.assign(patch, lf); landSet = true;
     }
     const coords = String(st.f_coordsRaw || "").trim();
     if (coords) {
@@ -177,7 +180,7 @@ class Component extends DCLogic {
     try {
       await this._fb.updateDocFields("properties", this._id, patch);
       try { await this._fb.logActivity({ type: "case_data_edited", propertyId: this._id, fields: Object.keys(patch).filter((k) => k !== "updatedAt"), summary: "แก้ข้อมูลทรัพย์ของเคส " + this._id }); } catch (e) {}
-      this.setState({ saving: false, saved: true });
+      this.setState({ saving: false, saved: true, ...(landSet ? { hadLandArea: true } : {}), ...(landCleared ? { hadLandArea: false, legacyLand: null } : {}) });
     } catch (e) {
       this.setState({ saving: false, error: "บันทึกไม่สำเร็จ" + (e && e.code === "permission-denied" ? " — ไม่มีสิทธิ์แก้เคสนี้" : " — ลองอีกครั้ง") });
     }

@@ -2116,13 +2116,26 @@ class Component extends DCLogic {
     const old = p.landSize != null ? String(p.landSize) : "";
     return { f_landSize: old, f_landUnit: "", f_landLegacyValue: old };
   }
+  // true only for an OLD unitless value left exactly as loaded with no unit chosen (the one case that keeps landSize and is never validated or converted)
+  _landLegacyUntouched() {
+    const lv = String(this.state.f_landSize || "").trim();
+    return lv !== "" && !this.state.f_landUnit && this.state.f_landLegacyValue !== "" && lv === this.state.f_landLegacyValue;
+  }
+  // error text when the land box cannot be stored, else null. An empty box is a deliberate clear; an untouched legacy value never blocks.
+  _landCheck() {
+    const lv = String(this.state.f_landSize || "").trim();
+    if (lv === "" || this._landLegacyUntouched()) return null;
+    if (!this.state.f_landUnit) return "เลือกหน่วยของขนาดที่ดิน (ตร.ว. หรือ ตร.ม.) ก่อนบันทึก";
+    if (!this._land || !this._land.landAreaFields(Number(lv), this.state.f_landUnit)) return "ขนาดที่ดินต้องเป็นตัวเลขมากกว่า 0 และไม่เกินขอบเขตที่รองรับ";
+    return null;
+  }
   _landPatch(existing) {
     const lv = String(this.state.f_landSize || "").trim();
     if (lv === "") return { landAreaValue: null, landAreaUnit: null, landAreaSqm: null, landSize: null };
+    if (this._landLegacyUntouched()) return { landSize: existing && existing.landSize != null ? existing.landSize : Number(lv) };
     const f = this._land ? this._land.landAreaFields(Number(lv), this.state.f_landUnit) : null;
-    if (f) return Object.assign({}, f, { landSize: existing && existing.landSize != null ? existing.landSize : null });
-    // no unit and untouched legacy value (validated above): leave every land field exactly as it is
-    return { landSize: existing && existing.landSize != null ? existing.landSize : (lv ? Number(lv) : null) };
+    if (!f) throw new Error("land size refused (unit/value) — nothing written");
+    return Object.assign({}, f, { landSize: existing && existing.landSize != null ? existing.landSize : null });
   }
   // text for the generated post: unit-aware, or the bare number marked "ไม่ระบุหน่วย" — never a guessed unit
   _landText(valueStr, unit) {
@@ -2141,10 +2154,8 @@ class Component extends DCLogic {
       this.setState({ saveError: "กรุณากรอกชื่อทำเลและราคาให้ครบ" });
       return;
     }
-    // D2: a land size needs its unit. The one exception: an OLD unitless value that was left untouched is kept as it is (not converted, not labelled) so editing other fields is never blocked.
-    { const lv = String(this.state.f_landSize || "").trim();
-      if (lv !== "" && !this.state.f_landUnit && lv !== this.state.f_landLegacyValue) { this.setState({ saveError: "เลือกหน่วยของขนาดที่ดิน (ตร.ว. หรือ ตร.ม.) ก่อนบันทึก" }); return; }
-      if (lv !== "" && (!isFinite(Number(lv)) || Number(lv) <= 0)) { this.setState({ saveError: "ขนาดที่ดินต้องเป็นตัวเลขมากกว่า 0" }); return; } }
+    // D2: validated with the SAME rule that builds the stored fields (landAreaFields), so nothing the builder would refuse can ever fall back to an old value and be reported as saved.
+    { const landErr = this._landCheck(); if (landErr) { this.setState({ saveError: landErr }); return; } }
     this.setState({ saving: true, saveError: "" });
     const id = this.state.editingId || this.genCode(this.state.f_area);
     const allPhotoUrls = [...this.state.existingPhotos.map((p) => p.url), ...this.state.newPhotos.map((p) => p.url)].slice(0, this.myPhotoLimit());

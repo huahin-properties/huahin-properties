@@ -874,4 +874,49 @@ const preview = async (page, state, ms) => waitFor(async () => (await page.getAt
     await b.ctx.close(); await db.doc("properties/" + id2).delete();
     rec("B21", "agent land size: unit selector present; old unitless value shown with a note and not guessed; a changed value without a unit is refused; 150 ตร.ว. stored as 150 / sqwa / 600 ตร.ม.; old landSize untouched", "PASS (local browser + emulators)", "synthetic listing written to the emulator and deleted afterwards");
   });
+
+  it("B22 (r9 review) legacy → a person enters a value with a unit → saves → clears it → saves → reopens: the OLD unitless number does not come back in the Staff page, the Owner's preview or the public page; an unrelated edit of an untouched legacy case still keeps it", async () => {
+    const tpl = (await db.doc("caseInternal/" + ids.sevenCase).get()).data(); const lid = "d2-clear-case";
+    const clean = { ...tpl }; ["landAreaValue", "landAreaUnit", "landAreaSqm", "publicId", "publishedAt"].forEach((k) => delete clean[k]);
+    await db.doc("caseInternal/" + lid).set({ ...clean, listingStatus: "pending", reviewStatus: "submitted", landSize: 100, assignedToEmail: "staff@example.test", assignedToUid: ids.staff });
+    const st = await newPage({}, "d2-clear-staff"); await loginAdmin(st.page, "staff@example.test"); await st.page.goto(site.url + "/Case%20Data.dc.html?id=" + lid); await st.page.waitForSelector('[data-f="landAreaValue"]', { timeout: 30000 });
+    const save = async () => { await st.page.locator("[data-case-data-save]").click(); await st.page.waitForSelector("[data-case-data-saved]", { timeout: 20000 }); };
+    await st.page.locator('[data-f="description"]').fill("A quiet single-storey house with a small garden, near the market and the beach road. Only other data was edited here."); await save();
+    assert.strictEqual((await db.doc("caseInternal/" + lid).get()).data().landSize, 100, "untouched legacy kept while editing other data");
+    await st.page.locator('[data-f="landAreaValue"]').fill("50"); await st.page.locator('[data-f="landAreaUnit"]').selectOption("sqwa"); await save();
+    { const r = (await db.doc("caseInternal/" + lid).get()).data(); assert.deepStrictEqual([r.landAreaValue, r.landAreaUnit, r.landAreaSqm], [50, "sqwa", 200]); }
+    await st.page.locator('[data-f="landAreaValue"]').fill(""); await st.page.locator('[data-f="landAreaUnit"]').selectOption(""); await save();
+    { const r = (await db.doc("caseInternal/" + lid).get()).data(); assert.deepStrictEqual([r.landAreaValue, r.landAreaUnit, r.landAreaSqm, r.landSize], [null, null, null, null], "a deliberate clear clears the old unitless number too"); }
+    await st.page.reload(); await st.page.waitForSelector('[data-f="landAreaValue"]', { timeout: 30000 });
+    assert.strictEqual(await st.page.locator("[data-land-legacy]").count(), 0, "no legacy note comes back after reopening"); assert.strictEqual(await st.page.locator('[data-f="landAreaValue"]').inputValue(), "");
+    await st.ctx.close();
+    // Owner preview rows: built by the real public-preview.js from the cleared record (the publish projection itself is covered by core test L5; a clone of a case cannot reach "ready" because its photos belong to the original)
+    { const r = (await db.doc("caseInternal/" + lid).get()).data(); const pr = await newPage({}, "d2-clear-preview"); await pr.page.goto(site.url + "/Case%20Data.dc.html?id=" + lid); await pr.page.waitForSelector("body");
+      const rows = await pr.page.evaluate(async (rec) => { const m = await import("./public-preview.js"); return m.previewRows({ publicDocument: rec, currentPublicDocument: null }).map((x) => x.key + ":" + x.text); }, JSON.parse(JSON.stringify(r)));
+      assert.ok(!rows.some((x) => /land|ที่ดิน|ไม่ระบุหน่วย/.test(x)), "no land row in the preview rows: " + rows.join(" | ")); await pr.ctx.close();
+      const legacyRows = await (async () => { const q = await newPage({}, "d2-clear-preview2"); await q.page.goto(site.url + "/Case%20Data.dc.html?id=" + lid); await q.page.waitForSelector("body"); const out = await q.page.evaluate(async () => { const m = await import("./public-preview.js"); return m.previewRows({ publicDocument: { landSize: 100 }, currentPublicDocument: null }).map((x) => x.key + ":" + x.text); }); await q.ctx.close(); return out; })();
+      assert.ok(legacyRows.some((x) => /ไม่ระบุหน่วย/.test(x)), "control: the old number alone IS shown as unit-not-specified, so the check above is meaningful: " + legacyRows.join(" | ")); }
+    await db.doc("caseInternal/" + lid).delete();
+    rec("B22", "r9 review: legacy → value+unit → save → clear → save → reopen: old unitless number gone (record, Staff page, Owner preview rows; publish projection by core L5); editing other data of an untouched legacy case keeps it", "PASS (local browser + emulators)", "synthetic case written to the emulator");
+  });
+
+  it("B23 (r9 review) agent: a value the builder refuses (too large) or clearing the unit of a listing that already has one is refused with an error and NOTHING is written; clearing the box clears every land field", async () => {
+    const id = "d2-lister-3"; const doc = { status: "sale", type: "house", area: "hua-hin", zone: "ทดสอบ", price: 2900000, bedrooms: 2, bathrooms: 1, livingArea: 70, landSize: 60, landAreaValue: 40, landAreaUnit: "sqwa", landAreaSqm: 160, listingStatus: "live", isDraft: false, features: [], listerId: ids.agent, approvedAt: Date.now() - 5000, publishedAt: Date.now() - 5000, expiresAt: Date.now() + 86400000, title: { th: "บ้านเอเจนต์สาม", en: "Agent three" } };
+    await db.doc("properties/" + id).set(doc);
+    const a = await newPage({}, "agent-d2c"); await loginAgent(a.page, "agent@example.test"); await a.page.goto(site.url + "/Lister%20Dashboard.dc.html?edit=" + id);
+    await a.page.locator("text=📋 รายการทรัพย์").first().click(); await a.page.locator("text=✏️").first().click({ timeout: 30000 }); await a.page.waitForSelector("select:has(option[value='sqwa'])", { state: "attached", timeout: 40000 });
+    const unit = a.page.locator("select:has(option[value='sqwa'])"), landBox = unit.locator("xpath=preceding-sibling::input[1]");
+    assert.strictEqual(await landBox.inputValue(), "40"); assert.strictEqual(await unit.inputValue(), "sqwa");
+    const saveBtn = async () => { const ok = await a.page.evaluate(() => { const b = Array.from(document.querySelectorAll("*")).find((e) => e.children.length === 0 && /^บันทึกแบบร่าง/.test((e.textContent || "").trim())); if (b) { b.click(); return true; } return false; }); assert.ok(ok); };
+    const unchanged = async (why) => { await new Promise((r) => setTimeout(r, 2500)); const r = (await db.doc("properties/" + id).get()).data(); assert.deepStrictEqual([r.landAreaValue, r.landAreaUnit, r.landAreaSqm, r.landSize, !!r.seo], [40, "sqwa", 160, 60, false], why + ": nothing written"); };
+    // 1. out of bounds
+    await landBox.fill("5000000000"); await saveBtn(); await waitFor(async () => /ขนาดที่ดินต้องเป็นตัวเลข/.test(await a.page.innerText("body")), 15000, "error shown for a too large value"); await unchanged("too large");
+    // 2. unit cleared on a listing that has one
+    await landBox.fill("40"); await unit.selectOption(""); await saveBtn(); await waitFor(async () => /เลือกหน่วยของขนาดที่ดิน/.test(await a.page.innerText("body")), 15000, "asks for the unit"); await unchanged("unit cleared");
+    // 3. clearing the box clears every land field (the old number too)
+    await landBox.fill(""); await saveBtn(); await waitFor(async () => !!(await db.doc("properties/" + id).get()).data().seo, 60000, "saved");
+    { const r = (await db.doc("properties/" + id).get()).data(); assert.deepStrictEqual([r.landAreaValue, r.landAreaUnit, r.landAreaSqm, r.landSize], [null, null, null, null], "all land fields cleared"); }
+    await a.ctx.close(); await db.doc("properties/" + id).delete();
+    rec("B23", "r9 review: agent form refuses a too-large value and a cleared unit (no write, error shown); clearing the box clears all land fields", "PASS (local browser + emulators)", "synthetic listing written to the emulator and deleted afterwards");
+  });
 });

@@ -653,4 +653,15 @@ describe("LISTING-E2E-01 core: submit / publish / take down / track (emulators, 
     const same = await call("syncListingCase", A.staff, { propertyId: a.r.propertyId });
     assert.ok(same.synced === false || same.reason, "an identical save is not a change"); pub = await getDoc("properties/" + a.r.propertyId); assert.deepStrictEqual([pub.landAreaValue, pub.landAreaUnit, pub.landAreaSqm], [400, "sqm", 400]);
   });
+  it("L5 (r9 review) a deliberate clear (all land fields and the old landSize emptied by the person) reaches the public document: the old unitless number does not come back", async () => {
+    const a = await ready(A.extA, { n: 2 });
+    await db.doc("caseInternal/" + a.r.propertyId).update({ landSize: 100 });
+    await publish(A.owner, a.r.propertyId);
+    assert.strictEqual((await getDoc("properties/" + a.r.propertyId)).landSize, 100, "legacy published as it was");
+    await db.doc("caseInternal/" + a.r.propertyId).update({ landAreaValue: null, landAreaUnit: null, landAreaSqm: null, landSize: null });
+    const pv = await call("previewListingCase", A.owner, { propertyId: a.r.propertyId });
+    assert.ok(!pv.publicDocument.landSize && !pv.publicDocument.landAreaValue && !pv.publicDocument.landAreaSqm, "the preview shows no land size");
+    assert.strictEqual((await call("syncListingCase", A.owner, { propertyId: a.r.propertyId, reviewedSig: pv.updateSig })).synced, true);
+    const pub = await getDoc("properties/" + a.r.propertyId); assert.ok(!pub.landSize && !pub.landAreaValue && !pub.landAreaUnit && !pub.landAreaSqm, "no land field is public any more");
+  });
 });
