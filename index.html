@@ -67,7 +67,7 @@
         <div style="position:absolute; left:50%; top:-3px; transform:translateX(-50%) rotate(45deg); width:6px; height:6px; background:oklch(65% 0.1 80);"></div>
       </div>
 
-      <div style="display:flex; gap:10px; flex-wrap:nowrap; overflow-x:auto; max-width:100%; padding:2px 2px 10px; margin-bottom:14px; justify-content:{{ chipsJustify }};">
+      <div style="display:flex; gap:10px; flex-wrap:nowrap; overflow-x:auto; max-width:100%; padding:2px 2px 10px; margin-bottom:14px; justify-content:flex-start; justify-content:{{ chipsJustify }};">
         <sc-for list="{{ suggestionChips }}" as="chip" hint-placeholder-count="3">
           <div onClick="{{ chip.onClick }}" style="flex-shrink:0; display:flex; align-items:center; gap:7px; background:oklch(99% 0.005 80 / 0.9); border:1px solid oklch(70% 0.06 70 / 0.35); border-radius:100px; padding:11px 20px; font-size:14.5px; color:oklch(28% 0.02 60); cursor:pointer; box-shadow:0 2px 10px oklch(20% 0.02 60 / 0.05); white-space:nowrap;">
             <span>{{ chip.icon }}</span>{{ chip.label }}
@@ -75,7 +75,7 @@
         </sc-for>
       </div>
 
-      <div style="width:100%; max-width:780px; background:oklch(99% 0.005 80 / 0.96); border:1px solid oklch(75% 0.05 75 / 0.3); border-radius:24px; box-shadow:0 16px 44px oklch(20% 0.02 60 / 0.14); box-sizing:border-box; padding:clamp(16px,3vw,26px) clamp(16px,3vw,22px) clamp(14px,2.4vw,18px); display:flex; flex-direction:column; min-height:clamp(300px,42vw,420px);">
+      <div style="width:100%; max-width:780px; background:oklch(99% 0.005 80 / 0.96); border:1px solid oklch(75% 0.05 75 / 0.3); border-radius:24px; box-shadow:0 16px 44px oklch(20% 0.02 60 / 0.14); box-sizing:border-box; padding:clamp(16px,3vw,26px) clamp(16px,3vw,22px) clamp(14px,2.4vw,18px); display:flex; flex-direction:column; min-height:clamp(190px,42vw,420px);">
         <div style="display:flex; align-items:flex-start; gap:10px; text-align:left; margin-bottom:16px;">
           <div style="font-size:19px; flex-shrink:0; margin-top:1px;">✨</div>
           <div>
@@ -96,7 +96,7 @@
 
       <div style="width:100%; max-width:1000px; display:grid; grid-template-columns:repeat({{ benefitCols }},1fr); gap:clamp(14px,2vw,20px); margin-top:clamp(24px,4vw,40px); text-align:center;">
         <sc-for list="{{ benefitItems }}" as="b" hint-placeholder-count="4">
-          <div style="padding:0 8px;">
+          <div style="padding:12px 8px; background:oklch(99% 0.005 80 / 0.78); border-radius:14px;">
             <div style="font-size:clamp(22px,3vw,30px); color:oklch(65% 0.1 80); margin-bottom:8px;">{{ b.icon }}</div>
             <div style="font-size:clamp(14px,1.6vw,16px); font-weight:600; color:oklch(24% 0.02 60); margin-bottom:4px;">{{ b.title }}</div>
             <div style="font-size:clamp(12px,1.4vw,13.5px); color:oklch(48% 0.02 60); line-height:1.5;">{{ b.desc }}</div>
@@ -581,7 +581,18 @@ const WELCOME_I18N = {
       { icon: "🗺️", title: "Local Expertise", desc: "In-depth knowledge of the Hua Hin market." },
     ],
     placeholder: "Type your message here... — e.g. \"3 bedroom pool villa under 9M\"", sample: "3 bedroom pool villa under 9M", submit: "Search with AI", browseSite: "Browse the full site instead →" },
-  th: { kicker: "huahin.properties", title1: "ยินดีต้อนรับสู่หัวหิน พร็อพเพอร์ตี้", title2: "บอกความต้องการ แล้วให้ AI ค้นหาทรัพย์ที่ใช่ให้คุณ", placeholder: "บอกสิ่งที่คุณต้องการ — เช่น \"พูลวิลล่า 3 ห้องนอน ไม่เกิน 9 ล้าน\"", sample: "พูลวิลล่า 3 ห้องนอน ไม่เกิน 9 ล้าน", submit: "ค้นหาด้วย AI", browseSite: "เข้าเว็บไซต์แบบปกติแทน →" },
+  th: { kicker: "huahin.properties", title1: "ยินดีต้อนรับสู่หัวหิน พร็อพเพอร์ตี้", title2: "บอกความต้องการ แล้วให้ AI ค้นหาทรัพย์ที่ใช่ให้คุณ", placeholder: "บอกสิ่งที่คุณต้องการ — เช่น \"พูลวิลล่า 3 ห้องนอน ไม่เกิน 9 ล้าน\"", sample: "พูลวิลล่า 3 ห้องนอน ไม่เกิน 9 ล้าน", submit: "ค้นหาด้วย AI", browseSite: "เข้าเว็บไซต์แบบปกติแทน →", chatGreeting: "สวัสดีค่ะ! กำลังมองหาทรัพย์แบบไหนอยู่คะ?", chatSub: "พิมพ์หรือพูดบอกความต้องการของคุณได้เลย",
+    chips: [
+      { icon: "🏠", label: "พูลวิลล่า 3 ห้องนอน ไม่เกิน 9 ล้าน" },
+      { icon: "🌊", label: "วิลล่าใกล้ทะเล" },
+      { icon: "📍", label: "บ้านหัวหิน ซอย 88" },
+    ],
+    benefits: [
+      { icon: "🏠", title: "ทรัพย์ให้เลือกหลากหลาย", desc: "ทรัพย์สินจำนวนมากในหัวหินและพื้นที่ใกล้เคียง" },
+      { icon: "🛡️", title: "ตัวแทนที่ไว้ใจได้", desc: "ประกาศที่ผ่านการตรวจสอบจากผู้เชี่ยวชาญในพื้นที่" },
+      { icon: "❤️", title: "เหมาะกับคุณ", desc: "AI ช่วยหาทรัพย์ที่ตรงกับความต้องการของคุณ" },
+      { icon: "🗺️", title: "รู้จริงเรื่องหัวหิน", desc: "เข้าใจตลาดอสังหาริมทรัพย์หัวหินอย่างลึกซึ้ง" },
+    ] },
   ru: { kicker: "huahin.properties", title1: "Добро пожаловать в Hua Hin Properties.", title2: "Найдите идеальную недвижимость с помощью ИИ.", placeholder: "Расскажите, что вы ищете — напр. «вилла с бассейном, 3 спальни, до 9 млн»", sample: "Вилла с бассейном, 3 спальни, до 9 млн", submit: "Поиск с ИИ", browseSite: "Перейти на обычный сайт →" },
   zh: { kicker: "huahin.properties", title1: "欢迎来到华欣房产。", title2: "用 AI 找到您理想的房产。", placeholder: "告诉我们您的需求 — 例如「3居室泳池别墅，900万以内」", sample: "3居室泳池别墅，900万以内", submit: "用 AI 搜索", browseSite: "改为浏览完整网站 →" },
   de: { kicker: "huahin.properties", title1: "Willkommen bei Hua Hin Properties.", title2: "Finden Sie Ihre perfekte Immobilie mit KI.", placeholder: "Sagen Sie uns, wonach Sie suchen — z.B. \"3-Zimmer-Poolvilla unter 9 Mio.\"", sample: "3-Zimmer-Poolvilla unter 9 Mio.", submit: "Mit KI suchen", browseSite: "Stattdessen die ganze Website durchsuchen →" },
@@ -934,7 +945,7 @@ class Component extends DCLogic {
       };
     });
 
-    const w = WELCOME_I18N[lang] || WELCOME_I18N.en;
+    const w = { ...WELCOME_I18N.en, ...(WELCOME_I18N[lang] || {}) };
     return {
       t: tMerged,
       w,
@@ -946,7 +957,7 @@ class Component extends DCLogic {
       onWelcomeSubmit: () => this.submitWelcome(),
       onWelcomeKeyDown: (e) => { if (e.key === "Enter") this.submitWelcome(); },
       onWelcomeSampleClick: () => { this.setState({ welcomeQuery: (WELCOME_I18N[lang] || WELCOME_I18N.en).sample }); },
-      chipsJustify: "center",
+      chipsJustify: "safe center",
       suggestionChips: (w.chips || WELCOME_I18N.en.chips).map((c) => ({ icon: c.icon, label: c.label, onClick: () => this.setState({ welcomeQuery: c.label }) })),
       benefitCols: (typeof window !== "undefined" && window.innerWidth < 640) ? 2 : 4,
       benefitItems: w.benefits || WELCOME_I18N.en.benefits,
